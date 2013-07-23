@@ -1,0 +1,19 @@
+module ds.generated
+
+completions
+  completion template Start : "module ID " =
+    "module " <ID:ID> "\n\t" (cursor) (blank)  
+  completion template Definition : "entity ID { }" =
+    "entity " <ID:ID> " {\n\t" (cursor) "\n}" (blank)  
+  completion template Property : "ID : ID" =
+    <ID:ID> " : " <ID:Type>  
+
+completions
+  completion template Term : "ID()" =
+    <ID:ID> "(" <:Term> ")"  
+
+completions
+  completion template Definition : "rules " =
+    "rules\n\t" (cursor) (blank)  
+  completion template Rule : "ID : ID -> ID" =
+    <ID:ID> " :\n\t" <ID:Term> " -> " <ID:Term> (blank)  

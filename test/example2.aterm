@@ -1,0 +1,17 @@
+Module(
+  "example2"
+, [ Rules(
+      [ Rule(
+          "plus"
+        , Cons(
+            "Plus"
+          , [ Cons("Int", [Var("i")])
+            , Cons("Int", [Var("j")])
+            ]
+          )
+        , Cons("Int", [Var("ipj")])
+        )
+      ]
+    )
+  ]
+)

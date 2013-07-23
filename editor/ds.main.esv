@@ -1,0 +1,16 @@
+module ds.main
+
+imports ds-Builders ds-Refactorings ds-Colorer ds-Completions ds-Folding ds-Outliner ds-References ds-Syntax
+
+language General properties
+                  
+  name          : ds
+  id            : dynsem
+  extends       : Root
+                  
+  description   : "Spoofax/IMP-generated editor for the ds language"
+  url           : http://strategoxt.org
+                  
+  extensions    : ds
+  table         : include/ds.tbl
+  start symbols : Start

@@ -1,0 +1,18 @@
+module outline
+
+imports
+  include/ds
+  lib/outline-library.generated
+
+rules
+
+  outline-strategy = simple-label-outline(to-outline-label)
+  outline-expand-to-level = !3
+
+  to-outline-label: Module(name, _) -> name
+  to-outline-label: Entity(name, _) -> name
+  to-outline-label: Property(name, _) -> name
+  
+  to-outline-label: Rule(name, _, _) -> name
+  
+  

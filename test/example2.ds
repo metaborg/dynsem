@@ -1,0 +1,6 @@
+module example2
+ 
+ rules
+ 
+  plus :
+  	Plus(Int(i), Int(j)) -> Int(ipj)

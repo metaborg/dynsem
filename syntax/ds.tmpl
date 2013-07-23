@@ -1,0 +1,39 @@
+
+
+templates
+
+  Start.Module = <
+  module <ID> 
+    <Definition*; separator="\n\n">
+  >
+  
+  Definition.Entity = <
+  entity <ID> {
+  	<Property*;separator="\n">
+  }
+  >
+  
+  Property.Property = <<ID> : <Type>>
+  
+  Type.Type = <<ID>>
+  
+templates
+
+  Term.Var    = <<ID>>
+  Term.String = <<STRING>>
+  Term.Cons   = <<ID>(<Term*; separator=",">)>
+  
+templates
+
+  Definition.Rules = <
+    rules 
+      <Rule*; separator="\n">
+  >
+
+  Rule.Rule = [
+    [ID] :
+  	  [Term] -> [Term]
+  ]
+  
+
+

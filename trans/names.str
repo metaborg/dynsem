@@ -1,0 +1,179 @@
+module names
+
+imports
+  lib/runtime/nbl/-
+  lib/runtime/task/-
+  lib/runtime/types/-
+  lib/runtime/editor/-
+  include/ds
+
+
+signature
+  constructors
+    NablNsModule   : Namespace
+    NablNsEntity   : Namespace
+    NablNsProperty : Namespace
+
+
+rules
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
+    ?Module(x, _)
+    ; origin-track-forced(
+        Module(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , partition__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsModule()
+          , Unique()
+          , Current()
+          , [NablNsEntity()]
+          )
+        , id
+        )
+        ; where(i-2__ := <nabl-def(
+                            ?c-uri2__
+                          , ?s-uri2__
+                          | lang__
+                          , partition__
+                          , uniques__
+                          , c-uri1__
+                          , s-uri1__
+                          , NablNsEntity()
+                          , Unique()
+                          , Current()
+                          , []
+                          )> "String")
+        ; where(i-3__ := <nabl-def(
+                            ?c-uri3__
+                          , ?s-uri3__
+                          | lang__
+                          , partition__
+                          , uniques__
+                          , c-uri2__
+                          , s-uri2__
+                          , NablNsEntity()
+                          , Unique()
+                          , Current()
+                          , []
+                          )> "Int")
+        ; match(child-uris__|c-uri3__)
+        ; match(sibl-uris__|s-uri3__)
+        ; match(implicits__|[i-2__, i-3__])
+      |
+      )
+
+  nabl-prop-site(|lang__, partition__, states__, implicits__) =
+    ?Module(x, _)
+    ; origin-track-forced(
+        where([i-2__, i-3__] := implicits__)
+      |
+      )
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
+    ?Entity(x, _)
+    ; origin-track-forced(
+        Entity(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , partition__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsEntity()
+          , Unique()
+          , Current()
+          , [NablNsProperty()]
+          )
+        , id
+        )
+        ; match(child-uris__|c-uri1__)
+        ; match(sibl-uris__|s-uri1__)
+        ; match(implicits__|[])
+      |
+      )
+
+  nabl-prop-site(|lang__, partition__, states__, implicits__) =
+    ?Entity(x, _)
+    ; origin-track-forced(
+        Entity(
+          nabl-props(
+          | partition__
+          , [ Prop(
+                Type()
+              , Type(x)
+              , []
+              )
+            ]
+          )
+        , id
+        )
+      |
+      )
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
+    ?Property(x, t)
+    ; origin-track-forced(
+        Property(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , partition__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsProperty()
+          , Unique()
+          , Current()
+          , []
+          )
+        , id
+        )
+        ; match(child-uris__|c-uri1__)
+        ; match(sibl-uris__|s-uri1__)
+        ; match(implicits__|[])
+      |
+      )
+
+  nabl-prop-site(|lang__, partition__, states__, implicits__) =
+    ?Property(x, t)
+    ; origin-track-forced(
+        Property(
+          nabl-props(
+          | partition__
+          , [Prop(Type(), t, [])]
+          )
+        , id
+        )
+      |
+      )
+
+  nabl-use-site(|lang__, partition__, uniques__, uris__, states__) =
+    ?Type(x)
+    ; origin-track-forced(
+        Type(
+          nabl-use(
+          | lang__
+          , partition__
+          , uniques__
+          , uris__
+          , [ UseCandidate(
+                NablNsEntity()
+              , []
+              , Current()
+              , True()
+              , []
+              )
+            ]
+          )
+        )
+      |
+      )

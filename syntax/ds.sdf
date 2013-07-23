@@ -1,0 +1,12 @@
+%% Grammar for the ds language
+%% By default, based on an example "entities" syntax
+module ds
+
+imports Common dsgenerated
+
+exports
+
+  context-free start-symbols
+  
+    Start
+
