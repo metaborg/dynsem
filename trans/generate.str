@@ -19,7 +19,10 @@ rules
           [cs]
           MapExtend : T * T -> T
           MapSelect : T * T -> T
+          MapEmpty : T
+          Map1 : T * T -> T
           Fresh : T -> T
+          Exec : T -> T
       
       rules // run-time library
         
@@ -28,11 +31,17 @@ rules
           where term' := <innermost(norm)> term 
           
         exec :
-          prog -> <normalize; repeat(eval; normalize)> (prog, [init-comps])
+          prog -> <eval> (Exec(prog), [init-comps])
         
         norm:
           MapExtend(map1, map2) -> <conc> (map1, map2)
-    
+          
+        norm:
+          MapEmpty() -> ["[]"]
+          
+        norm:
+          Map1(x,y) -> ["[(x,y)]"]
+              
         norm:
           MapSelect(key, map) -> value
           where <fetch(?(key, value))> map  

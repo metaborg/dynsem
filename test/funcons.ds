@@ -1,0 +1,76 @@
+rules
+
+   IsValue(True()) = True()
+  
+   IsValue(False()) = True()
+   
+   Not(True()) = False()
+   
+   Not(False()) = True()
+   
+   prop --> prop'
+   ----------------------------------
+   Cond(prop,x,y) --> Cond(prop',x,y)
+   
+   cond(True(),x,y) = x
+   
+   cond(False(),x,y) = y
+   
+   comm --> comm'
+   ----------------------------
+   Seq(comm,x) --> Seq(comm',x)
+   
+   IsValue(Skip()) = True()
+   
+   IsValue(val) = True()
+   ---------------------
+   Seq(val,x) = x
+   
+   Print(x) -- Print x --> Skip()
+   
+   Env env |- BoundValue(i) --> MapSelect(i,env)
+   
+   exp --> exp'
+   --------------------------------------
+   Let(i,exp,body) --> Let(i,exp',body)
+   
+   IsValue(val) = True() ,
+   MapExtend(env,Map1(i,val)) = env1 ,
+   Env env1 |- body --> body'
+   -----------------------------------------------------
+   Env env |- Let(i,val,body) --> Let(i,val,body')
+   
+   IsValue(bodyval) = True()
+   -------------------------------
+   Let(i,val,bodyval) --> bodyval
+   
+   Start() = Let(X(),False(),Not(X()))
+
+
+/*
+
+Should be in library:
+	      
+x = y , Exec1(y) --> z
+----------------------
+    Exec(x) --> z
+
+IsValue(y) = true
+-----------------
+ Exec1(y) --> y
+
+y --> w , Exec(w) --> z
+-----------------------
+   Exec1(y) --> z
+*/
+     
+// specialise first premise with respect
+// to each rule -- refocus transformation
+// of that rule, small -> big step
+//
+// can parametrise interepretergen
+/*
+x --> y , Exec(y) --> z
+-----------------------
+       x --> z
+*/
