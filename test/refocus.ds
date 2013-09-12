@@ -1,0 +1,19 @@
+rules
+
+  e --> e'
+  ----------------------------------
+  Assign(ref, e) --> Assign(ref, e')
+  
+  x --> y, Exec(y) --> z
+  ----------------------
+  Exec(x) --> z
+  
+  
+  a --> b
+  --------
+  c --Log l --> (d, State s)
+  
+  a --> b, (Exec(d), State s) --Log lprime --> z
+  ----------------------
+  c -- Log llprime --> z
+  

@@ -6,6 +6,7 @@ imports
   libstratego-aterm
   include/ds
   lib/editor-common.generated
+  refocus
 
 rules
 
@@ -42,7 +43,7 @@ rules
       rules
         [rs'']
     ]
-    where rs' := <innermost(desugar)> rs;
+    where rs' := <desugar-all> rs;
           <extract-writables> rs';
           <extract-readables> rs';
           <extract-components> rs';
@@ -98,9 +99,9 @@ rules // translate rules
   translate-rules =
     collect(?Rules(<id>)); 
     concat; 
-    filter(translate-rule);
+    filter(/* try(refocus); desugar-all; */ translate-rule);
     concat-strings
-    
+ 
   translate-rule :
     Axiom(Termeq(lhs, rhs)) -> $[
       norm:
@@ -130,7 +131,9 @@ rules // translate rules
   // (optimization)
   
 rules // translate dynamic
-  
+
+  desugar-all = innermost(desugar)
+    
   desugar :
     NoReads() -> Reads([])
    
