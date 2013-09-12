@@ -7,18 +7,18 @@
     <property name="esvmodule" value="ds"/>
     <property name="strmodule" value="ds"/>
 
-    <!-- Project directories -->
+    <!-- Project directories -->  
     <property name="trans" location="trans"/>
     <property name="src-gen" location="editor/java"/>
     <property name="syntax" location="syntax"/>
     <property name="include" location="include"/>
     <property name="lib" location="lib"/>
     <property name="build" location="bin"/>
-    <property name="dist" location="bin/dist"/>
-    
+    <property name="dist" location="bin/dist"/> 
+      
     <!-- Imports -->
     <property name="build.sdf.imports" value=""/>
-    <property name="build.stratego.args" value="
+    <property name="build.stratego.args" value=" 
                     --library
                     -I &quot;${trans}&quot;
                     -I &quot;${basedir}&quot;

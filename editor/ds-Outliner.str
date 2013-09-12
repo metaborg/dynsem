@@ -1,0 +1,11 @@
+module editor/ds-Outliner
+
+imports
+  include/ds
+  lib/runtime/editor/outline-library
+  lib/runtime/editor/origins
+  editor/ds-Outliner.generated
+
+rules
+  
+  outline-expand-to-level = !3

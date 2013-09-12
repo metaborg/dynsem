@@ -6,7 +6,7 @@ imports
 	lib/editor-common.generated
 	lib/runtime/nbl/check
 
-rules
+rules 
 	
 	constraint-warning:
 		Entity(x, _) -> (x, $[Entity names must start with a capital])

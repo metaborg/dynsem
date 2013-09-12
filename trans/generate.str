@@ -1,50 +1,242 @@
 module generate
 
 imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/ds
+  lib/editor-common.generated
 
-	include/ds
+rules
 
-rules // Transformation to java strings.
+  to-stratego(|filename) :
+    rs -> $[
+      module [<base-filename; remove-extension>filename]
+      
+      signature
+        constructors
+          [cs]
+          MapExtend : T * T -> T
+          MapSelect : T * T -> T
+          Fresh : T -> T
+      
+      rules // run-time library
+        
+        normalize :
+          term -> term' 
+          where term' := <innermost(norm)> term 
+          
+        exec :
+          prog -> <normalize; repeat(eval; normalize)> (prog, [init-comps])
+        
+        norm:
+          MapExtend(map1, map2) -> <conc> (map1, map2)
+    
+        norm:
+          MapSelect(key, map) -> value
+          where <fetch(?(key, value))> map  
+          
+        norm:
+          Fresh(["[]"]) -> <new>
+           
+      rules
+        [rs'']
+    ]
+    where rs' := <innermost(desugar)> rs;
+          <extract-writables> rs';
+          <extract-readables> rs';
+          <extract-components> rs';
+          rs'' := <translate-rules> rs';
+          cs  := <declare-constructors; separate-by(|"\n"); concat-strings> rs;
+          init-comps := $<[<<CompList; filter(not(IsWritable)); tr-list(\name -> $<<name>([])>\|",")>>]>
+          
+rules // declare constructors
+  
+  declare-constructors =
+    collect-all(declare-constructor, union)
+    
+  declare-constructor :
+    Con(name, []) -> $[[name]: T]
 
-	to-java:
-		[_] -> <concat-strings> <map(to-java)>
-		
-	to-java:
-		() -> ""
+  declare-constructor :
+    Con(name, t*) -> $[[name]: [<tr-list(!"T"|" * ")>t*] -> T]
+    where <not([])> t*
 
-	to-java:
-		Module(x, d*) ->
-		$[ package [x];
-			 
-			 [d'*]
-		 ]
-		with
-			d'* := <filter(to-java)> d*
-	
-	to-java:
-		Entity(x, p*) ->
-		$[ class [x] {
-					 [p'*]
-			 }
-		 ]
-		with
-			p'* := <to-java> p*
+  declare-constructor :
+    LabelComp(name, _) -> $[[name]: T -> T]
+        
+rules // extract components        
+  
+  extract-components =
+    collect-all(?LabelComp(<id>, _), union) => comps; 
+    <filter(not(IsWritable))> comps => non-writeables;
+    <filter(not(IsReadable))> comps => non-readables;    
+    rules(
+      CompList : _ -> comps
+      CompPatLhs : num -> $<[<<separate-by(|",")>lst>]>
+        where <map(\ name -> $[[name]([<lower-case>name]_[num])] \)> non-writeables => lst     
+      CompPatRhs : num -> $<[<<separate-by(|",")>lst>]>
+        where <map(\ name -> $[[name]([<lower-case>name]_[num])] \)> non-readables => lst     
+    )
+  
+  extract-writables =
+    collect-all(?DynamicEmitted(<map(?LabelComp(<id>,_))>), union); concat => comps;
+    rules(
+      WritableComps : _ -> comps
+    );
+    map({?comp; rules( IsWritable : comp -> comp )})
 
-	to-java:
-		Property(x, Type(t)) -> $[
-			private [t] [x];
-			
-			public [t] get_[x]() {
-					return [x];
-			}
-			
-			public void set_[x] ([t] [x]) {
-					this.[x] = [x];		
-			}
-	]
-	
-	to-java:
-		Type(t) -> t
+  extract-readables =
+    collect-all(?Reads(<map(?LabelComp(<id>,_))>), union); concat => comps;
+    rules(
+      ReadableComps : _ -> comps
+    );
+    map({?comp; rules( IsReadable : comp -> comp )})
+    
+rules // translate rules
+   
+  translate-rules =
+    collect(?Rules(<id>)); 
+    concat; 
+    filter(translate-rule);
+    concat-strings
+    
+  translate-rule :
+    Axiom(Termeq(lhs, rhs)) -> $[
+      norm:
+        [<pp-term>lhs] -> [<pp-term> rhs]
+    ]
+    
+  translate-rule :
+    Rule(prem*, _, Termeq(lhs, rhs)) -> $[
+      norm:       
+        [<pp-term>lhs] -> [<pp-term> rhs]
+        where [prems]
+    ]
+    where (_, prems) := <translate-premisses> (1, prem*)
+     
+  translate-premisses :
+    (num, []) -> (num, $[id])
+    
+  translate-premisses :
+    (num, [Formula(Termeq(lhs, rhs)) | prem*]) -> (num', prems')
+    where (num', prems) := <translate-premisses>(num, prem*);
+          prems' := $[<normalize>[<pp-term>lhs] => [<pp-term>rhs]; 
+                      [prems]]
+          
+             
+  // todo: lift non-variable arguments from lhs patterns (recursively)
+  // as normalization on MSOS rules
+  // (optimization)
+  
+rules // translate dynamic
+  
+  desugar :
+    NoReads() -> Reads([])
+   
+  desugar :
+    Source(lhs) -> Source(lhs, [])
+    
+  desugar :
+    Target(rhs) -> Target(rhs, [])
+    
+  desugar :
+    Dynamic() -> DynamicEmitted([])
+    
+  desugar :
+    Axiom(form) -> Rule([], "-----", form)
+  
+  translate-rule :
+    Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) -> $[
+      eval:       
+        ([<pp-term>lhs], [comps-lhs]) -> ([<pp-term> rhs], [comps-rhs])
+        where [initsprems] 
+    ]
+    where comps-lhs := <CompPatLhs> 1;
+          inits := <conc; label-comp-inits(|1)> (r*, sc*);
+          (num, prems) := <translate-premisses> (2, prem*);
+          initsprems := <if (?"") then !$[[prems]] else !$[[inits]
+                                                            [prems]] end> inits;
+          comps-rhs := <conc; label-comp-conclusion(|num)> (e*, tc*)
+            
+  label-comp-inits(|num) = 
+    if ?[] then !$[] else map(label-comp-init(|num)); concat-strings end
+  
+  label-comp-init(|num) :
+    LabelComp(name, t) -> $[[<pp-term>t] := [<lower-case>name]_[num];]
+    
+  label-comp-premisse(|num) :
+    comps -> $<[<<separate-by(|",")> t*>]>
+    where
+      CompList; 
+      filter(not(IsWritable); (
+        {t: \ comp-name -> $[[comp-name]([<pp-term>t])]
+              where <fetch(?LabelComp(comp-name, t))> comps \ }        
+        <+ ( not(IsReadable) ; \ comp-name -> $[[comp-name]([<lower-case>comp-name]_[<subt>(num,1)])] \ )
+        <+ ( IsReadable ; \ comp-name -> $[[comp-name]([<lower-case>comp-name]_1)] \ )        
+        )
+      ) => t*
 
-	to-java:
-		t* -> <map(to-java)> t*
+  label-comp-conclusion(|num) :
+    comps -> $<[<<separate-by(|",")> t*>]>
+    where
+      CompList;
+      filter(not(IsReadable)); 
+      map(
+        {t: \ comp-name -> $[[comp-name]([<pp-term>t])]
+              where <fetch(?LabelComp(comp-name, t))> comps \ }       
+        <+ if not(IsWritable) <+ <eq> (num, 3) then       
+              \ comp-name -> $[[comp-name]([<lower-case>comp-name]_[<subt>(num,1)])] \ 
+           else if <gt> (num, 3) then
+               \ comp-name -> $[[comp-name](<concat>([<range; map(\i -> $[[<lower-case>comp-name]_[i]] \); separate-by(|","); concat-strings> (2, num)]))] \
+           else 
+               \ comp-name -> $<<comp-name>([])> \
+           end end
+      ) => t*
+               
+  translate-premisses :
+    (num, [Formula(Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) | prem*]) -> 
+    (num', $[<eval>([<pp-term>lhs], [comps-lhs]) => ([<pp-term> rhs], [comps-rhs]);
+             [initsprems]])
+    where comps-lhs := <conc; label-comp-premisse(|num)> (r*, sc*);
+          comps-rhs := <CompPatRhs> num;
+          inits     := <conc; label-comp-inits(|num)> (e*, tc*);
+          (num', prems) := <translate-premisses> (<add>(num, 1), prem*);
+          initsprems := <if (?"") then !$[[prems]] else !$[[inits]
+                                                           [prems]] end> inits         
+          
+    
+rules 
+  
+  tr-list(s|sep) = 
+    map(s); separate-by(|sep); concat-strings
+  
+  pp-terms = 
+    map(pp-term); separate-by(|","); concat-strings
+  
+  pp-term :
+    Con(c, t*) -> $[[c]([<pp-terms>t*])]
+    
+  pp-term :
+    Var(x) -> x
+    
+  pp-term :
+    Map(l) -> <pp-list> l
+
+  pp-term :
+    Bind(x, y) -> $[([<pp-term>x],[<pp-term>y])]
+
+  pp-term :
+    List(l) -> <pp-list> l
+        
+  pp-list :
+    [t*] -> $<[<<pp-terms>t*>]>
+    
+  pp-term :
+    y -> <pp-aterm>
+    
+rules
+  
+  pp-aterm :
+    c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
+    

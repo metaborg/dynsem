@@ -2,7 +2,7 @@ module outline
 
 imports
   include/ds
-  lib/outline-library.generated
+  //lib/outline-library.generated
 
 rules
 

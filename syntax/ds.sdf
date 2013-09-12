@@ -1,12 +1,77 @@
-%% Grammar for the ds language
-%% By default, based on an example "entities" syntax
+%% Grammar for the DynSem language 
+%% based on IMSOS formalism of Peter Mosses
+
 module ds
 
 imports Common dsgenerated
 
 exports
 
-  context-free start-symbols
-  
+  context-free start-symbols 
     Start
 
+exports
+  
+  lexical syntax 
+    [\-][\-][\-][\-]*             -> INFER
+    (~[\n]+[\n])+[\n]             -> GTEXT
+    [\']~[\']*[\']                -> ATOM
+    "-"? [0-9]+ "." [0-9]*        -> FLOAT
+  lexical restrictions
+    INFER          -/- [\-]
+    FLOAT          -/- [0-9]
+
+  context-free syntax  
+
+    Item*                   -> Start {"File"}
+
+  context-free syntax %% terms
+    
+    ID "(" {Term ","}* ")"  -> Term {"Con"}
+    ID                      -> Term {"Var"} 
+    ATOM                    -> Term {"Atom"}
+    INT                     -> Term {"Int"}
+    FLOAT                   -> Term {"Float"}
+    STRING                  -> Term {"String"}
+    
+    "{" {Map ","}* "}"      -> Term {"Map"}
+    "[" {Term ","}* "]"     -> Term {"List"}
+    Term "|-->" Term        -> Map {"Bind"}
+
+  context-free syntax %% rules
+  
+    "rules" Rule*                -> Item {"Rules"}
+  
+    Formula                      -> Rule {"Axiom"}
+    {Premise ","}+ INFER Formula -> Rule {"Rule"}
+        
+    Formula                      -> Premise {"Formula"}
+
+  context-free syntax %% formulas
+  
+    Term "=" Term             -> Formula {"Termeq"}
+    Term "!=" Term            -> Formula {"TermNeq"}
+    "~" Formula               -> Formula {"Negation"}
+    ID "(" Term ")"           -> Formula {"Runcheck"}
+  
+  context-free syntax %% relations
+      
+    Reads Source Rel Target           -> Formula {"Relation"}
+  
+                                      -> Reads {"NoReads"}
+    {LabelComp ","}* "|-"             -> Reads {"Reads"}
+  
+    ID Term                           -> LabelComp {"LabelComp"}
+  
+    Term                              -> Source {"Source"}
+    "(" Term "," {LabelComp ","}* ")" -> Source {"Source"}
+
+    Term                              -> Target {"Target"}
+    "(" Term "," {LabelComp ","}* ")" -> Target {"Target"}
+  
+    "-->"                             -> Rel {"Dynamic"}
+    "--" {LabelComp ","}* "-->"       -> Rel {"DynamicEmitted"}
+  
+  
+
+                         

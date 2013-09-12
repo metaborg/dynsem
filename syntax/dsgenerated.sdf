@@ -1,29 +1,10 @@
 module dsgenerated
 exports
   context-free syntax
-    "module" ID Definition*       -> Start      {cons("Module")}
-    "entity" ID "{" Property* "}" -> Definition {cons("Entity")}
-    ID ":" Type                   -> Property   {cons("Property")}
-    ID                            -> Type       {cons("Type")}
+    
 
   context-free syntax
-    CONTENTCOMPLETE -> Start      {cons("COMPLETION-Start")}
-    CONTENTCOMPLETE -> Definition {cons("COMPLETION-Definition")}
-    CONTENTCOMPLETE -> Property   {cons("COMPLETION-Property")}
-    CONTENTCOMPLETE -> Type       {cons("COMPLETION-Type")}
+    
 
-  context-free syntax
-    ID                     -> Term {cons("Var")}
-    STRING                 -> Term {cons("String")}
-    ID "(" {Term ","}* ")" -> Term {cons("Cons")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> Term {cons("COMPLETION-Term")}
-
-  context-free syntax
-    "rules" Rule*         -> Definition {cons("Rules")}
-    ID ":" Term "->" Term -> Rule       {cons("Rule")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> Definition {cons("COMPLETION-Definition")}
-    CONTENTCOMPLETE -> Rule       {cons("COMPLETION-Rule")}
+  lexical syntax
+    

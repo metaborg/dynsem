@@ -1,20 +1,38 @@
-/**
-* Example ds program.
-*/  
-module example
+rules 
 
-entity User {
-  name     : String
-  password : String
-  homepage : URL
-}
+  Env e |- E() --> e
+  
+  Throw() -- Log L() --> Done()
  
-entity BlogPosting { 
-  poster : User
-  body   : String
-}
+  Env G(env) |- (x, State R()) --> (x', State l)
+  ----------------------------------------------
+  Env K(env) |- F(x) -- Log l --> x'
+  
+  A() --> B(), B() --> C(), D() --> E(), E() --> F()
+  ----------------
+  A() --> F()
+  
+  A() --> B()
+  -----------
+  A() --> F()  
+  
+  C(d,e) --> d
 
-entity URL {
-  location : String
-  prop : BlogPosting
-}
+  A() --> F() 
+
+
+x = y , Exec1(y) --> z
+----------------------
+    Exec(x) --> z
+
+IsValue(y) = true
+-----------------
+ Exec1(y) --> y
+
+y --> w , Exec(w) --> z
+-----------------------
+   Exec1(y) --> z
+   
+   
+Not(True()) = False()
+

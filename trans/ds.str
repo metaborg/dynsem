@@ -47,15 +47,6 @@ rules // Editor services
 		where
 			proposals := <analysis-propose-completions(|<language>, project-path)> ast
 
-rules // Builders
-	
-	// Generates a Java program for selected AST.
-	generate-java:
-		(selected, position, ast, path, project-path) -> (filename, result)
-		with
-			filename := <guarantee-extension(|"java")> path;
-			result	 := <to-java> selected
-
 rules // Debugging
 	
 	// Prints the abstract syntax ATerm of a selection.
@@ -83,3 +74,14 @@ rules // Debugging
 		
 	debug-reanalyze = 
 		analysis-debug-reanalyze(|<language>)
+
+rules // Builders
+  
+  // Transforms a selection to Stratego
+  generate-stratego:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"generated.str")> path;
+      result   := <to-stratego(|filename)> selected
+      
+      

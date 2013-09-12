@@ -22,3 +22,5 @@ syntax/ds.generated.pp
 utils
 lib/*.generated.str
 lib-refactoring/*.generated.str
+lib
+ds-Outliner.generated.str
