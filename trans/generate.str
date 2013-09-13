@@ -163,7 +163,8 @@ rules // translate dynamic
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) -> $[
       eval:       
         ([<pp-term>lhs], [comps-lhs]) -> ([<pp-term> rhs], [comps-rhs])
-        where [initsprems] 
+        where debug(!"eval: "); 
+              [initsprems] 
     ]
     where comps-lhs := <CompPatLhs> 1;
           inits := <conc; label-comp-inits(|1)> (r*, sc*);
