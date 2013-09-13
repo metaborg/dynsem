@@ -1,17 +1,16 @@
 rules
-
    IsValue(True()) = True()
   
    IsValue(False()) = True()
-   
+
    Not(True()) = False()
    
    Not(False()) = True()
-   
+
    prop --> prop'
    ----------------------------------
    Cond(prop,x,y) --> Cond(prop',x,y)
-   
+
    cond(True(),x,y) = x
    
    cond(False(),x,y) = y
@@ -45,7 +44,6 @@ rules
    Let(i,val,bodyval) --> bodyval
    
    Start() = Let(X(),False(),Not(X()))
-
 
 /*
 

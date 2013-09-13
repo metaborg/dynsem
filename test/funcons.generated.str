@@ -26,6 +26,7 @@ signature
     Map1 : T * T -> T
     Fresh : T -> T
     Exec : T -> T
+    Bind : T * T -> T
 
 rules // run-time library
   
@@ -43,11 +44,11 @@ rules // run-time library
     MapEmpty() -> []
     
   norm:
-    Map1(x,y) -> [(x,y)]
+    Map1(x,y) -> [Bind(x,y)]
         
   norm:
     MapSelect(key, map) -> value
-    where <fetch(?(key, value))> map  
+    where <fetch(?Bind(key, value))> map  
     
   norm:
     Fresh([]) -> <new>

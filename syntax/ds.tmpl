@@ -1,1 +1,45 @@
+templates // rules
 
+  Start.File = [[Item*; separator="\n\n"]]
+  
+  Item.Rules = [rules [Rule*; separator="\n\n"]]
+  
+  Rule.Axiom = [[Formula]]
+  Rule.Rule = [[Premise+; separator=",\n"] [INFER] [Formula]]
+  
+  Premise.Formula = [[Formula]]
+  
+templates // formula
+
+  Formula.TermEq = [[Term] = [Term]]
+  Formula.Relation = [[Reads] [Source] [Rel] [Target]]
+  
+  Reads.NoReads = []
+  Reads.Reads = [[LabelComp*; separator=", "] |-]
+  
+  Source.Source = [[Term]]
+  Source.Source = [( [Term] , [LabelComp*; separator=", "])]
+
+  Target.Target = [[Term]]
+  Target.Target = [( [Term] , [LabelComp*; separator=", "])]
+  
+  Rel.Dynamic = [-->]
+  Rel.DynamicEmitted = [-- [LabelComp*; separator=", "] -->]
+  
+  LabelComp.LabelComp = [[ID] [Term]]
+
+templates // terms
+
+  Term.Con = [[ID] ( [Term*; separator=","])]
+  Term.Var = [[ID]]
+  Term.List = <[<Entry*; separator=",">]>
+  Term.Map = [{ [Entry*;separator=","] }]
+  Entry.Bind = [[Term] |--> [Term]]
+
+
+/*
+todo:
+	seperate "explicate" and "generate stratego" phases
+	refocus + pretty printing phase
+*/
+	
