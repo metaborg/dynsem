@@ -23,6 +23,7 @@ rules
           Map1 : T * T -> T
           Fresh : T -> T
           Exec : T -> T
+          Bind : T * T -> T
       
       rules // run-time library
         
@@ -40,11 +41,11 @@ rules
           MapEmpty() -> ["[]"]
           
         norm:
-          Map1(x,y) -> ["[(x,y)]"]
+          Map1(x,y) -> ["[Bind(x,y)]"]
               
         norm:
           MapSelect(key, map) -> value
-          where <fetch(?(key, value))> map  
+          where <fetch(?Bind(key, value))> map  
           
         norm:
           Fresh(["[]"]) -> <new>
@@ -112,13 +113,13 @@ rules // translate rules
     concat-strings
  
   translate-rule :
-    Axiom(Termeq(lhs, rhs)) -> $[
+    Axiom(TermEq(lhs, rhs)) -> $[
       norm:
         [<pp-term>lhs] -> [<pp-term> rhs]
     ]
     
   translate-rule :
-    Rule(prem*, _, Termeq(lhs, rhs)) -> $[
+    Rule(prem*, _, TermEq(lhs, rhs)) -> $[
       norm:       
         [<pp-term>lhs] -> [<pp-term> rhs]
         where [prems]
@@ -129,7 +130,7 @@ rules // translate rules
     (num, []) -> (num, $[id])
     
   translate-premisses :
-    (num, [Formula(Termeq(lhs, rhs)) | prem*]) -> (num', prems')
+    (num, [Formula(TermEq(lhs, rhs)) | prem*]) -> (num', prems')
     where (num', prems) := <translate-premisses>(num, prem*);
           prems' := $[<normalize>[<pp-term>lhs] => [<pp-term>rhs]; 
                       [prems]]
@@ -231,9 +232,6 @@ rules
     
   pp-term :
     Var(x) -> x
-    
-  pp-term :
-    String(s) -> $["[<un-double-quote> s]"]
     
   pp-term :
     Map(l) -> <pp-list> l

@@ -6,6 +6,7 @@ imports
   libstratego-aterm
   include/ds
   lib/editor-common.generated
+  generate
   
 rules
   
@@ -23,7 +24,7 @@ rules
             Formula(Relation(NoReads(), 
                       Source(Con("Exec", [rhs]), tc*), DynamicEmitted(em2*), Target(Var(x))))
                       
-
+  refocus-rules = desugar-all; alltd(refocus)
           
     
     

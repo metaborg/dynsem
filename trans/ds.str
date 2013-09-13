@@ -11,10 +11,13 @@ imports
 	lib/runtime/nbl/-
 	lib/runtime/task/-
 	lib/runtime/index/-
+	lib/runtime/tmpl/pp
+	ds.pp.generated
 	names
 	check
 	generate
-  outline
+	refocus
+    outline
 
 rules // Analysis
 	
@@ -83,5 +86,14 @@ rules // Builders
     with
       filename := <guarantee-extension(|"generated.str")> path;
       result   := <to-stratego(|filename)> selected
-      
+  
+  prettyprint-ID = id
+  prettyprint-INFER = id
+  
+  // Refocus
+  refocus-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"refocus.ds")> path;
+      result   := <debug(!"pp: "); prettyprint-Rule> selected
       
