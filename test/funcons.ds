@@ -44,20 +44,3 @@ rules
    Let(i,val,bodyval) --> bodyval
    
    Start() = Let(X(),False(),Not(X()))
-
-/*
-
-Should be in library:
-	      
-x = y , Exec1(y) --> z
-----------------------
-    Exec(x) --> z
-
-IsValue(y) = true
------------------
- Exec1(y) --> y
-
-y --> w , Exec(w) --> z
------------------------
-   Exec1(y) --> z
-*/

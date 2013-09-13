@@ -20,19 +20,5 @@ rules
 
   A() --> F() 
 
-
-x = y , Exec1(y) --> z
-----------------------
-    Exec(x) --> z
-
-IsValue(y) = true
------------------
- Exec1(y) --> y
-
-y --> w , Exec(w) --> z
------------------------
-   Exec1(y) --> z
-   
-   
-Not(True()) = False()
+  Not(True()) = False()
 
