@@ -24,9 +24,12 @@ signature
     MapSelect : T * T -> T
     MapEmpty : T
     Map1 : T * T -> T
+    Bind : T * T -> T
     Fresh : T -> T
     Exec : T -> T
-    Bind : T * T -> T
+    Exec1 : T -> T
+    IsValue : T -> T       
+    
 
 rules // run-time library
   
@@ -35,11 +38,16 @@ rules // run-time library
     where term' := <innermost(norm)> term 
     
   exec :
-    prog -> <eval> (Exec(prog), [Env([])])
+    prog -> <eval> (<bottomup(n)>Exec(prog), [Env([])]) 
   
   norm:
     MapExtend(map1, map2) -> <conc> (map1, map2)
-    
+   
+
+rules // built-ins
+  
+  n = try(norm)
+	
   norm:
     MapEmpty() -> []
     
@@ -51,29 +59,64 @@ rules // run-time library
     where <fetch(?Bind(key, value))> map  
     
   norm:
-    Fresh([]) -> <new>
-     
+    Fresh() -> <new>
+  
+  /*
+  The following rules are generated from
+  
+  x = y , Exec1(y) --> z
+  ----------------------
+       Exec(x) --> z
+
+  IsValue(y) = true
+  -----------------
+   Exec1(y) --> y
+	
+  y --> w , Exec(w) --> z
+  -----------------------
+     Exec1(y) --> z
+  */
+   /* 
+  eval:       
+    (Exec(x), []) -> (z, [])
+    where <normalize>x => y; 
+          <eval>(Exec1(y), []) => (z, []);
+          id 
+
+  eval:       
+    (Exec1(y), []) -> (y, [])
+    where <normalize>IsValue(y) => true; 
+          id 
+
+  eval:       
+    (Exec1(y), []) -> (z, [])
+    where <eval>(y, []) => (w, []);
+          <eval>(Exec(w), []) => (z, []);
+          id 
+  */
+               
 rules
   
   norm:       
-    IsValue(True()) -> True()
+    IsValue(True()) -> <n>True()
     where id
   
   norm:       
-    IsValue(False()) -> True()
+    IsValue(False()) -> <n>True()
     where id
   
   norm:       
-    Not(True()) -> False()
+    Not(True()) -> <n>False()
     where id
   
   norm:       
-    Not(False()) -> True()
+    Not(False()) -> <n>True()
     where id
   
   eval:       
-    (Cond(prop,x,y), [Env(env_1)]) -> (Cond(prop',x,y), [Print(print_2)])
-    where <eval>(prop, [Env(env_1)]) => (prop', [Print(print_2)]);
+    (Cond(prop,x,y), [Env(env_1)]) -> (<n>Cond(prop',x,y), [Print(print_2)])
+    where debug(!"eval: "); 
+          <eval>(prop, [Env(env_1)]) => (prop', [Print(print_2)]);
           id 
   
   norm:       
@@ -85,47 +128,53 @@ rules
     where id
   
   eval:       
-    (Seq(comm,x), [Env(env_1)]) -> (Seq(comm',x), [Print(print_2)])
-    where <eval>(comm, [Env(env_1)]) => (comm', [Print(print_2)]);
+    (Seq(comm,x), [Env(env_1)]) -> (<n>Seq(comm',x), [Print(print_2)])
+    where debug(!"eval: "); 
+          <eval>(comm, [Env(env_1)]) => (comm', [Print(print_2)]);
           id 
   
   norm:       
-    IsValue(Skip()) -> True()
+    IsValue(Skip()) -> <n>True()
     where id
   
   norm:       
     Seq(val,x) -> x
-    where <normalize>IsValue(val) => True(); 
+    where True() := <n>IsValue(val); 
           id
   
   eval:       
-    (Print(x), [Env(env_1)]) -> (Skip(), [Print(x)])
-    where id 
-  
-  eval:       
-    (BoundValue(i), [Env(env_1)]) -> (MapSelect(i,env), [Print([])])
-    where env := env_1;
-           id 
-  
-  eval:       
-    (Let(i,exp,body), [Env(env_1)]) -> (Let(i,exp',body), [Print(print_2)])
-    where <eval>(exp, [Env(env_1)]) => (exp', [Print(print_2)]);
+    (Print(x), [Env(env_1)]) -> (<n>Skip(), [Print(x)])
+    where debug(!"eval: "); 
           id 
   
   eval:       
-    (Let(i,val,body), [Env(env_1)]) -> (Let(i,val,body'), [Print(print_2)])
-    where env := env_1;
-           <normalize>IsValue(val) => True(); 
-           <normalize>MapExtend(env,Map1(i,val)) => env1; 
+    (BoundValue(i), [Env(env_1)]) -> (<n>MapSelect(i,env), [Print([])])
+    where debug(!"eval: "); 
+          env := env_1;
+           id 
+  
+  eval:       
+    (Let(i,exp,body), [Env(env_1)]) -> (<n>Let(i,exp',body), [Print(print_2)])
+    where debug(!"eval: "); 
+          <eval>(exp, [Env(env_1)]) => (exp', [Print(print_2)]);
+          id 
+  
+  eval:       
+    (Let(i,val,body), [Env(env_1)]) -> (<n>Let(i,val,body'), [Print(print_2)])
+    where debug(!"eval: "); 
+          env := env_1;
+           True() := <n>IsValue(val); 
+           env1 := <n>MapExtend(env,<n>Map1(i,val)); 
            <eval>(body, [Env(env1)]) => (body', [Print(print_2)]);
            id 
   
   eval:       
     (Let(i,val,bodyval), [Env(env_1)]) -> (bodyval, [Print([])])
-    where <normalize>IsValue(bodyval) => True(); 
+    where debug(!"eval: "); 
+          True() := <n>IsValue(bodyval); 
           id 
   
   norm:       
-    Start() -> Let(X(),False(),Not(X()))
+    Start() -> <n>Let(<n>X(),<n>False(),<n>Not(<n>X()))
     where id
   
