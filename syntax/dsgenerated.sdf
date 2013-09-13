@@ -39,7 +39,7 @@ exports
     ID                     -> Term  {cons("Var")}
     "[" {Term ","}* "]"    -> Term  {cons("List")}
     "{" {Entry ","}* "}"   -> Term  {cons("Map")}
-    STRING                 -> Term  {cons("Atom")}
+    STRING                 -> Term  {cons("String")}
     Term "|-->" Term       -> Entry {cons("Bind")}
 
   context-free syntax

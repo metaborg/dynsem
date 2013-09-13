@@ -247,7 +247,7 @@ strategies
        ]
 
   prettyprint-Term =
-    ?Atom(a)
+    ?String(a)
     ; ![ H(
            [SOpt(HS(), "0")]
          , [<pp-one-Z(prettyprint-STRING)> a]

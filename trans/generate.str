@@ -36,7 +36,7 @@ rules
           where term' := <innermost(norm)> term 
           
         exec :
-          prog -> <eval> (Exec(prog), [init-comps])
+          prog -> <eval> (Exec(prog), [init-comps]) 
         
         norm:
           MapExtend(map1, map2) -> <conc> (map1, map2)
@@ -185,7 +185,8 @@ rules // translate dynamic
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) -> $[
       eval:       
         ([<pp-term>lhs], [comps-lhs]) -> ([<pp-term> rhs], [comps-rhs])
-        where [initsprems] 
+        where debug(!"eval: "); 
+              [initsprems] 
     ]
     where comps-lhs := <CompPatLhs> 1;
           inits := <conc; label-comp-inits(|1)> (r*, sc*);
@@ -223,7 +224,7 @@ rules // translate dynamic
         <+ if not(IsWritable) <+ <eq> (num, 3) then       
               \ comp-name -> $[[comp-name]([<lower-case>comp-name]_[<subt>(num,1)])] \ 
            else if <gt> (num, 3) then
-               \ comp-name -> $[[comp-name](<concat>([<range; map(\i -> $[[<lower-case>comp-name]_[i]] \); separate-by(|","); concat-strings> (2, num)]))] \
+               \ comp-name -> $[[comp-name](<concat>["["][<range; map(\i -> $[[<lower-case>comp-name]_[i]] \); separate-by(|","); concat-strings> (2, num)]["]"])] \
            else 
                \ comp-name -> $<<comp-name>([])> \
            end end
@@ -254,6 +255,9 @@ rules
     
   pp-term :
     Var(x) -> x
+
+  pp-term :
+    String(s) -> $["[<un-double-quote> s]"]
     
   pp-term :
     Map(l) -> <pp-list> l

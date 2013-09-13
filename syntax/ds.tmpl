@@ -39,11 +39,11 @@ templates // formulas
 
 templates // terms
 
-  Term.Con = [[ID]([Term*; separator=","])]
-  Term.Var = [[ID]]
-  Term.List = <[ <Term*; separator=", "> ]>
-  Term.Map = [{[Entry*;separator=", "]}]
-  Term.Atom = [[STRING]]
+  Term.Con    = [[ID]([Term*; separator=","])]
+  Term.Var    = [[ID]]
+  Term.List   = <[ <Term*; separator=", "> ]>
+  Term.Map    = [{[Entry*;separator=", "]}]
+  Term.String = [[STRING]]
   
   Entry.Bind = [[Term] |--> [Term]]
 	
