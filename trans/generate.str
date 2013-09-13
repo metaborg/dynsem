@@ -22,9 +22,12 @@ rules
           MapSelect : T * T -> T
           MapEmpty : T
           Map1 : T * T -> T
+          Bind : T * T -> T
           Fresh : T -> T
           Exec : T -> T
-          Bind : T * T -> T
+          Exec1 : T -> T
+          IsValue : T -> T       
+          
       
       rules // run-time library
         
@@ -37,7 +40,9 @@ rules
         
         norm:
           MapExtend(map1, map2) -> <conc> (map1, map2)
-          
+      
+      rules // built-ins
+      	
         norm:
           MapEmpty() -> ["[]"]
           
@@ -50,7 +55,40 @@ rules
           
         norm:
           Fresh(["[]"]) -> <new>
-           
+        
+        /*
+        The following rules are generated from
+        
+        x = y , Exec1(y) --> z
+        ----------------------
+             Exec(x) --> z
+
+        IsValue(y) = true
+        -----------------
+         Exec1(y) --> y
+		
+        y --> w , Exec(w) --> z
+        -----------------------
+           Exec1(y) --> z
+        */
+          
+	    eval:       
+          (Exec(x), ["[]"]) -> (z, ["[]"])
+          where <normalize>x => y; 
+                <eval>(Exec1(y), ["[]"]) => (z, ["[]"]);
+                id 
+  
+        eval:       
+          (Exec1(y), ["[]"]) -> (y, ["[]"])
+          where <normalize>IsValue(y) => true; 
+                id 
+  
+        eval:       
+          (Exec1(y), ["[]"]) -> (z, ["[]"])
+          where <eval>(y, ["[]"]) => (w, ["[]"]);
+                <eval>(Exec(w), ["[]"]) => (z, ["[]"]);
+                id 
+                     
       rules
         [rs'']
     ]
