@@ -2,9 +2,9 @@ module ds.generated
 
 completions
   completion template Item : "rules " =
-    "rules " <:Rule>   
+    "rules\n\n\t" (cursor) (blank)  
   completion template Rule : "Premise INFER Formula" =
-    <Premise:Premise> " " <INFER:INFER> " " <Formula:Formula>  
+    <Premise:Premise> "\n" <INFER:INFER> "\n" <Formula:Formula> (blank)  
 
 completions
   completion template Formula : "Term = Term" =
@@ -13,10 +13,10 @@ completions
     <Reads:Reads> " " <Source:Source> " " <Rel:Rel> " " <Target:Target>  
   completion template Reads : " |-" =
     <:LabelComp> " |-"             
-  completion template Source : "( Term , )" =
-    "( " <Term:Term> " , " <:LabelComp> ")"  
-  completion template Target : "( Term , )" =
-    "( " <Term:Term> " , " <:LabelComp> ")"  
+  completion template Source : "(Term, )" =
+    "(" <Term:Term> ", " <:LabelComp> ")"  
+  completion template Target : "(Term, )" =
+    "(" <Term:Term> ", " <:LabelComp> ")"  
   completion template Rel : "-->" =
     "-->"                            
   completion template Rel : "-- -->" =

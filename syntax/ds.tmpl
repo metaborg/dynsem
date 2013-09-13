@@ -2,14 +2,23 @@ templates // rules
 
   Start.File = [[Item*; separator="\n\n"]]
   
-  Item.Rules = [rules [Rule*; separator="\n\n"]]
+  Item.Rules = [
+    rules 
+    
+      [Rule*; separator="\n\n"]
+  ]
   
   Rule.Axiom = [[Formula]]
-  Rule.Rule = [[Premise+; separator=",\n"] [INFER] [Formula]]
+  
+  Rule.Rule = [
+    [Premise+; separator=",\n"]
+    [INFER]
+    [Formula]
+  ]
   
   Premise.Formula = [[Formula]]
   
-templates // formula 
+templates // formulas
 
   Formula.TermEq = [[Term] = [Term]]
   Formula.Relation = [[Reads] [Source] [Rel] [Target]]
@@ -18,10 +27,10 @@ templates // formula
   Reads.Reads = [[LabelComp*; separator=", "] |-]
   
   Source.Source = [[Term]]
-  Source.Source = [( [Term] , [LabelComp*; separator=", "])]
+  Source.Source = [([Term], [LabelComp*; separator=", "])]
 
   Target.Target = [[Term]]
-  Target.Target = [( [Term] , [LabelComp*; separator=", "])]
+  Target.Target = [([Term], [LabelComp*; separator=", "])]
   
   Rel.Dynamic = [-->]
   Rel.DynamicEmitted = [-- [LabelComp*; separator=", "] -->]
@@ -34,6 +43,7 @@ templates // terms
   Term.Var = [[ID]]
   Term.List = <[<Entry*; separator=",">]>
   Term.Map = [{ [Entry*;separator=","] }]
+  
   Entry.Bind = [[Term] |--> [Term]]
 
 

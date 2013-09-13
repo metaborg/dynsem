@@ -13,10 +13,13 @@ strategies
     ?Rules(a)
     ; ![ H(
            [SOpt(HS(), "0")]
-         , [ S("rules ")
-           , <pp-V-list(prettyprint-Rule|"1")> a
-           ]
+         , [S("rules")]
          )
+       , H(
+           []
+         , [S("")]
+         )
+       , <pp-indent(|"2")> [<pp-V-list(prettyprint-Rule|"1")> a]
        ]
 
   prettyprint-Rule =
@@ -32,11 +35,15 @@ strategies
     ; ![ H(
            [SOpt(HS(), "0")]
          , [ <pp-V-list(prettyprint-Premise|"0", ",")> a
-           , S(" ")
-           , <pp-one-Z(prettyprint-INFER)> b
-           , S(" ")
-           , <pp-one-Z(prettyprint-Formula)> c
            ]
+         )
+       , H(
+           [SOpt(HS(), "0")]
+         , [<pp-one-Z(prettyprint-INFER)> b]
+         )
+       , H(
+           [SOpt(HS(), "0")]
+         , [<pp-one-Z(prettyprint-Formula)> c]
          )
        ]
 
@@ -118,9 +125,9 @@ strategies
     ?Source(a, b)
     ; ![ H(
            [SOpt(HS(), "0")]
-         , [ S("( ")
+         , [ S("(")
            , <pp-one-Z(prettyprint-Term)> a
-           , S(" , ")
+           , S(", ")
            , <pp-H-list(prettyprint-LabelComp|", ")> b
            , S(")")
            ]
@@ -139,9 +146,9 @@ strategies
     ?Target(a, b)
     ; ![ H(
            [SOpt(HS(), "0")]
-         , [ S("( ")
+         , [ S("(")
            , <pp-one-Z(prettyprint-Term)> a
-           , S(" , ")
+           , S(", ")
            , <pp-H-list(prettyprint-LabelComp|", ")> b
            , S(")")
            ]
