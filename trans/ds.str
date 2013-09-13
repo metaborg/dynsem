@@ -94,6 +94,6 @@ rules // Builders
   refocus-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"refocus.ds")> path;
-      result   := <prettyprint-example; box2text-string(|80)> selected
+      filename := <guarantee-extension(|"refocussed.ds")> path;
+      result   := <refocus-rules; prettyprint-example; box2text-string(|80)> selected
       
