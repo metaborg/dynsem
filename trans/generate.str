@@ -233,6 +233,9 @@ rules
     Var(x) -> x
     
   pp-term :
+    String(s) -> $["[<un-double-quote> s]"]
+    
+  pp-term :
     Map(l) -> <pp-list> l
 
   pp-term :
