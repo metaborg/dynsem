@@ -17,7 +17,10 @@ builders
   observer : editor-analyze           (multifile)                                                 
 
   builder  : "Refocus"                = refocus-editor (openeditor) (realtime)                                                                                                  
-  builder  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)                     
+  builder  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)     
+                                                                                         
+  builder  : "Format"                 = format-editor (openeditor) (realtime)               
+            
   builder  : "Show abstract syntax"   = debug-show-aterm (openeditor) (realtime) (meta) (source)  
   builder  : "Show analyzed syntax"   = debug-show-analyzed (openeditor) (realtime) (meta)        
   builder  : "Show index (current)"   = debug-show-index-current (openeditor) (meta)              
