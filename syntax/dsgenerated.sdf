@@ -17,13 +17,13 @@ exports
     Term "=" Term                     -> Formula   {cons("TermEq")}
     Reads Source Rel Target           -> Formula   {cons("Relation")}
                                       -> Reads     {cons("NoReads")}
-    {LabelComp ","}* "|-"             -> Reads     {cons("Reads")}
+    {LabelComp ","}+ "|-"             -> Reads     {cons("Reads")}
     Term                              -> Source    {cons("Source")}
-    "(" Term "," {LabelComp ","}* ")" -> Source    {cons("Source")}
+    "(" Term "," {LabelComp ","}+ ")" -> Source    {cons("Source")}
     Term                              -> Target    {cons("Target")}
-    "(" Term "," {LabelComp ","}* ")" -> Target    {cons("Target")}
+    "(" Term "," {LabelComp ","}+ ")" -> Target    {cons("Target")}
     "-->"                             -> Rel       {cons("Dynamic")}
-    "--" {LabelComp ","}* "-->"       -> Rel       {cons("DynamicEmitted")}
+    "--" {LabelComp ","}+ "-->"       -> Rel       {cons("DynamicEmitted")}
     ID Term                           -> LabelComp {cons("LabelComp")}
 
   context-free syntax
@@ -37,8 +37,9 @@ exports
   context-free syntax
     ID "(" {Term ","}* ")" -> Term  {cons("Con")}
     ID                     -> Term  {cons("Var")}
-    "[" {Entry ","}* "]"   -> Term  {cons("List")}
+    "[" {Term ","}* "]"    -> Term  {cons("List")}
     "{" {Entry ","}* "}"   -> Term  {cons("Map")}
+    STRING                 -> Term  {cons("Atom")}
     Term "|-->" Term       -> Entry {cons("Bind")}
 
   context-free syntax

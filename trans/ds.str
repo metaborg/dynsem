@@ -89,6 +89,7 @@ rules // Builders
   
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
+  prettyprint-STRING = ![S(<id>)]
    
   refocus-editor:
     (selected, position, ast, path, project-path) -> (filename, result)

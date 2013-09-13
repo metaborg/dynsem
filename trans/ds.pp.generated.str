@@ -85,7 +85,6 @@ strategies
     ; ![ H(
            [SOpt(HS(), "0")]
          , [ <pp-one-Z(prettyprint-Reads)> a
-           , S(" ")
            , <pp-one-Z(prettyprint-Source)> b
            , S(" ")
            , <pp-one-Z(prettyprint-Rel)> c
@@ -108,7 +107,7 @@ strategies
     ; ![ H(
            [SOpt(HS(), "0")]
          , [ <pp-H-list(prettyprint-LabelComp|", ")> a
-           , S(" |-")
+           , S(" |- ")
            ]
          )
        ]
@@ -210,7 +209,7 @@ strategies
     ; ![ H(
            [SOpt(HS(), "0")]
          , [ <pp-one-Z(prettyprint-ID)> a
-           , S(" ( ")
+           , S("(")
            , <pp-H-list(prettyprint-Term|",")> b
            , S(")")
            ]
@@ -229,9 +228,9 @@ strategies
     ?List(a)
     ; ![ H(
            [SOpt(HS(), "0")]
-         , [ S("[")
-           , <pp-H-list(prettyprint-Entry|",")> a
-           , S("]")
+         , [ S("[ ")
+           , <pp-H-list(prettyprint-Term|", ")> a
+           , S(" ]")
            ]
          )
        ]
@@ -240,10 +239,18 @@ strategies
     ?Map(a)
     ; ![ H(
            [SOpt(HS(), "0")]
-         , [ S("{ ")
-           , <pp-H-list(prettyprint-Entry|",")> a
-           , S(" }")
+         , [ S("{")
+           , <pp-H-list(prettyprint-Entry|", ")> a
+           , S("}")
            ]
+         )
+       ]
+
+  prettyprint-Term =
+    ?Atom(a)
+    ; ![ H(
+           [SOpt(HS(), "0")]
+         , [<pp-one-Z(prettyprint-STRING)> a]
          )
        ]
 

@@ -7,6 +7,7 @@ imports
   include/ds
   lib/editor-common.generated
   refocus
+  sugar
 
 rules
 
@@ -142,23 +143,6 @@ rules // translate rules
   
 rules // translate dynamic
 
-  desugar-all = innermost(desugar)
-    
-  desugar :
-    NoReads() -> Reads([])
-   
-  desugar :
-    Source(lhs) -> Source(lhs, [])
-    
-  desugar :
-    Target(rhs) -> Target(rhs, [])
-    
-  desugar :
-    Dynamic() -> DynamicEmitted([])
-    
-  desugar :
-    Axiom(form) -> Rule([], "-----", form)
-  
   translate-rule :
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) -> $[
       eval:       
@@ -252,4 +236,10 @@ rules
   
   pp-aterm :
     c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
+    
+/*
+todo:
+	seperate "explicate" and "generate stratego" phases
+*/
+
     
