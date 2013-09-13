@@ -87,13 +87,13 @@ rules // Builders
       filename := <guarantee-extension(|"generated.str")> path;
       result   := <to-stratego(|filename)> selected
   
-  prettyprint-ID = id
-  prettyprint-INFER = id
+  prettyprint-ID = ![S(<id>)]
+  prettyprint-INFER = ![S(<id>)]
   
   // Refocus
   refocus-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"refocus.ds")> path;
-      result   := <debug(!"pp: "); prettyprint-Rule> selected
+      result   := <prettyprint-example; box2text-string(|80)> selected
       
