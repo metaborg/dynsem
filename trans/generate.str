@@ -36,12 +36,15 @@ rules
           where term' := <innermost(norm)> term 
           
         exec :
-          prog -> <eval> (Exec(prog), [init-comps]) 
+          prog -> <eval> (<bottomup(n)>Exec(prog), [init-comps]) 
         
         norm:
           MapExtend(map1, map2) -> <conc> (map1, map2)
+         
       
       rules // built-ins
+        
+        n = try(norm)
       	
         norm:
           MapEmpty() -> ["[]"]
@@ -54,7 +57,7 @@ rules
           where <fetch(?Bind(key, value))> map  
           
         norm:
-          Fresh(["[]"]) -> <new>
+          Fresh() -> <new>
         
         /*
         The following rules are generated from
@@ -71,7 +74,7 @@ rules
         -----------------------
            Exec1(y) --> z
         */
-          
+         /* 
 	    eval:       
           (Exec(x), ["[]"]) -> (z, ["[]"])
           where <normalize>x => y; 
@@ -88,6 +91,7 @@ rules
           where <eval>(y, ["[]"]) => (w, ["[]"]);
                 <eval>(Exec(w), ["[]"]) => (z, ["[]"]);
                 id 
+        */
                      
       rules
         [rs'']
@@ -154,13 +158,13 @@ rules // translate rules
   translate-rule :
     Axiom(TermEq(lhs, rhs)) -> $[
       norm:
-        [<pp-term>lhs] -> [<pp-term> rhs]
+        [<pp-term>lhs] -> [<pp-term-norm> rhs]
     ]
     
   translate-rule :
     Rule(prem*, _, TermEq(lhs, rhs)) -> $[
       norm:       
-        [<pp-term>lhs] -> [<pp-term> rhs]
+        [<pp-term>lhs] -> [<pp-term-norm> rhs]
         where [prems]
     ]
     where (_, prems) := <translate-premisses> (1, prem*)
@@ -171,7 +175,7 @@ rules // translate rules
   translate-premisses :
     (num, [Formula(TermEq(lhs, rhs)) | prem*]) -> (num', prems')
     where (num', prems) := <translate-premisses>(num, prem*);
-          prems' := $[<normalize>[<pp-term>lhs] => [<pp-term>rhs]; 
+          prems' := $[[<pp-term>rhs] := [<pp-term-norm>lhs]; 
                       [prems]]
           
              
@@ -184,7 +188,7 @@ rules // translate dynamic
   translate-rule :
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) -> $[
       eval:       
-        ([<pp-term>lhs], [comps-lhs]) -> ([<pp-term> rhs], [comps-rhs])
+        ([<pp-term>lhs], [comps-lhs]) -> ([<pp-term-norm> rhs], [comps-rhs])
         where debug(!"eval: "); 
               [initsprems] 
     ]
@@ -206,7 +210,7 @@ rules // translate dynamic
     where
       CompList; 
       filter(not(IsWritable); (
-        {t: \ comp-name -> $[[comp-name]([<pp-term>t])]
+        {t: \ comp-name -> $[[comp-name]([<pp-term-norm>t])]
               where <fetch(?LabelComp(comp-name, t))> comps \ }        
         <+ ( not(IsReadable) ; \ comp-name -> $[[comp-name]([<lower-case>comp-name]_[<subt>(num,1)])] \ )
         <+ ( IsReadable ; \ comp-name -> $[[comp-name]([<lower-case>comp-name]_1)] \ )        
@@ -219,7 +223,7 @@ rules // translate dynamic
       CompList;
       filter(not(IsReadable)); 
       map(
-        {t: \ comp-name -> $[[comp-name]([<pp-term>t])]
+        {t: \ comp-name -> $[[comp-name]([<pp-term-norm>t])]
               where <fetch(?LabelComp(comp-name, t))> comps \ }       
         <+ if not(IsWritable) <+ <eq> (num, 3) then       
               \ comp-name -> $[[comp-name]([<lower-case>comp-name]_[<subt>(num,1)])] \ 
@@ -232,7 +236,7 @@ rules // translate dynamic
                
   translate-premisses :
     (num, [Formula(Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) | prem*]) -> 
-    (num', $[<eval>([<pp-term>lhs], [comps-lhs]) => ([<pp-term> rhs], [comps-rhs]);
+    (num', $[<eval>([<pp-term-norm>lhs], [comps-lhs]) => ([<pp-term> rhs], [comps-rhs]);
              [initsprems]])
     where comps-lhs := <conc; label-comp-premisse(|num)> (r*, sc*);
           comps-rhs := <CompPatRhs> num;
@@ -241,14 +245,30 @@ rules // translate dynamic
           initsprems := <if (?"") then !$[[prems]] else !$[[inits]
                                                            [prems]] end> inits         
           
-    
+
+signature
+  constructors
+    N : T -> T
+        
 rules 
+  
+  pp-term-norm =
+    norm-all-cons; pp-term
+  
+  norm-all-cons = 
+    bottomup(try(norm-term))
+  
+  norm-term :
+    Con(c, t*) -> N(Con(c, t*))
   
   tr-list(s|sep) = 
     map(s); separate-by(|sep); concat-strings
   
   pp-terms = 
     map(pp-term); separate-by(|","); concat-strings
+    
+  pp-term :
+    N(t) -> $[<n>[<pp-term>t]]
   
   pp-term :
     Con(c, t*) -> $[[c]([<pp-terms>t*])]
@@ -263,7 +283,7 @@ rules
     Map(l) -> <pp-list> l
 
   pp-term :
-    Bind(x, y) -> $[([<pp-term>x],[<pp-term>y])]
+    Bind(x, y) -> $[Bind([<pp-term>x],[<pp-term>y])]
 
   pp-term :
     List(l) -> <pp-list> l
