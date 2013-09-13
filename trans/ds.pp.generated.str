@@ -32,12 +32,10 @@ strategies
     ; ![ H(
            [SOpt(HS(), "0")]
          , [ <pp-V-list(prettyprint-Premise|"0", ",")> a
-           , S(" ")
-           , <pp-one-Z(prettyprint-INFER)> b
-           , S(" ")
-           , <pp-one-Z(prettyprint-Formula)> c
            ]
          )
+       , <pp-indent(|"15")> [<pp-one-Z(prettyprint-INFER)> b]
+       , <pp-indent(|"15")> [<pp-one-Z(prettyprint-Formula)> c]
        ]
 
   prettyprint-Premise =
@@ -118,9 +116,9 @@ strategies
     ?Source(a, b)
     ; ![ H(
            [SOpt(HS(), "0")]
-         , [ S("( ")
+         , [ S("(")
            , <pp-one-Z(prettyprint-Term)> a
-           , S(" , ")
+           , S(", ")
            , <pp-H-list(prettyprint-LabelComp|", ")> b
            , S(")")
            ]
@@ -139,9 +137,9 @@ strategies
     ?Target(a, b)
     ; ![ H(
            [SOpt(HS(), "0")]
-         , [ S("( ")
+         , [ S("(")
            , <pp-one-Z(prettyprint-Term)> a
-           , S(" , ")
+           , S(", ")
            , <pp-H-list(prettyprint-LabelComp|", ")> b
            , S(")")
            ]
