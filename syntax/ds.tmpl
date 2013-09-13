@@ -21,35 +21,29 @@ templates // rules
 templates // formulas
 
   Formula.TermEq = [[Term] = [Term]]
-  Formula.Relation = [[Reads] [Source] [Rel] [Target]]
+  Formula.Relation = [[Reads][Source] [Rel] [Target]]
   
   Reads.NoReads = []
-  Reads.Reads = [[LabelComp*; separator=", "] |-]
+  Reads.Reads = [[LabelComp+; separator=", "] |- ]
   
   Source.Source = [[Term]]
-  Source.Source = [([Term], [LabelComp*; separator=", "])]
+  Source.Source = [([Term], [LabelComp+; separator=", "])]
 
   Target.Target = [[Term]]
-  Target.Target = [([Term], [LabelComp*; separator=", "])]
+  Target.Target = [([Term], [LabelComp+; separator=", "])]
   
   Rel.Dynamic = [-->]
-  Rel.DynamicEmitted = [-- [LabelComp*; separator=", "] -->]
+  Rel.DynamicEmitted = [-- [LabelComp+; separator=", "] -->]
   
   LabelComp.LabelComp = [[ID] [Term]]
 
 templates // terms
 
-  Term.Con = [[ID] ( [Term*; separator=","])]
+  Term.Con = [[ID]([Term*; separator=","])]
   Term.Var = [[ID]]
-  Term.List = <[<Entry*; separator=",">]>
-  Term.Map = [{ [Entry*;separator=","] }]
+  Term.List = <[ <Term*; separator=", "> ]>
+  Term.Map = [{[Entry*;separator=", "]}]
+  Term.Atom = [[STRING]]
   
   Entry.Bind = [[Term] |--> [Term]]
-
-
-/*
-todo:
-	seperate "explicate" and "generate stratego" phases
-	refocus + pretty printing phase
-*/
 	

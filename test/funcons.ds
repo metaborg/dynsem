@@ -61,14 +61,3 @@ y --> w , Exec(w) --> z
 -----------------------
    Exec1(y) --> z
 */
-     
-// specialise first premise with respect
-// to each rule -- refocus transformation
-// of that rule, small -> big step
-//
-// can parametrise interepretergen
-/*
-x --> y , Exec(y) --> z
------------------------
-       x --> z
-*/
