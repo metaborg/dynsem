@@ -1,0 +1,44 @@
+module sugar
+
+imports
+	include/ds
+	
+rules
+	
+  desugar-all = innermost(desugar)
+    
+  desugar :
+    NoReads() -> Reads([])
+   
+  desugar :
+    Source(lhs) -> Source(lhs, [])
+    
+  desugar :
+    Target(rhs) -> Target(rhs, [])
+    
+  desugar :
+    Dynamic() -> DynamicEmitted([])
+    
+  desugar :
+    Axiom(form) -> Rule([], "---------", form)
+
+  sugar-all = innermost(sugar)
+  
+  sugar :
+  	Rule([],infer,conc) -> Axiom(conc)
+
+  sugar :
+  	Reads([]) -> NoReads()
+
+  sugar :
+  	DynamicEmitted([]) -> Dynamic()
+
+  sugar :
+  	Target(term,[]) -> Target(term)
+
+  sugar :
+  	Source(term,[]) -> Source(term)
+  
+  
+  
+          

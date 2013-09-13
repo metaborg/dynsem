@@ -17,7 +17,7 @@ imports
 	check
 	generate
 	refocus
-    outline
+  outline
 
 rules // Analysis
 	
@@ -89,11 +89,16 @@ rules // Builders
   
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
-  
-  // Refocus
+   
   refocus-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"refocussed.ds")> path;
       result   := <refocus-rules; prettyprint-example; box2text-string(|80)> selected
       
+  // format rules
+  format-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"pp.ds")> path;
+      result   := <prettyprint-example; box2text-string(|80)> ast
