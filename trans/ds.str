@@ -17,6 +17,8 @@ imports
 	check
 	generate
 	refocus
+	factorize
+	explicate
   outline
 
 rules // Analysis
@@ -96,6 +98,25 @@ rules // Builders
     with
       filename := <guarantee-extension(|"refocussed.ds")> path;
       result   := <refocus-rules; prettyprint-example; box2text-string(|80)> selected
+
+  factorize-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"factorized.ds")> path;
+      result   := <factorize-rules; prettyprint-example; box2text-string(|80)> selected
+
+  explicate-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"explicated.ds")> path;
+      result   := <explicate-rules; prettyprint-example; box2text-string(|80)> selected
+
+  explicate-editor-ast:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"explicated.aterm")> path;
+      result   := <explicate-rules> selected
+
       
   // format rules
   format-editor:
