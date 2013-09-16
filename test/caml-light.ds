@@ -1,0 +1,133 @@
+/*
+
+  For(li, e1, e2, e3) =
+    ApplyToEach(Abs(Bind(li, Effect(e3))), ListReverse(IntClosedInterval(e2, e1)))
+  
+
+Abs(Bind(li), Effect(e3)) 
+= Abs(Scope(Match(Given(), Bind(li)), Effect(e3)))
+= Abs(Scope(Apply(Bind(li), Given()), Effect(e3)))
+= Abs(Scope(Apply(Abs(Bind_decl(li)), Given()), Effect(e3)))
+
+= Abs(Scope(Supply(Given(), Bind_decl(li)), Effect(e3)))
+
+
+
+rules // to be derived
+
+  Env MapOver({ li |-> int }, env) |- e --> e'
+  --------------------------------------
+  Env env |- For(li, int, int, e) --> e'
+
+  IntLess(int2, int1) = True()
+  --------------------------------------------
+  Env env |- For(li, int1, int2, e) --> Skip()
+
+  IntLess(int1, int2) = True()
+  --------------------------------------------
+  Env env |- For(li, int1, int2, e) --> Seq(Let(li, int1, e), For(li, Add(int1, 1), int2, e))
+   
+*/
+
+rules
+
+  For(li, e1, e2, e3) =
+    ApplyToEach(Abs(Bind(li), Effect(e3)), IntClosedInterval(e2, e1))
+                
+rules // apply to each
+
+  ApplyToEach(proc, ListEmpty()) = Skip()
+
+  ApplyToEach(proc, ListPrefix(x, list)) = Seq(Apply(proc, x), ApplyToEach(proc,list))
+ 
+rules // seq
+
+  comm --> comm'
+  ------------------------------
+  Seq(comm, x) --> Seq(comm', x)
+ 
+  Seq(Skip(), x) = x
+
+rules // apply
+
+  Apply(Abs(y), x) --> Supply(x, y)
+  
+rules // abs
+
+  Abs(patt, expr) = Abs(Scope(Match(Given(), patt), expr))
+  
+rules // match
+
+  Match(expressible, patt) = Apply(patt, expressible)
+  
+rules // bind
+
+  Bind(x) = Abs(Bind_decl(x))
+  
+  Given x |- Bind_decl(y) --> { x |--> y }
+
+rules // scope
+
+  Env MapOver(env, env1) |- x --> x'
+  --------------------------------------------
+  Env env1 |- Scope(env, x) --> Scope(env, x')
+
+  IsValue(val) = True()
+  ---------------------
+  Scope(env, val) = val
+ 
+rules // supply
+ 
+  Given val |- y --> y'
+  ------------------------------------------------
+  Given val' |- Supply(val, y) --> Supply(val, y')
+
+  IsValue(val1) = True()
+  ------------------------
+  Supply(val, val1) = val1
+
+rules
+  
+  IsNull(Val) = False()
+  --------------------------
+  Given val |- Given --> val
+
+rules  
+
+  x --> x'
+  ------------------------
+  Effect(x) --> Effect(x')
+
+  IsValue(val) = True()
+  ---------------------
+  Effect(val) = Skip()
+  
+rules // while
+
+  WhileTrue(expr, comm) --> IfTrue(expr, Seq(comm, WhileTrue(expr, comm)),Skip())
+  
+rules // if
+
+  IfTrue(True(), x1, x2) = x1
+
+  IfTrue(False(), x1, x2) = x2
+ 
+rules
+
+  ListReverse(ListEmpty()) = ListEmpty()
+
+  ListReverse(ListPrefix(x,list)) = ListAppend1(list, x)
+  
+rules
+  
+  ListAppend(ListEmpty(), list) = list
+  
+  ListAppend(ListPrefix(x, list1), list2) = ListPrefix(x, ListAppend(list1, list2))
+  
+rules
+
+  IntClosedInterval(int, int) = ListPrefix(int, ListEmpty())
+
+  IntLess(int1, int2) = True()
+  ---------------------------------------------------------------------------------------------
+  IntClosedInterval(int1, int2) = ListPrefix(int1, IntClosedInterval(IntPlus(int1, "1"), int2))
