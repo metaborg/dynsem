@@ -8,8 +8,12 @@ imports
   lib/editor-common.generated
   sugar
   
+strategies
+  
+  refocus-rules = desugar-all; alltd(refocus); sugar-all
+  
 rules
-
+  
 	/* Refocussing:
 	
 	x --> y , Exec(y) --> z
@@ -33,8 +37,7 @@ rules
             Formula(Relation(NoReads(), 
                       Source(Con("Exec", [rhs]), tc*), DynamicEmitted(em2*), Target(Var(x))))
                       
-  refocus-rules = desugar-all; alltd(refocus); sugar-all
-  
+   // todo: don't lift target if it is a value 
 
     
     
