@@ -23,7 +23,7 @@ rules
           MapEmpty : T
           Map1 : T * T -> T
           Bind : T * T -> T
-          Fresh : T -> T
+          Fresh : T
           Exec : T -> T
           Exec1 : T -> T
           IsValue : T -> T       
@@ -60,37 +60,15 @@ rules
           Fresh() -> <new>
         
         /*
-        The following rules are generated from
+        The following rules should be somewhere:
         
-        x = y , Exec1(y) --> z
-        ----------------------
-             Exec(x) --> z
-
-        IsValue(y) = true
+        IsValue(x) = true
         -----------------
-         Exec1(y) --> y
+         Exec(x) --> x
 		
-        y --> w , Exec(w) --> z
+        x --> y , Exec(x) --> y
         -----------------------
-           Exec1(y) --> z
-        */
-         /* 
-	    eval:       
-          (Exec(x), ["[]"]) -> (z, ["[]"])
-          where <normalize>x => y; 
-                <eval>(Exec1(y), ["[]"]) => (z, ["[]"]);
-                id 
-  
-        eval:       
-          (Exec1(y), ["[]"]) -> (y, ["[]"])
-          where <normalize>IsValue(y) => true; 
-                id 
-  
-        eval:       
-          (Exec1(y), ["[]"]) -> (z, ["[]"])
-          where <eval>(y, ["[]"]) => (w, ["[]"]);
-                <eval>(Exec(w), ["[]"]) => (z, ["[]"]);
-                id 
+           Exec(x) --> y
         */
                      
       rules
