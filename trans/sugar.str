@@ -3,7 +3,7 @@ module sugar
 imports
 	include/ds
 	
-rules
+rules // desugaring
 	
   desugar-all = innermost(desugar)
     
@@ -22,6 +22,8 @@ rules
   desugar :
     Axiom(form) -> Rule([], "---------", form)
 
+rules // sugaring
+  
   sugar-all = innermost(sugar)
   
   sugar :
