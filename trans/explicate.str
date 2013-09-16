@@ -1,0 +1,90 @@
+module explicate
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/ds
+  lib/editor-common.generated
+  sugar
+  generate
+  
+strategies
+  
+  explicate-rules :
+    rs -> <sugar-all>rs''
+    where rs' := <desugar-all> rs;
+          wr := <extract-writables> rs';
+          re := <extract-readables> rs';
+          ch := <extract-changeables> rs';
+          rs'' := <alltd(explicate-rule)> rs'
+
+rules
+  
+  explicate-rule :
+    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), DynamicEmitted(e1*), Target(rhs, tc1*))) -> 
+    
+    Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), DynamicEmitted(e2*), Target(rhs, tc2*)))
+    where 
+      debug(!"0: ");
+      r2* := <ReadableComps; mk-label-comps(|1)>;
+      debug(!"1: ");
+      sc2* := <ChangeableComps; mk-label-comps(|1)>;
+      debug(!"2: ");
+      init* := <exp-label-comp-inits(|1)> [r1*, sc1*];  
+      debug(!"3: ");
+      (num, prem2*) := <explicate-premisses(|2)> prem1*;   
+      debug(!"4: "); 
+      e2* := <WritableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|num))>;  
+      debug(!"5: ");
+      tc2* := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|num))>;  
+      debug(!"6: ");
+      prem3* := [init* | prem2*];
+      debug(!"7: ")
+          
+  exp-label-comp-inits(|num) = 
+    map(exp-label-comp-init(|num))
+  
+  exp-label-comp-init(|num) :
+    LabelComp(name, t) -> Formula(TermEq(Var(<comp-var(|num)> name), t))
+
+
+  explicate-premisses(|num) :
+    [] -> (num, [])
+        
+  explicate-premisses(|num1) :
+    [prem1 | prem1*] -> (num3, [prem2*, prem3*])
+    where (num2, prem2*) := <explicate-premisse(|num1)> prem1;
+          (num3, prem3*) := <explicate-premisses(|num2)> prem1*
+          
+          
+  explicate-premisse(|num) :
+    form@Formula(TermEq(lhs, rhs)) -> (num, [form])
+    
+  explicate-premisse(|num) :
+    Formula(Relation(Reads(r1*), Source(lhs, sc1*), DynamicEmitted(e1*), Target(rhs, tc1*))) -> 
+    (<add>(num, 1), 
+      [Formula(Relation(Reads(r2*), Source(lhs, sc2*), DynamicEmitted(e2*), Target(rhs, tc2*))) | init*])
+    where
+      debug(!"a: ");
+      r2*   := <ReadableComps;   map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))>;  
+      debug(!"b: ");   
+      sc2*  := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> sc1* \|num))>;
+      debug(!"c: ");
+      
+      e2*   := <WritableComps; mk-label-comps(|num)>;
+      debug(!"d: ");
+      tc2*  := <ChangeableComps; mk-label-comps(|num)>;
+      debug(!"e: ");
+      init* := <exp-label-comp-inits(|num)> [e1*, tc1*];
+      debug(!"f: ")
+        
+      
+
+
+    //       comps-rhs := <CompPatRhs> num;
+    //       inits     := <label-comp-inits(|num)> (e*, tc*);
+                                                           
+
+      
+      
