@@ -1,0 +1,104 @@
+module factorize
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/ds
+  lib/editor-common.generated
+  sugar
+  
+strategies
+  
+  factorize-rules = desugar-all; alltd(factorize-rule); sugar-all
+    
+rules
+  
+  factorize-rule :
+    Rule(prem1*, infer, 
+          Relation(reads, Source(lhs,sc*), DynamicEmitted(em1*), Target(rhs,tc*))) -> 
+    Rule(prem4*, infer, 
+          Relation(reads, Source(lhs',sc*), DynamicEmitted(em1*), Target(rhs',tc*)))
+    where (prem2*, lhs') := <lift-constructors-from-match> lhs;
+          (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
+          prem4* := <lift-constructors-from-premisses>[prem2*, prem1*, prem3*]
+          
+  factorize-rule :
+    Rule(prem1*, infer, TermEq(lhs, rhs)) -> Rule(prem4*, infer, TermEq(lhs', rhs'))
+    where (prem2*, lhs') := <lift-constructors-from-match> lhs;
+          (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
+          prem4* := <lift-constructors-from-premisses>[prem2*, prem1*, prem3*]
+          
+rules // lift constructor sub-terms in match
+      
+  lift-constructors-from-match :
+    t -> ([], t)
+    where <not(?Con(_,_))> t
+    
+  lift-constructors-from-match :
+    Con(c, t1*) -> (prem*, Con(c, t2*))
+    where (prem*, t2*) := <map(lift-constructor-from-match); unzip; (concat,id)> t1*
+        
+  lift-constructor-from-match :
+    t@Con(c, _) -> ([Formula(TermEq(Var(x), t))], Var(x))
+    where x := <new>
+
+  lift-constructor-from-match :
+    t -> ([], t)
+    where <not(?Con(_,_))> t
+     
+rules // lift constructor sub-terms in build
+  
+  lift-constructors-from-rhs :
+    t@Con(c, t*) -> ([Formula(TermEq(t, Var(x)))], Var(x))
+    where x := <new>
+
+  lift-constructors-from-rhs :
+    t -> ([], t)
+    where <not(?Con(_,_))> t
+
+rules // lift from build
+  
+  lift-constructors-from-build :
+    t -> ([], t)
+    where <not(?Con(_,_))> t    
+        
+  lift-constructors-from-build :
+    Con(c, t1*) -> (prem*, Con(c, t2*))
+    where (prem*@[_|_], t2*) := <map(lift-constructor-from-build); unzip; (concat,id)> t1*
+    
+  lift-constructor-from-build :
+    t@Con(c, _) -> ([Formula(TermEq(t, Var(x)))], Var(x))
+    where x := <new>   
+    
+  lift-constructor-from-build :
+    t -> ([], t)
+    where <not(?Con(_,_))> t
+
+rules // lift constructors from sub-terms in premisses
+  
+  lift-constructors-from-premisses :
+    [] -> []  
+    
+  lift-constructors-from-premisses :
+    [prem | prem1*] -> prem3*
+    where if prem2* := <lift-constructors-from-premisse> prem then
+            prem3* := <lift-constructors-from-premisses> [prem2*, prem1*]
+          else
+            prem3* := [prem | <lift-constructors-from-premisses> [prem1*]]
+          end
+
+  lift-constructors-from-premisse :
+    Formula(TermEq(lhs, rhs)) -> [prem1*, Formula(TermEq(lhs', rhs')), prem2*]  
+    where (prem1*, lhs') := <lift-constructors-from-build> lhs;
+          (prem2*, rhs') := <lift-constructors-from-match> rhs;
+          (not(<?[]> prem1*) <+ not(<?[]> prem2*))
+
+  lift-constructors-from-premisse :
+    Formula(TermEq(lhs, rhs)) -> [prem1*, Formula(TermEq(lhs', rhs')), prem2*]  
+    where (prem1*, lhs') := <lift-constructors-from-build> lhs;
+          (prem2*, rhs') := <lift-constructors-from-match> rhs;
+          (not(<?[]> prem1*) <+ not(<?[]> prem2*))
+          
+          
+    
