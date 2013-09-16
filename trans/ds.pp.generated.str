@@ -210,7 +210,7 @@ strategies
            [SOpt(HS(), "0")]
          , [ <pp-one-Z(prettyprint-ID)> a
            , S("(")
-           , <pp-H-list(prettyprint-Term|",")> b
+           , <pp-H-list(prettyprint-Term|", ")> b
            , S(")")
            ]
          )
