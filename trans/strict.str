@@ -31,13 +31,13 @@ rules
 			  conc-target-params := < map( (?param-num; !Var($[x_[param-num]'])) 
 			  	                           <+ (\ n -> Var($[x_[n]]) \)) > param-nums;
 			  conc-target := Target(Con(con,conc-target-params));
-			  args-to-check := <range; debug(!"a: ")>(1,<string-to-int>param);
+			  args-to-check := <range>(1,<string-to-int>param);
          	  value-prems := <map( \ n -> Formula(TermEq(Con("IsValue",[Var($[x_[n]])]),
-       	                               Con("True",[]))) \); debug(!"b: ")> args-to-check;
+       	                               Con("True",[]))) \)> args-to-check;
 			  prem-source := Source(Var($[x_[param-num]]));
 			  prem-target := Target(Var($[x_[param-num]']));
 			  prem := [Formula(Relation(NoReads(),prem-source,Dynamic(),prem-target))];
-			  prems := <conc; debug(!"c: ")>(value-prems,prem); // value checks first
+			  prems := <conc>(value-prems,prem); // value checks first
 			  conc := Relation(NoReads(),conc-source,Dynamic(),conc-target)
 
   extract-stricts : x -> x // (and seqstricts)
