@@ -31,6 +31,8 @@ rules // desugaring
     Seqstrict(con,params1,params2) -> list
      where Cons(_,Cons(_,_)) := params1;
            list := <map( \ param -> Seqstrict(con,[param],params2) \)> params1
+     // this converts a Rule into a list of Rules
+     // so they must later be concatenated, post-desugaring:
      
   rules-concat :
   	 Rules(list) -> Rules(list1)
