@@ -5,7 +5,7 @@ imports
 	
 rules // desugaring
 	
-  desugar-all = innermost(desugar)
+  desugar-all = innermost(desugar); alltd(rules-concat)
     
   desugar :
     NoReads() -> Reads([])
@@ -22,6 +22,15 @@ rules // desugaring
   desugar :
     Axiom(form) -> Rule([], "---------", form)
 
+  desugar :
+    Strict(con,params1,params2) -> list
+     where Cons(_,Cons(_,_)) := params1;
+           list := <map( \ param -> Strict(con,[param],params2) \)> params1
+     
+  rules-concat :
+  	 Rules(list) -> Rules(list1)
+  	 where list1 := <map(?Cons(_,_) <+ ( \ n -> Cons(n,Nil()) \)); concat> list
+    
 rules // sugaring
   
   sugar-all = innermost(sugar)

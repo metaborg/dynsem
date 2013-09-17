@@ -12,7 +12,7 @@ rules
 	
 	unstrict-rules = desugar-all; extract-stricts; alltd(add-value-requirements); alltd(unstrict); sugar-all
 	
-	unstrict : Strict(con,param,params) -> Rule([prem],"----------",conc)
+	unstrict : Strict(con,[param],params) -> Rule([prem],"----------",conc)
 		where param-nums := <range>(1,<add>(<string-to-int>params,1));
 			  param-num := <string-to-int>param;
 			  conc-source := Source(Con(con,<map(\ n -> Var($[x_[n]]) \)> param-nums));
@@ -26,8 +26,8 @@ rules
 
   extract-stricts : x -> x
   	 with
-      stricts := <collect-all(?Strict(_,_,_))> x;
-      stricts-numeric := <map(\ Strict(con,param,params) -> Strict(con,<string-to-int>param, <string-to-int> params) \)> stricts;
+      stricts := <collect-all(?Strict(_,[_],_))> x;
+      stricts-numeric := <map(\ Strict(con,[param],params) -> Strict(con,<string-to-int>param, <string-to-int> params) \)> stricts;
       _ := <map({?Strict(con,param,params);
       	   rules(IsStrict : (con,param,params) -> param) })> stricts-numeric
 	                          

@@ -16,10 +16,8 @@ rules
   -----------
   A() --> F()  
 
-  strict C 1/2
-  
-  strict C 2/2
-  
+  strict C 1,2/2
+ 
   C(d,e) = d
 
   A() --> F() 

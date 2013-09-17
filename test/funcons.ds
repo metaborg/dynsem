@@ -7,6 +7,12 @@ rules
    Not(True()) = False()
    
    Not(False()) = True()
+  
+   strict And 1,2/2
+   
+   And(True(),x) = x
+   
+   And(False(),x) = False()
 
    strict Cond 1/3
 
