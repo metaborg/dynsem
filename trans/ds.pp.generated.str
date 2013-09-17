@@ -23,6 +23,20 @@ strategies
        ]
 
   prettyprint-Rule =
+    ?Strict(a, b, c)
+    ; ![ H(
+           [SOpt(HS(), "0")]
+         , [ S("strict ")
+           , <pp-one-Z(prettyprint-ID)> a
+           , S(" ")
+           , <pp-one-Z(prettyprint-INT)> b
+           , S("/")
+           , <pp-one-Z(prettyprint-INT)> c
+           ]
+         )
+       ]
+
+  prettyprint-Rule =
     ?Axiom(a)
     ; ![ H(
            [SOpt(HS(), "0")]

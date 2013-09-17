@@ -8,6 +8,7 @@ imports
   lib/editor-common.generated
   refocus
   sugar
+  strict
 
 rules
 
@@ -74,7 +75,7 @@ rules
       rules
         [rs'']
     ]
-    where rs' := <desugar-all> rs;
+    where rs' := <unstrict-rules; desugar-all> rs;
           <extract-writables> rs';
           <extract-readables> rs';
           <extract-components> rs';

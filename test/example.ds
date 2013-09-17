@@ -1,5 +1,4 @@
 rules 
-
   Env e |- E() --> e
   
   Throw() -- Log L() --> Done()
@@ -15,10 +14,11 @@ rules
   A() --> B()
   -----------
   A() --> F()  
+
+  strict C 2/2
   
   C(d,e) --> d
 
   A() --> F() 
 
   Not(True()) = False()
-

@@ -3,6 +3,8 @@ module ds.generated
 completions
   completion template Item : "rules " =
     "rules\n\n\t" (cursor) (blank)  
+  completion template Rule : "strict ID INT/INT" =
+    "strict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
   completion template Rule : "Premise INFER Formula" =
     <Premise:Premise> "\n" <INFER:INFER> "\n" <Formula:Formula> (blank)  
 

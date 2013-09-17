@@ -19,7 +19,8 @@ imports
 	refocus
 	factorize
 	explicate
-  outline
+	outline
+	strict
 
 rules // Analysis
 	
@@ -92,6 +93,7 @@ rules // Builders
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
   prettyprint-STRING = ![S(<id>)]
+  prettyprint-INT = ![S(<id>)]
    
   refocus-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
@@ -117,10 +119,15 @@ rules // Builders
       filename := <guarantee-extension(|"explicated.aterm")> path;
       result   := <explicate-rules> selected
 
-      
   // format rules
   format-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"pp.ds")> path;
       result   := <prettyprint-example; box2text-string(|80)> ast
+
+  unstrict-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"unstrict.ds")> path;
+      result   := <unstrict-rules; prettyprint-example; box2text-string(|80)> selected

@@ -3,6 +3,7 @@ exports
   context-free syntax
     Item*                        -> Start   {cons("File")}
     "rules" Rule*                -> Item    {cons("Rules")}
+    "strict" ID INT "/" INT      -> Rule    {cons("Strict")}
     Formula                      -> Rule    {cons("Axiom")}
     {Premise ","}+ INFER Formula -> Rule    {cons("Rule")}
     Formula                      -> Premise {cons("Formula")}
