@@ -26,6 +26,11 @@ rules // desugaring
     Strict(con,params1,params2) -> list
      where Cons(_,Cons(_,_)) := params1;
            list := <map( \ param -> Strict(con,[param],params2) \)> params1
+
+  desugar :
+    Seqstrict(con,params1,params2) -> list
+     where Cons(_,Cons(_,_)) := params1;
+           list := <map( \ param -> Seqstrict(con,[param],params2) \)> params1
      
   rules-concat :
   	 Rules(list) -> Rules(list1)

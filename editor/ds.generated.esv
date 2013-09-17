@@ -5,6 +5,8 @@ completions
     "rules\n\n\t" (cursor) (blank)  
   completion template Rule : "strict ID INT/INT" =
     "strict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
+  completion template Rule : "seqstrict ID INT/INT" =
+    "seqstrict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
   completion template Rule : "Premise INFER Formula" =
     <Premise:Premise> "\n" <INFER:INFER> "\n" <Formula:Formula> (blank)  
 

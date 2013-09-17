@@ -19,13 +19,20 @@ rules
    Cond(True(),x,y) = x
    
    Cond(False(),x,y) = y
-   
-   strict Seq 1/2
-	    
+
    IsValue(Skip()) = True()
-   
+
+   /* strict Seq 1/2	    
+  
    Seq(val,x) = x
- 
+   
+   Alternative Seq below (just for testing seqstrict)
+   */
+   
+   seqstrict Seq 1,2/2
+   
+   Seq(x,y) = y
+   
    Print(x) -- Print x --> Skip()
    
    Env env |- BoundValue(i) --> MapSelect(i,env)

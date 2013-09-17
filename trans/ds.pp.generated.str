@@ -37,6 +37,20 @@ strategies
        ]
 
   prettyprint-Rule =
+    ?Seqstrict(a, b, c)
+    ; ![ H(
+           [SOpt(HS(), "0")]
+         , [ S("seqstrict ")
+           , <pp-one-Z(prettyprint-ID)> a
+           , S(" ")
+           , <pp-H-list(prettyprint-INT|",")> b
+           , S("/")
+           , <pp-one-Z(prettyprint-INT)> c
+           ]
+         )
+       ]
+
+  prettyprint-Rule =
     ?Axiom(a)
     ; ![ H(
            [SOpt(HS(), "0")]

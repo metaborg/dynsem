@@ -1,12 +1,13 @@
 module dsgenerated
 exports
   context-free syntax
-    Item*                          -> Start   {cons("File")}
-    "rules" Rule*                  -> Item    {cons("Rules")}
-    "strict" ID {INT ","}+ "/" INT -> Rule    {cons("Strict")}
-    Formula                        -> Rule    {cons("Axiom")}
-    {Premise ","}+ INFER Formula   -> Rule    {cons("Rule")}
-    Formula                        -> Premise {cons("Formula")}
+    Item*                             -> Start   {cons("File")}
+    "rules" Rule*                     -> Item    {cons("Rules")}
+    "strict" ID {INT ","}+ "/" INT    -> Rule    {cons("Strict")}
+    "seqstrict" ID {INT ","}+ "/" INT -> Rule    {cons("Seqstrict")}
+    Formula                           -> Rule    {cons("Axiom")}
+    {Premise ","}+ INFER Formula      -> Rule    {cons("Rule")}
+    Formula                           -> Premise {cons("Formula")}
 
   context-free syntax
     CONTENTCOMPLETE -> Start   {cons("COMPLETION-Start")}
