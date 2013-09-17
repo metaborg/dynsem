@@ -1,8 +1,8 @@
 rules
 
-   IsValue(True()) = True()
-  
-   IsValue(False()) = True()
+   value(True())
+
+   value(False())
 
    Not(True()) = False()
    
@@ -20,15 +20,8 @@ rules
    
    Cond(False(),x,y) = y
 
-   IsValue(Skip()) = True()
-
-   /* strict Seq 1/2	    
+   value(Skip())
   
-   Seq(val,x) = x
-   
-   Alternative Seq below (just for testing seqstrict)
-   */
-   
    seqstrict Seq 1,2/2
    
    Seq(x,y) = y
@@ -44,7 +37,7 @@ rules
    -----------------------------------------------------
    Env env |- Let(i,val,body) --> Let(i,val,body')
    
-   IsValue(bodyval) = True()
+   value(bodyval)
    -------------------------------
    Let(i,val,bodyval) --> bodyval
    

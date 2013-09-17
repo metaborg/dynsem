@@ -122,6 +122,17 @@ strategies
          )
        ]
 
+  prettyprint-Formula =
+    ?IsValue(a)
+    ; ![ H(
+           [SOpt(HS(), "0")]
+         , [ S("value(")
+           , <pp-one-Z(prettyprint-Term)> a
+           , S(")")
+           ]
+         )
+       ]
+
   prettyprint-Reads =
     ?NoReads()
     ; ![ H(

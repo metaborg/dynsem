@@ -3,7 +3,10 @@ module funcons.generated
 
 signature
   constructors
+    And: T * T -> T
     Cond: T * T * T -> T
+    IsValue: T -> T
+    True: T
     Seq: T * T -> T
     Print: T -> T
     Skip: T
@@ -12,8 +15,6 @@ signature
     MapExtend: T * T -> T
     Map1: T * T -> T
     Env: T -> T
-    IsValue: T -> T
-    True: T
     Start: T
     Let: T * T * T -> T
     False: T
@@ -91,6 +92,30 @@ rules
     where id
   
   eval:       
+    (And(x_1,x_2), [Env(env_1)]) -> (<n>And(x_1',x_2), [Print(print_2)])
+    where debug(!"eval: "); 
+          <eval>(x_1, [Env(env_1)]) => (x_1', [Print(print_2)]);
+          id 
+  
+  eval:       
+    (And(x_1,x_2), [Env(env_1)]) -> (<n>And(x_1,x_2'), [Print(print_2)])
+    where debug(!"eval: "); 
+          <eval>(x_2, [Env(env_1)]) => (x_2', [Print(print_2)]);
+          id 
+  
+  norm:       
+    And(True(),x) -> x
+    where True() := <n>IsValue(<n>True()); 
+          True() := <n>IsValue(x); 
+          id
+  
+  norm:       
+    And(False(),x) -> <n>False()
+    where True() := <n>IsValue(<n>False()); 
+          True() := <n>IsValue(x); 
+          id
+  
+  eval:       
     (Cond(x_1,x_2,x_3), [Env(env_1)]) -> (<n>Cond(x_1',x_2,x_3), [Print(print_2)])
     where debug(!"eval: "); 
           <eval>(x_1, [Env(env_1)]) => (x_1', [Print(print_2)]);
@@ -106,19 +131,27 @@ rules
     where True() := <n>IsValue(<n>False()); 
           id
   
+  norm:       
+    IsValue(Skip()) -> <n>True()
+    where id
+  
   eval:       
     (Seq(x_1,x_2), [Env(env_1)]) -> (<n>Seq(x_1',x_2), [Print(print_2)])
     where debug(!"eval: "); 
           <eval>(x_1, [Env(env_1)]) => (x_1', [Print(print_2)]);
           id 
   
-  norm:       
-    IsValue(Skip()) -> <n>True()
-    where id
+  eval:       
+    (Seq(x_1,x_2), [Env(env_1)]) -> (<n>Seq(x_1,x_2'), [Print(print_2)])
+    where debug(!"eval: "); 
+          True() := <n>IsValue(x_1); 
+          <eval>(x_2, [Env(env_1)]) => (x_2', [Print(print_2)]);
+          id 
   
   norm:       
-    Seq(val,x) -> x
-    where True() := <n>IsValue(val); 
+    Seq(x,y) -> y
+    where True() := <n>IsValue(x); 
+          True() := <n>IsValue(y); 
           id
   
   eval:       

@@ -18,6 +18,7 @@ exports
   context-free syntax
     Term "=" Term                     -> Formula   {cons("TermEq")}
     Reads Source Rel Target           -> Formula   {cons("Relation")}
+    "value" "(" Term ")"              -> Formula   {cons("IsValue")}
                                       -> Reads     {cons("NoReads")}
     {LabelComp ","}+ "|-"             -> Reads     {cons("Reads")}
     Term                              -> Source    {cons("Source")}

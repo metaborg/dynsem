@@ -21,6 +21,9 @@ rules // desugaring
     
   desugar :
     Axiom(form) -> Rule([], "---------", form)
+    
+  desugar :
+    IsValue(term) -> TermEq(Con("IsValue",[term]),Con("True",[]))
 
   desugar :
     Strict(con,params1,params2) -> list
@@ -56,6 +59,9 @@ rules // sugaring
 
   sugar :
   	Source(term,[]) -> Source(term)
+
+  sugar :
+    TermEq(Con("IsValue",[term]),Con("True",[])) -> IsValue(term)
   
   
   
