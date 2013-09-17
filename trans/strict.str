@@ -10,7 +10,7 @@ imports
   
 rules
 	
-	unstrict-rules = alltd(unstrict)
+	unstrict-rules = desugar-all; extract-stricts; alltd(add-value-requirements); alltd(unstrict); sugar-all
 	
 	unstrict : Strict(con,param,params) -> Rule([prem],"----------",conc)
 		where param-nums := <range>(1,<add>(<string-to-int>params,1));
@@ -23,4 +23,23 @@ rules
 			  prem-target := Target(Var($[x_[param-num]']));
 			  prem := Formula(Relation(NoReads(),prem-source,Dynamic(),prem-target));
 			  conc := Relation(NoReads(),conc-source,Dynamic(),conc-target)
-			  
+
+  extract-stricts : x -> x
+  	 with
+      stricts := <collect-all(?Strict(_,_,_))> x;
+      stricts-numeric := <map(\ Strict(con,param,params) -> Strict(con,<string-to-int>param, <string-to-int> params) \)> stricts;
+      _ := <map({?Strict(con,param,params);
+      	   rules(IsStrict : (con,param,params) -> param) })> stricts-numeric
+	                          
+    add-value-requirements : Rule(prems,infer,conc) -> Rule(extended-prems,infer,conc)
+        where (con,params) := <source-con-params> conc;
+               no-params := <length>params;
+			   param-nums := <range>(1,<add>(no-params,1));    
+        	   args-to-check := <filter(\ n -> <IsStrict>(con,n,no-params) \)> param-nums;
+        	   new-prems := <map( \ n -> Formula(TermEq(Con("IsValue",[<index(|n)>params]),
+        	                               Con("True",[]))) \) > args-to-check;
+        	   extended-prems := <conc>(new-prems,prems) // value checking first
+
+	source-con-params = ( ?Relation(_,Source(Con(con,params),_),_,_)
+	                         <+ ?TermEq(Con(con,params),_) ) ;
+	                       !(con,params)

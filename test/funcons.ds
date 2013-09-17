@@ -1,4 +1,5 @@
 rules
+
    IsValue(True()) = True()
   
    IsValue(False()) = True()
@@ -8,26 +9,23 @@ rules
    Not(False()) = True()
 
    strict Cond 1/3
+
+   Cond(True(),x,y) = x
    
-   cond(True(),x,y) = x
-   
-   cond(False(),x,y) = y
+   Cond(False(),x,y) = y
    
    strict Seq 1/2
 	    
    IsValue(Skip()) = True()
    
-   IsValue(val) = True()
-   ---------------------
    Seq(val,x) = x
-   
+ 
    Print(x) -- Print x --> Skip()
    
    Env env |- BoundValue(i) --> MapSelect(i,env)
 
    strict Let 2/3
       
-   IsValue(val) = True() ,
    MapExtend(env,Map1(i,val)) = env1 ,
    Env env1 |- body --> body'
    -----------------------------------------------------

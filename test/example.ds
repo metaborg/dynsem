@@ -1,4 +1,5 @@
 rules 
+
   Env e |- E() --> e
   
   Throw() -- Log L() --> Done()
@@ -15,9 +16,11 @@ rules
   -----------
   A() --> F()  
 
+  strict C 1/2
+  
   strict C 2/2
   
-  C(d,e) --> d
+  C(d,e) = d
 
   A() --> F() 
 

@@ -4,7 +4,6 @@ module funcons.generated
 signature
   constructors
     Cond: T * T * T -> T
-    cond: T * T * T -> T
     Seq: T * T -> T
     Print: T -> T
     Skip: T
@@ -25,7 +24,7 @@ signature
     MapEmpty : T
     Map1 : T * T -> T
     Bind : T * T -> T
-    Fresh : T -> T
+    Fresh : T
     Exec : T -> T
     Exec1 : T -> T
     IsValue : T -> T       
@@ -62,37 +61,15 @@ rules // built-ins
     Fresh() -> <new>
   
   /*
-  The following rules are generated from
+  The following rules should be somewhere:
   
-  x = y , Exec1(y) --> z
-  ----------------------
-       Exec(x) --> z
-
-  IsValue(y) = true
+  IsValue(x) = true
   -----------------
-   Exec1(y) --> y
+   Exec(x) --> x
 	
-  y --> w , Exec(w) --> z
+  x --> y , Exec(x) --> y
   -----------------------
-     Exec1(y) --> z
-  */
-   /* 
-  eval:       
-    (Exec(x), []) -> (z, [])
-    where <normalize>x => y; 
-          <eval>(Exec1(y), []) => (z, []);
-          id 
-
-  eval:       
-    (Exec1(y), []) -> (y, [])
-    where <normalize>IsValue(y) => true; 
-          id 
-
-  eval:       
-    (Exec1(y), []) -> (z, [])
-    where <eval>(y, []) => (w, []);
-          <eval>(Exec(w), []) => (z, []);
-          id 
+     Exec(x) --> y
   */
                
 rules
@@ -114,23 +91,25 @@ rules
     where id
   
   eval:       
-    (Cond(prop,x,y), [Env(env_1)]) -> (<n>Cond(prop',x,y), [Print(print_2)])
+    (Cond(x_1,x_2,x_3), [Env(env_1)]) -> (<n>Cond(x_1',x_2,x_3), [Print(print_2)])
     where debug(!"eval: "); 
-          <eval>(prop, [Env(env_1)]) => (prop', [Print(print_2)]);
+          <eval>(x_1, [Env(env_1)]) => (x_1', [Print(print_2)]);
           id 
   
   norm:       
-    cond(True(),x,y) -> x
-    where id
+    Cond(True(),x,y) -> x
+    where True() := <n>IsValue(<n>True()); 
+          id
   
   norm:       
-    cond(False(),x,y) -> y
-    where id
+    Cond(False(),x,y) -> y
+    where True() := <n>IsValue(<n>False()); 
+          id
   
   eval:       
-    (Seq(comm,x), [Env(env_1)]) -> (<n>Seq(comm',x), [Print(print_2)])
+    (Seq(x_1,x_2), [Env(env_1)]) -> (<n>Seq(x_1',x_2), [Print(print_2)])
     where debug(!"eval: "); 
-          <eval>(comm, [Env(env_1)]) => (comm', [Print(print_2)]);
+          <eval>(x_1, [Env(env_1)]) => (x_1', [Print(print_2)]);
           id 
   
   norm:       
@@ -154,9 +133,9 @@ rules
            id 
   
   eval:       
-    (Let(i,exp,body), [Env(env_1)]) -> (<n>Let(i,exp',body), [Print(print_2)])
+    (Let(x_1,x_2,x_3), [Env(env_1)]) -> (<n>Let(x_1,x_2',x_3), [Print(print_2)])
     where debug(!"eval: "); 
-          <eval>(exp, [Env(env_1)]) => (exp', [Print(print_2)]);
+          <eval>(x_2, [Env(env_1)]) => (x_2', [Print(print_2)]);
           id 
   
   eval:       
@@ -171,6 +150,7 @@ rules
   eval:       
     (Let(i,val,bodyval), [Env(env_1)]) -> (bodyval, [Print([])])
     where debug(!"eval: "); 
+          True() := <n>IsValue(val); 
           True() := <n>IsValue(bodyval); 
           id 
   
