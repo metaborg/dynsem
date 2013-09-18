@@ -31,6 +31,10 @@ rules // to be derived
 
 rules
 
+  (Assign(Loc(l), v), State s) --> (Skip(), State MapOver({ l |--> v }, s))
+
+rules
+
   For(li, e1, e2, e3) =
     ApplyToEach(Abs(Bind(li), Effect(e3)), IntClosedInterval(e2, e1))
                 

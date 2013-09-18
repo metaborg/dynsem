@@ -72,4 +72,68 @@ rules // component operations
   mk-label-comp(default|num) :
     name -> <default <+ mk-label-comp(|num)> name
     
+signature
+  constructors
+    N : T -> T
+        
+rules // pretty-printing terms 
+  
+ pp-comps =
+    !$<[<<map(pp-comp); separate-by(|", ")>>]>
+    
+ pp-comps-norm =
+    !$<[<<map(pp-comp-norm); separate-by(|", ")>>]>
+  
+  pp-comp :
+    LabelComp(name, t) -> $[[name]([<pp-term>t])]
+
+  pp-comp-norm :
+    LabelComp(name, t) -> $[[name]([<pp-term-norm>t])]
+ 
+  pp-term-norm =
+    norm-all-cons; pp-term
+  
+  norm-all-cons = 
+    bottomup(try(norm-term))
+  
+  norm-term :
+    Con(c, t*) -> N(Con(c, t*))
+  
+  tr-list(s|sep) = 
+    map(s); separate-by(|sep); concat-strings
+  
+  pp-terms = 
+    map(pp-term); separate-by(|","); concat-strings
+    
+  pp-term :
+    N(t) -> $[<n>[<pp-term>t]]
+  
+  pp-term :
+    Con(c, t*) -> $[[c]([<pp-terms>t*])]
+    
+  pp-term :
+    Var(x) -> x
+
+  pp-term :
+    String(s) -> $["[<un-double-quote> s]"]
+    
+  pp-term :
+    Map(l) -> <pp-list> l
+
+  pp-term :
+    Bind(x, y) -> $[Bind([<pp-term>x],[<pp-term>y])]
+
+  pp-term :
+    List(l) -> <pp-list> l
+        
+  pp-list :
+    [t*] -> $<[<<pp-terms>t*>]>
+    
+  pp-term :
+    y -> <pp-aterm>
+    
+rules
+  
+  pp-aterm :
+    c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
     

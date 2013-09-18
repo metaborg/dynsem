@@ -15,12 +15,13 @@ imports
 	ds.pp.generated
 	names
 	check
-	generate
+	generate-str
 	refocus
 	factorize
 	explicate
 	outline
 	strict
+	sugar
 
 rules // Analysis
 	
@@ -111,13 +112,13 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      result   := <explicate-rules; prettyprint-example; box2text-string(|80)> selected
+      result   := <desugar-all; explicate-rules; sugar-all; prettyprint-example; box2text-string(|80)> selected
 
   explicate-editor-ast:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.aterm")> path;
-      result   := <explicate-rules> selected
+      result   := <desugar-all; explicate-rules> selected
 
   // format rules
   format-editor:

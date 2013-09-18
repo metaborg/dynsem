@@ -11,13 +11,13 @@ imports
   
 strategies
   
+  // explicate-rules assumes rules to be desugared
+  
   explicate-rules :
-    rs -> <sugar-all>rs''
-    where rs' := <desugar-all> rs;
-          <extract-writables> rs';
-          <extract-readables> rs';
-          <extract-changeables> rs';
-          rs'' := <alltd(explicate-rule)> rs'
+    rs -> <alltd(explicate-rule)> rs
+    where <extract-writables> rs;
+          <extract-readables> rs;
+          <extract-changeables> rs
 
 rules
   
@@ -47,11 +47,11 @@ rules // components in rhs
     comp-name -> <fetch-elem(?LabelComp(comp-name,_))> comps
       
   concat-changeables(|num) :
-    comp-name -> LabelComp(comp-name, Con("Concat", [List(<range; map(\i -> Var(<comp-var(|i)>comp-name) \)>(1, num))]))
+    comp-name -> LabelComp(comp-name, Con("Concat", [List(<range; map(\i -> Var(<comp-var(|i)>comp-name) \)>(2, <inc>num))]))
     where <gt> (num, 2)
 
   concat-changeables(|num) :
-    comp-name -> LabelComp(comp-name, Var(<comp-var(|num)>comp-name))
+    comp-name -> LabelComp(comp-name, Var(<comp-var(|2)>comp-name))
     where <eq> (num, 2)
 
   concat-changeables(|num) :
@@ -76,7 +76,7 @@ rules // premisses
     (num-next, 
       [Formula(Relation(Reads(r2*), Source(lhs, sc2*), DynamicEmitted(e2*), Target(rhs, tc2*))) | init*])
     where
-      num-next := <add>(num-prev, 1);
+      num-next := <inc>num-prev;
       r2*   := <ReadableComps;   map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))>;  
       sc2*  := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> sc1* \|num-prev))>;
       e2*   := <WritableComps; mk-label-comps(|num-next)>;

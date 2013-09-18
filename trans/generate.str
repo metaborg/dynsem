@@ -188,58 +188,5 @@ rules // translate dynamic
                                                            [prems]] end> inits         
           
 
-signature
-  constructors
-    N : T -> T
-        
-rules 
-  
-  pp-term-norm =
-    norm-all-cons; pp-term
-  
-  norm-all-cons = 
-    bottomup(try(norm-term))
-  
-  norm-term :
-    Con(c, t*) -> N(Con(c, t*))
-  
-  tr-list(s|sep) = 
-    map(s); separate-by(|sep); concat-strings
-  
-  pp-terms = 
-    map(pp-term); separate-by(|","); concat-strings
-    
-  pp-term :
-    N(t) -> $[<n>[<pp-term>t]]
-  
-  pp-term :
-    Con(c, t*) -> $[[c]([<pp-terms>t*])]
-    
-  pp-term :
-    Var(x) -> x
-
-  pp-term :
-    String(s) -> $["[<un-double-quote> s]"]
-    
-  pp-term :
-    Map(l) -> <pp-list> l
-
-  pp-term :
-    Bind(x, y) -> $[Bind([<pp-term>x],[<pp-term>y])]
-
-  pp-term :
-    List(l) -> <pp-list> l
-        
-  pp-list :
-    [t*] -> $<[<<pp-terms>t*>]>
-    
-  pp-term :
-    y -> <pp-aterm>
-    
-rules
-  
-  pp-aterm :
-    c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
-
 
     
