@@ -1,0 +1,75 @@
+module lib-ds
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/ds
+  lib/editor-common.generated
+  refocus
+  sugar
+  strict
+
+// utilities for DynSem analysis
+
+rules // extract components        
+  
+  extract-components =
+    collect-all(?LabelComp(<id>, _), union) => comps; 
+    <filter(not(IsWritable))> comps => non-writeables;
+    <filter(not(IsReadable))> comps => non-readables;    
+    rules(
+      CompList : _ -> comps
+      NonWriteables : _ -> non-writeables
+      NonReadables : _ -> non-readables
+      
+      CompPatLhs : num -> $<[<<separate-by(|",")>lst>]>
+        where <map(mk-label-comp-str(|num))> non-writeables => lst     
+        
+      CompPatRhs : num -> $<[<<separate-by(|",")>lst>]>
+        where <map(mk-label-comp-str(|num))> non-readables => lst     
+        
+      CompsLhs : num -> <mk-label-comps(|num)> non-writeables
+      
+      CompsRhs : num -> <mk-label-comps(|num)> non-readables       
+    )
+        
+  extract-writables  :
+    rs -> comps
+    where
+      collect-all(?DynamicEmitted(<map(?LabelComp(<id>,_))>), union); concat => comps;
+      rules( WritableComps : _ -> comps );
+      map({?comp; rules( IsWritable : comp -> comp )})
+
+  extract-readables :
+    rs -> comps
+    where
+      collect-all(?Reads(<map(?LabelComp(<id>,_))>), union); concat => comps;
+      rules( ReadableComps : _ -> comps );
+      map({?comp; rules( IsReadable : comp -> comp )})
+
+  extract-changeables :
+    rs -> comps
+    where
+      collect-all((?Source(_, <id>) <+ ?Target(_, <id>)); map(?LabelComp(<id>,_)), union); concat => comps;
+      rules( ChangeableComps : _ -> comps );
+      map({?comp; rules( IsChangeable : comp -> comp )})
+      
+rules // component operations
+  
+  comp-var(|num) :
+    name -> $[[<lower-case>name]_[num]]
+    
+  mk-label-comps(|num) = 
+    map(mk-label-comp(|num))
+   
+  mk-label-comp(|num) :
+    name -> LabelComp(name, Var(<comp-var(|num)> name))
+
+  mk-label-comp-str(|num) :
+    name -> $[[name]([<comp-var(|num)> name])]
+
+  mk-label-comp(default|num) :
+    name -> <default <+ mk-label-comp(|num)> name
+    
+    
