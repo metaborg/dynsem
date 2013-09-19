@@ -83,8 +83,6 @@ rules
         [rs'']
     ]
     where rs' := <unstrict-rules; desugar-all; explicate-rules> rs;
-          <extract-writables> rs';
-          <extract-readables> rs';
           <extract-components> rs';
           rs'' := <translate-rules> rs';
           cs  := <declare-constructors; separate-by(|"\n"); concat-strings> rs;
@@ -118,18 +116,18 @@ rules // translate rules
     Rule(prem*, _, TermEq(lhs, rhs)) -> $[
       norm:       
         [<pp-term>lhs] -> [<pp-term-norm> rhs]
-        [<translate-premisses> prem*]]
+        [<translate-premises> prem*]]
      
-  translate-premisses =
+  translate-premises =
     if ?[] then !"" 
     else 
       !$[where 
-           [<map(translate-premisse); separate-by(|";\n"); concat-strings>]
+           [<map(translate-premise); separate-by(|";\n"); concat-strings>]
         ]
     end
     
-  translate-premisse :
-    Formula(TermEq(lhs, rhs)) -> $[[<pp-term>rhs] := [<pp-term-norm>lhs]]
+  translate-premise :
+    TermEq(lhs, rhs) -> $[[<pp-term>rhs] := [<pp-term-norm>lhs]]
   
 rules // translate dynamic
 
@@ -138,22 +136,22 @@ rules // translate dynamic
       eval:       
         ([<pp-term>lhs], [comps-lhs]) -> <debug(!"  to [<next-counter>"r"]: ")>([<pp-term-norm> rhs], [comps-rhs])
         where debug(!"eval [<get-counter>"r"]: ")
-        [<translate-premisses> prem*] 
+        [<translate-premises> prem*] 
     ]
     with 
       nonwr* := <conc>(r*, sc*); 
-      comps-lhs := <NonWriteables; map(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonwr* \); pp-comps>; 
+      comps-lhs := <NonWriteables; map(copy-comp(|nonwr*)); pp-comps>; 
       nonr* := <conc>(e*, tc*);
-      comps-rhs := <NonReadables; map(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonr* \); pp-comps-norm>
+      comps-rhs := <NonReadables; map(copy-comp(|nonr*)); pp-comps-norm>
                
-  translate-premisse :
-    Formula(Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) -> 
+  translate-premise :
+    Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*)) -> 
     $[<eval>([<pp-term-norm>lhs], [comps-lhs]) => ([<pp-term> rhs], [comps-rhs])]
     with      
       nonwr* := <conc>(r*, sc*);
-      comps-lhs := <NonWriteables; map(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonwr* \); pp-comps-norm> ;         
+      comps-lhs := <NonWriteables; map(copy-comp(|nonwr*)); pp-comps-norm> ;         
       nonr* := <conc>(e*, tc*);
-      comps-rhs := <NonReadables; map(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonr* \); pp-comps>
+      comps-rhs := <NonReadables; map(copy-comp(|nonr*)); pp-comps>
 
   
   

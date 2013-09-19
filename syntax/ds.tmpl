@@ -14,13 +14,11 @@ templates // rules
   Rule.Axiom = [[Formula]]
   
   Rule.Rule = [
-    [Premise+; separator=",\n"]
+    [Formula+; separator=",\n"]
     [INFER]
     [Formula]
   ]
-  
-  Premise.Formula = [[Formula]]
-  
+   
 templates // formulas
 
   Formula.TermEq = [[Term] = [Term]]

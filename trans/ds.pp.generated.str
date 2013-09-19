@@ -62,7 +62,7 @@ strategies
     ?Rule(a, b, c)
     ; ![ H(
            [SOpt(HS(), "0")]
-         , [ <pp-V-list(prettyprint-Premise|"0", ",")> a
+         , [ <pp-V-list(prettyprint-Formula|"0", ",")> a
            ]
          )
        , H(
@@ -75,14 +75,6 @@ strategies
          )
        ]
 
-  prettyprint-Premise =
-    ?Formula(a)
-    ; ![ H(
-           [SOpt(HS(), "0")]
-         , [<pp-one-Z(prettyprint-Formula)> a]
-         )
-       ]
-
   prettyprint-example =
     prettyprint-Start
 
@@ -91,9 +83,6 @@ strategies
 
   prettyprint-example =
     prettyprint-Rule
-
-  prettyprint-example =
-    prettyprint-Premise
 
 
 strategies

@@ -1,3 +1,6 @@
+// NB: This file is now obsolete (I think)
+// since it's functionality is provided by generate-str + explicate
+
 module generate
 
 imports
@@ -77,8 +80,6 @@ rules
         [rs'']
     ]
     where rs' := <unstrict-rules; desugar-all> rs;
-          <extract-writables> rs';
-          <extract-readables> rs';
           <extract-components> rs';
           rs'' := <translate-rules> rs';
           cs  := <declare-constructors; separate-by(|"\n"); concat-strings> rs;
@@ -114,14 +115,14 @@ rules // translate rules
         [<pp-term>lhs] -> [<pp-term-norm> rhs]
         where [prems]
     ]
-    where (_, prems) := <translate-premisses> (1, prem*)
+    where (_, prems) := <translate-premises> (1, prem*)
      
-  translate-premisses :
+  translate-premises :
     (num, []) -> (num, $[id])
     
-  translate-premisses :
-    (num, [Formula(TermEq(lhs, rhs)) | prem*]) -> (num', prems')
-    where (num', prems) := <translate-premisses>(num, prem*);
+  translate-premises :
+    (num, [TermEq(lhs, rhs) | prem*]) -> (num', prems')
+    where (num', prems) := <translate-premises>(num, prem*);
           prems' := $[[<pp-term>rhs] := [<pp-term-norm>lhs]; 
                       [prems]]
   
@@ -136,7 +137,7 @@ rules // translate dynamic
     ]
     where comps-lhs := <CompPatLhs> 1;
           inits := <conc; label-comp-inits(|1)> (r*, sc*);
-          (num, prems) := <translate-premisses> (2, prem*);
+          (num, prems) := <translate-premises> (2, prem*);
           initsprems := <if (?"") then !$[[prems]] else !$[[inits]
                                                             [prems]] end> inits;
           comps-rhs := <conc; label-comp-conclusion(|num)> (e*, tc*)
@@ -147,7 +148,7 @@ rules // translate dynamic
   label-comp-init(|num) :
     LabelComp(name, t) -> $[[<pp-term>t] := [<lower-case>name]_[num];]
     
-  label-comp-premisse(|num) :
+  label-comp-premise(|num) :
     comps -> $<[<<separate-by(|",")> t*>]>
     where
       CompList; 
@@ -176,14 +177,14 @@ rules // translate dynamic
            end end
       ) => t*
                
-  translate-premisses :
-    (num, [Formula(Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) | prem*]) -> 
+  translate-premises :
+    (num, [Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*)) | prem*]) -> 
     (num', $[<eval>([<pp-term-norm>lhs], [comps-lhs]) => ([<pp-term> rhs], [comps-rhs]);
              [initsprems]])
-    where comps-lhs := <conc; label-comp-premisse(|num)> (r*, sc*);
+    where comps-lhs := <conc; label-comp-premise(|num)> (r*, sc*);
           comps-rhs := <CompPatRhs> num;
           inits     := <conc; label-comp-inits(|num)> (e*, tc*);
-          (num', prems) := <translate-premisses> (<add>(num, 1), prem*);
+          (num', prems) := <translate-premises> (<add>(num, 1), prem*);
           initsprems := <if (?"") then !$[[prems]] else !$[[inits]
                                                            [prems]] end> inits         
           

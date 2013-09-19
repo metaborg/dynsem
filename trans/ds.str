@@ -100,19 +100,19 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"refocussed.ds")> path;
-      result   := <refocus-rules; prettyprint-example; box2text-string(|80)> selected
+      result   := <unstrict-rules; refocus-rules; prettyprint-example; box2text-string(|80)> selected
 
   factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factorized.ds")> path;
-      result   := <factorize-rules; prettyprint-example; box2text-string(|80)> selected
+      result   := <unstrict-rules; factorize-rules; prettyprint-example; box2text-string(|80)> selected
 
   explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      result   := <desugar-all; explicate-rules; sugar-all; prettyprint-example; box2text-string(|80)> selected
+      result   := <unstrict-rules; desugar-all; explicate-rules; sugar-all; prettyprint-example; box2text-string(|80)> selected
 
   explicate-editor-ast:
     (selected, position, ast, path, project-path) -> (filename, result)

@@ -21,13 +21,13 @@ rules
           Relation(reads, Source(lhs',sc*), DynamicEmitted(em1*), Target(rhs',tc*)))
     where (prem2*, lhs') := <lift-constructors-from-match> lhs;
           (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-          prem4* := <lift-constructors-from-premisses>[prem2*, prem1*, prem3*]
+          prem4* := <lift-constructors-from-premises>[prem2*, prem1*, prem3*]
           
   factorize-rule :
     Rule(prem1*, infer, TermEq(lhs, rhs)) -> Rule(prem4*, infer, TermEq(lhs', rhs'))
     where (prem2*, lhs') := <lift-constructors-from-match> lhs;
           (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-          prem4* := <lift-constructors-from-premisses>[prem2*, prem1*, prem3*]
+          prem4* := <lift-constructors-from-premises>[prem2*, prem1*, prem3*]
           
 rules // lift constructor sub-terms in match
       
@@ -40,7 +40,7 @@ rules // lift constructor sub-terms in match
     where (prem*, t2*) := <map(lift-constructor-from-match); unzip; (concat,id)> t1*
         
   lift-constructor-from-match :
-    t@Con(c, _) -> ([Formula(TermEq(Var(x), t))], Var(x))
+    t@Con(c, _) -> ([TermEq(Var(x), t)], Var(x))
     where x := <new>
 
   lift-constructor-from-match :
@@ -50,7 +50,7 @@ rules // lift constructor sub-terms in match
 rules // lift constructor sub-terms in build
   
   lift-constructors-from-rhs :
-    t@Con(c, t*) -> ([Formula(TermEq(t, Var(x)))], Var(x))
+    t@Con(c, t*) -> ([TermEq(t, Var(x))], Var(x))
     where x := <new>
 
   lift-constructors-from-rhs :
@@ -68,34 +68,34 @@ rules // lift from build
     where (prem*@[_|_], t2*) := <map(lift-constructor-from-build); unzip; (concat,id)> t1*
     
   lift-constructor-from-build :
-    t@Con(c, _) -> ([Formula(TermEq(t, Var(x)))], Var(x))
+    t@Con(c, _) -> ([TermEq(t, Var(x))], Var(x))
     where x := <new>   
     
   lift-constructor-from-build :
     t -> ([], t)
     where <not(?Con(_,_))> t
 
-rules // lift constructors from sub-terms in premisses
+rules // lift constructors from sub-terms in premises
   
-  lift-constructors-from-premisses :
+  lift-constructors-from-premises :
     [] -> []  
     
-  lift-constructors-from-premisses :
+  lift-constructors-from-premises :
     [prem | prem1*] -> prem3*
-    where if prem2* := <lift-constructors-from-premisse> prem then
-            prem3* := <lift-constructors-from-premisses> [prem2*, prem1*]
+    where if prem2* := <lift-constructors-from-premise> prem then
+            prem3* := <lift-constructors-from-premises> [prem2*, prem1*]
           else
-            prem3* := [prem | <lift-constructors-from-premisses> [prem1*]]
+            prem3* := [prem | <lift-constructors-from-premises> [prem1*]]
           end
 
-  lift-constructors-from-premisse :
-    Formula(TermEq(lhs, rhs)) -> [prem1*, Formula(TermEq(lhs', rhs')), prem2*]  
+  lift-constructors-from-premise :
+    TermEq(lhs, rhs) -> [prem1*, TermEq(lhs', rhs'), prem2*]  
     where (prem1*, lhs') := <lift-constructors-from-build> lhs;
           (prem2*, rhs') := <lift-constructors-from-match> rhs;
           (not(<?[]> prem1*) <+ not(<?[]> prem2*))
 
-  lift-constructors-from-premisse :
-    Formula(TermEq(lhs, rhs)) -> [prem1*, Formula(TermEq(lhs', rhs')), prem2*]  
+  lift-constructors-from-premise :
+    TermEq(lhs, rhs) -> [prem1*, TermEq(lhs', rhs'), prem2*]  
     where (prem1*, lhs') := <lift-constructors-from-build> lhs;
           (prem2*, rhs') := <lift-constructors-from-match> rhs;
           (not(<?[]> prem1*) <+ not(<?[]> prem2*))

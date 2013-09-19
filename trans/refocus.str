@@ -33,9 +33,7 @@ rules
     where x := <new>;
           em2* := <map(\LabelComp(name, t) -> LabelComp(name, Var(<new>))\)>em1*; // fresh variable
           em3* := <zip(\(LabelComp(name, t1), LabelComp(name, t2)) -> LabelComp(name, Con("Conc", [t1, t2]))\)> (em1*, em2*); 
-          prem := 
-            Formula(Relation(NoReads(), 
-                      Source(Con("Exec", [rhs]), tc*), DynamicEmitted(em2*), Target(Var(x))))
+          prem := Relation(NoReads(), Source(Con("Exec", [rhs]), tc*), DynamicEmitted(em2*), Target(Var(x)))
                       
    // todo: don't lift target if it is a value 
 

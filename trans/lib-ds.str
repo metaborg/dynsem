@@ -14,8 +14,12 @@ imports
 
 rules // extract components        
   
-  extract-components =
-    collect-all(?LabelComp(<id>, _), union) => comps; 
+  extract-components : rs -> comps
+  where
+    <extract-writables> rs;
+    <extract-readables> rs;
+    <extract-changeables> rs;
+    <collect-all(?LabelComp(<id>, _), union)> rs => comps; 
     <filter(not(IsWritable))> comps => non-writeables;
     <filter(not(IsReadable))> comps => non-readables;    
     rules(
@@ -71,6 +75,9 @@ rules // component operations
 
   mk-label-comp(default|num) :
     name -> <default <+ mk-label-comp(|num)> name
+
+  copy-comp(|comps) :
+    comp-name -> <fetch-elem(?LabelComp(comp-name,_))> comps
     
 signature
   constructors
