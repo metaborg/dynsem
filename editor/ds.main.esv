@@ -12,7 +12,7 @@ language General properties
   url           : http://strategoxt.org
                   
   extensions    : ds
-  table         : include/ds.tbl
+  table         : include/DynSem.tbl
   start symbols : Start
   
   

@@ -1,0 +1,10 @@
+module Lexical
+
+imports Common
+  
+  lexical syntax 
+    [\-][\-][\-][\-]*             -> INFER
+
+  lexical restrictions
+    INFER          -/- [\-]
+                         
