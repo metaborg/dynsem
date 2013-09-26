@@ -1,11 +1,11 @@
-module ds
+module DynSem
 
 imports Common Lexical
 
 context-free start-symbols Start
 
 templates // rules
-
+  
   Start.File = [[Item*; separator="\n\n"]]
   
   Item.Rules = [
@@ -20,11 +20,15 @@ templates // rules
   Rule.Axiom = [[Formula]]
       
   Rule.Rule = [
-    [Formula+; separator=",\n"]
+    [Premise+; separator=",\n"]
     [INFER]
     [Formula]
   ]
-   
+  
+  Premise.Formula = [[Formula]]
+
+  ID = <rules> {reject}
+  
 templates // formulas
 
   Formula.TermEq = [[Term] = [Term]]
