@@ -13,6 +13,12 @@ rules
    And(True(),x) = x
    
    And(False(),x) = False()
+   
+   strict Or 1,2/2
+   
+   Or(True(),x) = True()
+   
+   Or(False(),x) = x
 
    strict Cond 1/3
 
@@ -41,4 +47,156 @@ rules
    -------------------------------
    Let(i,val,bodyval) --> bodyval
    
-   Start() = Let(X(),False(),Not(X()))
+   value(Abs(x))
+   
+   Abs(patt,expr) = Abs(Scope(Match(Given(),patt),expr))
+   
+   Given given |- Given() --> given
+   
+   strict Supply 1/2
+   
+   Given x |- y --> y'
+   ----------------------------
+   Supply(x,y) --> Supply(x,y')
+   
+   value(val)
+   ---------------------
+   Supply(x,val) --> val
+
+   strict Apply 1,2/2
+   
+   Apply(Abs(x),val) = Supply(val,x)
+   
+   strict Match 1/2
+   
+   Match(val,patt) = Apply(patt,val)
+   
+   strict Accum 1/2
+   
+   Accum(env,decl) = Scope(env,MapOver(decl,env))
+   
+   strict MapOver 1,2/2
+   
+   Any = Abs({})
+   
+   strict Alloc 1/1
+   
+   Fresh() = var
+   --------------------------------------------------------------------
+   (Alloc(val), Store sto) --> (var, Store MapOver({var |--> val},sto))
+   
+    strict ApplyToEach 1,2/2
+    
+    ApplyToEach(Proc,ListEmpty) --> Skip()
+    
+    ApplyToEach(proc,ListPrefix(x,xs)) --> Seq(Apply(proc,x),ApplyToEach(proc,xs))
+    
+    strict Assign 1,2/2
+    
+    MapContainsKey(sto,var) = True(),
+    MapOver({ var |--> val},sto) = sto1
+    -----------------------------------------------------
+    (Assign(var,val), Store sto) --> (Skip(), Store sto1)
+    
+    strict Assigned 1/1
+    
+    (Assigned(var), Store sto) --> (MapSelect(sto,var), Store sto)
+    
+    Bind(i) = Abs(BindDecl(i))
+    
+    Given given |- BindDecl(i) --> { i |--> given }
+    
+    strict BindValue 2/2
+    
+    BindValue(i,val) = { i |--> val }
+    
+    strict Catch 2/2
+    
+    expr -- Exception None() --> expr'
+    --------------------------------------------------------
+    Catch(expr,abs) -- Exception None() --> Catch(expr',abs)
+    
+    expr -- Exception Some(thrown) --> expr'
+    ---------------------------------------------------------
+    Catch(expr,abs) -- Exception None() --> Apply(abs,thrown)
+    
+    value(val)
+    --------------------
+    Catch(val,abs) = val
+    
+    strict CatchElseRethrow 2/2
+    
+    CatchElseRethrow(expr,abs) = Catch(expr,PreferOver(abs,Abs(Throw(Given()))))
+    
+    strict Close 1/1
+    
+    Env env |- Close(Abs(x)) --> Abs(Closure(x,env))
+    
+    strict Closure 2/2
+    
+    Env env |- x --> x'
+    ----------------------------------
+    Closure(x,env) --> Closure(x',env)
+    
+    value(val)
+    ----------------------
+    Closure(val,env) = val
+    
+    strict Compose 1,2/2
+    
+    Compose(abs1,abs2) = Abs(Apply(abs1,Apply(abs2,Given())))
+    
+    strict Curry 1/1
+    
+    Curry(abs) = Abs(CurryExpr(abs))
+    
+    Given given |- CurryExpr(abs) --> PartialApply(abs,given)
+    
+    strict Effect 1/1
+    
+    Effect(x) = Skip()
+    
+    x -- Failure False() --> x'
+    --------------------------------------------
+    Else(x,y) -- Failure False() --> Else(x',y)
+    
+    x -- Failure True() --> x'
+    ----------------------------------
+    Else(x,y) -- Failure False() --> y
+    
+    value(val)
+    -----------------
+    Else(val,x) = val
+    
+    strict Only 1/1
+    
+    Only(val) = Abs(OnlyDecl(val))
+    
+    strict OnlyDecl 1/1
+    
+    Equal(val,val1) = True()
+    -------------------------------------------
+    Given val |- OnlyDecl(val1) --> MapEmpty()
+    
+    Equal(val,val1) = False()
+    ---------------------------------------------------------
+    Given val |- OnlyDecl(val1) -- Failure True() --> Stuck()
+    
+    strict PartialApply 1,2/2
+    
+    PartialApply(abs,val) = Abs(Apply(abs,Tuple2(val,Given())))
+    
+    strict PreferOver 1,2/2
+    
+    PreferOver(Abs(x),Abs(y)) = Abs(Else(x,y))
+    
+    strict Throw 1/1
+    
+    Throw(val) -- Exception Some(val) --> Stuck()
+    
+    WhileTrue(expr,comm) --> IfTrue(expr,Seq(comm,WhileTrue(expr,comm)),Skip())
+    
+    strict Tuple2 1,2/2
+    
+    Tuple2(x,y) = TuplePrefix(x,TuplePrefix(y,TupleEmpty()))
+    

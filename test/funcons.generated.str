@@ -3,23 +3,69 @@ module funcons.generated
 
 signature
   constructors
+    Not: T -> T
     And: T * T -> T
+    Or: T * T -> T
     Cond: T * T * T -> T
-    IsValue: T -> T
-    True: T
-    Seq: T * T -> T
     Print: T -> T
-    Skip: T
     BoundValue: T -> T
-    MapSelect: T * T -> T
     MapExtend: T * T -> T
     Map1: T * T -> T
-    Env: T -> T
-    Start: T
     Let: T * T * T -> T
+    Abs: T * T -> T
+    Supply: T * T -> T
+    Match: T * T -> T
+    Accum: T * T -> T
+    Scope: T * T -> T
+    Fresh: T
+    Alloc: T -> T
+    ListPrefix: T * T -> T
+    ApplyToEach: T * T -> T
+    MapContainsKey: T * T -> T
+    MapOver: T * T -> T
+    Assign: T * T -> T
+    Assigned: T -> T
+    MapSelect: T * T -> T
+    Store: T -> T
+    Bind: T -> T
+    BindDecl: T -> T
+    BindValue: T * T -> T
+    None: T
+    CatchElseRethrow: T * T -> T
+    Catch: T * T -> T
+    Close: T -> T
+    Env: T -> T
+    Closure: T * T -> T
+    Compose: T * T -> T
+    Curry: T -> T
+    CurryExpr: T -> T
+    Effect: T -> T
+    Only: T -> T
+    MapEmpty: T
+    Equal: T * T -> T
     False: T
-    Not: T -> T
-    X: T
+    Given: T -> T
+    OnlyDecl: T -> T
+    Failure: T -> T
+    True: T
+    PartialApply: T * T -> T
+    Apply: T * T -> T
+    Given: T
+    PreferOver: T * T -> T
+    Abs: T -> T
+    Else: T * T -> T
+    Throw: T -> T
+    Exception: T -> T
+    Some: T -> T
+    Stuck: T
+    IfTrue: T * T * T -> T
+    Seq: T * T -> T
+    WhileTrue: T * T -> T
+    Skip: T
+    Tuple2: T * T -> T
+    TuplePrefix: T * T -> T
+    TuplePrefix: T * T -> T
+    TupleEmpty: T
     MapExtend : T * T -> T
     MapSelect : T * T -> T
     MapEmpty : T
@@ -28,7 +74,9 @@ signature
     Fresh : T
     Exec : T -> T
     Exec1 : T -> T
-    IsValue : T -> T       
+    IsValue : T -> T   
+    True : T   
+    Concat : T -> T
     
 
 rules // run-time library
@@ -38,7 +86,7 @@ rules // run-time library
     where term' := <innermost(norm)> term 
     
   exec :
-    prog -> <eval> (<bottomup(n)>Exec(prog), [Env([])]) 
+    prog -> <eval> (<bottomup(n)>Exec(prog), [Env([]),Given([]),Store([])]) 
   
   norm:
     MapExtend(map1, map2) -> <conc> (map1, map2)
@@ -47,6 +95,9 @@ rules // run-time library
 rules // built-ins
   
   n = try(norm)
+  
+  norm:
+    Concat(t*) -> <concat> t*
 	
   norm:
     MapEmpty() -> []
@@ -77,117 +128,615 @@ rules
   
   norm:       
     IsValue(True()) -> <n>True()
-    where id
-  
+    
   norm:       
     IsValue(False()) -> <n>True()
-    where id
-  
+    
   norm:       
     Not(True()) -> <n>False()
-    where id
-  
+    
   norm:       
     Not(False()) -> <n>True()
-    where id
+    
+  eval:       
+    (And(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 1: ")>(<n>And(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 1: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
   
   eval:       
-    (And(x_1,x_2), [Env(env_1)]) -> (<n>And(x_1',x_2), [Print(print_2)])
-    where debug(!"eval: "); 
-          <eval>(x_1, [Env(env_1)]) => (x_1', [Print(print_2)]);
-          id 
-  
-  eval:       
-    (And(x_1,x_2), [Env(env_1)]) -> (<n>And(x_1,x_2'), [Print(print_2)])
-    where debug(!"eval: "); 
-          <eval>(x_2, [Env(env_1)]) => (x_2', [Print(print_2)]);
-          id 
+    (And(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 2: ")>(<n>And(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 2: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
   
   norm:       
     And(True(),x) -> x
-    where True() := <n>IsValue(<n>True()); 
-          True() := <n>IsValue(x); 
-          id
-  
+    where 
+      True() := <n>IsValue(<n>True());
+      True() := <n>IsValue(x)
+    
   norm:       
     And(False(),x) -> <n>False()
-    where True() := <n>IsValue(<n>False()); 
-          True() := <n>IsValue(x); 
-          id
+    where 
+      True() := <n>IsValue(<n>False());
+      True() := <n>IsValue(x)
+    
+  eval:       
+    (Or(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 3: ")>(<n>Or(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 3: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
   
   eval:       
-    (Cond(x_1,x_2,x_3), [Env(env_1)]) -> (<n>Cond(x_1',x_2,x_3), [Print(print_2)])
-    where debug(!"eval: "); 
-          <eval>(x_1, [Env(env_1)]) => (x_1', [Print(print_2)]);
-          id 
+    (Or(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 4: ")>(<n>Or(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 4: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Or(True(),x) -> <n>True()
+    where 
+      True() := <n>IsValue(<n>True());
+      True() := <n>IsValue(x)
+    
+  norm:       
+    Or(False(),x) -> x
+    where 
+      True() := <n>IsValue(<n>False());
+      True() := <n>IsValue(x)
+    
+  eval:       
+    (Cond(x_1,x_2,x_3), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 5: ")>(<n>Cond(x_1',x_2,x_3), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 5: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
   
   norm:       
     Cond(True(),x,y) -> x
-    where True() := <n>IsValue(<n>True()); 
-          id
-  
+    where 
+      True() := <n>IsValue(<n>True())
+    
   norm:       
     Cond(False(),x,y) -> y
-    where True() := <n>IsValue(<n>False()); 
-          id
-  
+    where 
+      True() := <n>IsValue(<n>False())
+    
   norm:       
     IsValue(Skip()) -> <n>True()
-    where id
+    
+  eval:       
+    (Seq(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 6: ")>(<n>Seq(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 6: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
   
   eval:       
-    (Seq(x_1,x_2), [Env(env_1)]) -> (<n>Seq(x_1',x_2), [Print(print_2)])
-    where debug(!"eval: "); 
-          <eval>(x_1, [Env(env_1)]) => (x_1', [Print(print_2)]);
-          id 
-  
-  eval:       
-    (Seq(x_1,x_2), [Env(env_1)]) -> (<n>Seq(x_1,x_2'), [Print(print_2)])
-    where debug(!"eval: "); 
-          True() := <n>IsValue(x_1); 
-          <eval>(x_2, [Env(env_1)]) => (x_2', [Print(print_2)]);
-          id 
+    (Seq(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 7: ")>(<n>Seq(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 7: ")
+    where 
+      True() := <n>IsValue(x_1);
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
   
   norm:       
     Seq(x,y) -> y
-    where True() := <n>IsValue(x); 
-          True() := <n>IsValue(y); 
-          id
+    where 
+      True() := <n>IsValue(x);
+      True() := <n>IsValue(y)
+    
+  eval:       
+    (Print(x), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 8: ")>(<n>Skip(), [Print(x), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 8: ")
+     
   
   eval:       
-    (Print(x), [Env(env_1)]) -> (<n>Skip(), [Print(x)])
-    where debug(!"eval: "); 
-          id 
+    (BoundValue(i), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 9: ")>(<n>MapSelect(i,env), [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 9: ")
+    where 
+      env := env_1
+     
   
   eval:       
-    (BoundValue(i), [Env(env_1)]) -> (<n>MapSelect(i,env), [Print([])])
-    where debug(!"eval: "); 
-          env := env_1;
-           id 
+    (Let(x_1,x_2,x_3), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 10: ")>(<n>Let(x_1,x_2',x_3), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 10: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
   
   eval:       
-    (Let(x_1,x_2,x_3), [Env(env_1)]) -> (<n>Let(x_1,x_2',x_3), [Print(print_2)])
-    where debug(!"eval: "); 
-          <eval>(x_2, [Env(env_1)]) => (x_2', [Print(print_2)]);
-          id 
+    (Let(i,val,body), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 11: ")>(<n>Let(i,val,body'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 11: ")
+    where 
+      env := env_1;
+      True() := <n>IsValue(val);
+      env1 := <n>MapExtend(env,<n>Map1(i,val));
+      <eval>(body, [Env(env1), Given(given_1), Store(store_1)]) => (body', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
   
   eval:       
-    (Let(i,val,body), [Env(env_1)]) -> (<n>Let(i,val,body'), [Print(print_2)])
-    where debug(!"eval: "); 
-          env := env_1;
-           True() := <n>IsValue(val); 
-           env1 := <n>MapExtend(env,<n>Map1(i,val)); 
-           <eval>(body, [Env(env1)]) => (body', [Print(print_2)]);
-           id 
-  
-  eval:       
-    (Let(i,val,bodyval), [Env(env_1)]) -> (bodyval, [Print([])])
-    where debug(!"eval: "); 
-          True() := <n>IsValue(val); 
-          True() := <n>IsValue(bodyval); 
-          id 
+    (Let(i,val,bodyval), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 12: ")>(bodyval, [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 12: ")
+    where 
+      True() := <n>IsValue(val);
+      True() := <n>IsValue(bodyval)
+     
   
   norm:       
-    Start() -> <n>Let(<n>X(),<n>False(),<n>Not(<n>X()))
-    where id
+    IsValue(Abs(x)) -> <n>True()
+    
+  norm:       
+    Abs(patt,expr) -> <n>Abs(<n>Scope(<n>Match(<n>Given(),patt),expr))
+    
+  eval:       
+    (Given(), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 13: ")>(given, [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 13: ")
+    where 
+      given := given_1
+     
   
+  eval:       
+    (Supply(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 14: ")>(<n>Supply(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 14: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Supply(x,y), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 15: ")>(<n>Supply(x,y'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 15: ")
+    where 
+      True() := <n>IsValue(x);
+      <eval>(y, [Env(env_1), Given(x), Store(store_1)]) => (y', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Supply(x,val), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 16: ")>(val, [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 16: ")
+    where 
+      True() := <n>IsValue(x);
+      True() := <n>IsValue(val)
+     
+  
+  eval:       
+    (Apply(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 17: ")>(<n>Apply(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 17: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Apply(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 18: ")>(<n>Apply(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 18: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Apply(Abs(x),val) -> <n>Supply(val,x)
+    where 
+      True() := <n>IsValue(<n>Abs(x));
+      True() := <n>IsValue(val)
+    
+  eval:       
+    (Match(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 19: ")>(<n>Match(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 19: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Match(val,patt) -> <n>Apply(patt,val)
+    where 
+      True() := <n>IsValue(val)
+    
+  eval:       
+    (Accum(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 20: ")>(<n>Accum(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 20: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Accum(env,decl) -> <n>Scope(env,<n>MapOver(decl,env))
+    where 
+      True() := <n>IsValue(env)
+    
+  eval:       
+    (MapOver(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 21: ")>(<n>MapOver(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 21: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (MapOver(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 22: ")>(<n>MapOver(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 22: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Any -> <n>Abs([])
+    
+  eval:       
+    (Alloc(x_1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 23: ")>(<n>Alloc(x_1'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 23: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Alloc(val), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 24: ")>(var, [Print([]), Failure([]), Exception([]), Store(<n>MapOver([Bind(var,val)],sto))])
+    where debug(!"eval 24: ")
+    where 
+      sto := store_1;
+      True() := <n>IsValue(val);
+      var := <n>Fresh()
+     
+  
+  eval:       
+    (ApplyToEach(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 25: ")>(<n>ApplyToEach(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 25: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (ApplyToEach(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 26: ")>(<n>ApplyToEach(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 26: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (ApplyToEach(Proc,ListEmpty), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 27: ")>(<n>Skip(), [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 27: ")
+    where 
+      True() := <n>IsValue(Proc);
+      True() := <n>IsValue(ListEmpty)
+     
+  
+  eval:       
+    (ApplyToEach(proc,ListPrefix(x,xs)), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 28: ")>(<n>Seq(<n>Apply(proc,x),<n>ApplyToEach(proc,xs)), [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 28: ")
+    where 
+      True() := <n>IsValue(proc);
+      True() := <n>IsValue(<n>ListPrefix(x,xs))
+     
+  
+  eval:       
+    (Assign(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 29: ")>(<n>Assign(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 29: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Assign(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 30: ")>(<n>Assign(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 30: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Assign(var,val), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 31: ")>(<n>Skip(), [Print([]), Failure([]), Exception([]), Store(sto1)])
+    where debug(!"eval 31: ")
+    where 
+      sto := store_1;
+      True() := <n>IsValue(var);
+      True() := <n>IsValue(val);
+      True() := <n>MapContainsKey(sto,var);
+      sto1 := <n>MapOver([Bind(var,val)],sto)
+     
+  
+  eval:       
+    (Assigned(x_1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 32: ")>(<n>Assigned(x_1'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 32: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Assigned(var), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 33: ")>(<n>MapSelect(sto,var), [Print([]), Failure([]), Exception([]), Store(sto)])
+    where debug(!"eval 33: ")
+    where 
+      sto := store_1;
+      True() := <n>IsValue(var)
+     
+  
+  norm:       
+    Bind(i) -> <n>Abs(<n>BindDecl(i))
+    
+  eval:       
+    (BindDecl(i), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 34: ")>([Bind(i,given)], [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 34: ")
+    where 
+      given := given_1
+     
+  
+  eval:       
+    (BindValue(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 35: ")>(<n>BindValue(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 35: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    BindValue(i,val) -> [Bind(i,val)]
+    where 
+      True() := <n>IsValue(val)
+    
+  eval:       
+    (Catch(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 36: ")>(<n>Catch(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 36: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Catch(expr,abs), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 37: ")>(<n>Catch(expr',abs), [Print(print_2), Failure(failure_2), Exception(<n>None()), Store(store_2)])
+    where debug(!"eval 37: ")
+    where 
+      True() := <n>IsValue(abs);
+      <eval>(expr, [Env(env_1), Given(given_1), Store(store_1)]) => (expr', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)]);
+      None() := exception_2
+     
+  
+  eval:       
+    (Catch(expr,abs), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 38: ")>(<n>Apply(abs,thrown), [Print(print_2), Failure(failure_2), Exception(<n>None()), Store(store_2)])
+    where debug(!"eval 38: ")
+    where 
+      True() := <n>IsValue(abs);
+      <eval>(expr, [Env(env_1), Given(given_1), Store(store_1)]) => (expr', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)]);
+      Some(thrown) := exception_2
+     
+  
+  norm:       
+    Catch(val,abs) -> val
+    where 
+      True() := <n>IsValue(abs);
+      True() := <n>IsValue(val)
+    
+  eval:       
+    (CatchElseRethrow(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 39: ")>(<n>CatchElseRethrow(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 39: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    CatchElseRethrow(expr,abs) -> <n>Catch(expr,<n>PreferOver(abs,<n>Abs(<n>Throw(<n>Given()))))
+    where 
+      True() := <n>IsValue(abs)
+    
+  eval:       
+    (Close(x_1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 40: ")>(<n>Close(x_1'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 40: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Close(Abs(x)), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 41: ")>(<n>Abs(<n>Closure(x,env)), [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 41: ")
+    where 
+      env := env_1;
+      True() := <n>IsValue(<n>Abs(x))
+     
+  
+  eval:       
+    (Closure(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 42: ")>(<n>Closure(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 42: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Closure(x,env), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 43: ")>(<n>Closure(x',env), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 43: ")
+    where 
+      True() := <n>IsValue(env);
+      <eval>(x, [Env(env), Given(given_1), Store(store_1)]) => (x', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Closure(val,env) -> val
+    where 
+      True() := <n>IsValue(env);
+      True() := <n>IsValue(val)
+    
+  eval:       
+    (Compose(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 44: ")>(<n>Compose(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 44: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Compose(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 45: ")>(<n>Compose(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 45: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Compose(abs1,abs2) -> <n>Abs(<n>Apply(abs1,<n>Apply(abs2,<n>Given())))
+    where 
+      True() := <n>IsValue(abs1);
+      True() := <n>IsValue(abs2)
+    
+  eval:       
+    (Curry(x_1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 46: ")>(<n>Curry(x_1'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 46: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Curry(abs) -> <n>Abs(<n>CurryExpr(abs))
+    where 
+      True() := <n>IsValue(abs)
+    
+  eval:       
+    (CurryExpr(abs), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 47: ")>(<n>PartialApply(abs,given), [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 47: ")
+    where 
+      given := given_1
+     
+  
+  eval:       
+    (Effect(x_1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 48: ")>(<n>Effect(x_1'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 48: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Effect(x) -> <n>Skip()
+    where 
+      True() := <n>IsValue(x)
+    
+  eval:       
+    (Else(x,y), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 49: ")>(<n>Else(x',y), [Print(print_2), Failure(<n>False()), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 49: ")
+    where 
+      <eval>(x, [Env(env_1), Given(given_1), Store(store_1)]) => (x', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)]);
+      False() := failure_2
+     
+  
+  eval:       
+    (Else(x,y), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 50: ")>(y, [Print(print_2), Failure(<n>False()), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 50: ")
+    where 
+      <eval>(x, [Env(env_1), Given(given_1), Store(store_1)]) => (x', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)]);
+      True() := failure_2
+     
+  
+  norm:       
+    Else(val,x) -> val
+    where 
+      True() := <n>IsValue(val)
+    
+  eval:       
+    (Only(x_1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 51: ")>(<n>Only(x_1'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 51: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Only(val) -> <n>Abs(<n>OnlyDecl(val))
+    where 
+      True() := <n>IsValue(val)
+    
+  eval:       
+    (OnlyDecl(x_1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 52: ")>(<n>OnlyDecl(x_1'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 52: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (OnlyDecl(val1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 53: ")>(<n>MapEmpty(), [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 53: ")
+    where 
+      val := given_1;
+      True() := <n>IsValue(val1);
+      True() := <n>Equal(val,val1)
+     
+  
+  eval:       
+    (OnlyDecl(val1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 54: ")>(<n>Stuck(), [Print([]), Failure(<n>True()), Exception([]), Store(store_1)])
+    where debug(!"eval 54: ")
+    where 
+      val := given_1;
+      True() := <n>IsValue(val1);
+      False() := <n>Equal(val,val1)
+     
+  
+  eval:       
+    (PartialApply(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 55: ")>(<n>PartialApply(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 55: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (PartialApply(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 56: ")>(<n>PartialApply(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 56: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    PartialApply(abs,val) -> <n>Abs(<n>Apply(abs,<n>Tuple2(val,<n>Given())))
+    where 
+      True() := <n>IsValue(abs);
+      True() := <n>IsValue(val)
+    
+  eval:       
+    (PreferOver(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 57: ")>(<n>PreferOver(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 57: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (PreferOver(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 58: ")>(<n>PreferOver(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 58: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    PreferOver(Abs(x),Abs(y)) -> <n>Abs(<n>Else(x,y))
+    where 
+      True() := <n>IsValue(<n>Abs(x));
+      True() := <n>IsValue(<n>Abs(y))
+    
+  eval:       
+    (Throw(x_1), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 59: ")>(<n>Throw(x_1'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 59: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Throw(val), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 60: ")>(<n>Stuck(), [Print([]), Failure([]), Exception(<n>Some(val)), Store(store_1)])
+    where debug(!"eval 60: ")
+    where 
+      True() := <n>IsValue(val)
+     
+  
+  eval:       
+    (WhileTrue(expr,comm), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 61: ")>(<n>IfTrue(expr,<n>Seq(comm,<n>WhileTrue(expr,comm)),<n>Skip()), [Print([]), Failure([]), Exception([]), Store(store_1)])
+    where debug(!"eval 61: ")
+     
+  
+  eval:       
+    (Tuple2(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 62: ")>(<n>Tuple2(x_1',x_2), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 62: ")
+    where 
+      <eval>(x_1, [Env(env_1), Given(given_1), Store(store_1)]) => (x_1', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  eval:       
+    (Tuple2(x_1,x_2), [Env(env_1), Given(given_1), Store(store_1)]) -> <debug(!"  to 63: ")>(<n>Tuple2(x_1,x_2'), [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+    where debug(!"eval 63: ")
+    where 
+      <eval>(x_2, [Env(env_1), Given(given_1), Store(store_1)]) => (x_2', [Print(print_2), Failure(failure_2), Exception(exception_2), Store(store_2)])
+     
+  
+  norm:       
+    Tuple2(x,y) -> <n>TuplePrefix(x,<n>TuplePrefix(y,<n>TupleEmpty()))
+    where 
+      True() := <n>IsValue(x);
+      True() := <n>IsValue(y)
+    
