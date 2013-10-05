@@ -34,11 +34,18 @@ rules
 rules // components from lhs
 
   exp-label-comp-inits(|num) = 
-    map(exp-label-comp-init(|num))
+    map(exp-label-comp-no-init(|num) <+ exp-label-comp-init(|num)) ; concat
   
   exp-label-comp-init(|num) :
-    LabelComp(name, t) -> TermEq(Var(<comp-var(|num)> name), t)
- 
+    LabelComp(name, t) -> [TermEq(Var(<comp-var(|num)> name), t)]
+
+  exp-label-comp-no-init(|num) :
+    LabelComp(name, Var(v)) -> []
+    where <eq>(v,<comp-var(|num)> name)
+  // this rule prevents equations like env_1 = env_1 being generated
+  // ensuring that explicate is idempotent, and doesn't generate warnings
+  // in generated Stratego code
+    
 rules // components in rhs
            
   concat-changeables(|num) :
