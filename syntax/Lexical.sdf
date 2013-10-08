@@ -1,12 +1,9 @@
 module Lexical
-
 imports Common
 
 exports
-  
-  lexical syntax 
-    [\-][\-][\-][\-]*             -> INFER
+  lexical syntax
+    [\-] [\-] [\-] [\-]* -> INFER 
 
   lexical restrictions
-    INFER          -/- [\-]
-                         
+    INFER -/- [\-]
