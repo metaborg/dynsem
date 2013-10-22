@@ -1,8 +1,9 @@
 module names
 
 imports
-  lib/runtime/nbl/-
+  lib/runtime/nabl/-
   lib/runtime/task/-
+  lib/runtime/properties/-
   lib/runtime/types/-
   lib/runtime/editor/-
   include/ds
@@ -16,6 +17,13 @@ signature
 
 
 rules
+
+  nabl-get-scope =
+    ?Module(x, _)
+    ; ![NablNsEntity()]
+
+  nabl-get-name :
+    Module(x, _) -> x
 
   nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
     ?Module(x, _)
@@ -68,12 +76,19 @@ rules
       |
       )
 
-  nabl-prop-site(|lang__, partition__, states__, implicits__) =
+  nabl-prop-site(|lang__, partition__, uris__, states__, implicits__) =
     ?Module(x, _)
     ; origin-track-forced(
         where([i-2__, i-3__] := implicits__)
       |
       )
+
+  nabl-get-scope =
+    ?Entity(x, _)
+    ; ![NablNsProperty()]
+
+  nabl-get-name :
+    Entity(x, _) -> x
 
   nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
     ?Entity(x, _)
@@ -100,11 +115,11 @@ rules
       |
       )
 
-  nabl-prop-site(|lang__, partition__, states__, implicits__) =
+  nabl-prop-site(|lang__, partition__, uris__, states__, implicits__) =
     ?Entity(x, _)
     ; origin-track-forced(
         Entity(
-          nabl-props(
+          nabl-store-props(
           | partition__
           , [ Prop(
                 Type()
@@ -117,6 +132,9 @@ rules
         )
       |
       )
+
+  nabl-get-name :
+    Property(x, t) -> x
 
   nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
     ?Property(x, t)
@@ -143,11 +161,11 @@ rules
       |
       )
 
-  nabl-prop-site(|lang__, partition__, states__, implicits__) =
+  nabl-prop-site(|lang__, partition__, uris__, states__, implicits__) =
     ?Property(x, t)
     ; origin-track-forced(
         Property(
-          nabl-props(
+          nabl-store-props(
           | partition__
           , [Prop(Type(), t, [])]
           )
@@ -155,6 +173,9 @@ rules
         )
       |
       )
+
+  nabl-get-name :
+    Type(x) -> x
 
   nabl-use-site(|lang__, partition__, uniques__, uris__, states__) =
     ?Type(x)

@@ -24,3 +24,4 @@ lib/*.generated.str
 lib-refactoring/*.generated.str
 lib
 ds-Outliner.generated.str
+/include

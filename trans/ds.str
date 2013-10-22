@@ -8,7 +8,7 @@ imports
 	include/ds
 	lib/editor-common.generated
 	lib/runtime/analysis/-
-	lib/runtime/nbl/-
+	lib/runtime/nabl/-
 	lib/runtime/task/-
 	lib/runtime/index/-
 	lib/runtime/tmpl/pp
