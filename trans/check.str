@@ -4,7 +4,7 @@ imports
 
 	include/ds
 	lib/editor-common.generated
-	lib/runtime/nbl/check
+	lib/runtime/nabl/check
 
 rules 
 	
