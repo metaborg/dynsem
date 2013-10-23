@@ -1,0 +1,189 @@
+module generate-truffle
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/ds
+  lib/editor-common.generated
+  refocus
+  sugar
+  strict
+  lib-ds
+  explicate
+
+rules
+	
+  /*
+  
+  1. every term T/n from the interpreter language becomes a class T_n.java extends DynsemNode
+  2. every term T/n that is not part of the language and is not a function becomes a T_n.java extends RootNode 
+  3. every function (things that are only norm) becomes a function in truffle
+  
+  */
+
+  to-truffle:
+    rs -> <map(to-truffle-dynsem-node(fail)); concat-strings> root-node-cs
+    where
+      rs' := <unstrict-rules; desugar-all; explicate-rules> rs;
+      <extract-components> rs';
+      cs := <gather-constructors> rs;
+      rs'' := <collect(?Rules(<id>));concat> rs';
+      // dynsem-node-cs := <filter(is-node(|rs''))> cs
+      root-node-cs   := <filter(is-root(|rs''))> cs
+      // function-cs    := <filter(is-function(|rs''))> cs 
+      
+      // cs  := <declare-constructors; separate-by(|"\n"); concat-strings> rs
+      // rs'' := <translate-rules> rs';
+      // init-comps := $<[<<CompList; filter(not(IsWritable)); tr-list(\name -> $<<name>([])>\|",")>>]>
+
+  gather-constructors = 
+    <diff> (<collect-all(gather-constructor, union)>, <builtin-constructors>)
+    
+  gather-constructor :
+    Con(name, t) -> (name, <length> t)
+  
+  /*
+    A constructor is a function iff it shows up at least once and it shows up in axiom
+  */
+  is-function(|rs) =
+  	where(
+  	  ?(name, arity);
+  	  <collect-one(?Rule(_, _, TermEq(Con(name, <eq> (<length>, arity)), _)))> rs
+  	)
+  
+  /*
+   A constructor is a node if it is part of the interpreted language or is a term introduced by the 
+  */
+  is-node(|rs) =
+    ?("Cast", 2) +
+    ?("New", 2) +
+    ?("MethCall", 3) +
+    ?("FieldRef", 2) +
+    ?("Var", 1) +
+    ?("Param", 2) +
+    ?("Method", 4) +
+    ?("FieldInit", 2) +
+    ?("SuperCall", 1) +
+    ?("Constructor", 4) +
+    ?("Void", 0) +
+    ?("ClassType", 1) +
+    ?("Field", 2) +
+    ?("Super", 1) +
+    ?("Class", 5) +
+    ?("Program", 2)
+  
+  /*
+   A constructor is a root-node if it is not part of the interpreted language and appears on the RHS of relations
+  */
+  is-root(|rs) = 
+    where(
+      not(is-function(|rs) + is-node(|rs));
+      ?(name, arity);
+      <collect-one(?Rule(_, _, Relation(_, Source(Con(name, <eq> (<length> , arity)), _), _, _)))> rs
+    )
+    
+rules
+  
+  builtin-constructors = ![ ("MapExtend", 2), ("MapSelect", 2), ("Skip", 0), ("Cons", 2), ("Nil", 0), ("Fresh", 0) ]
+  
+  to-truffle-dynsem-node(is-root-node):
+    (name, arity) -> $[
+						package org.metaborg.truffle.fj.dynsem.manual.eval;
+						
+						import org.metaborg.truffle.dynsem.shared.nodes.*;
+						import org.metaborg.truffle.dynsem.shared.runtime.*;
+						
+						import com.oracle.truffle.api.frame.*;
+						
+						public class [name]_[arity] extends [super-class] {
+						
+						    [<separate-by(|"\n"); concat-strings> fields]
+						
+						    public [name]_[arity]([<separate-by(|","); concat-strings> const-pars]) {
+						        super();
+						        [<separate-by(|"\n"); concat-strings> field-init]
+						    }
+						
+						    [<separate-by(|"\n"); concat-strings> field-gets]
+						
+						    @Override
+						    public Result execute(VirtualFrame frame) {
+						        throw new RuntimeException("Cannot execute [name]_[arity] node");
+						    }
+						
+						}]
+		with
+		  super-class := <is-root-node; !"RootNode" <+ !"DynsemNode">;
+		  index-seq  := <mk-sequence> (1, <inc> arity);
+		  fields     := <map(\ idx -> $[@Child protected DynsemNode _[idx];] \)> index-seq;
+		  const-pars := <map(\ idx -> $[DynsemNode _[idx]] \)> index-seq;
+		  field-init := <map(\ idx -> $[this._[idx] = adoptChild(_[idx]);] \)> index-seq;
+		  field-gets := <map(\ idx -> $[public DynsemNode _[idx](){ return _[idx]; } ] \)> index-seq
+
+rules
+  
+  mk-sequence = 
+    ?(from, to);
+    if <gt + eq> (from, to) then
+      ![]
+    else
+      ![from | <mk-sequence> (<inc> from, to) ]
+    end
+          
+//  
+//        
+// rules // translate rules
+//    
+//   translate-rules =
+//     collect(?Rules(<id>)); 
+//     concat; 
+//     filter(translate-rule);
+//     concat-strings
+//     
+//   translate-rule :
+//     Rule(prem*, _, TermEq(lhs, rhs)) -> $[
+//       norm:       
+//         [<pp-term>lhs] -> [<pp-term-norm> rhs]
+//         [<translate-premises> prem*]]
+//      
+//   translate-premises =
+//     if ?[] then !"" 
+//     else 
+//       !$[where 
+//            [<map(translate-premise); separate-by(|";\n"); concat-strings>]
+//         ]
+//     end
+//     
+//   translate-premise :
+//     TermEq(lhs, rhs) -> $[[<pp-term>rhs] := [<pp-term-norm>lhs]]
+//   
+// rules // translate dynamic
+// 
+//   translate-rule :
+//     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) -> $[
+//       eval:       
+//         ([<pp-term>lhs], [comps-lhs]) -> <debug(!"  to [<next-counter>"r"]: ")>([<pp-term-norm> rhs], [comps-rhs])
+//         where debug(!"eval [<get-counter>"r"]: ")
+//         [<translate-premises> prem*] 
+//     ]
+//     with 
+//       nonwr* := <conc>(r*, sc*); 
+//       comps-lhs := <NonWriteables; map(copy-comp(|nonwr*)); pp-comps>; 
+//       nonr* := <conc>(e*, tc*);
+//       comps-rhs := <NonReadables; map(copy-comp(|nonr*)); pp-comps-norm>
+//                
+//   translate-premise :
+//     Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*)) -> 
+//     $[<eval>([<pp-term-norm>lhs], [comps-lhs]) => ([<pp-term> rhs], [comps-rhs])]
+//     with      
+//       nonwr* := <conc>(r*, sc*);
+//       comps-lhs := <NonWriteables; map(copy-comp(|nonwr*)); pp-comps-norm> ;         
+//       nonr* := <conc>(e*, tc*);
+//       comps-rhs := <NonReadables; map(copy-comp(|nonr*)); pp-comps>
+
+  
+  
+
+
+    

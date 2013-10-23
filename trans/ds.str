@@ -16,6 +16,7 @@ imports
 	names
 	check
 	generate-str
+	generate-truffle
 	refocus
 	factorize
 	explicate
@@ -90,6 +91,13 @@ rules // Builders
     with
       filename := <guarantee-extension(|"generated.str")> path;
       result   := <to-stratego(|filename)> selected
+  
+  // Transforms to Truffle
+  generate-truffle:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"generated.java")> path;
+      result   := <to-truffle> ast
   
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
