@@ -33,21 +33,25 @@ rules
   to-truffle:
     rs -> <concat-strings> truffle
     where
-      rs' := <unstrict-rules; factorize-rules; unstrict-rules; desugar-all; explicate-rules> rs;
+      rs' := <unstrict-rules; factorize-rules; unstrict-rules; desugar-all; explicate-rules; alltd(escape-variable)> rs;
       <extract-components> rs';
       rule-store := <new-hashtable>;
-      // group the rules by matching constructor
       <fill-rule-store(|rule-store)> rs';
+      <debug(!"constructors ")> <hashtable-keys> rule-store;
       truffle := <to-truffle-impl(|rule-store)>
+  
+  escape-variable:
+    Var(v) -> Var($[_[v']])
+    with
+      v' := <string-replace(|"'", "_$prime$_")> v
   
   fill-rule-store(|store) =
     ?ast;
   	collect(?Rules(<id>));
   	concat;
-  	filter(gather-constructor; store-constructor(|store));
+  	map(gather-constructor; store-constructor(|store));
   	!ast;
   	collect-all(gather-implicit-constructor; store-constructor(|store))
-  	
   
   store-constructor(|store) =
   	?(name, arity, ty, r*);
@@ -136,7 +140,7 @@ rules
 					
 					public class [name]_[arity] {
 					
-					    public static Object apply([<separate-by(|","); concat-strings> apply-pars]) {
+					    public static Object apply([params]) {
 					        [alterns]
 					    }
 					    
@@ -145,21 +149,21 @@ rules
     where
       <hashtable-get(|(name, arity))> store => (Func(), rs)
     with
-      index-seq   := <mk-sequence> (1, <inc> arity);
-      apply-pars  := <map(\ idx -> $[Object _[idx]] \)> index-seq;
+      index-seq   := <mk-sequence> (1, arity);
+      params      := <map(\ idx -> $[Object _[idx]] \); separate-by(|","); concat-strings> index-seq;
       invoke-args := <map(\ idx -> $[_[idx]] \); separate-by(|","); concat-strings> index-seq;
       invoc-seq   := <mk-sequence> (1, <length> rs);
       if <?[]> invoc-seq then
         alterns := $[throw new Error("Cannot execute function [name]_[arity]");]
       else
-	      [inv|invxs] := <map(\ idx -> $[return apply_[idx]([invoke-args]);] \); reverse> invoc-seq;
+	      [inv|invxs] := <map(\ idx -> $[return apply_[idx]([invoke-args]);] \)> invoc-seq;
 	      if <?[]> invxs then
 	        alterns := <to-catch-rethrow> inv
 	      else
 	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
 	      end
       end;
-      applydefs := <map-with-index(function-to-truffle(|store, apply-pars))> rs
+      applydefs := <map-with-index(function-to-truffle(|store, params))> rs
 
   to-truffle-dynsem-node(|store):
     (name, arity) -> $[
@@ -196,7 +200,7 @@ rules
 		  else
 		    super-class := "RootNode"
 		  end;
-		  index-seq  := <mk-sequence> (1, <inc> arity);
+		  index-seq  := <mk-sequence> (1, arity);
 		  fields     := <map(\ idx -> $[@Child protected DynsemNode _[idx];] \)> index-seq;
 		  const-pars := <map(\ idx -> $[DynsemNode _[idx]] \)> index-seq;
 		  field-init := <map(\ idx -> $[this._[idx] = adoptChild(_[idx]);] \)> index-seq;
@@ -205,7 +209,7 @@ rules
       if <?[]> invoc-seq then
         alterns := $[throw new Error("Cannot execute node [name]_[arity]");]
       else
-			  [inv|invxs] := <map(\ idx -> $[return apply_[idx](frame);] \); reverse> invoc-seq;
+			  [inv|invxs] := <map(\ idx -> $[return apply_[idx](frame);] \)> invoc-seq;
 			  if <?[]> invxs then
 	        alterns := <to-catch-rethrow> inv
 	      else
@@ -234,16 +238,75 @@ rules
       ex-var := <newname> "e"
 
   function-to-truffle(|store, params):
-    (idx, Rule(prem*, _, TermEq(Con(name, args), res)) ) -> $[
-      public static Object apply_[idx](params) {
-        // allocate correctly named variables
+    (idx, Rule(prem, _, TermEq(Con(name, args), res)) ) -> $[
+      public static Object apply_[idx]([params]) {
         [<separate-by(|"\n"); concat-strings> named-vars]
-        // evaluate the premises
-        // return the result
+        [<separate-by(|"\n"); concat-strings> truffle-prem]
+        return [result];
       }]
     where
       <debug(!"Genfunc: ")> (idx, name, args);
-      named-vars := <map-with-index(\ (idx, Var(v)) -> $[Object v = _[idx];] \)> args
+      named-vars   := <map-with-index(\ (idx, Var(v)) -> $[Object [v] = _[idx];] \)> args;
+      truffle-prem := <map(premise-to-truffle(|store) <+ !$[// fail: [<pp-term>]])> prem;
+      result       := <premise-lhs-to-truffle(|store)> res
+
+  // assignment to variable
+  premise-to-truffle(|store):
+    TermEq(lhs, Var(v)) -> $[Object [v] = [<premise-lhs-to-truffle(|store)> lhs];]
+  
+  // match/read from variable
+  premise-to-truffle(|store):
+    TermEq(Var(v), Con(name, args)) -> $[
+        [name]_[arity] [tmp_var] = ([name]_[arity]) [v];
+        [<separate-by(|"\n"); concat-strings> var_inits]
+    ]
+    where
+      <is-con-node(|store) + is-con-rootnode(|store) + is-builtin-node> (name, <length> args)
+    with
+      arity     := <length> args;
+      tmp_var   := <newname> "temp";
+      var_inits := <map-with-index(\ (idx, Var(r)) -> $[DynsemNode [r] = [tmp_var]._[idx]();]\)> args 
+  
+  // function application
+  premise-lhs-to-truffle(|store):
+    Con(name, args) -> $[[name]_[<length> args].apply([truffle-args])]
+    where
+    	<is-con-function(|store) + is-builtin-function> (name, <length> args)
+    with
+      truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
+  
+  // node construction
+  premise-lhs-to-truffle(|store):
+    Con(name, args) -> $[new [name]_[<length> args]([truffle-args]) ]
+    where
+      <is-con-node(|store) + is-con-rootnode(|store)> (name, <length> args)
+    with
+      truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
+  
+  premise-lhs-to-truffle(|store):
+    Var(v) -> $[[v]]
+
+  premise-lhs-to-truffle(|store) = map-to-truffle(|store)
+  
+  // empty map
+  map-to-truffle(|store):
+    Map([]) -> $[DynsemMap.createEmpty()]
+  
+  map-to-truffle(|store):
+  	Map([b|bs]) -> $[[bs'].plus([b'])]
+  	with
+  		b'  := <bind-to-truffle(|store)> b;
+  		bs' := <map-to-truffle(|store)> Map(bs)
+  
+  bind-to-truffle(|store):
+  	Bind(lhs, rhs) -> $[DynsemMap.createWithSingular([lhs'].asMapKey(), [rhs'])]
+  	with
+      debug(!"1 ");  	  
+  	  lhs' := <premise-lhs-to-truffle(|store)> lhs;
+  	  debug(!"2 ");
+  	  rhs' := <premise-lhs-to-truffle(|store)> rhs;
+  	  debug(!"3 ")
+  
 
   // TermEq(
   //     Var("m_585915")
