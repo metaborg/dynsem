@@ -11,7 +11,9 @@ imports
   strict
   lib-ds
   explicate
-
+  factorize
+  ds.pp.generated
+  
 signature constructors
 	
 	Node : T
@@ -29,9 +31,9 @@ rules
   */
 
   to-truffle:
-    rs -> <concat-strings> truffle //<hashtable-keys> rule-store //<fail> // <concat-strings> [dnode-js, rnode-js]
+    rs -> <concat-strings> truffle
     where
-      rs' := <unstrict-rules; desugar-all; explicate-rules> rs;
+      rs' := <unstrict-rules; factorize-rules; unstrict-rules; desugar-all; explicate-rules> rs;
       <extract-components> rs';
       rule-store := <new-hashtable>;
       // group the rules by matching constructor
@@ -42,7 +44,7 @@ rules
     ?ast;
   	collect(?Rules(<id>));
   	concat;
-  	map(gather-constructor; store-constructor(|store));
+  	filter(gather-constructor; store-constructor(|store));
   	!ast;
   	collect-all(gather-implicit-constructor; store-constructor(|store))
   	
@@ -94,13 +96,34 @@ rules
     ?("Super", 1) +
     ?("Class", 5) +
     ?("Program", 2)
+
+  is-builtin-function = 
+    ?("MapExtend", 2) +
+    ?("MapSelect", 2) +
+    ?("Fresh", 0)
+  
+  is-builtin-node =
+    ?("Skip", 0) +
+    ?("Cons", 2) +
+    ?("Nil", 0)
+  
+  is-con-function(|store) =
+    ?(name, arity);
+    <hashtable-get(|(name, arity))> store => (Func(), _)
+  
+  is-con-rootnode(|store) = 
+    ?(name, arity);
+    <hashtable-get(|(name, arity))> store => (Root(), _)
+  
+  is-con-node(|store) = 
+    ?(name, arity);
+    <hashtable-get(|(name, arity))> store => (Node(), _)
   
 rules
   
-  // builtin-constructors = ![ ("MapExtend", 2), ("MapSelect", 2), ("Skip", 0), ("Cons", 2), ("Nil", 0), ("Fresh", 0) ]
-  
   to-truffle-impl(|store) =
     <hashtable-keys> store;
+    filter(not(is-builtin-node + is-builtin-function));
     map(to-truffle-dynsem-node(|store) <+ to-truffle-dynsem-function(|store))
   
   to-truffle-dynsem-function(|store):
@@ -108,13 +131,16 @@ rules
 					package org.metaborg.truffle.fj.dynsem.manual.functions;
 					
 					import org.metaborg.truffle.dynsem.shared.functions.*;
+					import org.metaborg.truffle.dynsem.shared.nodes.*;
 					import org.metaborg.truffle.dynsem.shared.runtime.*;
 					
 					public class [name]_[arity] {
 					
-					    public static DynsemMap apply([<separate-by(|","); concat-strings> apply-pars]) {
+					    public static Object apply([<separate-by(|","); concat-strings> apply-pars]) {
 					        [alterns]
 					    }
+					    
+					    [applydefs]
 					}]
     where
       <hashtable-get(|(name, arity))> store => (Func(), rs)
@@ -122,7 +148,7 @@ rules
       index-seq   := <mk-sequence> (1, <inc> arity);
       apply-pars  := <map(\ idx -> $[Object _[idx]] \)> index-seq;
       invoke-args := <map(\ idx -> $[_[idx]] \); separate-by(|","); concat-strings> index-seq;
-      invoc-seq   := <mk-sequence> (0, <length;dec> rs);
+      invoc-seq   := <mk-sequence> (1, <length> rs);
       if <?[]> invoc-seq then
         alterns := $[throw new Error("Cannot execute function [name]_[arity]");]
       else
@@ -132,7 +158,8 @@ rules
 	      else
 	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
 	      end
-      end
+      end;
+      applydefs := <map-with-index(function-to-truffle(|store, apply-pars))> rs
 
   to-truffle-dynsem-node(|store):
     (name, arity) -> $[
@@ -174,7 +201,7 @@ rules
 		  const-pars := <map(\ idx -> $[DynsemNode _[idx]] \)> index-seq;
 		  field-init := <map(\ idx -> $[this._[idx] = adoptChild(_[idx]);] \)> index-seq;
 		  field-gets := <map(\ idx -> $[public DynsemNode _[idx](){ return _[idx]; } ] \)> index-seq;
-		  invoc-seq   := <mk-sequence> (0, <length;dec> rs);
+		  invoc-seq   := <mk-sequence> (1, <length> rs);
       if <?[]> invoc-seq then
         alterns := $[throw new Error("Cannot execute node [name]_[arity]");]
       else
@@ -205,6 +232,33 @@ rules
       }]
     with
       ex-var := <newname> "e"
+
+  function-to-truffle(|store, params):
+    (idx, Rule(prem*, _, TermEq(Con(name, args), res)) ) -> $[
+      public static Object apply_[idx](params) {
+        // allocate correctly named variables
+        [<separate-by(|"\n"); concat-strings> named-vars]
+        // evaluate the premises
+        // return the result
+      }]
+    where
+      <debug(!"Genfunc: ")> (idx, name, args);
+      named-vars := <map-with-index(\ (idx, Var(v)) -> $[Object v = _[idx];] \)> args
+
+  // TermEq(
+  //     Var("m_585915")
+  //   , Con("Cons", [Var("o_585915"), Var("methods")])
+  //   )
+  // , TermEq(
+  //     Var("o_585915")
+  //   , Con(
+  //       "Method"
+  //     , [Var("t"), Var("name"), Var("params"), Var("e")]
+  //     )
+  //   )
+  // , TermEq(Con("Methods2Env", [Var("methods")]), Var("p_585915"))
+    
+
 
 rules
   
