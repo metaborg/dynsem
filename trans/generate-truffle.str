@@ -12,6 +12,12 @@ imports
   lib-ds
   explicate
 
+signature constructors
+	
+	Node : T
+	Root : T
+	Func : T
+
 rules
 	
   /*
@@ -23,39 +29,48 @@ rules
   */
 
   to-truffle:
-    rs -> <map(to-truffle-dynsem-node(fail)); concat-strings> root-node-cs
+    rs -> <concat-strings> truffle //<hashtable-keys> rule-store //<fail> // <concat-strings> [dnode-js, rnode-js]
     where
       rs' := <unstrict-rules; desugar-all; explicate-rules> rs;
       <extract-components> rs';
-      cs := <gather-constructors> rs;
-      rs'' := <collect(?Rules(<id>));concat> rs';
-      // dynsem-node-cs := <filter(is-node(|rs''))> cs
-      root-node-cs   := <filter(is-root(|rs''))> cs
-      // function-cs    := <filter(is-function(|rs''))> cs 
-      
-      // cs  := <declare-constructors; separate-by(|"\n"); concat-strings> rs
-      // rs'' := <translate-rules> rs';
-      // init-comps := $<[<<CompList; filter(not(IsWritable)); tr-list(\name -> $<<name>([])>\|",")>>]>
-
-  gather-constructors = 
-    <diff> (<collect-all(gather-constructor, union)>, <builtin-constructors>)
-    
-  gather-constructor :
-    Con(name, t) -> (name, <length> t)
+      rule-store := <new-hashtable>;
+      // group the rules by matching constructor
+      <fill-rule-store(|rule-store)> rs';
+      truffle := <to-truffle-impl(|rule-store)>
   
-  /*
-    A constructor is a function iff it shows up at least once and it shows up in axiom
-  */
-  is-function(|rs) =
-  	where(
-  	  ?(name, arity);
-  	  <collect-one(?Rule(_, _, TermEq(Con(name, <eq> (<length>, arity)), _)))> rs
-  	)
+  fill-rule-store(|store) =
+  	collect(?Rules(<id>));
+  	concat;
+  	map(gather-constructor; store-constructor(|store))
+  	
+  store-constructor(|store) =
+  	?(name, arity, ty, r);
+		<hashtable-get(|(name, arity))> store => (ty, rs);
+		<hashtable-put(|(name, arity), (ty, [r|rs]))> store
   
-  /*
-   A constructor is a node if it is part of the interpreted language or is a term introduced by the 
-  */
-  is-node(|rs) =
+  store-constructor(|store) = 
+  	?(name, arity, ty, r);
+  	<not(hashtable-get(|(name, arity)))> store;
+  	<hashtable-put(|(name, arity), (ty, [r]))> store
+  
+  // functions
+  gather-constructor:
+  	r@Rule(_, _, TermEq(Con(name, args), _)) -> (name, arity, Func(), r)
+  	with
+  		arity := <length> args
+  
+  // nodes & rootnodes
+  gather-constructor:
+  	r@Rule(_, _, Relation(_, Source(Con(name, args), _), _, _)) -> (name, arity, nodetype, r)
+  	with
+  	  arity := <length> args;
+  	  if <is-language-node> (name, arity) then
+  	    nodetype := Node()
+  	  else
+  	    nodetype := Root()
+  	  end
+  
+  is-language-node =
     ?("Cast", 2) +
     ?("New", 2) +
     ?("MethCall", 3) +
@@ -73,21 +88,42 @@ rules
     ?("Class", 5) +
     ?("Program", 2)
   
-  /*
-   A constructor is a root-node if it is not part of the interpreted language and appears on the RHS of relations
-  */
-  is-root(|rs) = 
-    where(
-      not(is-function(|rs) + is-node(|rs));
-      ?(name, arity);
-      <collect-one(?Rule(_, _, Relation(_, Source(Con(name, <eq> (<length> , arity)), _), _, _)))> rs
-    )
-    
 rules
   
-  builtin-constructors = ![ ("MapExtend", 2), ("MapSelect", 2), ("Skip", 0), ("Cons", 2), ("Nil", 0), ("Fresh", 0) ]
+  // builtin-constructors = ![ ("MapExtend", 2), ("MapSelect", 2), ("Skip", 0), ("Cons", 2), ("Nil", 0), ("Fresh", 0) ]
   
-  to-truffle-dynsem-node(is-root-node):
+  to-truffle-impl(|store) =
+    <hashtable-keys> store;
+    map(to-truffle-dynsem-node(|store) <+ to-truffle-dynsem-function(|store))
+  
+  to-truffle-dynsem-function(|store):
+    (name, arity) -> $[
+					package org.metaborg.truffle.fj.dynsem.manual.functions;
+					
+					import org.metaborg.truffle.dynsem.shared.functions.*;
+					import org.metaborg.truffle.dynsem.shared.runtime.*;
+					
+					public class [name] {
+					
+					    public static DynsemMap apply([<separate-by(|","); concat-strings> apply-pars]) {
+					        [alterns]
+					    }
+					}]
+    where
+      <hashtable-get(|(name, arity))> store => (Func(), rs)
+    with
+      index-seq   := <mk-sequence> (1, <inc> arity);
+      apply-pars  := <map(\ idx -> $[Object _[idx]] \)> index-seq;
+      invoke-args := <map(\ idx -> $[_[idx]] \); separate-by(|","); concat-strings> index-seq;
+      invoc-seq   := <mk-sequence> (0, <length;dec> rs);
+      [inv|invxs] := <map(\ idx -> $[return apply_[idx]([invoke-args]);] \); reverse> invoc-seq;
+      if <?[]> invxs then
+        alterns := <to-catch-rethrow> inv
+      else
+        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
+      end
+      
+  to-truffle-dynsem-node(|store):
     (name, arity) -> $[
 						package org.metaborg.truffle.fj.dynsem.manual.eval;
 						
@@ -109,24 +145,58 @@ rules
 						
 						    @Override
 						    public Result execute(VirtualFrame frame) {
-						        throw new RuntimeException("Cannot execute [name]_[arity] node");
+						        [alterns]
 						    }
 						
 						}]
+	  where
+	    <hashtable-get(|(name, arity))> store => (nodety, rs);
+	    <?Node() + ?Root()> nodety
 		with
-		  super-class := <is-root-node; !"RootNode" <+ !"DynsemNode">;
+		  if <?Node()> nodety then
+		    super-class := "DynsemNode"
+		  else
+		    super-class := "RootNode"
+		  end;
 		  index-seq  := <mk-sequence> (1, <inc> arity);
 		  fields     := <map(\ idx -> $[@Child protected DynsemNode _[idx];] \)> index-seq;
 		  const-pars := <map(\ idx -> $[DynsemNode _[idx]] \)> index-seq;
 		  field-init := <map(\ idx -> $[this._[idx] = adoptChild(_[idx]);] \)> index-seq;
-		  field-gets := <map(\ idx -> $[public DynsemNode _[idx](){ return _[idx]; } ] \)> index-seq
+		  field-gets := <map(\ idx -> $[public DynsemNode _[idx](){ return _[idx]; } ] \)> index-seq;
+		  invoc-seq   := <mk-sequence> (0, <length;dec> rs);
+		  [inv|invxs] := <map(\ idx -> $[return apply_[idx](frame);] \); reverse> invoc-seq;
+		  if <?[]> invxs then
+        alterns := <to-catch-rethrow> inv
+      else
+        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
+      end
+      
+  to-catch-stm:
+    (stm1, stm2) -> $[
+      try {
+        [stm1]
+      }catch(Exception [ex-var]) {
+        [stm2]
+      }]
+    with
+      ex-var := <newname> "e"
+  
+  to-catch-rethrow:
+    stm -> $[
+      try {
+        [stm]
+      }catch(Exception [ex-var]) {
+        throw [ex-var];
+      }]
+    with
+      ex-var := <newname> "e"
 
 rules
   
   mk-sequence = 
     ?(from, to);
     if <gt + eq> (from, to) then
-      ![]
+      ![from ]
     else
       ![from | <mk-sequence> (<inc> from, to) ]
     end
