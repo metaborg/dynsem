@@ -39,29 +39,36 @@ rules
       truffle := <to-truffle-impl(|rule-store)>
   
   fill-rule-store(|store) =
+    ?ast;
   	collect(?Rules(<id>));
   	concat;
-  	map(gather-constructor; store-constructor(|store))
+  	map(gather-constructor; store-constructor(|store));
+  	!ast;
+  	collect-all(gather-implicit-constructor; store-constructor(|store))
   	
+  
   store-constructor(|store) =
-  	?(name, arity, ty, r);
-		<hashtable-get(|(name, arity))> store => (ty, rs);
-		<hashtable-put(|(name, arity), (ty, [r|rs]))> store
+  	?(name, arity, ty, r*);
+		<hashtable-get(|(name, arity))> store => (ty, rs*);
+		<hashtable-put(|(name, arity), (ty, [r*, rs*]))> store
   
   store-constructor(|store) = 
-  	?(name, arity, ty, r);
+  	?(name, arity, ty, r*);
   	<not(hashtable-get(|(name, arity)))> store;
-  	<hashtable-put(|(name, arity), (ty, [r]))> store
+  	<hashtable-put(|(name, arity), (ty, r*))> store
+  
+  gather-implicit-constructor:
+    Con(name, args) -> (name, <length> args, Node(), [])
   
   // functions
   gather-constructor:
-  	r@Rule(_, _, TermEq(Con(name, args), _)) -> (name, arity, Func(), r)
+  	r@Rule(_, _, TermEq(Con(name, args), _)) -> (name, arity, Func(), [r])
   	with
   		arity := <length> args
   
   // nodes & rootnodes
   gather-constructor:
-  	r@Rule(_, _, Relation(_, Source(Con(name, args), _), _, _)) -> (name, arity, nodetype, r)
+  	r@Rule(_, _, Relation(_, Source(Con(name, args), _), _, _)) -> (name, arity, nodetype, [r])
   	with
   	  arity := <length> args;
   	  if <is-language-node> (name, arity) then
@@ -103,7 +110,7 @@ rules
 					import org.metaborg.truffle.dynsem.shared.functions.*;
 					import org.metaborg.truffle.dynsem.shared.runtime.*;
 					
-					public class [name] {
+					public class [name]_[arity] {
 					
 					    public static DynsemMap apply([<separate-by(|","); concat-strings> apply-pars]) {
 					        [alterns]
@@ -116,13 +123,17 @@ rules
       apply-pars  := <map(\ idx -> $[Object _[idx]] \)> index-seq;
       invoke-args := <map(\ idx -> $[_[idx]] \); separate-by(|","); concat-strings> index-seq;
       invoc-seq   := <mk-sequence> (0, <length;dec> rs);
-      [inv|invxs] := <map(\ idx -> $[return apply_[idx]([invoke-args]);] \); reverse> invoc-seq;
-      if <?[]> invxs then
-        alterns := <to-catch-rethrow> inv
+      if <?[]> invoc-seq then
+        alterns := $[throw new Error("Cannot execute function [name]_[arity]");]
       else
-        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
+	      [inv|invxs] := <map(\ idx -> $[return apply_[idx]([invoke-args]);] \); reverse> invoc-seq;
+	      if <?[]> invxs then
+	        alterns := <to-catch-rethrow> inv
+	      else
+	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
+	      end
       end
-      
+
   to-truffle-dynsem-node(|store):
     (name, arity) -> $[
 						package org.metaborg.truffle.fj.dynsem.manual.eval;
@@ -164,12 +175,16 @@ rules
 		  field-init := <map(\ idx -> $[this._[idx] = adoptChild(_[idx]);] \)> index-seq;
 		  field-gets := <map(\ idx -> $[public DynsemNode _[idx](){ return _[idx]; } ] \)> index-seq;
 		  invoc-seq   := <mk-sequence> (0, <length;dec> rs);
-		  [inv|invxs] := <map(\ idx -> $[return apply_[idx](frame);] \); reverse> invoc-seq;
-		  if <?[]> invxs then
-        alterns := <to-catch-rethrow> inv
+      if <?[]> invoc-seq then
+        alterns := $[throw new Error("Cannot execute node [name]_[arity]");]
       else
-        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
-      end
+			  [inv|invxs] := <map(\ idx -> $[return apply_[idx](frame);] \); reverse> invoc-seq;
+			  if <?[]> invxs then
+	        alterns := <to-catch-rethrow> inv
+	      else
+	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
+	      end
+	    end
       
   to-catch-stm:
     (stm1, stm2) -> $[
@@ -195,8 +210,8 @@ rules
   
   mk-sequence = 
     ?(from, to);
-    if <gt + eq> (from, to) then
-      ![from ]
+    if <gt> (from, to) then
+      ![]
     else
       ![from | <mk-sequence> (<inc> from, to) ]
     end
