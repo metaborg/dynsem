@@ -30,15 +30,48 @@ rules
   
   */
 
-  to-truffle:
-    rs -> <concat-strings> truffle
-    where
+  to-truffle(|project-path):
+    rs -> None() //<concat-strings> truffle
+    with
       rs' := <unstrict-rules; factorize-rules; unstrict-rules; desugar-all; explicate-rules; alltd(escape-variable)> rs;
       <extract-components> rs';
       rule-store := <new-hashtable>;
-      <fill-rule-store(|rule-store)> rs';
-      <debug(!"constructors ")> <hashtable-keys> rule-store;
-      truffle := <to-truffle-impl(|rule-store)>
+      <fill-rule-store(|rule-store)> rs'
+    with {| NodeDestination, NodePackage, FunctionDestination, FunctionPackage:
+      <ensure-truffle-dirs> project-path;
+      to-truffle-impl(|rule-store);
+      map(emit-truffle-file);
+      <refresh-workspace-file> project-path
+    |}
+  
+  ensure-truffle-dirs:
+    project-path -> project-path
+    with
+      node-bit  := ["truffle", "interpreter", "nodes"];
+      func-bit  := ["truffle", "interpreter", "funcs"];
+      node-dir  := $[[project-path]/editor/java/[<separate-by(|"/"); concat-strings> node-bit]];
+      func-dir  := $[[project-path]/editor/java/[<separate-by(|"/"); concat-strings> func-bit]];
+      <try(call)> ("rm", ["-r", node-dir, func-dir]);
+      <call> ("mkdir", ["-p", node-dir, func-dir]);
+      node-pkg := <separate-by(|"."); concat-strings> node-bit;
+      func-pkg := <separate-by(|"."); concat-strings> func-bit;
+      rules(
+        NodeDestination: _ -> node-dir
+	      NodePackage: _ -> node-pkg
+	      FunctionDestination: _ -> func-dir
+	      FunctionPackage: _ -> func-pkg
+      )
+  
+  emit-truffle-file =
+  	?(contents, filename, elemty);
+  	if <?Node()> elemty then
+  		dest-dir := <NodeDestination>
+    else
+    	dest-dir := <FunctionDestination>
+    end;
+    fout := <fopen> ($[[dest-dir]/[filename]], "w");
+    <fputs> (contents, fout);
+    <fclose> fout
   
   escape-variable:
     Var(v) -> Var($[_[v']])
@@ -131,12 +164,13 @@ rules
     map(to-truffle-dynsem-node(|store) <+ to-truffle-dynsem-function(|store))
   
   to-truffle-dynsem-function(|store):
-    (name, arity) -> $[
-					package org.metaborg.truffle.fj.dynsem.manual.functions;
+    (name, arity) -> ($[
+					package [<FunctionPackage>];
 					
 					import org.metaborg.truffle.dynsem.shared.functions.*;
 					import org.metaborg.truffle.dynsem.shared.nodes.*;
 					import org.metaborg.truffle.dynsem.shared.runtime.*;
+					import [<NodePackage>].*;
 					
 					public class [name]_[arity] {
 					
@@ -145,7 +179,7 @@ rules
 					    }
 					    
 					    [applydefs]
-					}]
+					}], $[[name]_[arity].java], Func())
     where
       <hashtable-get(|(name, arity))> store => (Func(), rs)
     with
@@ -166,13 +200,13 @@ rules
       applydefs := <map-with-index(function-to-truffle(|store, params))> rs
 
   to-truffle-dynsem-node(|store):
-    (name, arity) -> $[
-						package org.metaborg.truffle.fj.dynsem.manual.eval;
+    (name, arity) -> ($[
+						package [<NodePackage>];
 						
 						import org.metaborg.truffle.dynsem.shared.nodes.*;
 						import org.metaborg.truffle.dynsem.shared.runtime.*;
-						
 						import com.oracle.truffle.api.frame.*;
+						import [<FunctionPackage>].*;
 						
 						public class [name]_[arity] extends [super-class] {
 						
@@ -190,7 +224,7 @@ rules
 						        [alterns]
 						    }
 						
-						}]
+						}], $[[name]_[arity].java], Node())
 	  where
 	    <hashtable-get(|(name, arity))> store => (nodety, rs);
 	    <?Node() + ?Root()> nodety
@@ -277,12 +311,16 @@ rules
   
   // node construction
   premise-lhs-to-truffle(|store):
-    Con(name, args) -> $[new [name]_[<length> args]([truffle-args]) ]
+    Con(name, args) -> $["[name]("+ [truffle-args] + ")"]
     where
       <is-con-node(|store) + is-con-rootnode(|store)> (name, <length> args)
     with
-      truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
-  
+    	if <?[]> args then
+    		truffle-args := $[""]
+      else
+        truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
+      end
+      
   premise-lhs-to-truffle(|store):
     Var(v) -> $[[v]]
 
@@ -293,13 +331,13 @@ rules
     Map([]) -> $[DynsemMap.createEmpty()]
   
   map-to-truffle(|store):
-  	Map([b|bs]) -> $[[bs'].plus([b'])]
+  	Map([b|bs]) -> $[[bs'].plusAll([b'])]
   	with
   		b'  := <bind-to-truffle(|store)> b;
   		bs' := <map-to-truffle(|store)> Map(bs)
   
   bind-to-truffle(|store):
-  	Bind(lhs, rhs) -> $[DynsemMap.createWithSingular([lhs'].asMapKey(), [rhs'])]
+  	Bind(lhs, rhs) -> $[DynsemMap.createWithSingular([lhs'], [rhs'])]
   	with
       debug(!"1 ");  	  
   	  lhs' := <premise-lhs-to-truffle(|store)> lhs;

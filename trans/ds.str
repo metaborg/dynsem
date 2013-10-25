@@ -94,10 +94,10 @@ rules // Builders
   
   // Transforms to Truffle
   generate-truffle:
-    (selected, position, ast, path, project-path) -> (filename, result)
+    (selected, position, ast, path, project-path) -> None()
     with
       filename := <guarantee-extension(|"generated.java")> path;
-      result   := <to-truffle> ast
+      <to-truffle(|project-path)> ast
   
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
