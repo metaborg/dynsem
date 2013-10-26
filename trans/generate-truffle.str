@@ -140,9 +140,8 @@ rules
     ?("Fresh", 0)
   
   is-builtin-node =
-    ?("Skip", 0) +
     ?("Cons", 2) +
-    ?("Nil", 0)
+    ?("Nil", 0) 
   
   is-con-function(|store) =
     ?(name, arity);
@@ -205,6 +204,9 @@ rules
 						
 						import org.metaborg.truffle.dynsem.shared.nodes.*;
 						import org.metaborg.truffle.dynsem.shared.runtime.*;
+						import org.metaborg.truffle.dynsem.shared.functions.*;
+						import com.oracle.truffle.api.*;
+						import com.oracle.truffle.api.nodes.*;
 						import com.oracle.truffle.api.frame.*;
 						import [<FunctionPackage>].*;
 						
@@ -224,6 +226,8 @@ rules
 						        [alterns]
 						    }
 						
+						    [execdefs]
+						    
 						}], $[[name]_[arity].java], Node())
 	  where
 	    <hashtable-get(|(name, arity))> store => (nodety, rs);
@@ -243,13 +247,14 @@ rules
       if <?[]> invoc-seq then
         alterns := $[throw new Error("Cannot execute node [name]_[arity]");]
       else
-			  [inv|invxs] := <map(\ idx -> $[return apply_[idx](frame);] \)> invoc-seq;
+			  [inv|invxs] := <map(\ idx -> $[return exec_[idx](frame);] \)> invoc-seq;
 			  if <?[]> invxs then
 	        alterns := <to-catch-rethrow> inv
 	      else
 	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
 	      end
-	    end
+	    end;
+	    execdefs := <map-with-index(node-to-truffle(|store))> rs
       
   to-catch-stm:
     (stm1, stm2) -> $[
@@ -290,8 +295,8 @@ rules
   
   // match/read from variable
   premise-to-truffle(|store):
-    TermEq(Var(v), Con(name, args)) -> $[
-        [name]_[arity] [tmp_var] = ([name]_[arity]) [v];
+    TermEq(lhs, Con(name, args)) -> $[
+        [name]_[arity] [tmp_var] = ([name]_[arity]) [<premise-lhs-to-truffle(|store)> lhs];
         [<separate-by(|"\n"); concat-strings> var_inits]
     ]
     where
@@ -299,7 +304,8 @@ rules
     with
       arity     := <length> args;
       tmp_var   := <newname> "temp";
-      var_inits := <map-with-index(\ (idx, Var(r)) -> $[DynsemNode [r] = [tmp_var]._[idx]();]\)> args 
+      var_inits := <map-with-index(\ (idx, Var(r)) -> $[DynsemNode [r] = [tmp_var]._[idx]();]\)> args
+  
   
   // function application
   premise-lhs-to-truffle(|store):
@@ -309,20 +315,31 @@ rules
     with
       truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
   
-  // node construction
+  // // node construction
+  // premise-lhs-to-truffle(|store):
+  //   Con(name, args) -> $["[name]("+ [truffle-args] + ")"]
+  //   where
+  //     <is-con-node(|store) + is-con-rootnode(|store)> (name, <length> args)
+  //   with
+  //   	if <?[]> args then
+  //   		truffle-args := $[""]
+  //     else
+  //       truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
+  //     end
+  
   premise-lhs-to-truffle(|store):
-    Con(name, args) -> $["[name]("+ [truffle-args] + ")"]
+    Con(name, args) -> $[new [name]_[arity]([truffle-args])]
     where
       <is-con-node(|store) + is-con-rootnode(|store)> (name, <length> args)
     with
-    	if <?[]> args then
-    		truffle-args := $[""]
-      else
-        truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
-      end
+      arity := <length> args;
+      truffle-args := <map(premise-lhs-to-truffle(|store); !$[(DynsemNode) [<id>]]); separate-by(|","); concat-strings> args
       
   premise-lhs-to-truffle(|store):
     Var(v) -> $[[v]]
+
+  premise-lhs-to-truffle(|store):
+    String(s) -> $[[s]]
 
   premise-lhs-to-truffle(|store) = map-to-truffle(|store)
   
@@ -339,27 +356,54 @@ rules
   bind-to-truffle(|store):
   	Bind(lhs, rhs) -> $[DynsemMap.createWithSingular([lhs'], [rhs'])]
   	with
-      debug(!"1 ");  	  
   	  lhs' := <premise-lhs-to-truffle(|store)> lhs;
-  	  debug(!"2 ");
-  	  rhs' := <premise-lhs-to-truffle(|store)> rhs;
-  	  debug(!"3 ")
+  	  rhs' := <premise-lhs-to-truffle(|store)> rhs
+
+  node-to-truffle(|store):
+    (idx, Rule(prem*, _, Relation(Reads(r*), Source(Con(name, args), sc*), DynamicEmitted(_), Target(rhs, tc*)))) -> $[
+      public Result exec_[idx](VirtualFrame frame) {
+        DynsemArguments in_args = frame.getArguments(DynsemArguments.class);
+        [allocs1]
+        [allocs2]
+        [allocs3]
+        [<separate-by(|"\n"); concat-strings> premises]
+
+        return new Result([val], (DynsemMap) [state]);
+      }]
+    with
+      <debug(!"Gennode: ")> (idx, name, args);
+      allocs1  := <map(read-to-alloc)> r*;
+      allocs2  := <map(read-to-alloc)> sc*;
+      allocs3  := <map-with-index(\ (idx, Var(v)) -> $[DynsemNode [v] = this._[idx]();] \)> args;
+      premises := <map(premise-to-truffle(|store))> prem*
+    where
+      !rhs => Var(val);
+      !tc* => [LabelComp(_, Var(state))]
+
+  read-to-alloc:
+    LabelComp("Env", Var(name)) -> $[DynsemMap [name] = in_args.env;]
   
-
-  // TermEq(
-  //     Var("m_585915")
-  //   , Con("Cons", [Var("o_585915"), Var("methods")])
-  //   )
-  // , TermEq(
-  //     Var("o_585915")
-  //   , Con(
-  //       "Method"
-  //     , [Var("t"), Var("name"), Var("params"), Var("e")]
-  //     )
-  //   )
-  // , TermEq(Con("Methods2Env", [Var("methods")]), Var("p_585915"))
-    
-
+  read-to-alloc:
+    LabelComp("State", Var(name)) -> $[DynsemMap [name] = in_args.state;]
+  
+  premise-to-truffle(|store):
+    Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*)) -> $[
+      DynsemArguments [args-var] = new DynsemArguments((DynsemMap) [renv], (DynsemMap) [rstate]);
+      Result [res-var] = [lhs'].execute(Truffle.getRuntime().createVirtualFrame(frame.pack(), [args-var], frame.getFrameDescriptor()));
+      DynsemNode [val-var] = [res-var].val;
+      [val-match]
+      DynsemMap [tstate] = [res-var].state;
+      ]
+    where
+      !r* => [LabelComp(_, Var(renv))];
+      !sc* => [LabelComp(_, Var(rstate))];
+      !tc* => [LabelComp(_, Var(tstate))]
+    with
+      args-var := <newname> "tmp";
+      lhs' := <premise-lhs-to-truffle(|store)> lhs;
+      res-var := <newname> "tmp";
+      val-var := <newname> "tmp";
+      val-match := <premise-to-truffle(|store)> TermEq(Var(val-var), rhs)
 
 rules
   
