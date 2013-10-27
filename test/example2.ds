@@ -1,3 +1,5 @@
+module example2
+
 rules // library
 
   value(y)
