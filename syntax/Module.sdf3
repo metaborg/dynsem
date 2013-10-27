@@ -1,0 +1,33 @@
+module Module 
+ 
+templates  
+      
+  Module.Module = <
+  	module <ModuleID>
+        
+    <ModuleSection*; separator="\n\n">
+    >
+    
+  //<ModMetaData*>  
+     
+  ModuleSection.Imports = <
+    imports <ImportModule*>>
+
+  ImportModule.ImportWildcard=
+  	<<ModuleID>/->
+  	            
+  ImportModule.Import = <<ModuleID>>
+
+lexical syntax
+
+  ModuleID     = {ModuleIDPart "/"}+ 
+  ModuleIDPart = [a-zA-Z\.\_] [a-zA-Z0-9\'\.\-\_]* 
+    
+  ModuleID = "rules"      {reject}
+  ModuleID = "namespaces" {reject}
+  ModuleID = "properties" {reject}
+
+lexical restrictions
+  
+  ModuleID -/- [a-zA-Z0-9\'\.\-\_]
+  
