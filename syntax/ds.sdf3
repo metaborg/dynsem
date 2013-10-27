@@ -1,4 +1,4 @@
-module DynSem
+module ds
 
 imports Common Lexical Module
  

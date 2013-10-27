@@ -36,3 +36,5 @@ trans/Common.pp.generated.str
 trans/DynSem.pp.generated.str
 trans/Lexical.pp.generated.str
 trans/Module.pp.generated.str
+syntax/ds.sdf
+trans/ds.pp.generated.str
