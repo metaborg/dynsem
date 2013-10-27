@@ -1,0 +1,58 @@
+module ds-Menus
+
+//imports FJ-Menus.generated
+
+  // This file can be used to specify toolbar menus.
+  // See the imported file for a brief introduction and examples.
+
+menus
+  
+  menu: "Syntax"
+    
+    action: "Format"               = format-editor (openeditor) 
+    action: "Show Abstract Syntax" = debug-show-aterm (openeditor) (meta) 
+    action: "Show Analyzed Syntax" = debug-show-analyzed-selection (openeditor) (meta) 
+    
+  menu: "Analysis"
+    
+    action: "Reset and reanalyze"  = debug-reanalyze (meta)   
+
+    submenu: "Show Analysis"
+      action: "Project"            = debug-project (openeditor) (meta)
+      action: "Partition"          = debug-partition (openeditor) (meta)
+    end
+    
+    submenu: "Show Index"
+      action: "Show index (current)" = debug-show-index-current (openeditor) (meta) 
+      action: "Show index (all)"     = debug-show-index-all (openeditor) (meta)      
+      action: "Project"              = debug-index-project (openeditor) (meta)
+      action: "Partition"            = debug-index-partition (openeditor) (meta)
+    end
+    
+    submenu: "Show Tasks"
+      action: "Show tasks (selection)" = debug-show-tasks-selection (openeditor) (meta) 
+      action: "Project"            = debug-task-project (openeditor) (meta)
+      action: "Partition"          = debug-task-partition (openeditor) (meta)
+      action: "Selection"          = debug-task-selection (openeditor) (meta)
+    end
+    
+                                                                                                                                                                                       
+  // builder  : "Show analyzed syntax"   = debug-show-analyzed (openeditor) (meta)        
+  // builder  : "Show index (current)"   = debug-show-index-current (openeditor) (meta)              
+  // builder  : "Show index (all)"       = debug-show-index-all (openeditor) (meta)                  
+  // builder  : "Show tasks (selection)" = debug-show-tasks-selection (openeditor) (meta)            
+  // builder  : "Reset and reanalyze"    = debug-reanalyze (meta) 
+    
+  menu: "Semantics"
+
+    action  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
+    action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)     
+    action  : "Refocus"                = refocus-editor (openeditor) (realtime)       
+    action  : "Factorize"              = factorize-editor (openeditor) (realtime) 
+    action  : "Explicate"              = explicate-editor (openeditor) (realtime)   
+    
+    separator
+    
+    action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime)   
+     
+                
