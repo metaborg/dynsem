@@ -25,7 +25,7 @@ templates // rules
     [Formula]
   ]
    
-templates // formulas
+templates // formulas 
 
   Formula.TermEq = [[Term] = [Term]]
   Formula.Relation = [[Reads][Source] [Rel] [Target]]

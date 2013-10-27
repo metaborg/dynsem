@@ -3,7 +3,8 @@ imports Common
 
 exports
   lexical syntax
-    [\-] [\-] [\-] [\-]* -> INFER 
+    [\-] [\-] [\-] [\-]*          -> INFER 
+    [a-zA-Z] [a-zA-Z0-9\'\_]* "*" -> LID   
 
   lexical restrictions
     INFER -/- [\-]

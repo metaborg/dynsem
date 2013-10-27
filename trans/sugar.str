@@ -3,6 +3,11 @@ module sugar
 imports
 	include/ds
 	
+signature
+  constructors
+    MapExtend : Map * Map -> Map
+    MapEntry : Map -> Bind
+	
 rules // desugaring
 	
   desugar-all = innermost(desugar); alltd(rules-concat)
@@ -63,6 +68,12 @@ rules // sugaring
   sugar :
     TermEq(Con("IsValue",[term]),Con("True",[])) -> IsValue(term)
   
+rules // desugaring maps
   
+  desugar :
+    Map([b | b*@[_|_]]) -> MapExtend(Map([b]), Map(b*))
+    
+  desugar :
+    Map([MapEntry(x)]) -> x
   
           

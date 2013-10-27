@@ -9,8 +9,14 @@ imports
   sugar
   
 strategies
-  
-  factorize-rules = desugar-all; alltd(factorize-rule); sugar-all
+    
+  factorize-module :
+    Module(name, section*) -> Module(name, section'*) 
+    where
+      section'* := <map(try(factorize-rules))> section*
+        
+  factorize-rules = 
+    desugar-all; alltd(factorize-rule); sugar-all
     
 rules
   

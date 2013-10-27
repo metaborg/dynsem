@@ -4,7 +4,7 @@ imports
   libstratego-lib
   libstratego-gpp
   libstratego-aterm
-  include/ds
+  include/DynSem
   lib/editor-common.generated
   refocus
   sugar
@@ -13,108 +13,80 @@ imports
   explicate
 
 rules
-
+ 
   to-stratego(|filename) :
-    rs -> $[
-      module [<base-filename; remove-extension>filename]
+    Module(name, section*) ->
+    $[module [<base-filename; remove-extension>filename]
+            
+      [section''*]       
       
-      signature
-        constructors
-          [cs]
-          MapExtend : T * T -> T
-          MapSelect : T * T -> T
-          MapEmpty : T
-          Map1 : T * T -> T
-          Bind : T * T -> T
-          Fresh : T
-          Exec : T -> T
-          Exec1 : T -> T
-          IsValue : T -> T   
-          True : T   
-          Concat : T -> T
-          
-      
-      rules // run-time library
+      rules
         
-        normalize :
-          term -> term' 
-          where term' := <innermost(norm)> term 
-          
         exec :
           prog -> <eval> (<bottomup(n)>Exec(prog), [init-comps]) 
-        
-        norm:
-          MapExtend(map1, map2) -> <conc> (map1, map2)
          
-      
-      rules // built-ins
-        
-        n = try(norm)
-        
-        norm:
-          Concat(t*) -> <concat> t*
-      	
-        norm:
-          MapEmpty() -> ["[]"]
-          
-        norm:
-          Map1(x,y) -> ["[Bind(x,y)]"]
-              
-        norm:
-          MapSelect(key, map) -> value
-          where <fetch(?Bind(key, value))> map  
-          
-        norm:
-          Fresh() -> <new>
-        
-        /*
-        The following rules should be somewhere:
-        
-        IsValue(x) = true
-        -----------------
-         Exec(x) --> x
-		
-        x --> y , Exec(x) --> y
-        -----------------------
-           Exec(x) --> y
-        */
-                     
-      rules
-        [rs'']
+        n = try(norm)                               
     ]
-    where rs' := <unstrict-rules; desugar-all; explicate-rules> rs;
-          <extract-components> rs';
-          rs'' := <translate-rules> rs';
-          cs  := <declare-constructors; separate-by(|"\n"); concat-strings> rs;
-          init-comps := $<[<<CompList; filter(not(IsWritable)); tr-list(\name -> $<<name>([])>\|",")>>]>
-          
-rules // declare constructors
-  
-  declare-constructors =
-    collect-all(declare-constructor, union)
-    
-  declare-constructor :
-    Con(name, []) -> $[[name]: T]
+    where section'* := <unstrict-rules; desugar-all; explicate-rules> section*;
+       <extract-writables> section'* ;
+       <extract-readables> section'* ;
+       <extract-components> section'* ;
+       section''*  := <translate-sections> section'* ;
+       //cs  := <declare-constructors; separate-by(|"\n"); concat-strings> section*//;
+       init-comps := $<[<<CompList; filter(not(IsWritable)); tr-list(\name -> $<<name>([])>\|",")>>]>
 
-  declare-constructor :
-    Con(name, t*) -> $[[name]: [<tr-list(!"T"|" * ")>t*] -> T]
-    where <not([])> t*
+//     where rs' := <unstrict-rules; desugar-all; explicate-rules> rs;
+//           <extract-components> rs';
+//           rs'' := <translate-rules> rs';
+//           cs  := <declare-constructors; separate-by(|"\n"); concat-strings> rs;
+//           init-comps := $<[<<CompList; filter(not(IsWritable)); tr-list(\name -> $<<name>([])>\|",")>>]>
+//           
+// rules // declare constructors
+//   
+//   declare-constructors =
+//     collect-all(declare-constructor, union)
+//     
+//   declare-constructor :
+//     Con(name, []) -> $[[name]: T]
+// =======
 
-  declare-constructor :
-    LabelComp(name, _) -> $[[name]: T -> T]
+// rules // declare constructors
+//   
+//   declare-constructors =
+//     collect-all(declare-constructor, union)
+//     
+//   declare-constructor :
+//     Con(name, []) -> $[[name]: T]
+// 
+//   declare-constructor :
+//     Con(name, t*) -> $[[name]: [<tr-list(!"T"|" * ")>t*] -> T]
+//     where <not([])> t*
+// 
+//   declare-constructor :
+//     LabelComp(name, _) -> $[[name]: T -> T]
  
        
 rules // translate rules
-   
-  translate-rules =
-    collect(?Rules(<id>)); 
-    concat; 
-    filter(translate-rule);
-    concat-strings
+  
+  translate-sections =
+    map(translate-section); separate-by(|"\n\n"); concat-strings
+
+  translate-section :
+    Imports(imp*) -> 
+      $[imports [imps]]
+    where
+      imps := <map(?Import(<id>)); separate-by(|"\n  "); concat-strings>imp*
+     
+  translate-section :
+    Rules(r*) ->
+      $[rules         
+          [rs]]
+    where
+      rs := <filter(translate-rule); concat-strings> r*
     
   translate-rule :
     Rule(prem*, _, TermEq(lhs, rhs)) -> $[
-      norm:       
+      norm:
         [<pp-term>lhs] -> [<pp-term-norm> rhs]
         [<translate-premises> prem*]]
      

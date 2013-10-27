@@ -2,8 +2,8 @@
 <project name="ds" default="all">
     
     <!-- Key input modules -->
-    <property name="sdfmodule" value="DynSem"/>
-    <property name="metasdfmodule" value="Stratego-DynSem"/>
+    <property name="sdfmodule" value="ds"/>
+    <property name="metasdfmodule" value="Stratego-ds"/>
     <property name="esvmodule" value="ds"/>
     <property name="strmodule" value="ds"/>
 
@@ -17,7 +17,7 @@
     <property name="dist" location="bin/dist"/> 
       
     <!-- Imports -->
-    <property name="build.sdf.imports" value=""/>
+    <property name="build.sdf.imports" value=""/> 
     <property name="build.stratego.args" value=" 
                     --library
                     -I &quot;${trans}&quot;
@@ -49,5 +49,7 @@
     </path>
 
     <!-- Main target -->
-    <target name="all" depends="spoofaximp.default.ctree"/>
+    <target name="all" depends="spoofaximp.default.ctree"/> 
+
+
 </project>
