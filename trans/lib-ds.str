@@ -5,6 +5,7 @@ imports
   libstratego-gpp
   libstratego-aterm
   include/ds
+  include/DynSem
   lib/editor-common.generated
   refocus
   sugar
@@ -118,10 +119,48 @@ rules // pretty-printing terms
     String(s) -> $["[<un-double-quote> s]"]
     
   pp-term :
-    Map(l) -> <pp-list> l
+    Fresh() -> $[<new>]
+    
+  pp-term :
+    Map(l) -> $[Map([<pp-bindings> l])]
+    
+  pp-bindings :
+    [] -> $<[]>
+    
+  pp-bindings :
+    [b@Bind(x, y)] -> $<[<<pp-term>b>]>
+
+  // pp-bindings :
+  //   [b@Bind(x, y) | ts@[_|_]] -> $<[<<pp-term>b> | <<pp-bindings> ts>]>
+    
+  pp-bindings :
+    [MapEntry(t)] -> <pp-term>t
+    
+  // pp-bindings :
+  //   [MapEntry(t) | ts@[_|_]] -> $[<conc>([<pp-term>t], [<pp-bindings>ts])]
+
+  pp-bindings :
+    [t@Binds(_,_)] -> <pp-term>t
+
+  // pp-bindings :
+  //   [t@Binds(_,_) | ts@[_|_]] -> $[<conc>([<pp-term>t], [<pp-bindings>ts])]
+        
+  pp-term :
+    MapEntry(t) -> <pp-term>t
 
   pp-term :
-    Bind(x, y) -> $[Bind([<pp-term>x],[<pp-term>y])]
+    Bind(x, y) -> $[Bind([<pp-term>x], [<pp-term>y])]
+    
+  pp-term :
+    MapSelect(m, k) ->
+      $[<ds-mapselect>([<pp-term>k], [<pp-term>m])]
+      
+  pp-term :
+    MapExtend(t1, t2) -> 
+      $[<ds-mapextend>([<pp-term>t1], [<pp-term>t2])]
+      
+  pp-term :
+    Binds(t1, t2) -> $[<ds-binds>([<pp-term>t1], [<pp-term>t2])]
 
   pp-term :
     List(l) -> <pp-list> l
@@ -130,7 +169,10 @@ rules // pretty-printing terms
     [t*] -> $<[<<pp-terms>t*>]>
     
   pp-term :
-    y -> <pp-aterm>
+    ListTail(t*, t) -> $<[<<pp-terms>t*> | <<pp-term>t>]>
+    
+  // pp-term :
+  //   y -> <pp-aterm>
     
 rules
   

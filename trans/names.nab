@@ -1,31 +1,29 @@
 module names
 
-imports
+imports	include/ds
 	
-	include/ds
-	
-namespaces
-	
-	Module
-	Entity
-	Property
-	
-binding rules
-
-	Module(x, _) : 
-		defines Module x
-		scopes Entity
-		implicitly defines Entity "String"
-		implicitly defines Entity "Int"
-		
-	Entity(x, _) :
-		defines Entity x 
-			of type Type(x)
-		scopes Property
-		
-	Property(x, t) :
-		defines Property x 
-			of type t
-		
-	Type(x) :
-		refers to Entity x
+// namespaces
+// 	
+// 	Module
+// 	Entity
+// 	Property
+// 	
+// binding rules
+// 
+// 	Module(x, _) : 
+// 		defines Module x
+// 		scopes Entity
+// 		implicitly defines Entity "String"
+// 		implicitly defines Entity "Int"
+// 		
+// 	Entity(x, _) :
+// 		defines Entity x 
+// 			of type Type(x)
+// 		scopes Property
+// 		
+// 	Property(x, t) :
+// 		defines Property x 
+// 			of type t
+// 		
+// 	Type(x) :
+// 		refers to Entity x

@@ -10,7 +10,13 @@ imports
   
 strategies
   
-  refocus-rules = desugar-all; alltd(refocus); sugar-all
+  refocus-module :
+    Module(name, section*) -> Module(name, section'*)
+    where 
+      section'* := <map(try(refocus-rules))> section*
+  
+  refocus-rules = 
+    desugar-all; alltd(refocus); sugar-all
   
 rules
   

@@ -11,6 +11,11 @@ imports
   
 strategies
   
+  explicate-module :
+    Module(name, section*) -> Module(name, section'*) 
+    where
+      section'* := <map(try(explicate-rules))> section*
+                
   // explicate-rules assumes rules to be desugared
   
   explicate-rules :

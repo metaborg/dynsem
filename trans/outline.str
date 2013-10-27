@@ -2,7 +2,7 @@ module outline
 
 imports
   include/ds
-  //lib/outline-library.generated
+  lib/runtime/editor/outline-library
 
 rules
 
@@ -16,3 +16,4 @@ rules
   to-outline-label: Rule(name, _, _) -> name
   
   
+ 

@@ -8,11 +8,10 @@ imports
 	include/ds
 	lib/editor-common.generated
 	lib/runtime/analysis/-
-	lib/runtime/nbl/-
+	lib/runtime/nabl/-
 	lib/runtime/task/-
-	lib/runtime/index/-
-	lib/runtime/tmpl/pp
-	ds.pp.generated
+	lib/runtime/index/- 
+	pp
 	names
 	check
 	generate-str
@@ -32,8 +31,23 @@ rules // Analysis
 	analysis-multiple-default-interface = 
 		analysis-multiple-default(parse-file <+ !(), id, id, id|<language>, <project-path>)
 	
-	editor-save = analysis-save-default(|<language>)
+	editor-save = 
+	  where(generate-stratego; write-string-to-file); analysis-save-default(|<language>)
 
+rules
+  
+  // When given a tuple (path, string) this writes string into path.
+  write-string-to-file =
+    ?(filename, string);
+    if <dirname; readdir> filename then
+      with(
+        handle := <fopen> (filename, "w");
+        <fputs> (string, handle);
+        <fclose> handle;
+        <refresh-workspace-file> filename
+      )
+    end
+    
 rules // Editor services
 	
 	// Resolves a reference when the user control-clicks or presses F3 in the editor.
@@ -100,35 +114,35 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"refocussed.ds")> path;
-      result   := <refocus-rules; prettyprint-example; box2text-string(|80)> selected
+      result   := <refocus-module; pp-debug> selected
 
   factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factorized.ds")> path;
-      result   := <factorize-rules; prettyprint-example; box2text-string(|80)> selected
+      result   := <factorize-module; pp-debug> selected
 
   explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      result   := <desugar-all; explicate-rules; sugar-all; prettyprint-example; box2text-string(|80)> selected
+      result   := <desugar-all; explicate-module; sugar-all; pp-debug> selected
 
   explicate-editor-ast:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.aterm")> path;
-      result   := <desugar-all; explicate-rules> selected
+      result   := <desugar-all; explicate-module> selected
 
   // format rules
   format-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"pp.ds")> path;
-      result   := <prettyprint-example; box2text-string(|80)> ast
+      result   := <pp-debug> ast
 
   unstrict-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"unstrict.ds")> path;
-      result   := <unstrict-rules; prettyprint-example; box2text-string(|80)> selected
+      result   := <unstrict-rules; pp-debug> selected
