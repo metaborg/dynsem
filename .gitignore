@@ -24,3 +24,15 @@ lib/*.generated.str
 lib-refactoring/*.generated.str
 lib
 ds-Outliner.generated.str
+/include
+editor/Common.generated.esv
+editor/DynSem.generated.esv
+editor/Lexical.generated.esv
+editor/Module.generated.esv
+syntax/DynSem.generated.pp
+syntax/DynSem.sdf
+syntax/Module.sdf
+trans/Common.pp.generated.str
+trans/DynSem.pp.generated.str
+trans/Lexical.pp.generated.str
+trans/Module.pp.generated.str
