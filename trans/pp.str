@@ -6,14 +6,14 @@ imports
   lib/runtime/tmpl/pp
   Common.pp.generated
   Module.pp.generated
-  DynSem.pp.generated
+  ds.pp.generated
   Lexical.pp.generated
-  include/DynSem-parenthesize
+  include/ds-parenthesize
   
 rules
      
   pp-dynsem-string =
-    parenthesize-DynSem
+    parenthesize-ds
     ; prettyprint-Module
     ; !V([], <id>)
     ; box2text-string(|80)

@@ -12,7 +12,7 @@ imports
   lib-ds
   explicate
   factorize
-  DynSem.pp.generated
+  ds.pp.generated
   
 signature constructors
 	

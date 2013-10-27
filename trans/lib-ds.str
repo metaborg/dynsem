@@ -5,7 +5,6 @@ imports
   libstratego-gpp
   libstratego-aterm
   include/ds
-  include/DynSem
   lib/editor-common.generated
   refocus
   sugar
