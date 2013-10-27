@@ -46,6 +46,7 @@ menus
   menu: "Semantics"
 
     action  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
+    action  : "Generate Truffle"      = generate-truffle
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)     
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)       
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) 
