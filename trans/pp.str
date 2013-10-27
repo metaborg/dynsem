@@ -1,0 +1,28 @@
+module pp
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  lib/runtime/tmpl/pp
+  Common.pp.generated
+  Module.pp.generated
+  DynSem.pp.generated
+  Lexical.pp.generated
+  include/DynSem-parenthesize
+  
+rules
+     
+  pp-dynsem-string =
+    parenthesize-DynSem
+    ; prettyprint-Module
+    ; !V([], <id>)
+    ; box2text-string(|80)
+
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-dynsem-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-dynsem-string); debug(!"cannot pp ")))> ast
+    ;  result := ""
+       
+       
