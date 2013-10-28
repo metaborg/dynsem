@@ -34,6 +34,8 @@ rules
     rs -> None() //<concat-strings> truffle
     with
       rs' := <unstrict-rules; factorize-rules; unstrict-rules; desugar-all; explicate-rules; alltd(escape-variable)> rs;
+      <extract-writables> rs';
+      <extract-readables> rs';
       <extract-components> rs';
       rule-store := <new-hashtable>;
       <fill-rule-store(|rule-store)> rs'
@@ -286,16 +288,16 @@ rules
     where
       <debug(!"Genfunc: ")> (idx, name, args);
       named-vars   := <map-with-index(\ (idx, Var(v)) -> $[Object [v] = _[idx];] \)> args;
-      truffle-prem := <map(premise-to-truffle(|store) <+ !$[// fail: [<pp-term>]])> prem;
+      truffle-prem := <map(premise-to-truffle(|store) <+ !$[// fail: [<pp-term <+ pp-terms>]])> prem;
       result       := <premise-lhs-to-truffle(|store)> res
 
   // assignment to variable
   premise-to-truffle(|store):
-    TermEq(lhs, Var(v)) -> $[Object [v] = [<premise-lhs-to-truffle(|store)> lhs];]
+    Formula(TermEq(lhs, Var(v))) -> $[Object [v] = [<premise-lhs-to-truffle(|store)> lhs];]
   
   // match/read from variable
   premise-to-truffle(|store):
-    TermEq(lhs, Con(name, args)) -> $[
+    Formula(TermEq(lhs, Con(name, args))) -> $[
         [name]_[arity] [tmp_var] = ([name]_[arity]) [<premise-lhs-to-truffle(|store)> lhs];
         [<separate-by(|"\n"); concat-strings> var_inits]
     ]
@@ -329,18 +331,25 @@ rules
   premise-lhs-to-truffle(|store):
     String(s) -> $[[s]]
 
-  premise-lhs-to-truffle(|store) = map-to-truffle(|store)
+  // premise-lhs-to-truffle(|store) = map-to-truffle(|store)
   
-  // empty map
-  map-to-truffle(|store):
-    Map([]) -> $[DynsemMap.createEmpty()]
+  premise-lhs-to-truffle(|store):
+    MapExtend(lhs, rhs) -> $[((DynsemMap) [lhs']).plusAll([rhs'])]
+    with
+      lhs' := <premise-lhs-to-truffle(|store)> lhs;
+      rhs' := <premise-lhs-to-truffle(|store)> rhs
+
+  premise-lhs-to-truffle(|store):
+  	Map([]) -> $[DynsemMap.createEmpty()]
   
-  map-to-truffle(|store):
-  	Map([b|bs]) -> $[[bs'].plusAll([b'])]
+  premise-lhs-to-truffle(|store):
+  	Map([b|bs]) -> $[((DynsemMap) [bs']).plusAll([b'])]
   	with
-  		b'  := <bind-to-truffle(|store)> b;
-  		bs' := <map-to-truffle(|store)> Map(bs)
+  		b'  := <premise-lhs-to-truffle(|store)> b;
+  		bs' := <premise-lhs-to-truffle(|store)> Map(bs)
   
+  premise-lhs-to-truffle(|store) = bind-to-truffle(|store)
+    
   bind-to-truffle(|store):
   	Bind(lhs, rhs) -> $[DynsemMap.createWithSingular([lhs'], [rhs'])]
   	with
@@ -375,7 +384,7 @@ rules
     LabelComp("State", Var(name)) -> $[DynsemMap [name] = in_args.state;]
   
   premise-to-truffle(|store):
-    Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*)) -> $[
+    Formula(Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*))) -> $[
       DynsemArguments [args-var] = new DynsemArguments((DynsemMap) [renv], (DynsemMap) [rstate]);
       Result [res-var] = [lhs'].execute(Truffle.getRuntime().createVirtualFrame(frame.pack(), [args-var], frame.getFrameDescriptor()));
       DynsemNode [val-var] = [res-var].val;
@@ -391,7 +400,7 @@ rules
       lhs' := <premise-lhs-to-truffle(|store)> lhs;
       res-var := <newname> "tmp";
       val-var := <newname> "tmp";
-      val-match := <premise-to-truffle(|store)> TermEq(Var(val-var), rhs)
+      val-match := <premise-to-truffle(|store)> Formula(TermEq(Var(val-var), rhs))
 
 rules
   
