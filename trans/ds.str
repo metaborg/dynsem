@@ -22,6 +22,7 @@ imports
 	outline
 	strict
 	sugar
+	to-truffle/to-ir
 
 rules // Analysis
 	
@@ -110,8 +111,14 @@ rules // Builders
   generate-truffle:
     (selected, position, ast, path, project-path) -> None()
     with
-      filename := <guarantee-extension(|"generated.java")> path;
       <to-truffle(|project-path)> ast
+
+  // Transforms to IR
+  generate-ir:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"generated.ir.aterm")> path;
+      result   := <to-ir> ast
   
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
