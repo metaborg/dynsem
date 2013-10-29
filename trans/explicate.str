@@ -12,17 +12,17 @@ imports
 strategies
   
   explicate-module :
-    Module(name, section*) -> Module(name, section'*) 
+    mod@Module(name, section*) -> Module(name, section'*) 
     where
+      <extract-writables> mod;
+      <extract-readables> mod;
+      <extract-changeables> mod;
       section'* := <map(try(explicate-rules))> section*
                 
   // explicate-rules assumes rules to be desugared
   
   explicate-rules :
     rs -> <alltd(explicate-rule)> rs
-    where <extract-writables> rs;
-          <extract-readables> rs;
-          <extract-changeables> rs
 
 rules
   
