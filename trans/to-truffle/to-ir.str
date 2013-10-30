@@ -28,6 +28,8 @@ signature
     Assign:   String * PremisePart             -> Premise
     Match :   String * List(PremisePart)       -> Premise
     Call  :   String * Integer * List(PremisePart) -> PremisePart
+    
+    // Reduc: envname * statename * inputvar * outvar * outstate
     Reduc :   String * String * String * String * String -> Rule
     	    
     String:   String                           -> PremisePart
@@ -57,7 +59,8 @@ rules // gather constructors and their usage
   gather-constructors =
     collect(?Rules(<id>));
     collect-all(gather-constructor);
-    implode-constructors
+    implode-constructors;
+    filter(not(element-is-builtin-function))
 
   gather-constructor:
     Con(name, args) -> Element(conskind, name, arity, [])
@@ -119,68 +122,73 @@ rules // gather constructors and their usage
 
 rules
   
-  rules-to-ir = ?elements; map(elem-to-ir(|elements))
+  rules-to-ir = ?elements; map(Element(id, id, id, map(rule-to-ir(|elements))))
 
-  elem-to-ir(|elements) = Element(id, id, id, map(rule-to-ir(|elements)))
+  in-tuple-conc:
+    ((a*, b*), (a'*, b'*)) -> ([a'*, a*], [b'*, b*])
 
   // functions
   rule-to-ir(|elements):
-    Rule(prem*, _, TermEq(Con(_, args), rhs)) -> Func(invar*, prem'*, outvar)
+    Rule(prem*, _, TermEq(Con(_, args), rhs)) -> Func(invar*, prem''*, outvar)
     with
-      invar* := <map(?Var(<id>))> args;
-      <lift-pattern-to-var> rhs => (p2*, outvar);
-      prem'* := <premises-to-ir(|elements)> [prem*, p2*]
+      <foldr(!([],[]), in-tuple-conc , lift-pattern-to-var)> args => (p1*, invar*);
+      <lift-pattern-to-var> rhs => (p2*, [outvar]);
+      prem'* := <map(?Formula(<id>))> prem*;
+      prem''* := <premises-to-ir(|elements)> [p1*, prem'*, p2*]
 
+  // rules
   rule-to-ir(|elements):
-    Rule(prem*, _, Relation(Reads(r*), Source(Con(_, args), sc*), _, Target(Var(outvar), tc*))) ->
-      Rule(env, sin, invar*, prem'*, outvar, sout)
+    Rule(prem*, _, Relation(Reads(r*), Source(Con(_, args), sc*), _, Target(rhs, tc*))) ->
+      Rule(env, sin, invar*, prem''*, outvar, sout)
       with
-        invar* := <map(?Var(<id>))> args;
-        !r* => [LabelComp(_, Var(env))];
-        prem'* := <premises-to-ir(|elements)> prem*;
-        !sc* => [LabelComp(_, Var(sin))];
-        !tc* => [LabelComp(_, Var(sout))]
-        
-  lift-pattern-to-var:
-    Var(x) -> ([], x)
+        <foldr(!([],[]), in-tuple-conc , lift-pattern-to-var)> args => (p1*, invar*);
+        env := <get-read-mapvar> r*;
+        <lift-pattern-to-var> rhs => (p2*, [outvar]);
+        prem'* := <map(?Formula(<id>))> prem*;
+        prem''* := <premises-to-ir(|elements)> [p1*, prem'*, p2*];
+        sin := <get-read-mapvar> sc*;
+        sout := <get-read-mapvar> tc*
   
   lift-pattern-to-var:
-    con -> ([Formula(TermEq(Var(var-name), con))], var-name)
+    Var(x) -> ([], [x])
+  
+  lift-pattern-to-var:
+    con -> ([TermEq(Var(var-name), con)], [var-name])
     where
-      <not(?Con(_, _))> con
+      <not(?Var(_))> con
     with
       var-name := <new>
-
+      
+  get-read-mapvar = ?[LabelComp(_, Var(<id>))]
+    
 rules
 
-  premises-to-ir(|elements) = map(?Formula(<premise-to-ir(|elements)>))
-  
-  //   Assign:   String * PremisePart             -> Premise
-  //   Match :   String * List(PremisePart)       -> Premise
-  //   Call  :   String * Integer * List(PremisePart) -> PremisePart
-  //   Reduc :   String * String * String * String * String -> Rule
-  //         
-  //   String:   String                           -> PremisePart
-  //   Var   :   String                           -> PremisePart
-  //   Fresh :                                       PremisePart
-  //   
-  //   List  :   List(String)                     -> PremisePart
-  //   ListTail: List(String) * String            -> PremisePart
-  //   
-  //   MapEmpty:                                     PremisePart
-  //   MapExtend: PremisePart * PremisePart       -> PremisePart
-  //   MapSelect: PremisePart * PremisePart       -> PremisePart
-  
+  premises-to-ir(|elements) = 
+    map(innermost(premise-to-ir(|elements) + premisepart-to-ir(|elements)));
+    try(flatten-list)
   
   premise-to-ir(|elements):
-    TermEq(lhs, Var(v)) -> Assign(v, <premise-part-to-ir(|elements)> lhs)
+    TermEq(lhs, Var(v)) -> Assign(v, lhs)
   
-  premise-part-to-ir(|elements) = ?Var(_)
+  premise-to-ir(|elements):
+    TermEq(Var(v), rhs) -> Match(v, rhs)
   
-  premise-part-to-ir(|elements):
-    Con(name, args) -> <fail>
-  
-  premise-to-ir(|elements) = id
+  // Reduc: envname * statename * inputvar * outvar * outstate
+  premise-to-ir(|elements):
+    Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)) -> [ p1*, Reduc(ein, sin, invar, outvar, sout), p2*]
+    with
+      ein := <get-read-mapvar> r*;
+      sin := <get-read-mapvar> sc*;
+      sout := <get-read-mapvar> tc*;
+      <lift-pattern-to-var> lhs => (p1*, [invar]);
+      <lift-pattern-to-var> rhs => (p2*, [outvar])
+    
+  premisepart-to-ir(|elements):
+    Con(name, args) -> Call(name, arity, args)
+    with
+      arity := <length> args
+    where  
+      <element-get-w-kind(|name, <length> args, Function())> elements
 
 rules
   
@@ -189,6 +197,22 @@ rules
     with
       v' := <string-replace(|"'", "_$p$_")> v
 
+rules // Element store querying
+  
+  element-get(|name, arity) = fetch-elem(?Element(_, name, arity, _))
+  
+  element-get-w-kind(|name, arity, kind) = element-get(|name, arity); ?Element(kind, _, _, _)
+
+
+rules // built ins
+
+  constructor-is-builtin-function = <elem> (<id>, <builtin-functions>)
+  
+  element-is-builtin-function:
+    Element(_, name, arity, _) -> <elem> ((name, arity), <builtin-functions>)
+
+  builtin-functions = ![("Fresh", 0), ("MapEmpty", 0), ("MapExtend", 2), ("MapSelect", 2)]
+    
 rules // FJ specifics
 
   is-language-node = <elem> (<id>, <language-nodes>)
