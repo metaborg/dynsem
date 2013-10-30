@@ -59,8 +59,8 @@ rules // gather constructors and their usage
   gather-constructors =
     collect(?Rules(<id>));
     collect-all(gather-constructor);
-    implode-constructors;
-    filter(not(element-is-builtin-function))
+    implode-constructors
+    // filter(not(element-is-builtin-function))
 
   gather-constructor:
     Con(name, args) -> Element(conskind, name, arity, [])
@@ -178,6 +178,13 @@ rules
   premise-to-ir(|elements):
     TermEq(Var(v), rhs) -> Match(v, rhs)
   
+  premise-to-ir(|elements):
+    TermEq(lhs, rhs) -> [TermEq(lhs, Var(v)), TermEq(Var(v), rhs)]
+    where
+      <not(?Var(_))> lhs;
+      <not(?Var(_))> rhs;
+      v := <new>
+  
   // Reduc: envname * statename * inputvar * outvar * outstate
   premise-to-ir(|elements):
     Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)) -> [ p1*, Reduc(ein, sin, invar, outvar, sout), p2*]
@@ -185,15 +192,17 @@ rules
       ein := <get-read-mapvar> r*;
       sin := <get-read-mapvar> sc*;
       sout := <get-read-mapvar> tc*;
-      <lift-pattern-to-var(id)> lhs => (p1*, [invar]);
-      <lift-pattern-to-var(fail)> rhs => (p2*, [outvar])
+      <lift-pattern-to-var(fail)> lhs => (p1*, [invar]);
+      <lift-pattern-to-var(id)> rhs => (p2*, [outvar])
     
   premisepart-to-ir(|elements):
     Con(name, args) -> Call(name, arity, args)
-    with
-      arity := <length> args
-    where  
+    where
+      arity := <length> args;
       <element-get-w-kind(|name, <length> args, Function())> elements
+
+  premisepart-to-ir(|elements):
+    Map([]) -> MapEmpty()
 
 rules
   
@@ -211,12 +220,12 @@ rules // Element store querying
 
 rules // built ins
 
-  constructor-is-builtin-function = <elem> (<id>, <builtin-functions>)
-  
-  element-is-builtin-function:
-    Element(_, name, arity, _) -> <elem> ((name, arity), <builtin-functions>)
-
-  builtin-functions = ![("Fresh", 0), ("MapEmpty", 0), ("MapExtend", 2), ("MapSelect", 2)]
+//   constructor-is-builtin-function = <elem> (<id>, <builtin-functions>)
+//   
+//   element-is-builtin-function:
+//     Element(_, name, arity, _) -> <elem> ((name, arity), <builtin-functions>)
+// 
+//   builtin-functions = ![("Fresh", 0), ("MapEmpty", 0), ("MapExtend", 2), ("MapSelect", 2)]
     
 rules // FJ specifics
 
