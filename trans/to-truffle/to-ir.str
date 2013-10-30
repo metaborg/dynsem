@@ -35,6 +35,7 @@ signature
     String:   String                           -> PremisePart
     Var   :   String                           -> PremisePart
     Fresh :                                       PremisePart
+    Skip  :                                       PremisePart
     
     List  :   List(String)                     -> PremisePart
     ListTail: List(String) * String            -> PremisePart
@@ -203,6 +204,9 @@ rules
 
   premisepart-to-ir(|elements):
     Map([]) -> MapEmpty()
+
+  premisepart-to-ir(|elements):
+    Con("Skip", []) -> Skip()
 
 rules
   
