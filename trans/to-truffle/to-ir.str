@@ -131,8 +131,8 @@ rules
   rule-to-ir(|elements):
     Rule(prem*, _, TermEq(Con(_, args), rhs)) -> Func(invar*, prem''*, outvar)
     with
-      <foldr(!([],[]), in-tuple-conc , lift-pattern-to-var)> args => (p1*, invar*);
-      <lift-pattern-to-var> rhs => (p2*, [outvar]);
+      <foldr(!([],[]), in-tuple-conc , lift-pattern-to-var(id))> args => (p1*, invar*);
+      <lift-pattern-to-var(fail)> rhs => (p2*, [outvar]);
       prem'* := <map(?Formula(<id>))> prem*;
       prem''* := <premises-to-ir(|elements)> [p1*, prem'*, p2*]
 
@@ -141,23 +141,28 @@ rules
     Rule(prem*, _, Relation(Reads(r*), Source(Con(_, args), sc*), _, Target(rhs, tc*))) ->
       Rule(env, sin, invar*, prem''*, outvar, sout)
       with
-        <foldr(!([],[]), in-tuple-conc , lift-pattern-to-var)> args => (p1*, invar*);
+        <foldr(!([],[]), in-tuple-conc , lift-pattern-to-var(id))> args => (p1*, invar*);
         env := <get-read-mapvar> r*;
-        <lift-pattern-to-var> rhs => (p2*, [outvar]);
+        <lift-pattern-to-var(fail)> rhs => (p2*, [outvar]);
         prem'* := <map(?Formula(<id>))> prem*;
         prem''* := <premises-to-ir(|elements)> [p1*, prem'*, p2*];
         sin := <get-read-mapvar> sc*;
         sout := <get-read-mapvar> tc*
   
-  lift-pattern-to-var:
+  lift-pattern-to-var(to-match):
     Var(x) -> ([], [x])
   
-  lift-pattern-to-var:
-    con -> ([TermEq(Var(var-name), con)], [var-name])
+  lift-pattern-to-var(to-match):
+    con -> ([prem], [var-name])
     where
       <not(?Var(_))> con
     with
-      var-name := <new>
+      var-name := <new>;
+      if to-match then
+        prem := TermEq(Var(var-name), con)
+      else
+        prem := TermEq(con, Var(var-name))
+      end
       
   get-read-mapvar = ?[LabelComp(_, Var(<id>))]
     
@@ -180,8 +185,8 @@ rules
       ein := <get-read-mapvar> r*;
       sin := <get-read-mapvar> sc*;
       sout := <get-read-mapvar> tc*;
-      <lift-pattern-to-var> lhs => (p1*, [invar]);
-      <lift-pattern-to-var> rhs => (p2*, [outvar])
+      <lift-pattern-to-var(id)> lhs => (p1*, [invar]);
+      <lift-pattern-to-var(fail)> rhs => (p2*, [outvar])
     
   premisepart-to-ir(|elements):
     Con(name, args) -> Call(name, arity, args)
