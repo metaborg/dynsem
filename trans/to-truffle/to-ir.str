@@ -44,7 +44,8 @@ signature
     MapExtend: PremisePart * PremisePart       -> PremisePart
     MapSelect: PremisePart * PremisePart       -> PremisePart
     
-    
+    MkNode: String * Integer * ConsKind * List(PremisePart) -> PremisePart
+      
 rules
   
   to-ir:
@@ -207,6 +208,12 @@ rules
 
   premisepart-to-ir(|elements):
     Con("Skip", []) -> Skip()
+
+  premise-to-ir(|elements):
+    Assign(vn, Con(name, args)) -> Assign(vn, MkNode(name, arity, InterNode(), args))
+    where
+      arity := <length> args;
+      <element-get-w-kind(|name, arity, InterNode())> elements
 
 rules
   
