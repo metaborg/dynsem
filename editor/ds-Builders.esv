@@ -21,6 +21,7 @@ builders
                                              
 
   builder  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
+  builder  : "Generate Truffle"       = generate-truffle
   builder  : "Show strictness rules"  = unstrict-editor (openeditor) (realtime)     
   builder  : "Refocus"                = refocus-editor (openeditor) (realtime)       
   builder  : "Factorize"              = factorize-editor (openeditor) (realtime) 
