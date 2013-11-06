@@ -14,7 +14,11 @@ builders
   provider : include/ds.ctree                                                                     
   provider : include/ds-java.jar                                                                  
                                                                                                   
-  observer : editor-analyze           (multifile)                                                 
+  observer : editor-analyze           (multifile)    
+  
+  builder  : "Dym sem to Coq"    = 
+  	ds-to-coq (openeditor)
+                                             
 
   builder  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
   builder  : "Show strictness rules"  = unstrict-editor (openeditor) (realtime)     

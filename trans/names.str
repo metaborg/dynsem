@@ -23,7 +23,7 @@ rules
     ; ![NablNsEntity()]
 
   nabl-get-name :
-    Module(x, _) -> x
+    Module(x, _) -> <strip-annos> x
 
   nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
     ?Module(x, _)
@@ -88,7 +88,7 @@ rules
     ; ![NablNsProperty()]
 
   nabl-get-name :
-    Entity(x, _) -> x
+    Entity(x, _) -> <strip-annos> x
 
   nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
     ?Entity(x, _)
@@ -134,7 +134,7 @@ rules
       )
 
   nabl-get-name :
-    Property(x, t) -> x
+    Property(x, t) -> <strip-annos> x
 
   nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
     ?Property(x, t)
@@ -175,7 +175,7 @@ rules
       )
 
   nabl-get-name :
-    Type(x) -> x
+    Type(x) -> <strip-annos> x
 
   nabl-use-site(|lang__, partition__, uniques__, uris__, states__) =
     ?Type(x)
