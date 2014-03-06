@@ -10,7 +10,7 @@ imports
   
 strategies
   
-  refocus-module :
+  refocus-module : 
     Module(name, section*) -> Module(name, section'*)
     where 
       section'* := <map(try(refocus-rules))> section*

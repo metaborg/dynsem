@@ -24,6 +24,8 @@ rules
         
         exec :
           prog -> <eval> (<bottomup(n)>Exec(prog), [init-comps]) 
+          
+        norm = fail
          
         n = try(norm)                               
     ]
@@ -33,7 +35,7 @@ rules
        <extract-components> section'* ;
        section''*  := <translate-sections> section'* ;
        //cs  := <declare-constructors; separate-by(|"\n"); concat-strings> section*//;
-       init-comps := $<[<<CompList; filter(not(IsWritable)); tr-list(\name -> $<<name>([])>\|",")>>]>
+       init-comps := $<[<<CompList; filter(not(IsWritable)); tr-list(\name -> $<<name>(Map([]))>\|",")>>]>
 
 // rules // declare constructors
 //   
@@ -85,7 +87,7 @@ rules // translate rules
     
   translate-premisse :
     Formula(TermEq(lhs, rhs)) -> $[[<pp-term>rhs] := [<pp-term-norm>lhs]]
-  
+   
 rules // translate dynamic
 
   translate-rule :
@@ -97,18 +99,18 @@ rules // translate dynamic
     ]
     with 
       nonwr* := <conc>(r*, sc*); 
-      comps-lhs := <NonWriteables; map(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonwr* \); pp-comps>; 
+      comps-lhs := <NonWriteables; filter(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonwr* \); pp-comps>; 
       nonr* := <conc>(e*, tc*);
-      comps-rhs := <NonReadables; map(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonr* \); pp-comps-norm>
+      comps-rhs := <NonReadables; filter(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonr* \); pp-comps-norm>
                
   translate-premisse :
     Formula(Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*))) -> 
     $[<eval>([<pp-term-norm>lhs], [comps-lhs]) => ([<pp-term> rhs], [comps-rhs])]
     with      
       nonwr* := <conc>(r*, sc*);
-      comps-lhs := <NonWriteables; map(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonwr* \); pp-comps-norm> ;         
+      comps-lhs := <NonWriteables; filter(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonwr* \); pp-comps-norm> ;         
       nonr* := <conc>(e*, tc*);
-      comps-rhs := <NonReadables; map(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonr* \); pp-comps>
+      comps-rhs := <NonReadables; filter(\ comp -> <fetch-elem(?LabelComp(comp,_))>nonr* \); pp-comps>
 
   
   

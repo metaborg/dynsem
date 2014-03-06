@@ -104,7 +104,7 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"generated.str")> path;
-      result   := <to-stratego(|filename)> selected
+      result   := <desugar-all; explicate-module; to-stratego(|filename)> selected
       
   // Transforms to Truffle
   generate-truffle:

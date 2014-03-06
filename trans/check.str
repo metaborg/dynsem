@@ -17,3 +17,4 @@ rules
 		Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language 
 		                                  (this note is defined in trans/check.str)])
 
+ 

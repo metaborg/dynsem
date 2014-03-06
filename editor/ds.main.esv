@@ -5,7 +5,7 @@ imports ds-Menus ds-Refactorings ds-Colorer ds-Completions ds-Folding ds-Outline
 language General properties 
                   
   name          : ds 
-  id            : dynsem
+  id            : dynsem  
   extends       : Root
                   
   description   : "Spoofax/IMP-generated editor for the ds language"
