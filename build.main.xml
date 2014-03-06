@@ -2,8 +2,8 @@
 <project name="ds" default="all">
 
 	<!-- Key input modules -->
-	<property name="sdfmodule" value="DynSem" />
-	<property name="metasdfmodule" value="Stratego-DynSem" />
+	<property name="sdfmodule" value="ds" />
+	<property name="metasdfmodule" value="Stratego-ds" />
 	<property name="esvmodule" value="ds" />
 	<property name="strmodule" value="ds" />
 

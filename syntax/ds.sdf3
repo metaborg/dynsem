@@ -1,18 +1,16 @@
 module ds
 
-imports Common Lexical
-
-context-free start-symbols Start
+imports Common Lexical Module
+ 
+context-free start-symbols Module
 
 templates // rules
-
-  Start.File = [[Item*; separator="\n\n"]]
-  
-  Item.Rules = [
+     
+  ModuleSection.Rules = [
     rules 
     
       [Rule*; separator="\n\n"]
-  ]
+  ] 
   
   Rule.Strict = [strict [ID] [INT+; separator=","]/[INT]]
   Rule.Seqstrict = [seqstrict [ID] [INT+; separator=","]/[INT]]
@@ -20,19 +18,31 @@ templates // rules
   Rule.Axiom = [[Formula]]
       
   Rule.Rule = [
-    [Formula+; separator=",\n"]
+    [Premise+; separator=",\n"]
     [INFER]
     [Formula]
   ]
-   
-templates // formulas 
 
-  Formula.TermEq = [[Term] = [Term]]
+  Rule.RuleW = [
+    [Formula]
+    where
+      [Premise+; separator=",\n"]
+  ]
+     
+  Premise.Formula = [[Formula]]
+
+  ID = <rules> {reject}
+  ID = <fresh> {reject}
+  
+templates // formulas
+
+  Formula.TermEq   = [[Term] = [Term]]
+  Formula.TermNeq  = [[Term] != [Term]]
   Formula.Relation = [[Reads][Source] [Rel] [Target]]
-  Formula.IsValue = [value([Term])]
+  Formula.IsValue  = [value([Term])]
   
   Reads.NoReads = []
-  Reads.Reads = [[LabelComp+; separator=", "] |- ]
+  Reads.Reads   = [[LabelComp+; separator=", "] |- ]
   
   Source.Source = [[Term]]
   Source.Source = [([Term], [LabelComp+; separator=", "])]
@@ -40,18 +50,36 @@ templates // formulas
   Target.Target = [[Term]]
   Target.Target = [([Term], [LabelComp+; separator=", "])]
   
-  Rel.Dynamic = [-->]
+  Rel.Dynamic        = [-->]
   Rel.DynamicEmitted = [-- [LabelComp+; separator=", "] -->]
   
   LabelComp.LabelComp = [[ID] [Term]]
 
 templates // terms
 
-  Term.Con    = [[ID]([Term*; separator=", "])]
   Term.Var    = [[ID]]
-  Term.List   = <[ <Term*; separator=", "> ]>
-  Term.Map    = [{[Entry*;separator=", "]}]
-  Term.String = [[STRING]]
+  Term.Var    = [[LID]]
+
+  Term.String   = [[STRING]]
+  Term.Int      = [[INT]]
+  Term.Con      = [[ID]([Term*; separator=", "])]
+  Term.List     = <[ <Term*; separator=", "> ]>
+  Term.ListTail = <[ <Term*; separator=", "> | <Term>]>
   
-  Entry.Bind = [[Term] |--> [Term]]
+  Term.Fresh  = [fresh]
+  Term.Map    = [{[Entry*;separator=", "]}]
+  Entry.Bind  = [[Term] |--> [Term]] 
+  Entry.Binds = [[Term] |*-> [Term]]
+  Entry.MapEntry = [[Term]]
+  
+  Term.MapSelect = <<Term>[<Term>]>
+  Term.MapExtend = [[Term] + [Term]] {assoc}
+  //Term.MapExtend = [[Term] + [Term]]
+
+context-free priorities
+
+  Term.MapSelect > Term.MapExtend
+  
+  
+  
 	
