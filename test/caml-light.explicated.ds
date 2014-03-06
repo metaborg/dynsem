@@ -1,0 +1,112 @@
+rules
+
+  state_1 = s
+  ---------
+  Env env_1, Given given_1 |- (Assign(Loc(l), v), State state_1) --> (Skip(), State MapOver({l |--> v}, s))
+
+rules
+
+  For(li, e1, e2, e3) = ApplyToEach(Abs(Bind(li), Effect(e3)), IntClosedInterval(e2, e1))
+
+rules
+
+  ApplyToEach(proc, ListEmpty()) = Skip()
+
+  ApplyToEach(proc, ListPrefix(x, list)) = Seq(Apply(proc, x), ApplyToEach(proc, list))
+
+rules
+
+  Env env_1, Given given_1 |- (comm, State state_1) --> (comm', State state_2)
+  ------------------------------
+  Env env_1, Given given_1 |- (Seq(comm, x), State state_1) --> (Seq(comm', x), State state_2)
+
+  Seq(Skip(), x) = x
+
+rules
+
+  Env env_1, Given given_1 |- (Apply(Abs(y), x), State state_1) --> (Supply(x, y), State state_1)
+
+rules
+
+  Abs(patt, expr) = Abs(Scope(Match(Given(), patt), expr))
+
+rules
+
+  Match(expressible, patt) = Apply(patt, expressible)
+
+rules
+
+  Bind(x) = Abs(Bind_decl(x))
+
+  given_1 = x
+  ---------
+  Env env_1, Given given_1 |- (Bind_decl(y), State state_1) --> ({x |--> y}, State state_1)
+
+rules
+
+  env_1 = env1,
+  Env MapOver(env, env1), Given given_1 |- (x, State state_1) --> (x', State state_2)
+  --------------------------------------------
+  Env env_1, Given given_1 |- (Scope(env, x), State state_1) --> (Scope(env, x'), State state_2)
+
+  value(val)
+  ---------------------
+  Scope(env, val) = val
+
+rules
+
+  given_1 = val',
+  Env env_1, Given val |- (y, State state_1) --> (y', State state_2)
+  ------------------------------------------------
+  Env env_1, Given given_1 |- (Supply(val, y), State state_1) --> (Supply(val, y'), State state_2)
+
+  value(val1)
+  ------------------------
+  Supply(val, val1) = val1
+
+rules
+
+  given_1 = val,
+  IsNull(Val) = False()
+  --------------------------
+  Env env_1, Given given_1 |- (Given, State state_1) --> (val, State state_1)
+
+rules
+
+  Env env_1, Given given_1 |- (x, State state_1) --> (x', State state_2)
+  ------------------------
+  Env env_1, Given given_1 |- (Effect(x), State state_1) --> (Effect(x'), State state_2)
+
+  value(val)
+  ---------------------
+  Effect(val) = Skip()
+
+rules
+
+  Env env_1, Given given_1 |- (WhileTrue(expr, comm), State state_1) --> (IfTrue(expr, Seq(comm, WhileTrue(expr, comm)), Skip()), State state_1)
+
+rules
+
+  IfTrue(True(), x1, x2) = x1
+
+  IfTrue(False(), x1, x2) = x2
+
+rules
+
+  ListReverse(ListEmpty()) = ListEmpty()
+
+  ListReverse(ListPrefix(x, list)) = ListAppend1(list, x)
+
+rules
+
+  ListAppend(ListEmpty(), list) = list
+
+  ListAppend(ListPrefix(x, list1), list2) = ListPrefix(x, ListAppend(list1, list2))
+
+rules
+
+  IntClosedInterval(int, int) = ListPrefix(int, ListEmpty())
+
+  IntLess(int1, int2) = True()
+  ---------------------------------------------------------------------------------------------
+  IntClosedInterval(int1, int2) = ListPrefix(int1, IntClosedInterval(IntPlus(int1, "1"), int2))
