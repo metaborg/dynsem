@@ -1,0 +1,33 @@
+module example0
+
+rules
+
+  Lookup(x, env) = v
+  ---------------
+  Env env |- Var(x) --> v
+  
+  Lookup(ref, s) = v
+  ---------------------------
+  (Deref(ref), State s) --> v
+  
+  e --> e'
+  ----------------------------------
+  Assign(ref, e) --> Assign(ref, e')
+  
+  MapExtend({ref |--> v}, s) = s'
+  ------------------------------------------------
+  (Assign(ref, v), State s) --> (Skip(), State s')
+  
+rules
+
+  e --> e'
+  ----
+  Catch(e) --> Catch(e')
+  
+  e -- Exc Error() --> e'
+  -----------------
+  Catch(e) -- Exc None() --> skip
+  
+  Throw() -- Exc Error() --> Stuck()
+  
+  
