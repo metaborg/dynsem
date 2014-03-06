@@ -1,0 +1,161 @@
+module trans/to-truffle
+
+imports
+  to-truffle/to-ir
+  lib/editor-common.generated
+  
+overlays
+  
+  FunctionClass(pkg, name, arity, npkg, dispatchdef, applydefs) = 
+    $[package [pkg];
+    
+	    import org.metaborg.truffle.dynsem.shared.functions.*;
+	    import org.metaborg.truffle.dynsem.shared.nodes.*;
+	    import org.metaborg.truffle.dynsem.shared.runtime.*;
+	    import [npkg].*;
+	    
+	    public class [name]_[arity] {
+        [dispatchdef]
+        
+        [applydefs]	    
+      }]
+
+  FunctionDispatch(params, body) = 
+    $[public static Object apply([params]) {
+        [body]
+      }]
+  
+  FunctionVariant(idx, params, body) = 
+    $[public static Object apply_[idx]([params]){
+        [body]
+      }]
+  
+  FormalParam(type, index) = $[[type] _[index]]
+  
+  ActualParam(index) = $[_[index]]
+  
+  Error(name, arity) = $[throw new Error("Cannot execute )]
+rules
+  
+
+  to-truffle-elem(|elements) = to-truffle-func(|elements) + fail
+  
+      // Element : ConsKind * String * Integer * List(Logic) -> Element
+
+  to-truffle-func(|elements):
+    Element(Function(), name, arity, func*) ->
+      (Function(), $[[name]_[arity].java], FunctionClass(pkg, name, arity, npkg, dispatchdef, applydefs))
+    with
+      pkg   := <FunctionPackage>;
+      npkg  := <NodePackage>;
+      idx-seq := <mk-sequence> (1, arity);
+      fparams := <map-conc-strings(!FormalParam("Object", <id>)|",")> idx-seq;
+      aparams := <map-conc-strings(!ActualParam(<id>)|",")> idx-seq;
+      oload := <length> func*;
+      invoc-seq   := <mk-sequence> (1, oload);
+      fail
+  
+  // to-truffle-func
+  
+  // to-truffle-dynsem-function(|store):
+  //   (name, arity) -> ($[
+  //         package [<FunctionPackage>];
+  //         
+  //         import org.metaborg.truffle.dynsem.shared.functions.*;
+  //         import org.metaborg.truffle.dynsem.shared.nodes.*;
+  //         import org.metaborg.truffle.dynsem.shared.runtime.*;
+  //         import [<NodePackage>].*;
+  //         
+  //         public class [name]_[arity] {
+  //         
+  //             public static Object apply([params]) {
+  //                 [alterns]
+  //             }
+  //             
+  //             [applydefs]
+  //         }], $[[name]_[arity].java], Func())
+  //   where
+  //     <hashtable-get(|(name, arity))> store => (Func(), rs)
+  //   with
+  //     index-seq   := <mk-sequence> (1, arity);
+  //     params      := <map(\ idx -> $[Object _[idx]] \); separate-by(|","); concat-strings> index-seq;
+  //     invoke-args := <map(\ idx -> $[_[idx]] \); separate-by(|","); concat-strings> index-seq;
+  //     invoc-seq   := <mk-sequence> (1, <length> rs);
+  //     if <?[]> invoc-seq then
+  //       alterns := $[throw new Error("Cannot execute function [name]_[arity]");]
+  //     else
+  //       [inv|invxs] := <map(\ idx -> $[return apply_[idx]([invoke-args]);] \)> invoc-seq;
+  //       if <?[]> invxs then
+  //         alterns := <to-catch-rethrow> inv
+  //       else
+  //         alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
+  //       end
+  //     end;
+  //     applydefs := <map-with-index(function-to-truffle(|store, params))> rs
+
+rules
+  
+  to-truffle(|project-path):
+    rs -> None() //<concat-strings> truffle
+    with
+      elem* := <to-ir> rs
+    with {| NodeDestination, NodePackage, FunctionDestination, FunctionPackage:
+      <ensure-truffle-dirs> project-path;
+      <map(to-truffle(|elem*))> elem*
+      // map(emit-truffle-file);
+      // <refresh-workspace-file> project-path
+    |}
+    
+    
+    //   rs' := <unstrict-rules; factorize-rules; unstrict-rules; desugar-all; explicate-rules; alltd(escape-variable)> rs;
+    //   <extract-writables> rs';
+    //   <extract-readables> rs';
+    //   <extract-components> rs';
+    //   rule-store := <new-hashtable>;
+    //   <fill-rule-store(|rule-store)> rs'
+    // with {| NodeDestination, NodePackage, FunctionDestination, FunctionPackage:
+    //   <ensure-truffle-dirs> project-path;
+    //   to-truffle-impl(|rule-store);
+    //   map(emit-truffle-file);
+    //   <refresh-workspace-file> project-path
+    // |}
+  
+  ensure-truffle-dirs:
+    project-path -> project-path
+    with
+      node-bit  := ["truffle", "interpreter", "nodes"];
+      func-bit  := ["truffle", "interpreter", "funcs"];
+      node-dir  := $[[project-path]/editor/java/[<separate-by(|"/"); concat-strings> node-bit]];
+      func-dir  := $[[project-path]/editor/java/[<separate-by(|"/"); concat-strings> func-bit]];
+      <try(call)> ("rm", ["-r", node-dir, func-dir]);
+      <call> ("mkdir", ["-p", node-dir, func-dir]);
+      node-pkg := <separate-by(|"."); concat-strings> node-bit;
+      func-pkg := <separate-by(|"."); concat-strings> func-bit;
+      rules(
+        NodeDestination: _ -> node-dir
+        NodePackage: _ -> node-pkg
+        FunctionDestination: _ -> func-dir
+        FunctionPackage: _ -> func-pkg
+      )
+  
+  // emit-truffle-file =
+  //   ?(contents, filename, elemty);
+  //   if <?Node()> elemty then
+  //     dest-dir := <NodeDestination>
+  //   else
+  //     dest-dir := <FunctionDestination>
+  //   end;
+  //   fout := <fopen> ($[[dest-dir]/[filename]], "w");
+  //   <fputs> (contents, fout);
+  //   <fclose> fout
+  
+  mk-sequence = 
+    ?(from, to);
+    if <gt> (from, to) then
+      ![]
+    else
+      ![from | <mk-sequence> (<inc> from, to) ]
+    end
+  
+  map-conc-strings(s|sep) = map(s); separate-by(|sep); concat-strings
+  
