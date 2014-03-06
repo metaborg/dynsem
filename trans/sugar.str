@@ -11,6 +11,9 @@ signature
 rules // desugaring
 	
   desugar-all = innermost(desugar); alltd(rules-concat)
+  
+  desugar :
+    RuleW(form, prem*) -> Rule(prem*, "---", form)
     
   desugar :
     NoReads() -> Reads([])
