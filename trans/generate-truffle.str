@@ -14,392 +14,439 @@ imports
   factorize
   ds.pp.generated
   
-signature constructors
-	
-	Node : T
-	Root : T
-	Func : T
-
-rules
-	
-  /*
-  
-  1. every term T/n from the interpreter language becomes a class T_n.java extends DynsemNode
-  2. every term T/n that is not part of the language and is not a function becomes a T_n.java extends RootNode 
-  3. every function (things that are only norm) becomes a function in truffle
-  
-  */
-
-  to-truffle(|project-path):
-    rs -> None() //<concat-strings> truffle
-    with
-      rs' := <unstrict-rules; factorize-rules; unstrict-rules; desugar-all; explicate-rules; alltd(escape-variable)> rs;
-      <extract-components> rs';
-      rule-store := <new-hashtable>;
-      <fill-rule-store(|rule-store)> rs'
-    with {| NodeDestination, NodePackage, FunctionDestination, FunctionPackage:
-      <ensure-truffle-dirs> project-path;
-      to-truffle-impl(|rule-store);
-      map(emit-truffle-file);
-      <refresh-workspace-file> project-path
-    |}
-  
-  ensure-truffle-dirs:
-    project-path -> project-path
-    with
-      node-bit  := ["truffle", "interpreter", "nodes"];
-      func-bit  := ["truffle", "interpreter", "funcs"];
-      node-dir  := $[[project-path]/editor/java/[<separate-by(|"/"); concat-strings> node-bit]];
-      func-dir  := $[[project-path]/editor/java/[<separate-by(|"/"); concat-strings> func-bit]];
-      <try(call)> ("rm", ["-r", node-dir, func-dir]);
-      <call> ("mkdir", ["-p", node-dir, func-dir]);
-      node-pkg := <separate-by(|"."); concat-strings> node-bit;
-      func-pkg := <separate-by(|"."); concat-strings> func-bit;
-      rules(
-        NodeDestination: _ -> node-dir
-	      NodePackage: _ -> node-pkg
-	      FunctionDestination: _ -> func-dir
-	      FunctionPackage: _ -> func-pkg
-      )
-  
-  emit-truffle-file =
-  	?(contents, filename, elemty);
-  	if <?Node()> elemty then
-  		dest-dir := <NodeDestination>
-    else
-    	dest-dir := <FunctionDestination>
-    end;
-    fout := <fopen> ($[[dest-dir]/[filename]], "w");
-    <fputs> (contents, fout);
-    <fclose> fout
-  
-  escape-variable:
-    Var(v) -> Var($[_[v']])
-    with
-      v' := <string-replace(|"'", "_$prime$_")> v
-  
-  fill-rule-store(|store) =
-    ?ast;
-  	collect(?Rules(<id>));
-  	concat;
-  	map(gather-constructor; store-constructor(|store));
-  	!ast;
-  	collect-all(gather-implicit-constructor; store-constructor(|store))
-  
-  store-constructor(|store) =
-  	?(name, arity, ty, r*);
-		<hashtable-get(|(name, arity))> store => (ty, rs*);
-		<hashtable-put(|(name, arity), (ty, [r*, rs*]))> store
-  
-  store-constructor(|store) = 
-  	?(name, arity, ty, r*);
-  	<not(hashtable-get(|(name, arity)))> store;
-  	<hashtable-put(|(name, arity), (ty, r*))> store
-  
-  gather-implicit-constructor:
-    Con(name, args) -> (name, <length> args, Node(), [])
-  
-  // functions
-  gather-constructor:
-  	r@Rule(_, _, TermEq(Con(name, args), _)) -> (name, arity, Func(), [r])
-  	with
-  		arity := <length> args
-  
-  // nodes & rootnodes
-  gather-constructor:
-  	r@Rule(_, _, Relation(_, Source(Con(name, args), _), _, _)) -> (name, arity, nodetype, [r])
-  	with
-  	  arity := <length> args;
-  	  if <is-language-node> (name, arity) then
-  	    nodetype := Node()
-  	  else
-  	    nodetype := Root()
-  	  end
-  
-  is-language-node =
-    ?("Cast", 2) +
-    ?("New", 2) +
-    ?("MethCall", 3) +
-    ?("FieldRef", 2) +
-    ?("Var", 1) +
-    ?("Param", 2) +
-    ?("Method", 4) +
-    ?("FieldInit", 2) +
-    ?("SuperCall", 1) +
-    ?("Constructor", 4) +
-    ?("Void", 0) +
-    ?("ClassType", 1) +
-    ?("Field", 2) +
-    ?("Super", 1) +
-    ?("Class", 5) +
-    ?("Program", 2)
-
-  is-builtin-function = 
-    ?("MapExtend", 2) +
-    ?("MapSelect", 2) +
-    ?("Fresh", 0)
-  
-  is-builtin-node =
-    ?("Cons", 2) +
-    ?("Nil", 0) 
-  
-  is-con-function(|store) =
-    ?(name, arity);
-    <hashtable-get(|(name, arity))> store => (Func(), _)
-  
-  is-con-rootnode(|store) = 
-    ?(name, arity);
-    <hashtable-get(|(name, arity))> store => (Root(), _)
-  
-  is-con-node(|store) = 
-    ?(name, arity);
-    <hashtable-get(|(name, arity))> store => (Node(), _)
-  
-rules
-  
-  to-truffle-impl(|store) =
-    <hashtable-keys> store;
-    filter(not(is-builtin-node + is-builtin-function));
-    map(to-truffle-dynsem-node(|store) <+ to-truffle-dynsem-function(|store))
-  
-  to-truffle-dynsem-function(|store):
-    (name, arity) -> ($[
-					package [<FunctionPackage>];
-					
-					import org.metaborg.truffle.dynsem.shared.functions.*;
-					import org.metaborg.truffle.dynsem.shared.nodes.*;
-					import org.metaborg.truffle.dynsem.shared.runtime.*;
-					import [<NodePackage>].*;
-					
-					public class [name]_[arity] {
-					
-					    public static Object apply([params]) {
-					        [alterns]
-					    }
-					    
-					    [applydefs]
-					}], $[[name]_[arity].java], Func())
-    where
-      <hashtable-get(|(name, arity))> store => (Func(), rs)
-    with
-      index-seq   := <mk-sequence> (1, arity);
-      params      := <map(\ idx -> $[Object _[idx]] \); separate-by(|","); concat-strings> index-seq;
-      invoke-args := <map(\ idx -> $[_[idx]] \); separate-by(|","); concat-strings> index-seq;
-      invoc-seq   := <mk-sequence> (1, <length> rs);
-      if <?[]> invoc-seq then
-        alterns := $[throw new Error("Cannot execute function [name]_[arity]");]
-      else
-	      [inv|invxs] := <map(\ idx -> $[return apply_[idx]([invoke-args]);] \)> invoc-seq;
-	      if <?[]> invxs then
-	        alterns := <to-catch-rethrow> inv
-	      else
-	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
-	      end
-      end;
-      applydefs := <map-with-index(function-to-truffle(|store, params))> rs
-
-  to-truffle-dynsem-node(|store):
-    (name, arity) -> ($[
-						package [<NodePackage>];
-						
-						import org.metaborg.truffle.dynsem.shared.nodes.*;
-						import org.metaborg.truffle.dynsem.shared.runtime.*;
-						import org.metaborg.truffle.dynsem.shared.functions.*;
-						import com.oracle.truffle.api.*;
-						import com.oracle.truffle.api.nodes.*;
-						import com.oracle.truffle.api.frame.*;
-						import [<FunctionPackage>].*;
-						
-						public class [name]_[arity] extends [super-class] {
-						
-						    [<separate-by(|"\n"); concat-strings> fields]
-						
-						    public [name]_[arity]([<separate-by(|","); concat-strings> const-pars]) {
-						        super();
-						        [<separate-by(|"\n"); concat-strings> field-init]
-						    }
-						
-						    [<separate-by(|"\n"); concat-strings> field-gets]
-						
-						    @Override
-						    public Result execute(VirtualFrame frame) {
-						        [alterns]
-						    }
-						
-						    [execdefs]
-						    
-						}], $[[name]_[arity].java], Node())
-	  where
-	    <hashtable-get(|(name, arity))> store => (nodety, rs);
-	    <?Node() + ?Root()> nodety
-		with
-		  if <?Node()> nodety then
-		    super-class := "DynsemNode"
-		  else
-		    super-class := "RootNode"
-		  end;
-		  index-seq  := <mk-sequence> (1, arity);
-		  fields     := <map(\ idx -> $[@Child protected DynsemNode _[idx];] \)> index-seq;
-		  const-pars := <map(\ idx -> $[DynsemNode _[idx]] \)> index-seq;
-		  field-init := <map(\ idx -> $[this._[idx] = adoptChild(_[idx]);] \)> index-seq;
-		  field-gets := <map(\ idx -> $[public DynsemNode _[idx](){ return _[idx]; } ] \)> index-seq;
-		  invoc-seq   := <mk-sequence> (1, <length> rs);
-      if <?[]> invoc-seq then
-        alterns := $[throw new Error("Cannot execute node [name]_[arity]");]
-      else
-			  [inv|invxs] := <map(\ idx -> $[return exec_[idx](frame);] \)> invoc-seq;
-			  if <?[]> invxs then
-	        alterns := <to-catch-rethrow> inv
-	      else
-	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
-	      end
-	    end;
-	    execdefs := <map-with-index(node-to-truffle(|store))> rs
-      
-  to-catch-stm:
-    (stm1, stm2) -> $[
-      try {
-        [stm1]
-      }catch(Exception [ex-var]) {
-        [stm2]
-      }]
-    with
-      ex-var := <newname> "e"
-  
-  to-catch-rethrow:
-    stm -> $[
-      try {
-        [stm]
-      }catch(Exception [ex-var]) {
-        throw [ex-var];
-      }]
-    with
-      ex-var := <newname> "e"
-
-  function-to-truffle(|store, params):
-    (idx, Rule(prem, _, TermEq(Con(name, args), res)) ) -> $[
-      public static Object apply_[idx]([params]) {
-        [<separate-by(|"\n"); concat-strings> named-vars]
-        [<separate-by(|"\n"); concat-strings> truffle-prem]
-        return [result];
-      }]
-    where
-      <debug(!"Genfunc: ")> (idx, name, args);
-      named-vars   := <map-with-index(\ (idx, Var(v)) -> $[Object [v] = _[idx];] \)> args;
-      truffle-prem := <map(premise-to-truffle(|store) <+ !$[// fail: [<pp-term>]])> prem;
-      result       := <premise-lhs-to-truffle(|store)> res
-
-  // assignment to variable
-  premise-to-truffle(|store):
-    TermEq(lhs, Var(v)) -> $[Object [v] = [<premise-lhs-to-truffle(|store)> lhs];]
-  
-  // match/read from variable
-  premise-to-truffle(|store):
-    TermEq(lhs, Con(name, args)) -> $[
-        [name]_[arity] [tmp_var] = ([name]_[arity]) [<premise-lhs-to-truffle(|store)> lhs];
-        [<separate-by(|"\n"); concat-strings> var_inits]
-    ]
-    where
-      <is-con-node(|store) + is-con-rootnode(|store) + is-builtin-node> (name, <length> args)
-    with
-      arity     := <length> args;
-      tmp_var   := <newname> "temp";
-      var_inits := <map-with-index(\ (idx, Var(r)) -> $[DynsemNode [r] = [tmp_var]._[idx]();]\)> args
-  
-  
-  // function application
-  premise-lhs-to-truffle(|store):
-    Con(name, args) -> $[[name]_[<length> args].apply([truffle-args])]
-    where
-    	<is-con-function(|store) + is-builtin-function> (name, <length> args)
-    with
-      truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
-  
-  premise-lhs-to-truffle(|store):
-    Con(name, args) -> $[new [name]_[arity]([truffle-args])]
-    where
-      <is-con-node(|store) + is-con-rootnode(|store)> (name, <length> args)
-    with
-      arity := <length> args;
-      truffle-args := <map(premise-lhs-to-truffle(|store); !$[(DynsemNode) [<id>]]); separate-by(|","); concat-strings> args
-      
-  premise-lhs-to-truffle(|store):
-    Var(v) -> $[[v]]
-
-  premise-lhs-to-truffle(|store):
-    String(s) -> $[[s]]
-
-  premise-lhs-to-truffle(|store) = map-to-truffle(|store)
-  
-  // empty map
-  map-to-truffle(|store):
-    Map([]) -> $[DynsemMap.createEmpty()]
-  
-  map-to-truffle(|store):
-  	Map([b|bs]) -> $[[bs'].plusAll([b'])]
-  	with
-  		b'  := <bind-to-truffle(|store)> b;
-  		bs' := <map-to-truffle(|store)> Map(bs)
-  
-  bind-to-truffle(|store):
-  	Bind(lhs, rhs) -> $[DynsemMap.createWithSingular([lhs'], [rhs'])]
-  	with
-  	  lhs' := <premise-lhs-to-truffle(|store)> lhs;
-  	  rhs' := <premise-lhs-to-truffle(|store)> rhs
-
-  node-to-truffle(|store):
-    (idx, Rule(prem*, _, Relation(Reads(r*), Source(Con(name, args), sc*), DynamicEmitted(_), Target(rhs, tc*)))) -> $[
-      public Result exec_[idx](VirtualFrame frame) {
-        DynsemArguments in_args = frame.getArguments(DynsemArguments.class);
-        [allocs1]
-        [allocs2]
-        [allocs3]
-        [<separate-by(|"\n"); concat-strings> premises]
-
-        return new Result([val], (DynsemMap) [state]);
-      }]
-    with
-      <debug(!"Gennode: ")> (idx, name, args);
-      allocs1  := <map(read-to-alloc)> r*;
-      allocs2  := <map(read-to-alloc)> sc*;
-      allocs3  := <map-with-index(\ (idx, Var(v)) -> $[DynsemNode [v] = this._[idx]();] \)> args;
-      premises := <map(premise-to-truffle(|store))> prem*
-    where
-      !rhs => Var(val);
-      !tc* => [LabelComp(_, Var(state))]
-
-  read-to-alloc:
-    LabelComp("Env", Var(name)) -> $[DynsemMap [name] = in_args.env;]
-  
-  read-to-alloc:
-    LabelComp("State", Var(name)) -> $[DynsemMap [name] = in_args.state;]
-  
-  premise-to-truffle(|store):
-    Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*)) -> $[
-      DynsemArguments [args-var] = new DynsemArguments((DynsemMap) [renv], (DynsemMap) [rstate]);
-      Result [res-var] = [lhs'].execute(Truffle.getRuntime().createVirtualFrame(frame.pack(), [args-var], frame.getFrameDescriptor()));
-      DynsemNode [val-var] = [res-var].val;
-      [val-match]
-      DynsemMap [tstate] = [res-var].state;
-      ]
-    where
-      !r* => [LabelComp(_, Var(renv))];
-      !sc* => [LabelComp(_, Var(rstate))];
-      !tc* => [LabelComp(_, Var(tstate))]
-    with
-      args-var := <newname> "tmp";
-      lhs' := <premise-lhs-to-truffle(|store)> lhs;
-      res-var := <newname> "tmp";
-      val-var := <newname> "tmp";
-      val-match := <premise-to-truffle(|store)> TermEq(Var(val-var), rhs)
-
-rules
-  
-  mk-sequence = 
-    ?(from, to);
-    if <gt> (from, to) then
-      ![]
-    else
-      ![from | <mk-sequence> (<inc> from, to) ]
-    end
-          
+// signature constructors
+// 	
+// 	Node : T
+// 	Root : T
+// 	Func : T
+// 
+// rules
+// 	
+//   /*
+//   
+//   1. every term T/n from the interpreter language becomes a class T_n.java extends DynsemNode
+//   2. every term T/n that is not part of the language and is not a function becomes a T_n.java extends RootNode 
+//   3. every function (things that are only norm) becomes a function in truffle
+//   
+//   */
+// 
+//   to-truffle(|project-path):
+//     rs -> None() //<concat-strings> truffle
+//     with
+//       rs' := <unstrict-rules; factorize-rules; unstrict-rules; desugar-all; explicate-rules; alltd(escape-variable)> rs;
+// <<<<<<< HEAD
+// =======
+//       <extract-writables> rs';
+//       <extract-readables> rs';
+// >>>>>>> splash
+//       <extract-components> rs';
+//       rule-store := <new-hashtable>;
+//       <fill-rule-store(|rule-store)> rs'
+//     with {| NodeDestination, NodePackage, FunctionDestination, FunctionPackage:
+//       <ensure-truffle-dirs> project-path;
+//       to-truffle-impl(|rule-store);
+//       map(emit-truffle-file);
+//       <refresh-workspace-file> project-path
+//     |}
+//   
+//   ensure-truffle-dirs:
+//     project-path -> project-path
+//     with
+//       node-bit  := ["truffle", "interpreter", "nodes"];
+//       func-bit  := ["truffle", "interpreter", "funcs"];
+//       node-dir  := $[[project-path]/editor/java/[<separate-by(|"/"); concat-strings> node-bit]];
+//       func-dir  := $[[project-path]/editor/java/[<separate-by(|"/"); concat-strings> func-bit]];
+//       <try(call)> ("rm", ["-r", node-dir, func-dir]);
+//       <call> ("mkdir", ["-p", node-dir, func-dir]);
+//       node-pkg := <separate-by(|"."); concat-strings> node-bit;
+//       func-pkg := <separate-by(|"."); concat-strings> func-bit;
+//       rules(
+//         NodeDestination: _ -> node-dir
+// 	      NodePackage: _ -> node-pkg
+// 	      FunctionDestination: _ -> func-dir
+// 	      FunctionPackage: _ -> func-pkg
+//       )
+//   
+//   emit-truffle-file =
+//   	?(contents, filename, elemty);
+//   	if <?Node()> elemty then
+//   		dest-dir := <NodeDestination>
+//     else
+//     	dest-dir := <FunctionDestination>
+//     end;
+//     fout := <fopen> ($[[dest-dir]/[filename]], "w");
+//     <fputs> (contents, fout);
+//     <fclose> fout
+//   
+//   escape-variable:
+//     Var(v) -> Var($[_[v']])
+//     with
+//       v' := <string-replace(|"'", "_$prime$_")> v
+//   
+//   fill-rule-store(|store) =
+//     ?ast;
+//   	collect(?Rules(<id>));
+//   	concat;
+//   	map(gather-constructor; store-constructor(|store));
+//   	!ast;
+//   	collect-all(gather-implicit-constructor; store-constructor(|store))
+//   
+//   store-constructor(|store) =
+//   	?(name, arity, ty, r*);
+// 		<hashtable-get(|(name, arity))> store => (ty, rs*);
+// 		<hashtable-put(|(name, arity), (ty, [r*, rs*]))> store
+//   
+//   store-constructor(|store) = 
+//   	?(name, arity, ty, r*);
+//   	<not(hashtable-get(|(name, arity)))> store;
+//   	<hashtable-put(|(name, arity), (ty, r*))> store
+//   
+//   gather-implicit-constructor:
+//     Con(name, args) -> (name, <length> args, Node(), [])
+//   
+//   // functions
+//   gather-constructor:
+//   	r@Rule(_, _, TermEq(Con(name, args), _)) -> (name, arity, Func(), [r])
+//   	with
+//   		arity := <length> args
+//   
+//   // nodes & rootnodes
+//   gather-constructor:
+//   	r@Rule(_, _, Relation(_, Source(Con(name, args), _), _, _)) -> (name, arity, nodetype, [r])
+//   	with
+//   	  arity := <length> args;
+//   	  if <is-language-node> (name, arity) then
+//   	    nodetype := Node()
+//   	  else
+//   	    nodetype := Root()
+//   	  end
+//   
+//   is-language-node =
+//     ?("Cast", 2) +
+//     ?("New", 2) +
+//     ?("MethCall", 3) +
+//     ?("FieldRef", 2) +
+//     ?("Var", 1) +
+//     ?("Param", 2) +
+//     ?("Method", 4) +
+//     ?("FieldInit", 2) +
+//     ?("SuperCall", 1) +
+//     ?("Constructor", 4) +
+//     ?("Void", 0) +
+//     ?("ClassType", 1) +
+//     ?("Field", 2) +
+//     ?("Super", 1) +
+//     ?("Class", 5) +
+//     ?("Program", 2)
+// 
+//   is-builtin-function = 
+//     ?("MapExtend", 2) +
+//     ?("MapSelect", 2) +
+//     ?("Fresh", 0)
+//   
+//   is-builtin-node =
+//     ?("Cons", 2) +
+//     ?("Nil", 0) 
+//   
+//   is-con-function(|store) =
+//     ?(name, arity);
+//     <hashtable-get(|(name, arity))> store => (Func(), _)
+//   
+//   is-con-rootnode(|store) = 
+//     ?(name, arity);
+//     <hashtable-get(|(name, arity))> store => (Root(), _)
+//   
+//   is-con-node(|store) = 
+//     ?(name, arity);
+//     <hashtable-get(|(name, arity))> store => (Node(), _)
+//   
+// rules
+//   
+//   to-truffle-impl(|store) =
+//     <hashtable-keys> store;
+//     filter(not(is-builtin-node + is-builtin-function));
+//     map(to-truffle-dynsem-node(|store) <+ to-truffle-dynsem-function(|store))
+//   
+//   to-truffle-dynsem-function(|store):
+//     (name, arity) -> ($[
+// 					package [<FunctionPackage>];
+// 					
+// 					import org.metaborg.truffle.dynsem.shared.functions.*;
+// 					import org.metaborg.truffle.dynsem.shared.nodes.*;
+// 					import org.metaborg.truffle.dynsem.shared.runtime.*;
+// 					import [<NodePackage>].*;
+// 					
+// 					public class [name]_[arity] {
+// 					
+// 					    public static Object apply([params]) {
+// 					        [alterns]
+// 					    }
+// 					    
+// 					    [applydefs]
+// 					}], $[[name]_[arity].java], Func())
+//     where
+//       <hashtable-get(|(name, arity))> store => (Func(), rs)
+//     with
+//       index-seq   := <mk-sequence> (1, arity);
+//       params      := <map(\ idx -> $[Object _[idx]] \); separate-by(|","); concat-strings> index-seq;
+//       invoke-args := <map(\ idx -> $[_[idx]] \); separate-by(|","); concat-strings> index-seq;
+//       invoc-seq   := <mk-sequence> (1, <length> rs);
+//       if <?[]> invoc-seq then
+//         alterns := $[throw new Error("Cannot execute function [name]_[arity]");]
+//       else
+// 	      [inv|invxs] := <map(\ idx -> $[return apply_[idx]([invoke-args]);] \)> invoc-seq;
+// 	      if <?[]> invxs then
+// 	        alterns := <to-catch-rethrow> inv
+// 	      else
+// 	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
+// 	      end
+//       end;
+//       applydefs := <map-with-index(function-to-truffle(|store, params))> rs
+// 
+//   to-truffle-dynsem-node(|store):
+//     (name, arity) -> ($[
+// 						package [<NodePackage>];
+// 						
+// 						import org.metaborg.truffle.dynsem.shared.nodes.*;
+// 						import org.metaborg.truffle.dynsem.shared.runtime.*;
+// 						import org.metaborg.truffle.dynsem.shared.functions.*;
+// 						import com.oracle.truffle.api.*;
+// 						import com.oracle.truffle.api.nodes.*;
+// 						import com.oracle.truffle.api.frame.*;
+// 						import [<FunctionPackage>].*;
+// 						
+// 						public class [name]_[arity] extends [super-class] {
+// 						
+// 						    [<separate-by(|"\n"); concat-strings> fields]
+// 						
+// 						    public [name]_[arity]([<separate-by(|","); concat-strings> const-pars]) {
+// 						        super();
+// 						        [<separate-by(|"\n"); concat-strings> field-init]
+// 						    }
+// 						
+// 						    [<separate-by(|"\n"); concat-strings> field-gets]
+// 						
+// 						    @Override
+// 						    public Result execute(VirtualFrame frame) {
+// 						        [alterns]
+// 						    }
+// 						
+// 						    [execdefs]
+// 						    
+// 						}], $[[name]_[arity].java], Node())
+// 	  where
+// 	    <hashtable-get(|(name, arity))> store => (nodety, rs);
+// 	    <?Node() + ?Root()> nodety
+// 		with
+// 		  if <?Node()> nodety then
+// 		    super-class := "DynsemNode"
+// 		  else
+// 		    super-class := "RootNode"
+// 		  end;
+// 		  index-seq  := <mk-sequence> (1, arity);
+// 		  fields     := <map(\ idx -> $[@Child protected DynsemNode _[idx];] \)> index-seq;
+// 		  const-pars := <map(\ idx -> $[DynsemNode _[idx]] \)> index-seq;
+// 		  field-init := <map(\ idx -> $[this._[idx] = adoptChild(_[idx]);] \)> index-seq;
+// 		  field-gets := <map(\ idx -> $[public DynsemNode _[idx](){ return _[idx]; } ] \)> index-seq;
+// 		  invoc-seq   := <mk-sequence> (1, <length> rs);
+//       if <?[]> invoc-seq then
+//         alterns := $[throw new Error("Cannot execute node [name]_[arity]");]
+//       else
+// 			  [inv|invxs] := <map(\ idx -> $[return exec_[idx](frame);] \)> invoc-seq;
+// 			  if <?[]> invxs then
+// 	        alterns := <to-catch-rethrow> inv
+// 	      else
+// 	        alterns := <foldl(to-catch-stm)> (invxs, <to-catch-rethrow> inv)
+// 	      end
+// 	    end;
+// 	    execdefs := <map-with-index(node-to-truffle(|store))> rs
+//       
+//   to-catch-stm:
+//     (stm1, stm2) -> $[
+//       try {
+//         [stm1]
+//       }catch(Exception [ex-var]) {
+//         [stm2]
+//       }]
+//     with
+//       ex-var := <newname> "e"
+//   
+//   to-catch-rethrow:
+//     stm -> $[
+//       try {
+//         [stm]
+//       }catch(Exception [ex-var]) {
+//         throw [ex-var];
+//       }]
+//     with
+//       ex-var := <newname> "e"
+// 
+//   function-to-truffle(|store, params):
+//     (idx, Rule(prem, _, TermEq(Con(name, args), res)) ) -> $[
+//       public static Object apply_[idx]([params]) {
+//         [<separate-by(|"\n"); concat-strings> named-vars]
+//         [<separate-by(|"\n"); concat-strings> truffle-prem]
+//         return [result];
+//       }]
+//     where
+//       <debug(!"Genfunc: ")> (idx, name, args);
+//       named-vars   := <map-with-index(\ (idx, Var(v)) -> $[Object [v] = _[idx];] \)> args;
+// <<<<<<< HEAD
+//       truffle-prem := <map(premise-to-truffle(|store) <+ !$[// fail: [<pp-term>]])> prem;
+// =======
+//       truffle-prem := <map(premise-to-truffle(|store) <+ !$[// fail: [<pp-term <+ pp-terms>]])> prem;
+// >>>>>>> splash
+//       result       := <premise-lhs-to-truffle(|store)> res
+// 
+//   // assignment to variable
+//   premise-to-truffle(|store):
+// <<<<<<< HEAD
+//     TermEq(lhs, Var(v)) -> $[Object [v] = [<premise-lhs-to-truffle(|store)> lhs];]
+//   
+//   // match/read from variable
+//   premise-to-truffle(|store):
+//     TermEq(lhs, Con(name, args)) -> $[
+// =======
+//     Formula(TermEq(lhs, Var(v))) -> $[Object [v] = [<premise-lhs-to-truffle(|store)> lhs];]
+//   
+//   // match/read from variable
+//   premise-to-truffle(|store):
+//     Formula(TermEq(lhs, Con(name, args))) -> $[
+// >>>>>>> splash
+//         [name]_[arity] [tmp_var] = ([name]_[arity]) [<premise-lhs-to-truffle(|store)> lhs];
+//         [<separate-by(|"\n"); concat-strings> var_inits]
+//     ]
+//     where
+//       <is-con-node(|store) + is-con-rootnode(|store) + is-builtin-node> (name, <length> args)
+//     with
+//       arity     := <length> args;
+//       tmp_var   := <newname> "temp";
+//       var_inits := <map-with-index(\ (idx, Var(r)) -> $[DynsemNode [r] = [tmp_var]._[idx]();]\)> args
+//   
+//   
+//   // function application
+//   premise-lhs-to-truffle(|store):
+//     Con(name, args) -> $[[name]_[<length> args].apply([truffle-args])]
+//     where
+//     	<is-con-function(|store) + is-builtin-function> (name, <length> args)
+//     with
+//       truffle-args := <map(premise-lhs-to-truffle(|store)); separate-by(|","); concat-strings> args
+//   
+//   premise-lhs-to-truffle(|store):
+//     Con(name, args) -> $[new [name]_[arity]([truffle-args])]
+//     where
+//       <is-con-node(|store) + is-con-rootnode(|store)> (name, <length> args)
+//     with
+//       arity := <length> args;
+//       truffle-args := <map(premise-lhs-to-truffle(|store); !$[(DynsemNode) [<id>]]); separate-by(|","); concat-strings> args
+//       
+//   premise-lhs-to-truffle(|store):
+//     Var(v) -> $[[v]]
+// 
+//   premise-lhs-to-truffle(|store):
+//     String(s) -> $[[s]]
+// 
+// <<<<<<< HEAD
+//   premise-lhs-to-truffle(|store) = map-to-truffle(|store)
+//   
+//   // empty map
+//   map-to-truffle(|store):
+//     Map([]) -> $[DynsemMap.createEmpty()]
+//   
+//   map-to-truffle(|store):
+//   	Map([b|bs]) -> $[[bs'].plusAll([b'])]
+//   	with
+//   		b'  := <bind-to-truffle(|store)> b;
+//   		bs' := <map-to-truffle(|store)> Map(bs)
+//   
+// =======
+//   // premise-lhs-to-truffle(|store) = map-to-truffle(|store)
+//   
+//   premise-lhs-to-truffle(|store):
+//     MapExtend(lhs, rhs) -> $[((DynsemMap) [lhs']).plusAll([rhs'])]
+//     with
+//       lhs' := <premise-lhs-to-truffle(|store)> lhs;
+//       rhs' := <premise-lhs-to-truffle(|store)> rhs
+// 
+//   premise-lhs-to-truffle(|store):
+//   	Map([]) -> $[DynsemMap.createEmpty()]
+//   
+//   premise-lhs-to-truffle(|store):
+//   	Map([b|bs]) -> $[((DynsemMap) [bs']).plusAll([b'])]
+//   	with
+//   		b'  := <premise-lhs-to-truffle(|store)> b;
+//   		bs' := <premise-lhs-to-truffle(|store)> Map(bs)
+//   
+//   premise-lhs-to-truffle(|store) = bind-to-truffle(|store)
+//     
+// >>>>>>> splash
+//   bind-to-truffle(|store):
+//   	Bind(lhs, rhs) -> $[DynsemMap.createWithSingular([lhs'], [rhs'])]
+//   	with
+//   	  lhs' := <premise-lhs-to-truffle(|store)> lhs;
+//   	  rhs' := <premise-lhs-to-truffle(|store)> rhs
+// 
+//   node-to-truffle(|store):
+//     (idx, Rule(prem*, _, Relation(Reads(r*), Source(Con(name, args), sc*), DynamicEmitted(_), Target(rhs, tc*)))) -> $[
+//       public Result exec_[idx](VirtualFrame frame) {
+//         DynsemArguments in_args = frame.getArguments(DynsemArguments.class);
+//         [allocs1]
+//         [allocs2]
+//         [allocs3]
+//         [<separate-by(|"\n"); concat-strings> premises]
+// 
+//         return new Result([val], (DynsemMap) [state]);
+//       }]
+//     with
+//       <debug(!"Gennode: ")> (idx, name, args);
+//       allocs1  := <map(read-to-alloc)> r*;
+//       allocs2  := <map(read-to-alloc)> sc*;
+//       allocs3  := <map-with-index(\ (idx, Var(v)) -> $[DynsemNode [v] = this._[idx]();] \)> args;
+//       premises := <map(premise-to-truffle(|store))> prem*
+//     where
+//       !rhs => Var(val);
+//       !tc* => [LabelComp(_, Var(state))]
+// 
+//   read-to-alloc:
+//     LabelComp("Env", Var(name)) -> $[DynsemMap [name] = in_args.env;]
+//   
+//   read-to-alloc:
+//     LabelComp("State", Var(name)) -> $[DynsemMap [name] = in_args.state;]
+//   
+//   premise-to-truffle(|store):
+// <<<<<<< HEAD
+//     Relation(Reads(r*), Source(lhs, sc*), DynamicEmitted(e*), Target(rhs, tc*)) -> $[
+// =======
+//     Formula(Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*))) -> $[
+// >>>>>>> splash
+//       DynsemArguments [args-var] = new DynsemArguments((DynsemMap) [renv], (DynsemMap) [rstate]);
+//       Result [res-var] = [lhs'].execute(Truffle.getRuntime().createVirtualFrame(frame.pack(), [args-var], frame.getFrameDescriptor()));
+//       DynsemNode [val-var] = [res-var].val;
+//       [val-match]
+//       DynsemMap [tstate] = [res-var].state;
+//       ]
+//     where
+//       !r* => [LabelComp(_, Var(renv))];
+//       !sc* => [LabelComp(_, Var(rstate))];
+//       !tc* => [LabelComp(_, Var(tstate))]
+//     with
+//       args-var := <newname> "tmp";
+//       lhs' := <premise-lhs-to-truffle(|store)> lhs;
+//       res-var := <newname> "tmp";
+//       val-var := <newname> "tmp";
+// <<<<<<< HEAD
+//       val-match := <premise-to-truffle(|store)> TermEq(Var(val-var), rhs)
+// =======
+//       val-match := <premise-to-truffle(|store)> Formula(TermEq(Var(val-var), rhs))
+// >>>>>>> splash
+// 
+// rules
+//   
+//   mk-sequence = 
+//     ?(from, to);
+//     if <gt> (from, to) then
+//       ![]
+//     else
+//       ![from | <mk-sequence> (<inc> from, to) ]
+//     end
+//           

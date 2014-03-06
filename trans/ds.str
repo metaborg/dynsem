@@ -22,7 +22,6 @@ imports
 	outline
 	strict
 	sugar
-	dstocoq
 
 rules // Analysis
 	
@@ -105,15 +104,15 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"generated.str")> path;
-      result   := <to-stratego(|filename)> selected
-  
-  // Transforms to Truffle
-  generate-truffle:
-    (selected, position, ast, path, project-path) -> None()
-    with
-      filename := <guarantee-extension(|"generated.java")> path;
-      <to-truffle(|project-path)> ast
-  
+      result   := <desugar-all; explicate-module; to-stratego(|filename)> selected
+      
+  // // Transforms to Truffle
+  // generate-truffle:
+  //   (selected, position, ast, path, project-path) -> None()
+  //   with
+  //     filename := <guarantee-extension(|"generated.java")> path;
+  //     <to-truffle(|project-path)> ast
+  // 
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
   prettyprint-STRING = ![S(<id>)]
@@ -123,21 +122,18 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"refocussed.ds")> path;
-    // result   := <unstrict-rules; refocus-rules; prettyprint-example; box2text-string(|80)> selected
       result   := <refocus-module; pp-debug> selected
 
   factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factorized.ds")> path;
-      // result   := <unstrict-rules; factorize-rules; prettyprint-example; box2text-string(|80)> selected
       result   := <factorize-module; pp-debug> selected
 
   explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      // result   := <unstrict-rules; desugar-all; explicate-rules; sugar-all; prettyprint-example; box2text-string(|80)> selected
       result   := <desugar-all; explicate-module; sugar-all; pp-debug> selected
 
   explicate-editor-ast:

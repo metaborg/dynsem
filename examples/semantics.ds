@@ -1,30 +1,35 @@
-module example2
+module semantics
 
+imports include/FJ
+ 
 rules // library
 
   value(y)
-  -------------------
-  Exec(y) --> y
+  -------------
+  Exec(y) --> y 
 
-  y --> w , Exec(w) --> z
+  y --> w , Exec(w) --> z, A --> B
   -----------------------
   Exec(y) --> z
   
 rules // funcons
 
   e1 --> e1'
-  ----------------------------
+  ---------------------------- 
   Seq(e1, e2) --> Seq(e1', e2)
   
-  Seq(Skip(), e) = e
-  
+  Seq(Skip(), e) = e  
+   
   Env MapOver(env,env1) |- e --> e'
   -------------------------------------------
   Env env1 |- Scope(env, e) --> Scope(env,e')
-
+   
+  // [x/v](e1 + e2) -> ([x/v]e1) + ([x/v]e2) 
+  // [x/v]Var(x) -> v
+  
   value(v) 
   -------------------
-  Scope(env,v) = v
+  Scope(env,v) = v 
    
 rules // values
 
@@ -32,7 +37,7 @@ rules // values
   value(Skip())
   
   IsValueList([]) = True()
-  IsValueList(Cons(e, es)) = And(value(e), IsValueList(es))
+  IsValueList(Cons(e, es)) = And(IsValue(e), IsValueList(es))
   
   And(True(), x) = x
   And(False(), x) = False()
@@ -49,31 +54,32 @@ rules // class declarations to environment
     
   class = Class(name, super, fields, constr, meths), Classes2Env(cs') = Env(env)
   -----------------------------------------------------------------------------------
-  Classes2Env(Cons(class, cs')) = Env(MapExtend({ name |--> Class2Env(class) }, env))
+  Classes2Env(Cons(class, cs')) = Env({ name |--> Class2Env(class), env})
   
   Class2Env(Class(name, super, fields, constr, meths)) = 
-    MapExtend({ Super() |--> super, Constructor() |--> constr},
-              MapExtend(Fields2Env(fields), Methods2Env(meths))) 
+    { Super() |--> super, 
+      Constructor() |--> constr,
+      Fields2Env(fields), 
+      Methods2Env(meths) }
                
   Fields2Env([]) = {}
   Fields2Env(Cons(Field(t, name), fields)) = 
-    MapExtend({Field(name) |--> t}, Fields2Env(fields))
+    {Field(name) |--> t, Fields2Env(fields)}
     
   Methods2Env([]) = {}
   Methods2Env(Cons(Method(t, name, params, e), methods)) =
-    MapExtend({Method(name) |--> Method(t, name, params, e)}, Methods2Env(methods))
+    {Method(name) |--> Method(t, name, params, e), Methods2Env(methods)}
 
   value(val)
   ------------------------
   Program(env, val) = val
-    
 
 rules // expression list
 
   BindParams([], [], env) = env
 
   BindParams(Cons(Param(t, name), params), Cons(e, es), env) =
-    MapExtend({ name |--> e }, BindParams(params, es, env))
+    {name |--> e, params |*-> es, env}
     
   ExpList(es) --> ExpList(es')
   --------------------------------
@@ -90,20 +96,17 @@ rules // expression list
 rules // object creation
  
   IsValueList(es) = True(),
-  MapSelect(name, env) = class, 
+  env[name] = class, 
   Fresh() = o, 
-  MapExtend({o |--> {Class() |--> name}}, s) = s',
-  MapSelect(Constructor(), class) = Constructor(c,params,scall,inits),
-  MapExtend({ "this" |--> Ref(o) }, BindParams(params, es, env)) = env1
+  {o |--> {Class() |--> name}, s} = s',
+  class[Constructor()] = Constructor(c, params, scall, inits),
+  {"this" |--> Ref(o), params |*-> es, env} = env1
   ---------------------------------------------------------------------------------------------
-  Env env |- (New(name, es), State s) -- Log [Alloc(o)] -->
-                 (Seq(Scope(env1, FieldInits(inits)), Ref(o)), State s')
+  Env env |- (New(name, es), State s) --> (Seq(Scope(env1, FieldInits(inits)), Ref(o)), State s')
     
   FieldInits([]) --> Skip()
   
-  MapSelect("this", env) = Ref(o),
-  MapSelect(o, s) = omap,
-  MapOver({ o |--> MapExtend({ fld |--> MapSelect(x, env) }, omap) }, s) = s'
+  env["this"] = Ref(o), { o |--> { fld |--> env[x] } + s[o], s} = s'
   --------------------------------------------------------------------------------------------------
   Env env |- (FieldInits(Cons(FieldInit(fld, x), inits)), State s) --> (FieldInits(inits), State s')
   
@@ -113,34 +116,25 @@ rules // congruence
   ----------------------------------------------------------
   Env env' |- Program(Env(env), e) --> Program(Env(env), e')
   
-rules // method calls
+rules // method call
 
+  value(e), ExpList(es) --> ExpList(es') 
+  ------------------------------------------------
+  MethCall(e, name, es) --> MethCall(e, name, es') 
+  
   e --> e'
   -----------------------------------------------
   MethCall(e, name, es) --> MethCall(e', name, es) 
   
-  ExpList(es) --> ExpList(es')
-  ------------------------------------------------
-  MethCall(e, name, es) --> MethCall(e, name, es') 
-   
-
   IsValueList(vs) = True(),
-  MapSelect(Method(name), MapSelect(MapSelect(Class(), MapSelect(o, s)), env)) = Method(t, name', params, e),
-  MapExtend({ "this" |--> Ref(o) }, BindParams(params, vs, env)) = env1
-  ---------------------------------------------------------------------------------------------------------- 
-  Env env |- (MethCall(Ref(o), name, vs), State s) --> Scope(env1, e)
-
-/* // . notation for MapSelect
-  IsValueList(vs) = True(),
-  env.(s.o.Class()).Method(name) = Method(t, name', params, e),  
-  { "this" |--> Ref(o) } / BindParams(params, vs, env) = env1
+  env[s[o][Class()]][Method(name)] = Method(t, name', params, e),
+  { "this" |--> Ref(o), params |*-> vs, env } = env1
   -------------------------------------------------------------------
   Env env |- (MethCall(Ref(o), name, vs), State s) --> Scope(env1, e)
-*/
   
 rules // field reference
   
-  MapSelect(name, MapSelect(o, s)) = v
+  s[o][name] = v 
   ---------------------------------------
   (FieldRef(Ref(o), name), State s) --> v 
   
@@ -148,9 +142,8 @@ rules // field reference
   ----------------------------------------
   FieldRef(e, name) --> FieldRef(e', name)
 
-rules // variables
+rules // variable
   
-  Env env |- Var(x) --> MapSelect(x, env)
+  Env env |- Var(x) --> env[x]
     
-  
   

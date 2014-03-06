@@ -64,7 +64,7 @@ templates // terms
   Entry.Binds = [[Term] |*-> [Term]]
   Entry.MapEntry = [[Term]]
   
-  Term.MapSelect = <<Term>[<Term>]>
+  Term.MapSelect = <<Term>[<Term>]> 
   Term.MapExtend = [[Term] + [Term]] {assoc}
   //Term.MapExtend = [[Term] + [Term]]
 

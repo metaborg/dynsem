@@ -22,10 +22,15 @@ lexical syntax
 
   ModuleID     = {ModuleIDPart "/"}+ 
   ModuleIDPart = [a-zA-Z\.\_] [a-zA-Z0-9\'\.\-\_]* 
+
+context-free syntax
     
   ModuleID = "rules"      {reject}
   ModuleID = "namespaces" {reject}
   ModuleID = "properties" {reject}
+  ModuleID = "imports" {reject}
+  
+  ID = "rule" {reject}
 
 lexical restrictions
   

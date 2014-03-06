@@ -1,3 +1,5 @@
+module funcons
+
 rules
 
    value(True())

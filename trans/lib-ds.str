@@ -5,7 +5,6 @@ imports
   libstratego-gpp
   libstratego-aterm
   include/ds
-  include/DynSem
   lib/editor-common.generated
   refocus
   sugar
@@ -15,14 +14,10 @@ imports
 
 rules // extract components        
   
-  extract-components : rs -> comps
-  where
-    <extract-writables> rs;
-    <extract-readables> rs;
-    <extract-changeables> rs;
-    <collect-all(?LabelComp(<id>, _), union)> rs => comps; 
-    <filter(not(IsWritable))> comps => non-writeables;
-    <filter(not(IsReadable))> comps => non-readables;    
+  extract-components =
+    collect-all(?LabelComp(<id>, _), union) => comps; 
+    <filter(not(IsWritable))> comps => non-writeables; 
+    <filter(not(IsReadable))> comps => non-readables; 
     rules(
       CompList : _ -> comps
       NonWriteables : _ -> non-writeables
@@ -38,25 +33,25 @@ rules // extract components
       
       CompsRhs : num -> <mk-label-comps(|num)> non-readables       
     )
-        
+
   extract-writables  :
     rs -> comps
     where
-      collect-all(?DynamicEmitted(<map(?LabelComp(<id>,_))>), union); concat => comps;
+      collect-all(?DynamicEmitted(<map(?LabelComp(<id>,_))>), union); concat; make-set => comps;
       rules( WritableComps : _ -> comps );
       map({?comp; rules( IsWritable : comp -> comp )})
 
   extract-readables :
     rs -> comps
     where
-      collect-all(?Reads(<map(?LabelComp(<id>,_))>), union); concat => comps;
+      collect-all(?Reads(<map(?LabelComp(<id>,_))>), union); concat; make-set => comps;
       rules( ReadableComps : _ -> comps );
       map({?comp; rules( IsReadable : comp -> comp )})
 
   extract-changeables :
     rs -> comps
     where
-      collect-all((?Source(_, <id>) <+ ?Target(_, <id>)); map(?LabelComp(<id>,_)), union); concat => comps;
+      collect-all((?Source(_, <id>) <+ ?Target(_, <id>)); map(?LabelComp(<id>,_)), union); concat; make-set => comps;
       rules( ChangeableComps : _ -> comps );
       map({?comp; rules( IsChangeable : comp -> comp )})
       
@@ -76,9 +71,6 @@ rules // component operations
 
   mk-label-comp(default|num) :
     name -> <default <+ mk-label-comp(|num)> name
-
-  copy-comp(|comps) :
-    comp-name -> <fetch-elem(?LabelComp(comp-name,_))> comps
     
 signature
   constructors

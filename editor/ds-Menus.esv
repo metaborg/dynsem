@@ -1,10 +1,5 @@
 module ds-Menus
 
-//imports FJ-Menus.generated
-
-  // This file can be used to specify toolbar menus.
-  // See the imported file for a brief introduction and examples.
-
 menus
   
   menu: "Syntax"
@@ -35,17 +30,11 @@ menus
       action: "Partition"          = debug-task-partition (openeditor) (meta)
       action: "Selection"          = debug-task-selection (openeditor) (meta)
     end
-    
-                                                                                                                                                                                       
-  // builder  : "Show analyzed syntax"   = debug-show-analyzed (openeditor) (meta)        
-  // builder  : "Show index (current)"   = debug-show-index-current (openeditor) (meta)              
-  // builder  : "Show index (all)"       = debug-show-index-all (openeditor) (meta)                  
-  // builder  : "Show tasks (selection)" = debug-show-tasks-selection (openeditor) (meta)            
-  // builder  : "Reset and reanalyze"    = debug-reanalyze (meta) 
-    
+                                                                                                                                                                                         
   menu: "Semantics"
 
     action  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
+    action  : "Generate Truffle"      = generate-truffle
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)     
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)       
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) 
