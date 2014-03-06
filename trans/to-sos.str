@@ -1,0 +1,4 @@
+module to-sos
+
+// translate rules in MSOS style to explicit SOS rules
+
