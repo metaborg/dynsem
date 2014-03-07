@@ -8,6 +8,7 @@ imports
   Module.pp.generated
   ds.pp.generated
   Lexical.pp.generated
+  Signatures.pp.generated
   include/ds-parenthesize
   
 rules
