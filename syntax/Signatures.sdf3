@@ -10,6 +10,9 @@ templates
     <SignatureRule*; separator="\n\n">
   >
 
-  SignatureRule.SignatureRule = <<ID> : <SignatureType>>
+  SignatureRule.SignatureRule = <<ID> : <SignatureType> <SignatureAnnos?>>
   SignatureType.Type = [[ID*; separator=" * "] -> [ID]]
   SignatureType.Inj  = <<ID>>
+  
+  SignatureAnnos.SignatureAnnos = <{ <SignatureAnno+; separator=", "> }>
+  SignatureAnno.ValueAnno = <value>
