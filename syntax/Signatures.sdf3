@@ -1,0 +1,15 @@
+module Signatures
+
+imports Common
+
+templates
+
+  ModuleSection.Signatures = <
+    signatures
+
+    <SignatureRule*; separator="\n\n">
+  >
+
+  SignatureRule.SignatureRule = <<ID> : <SignatureType>>
+  SignatureType.Type = [[ID*; separator=" * "] -> [ID]]
+  SignatureType.Inj  = <<ID>>
