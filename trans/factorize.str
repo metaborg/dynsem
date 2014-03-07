@@ -46,7 +46,7 @@ rules // lift constructor sub-terms in match
     where (prem*, t2*) := <map(lift-constructor-from-match); unzip; (concat,id)> t1*
         
   lift-constructor-from-match :
-    t@Con(c, _) -> ([TermEq(Var(x), t)], Var(x))
+    t@Con(c, _) -> ([Formula(TermEq(Var(x), t))], Var(x))
     where x := <new>
 
   lift-constructor-from-match :
@@ -56,7 +56,7 @@ rules // lift constructor sub-terms in match
 rules // lift constructor sub-terms in build
   
   lift-constructors-from-rhs :
-    t@Con(c, t*) -> ([TermEq(t, Var(x))], Var(x))
+    t@Con(c, t*) -> ([Formula(TermEq(t, Var(x)))], Var(x))
     where x := <new>
 
   lift-constructors-from-rhs :
