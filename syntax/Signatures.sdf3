@@ -6,9 +6,7 @@ templates
 
   ModuleSection.Signatures = <
     signatures
-
-    <SignatureRule*; separator="\n\n">
-  >
+      <SignatureRule*; separator="\n">>
 
   SignatureRule.SignatureRule = <<ID> : <SignatureType> <SignatureAnnos?>>
   SignatureType.Type = [[ID*; separator=" * "] -> [ID]]
