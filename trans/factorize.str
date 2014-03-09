@@ -86,7 +86,7 @@ rules // lift from build
     where (prem*@[_|_], t2*) := <map(lift-constructor-from-build); unzip; (concat, id)> t1*
     
   lift-constructor-from-build :
-    t@Con(c, _) -> ([TermEq(t, Var(x))], Var(x))
+    t@Con(c, _) -> ([Formula(TermEq(t, Var(x)))], Var(x))
     where x := <new>   
     
   lift-constructor-from-build :
