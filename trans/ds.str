@@ -84,6 +84,12 @@ rules // Debugging
 		with
 			filename := <guarantee-extension(|"analyzed.aterm")> path;
 			result	 := ast
+  
+  debug-show-desugared:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"desugared.aterm")> path;
+      result   := <desugar-all> ast
 			
 	debug-show-index-current =
 		analysis-debug-show-current-partition(|<language>)
