@@ -14,3 +14,4 @@ templates
   
   SignatureAnnos.SignatureAnnos = <{ <SignatureAnno+; separator=", "> }>
   SignatureAnno.ValueAnno = <value>
+  SignatureAnno.NativeAnno = <native>
