@@ -28,4 +28,6 @@ templates
 
   SignatureAnno.ValueAnno = <value>
   SignatureAnno.NativeAnno = <native>
+  SignatureAnno.InternalAnno = <internal>
+  
 
