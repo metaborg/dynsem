@@ -10,21 +10,21 @@ templates
   
   SignatureSection.Sorts = <
     sorts
-      <SortDecl*; separator=" ">>
+      <SortDecl*; separator="\n">>
   
   SortDecl.SortDecl = <<ID> <SignatureAnnos?>>
+  SortDecl.InjDecl = [[ID] -> [ID] [SignatureAnnos?]]
   
   SignatureSection.Constructors = <
     constructors
       <ConsDecl*; separator="\n">>
 
   ConsDecl.ConsDecl = [[ID] : [Type*; separator=" * "] -> [Type] [SignatureAnnos?]]
-  ConsDecl.InjDecl = [: [Type] -> [Type]]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<ID>)> 
   
-  SignatureAnnos.SignatureAnnos = <{ <SignatureAnno+; separator=", "> }>
+  SignatureAnnos.SignatureAnnos = <{ <SignatureAnno*; separator=", "> }>
 
   SignatureAnno.ValueAnno = <value>
   SignatureAnno.NativeAnno = <native>
