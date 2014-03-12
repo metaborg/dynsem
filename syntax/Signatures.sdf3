@@ -5,13 +5,27 @@ imports Common
 templates
 
   ModuleSection.Signatures = <
-    signatures
-      <SignatureRule*; separator="\n">>
+    signature
+        <SignatureSection*; separator="\n">>
+  
+  SignatureSection.Sorts = <
+    sorts
+      <SortDecl*; separator=" ">>
+  
+  SortDecl.SortDecl = <<ID> <SignatureAnnos?>>
+  
+  SignatureSection.Constructors = <
+    constructors
+      <ConsDecl*; separator="\n">>
 
-  SignatureRule.SignatureRule = <<ID> : <SignatureType> <SignatureAnnos?>>
-  SignatureType.Type = [[ID*; separator=" * "] -> [ID]]
-  SignatureType.Inj  = <<ID>>
+  ConsDecl.ConsDecl = [[ID] : [Type*; separator=" * "] -> [Type] [SignatureAnnos?]]
+  ConsDecl.InjDecl = [: [Type] -> [Type]]
+
+  Type.SimpleSort = <<ID>>
+  Type.ListSort = <List(<ID>)> 
   
   SignatureAnnos.SignatureAnnos = <{ <SignatureAnno+; separator=", "> }>
+
   SignatureAnno.ValueAnno = <value>
   SignatureAnno.NativeAnno = <native>
+

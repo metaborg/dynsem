@@ -13,6 +13,18 @@ rules // desugaring
   desugar-all = innermost(desugar); alltd(rules-concat)
   
   desugar :
+    SortDecl(srt, Some(annos)) -> SortDecl(srt, annos)
+  
+  desugar :
+    SortDecl(srt, None()) -> SortDecl(srt, SignatureAnnos([]))
+  
+  desugar:
+    ConsDecl(cons, srtargs, srt, Some(annos)) -> ConsDecl(cons, srtargs, srt, annos)
+  
+  desugar:
+    ConsDecl(cons, srtargs, srt, None()) -> ConsDecl(cons, srtargs, srt, SignatureAnnos([]))
+  
+  desugar :
     RuleW(form, prem*) -> Rule(prem*, "---", form)
     
   desugar :

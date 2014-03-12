@@ -1,4 +1,7 @@
 module Common
+  
+  templates
+    NONE.None = <>
 
   lexical syntax 
     
