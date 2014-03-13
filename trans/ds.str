@@ -11,6 +11,7 @@ imports
 	lib/runtime/nabl/-
 	lib/runtime/task/-
 	lib/runtime/index/- 
+	coq-semantics/main
 	pp
 	names
 	check
