@@ -1,0 +1,131 @@
+module coq-semantics/main
+
+imports
+  libstratego-gpp
+  coq-semantics/-
+  lib/runtime/index/-
+  lib/runtime/nabl/-
+  lib/runtime/properties/-
+  lib/runtime/task/-
+  names
+  lib/editor-common.generated
+  include/ds
+
+rules
+  
+  generate-coq:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      task-setup(|project-path)
+    ; filename := <guarantee-extension(|"v")> path
+    ; coq-file := <strip-annos; module-to-coq> ast
+    with
+       result := <parenthesize-Coq; prettyprint-CoqFile; box2text-string(|100)> coq-file
+    <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-example) ; debug(!"cannot pp ")))> coq-file
+    ;  result := ""
+
+rules
+  
+  module-to-coq:
+  	Module(name, rule*) -> Sent([IND_SEMANTICS(definition*)])
+		where definition* := <filter(?Rules(<id>)); concat; filter(rule-to-coq)> rule*
+
+rules
+  
+  rule-to-coq:
+    RuleW(formula, prem*) -> DECL(name', <union> (f-bind*, p-bind*), type)
+    where
+      (name, t', f-bind*, if) := <formula-to-coq(|0)> formula
+    ; name'                   := $[[name]C]
+    ; (prem'*, p-bind*, _)    := <foldr(!([], [], if), fold-prem)> prem*
+    ; type                    := <foldr(!t', fold-type)> prem'*
+      
+  rule-to-coq:
+  	Rule(prem*,_,formula) -> <rule-to-coq> RuleW(formula, prem*)
+  	
+  rule-to-coq:
+    Axiom(formula) -> <rule-to-coq> RuleW(formula, [])
+
+rules // Formula
+  
+  formula-to-coq(|i):
+    Relation(r, src, rel, dst) -> (name, SEMANTICS_CBN(src', dst'), <union> (b-src*, b-dst*), i-dst)
+    where
+      (src', b-src*, i-src)   := <src-dst-to-coq(|i)> src
+    ; (dst', b-dst*, i-dst)   := <src-dst-to-coq(|i-src)> dst
+    ; con := <!src; (?Source(<id>, _) <+ ?Source(<id>))>
+    ; Con(name, _) := con
+
+rules // Sources and targets
+	
+  src-dst-to-coq(|i) = ?Source(<id>); term-to-coq(|i)
+	src-dst-to-coq(|i) = ?Source(x, lbl); !x; term-to-coq(|i)
+  src-dst-to-coq(|i) = ?Target(<id>); term-to-coq(|i)
+  src-dst-to-coq(|i) = ?Target(x, lbl); !x; term-to-coq(|i)
+  
+rules // Terms
+	
+	term-to-coq(|i):
+		Con(ident, t*) -> (APPLY2(Ref("Co"), t', Ref(k)), b*, i')
+		where
+			t' := CONS(Ref($[[ident]C]), <foldr(!Ref("nil"), fold-con)> t*)
+	  ; k  := $[k[i]]
+	  ; b* := <concat> [<map(?Var(<id>); !Bind(<id>))> t*, [Bind(k)]]
+	  ; i' := <inc> i
+  
+rules // Premise
+  
+  prem-to-coq(|i) = fail
+
+rules // Fold rules
+  
+  fold-prem:
+    ((p*, b*, i), p) -> ([p' | p*], <union> (b'*, b*), i')
+    where
+      (p', b'*, i') := <prem-to-coq(|i)> p
+  
+  fold-con:
+  	(Var(y), x) -> CONS(Ref(y), x)
+
+  fold-type: // Composes parts of a type
+    (x, y) -> Product(x, y)
+
+overlays
+
+  IND_SEMANTICS(terms) =
+		Inductive(
+      Ind(
+        [ Induc(
+            "semantics_cbn"
+          , []
+          , Type(
+              Product(
+                Ref("Env")
+              , Product(Ref("term"), Product(Ref("value"), Sort(Prop())))
+              )
+            )
+          , ListDeclBar(terms)
+          )
+        ]
+      )
+    )
+
+  DECL(name, binds, type) =
+		ConsDecl(
+		  name
+		, binds
+		, Type(type)
+    )
+	
+	SEMANTICS_CBN(t1, t2) = APPLY2(Ref("semantics_cbn"), t1, t2)
+	
+	CONS(hd, tl) = APPLY2(Ref("cons"), hd, tl)
+	
+	APPLY2(constr, fst, snd) =
+	  Apply(
+	    Apply(
+	      constr
+	    , fst
+	    )
+	  , snd
+	  )
