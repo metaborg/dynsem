@@ -35,11 +35,12 @@ rules
   rule-to-coq:
     RuleW(formula, prem*) -> DECL(name', <union> (f-bind*, p-bind*), type)
     where
-      (name, t', f-bind*, if) := <formula-to-coq(|0)> formula
-    ; name'                   := $[[name]C]
-    ; (prem'*, p-bind*, _)    := <foldr(!([], [], if), fold-prem)> prem*
-    ; type                    := <foldr(!t', fold-type)> prem'*
-      
+      (t', f-bind*, if)    := <formula-to-coq(|0)> formula
+    ; name                 := <formula-to-name> formula
+    ; name'                := $[[name]C]
+    ; (prem'*, p-bind*, _) := <foldl(fold-prem)> (prem*, ([], [], if))
+    ; type                 := <foldl(fold-type)> (prem'*, t')
+  
   rule-to-coq:
   	Rule(prem*,_,formula) -> <rule-to-coq> RuleW(formula, prem*)
   	
@@ -49,13 +50,13 @@ rules
 rules // Formula
   
   formula-to-coq(|i):
-    Relation(r, src, rel, dst) -> (name, SEMANTICS_CBN(src', dst'), <union> (b-src*, b-dst*), i-dst)
+    Relation(r, src, rel, dst) -> (SEMANTICS_CBN(Ref("env"), src', dst'), <union> (b-src*, b-dst*), i-dst)
     where
-      (src', b-src*, i-src)   := <src-dst-to-coq(|i)> src
-    ; (dst', b-dst*, i-dst)   := <src-dst-to-coq(|i-src)> dst
-    ; con := <!src; (?Source(<id>, _) <+ ?Source(<id>))>
-    ; Con(name, _) := con
+      (src', b-src*, i-src) := <src-dst-to-coq(|i)> src
+    ; (dst', b-dst*, i-dst) := <src-dst-to-coq(|i-src)> dst
 
+  formula-to-name = ?Relation(_, <id>, _, _); (?Source(<id>, _) <+ ?Source(<id>)); ?Con(<id>, _)
+  
 rules // Sources and targets
 	
   src-dst-to-coq(|i) = ?Source(<id>); term-to-coq(|i)
@@ -66,27 +67,39 @@ rules // Sources and targets
 rules // Terms
 	
 	term-to-coq(|i):
-		Con(ident, t*) -> (APPLY2(Ref("Co"), t', Ref(k)), b*, i')
-		where
-			t' := CONS(Ref($[[ident]C]), <foldr(!Ref("nil"), fold-con)> t*)
-	  ; k  := $[k[i]]
-	  ; b* := <concat> [<map(?Var(<id>); !Bind(<id>))> t*, [Bind(k)]]
-	  ; i' := <inc> i
+		Con(ident, t*) -> (APPLY2(Apply(Ref("Co"), Ref($[[ident]C])), t', Ref(k)), b*, i')
+		where not("I" := ident)
+		with
+		  k             := $[k[i]]
+	  ;	(t', bt*, i') := <foldr(!(Ref("nil"), [], <inc> i), fold-con)> t*
+	  ; b*            := <union> (<union> (<filter(?Var(<id>); !Bind(<id>))> t*, [Bind(k)]), bt*)
+	
+	term-to-coq(|i):
+	  Var(x) -> (Ref(x), [Bind(x)], i)
+	
+rules // Static definitions, hardcoded for now
+	term-to-coq(|i): Con("I", [Var(n)])                          -> (Apply(Ref("Natval"), Ref(n)), [], i)
+	term-to-coq(|i): Con("I", [Con("AddInt", [Var(x), Var(y)])]) -> NATIVE_CALL("plus", x, y, i)
+  term-to-coq(|i): Con("I", [Con("SubInt", [Var(x), Var(y)])]) -> NATIVE_CALL("minus", x, y, i)
+  term-to-coq(|i): Con("I", [Con("MulInt", [Var(x), Var(y)])]) -> NATIVE_CALL("mult", x, y, i)
+  term-to-coq(|i): Con("I", [Con("DivInt", [Var(x), Var(y)])]) -> NATIVE_CALL("div", x, y, i)
   
-rules // Premise
-  
-  prem-to-coq(|i) = fail
+overlays
+  NATIVE_CALL(op, x, y, i) = (APPLY2(Ref(op), Ref(x), Ref(y)), [Bind(x), Bind(y)], i)
 
 rules // Fold rules
   
   fold-prem:
-    ((p*, b*, i), p) -> ([p' | p*], <union> (b'*, b*), i')
+    (Formula(p), (p*, b*, i)) -> ([p' | p*], <union> (b'*, b*), i')
     where
-      (p', b'*, i') := <prem-to-coq(|i)> p
+      (p', b'*, i') := <formula-to-coq(|i)> p
   
   fold-con:
-  	(Var(y), x) -> CONS(Ref(y), x)
-
+  	(x, (y, b*, i)) -> (CONS(x', y), b'*, i')
+  	with
+  	  (x', bx*, i') := <term-to-coq(|i)> x
+  	; b'*           := <union> (bx*, b*)
+  
   fold-type: // Composes parts of a type
     (x, y) -> Product(x, y)
 
@@ -117,7 +130,7 @@ overlays
 		, Type(type)
     )
 	
-	SEMANTICS_CBN(t1, t2) = APPLY2(Ref("semantics_cbn"), t1, t2)
+	SEMANTICS_CBN(env, t1, t2) = APPLY2(Apply(Ref("semantics_cbn"), env), t1, t2)
 	
 	CONS(hd, tl) = APPLY2(Ref("cons"), hd, tl)
 	
