@@ -1,0 +1,69 @@
+module coq-semantics/term
+
+imports
+  libstratego-gpp
+  coq-semantics/-
+  lib/runtime/index/-
+  lib/runtime/nabl/-
+  lib/runtime/properties/-
+  lib/runtime/task/-
+  names
+  lib/editor-common.generated
+  include/ds
+  
+rules // Sources and targets
+	
+  src-dst-to-coq(|i) = ?Source(<id>); term-to-coq(|i)
+	src-dst-to-coq(|i) = ?Source(x, lbl); !x; term-to-coq(|i)
+  src-dst-to-coq(|i) = ?Target(<id>); term-to-coq(|i)
+  src-dst-to-coq(|i) = ?Target(x, lbl); !x; term-to-coq(|i)
+  
+rules // Terms
+	
+	term-to-coq(|i):
+		Con(ident, t*) -> (APPLY2(Apply(Ref("Co"), Ref($[[ident]C])), t', Ref(k)), b*, i')
+		where not("I" := ident)
+		where not("C" := ident)
+		where not("T" := ident)
+		with
+		  k             := $[k[i]]
+	  ;	(t', bt*, i') := <foldr(!(Ref("nil"), [], <inc> i), fold-con)> t*
+	  ; b*            := <union> (bt*, <union> (<filter(?Var(<id>); !Bind(<id>))> t*, [Bind(k)]))
+	
+	term-to-coq(|i):
+	  Con("T", [e1, e2]) -> (PAIR(e1', e2'), b*, i2)
+    with
+      (e1', b1*, i1) := <term-to-coq(|i)> e1
+    ; (e2', b2*, i2) := <term-to-coq(|i1)> e2
+    ; b*             := <union> (b1*, b2*)
+	
+	term-to-coq(|i):
+	  Var(x) -> (Ref(x), [Bind(x)], i)
+	  
+	term-to-coq(|i): // Ugly, but the only one supported by Coq for now, anyways
+	  Map([Bind(e1, e2), MapEntry(Var(env))]) -> (CONS_ENV(e1', e2', env), b*, i2)
+	  where
+	    (e1', b1*, i1) := <term-to-coq(|i)> e1
+	  ; (e2', b2*, i2) := <term-to-coq(|i1)> e2
+	  ; b*             := <union> ([Bind(env)], <union> (b1*, b2*))
+	    
+	
+rules // Static definitions, hardcoded for now
+	term-to-coq(|i): Con("I", [Var(n)])                          -> (Apply(Ref("Natval"), Ref(n)), [Bind(n)], i)
+	term-to-coq(|i): Con("I", [Con("AddInt", [Var(x), Var(y)])]) -> <native-call> ("plus", x, y, i)
+  term-to-coq(|i): Con("I", [Con("SubInt", [Var(x), Var(y)])]) -> <native-call> ("minus", x, y, i)
+  term-to-coq(|i): Con("I", [Con("MulInt", [Var(x), Var(y)])]) -> <native-call> ("mult", x, y, i)
+  term-to-coq(|i): Con("I", [Con("DivInt", [Var(x), Var(y)])]) -> <native-call> ("div", x, y, i)
+  
+  native-call: (op, x, y, i) -> (APPLY2(Ref(op), Ref(x), Ref(y)), <union> ([Bind(x)], [Bind(y)]), i)
+  
+rules // Fold rules
+  fold-con:
+  	(x, (y, b*, i)) -> (CONS(x', y), b'*, i')
+  	with
+  	  (x', bx*, i') := <term-to-coq(|i)> x
+  	; b'*           := <union> (bx*, b*)
+
+overlays
+  
+  CONS_ENV(a, t, env) = APPLY2(Ref("Cons_Env"), PAIR(a, t), Ref(env))

@@ -1,0 +1,55 @@
+module coq-semantics/formula
+
+imports
+  libstratego-gpp
+  coq-semantics/-
+  lib/runtime/index/-
+  lib/runtime/nabl/-
+  lib/runtime/properties/-
+  lib/runtime/task/-
+  names
+  lib/editor-common.generated
+  include/ds
+
+rules // Formula
+  
+  formula-to-coq(|i):
+    Relation(r, src, rel, dst) -> (SEMANTICS_CBN(env, src', dst'), bind*, i-dst)
+    where
+      (env , b-env*, i-env) := <reads-to-coq(|i)> r
+    ; (dst', b-dst*, i-dst) := <src-dst-to-coq(|i-env)> dst
+    ; (src', b-src*, i-src) := <src-dst-to-coq(|i-dst)> src
+    ; bind*                 := <union> (b-env*, <union> (b-src*, b-dst*))
+
+  formula-to-coq(|i):
+    TermEq(lhs, rhs) -> (GET_ENV(x, env, e, env'), bind*, i)
+    where
+      MapSelect(Var(env), Var(x))   := lhs
+    ; Con("T", [Var(e), Var(env')]) := rhs
+    ; bind* := <map(!Bind(<id>))> [env, x, e, env']
+
+  formula-to-name = ?Relation(_, <id>, _, _); (?Source(<id>, _) <+ ?Source(<id>)); ?Con(<id>, _)
+  
+rules // Environments rules
+  
+  reads-to-coq(|i):
+    Reads(lbl*) -> <foldl(fold-lbl)> (lbl*, ((), [], i))
+    
+  reads-to-coq(|i):
+    NoReads() -> (Ref("env"), [Bind("env")], i)
+      
+rules // Folding rules
+  
+  fold-lbl:
+    (LabelComp(_, e), (p , b*, i)) -> (n, <union> (b*, b'*), i')
+    where debug(!"LabelComp: ")
+    where
+      (e', b'*, i') := <term-to-coq(|i)> e
+    ; n             := <?() < !e' + !Product(e', p)> p
+    ; debug(!"LabelComp after: ") 
+
+overlays
+
+  GET_ENV(x, env, e, env') = APPLY2(APPLY2(Ref("get_env"), Ref(x), Ref(env)), Ref(e), Ref(env'))
+  
+	SEMANTICS_CBN(env, t1, t2) = APPLY2(Apply(Ref("semantics_cbn"), env), t1, t2)
