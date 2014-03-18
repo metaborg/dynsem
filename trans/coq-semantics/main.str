@@ -33,13 +33,13 @@ rules
 rules
   
   rule-to-coq:
-    RuleW(formula, prem*) -> DECL(name', <union> (f-bind*, p-bind*), type)
+    RuleW(formula, prem*) -> DECL(name', <union> (p-bind*, f-bind*), type)
     where
-      (t', f-bind*, if)    := <formula-to-coq(|0)> formula
+      (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
+    ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
+    ; type                 := <foldl(fold-type)> (prem'*, t')
     ; name                 := <formula-to-name> formula
     ; name'                := $[[name]C]
-    ; (prem'*, p-bind*, _) := <foldl(fold-prem)> (prem*, ([], [], if))
-    ; type                 := <foldl(fold-type)> (prem'*, t')
   
   rule-to-coq:
   	Rule(prem*,_,formula) -> <rule-to-coq> RuleW(formula, prem*)
@@ -73,7 +73,7 @@ rules // Terms
 		with
 		  k             := $[k[i]]
 	  ;	(t', bt*, i') := <foldr(!(Ref("nil"), [], <inc> i), fold-con)> t*
-	  ; b*            := <union> (<union> (<filter(?Var(<id>); !Bind(<id>))> t*, [Bind(k)]), bt*)
+	  ; b*            := <union> (bt*, <union> (<filter(?Var(<id>); !Bind(<id>))> t*, [Bind(k)]))
 	
 	term-to-coq(|i):
 	  Var(x) -> (Ref(x), [Bind(x)], i)
@@ -91,7 +91,7 @@ overlays
 rules // Fold rules
   
   fold-prem:
-    (Formula(p), (p*, b*, i)) -> ([p' | p*], <union> (b'*, b*), i')
+    (Formula(p), (p*, b*, i)) -> ([p' | p*], <union> (b*, b'*), i')
     where
       (p', b'*, i') := <formula-to-coq(|i)> p
   
