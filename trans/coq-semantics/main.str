@@ -50,10 +50,11 @@ rules
 rules // Formula
   
   formula-to-coq(|i):
-    Relation(r, src, rel, dst) -> (SEMANTICS_CBN(Ref("env"), src', dst'), <union> (b-src*, b-dst*), i-dst)
+    Relation(r, src, rel, dst) -> (SEMANTICS_CBN(Ref("env"), src', dst'), bind*, i-dst)
     where
-      (src', b-src*, i-src) := <src-dst-to-coq(|i)> src
-    ; (dst', b-dst*, i-dst) := <src-dst-to-coq(|i-src)> dst
+      (dst', b-dst*, i-dst) := <src-dst-to-coq(|i)> dst
+    ; (src', b-src*, i-src) := <src-dst-to-coq(|i-dst)> src
+    ; bind*                 := <union> ([Bind("env")], <union> (b-src*, b-dst*))
 
   formula-to-name = ?Relation(_, <id>, _, _); (?Source(<id>, _) <+ ?Source(<id>)); ?Con(<id>, _)
   
@@ -78,7 +79,7 @@ rules // Terms
 	  Var(x) -> (Ref(x), [Bind(x)], i)
 	
 rules // Static definitions, hardcoded for now
-	term-to-coq(|i): Con("I", [Var(n)])                          -> (Apply(Ref("Natval"), Ref(n)), [], i)
+	term-to-coq(|i): Con("I", [Var(n)])                          -> (Apply(Ref("Natval"), Ref(n)), [Bind(n)], i)
 	term-to-coq(|i): Con("I", [Con("AddInt", [Var(x), Var(y)])]) -> NATIVE_CALL("plus", x, y, i)
   term-to-coq(|i): Con("I", [Con("SubInt", [Var(x), Var(y)])]) -> NATIVE_CALL("minus", x, y, i)
   term-to-coq(|i): Con("I", [Con("MulInt", [Var(x), Var(y)])]) -> NATIVE_CALL("mult", x, y, i)
