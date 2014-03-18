@@ -22,12 +22,23 @@ rules // Formula
     ; bind*                 := <union> (b-env*, <union> (b-src*, b-dst*))
 
   formula-to-coq(|i):
-    TermEq(lhs, rhs) -> (GET_ENV(x, env, e, env'), bind*, i)
+    TermEq(MapSelect(Var(env), Var(x)), rhs) -> (GET_ENV(x, env, e, env'), bind*, i)
     where
-      MapSelect(Var(env), Var(x))   := lhs
-    ; Con("T", [Var(e), Var(env')]) := rhs
+      Con("T", [Var(e), Var(env')]) := rhs
     ; bind* := <map(!Bind(<id>))> [env, x, e, env']
 
+  formula-to-coq(|i):
+    TermEq(Var(x), t) -> (COQ_EQ(Ref(x), t'), bind*, i')
+    where
+      (t', b*, i') := <term-to-coq(|i)> t
+    ; bind*        := <union> ([Bind("env")], <union> ([Bind(x)], b*))
+  
+  formula-to-coq(|i):
+    TermNeq(Var(x), t) -> (COQ_NEQ(Ref(x), t'), bind*, i')
+    where
+      (t', b*, i') := <term-to-coq(|i)> t
+    ; bind*        := <union> ([Bind("env")], <union> ([Bind(x)], b*))
+  
   formula-to-name = ?Relation(_, <id>, _, _); (?Source(<id>, _) <+ ?Source(<id>)); ?Con(<id>, _)
   
 rules // Environments rules
@@ -42,13 +53,14 @@ rules // Folding rules
   
   fold-lbl:
     (LabelComp(_, e), (p , b*, i)) -> (n, <union> (b*, b'*), i')
-    where debug(!"LabelComp: ")
     where
       (e', b'*, i') := <term-to-coq(|i)> e
     ; n             := <?() < !e' + !Product(e', p)> p
-    ; debug(!"LabelComp after: ") 
 
 overlays
+  COQ_NEQ(e1, e2) = Apply(Ref("not"), COQ_EQ(e1, e2))
+
+  COQ_EQ(e1, e2) = APPLY2(Ref("eq"), e1, e2)
 
   GET_ENV(x, env, e, env') = APPLY2(APPLY2(Ref("get_env"), Ref(x), Ref(env)), Ref(e), Ref(env'))
   
