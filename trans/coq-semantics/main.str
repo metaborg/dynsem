@@ -28,26 +28,34 @@ rules
   
   module-to-coq:
   	Module(name, rule*) -> Sent([IND_SEMANTICS(definition*)])
-		where definition* := <filter(?Rules(<id>)); concat; filter(rule-to-coq)> rule*
+		where
+		  rule'*      := <filter(?Rules(<id>)); concat> rule*
+		; definition* := <foldl(fold-rule); Fst; reverse> (rule'*, ([], []))
 
 rules
   
-  rule-to-coq:
-    RuleW(formula, prem*) -> DECL(name', <union> (p-bind*, f-bind*), type)
+  rule-to-coq(|n*):
+    RuleW(formula, prem*) -> (DECL(name', <union> (p-bind*, f-bind*), type), [(name, count), n*])
     where
       (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
     ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
     ; type                 := <foldl(fold-type)> (prem'*, t')
     ; name                 := <formula-to-name> formula
-    ; name'                := $[[name]C_sem]
+    ; count                := <lookup; inc <+ !0> (name, n*)
+    ; name'                := $[[name][count]C_sem]
   
-  rule-to-coq:
-  	Rule(prem*,_,formula) -> <rule-to-coq> RuleW(formula, prem*)
+  rule-to-coq(|n*):
+  	Rule(prem*,_,formula) -> <rule-to-coq(|n*)> RuleW(formula, prem*)
   	
-  rule-to-coq:
-    Axiom(formula) -> <rule-to-coq> RuleW(formula, [])
+  rule-to-coq(|n*):
+    Axiom(formula) -> <rule-to-coq(|n*)> RuleW(formula, [])
 
 rules // Fold rules
+  
+  fold-rule:
+    (r, (p*, n*)) -> (p'*, n'*)
+    where
+      (p'*, n'*) := <rule-to-coq(|n*) < !([<Fst> | p*], <Snd>) + !(p*, n*)> r
   
   fold-prem:
     (Formula(p), (p*, b*, i)) -> ([p' | p*], <union> (b*, b'*), i')
