@@ -59,10 +59,9 @@ rules // Terms
 rules // Static definitions, hardcoded for now
 	term-to-coq(|i): Con("I", [Var(n)])                          -> (Apply(Ref("Natval"), Ref(n)), [Bind(n)], i)
 	term-to-coq(|i): Int(n)                                      -> (Ref(n), [], i)
-	term-to-coq(|i): Con("I", [Con("AddInt", [Var(x), Var(y)])]) -> <native-call> ("plus", x, y, i)
-  term-to-coq(|i): Con("I", [Con("SubInt", [Var(x), Var(y)])]) -> <native-call> ("minus", x, y, i)
-  term-to-coq(|i): Con("I", [Con("MulInt", [Var(x), Var(y)])]) -> <native-call> ("mult", x, y, i)
-  term-to-coq(|i): Con("I", [Con("DivInt", [Var(x), Var(y)])]) -> <native-call> ("div", x, y, i)
+	term-to-coq(|i): Con("I", [Con("addInt", [Var(x), Var(y)])]) -> <native-call> ("plus", x, y, i)
+  term-to-coq(|i): Con("I", [Con("subInt", [Var(x), Var(y)])]) -> <native-call> ("minus", x, y, i)
+  term-to-coq(|i): Con("I", [Con("mulInt", [Var(x), Var(y)])]) -> <native-call> ("mult", x, y, i)
   
   native-call: (op, x, y, i) -> (APPLY2(Ref(op), Ref(x), Ref(y)), <union> ([Bind(x)], [Bind(y)]), i)
   
