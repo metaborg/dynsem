@@ -97,6 +97,9 @@ rules // sugaring
 
   sugar :
     TermEq(Con("IsValue",[term]),Con("True",[])) -> IsValue(term)
+    
+  sugar :
+    Rule(prem*, _, form) -> RuleW(form, prem*)
   
 rules // desugaring maps
   
