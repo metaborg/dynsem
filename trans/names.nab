@@ -2,7 +2,7 @@ module names
 
 imports	include/ds
 	
-namespaces Module Variable Constructor Sort
+namespaces Module Variable Constructor Sort Parent
 	
 binding rules
 
@@ -10,4 +10,29 @@ binding rules
   	defines Module name
   	scopes Variable, Constructor, Sort
   	
+  Var(x) : 
+  	defines Variable x
+  	
+  VarRef(x) :
+  	refers to Variable x
+  	
+  Rule(prem*, _, conc) :
+  	scopes Variable
+
+  RuleW(conc, prem*) :
+  	scopes Variable
+  	  	
+  SortDecl(ty, _) :
+  	defines Sort ty
+  	
+  SimpleSort(ty) :
+  	refers to Sort ty
+
+  ConsDecl(c, ty*, ty, _) :
+  	defines Constructor c of type (ty*, ty)
+  	  	
+  Con(c, t*) :
+  	refers to Constructor c
+  	// implicitly defines Parent "parent" in t*
+  	// where c has type (ty*, ty)
   	

@@ -22,15 +22,22 @@ imports
 	outline
 	strict
 	sugar
+	mark-references
+	types.generated
+	
+signature
+  constructors
+    Var : LID -> Term
+    Var : ID -> Term
 
 rules // Analysis
 	
 	editor-analyze = analysis-default-editor
 	
 	analysis-single-default-interface = 
-		analysis-single-default(id, id, id|<language>)
+		analysis-single-default(mark-var-defs-in-rules, id, id|<language>)
 	analysis-multiple-default-interface = 
-		analysis-multiple-default(parse-file <+ !(), id, id, id|<language>, <project-path>)
+		analysis-multiple-default(parse-file <+ !(), mark-var-defs-in-rules, id, id|<language>, <project-path>)
 	
 	editor-save = 
 	  where(generate-stratego; write-string-to-file); analysis-save-default(|<language>)
@@ -89,7 +96,7 @@ rules // Debugging
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"desugared.aterm")> path;
-      result   := <desugar-all> ast
+      result   := <desugar-all; mark-var-defs-in-rules> ast
 			
 	debug-show-index-current =
 		analysis-debug-show-current-partition(|<language>)

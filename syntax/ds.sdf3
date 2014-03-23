@@ -57,11 +57,11 @@ templates // formulas
   
 templates // terms
 
-  Term.VarRef   = [[ID]]  {avoid}
+  Term.VarRef   = [[ID]] {avoid}
   Term.VarRef   = [[LID]] {avoid}
 
-  Term.Var      = [[ID]]
-  Term.Var      = [[LID]]
+  Term.Var      = [[ID]]  
+  Term.Var      = [[LID]] 
 
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]

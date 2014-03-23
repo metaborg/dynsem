@@ -1,0 +1,30 @@
+module mark-references
+
+imports include/ds
+
+rules
+	
+	mark-var-defs-in-rules =
+		alltd(mark-var-defs-in-rule)
+		
+  mark-var-defs-in-rule =
+  	Axiom(mark-var-defs-in-conclusion)
+		
+  mark-var-defs-in-rule :
+  	RuleW(conc, prem*) -> RuleW(conc', prem'*)
+  	where conc' := <mark-var-defs-in-conclusion> conc
+        ; prem'* := <map(mark-vardefs-in-premise)> prem*
+		
+  mark-var-defs-in-conclusion =
+  	Relation(make-vars, make-vars, id, id)
+  
+  mark-vardefs-in-premise =
+  	alltd(mark-vardefs-in-relation)
+  	
+  mark-vardefs-in-relation =
+  	Relation(id, id, make-vars, make-vars)
+  	<+ TermEq(id, make-vars)
+  
+  make-vars =
+  	alltd( \ VarRef(x) -> Var(x) \)
+  	

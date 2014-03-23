@@ -31,7 +31,7 @@ rules // arithmetic
     
   Add(e1, e2) --> I(addInt(i, j))
   where e1 --> I(i), e2 --> I(j)
- 
+  
   Sub(e1, e2) --> I(subInt(i, j))
   where e1 --> I(i), e2 --> I(j)
   
