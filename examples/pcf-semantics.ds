@@ -43,7 +43,7 @@ signature
     term   {native}
     int    {native}
     string {native}
-    value  {native}
+    value  {native, value}
     E      {native}
   
   constructors
