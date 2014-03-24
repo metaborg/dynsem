@@ -5,6 +5,7 @@ imports
   libstratego-gpp
   libstratego-aterm
   include/ds
+  ds
   lib/editor-common.generated
   sugar
   
@@ -118,11 +119,8 @@ rules // lift constructors from sub-terms in premises
           (prem2*, rhs') := <lift-constructors-from-match> rhs;
           (not(<?[]> prem1*) <+ not(<?[]> prem2*))
   
-  lift-constructors-from-premise:
-    Formula(Relation(reads, source, relation, Target(target, tc*))) ->
-      [Formula(Relation(reads, source, relation, Target(target', tc*))), prem1*]
-    where
-      (prem1*, target') := <lift-constructors-from-match> target;
-      not(<?[]> prem1*)
-          
-    
+  lift-constructors-from-premise :
+    Formula(Relation(reads, source, relation, Target(con@Con(_, _), tc*))) ->
+      <lift-constructors-from-premises> [Formula(Relation(reads, source, relation, Target(Var(x), tc*))), Formula(TermEq(Var(x), con)) ]
+    with
+      x := <new>

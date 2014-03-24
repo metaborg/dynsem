@@ -127,7 +127,7 @@ rules // Builders
   refocus-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"refocussed.ds")> path;
+      filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
   factorize-editor:
@@ -141,6 +141,18 @@ rules // Builders
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
       result   := <desugar-all; explicate-module; sugar-all; pp-debug> selected
+
+  explicate-factorize-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"explicated.factorized.ds")> path;
+      result   := <desugar-all; explicate-module; factorize-module; sugar-all; pp-debug> selected
+
+  explicate-factorize-editor-ast:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"explicated.factorized.aterm")> path;
+      result   := <desugar-all; explicate-module; factorize-module> selected
 
   explicate-editor-ast:
     (selected, position, ast, path, project-path) -> (filename, result)
