@@ -10,8 +10,9 @@ rules
   outline-expand-to-level = !3
 
   to-outline-label: Module(name, _) -> name
-  to-outline-label: Entity(name, _) -> name
-  to-outline-label: Property(name, _) -> name
+  // UNDONE (VV): constructors not found in language
+  // to-outline-label: Entity(name, _) -> name
+  // to-outline-label: Property(name, _) -> name
   
   to-outline-label: Rule(name, _, _) -> name
   
