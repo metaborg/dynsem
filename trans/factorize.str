@@ -24,12 +24,13 @@ rules
   factorize-rule :
     Rule(prem1*, infer, 
           Relation(reads, Source(lhs,sc*), DynamicEmitted(em1*), Target(rhs,tc*))) -> 
-    Rule(prem4*, infer, 
+    Rule(prem5*, infer, 
           Relation(reads, Source(lhs',sc*), DynamicEmitted(em1*), Target(rhs',tc*)))
     with
       (prem2*, lhs') := <lift-constructors-from-match> lhs;
       (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-      prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*]
+      prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*];
+      prem5* := <lift-mapselect-from-premises> prem4*
           
   factorize-rule :
     Rule(prem1*, infer, TermEq(lhs, rhs)) -> Rule(prem4*, infer, TermEq(lhs', rhs'))
@@ -124,3 +125,36 @@ rules // lift constructors from sub-terms in premises
       <lift-constructors-from-premises> [Formula(Relation(reads, source, relation, Target(Var(x), tc*))), Formula(TermEq(Var(x), con)) ]
     with
       x := <new>
+
+rules // lift map access from premises that do both match and bind
+  
+  lift-mapselect-from-premises:
+    [prem | prem1* ] -> prem3*
+    with
+      if prem2* := <lift-mapselect-from-premise> prem then
+        prem3* := <lift-mapselect-from-premises> [prem2*, prem1*]
+      else
+        prem3* := [prem | <lift-mapselect-from-premises> prem1* ]
+      end
+  
+  lift-mapselect-from-premises:
+    [] -> []
+  
+  lift-mapselect-from-premise:
+    Formula(TermEq(lhs@MapSelect(_, _), rhs)) ->
+      [Formula(TermEq(lhs, Var(x))), Formula(TermEq(VarRef(x), rhs))]
+    where
+      <?Con(_, _)> rhs
+      +
+      <?String(_)> rhs
+      +
+      <?Int(_)> rhs
+    with
+      x := <new>
+  
+  lift-mapselect-from-premise:
+    Formula(TermEq(lhs@MapSelect(_, _), rhs@VarRef(_))) ->
+      [Formula(TermEq(lhs, Var(x))), Formula(TermEq(VarRef(x), rhs))]
+    with
+      x := <new>
+
