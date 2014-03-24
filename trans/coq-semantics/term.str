@@ -49,7 +49,7 @@ rules // Terms
 	  Var(x) -> (Ref(x), [Bind(x)], i)
 	  
 	term-to-coq(|i): // Ugly, but the only one supported by Coq for now, anyways
-	  Map([Bind(e1, e2), MapEntry(Var(env))]) -> (CONS_ENV(e1', e2', env), b*, i2)
+	  Map([Bind(e1, e2), MapEntry(Var(env))]) -> (CONS_ENV(e1', e2', Ref(env)), b*, i2)
 	  where
 	    (e1', b1*, i1) := <term-to-coq(|i)> e1
 	  ; (e2', b2*, i2) := <term-to-coq(|i1)> e2
@@ -74,6 +74,6 @@ rules // Fold rules
 
 overlays
   
-  CONS_ENV(a, t, env) = APPLY2(Ref("Cons_Env"), PAIR(a, t), Ref(env))
+  CONS_ENV(a, t, env) = APPLY2(Apply(Ref("env_extend"), env), a, t)
   
   CLOS(e1, e2, env) = APPLY2(Apply(Ref("Clos"), e1), e2, env)
