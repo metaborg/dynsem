@@ -1,17 +1,17 @@
 module check
 
 imports
-
 	include/ds
 	lib/editor-common.generated
 	lib/runtime/nabl/check
 
 rules 
 	
-	constraint-warning:
-		Entity(x, _) -> (x, $[Entity names must start with a capital])
-		where
-			not(<string-starts-with-capital> x)
+	// UNDONE (VV): constructor not declared in project
+	// constraint-warning:
+	// 	Entity(x, _) -> (x, $[Entity names must start with a capital])
+	// 	where
+	// 		not(<string-starts-with-capital> x)
 
 	constraint-note:
 		Module(x @ "example", _) -> (x, $[This is just an example program in the "entities" language 
