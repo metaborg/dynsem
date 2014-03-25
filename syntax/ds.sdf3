@@ -36,8 +36,11 @@ templates // rules
   
 templates // formulas
 
+  Formula.Match    = [[Term] => [Term]]
   Formula.TermEq   = [[Term] = [Term]]
+  Formula.TermEq   = [[Term] == [Term]]  
   Formula.TermNeq  = [[Term] != [Term]]
+  
   Formula.Relation = [[Reads][Source] [Rel] [Target]]
   Formula.IsValue  = [value([Term])]
   
