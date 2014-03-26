@@ -1,7 +1,9 @@
 module mark-references
 
-imports include/ds
-
+imports
+  include/ds
+  ds
+  
 rules
 	
 	mark-var-defs-in-rules =
@@ -23,7 +25,9 @@ rules
   	
   mark-vardefs-in-relation =
   	Relation(id, id, make-vars, make-vars)
-  	<+ TermEq(id, make-vars)
+  	<+ TermEq(id, id)
+  	<+ TermNeq(id, id)
+  	<+ Match(id, make-vars)
   
   make-vars =
   	alltd( \ VarRef(x) -> Var(x) \)

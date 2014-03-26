@@ -8,6 +8,7 @@ imports
   ds
   lib/editor-common.generated
   sugar
+  mark-references
   
 strategies
     
@@ -17,7 +18,7 @@ strategies
       section'* := <map(try(factorize-rules))> section*
         
   factorize-rules = 
-    desugar-all; alltd(factorize-rule); sugar-all
+    desugar-all; alltd(factorize-rule); mark-var-defs-in-rules; sugar-all
     
 rules
   

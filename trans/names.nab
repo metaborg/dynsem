@@ -16,6 +16,9 @@ binding rules
   VarRef(x) :
   	refers to Variable x
   	
+  Axiom(conc) :
+    scopes Variable
+ 
   Rule(prem*, _, conc) :
   	scopes Variable
 

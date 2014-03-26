@@ -1,7 +1,6 @@
 module ds
 
 imports
-	
 	libstratego-lib
 	libstratego-gpp
 	libstratego-aterm
