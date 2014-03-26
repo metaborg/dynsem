@@ -9,7 +9,8 @@ imports
 	lib/runtime/analysis/-
 	lib/runtime/nabl/-
 	lib/runtime/task/-
-	lib/runtime/index/- 
+	lib/runtime/index/-
+	lib/runtime/editor/properties 
 	coq-semantics/main
 	pp
 	names
@@ -63,10 +64,16 @@ rules // Editor services
 		where
 			definition := <analysis-resolve(|<language>, project-path)> node
 
-	// Returns "hover help" information for a particular node in the editor.
-	// For references, this rule is invoked using the resolved term.
-	editor-hover:
-		(target, position, ast, path, project-path) -> "Hover"
+	 // Returns "hover help" information for a particular node in the editor.
+  // For references, this rule is invoked using the resolved term.
+  editor-hover:
+    (target, position, ast, path, project-path) ->
+      <get-editor-properties(pp-ds-string |<language>, project-path);properties-to-html>target
+
+  // Gathers the properties for the properties view.
+  editor-properties:
+    (target, position, ast, path, project-path) ->
+      <get-all-editor-properties(pp-ds-string |<language>, project-path)>target
 
 	// Completes an identifier when the user presses control-space
 	// (the completion identifier in the AST provides additional context information)

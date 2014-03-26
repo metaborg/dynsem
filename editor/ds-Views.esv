@@ -4,3 +4,5 @@ views
   
   outline view: outline
     expand to level: 3
+    
+  properties view: editor-properties
