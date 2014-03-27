@@ -3,10 +3,10 @@ module coq-semantics/main
 imports
   libstratego-gpp
   coq-semantics/-
-  lib/runtime/index/-
-  lib/runtime/nabl/-
-  lib/runtime/properties/-
-  lib/runtime/task/-
+  lib/index/-
+  lib/nabl/-
+  lib/properties/-
+  lib/task/-
   names
   lib/editor-common.generated
   include/ds

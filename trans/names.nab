@@ -1,18 +1,29 @@
 module names
 
-imports	include/ds
+imports
+  include/ds
+  lib/nabl/-
 	
 namespaces Module Variable Constructor Sort Parent
-	
+
+
+properties
+  // parent of Sort : Sort
+  expected-type of Term : Sort
+
 binding rules
 
   Module(name, section*) :
   	defines Module name
   	scopes Variable, Constructor, Sort
   	
-  Var(x) : 
-  	defines Variable x
-  	
+  v@Var(x) :
+  	defines Variable x of type t
+  	where v has expected-type t
+  
+  TypedVar(x, t) :
+    defines Variable x of type t
+  
   VarRef(x) :
   	refers to Variable x
   	
@@ -24,7 +35,7 @@ binding rules
 
   RuleW(conc, prem*) :
   	scopes Variable
-  	  	
+
   SortDecl(ty, _) :
   	defines Sort ty
   	
@@ -38,4 +49,6 @@ binding rules
   	refers to Constructor c
   	// implicitly defines Parent "parent" in t*
   	// where c has type (ty*, ty)
+ 
+
   	

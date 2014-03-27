@@ -3,7 +3,7 @@ module check
 imports
 	include/ds
 	lib/editor-common.generated
-	lib/runtime/nabl/check
+	lib/nabl/check
 
 rules 
 	

@@ -2,8 +2,8 @@ module editor/ds-Outliner
 
 imports
   include/ds
-  lib/runtime/editor/outline-library
-  lib/runtime/editor/origins
+  lib/editor/outline-library
+  lib/editor/origins
   editor/ds-Outliner.generated
 
 rules

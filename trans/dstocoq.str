@@ -17,7 +17,7 @@ imports
   coq/trans/Gallina.pp.generated
   coq/trans/Vernacular.pp.generated
   coq/trans/Coq.pp.generated
-  lib/runtime/tmpl/pp
+  lib/tmpl/pp
   coq/include/Coq-parenthesize
 
 signature constructors

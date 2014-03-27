@@ -63,8 +63,9 @@ templates // terms
   Term.VarRef   = [[ID]] {avoid}
   Term.VarRef   = [[LID]] {avoid}
 
-  Term.Var      = [[ID]]  
-  Term.Var      = [[LID]] 
+  Term.TypedVar = [[ID] : [Type]]
+  Term.Var      = [[ID]]
+  Term.TypedVar = [[LID] : [Type]] 
 
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
