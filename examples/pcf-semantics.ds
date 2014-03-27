@@ -2,21 +2,21 @@ module pcf-semantics
 
 rules // binding
 
-  E env |- Var(x) --> v 
-  where env[x] = T(e, env'),
+  E env |- Var(x) --> v
+  where env[x] => T(e, env'),
         E env' |- e --> v
   
-  E env |- Fun(Param(x, t), e) --> C(x, e, env)
+  E env : E |- Fun(Param(x, t), e ) --> C(x, e, env)
   
-  E env |- Fix(Param(x, t), e) --> v
+  E env : E |- Fix(Param(x, t : Type), e) --> v
   where 
     E {x |--> T(Fix(Param(x,t),e),env), env} |- e --> v
   
-  E env |- App(e1, e2) --> v
-  where E env |- e1 --> C(x, e, env'),
+  E env : E |- App(e1, e2) --> v
+  where E env |- e1 --> C(x, e, env' : E),
         E {x |--> T(e2, env), env'} |- e --> v
         
-  E env |- Let(x, t, e1, e2) --> v
+  E env : E |- Let(x, t, e1, e2 ) --> v
   where E {x |--> T(e1, env), env} |- e2 --> v
 
 rules // arithmetic
@@ -24,7 +24,7 @@ rules // arithmetic
   Num(i) --> I(i)
       
   Ifz(e1, e2, e3) --> v
-  where e1 --> I(i), i = 0, e2 --> v
+  where e1 --> I(i), i == 0, e2 --> v
   
   Ifz(e1, e2, e3) --> v
   where e1 --> I(i), i != 0, e3 --> v
@@ -57,14 +57,13 @@ signature
     
 signature // PCF
   sorts
-    Exp
     Type
     Param
     Start
     Exp -> Start
     
   constructors
-  
+    Num     : int -> Exp
     Ifz     : Exp * Exp * Exp -> Exp
     FunType : Type * Type -> Type
     IntType : -> Type
@@ -73,7 +72,6 @@ signature // PCF
     Mul     : Exp * Exp -> Exp
     Sub     : Exp * Exp -> Exp
     Add     : Exp * Exp -> Exp
-    Num     : int -> Exp
     Let     : string * Type * Exp * Exp -> Exp
     App     : Exp * Exp -> Exp
     Fix     : Param * Exp -> Exp

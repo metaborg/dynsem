@@ -190,33 +190,3 @@ rules // Builders
     with
       filename := <guarantee-extension(|"unstrict.ds")> path;
       result   := <unstrict-rules; pp-debug> selected
-
-imports lib/types/- lib/properties/-
-
-rules
- 
-  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
-    Con(c, t*) -> Con(c, t'*)
-    with
-      debug(!1);
-      c-def   := <nabl-use-candidate(|lang, ctx, uri*, c)> UseCandidate(NablNsConstructor(), [], Current(), (), ());
-      debug(!2);
-      x56 := <type-lookup(|ctx)> c-def;
-      debug(!3);
-      tys := <new-task(|ctx)> Rewrite("proj20", x56); task-create-id(|ctx, [x56]);
-      debug(!4);
-      ty := <new-task(|ctx)> Rewrite("proj21", x56); task-create-id(|ctx, [tys]);
-      debug(!5);
-      t'* := <map-with-index(attach-expected-type-to-term(|ctx, uri*, uri'*, tys))> t*;
-      debug(!6)
- 
-  attach-expected-type-to-term(|ctx, old-uri*, new-uri*, tys):
-  	(i, term{a*}) -> term{(NablProp_expected-type(), term-ty), a*}
-  	with
-  		term-ty := <task-create-index(|ctx, i)> tys
-
-  task-rewrite :
-    ("proj21", (_, ty)) -> ty
-  
-  task-rewrite :
-    ("proj20", (ty_, _)) -> ty_
