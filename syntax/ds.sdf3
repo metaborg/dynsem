@@ -56,7 +56,7 @@ templates // formulas
   Rel.Dynamic        = [-->]
   Rel.DynamicEmitted = [-- [LabelComp+; separator=", "] -->]
   
-  LabelComp.LabelComp = [[ID] [Term]]
+  LabelComp.LabelComp = [[Type] [Term]]
   
 templates // terms
 
