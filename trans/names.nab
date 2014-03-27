@@ -47,6 +47,9 @@ binding rules
   	  	
   Con(c, t*) :
   	refers to Constructor c
+  	
+  LabelComp(s, _) :
+    refers to Sort s
  
 
   	

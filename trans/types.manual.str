@@ -13,12 +13,18 @@ rules
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
     Con(c, t*) -> Con(c, t'*)
     with
-      c-def   := <nabl-use-candidate(|lang, ctx, uri*, c)> UseCandidate(NablNsConstructor(), [], Current(), (), ());
+      c-def := <nabl-use-candidate(|lang, ctx, uri*, c)> UseCandidate(NablNsConstructor(), [], Current(), (), ());
       c-ty := <type-lookup(|ctx)> c-def;
       tys := <new-task(|ctx)> Rewrite("proj20", c-ty); task-create-id(|ctx, [c-ty]);
       ty := <new-task(|ctx)> Rewrite("proj21", c-ty); task-create-id(|ctx, [tys]);
       t'* := <map-with-index(attach-expected-type-to-term(|ctx, uri*, uri'*, tys))> t*
- 
+  
+  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
+    LabelComp(s-ref, t) -> LabelComp(s-ref, t')
+    with
+      s-decl := <nabl-use-candidate(|lang, ctx, uri*, s-ref)> UseCandidate(NablNsSort(), [], Current(), (), ());
+      t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [s-decl])> (1, t)
+  
   attach-expected-type-to-term(|ctx, old-uri*, new-uri*, tys):
     (i, term{a*}) -> term{(NablProp_expected-type(), term-ty), a*}
     with
