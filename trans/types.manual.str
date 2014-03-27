@@ -22,8 +22,7 @@ rules
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
     LabelComp(s-ref, t) -> LabelComp(s-ref, t')
     with
-      s-decl := <nabl-use-candidate(|lang, ctx, uri*, s-ref)> UseCandidate(NablNsSort(), [], Current(), (), ());
-      t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [s-decl])> (1, t)
+      t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [s-ref])> (1, t)
   
   attach-expected-type-to-term(|ctx, old-uri*, new-uri*, tys):
     (i, term{a*}) -> term{(NablProp_expected-type(), term-ty), a*}
