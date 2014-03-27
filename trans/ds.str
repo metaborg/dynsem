@@ -24,6 +24,7 @@ imports
 	sugar
 	mark-references
 	types.generated
+	types.manual
 	
 signature
   constructors

@@ -8,7 +8,6 @@ namespaces Module Variable Constructor Sort Parent
 
 
 properties
-  // parent of Sort : Sort
   expected-type of Term : Sort
 
 binding rules
@@ -20,9 +19,6 @@ binding rules
   v@Var(x) :
   	defines Variable x of type t
   	where v has expected-type t
-  
-  TypedVar(x, t) :
-    defines Variable x of type t
   
   VarRef(x) :
   	refers to Variable x
@@ -38,7 +34,11 @@ binding rules
 
   SortDecl(ty, _) :
   	defines Sort ty
-  	
+  
+  InjDecl(ty, parent, _) :
+    defines Sort ty
+    refers to Sort parent
+  
   SimpleSort(ty) :
   	refers to Sort ty
 
@@ -47,8 +47,6 @@ binding rules
   	  	
   Con(c, t*) :
   	refers to Constructor c
-  	// implicitly defines Parent "parent" in t*
-  	// where c has type (ty*, ty)
  
 
   	
