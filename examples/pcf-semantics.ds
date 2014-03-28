@@ -5,24 +5,24 @@ rules // binding
   E env |- Var(x) --> v
   where env[x] => T(e, env'),
         E env' |- e --> v
-  
-  E env : E |- Fun(Param(x, t), e ) --> C(x, e, env)
-  
-  E env : E |- Fix(Param(x, t : Type), e) --> v
-  where 
+
+  E env |- Fun(Param(x, t), e ) --> C(x, e, env)
+
+  E env |- Fix(Param(x, t), e) --> v
+  where
     E {x |--> T(Fix(Param(x,t),e),env), env} |- e --> v
   
-  E env : E |- App(e1, e2) --> v
-  where E env |- e1 --> C(x, e, env' : E),
+  E env |- App(e1, e2) --> v
+  where E env |- e1 --> C(x, e, env'),
         E {x |--> T(e2, env), env'} |- e --> v
         
-  E env : E |- Let(x, t, e1, e2 ) --> v
+  E env |- Let(x, t, e1, e2) --> v
   where E {x |--> T(e1, env), env} |- e2 --> v
 
 rules // arithmetic
   
   Num(i) --> I(i)
-      
+
   Ifz(e1, e2, e3) --> v
   where e1 --> I(i), i == 0, e2 --> v
   
@@ -39,17 +39,10 @@ rules // arithmetic
   where e1 --> I(i), e2 --> I(j)
  
 signature
-  sorts
-    term   {native}
-    int    {native}
-    string {native}
-    value  {native, value}
-    E      {native}
-  
   constructors
     C : string * Exp * E -> value // closure
     I : int -> value              // integer
-    T : term * E -> value         // thunk
+    T : Exp * E -> value         // thunk
     
     addInt : int * int -> int { native }
     subInt : int * int -> int { native }
@@ -63,6 +56,7 @@ signature // PCF
     Exp -> Start
     
   constructors
+    X : -> Exp
     Num     : int -> Exp
     Ifz     : Exp * Exp * Exp -> Exp
     FunType : Type * Type -> Type

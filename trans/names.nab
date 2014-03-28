@@ -9,7 +9,8 @@ namespaces Module Variable Constructor Sort Parent
 
 properties
   expected-type of Term : Sort
-  sort-annos of Sort : Term
+  sort-annos of Sort : SignatureAnnos
+  cons-annos of Constructor : SignatureAnnos
 
 binding rules
 
@@ -17,15 +18,15 @@ binding rules
     defines Module name
     scopes Variable, Constructor, Sort
     implicitly defines Sort "term"
-      of sort-annos SignatureAnnos([NativeAnno()])
+      of cons-annos SignatureAnnos([NativeAnno()])
     implicitly defines Sort "int"
-      of sort-annos SignatureAnnos([NativeAnno()])
+      of cons-annos SignatureAnnos([NativeAnno()])
     implicitly defines Sort "string"
-      of sort-annos SignatureAnnos([NativeAnno()])
+      of cons-annos SignatureAnnos([NativeAnno()])
     implicitly defines Sort "value"
-      of sort-annos SignatureAnnos([NativeAnno(), ValueAnno()])
+      of cons-annos SignatureAnnos([NativeAnno(), ValueAnno()])
     implicitly defines Sort "E"
-      of sort-annos SignatureAnnos([NativeAnno()])
+      of cons-annos SignatureAnnos([NativeAnno()])
     
   v@Var(x) :
   	defines Variable x of type t
@@ -45,18 +46,20 @@ binding rules
 
   SortDecl(ty, annos) :
   	defines Sort ty
-  	 of sort-annos annos
+  	 of cons-annos annos
   
   InjDecl(ty, parent, annos) :
     defines Sort ty
-      of sort-annos annos
+      of cons-annos annos
     refers to Sort parent
   
   SimpleSort(ty) :
   	refers to Sort ty
 
-  ConsDecl(c, ty*, ty, _) :
-  	defines Constructor c of type (ty*, ty)
+  ConsDecl(c, ty*, ty, annos) :
+  	defines Constructor c
+  	 of type (ty*, ty)
+  	 of cons-annos annos
   	  	
   Con(c, t*) :
   	refers to Constructor c
