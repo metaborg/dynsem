@@ -13,7 +13,7 @@ rules
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"interpreter.aterm")> path;
-      result   := <to-java-interpreter> selected
+      result   := <to-java-interpreter> ast
 
 rules
   
@@ -22,7 +22,8 @@ rules
     factorize-module;
     alltd(escape-variable-names);
     fuse-sections;
-    merge-overlapping-rules
+    merge-overlapping-rules;
+    optimize-environments
 
 rules /* rename variables */
 
@@ -110,4 +111,39 @@ rules /* merge ovelapping rules */
     where
       <strip-annos; eq> (p1, p2)
 
-    
+signature
+  constructors
+    OptMap: List(Term) -> Term
+
+rules /* optimize environments */
+
+  optimize-environments = alltd(optimize-environment)
+
+  optimize-environment:
+    mex@MapExtend(_, _) -> OptMap(<implode-env-extend; eliminate-env-blanks> mex)
+
+  implode-env-extend:
+    MapExtend(map1, map2) -> [ bind1*, bind2* ]
+    with
+      bind1* := <implode-env-extend> map1
+      ; bind2* := <implode-env-extend> map2
+
+  implode-env-extend:
+    Map([]) -> [ Map([]) ]
+  
+  implode-env-extend:
+    Map([bind@Bind(_, _)]) -> [ bind ]
+  
+  implode-env-extend:
+    v@VarRef(_) -> [ v ]
+  
+  eliminate-env-blanks:
+    [ Map([]), bind | xsbind ] -> <eliminate-env-blanks> [bind | xsbind]
+  
+  eliminate-env-blanks:
+    [ bind | xsbind ] -> [bind | <eliminate-env-blanks> xsbind ]
+    where
+      <not(?Map([]))> bind
+  
+  eliminate-env-blanks:
+    [] -> []
