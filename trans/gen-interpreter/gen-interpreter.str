@@ -1,0 +1,109 @@
+module gen-interpreter/gen-interpreter
+
+imports
+	include/ds
+	ds
+	sugar
+	explicate
+	factorize
+
+rules
+  
+  generate-interpreter:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"interpreter.aterm")> path;
+      result   := <to-java-interpreter> selected
+
+rules
+  
+  to-java-interpreter =
+    strip-annos;
+    explicate-module;
+    factorize-module;
+    alltd(escape-variable-names);
+    fuse-sections;
+    merge-overlapping-rules
+
+rules /* rename variables */
+
+  escape-variable-names:
+    t -> <alltd(Var(escape-identifier) <+ VarRef(escape-identifier))> t
+  
+  escape-identifier = string-replace(|"'", "_")
+
+rules
+	
+	fuse-sections:
+		Module(mod, body*) -> Module(mod, [Signatures([sort-decl*, cons-decl*]), rule-decl*])
+		with
+			sort-decl* := <collect-all(?Sorts(<id>)); concat> body*;
+      cons-decl* := <collect-all(?Constructors(<id>)); concat> body*;
+      rule-decl* := <collect-all(?Rules(<id>)); concat> body*
+
+signature
+  constructors
+    MergePoint: List(MergeAlternative)-> Premise
+    MergeAlternative: Premise * List(Premise) -> MergeAlternative
+
+rules /* merge ovelapping rules */
+
+  merge-overlapping-rules:
+    Module(mod, body*) -> Module(mod, [sig*, merged-rule*])
+    with
+      sig* := <collect-all(?Signatures(_))> body*
+    with
+      cons-arity* := <collect-all(\ ConsDecl(cons, args, _, _) -> (cons, <length> args) \); make-set> body*;
+      rule* := <collect-all(?Rule(_, _, _))> body*;
+      merged-rule* := <map(group-rules(|rule*)); unzip; Snd; map(merge-rules); concat> cons-arity*
+  
+  group-rules(|rule*):
+    (cons, arity) -> (cons, cons-rule*)
+    with
+      cons-rule* := <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
+  
+  is-rule-matching-cons(|cons-goal, arity) =
+    ?Rule(_, _, Relation(_, Source(Con(cons-actual, conargs), _), _, _))
+    ; <?cons-goal> cons-actual
+    ; <eq> (arity, <length> conargs)
+  
+  merge-rules:
+    [] -> []
+
+  merge-rules:
+    rule*@[x | xs] -> rule'*
+    with
+      rule'* := <foldl(merge-rules)> (xs, [x])
+
+  merge-rules:
+    (r1@Rule(_, _, rel1), rule*) -> [rule'*, merged-rule]
+    where
+      r2 := <fetch-elem(?Rule(_, _, rel1))> rule*
+    with
+      merged-rule := <merge-rule> (r1, r2)
+      ; rule'* := <filter(not(?r2))> rule*
+  
+  merge-rules:
+    (r1@Rule(_, _, rel1), rule*) -> [rule*, r1]
+    where
+      <not(fetch-elem(?Rule(_, _, rel1)))> rule*
+  
+  merge-rule:
+    (Rule(prem1*, bar1, rel), Rule(prem2*, bar2, rel)) -> Rule(prem-merged*, bar1, rel)
+    with
+      prem-merged* := <merge-premises> (prem1*, prem2*)
+  
+  // there are no premises
+  merge-premises:
+    ([], []) -> []
+  
+  // the first premises are not the same
+  merge-premises:
+    ([p1 | p1xs], [p2 | p2xs]) -> [ MergePoint([MergeAlternative(p1, p1xs), MergeAlternative(p2, p2xs)])]
+    where
+      <not(?p1)> p2
+  
+  // the first premises are the same
+  merge-premises:
+    ([p1 | p1xs], [p1 | p2xs]) -> [p1 | <merge-premises> (p1xs, p2xs)]
+    

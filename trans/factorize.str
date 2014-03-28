@@ -17,8 +17,7 @@ strategies
     where
       section'* := <map(try(factorize-rules))> section*
         
-  factorize-rules = 
-    desugar-all; alltd(factorize-rule); mark-var-defs-in-rules; sugar-all
+  factorize-rules = alltd(factorize-rule)
     
 rules
   

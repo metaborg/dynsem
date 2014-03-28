@@ -24,6 +24,7 @@ imports
 	sugar
 	types.generated
 	types.manual
+	gen-interpreter/gen-interpreter
 	
 signature
   constructors
@@ -152,7 +153,7 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factorized.ds")> path;
-      result   := <factorize-module; pp-debug> selected
+      result   := <factorize-module; sugar-all; pp-debug> selected
 
   explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)

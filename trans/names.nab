@@ -4,7 +4,7 @@ imports
   include/ds
   lib/nabl/-
 	
-namespaces Module Variable Constructor Sort Parent
+namespaces Module Variable Constructor Sort
 
 
 properties
