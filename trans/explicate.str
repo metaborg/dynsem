@@ -8,6 +8,7 @@ imports
   lib/editor-common.generated
   sugar
   lib-ds
+  ds
   
 strategies
   
