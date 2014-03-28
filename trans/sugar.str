@@ -2,6 +2,7 @@ module sugar
 
 imports
 	include/ds
+	mark-references
 	
 signature
   constructors
@@ -10,7 +11,7 @@ signature
 	
 rules // desugaring
 	
-  desugar-all = innermost(desugar); alltd(rules-concat)
+  desugar-all = mark-var-defs-in-rules; innermost(desugar); alltd(rules-concat)
   
   desugar :
     SortDecl(srt, Some(annos)) -> SortDecl(srt, annos)

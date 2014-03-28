@@ -22,7 +22,6 @@ imports
 	outline
 	strict
 	sugar
-	mark-references
 	types.generated
 	types.manual
 	
@@ -36,9 +35,9 @@ rules // Analysis
 	editor-analyze = analysis-default-editor
 	
 	analysis-single-default-interface = 
-		analysis-single-default(mark-var-defs-in-rules, id, id|<language>)
+		analysis-single-default(desugar-all, id, id|<language>)
 	analysis-multiple-default-interface = 
-		analysis-multiple-default(parse-file <+ !(), mark-var-defs-in-rules, id, id|<language>, <project-path>)
+		analysis-multiple-default(parse-file <+ !(), desugar-all, id, id|<language>, <project-path>)
 	
 	editor-save = 
 	  where(generate-stratego; write-string-to-file); analysis-save-default(|<language>)
@@ -103,7 +102,7 @@ rules // Debugging
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"desugared.aterm")> path;
-      result   := <desugar-all; mark-var-defs-in-rules> ast
+      result   := <desugar-all> ast
 			
 	debug-show-index-current =
 		analysis-debug-show-current-partition(|<language>)
@@ -136,7 +135,7 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"generated.str")> path;
-      result   := <desugar-all; explicate-module; to-stratego(|filename)> selected
+      result   := <explicate-module; to-stratego(|filename)> selected
       
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
@@ -159,25 +158,25 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      result   := <desugar-all; explicate-module; sugar-all; pp-debug> selected
+      result   := <explicate-module; sugar-all; pp-debug> selected
 
   explicate-factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.factorized.ds")> path;
-      result   := <desugar-all; explicate-module; factorize-module; sugar-all; pp-debug> selected
+      result   := <explicate-module; factorize-module; sugar-all; pp-debug> selected
 
   explicate-factorize-editor-ast:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.factorized.aterm")> path;
-      result   := <desugar-all; explicate-module; factorize-module> selected
+      result   := <explicate-module; factorize-module> selected
 
   explicate-editor-ast:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.aterm")> path;
-      result   := <desugar-all; explicate-module> selected
+      result   := <explicate-module> selected
 
   // format rules
   format-editor:

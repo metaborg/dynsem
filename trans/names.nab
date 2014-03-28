@@ -9,13 +9,24 @@ namespaces Module Variable Constructor Sort Parent
 
 properties
   expected-type of Term : Sort
+  sort-annos of Sort : Term
 
 binding rules
 
   Module(name, section*) :
-  	defines Module name
-  	scopes Variable, Constructor, Sort
-  	
+    defines Module name
+    scopes Variable, Constructor, Sort
+    implicitly defines Sort "term"
+      of sort-annos SignatureAnnos([NativeAnno()])
+    implicitly defines Sort "int"
+      of sort-annos SignatureAnnos([NativeAnno()])
+    implicitly defines Sort "string"
+      of sort-annos SignatureAnnos([NativeAnno()])
+    implicitly defines Sort "value"
+      of sort-annos SignatureAnnos([NativeAnno(), ValueAnno()])
+    implicitly defines Sort "E"
+      of sort-annos SignatureAnnos([NativeAnno()])
+    
   v@Var(x) :
   	defines Variable x of type t
   	where v has expected-type t
@@ -32,11 +43,13 @@ binding rules
   RuleW(conc, prem*) :
   	scopes Variable
 
-  SortDecl(ty, _) :
+  SortDecl(ty, annos) :
   	defines Sort ty
+  	 of sort-annos annos
   
-  InjDecl(ty, parent, _) :
+  InjDecl(ty, parent, annos) :
     defines Sort ty
+      of sort-annos annos
     refers to Sort parent
   
   SimpleSort(ty) :
