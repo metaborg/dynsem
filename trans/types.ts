@@ -25,6 +25,23 @@ type rules
   InjDecl(ty, p-ty, _) :-
   where store ty <: p-ty
 
+type rules
+  
+  Int(i): SimpleSort("int")
+  String(s): SimpleSort("string")
+  
+  eq@TermEq(l, r) :-
+  where l : l-ty
+    and r : r-ty
+    and (r-ty == l-ty or r-ty <: l-ty)
+      else error "unlikely to succeed" on eq
+  
+  neq@TermNeq(l, r) :-
+  where l : l-ty
+    and r : r-ty
+    and (r-ty == l-ty or r-ty <: l-ty)
+      else error "very likely to always succeed" on neq
+  
 relations
 
   Var(x) <: VarRef(y)
