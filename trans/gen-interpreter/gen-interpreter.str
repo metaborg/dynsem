@@ -6,6 +6,7 @@ imports
 	sugar
 	explicate
 	factorize
+	lib/nabl/-
 
 rules
   
@@ -23,7 +24,9 @@ rules
     alltd(escape-variable-names);
     fuse-sections;
     merge-overlapping-rules;
-    optimize-environments
+    optimize-environments;
+    ?mod@Module(_, _);
+    sort-iface* := <sorts-to-java-interpreter> mod
 
 rules /* rename variables */
 
@@ -147,3 +150,14 @@ rules /* optimize environments */
   
   eliminate-env-blanks:
     [] -> []
+
+rules /* generate interfaces for declared sorts */
+
+  sorts-to-java-interpreter:
+    Module(mod, body*) -> <fail>
+    with
+      // nabl-collect-all-def
+      fail
+
+
+
