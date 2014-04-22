@@ -10,7 +10,7 @@ imports
 	lib/nabl/-
 	lib/task/-
 	lib/index/-
-	lib/editor/properties 
+	lib/editor/properties
 	coq-semantics/main
 	pp
 	names
@@ -72,9 +72,9 @@ rules // Editor services
       <get-editor-properties(pp-ds-string |<language>, project-path);properties-to-html>target
 
   // Gathers the properties for the properties view.
-  editor-properties:
-    (target, position, ast, path, project-path) ->
-      <get-all-editor-properties(pp-ds-string |<language>, project-path)>target
+  // editor-properties:
+  //   (target, position, ast, path, project-path) ->
+  //     <get-all-editor-properties(pp-ds-string |<language>, project-path)>target
 
 	// Completes an identifier when the user presses control-space
 	// (the completion identifier in the AST provides additional context information)
@@ -191,3 +191,4 @@ rules // Builders
     with
       filename := <guarantee-extension(|"unstrict.ds")> path;
       result   := <unstrict-rules; pp-debug> selected
+

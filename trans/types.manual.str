@@ -2,7 +2,6 @@ module types.manual
 
 imports
   lib/types/-
-  lib/properties/-
   lib/nabl/-
   lib/task/-
   include/ds
