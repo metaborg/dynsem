@@ -19,7 +19,7 @@ type rules
   Con(c, t*) : ty
   where definition of c : (ty*, ty)
     and t* : ty_t*
-    and (ty_t* == ty* or ty_t* <: ty*) 
+    and (ty_t* == ty* or ty_t* <: ty*)
     else error "types of sub-terms do not match constructor definition" on c
 
   InjDecl(ty, p-ty, _) :-
@@ -27,8 +27,8 @@ type rules
 
 type rules
   
-  Int(i): SimpleSort("int")
-  String(s): SimpleSort("string")
+  Int(i): SimpleSort("Int")
+  String(s): SimpleSort("String")
   
   eq@TermEq(l, r) :-
   where l : l-ty
