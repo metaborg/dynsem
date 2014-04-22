@@ -1,0 +1,37 @@
+module sorts-to-java
+
+imports
+  include/ds
+  generator/interpreter/java-templates
+  lib/nabl/-
+  lib/relations/-
+  
+signature
+  overlays
+    PKG_NAME() = "generated.interpreter"
+
+rules
+  
+  // sort-to-java-interpreter:
+  //   SortDecl(name, _) ->
+  //     JAVA_INTERFACE_MULTIPLE(
+  //       |[ package x_pkgname; ]|
+  //       ,  [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
+  //       , <sort-java-name(|ds-srt*)> srt
+  //       , [ node-iface*, iface*]
+  //     )
+  //   with
+  //     x_pkgname := PKG_NAME()
+  //     ; srt-alias* := <filter(srtdecl-is-inj)> srt-decl*
+  //     ; node-iface* := <srtdecl-by-srt(|ds-srt*); not(srtdecl-is-value-trans(|ds-srt*)) < ![InterfaceType(TypeName(Id("INode")), None())] + ![]> srt
+  //     ; iface* := <map(srtdecl-get-inj-into-srt; sort-java-name(|ds-srt*); !InterfaceType(TypeName(Id(<id>)), None()))> srt-alias*
+  
+  sort-to-java-interpreter:
+    InjDecl(name, _, _) -> <id>
+  
+  sort-to-java-interpreter:
+  	SortDecl(name, _) -> <debug(!"LOOKUP "); nabl-uri; get-index-relations(|"<depends-on:"); debug(!"IS ")> name
+  
+  sort-to-java-name:
+    _ -> <fail>
+

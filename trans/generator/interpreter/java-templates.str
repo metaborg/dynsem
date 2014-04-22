@@ -1,0 +1,25 @@
+module java-templates
+
+imports
+  libjava-front
+
+signature overlays
+  
+  JAVA_INTERFACE_MULTIPLE(pkgdec, imports, name, extended-ifaces) =
+		  CompilationUnit(
+		  Some(pkgdec)
+		  , imports
+		  , [ InterfaceDec(
+		        InterfaceDecHead(
+		          [Public()]
+		        , Id(name)
+		        , None()
+		        , Some(
+		            ExtendsInterfaces(extended-ifaces)
+		          )
+		        )
+		      , []
+		      )
+		    ]
+		  )
+	
