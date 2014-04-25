@@ -2,7 +2,7 @@ module names
 
 imports
   include/ds
-  lib/nabl/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
 	
 namespaces Module Variable Constructor Sort
 

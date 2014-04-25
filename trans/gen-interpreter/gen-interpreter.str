@@ -2,16 +2,26 @@ module gen-interpreter/gen-interpreter
 
 imports
 	include/ds
+	lib/editor-common.generated
 	ds
 	sugar
 	explicate
 	factorize
-	lib/nabl/-
-
+	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/relations/-
+	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/index/-
+	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
+  names
+  
 rules
+  
+  gen-package-name = !$[[<language>].generated.interpreter]
   
   generate-interpreter:
     (selected, position, ast, path, project-path) -> (filename, result)
+    with
+    	task-setup(|project-path);
+    	index-setup(|<language>, project-path)
     with
       filename := <guarantee-extension(|"interpreter.aterm")> path;
       result   := <to-java-interpreter> ast
@@ -26,6 +36,7 @@ rules
     merge-overlapping-rules;
     optimize-environments;
     ?mod@Module(_, _);
+    where(!""; debug(!9));
     sort-iface* := <sorts-to-java-interpreter> mod
 
 rules /* rename variables */
@@ -58,7 +69,10 @@ rules /* merge ovelapping rules */
     with
       cons-arity* := <collect-all(\ ConsDecl(cons, args, _, _) -> (cons, <length> args) \); make-set> body*;
       rule* := <collect-all(?Rule(_, _, _))> body*;
+    	// debug(!"A ");
+      // merged-rule* := <map(group-rules(|rule*)); debug(!1); unzip; debug(!2); Snd; debug(!3); map(merge-rules); debug(!4); concat; debug(!5)> cons-arity*
       merged-rule* := <map(group-rules(|rule*)); unzip; Snd; map(merge-rules); concat> cons-arity*
+    	// ;debug(!"B ")
   
   group-rules(|rule*):
     (cons, arity) -> (cons, cons-rule*)
@@ -154,10 +168,23 @@ rules /* optimize environments */
 rules /* generate interfaces for declared sorts */
 
   sorts-to-java-interpreter:
-    Module(mod, body*) -> <fail>
+    Module(mod, body*) -> <id>
     with
-      // nabl-collect-all-def
-      fail
-
-
+      decl* := <collect-all(?SortDecl(_, _) + ?InjDecl(_, _, _))> body*;
+      decl-pair* := <map(match-with-injected-sort(|decl*))> decl*;
+      sort-pair* := <map((get-sort-name, map(get-sort-name); add-term-sort))> decl-pair*
+      ;debug(!1)
+  
+  match-with-injected-sort(|decl*):
+    sdec -> (sdec, ssdec*)
+    where
+      srt := <get-sort-name> sdec
+    with
+      sdef := <get-annos; fetch-elem(?Def(_))> srt;
+      ssdec* := <filter(where(?InjDecl(_, <id>, _); nabl-collect-one-resolved-def; ?sdef))> decl*
+  
+  add-term-sort:
+    (srt, srt*) -> (srt, ["Term", srt*])
+  
+  get-sort-name = ?SortDecl(<id>, _) + ?InjDecl(<id>, _, _)
 

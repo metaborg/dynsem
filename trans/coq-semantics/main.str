@@ -3,13 +3,14 @@ module coq-semantics/main
 imports
   libstratego-gpp
   coq-semantics/-
-  lib/index/-
-  lib/nabl/-
-  lib/properties/-
-  lib/task/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/index/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/properties/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
   names
   lib/editor-common.generated
   include/ds
+  ds
 
 rules
   

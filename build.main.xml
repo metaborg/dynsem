@@ -22,6 +22,7 @@
                     --library
                     -I &quot;${trans}&quot;
                     -I &quot;${basedir}&quot;
+		                -I &quot;${basedir}/lib/runtime-libraries/org.spoofax.meta.runtime.libraries&quot;
                     -la stratego-lib -la stratego-sglr -la stratego-gpp -la stratego-xtc -la stratego-aterm -la stratego-parallel" />
 
 	<!-- Optional: external .def and .jar locations
@@ -29,7 +30,7 @@
     <property name="externaljar" value="../lib.jar"/>
     <property name="externaljarflags" value="-la org.lib"/>
     -->
-	<property name="externaljarflags" value="-la org.metaborg.runtime.task.interop" />
+	<!-- <property name="externaljarflags" value="-la org.metaborg.runtime.task.interop" /> -->
 
 	<!-- Environment configuration for command-line builds -->
 	<condition property="build.strategoxt.sdf" value="${eclipse.spoofaximp.nativeprefix}" else="">
@@ -50,55 +51,17 @@
 	</path>
 
 	<!-- Main target -->
-	<target name="all" depends="link-lib-files, copy-lib-files, spoofaximp.default.ctree" />
+	<target name="all" depends="link-lib-files, spoofaximp.default.ctree" />
 
-	  <target name="os-detection">
-	    <condition property="isWin">
-	      <os family="windows" />
-	    </condition>
-	  </target>
+	<target name="os-detection">
+		<condition property="isWin">
+			<os family="windows" />
+		</condition>
+	</target>
 
-	  <target name="copy-lib-files" if="isWin" depends="os-detection">
-	    <copy todir="${basedir}/lib/nabl">
-	      <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/" includes="**" />
-	    </copy>
-	    <copy todir="${basedir}/lib/index">
-	      <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/index/" includes="**" />
-	    </copy>
-	    <copy todir="${basedir}/lib/task">
-	      <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/task/" includes="**" />
-	    </copy>
-	    <copy todir="${basedir}/lib/properties">
-	      <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/properties/" includes="**" />
-	    </copy>
-	    <copy todir="${basedir}/lib/types">
-	      <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/types/" includes="**" />
-	    </copy>
-	    <copy todir="${basedir}/lib/analysis">
-	      <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/analysis/" includes="**" />
-	    </copy>
-	    <copy todir="${basedir}/lib/editor">
-	      <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/editor/" includes="**" />
-	    </copy>
-	    <copy todir="${basedir}/lib/tmpl">
-	      <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/tmpl/" includes="**" />
-	    </copy>
-	      <copy todir="${basedir}/lib/relations">
-	        <fileset dir="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/relations/" includes="**" />
-	      </copy>
-	  </target>
-
-	  <target name="link-lib-files" unless="isWin" depends="os-detection">
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/" link="${basedir}/lib/nabl" overwrite="true" />
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/index/" link="${basedir}/lib/index" overwrite="true" />
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/task/" link="${basedir}/lib/task" overwrite="true" />
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/properties/" link="${basedir}/lib/properties" overwrite="true" />
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/types/" link="${basedir}/lib/types" overwrite="true" />
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/analysis/" link="${basedir}/lib/analysis" overwrite="true" />
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/editor/" link="${basedir}/lib/editor" overwrite="true" />
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/tmpl/" link="${basedir}/lib/tmpl" overwrite="true" />
-	    <symlink resource="${basedir}/../runtime-libraries/org.spoofax.meta.runtime.libraries/relations/" link="${basedir}/lib/relations" overwrite="true" />
-	  </target>
+	<target name="link-lib-files" unless="isWin" depends="os-detection">
+		<symlink resource="${basedir}/../runtime-libraries/" link="${basedir}/lib/runtime-libraries" overwrite="true" />
+	</target>
 
 
 </project>

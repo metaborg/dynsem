@@ -1,8 +1,8 @@
 module types
 
 imports
-  lib/types/-
-  lib/relations/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/relations/-
   
 relations
 
@@ -44,5 +44,6 @@ type rules
   
 relations
 
+  // this makes no sense but it's here for some generator bug reason
   Var(x) <: VarRef(y)
   where x == y

@@ -3,7 +3,7 @@ module pp
 imports
   libstratego-lib
   libstratego-gpp
-  lib/tmpl/pp
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/tmpl/pp
   Common.pp.generated
   Module.pp.generated
   ds.pp.generated
