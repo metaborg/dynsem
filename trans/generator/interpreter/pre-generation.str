@@ -1,0 +1,141 @@
+module generator/interpreter/pre-generation
+
+imports
+  include/ds
+  ds
+  sugar
+  explicate
+  factorize
+  
+rules
+  
+  pre-generation-transform =
+    explicate-module;
+    factorize-module;
+    alltd(escape-variable-names);
+    fuse-sections;
+    merge-overlapping-rules;
+    optimize-environments
+
+rules /* rename variables */
+
+  escape-variable-names:
+    t -> <alltd(Var(escape-identifier) <+ VarRef(escape-identifier))> t
+  
+  escape-identifier = string-replace(|"'", "_")
+
+rules
+  
+  fuse-sections:
+    Module(mod, body*) -> Module(mod, [Signatures([sort-decl*, cons-decl*]), rule-decl*])
+    with
+      sort-decl* := <collect-all(?Sorts(<id>)); concat> body*;
+      cons-decl* := <collect-all(?Constructors(<id>)); concat> body*;
+      rule-decl* := <collect-all(?Rules(<id>)); concat> body*
+
+signature
+  constructors
+    MergePoint: List(MergeAlternative)-> Premise
+    MergeAlternative: Premise * List(Premise) -> MergeAlternative
+
+rules /* merge ovelapping rules */
+
+  merge-overlapping-rules:
+    Module(mod, body*) -> Module(mod, [sig*, merged-rule*])
+    with
+      sig* := <collect-all(?Signatures(_))> body*
+    with
+      cons-arity* := <collect-all(\ ConsDecl(cons, args, _, _) -> (cons, <length> args) \); make-set> body*;
+      rule* := <collect-all(?Rule(_, _, _))> body*;
+      merged-rule* := <map(group-rules(|rule*)); unzip; Snd; map(merge-rules); concat> cons-arity*
+  
+  group-rules(|rule*):
+    (cons, arity) -> (cons, cons-rule*)
+    with
+      cons-rule* := <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
+  
+  is-rule-matching-cons(|cons-goal, arity) =
+    ?Rule(_, _, Relation(_, Source(Con(cons-actual, conargs), _), _, _));
+    <strip-annos; eq> (cons-actual, cons-goal);
+    <eq> (arity, <length> conargs)
+  
+  merge-rules:
+    [] -> []
+
+  merge-rules:
+    rule*@[x | xs] -> rule'*
+    with
+      rule'* := <foldl(merge-rules)> (xs, [x])
+
+  merge-rules:
+    (r1@Rule(_, _, rel1), rule*) -> [rule'*, merged-rule]
+    where
+      r2 := <fetch-elem(where(?Rule(_, _, <strip-annos> rel1)))> rule*
+    with
+      merged-rule := <merge-rule> (r1, r2)
+      ; rule'* := <filter(not(?r2))> rule*
+  
+  merge-rules:
+    (r1@Rule(_, _, rel1), rule*) -> [rule*, r1]
+    where
+      <not(fetch-elem(?Rule(_, _, <strip-annos> rel1)))> rule*
+  
+  merge-rule:
+    (Rule(prem1*, bar1, rel1), Rule(prem2*, bar2, rel2)) -> Rule(prem-merged*, bar1, rel1)
+    where
+      <strip-annos; eq> (rel1, rel2)
+    with
+      prem-merged* := <merge-premises> (prem1*, prem2*)
+  
+  // there are no premises
+  merge-premises:
+    ([], []) -> []
+  
+  // the first premises are not the same
+  merge-premises:
+    ([p1 | p1xs], [p2 | p2xs]) -> [ MergePoint([MergeAlternative(p1, p1xs), MergeAlternative(p2, p2xs)])]
+    where
+      <strip-annos; not(eq)> (p1, p2)
+  
+  // the first premises are the same
+  merge-premises:
+    ([p1 | p1xs], [p2 | p2xs]) -> [p1 | <merge-premises> (p1xs, p2xs)]
+    where
+      <strip-annos; eq> (p1, p2)
+
+signature
+  constructors
+    OptMap: List(Term) -> Term
+
+rules /* optimize environments */
+
+  optimize-environments = alltd(optimize-environment)
+
+  optimize-environment:
+    mex@MapExtend(_, _) -> OptMap(<implode-env-extend; eliminate-env-blanks> mex)
+
+  implode-env-extend:
+    MapExtend(map1, map2) -> [ bind1*, bind2* ]
+    with
+      bind1* := <implode-env-extend> map1
+      ; bind2* := <implode-env-extend> map2
+
+  implode-env-extend:
+    Map([]) -> [ Map([]) ]
+  
+  implode-env-extend:
+    Map([bind@Bind(_, _)]) -> [ bind ]
+  
+  implode-env-extend:
+    v@VarRef(_) -> [ v ]
+  
+  eliminate-env-blanks:
+    [ Map([]), bind | xsbind ] -> <eliminate-env-blanks> [bind | xsbind]
+  
+  eliminate-env-blanks:
+    [ bind | xsbind ] -> [bind | <eliminate-env-blanks> xsbind ]
+    where
+      <not(?Map([]))> bind
+  
+  eliminate-env-blanks:
+    [] -> []

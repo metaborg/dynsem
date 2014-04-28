@@ -1,0 +1,88 @@
+module generator/interpreter/sorts-to-java
+
+imports
+  libjava-front
+  include/ds
+  generator/interpreter/gen-interpreter
+  names
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+
+signature overlays
+  
+  JAVA_INTERFACE_MULTIPLE(pkgdec, imports, name, extended-ifaces) =
+      CompilationUnit(
+      Some(pkgdec)
+      , imports
+      , [ InterfaceDec(
+            InterfaceDecHead(
+              [Public()]
+            , Id(name)
+            , None()
+            , Some(
+                ExtendsInterfaces(extended-ifaces)
+              )
+            )
+          , []
+          )
+        ]
+      )
+
+rules /* generate interfaces for declared sorts */
+
+  sorts-to-java-interpreter:
+    Module(mod, body*) -> <map(sort-to-java-interpreter)> sort-pair*
+    with
+      debug(!1);
+      decl* := <collect-all(?SortDecl(_, _) + ?InjDecl(_, _, _))> body*;
+      debug(!2);
+      decl-pair* := <map(match-with-injected-sort(|decl*))> decl*;
+      debug(!3);
+      sort-pair* := <map((get-sort-name, map(get-sort-name)); add-term-sort)> decl-pair*
+      ;debug(!4)
+  
+  match-with-injected-sort(|decl*):
+    sdec -> (sdec, ssdec*)
+    where
+      srt := <get-sort-name> sdec
+    with
+      sdef := <get-annos; fetch-elem(?Def(_))> srt;
+      ssdec* := <filter(where(?InjDecl(_, <id>, _); nabl-collect-one-resolved-def; ?sdef))> decl*
+  
+  add-term-sort:
+    (srt, srt*) -> (srt, ["Term", srt*])
+  
+  get-sort-name = ?SortDecl(<id>, _) + ?InjDecl(<id>, _, _)
+
+  // backend for Sort -> Java
+  sort-to-java-interpreter:
+    (srt, srt*) ->
+      JAVA_INTERFACE_MULTIPLE(
+        |[ package x_pkgname; ]|
+        ,  [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
+        , $[I_[srt]]
+        , <map(get-sort-java-name; string-to-java-iface-name)> srt*
+      )
+   with
+    x_pkgname := <gen-package-name>
+  
+  string-to-java-iface-name:
+    s -> InterfaceType(TypeName(Id(s)), None())
+    where
+      is-string
+  
+  get-sort-java-name = get-native-sort-java-name <+ get-user-sort-java-name
+  
+  get-native-sort-java-name:
+    "Term" -> "INode"
+  
+  get-native-sort-java-name:
+    "Value" -> "Value"
+  
+  get-native-sort-java-name:
+    "Map" -> "I_InterpreterFrame"
+  
+  get-user-sort-java-name:
+    term -> $[I_[term]]
+    where
+      is-string
+
