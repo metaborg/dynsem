@@ -24,7 +24,7 @@ imports
 	sugar
 	types.generated
 	types.manual
-	// generator/interpreter/gen-interpreter
+	generator/interpreter/gen-interpreter
 	
 signature
   constructors

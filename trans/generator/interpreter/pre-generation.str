@@ -45,7 +45,7 @@ rules /* merge ovelapping rules */
     with
       sig* := <collect-all(?Signatures(_))> body*
     with
-      cons-arity* := <collect-all(\ ConsDecl(cons, args, _, _) -> (cons, <length> args) \); make-set> body*;
+      cons-arity* := <collect-all(\ ConsDecl(cons, args, _) -> (cons, <length> args) \); make-set> body*;
       rule* := <collect-all(?Rule(_, _, _))> body*;
       merged-rule* := <map(group-rules(|rule*)); unzip; Snd; map(merge-rules); concat> cons-arity*
   

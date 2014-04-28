@@ -30,11 +30,17 @@ signature overlays
 rules /* generate interfaces for declared sorts */
 
   sorts-to-java-interpreter:
-    Module(mod, body*) -> <map(sort-to-java-interpreter)> sort-pair*
+    Module(mod, body*) -> [semanticcomponent-interface*, language-sort-interface*]
     with
-      decl* := <collect-all(?SortDecl(_, _) + ?InjDecl(_, _, _))> body*;
-      decl-pair* := <map(match-with-injected-sort(|decl*))> decl*;
-      sort-pair* := <map((get-sort-name, map(get-sort-name)); add-term-sort)> decl-pair*
+      language-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
+      language-decl-pair* := <map(match-with-injected-sort(|language-decl*))> language-decl*;
+      language-sort-pair* := <map((get-sort-name, map(get-sort-name)); add-term-sort)> language-decl-pair*;
+    	internal-sort* := <collect-all(\ d@InternalSortDecl(_) -> (d, []) \; add-term-sort)> body*;
+    	language-sort-interface* := <map(sort-to-java-interpreter)> [language-sort-pair*, internal-sort*]
+    with
+      semanticcomponent-sort* := <collect-all(?SemanticComponent(_))> body*;
+      semanticcomponent-interface* := <map(semanticcomponent-to-java-interpreter)> semanticcomponent-sort*
+    	
   
   match-with-injected-sort(|decl*):
     sdec -> (sdec, ssdec*)
@@ -42,7 +48,7 @@ rules /* generate interfaces for declared sorts */
       srt := <get-sort-name> sdec
     with
       sdef := <get-annos; fetch-elem(?Def(_))> srt;
-      ssdec* := <filter(where(?InjDecl(_, <id>, _); nabl-collect-one-resolved-def; ?sdef))> decl*
+      ssdec* := <filter(where(?InjDecl(_, <id>); nabl-collect-one-resolved-def; ?sdef))> decl*
   
   add-term-sort:
     (srt, srt*@[_|_]) -> (srt, srt*)
@@ -50,7 +56,7 @@ rules /* generate interfaces for declared sorts */
   add-term-sort:
     (srt, []) -> (srt, ["Term"])
   
-  get-sort-name = ?SortDecl(<id>, _) + ?InjDecl(<id>, _, _)
+  get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _)
 
   // backend for Sort -> Java
   sort-to-java-interpreter:
@@ -61,11 +67,17 @@ rules /* generate interfaces for declared sorts */
         , $[I_[srt]]
         , <map(get-sort-java-name; string-to-java-iface-name)> srt*
       )
-   where
-     <debug(!"GEN FOR SORT: ")> srt;
-     <debug(!"With subsorts: ")> <strip-annos> srt*
    with
     x_pkgname := <gen-package-name>
+  
+  semanticcomponent-to-java-interpreter:
+    srt ->
+      JAVA_INTERFACE_MULTIPLE(
+        |[ package x_pkgname; ]|
+        , [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
+        , $[I_[srt]], <string-to-java-iface-name> "I_PersistentMap")
+    with
+      x_pkgname := <gen-package-name>
   
   string-to-java-iface-name:
     s -> InterfaceType(TypeName(Id(s)), None())
@@ -87,4 +99,3 @@ rules /* generate interfaces for declared sorts */
     term -> $[I_[term]]
     where
       is-string
-
