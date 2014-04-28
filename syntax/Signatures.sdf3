@@ -7,27 +7,64 @@ templates
   ModuleSection.Signatures = <
     signature
         <SignatureSection*; separator="\n">>
-  
+
+templates // sort declarations
+
   SignatureSection.Sorts = <
     sorts
       <SortDecl*; separator="\n">>
   
-  SortDecl.SortDecl = <<ID> <SignatureAnnos?>>
-  SortDecl.InjDecl = [[ID] -> [ID] [SignatureAnnos?]]
+  SortDecl.SortDecl = <<ID>>
+  SortDecl.InjDecl = [[ID] -> [ID]]
   
+
+templates // constructor declarations
+
   SignatureSection.Constructors = <
     constructors
       <ConsDecl*; separator="\n">>
 
-  ConsDecl.ConsDecl = [[ID] : [Type*; separator=" * "] -> [Type] [SignatureAnnos?]]
+  ConsDecl.ConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<ID>)> 
   
-  SignatureAnnos.SignatureAnnos = <{ <SignatureAnno*; separator=", "> }>
+templates // semantic component declarations
 
-  SignatureAnno.NativeTermAnno = <native-term>
-  SignatureAnno.NativeFunAnno  = <native-operator>
-  SignatureAnno.InternalAnno   = <semantic-operator>
+  SignatureSection.SemanticComponents = <
+    semantic-components
+      <SemanticCompDecl; separator="\n">>
   
+  SemanticCompDecl.SemanticComponent = [[ID] -> Map]
 
+templates // internal sort declarations
+  
+  SignatureSection.Sorts = <
+    internal-sorts
+      <InternalSortDecl*; separator="\n">>
+  
+  InternalSortDecl.InternalSortDecl = <<ID>>
+
+templates // native operator declarations
+
+  SignatureSection.NativeOperators = <
+    native-operators
+      <NativeOpDecl*; separator="\n">>
+  
+  NativeOpDecl.NativeOpDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+
+templates // value term declarations
+
+  SignatureSection.Values = <
+    values
+      <ValueDecl*; separator="\n">>
+
+  ValueDecl.ValueDecl = [[ID] : [Type*; separator=" * "]]
+
+templates // internal constructor declarations
+
+  SignatureSection.Constructors = <
+    internal-constructors
+      <InternalConsDecl*; separator="\n">>
+
+  InternalConsDecl.InternalConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]

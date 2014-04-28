@@ -1,0 +1,20 @@
+module names.manual
+
+signature
+  sorts
+    SortKind
+
+  constructors
+    Language: SortKind
+    SemanticComponent: SortKind
+    Internal: SortKind
+  
+  sorts
+    ConsKind
+
+  constructors
+    Language: ConsKind
+    Value: ConsKind
+    NativeOperator: ConsKind
+    Internal: ConsKind
+    

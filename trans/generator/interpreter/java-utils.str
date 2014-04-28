@@ -9,27 +9,17 @@ imports
 rules
   
   emit-java-classes(merge-strategy, createdir|outputpkg, basedir) =
-    debug(!"W0 ");
     map(emit-java-class(merge-strategy, createdir|outputpkg, basedir))
   
   emit-java-class(merge-strategy, createdir|outputpkg, basedir) =
-    debug(!"W1 ");
     ?ast;
-    debug(!"W2 ");
     filename := <java-extractname; guarantee-extension(|"java")> ast;
-    debug(!"W3 ");
     if createdir then
-      debug(!"W3A ");
       outputdir := <concat-strings> [basedir, "/", <string-replace(|".", "/")> outputpkg];
-      debug(!"W3B ");
-      (<file-exists <+ mkdir(id)> outputdir);
-      debug(!"W3C ")
+      (<file-exists <+ mkdir(id)> outputdir)
     else
-      debug(!"W3D ");
-      outputdir := basedir;
-      debug(!"W3E ")
+      outputdir := basedir
     end;
-    debug(!"W4 ");
     filepath := <concat-strings> [outputdir, "/", filename];
     ( 
       <file-exists> filepath;
@@ -38,15 +28,10 @@ rules
       <+
       ast'' := ast
     );
-    debug(!"W5 ");
     pp-java := <debugged-java-pp> ast'';
-    debug(!"W6 ");
     fout     := <fopen> (filepath, "w");
-    debug(!"W7 ");
     <fputs> (pp-java, fout);
-    debug(!"W8 ");
-    <fclose> fout;
-    debug(!"W9 ")
+    <fclose> fout
   
   java-extractname:
     compilation-unit -> name
@@ -55,7 +40,7 @@ rules
 
   parse-java-file = parse-file(
         strsglr-perror, strsglr-report-parse-error
-    | <import-term(lib/strategoxt/java_front/languages/java-15/JavaCompilationUnit-15.tbl)>
+    | <import-term(lib/JavaCompilationUnit-15.tbl)>
     )
 
 rules /* merging of two Java ASTs */

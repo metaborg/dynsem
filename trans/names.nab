@@ -3,34 +3,32 @@ module names
 imports
   include/ds
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+	names.manual
 	
-namespaces Module Variable Constructor Sort
+namespaces
+  Module
+  Variable
+  Constructor
+  Sort
 
 
 properties
   expected-type of Term : Sort
-  sort-annos of Sort : SignatureAnnos
-  cons-annos of Constructor : SignatureAnnos
-
+  sort-kind of Sort : SortKind // Language(), SemanticComponent(), Internal()
+  cons-kind of Constructor : ConsKind // Language(), Value(), NativeOperator(), Internal()
+  
 binding rules
 
   Module(name, section*) :
     defines Module name
     scopes Variable, Constructor, Sort
     implicitly defines Sort "Term"
-      of cons-annos SignatureAnnos([NativeTermAnno()])
     implicitly defines Sort "Int"
-      of cons-annos SignatureAnnos([NativeTermAnno()])
     implicitly defines Sort "String"
-      of cons-annos SignatureAnnos([NativeTermAnno()])
-    implicitly defines Sort "Value"
-      of cons-annos SignatureAnnos([NativeTermAnno()])
-    implicitly defines Sort "Map"
-      of cons-annos SignatureAnnos([NativeTermAnno()])
     
   v@Var(x) :
-  	defines Variable x of type t
-  	where v has expected-type t
+    defines Variable x of type t
+      where v has expected-type t
   
   VarRef(x) :
   	refers to Variable x
@@ -44,26 +42,55 @@ binding rules
   RuleW(conc, prem*) :
   	scopes Variable
 
-  SortDecl(ty, annos) :
-  	defines Sort ty
-  	 of cons-annos annos
-  
-  InjDecl(ty, parent, annos) :
-    defines Sort ty
-      of cons-annos annos
-    refers to Sort parent
-  
+binding rules // sorts 
+
   SimpleSort(ty) :
   	refers to Sort ty
 
-  ConsDecl(c, ty*, ty, annos) :
-  	defines Constructor c
-  	 of type (ty*, ty)
-  	 of cons-annos annos
-  	  	
+  SortDecl(ty) :
+    defines Sort ty
+      of sort-kind Language()
+  
+  InjDecl(ty, parent) :
+    defines Sort ty
+      of sort-kind Language()
+    refers to Sort parent
+
+  SemanticComponent(ty) :
+    defines Sort ty
+      of sort-kind SemanticComponent()
+  
+  InternalSortDecl(ty) :
+    defines Sort ty
+      of sort-kind Internal()
+
+binding rules // constructors
+
   Con(c, t*) :
   	refers to Constructor c
-  	
+
+  ConsDecl(c, ty*, ty) :
+    defines Constructor c
+      of type (ty*, ty)
+      of cons-kind Language()
+
+  NativeOpDecl(c, ty*, ty):
+    defines Constructor c
+      of type (ty*, ty)
+      of cons-kind NativeOperator()
+  
+  ValueDecl(c, ty*):
+    defines Constructor c
+      of type (ty*, "Value")
+      of cons-kind Value()
+  
+  InternalConsDecl(c, ty*, ty) :
+    defines Constructor c
+      of type (ty*, ty)
+      of cons-kind Internal()
+
+binding rules // others
+
   LabelComp(s, _) :
     refers to Sort s
  

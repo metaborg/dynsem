@@ -45,7 +45,10 @@ rules /* generate interfaces for declared sorts */
       ssdec* := <filter(where(?InjDecl(_, <id>, _); nabl-collect-one-resolved-def; ?sdef))> decl*
   
   add-term-sort:
-    (srt, srt*) -> (srt, ["Term", srt*])
+    (srt, srt*@[_|_]) -> (srt, srt*)
+  
+  add-term-sort:
+    (srt, []) -> (srt, ["Term"])
   
   get-sort-name = ?SortDecl(<id>, _) + ?InjDecl(<id>, _, _)
 
@@ -58,6 +61,9 @@ rules /* generate interfaces for declared sorts */
         , $[I_[srt]]
         , <map(get-sort-java-name; string-to-java-iface-name)> srt*
       )
+   where
+     <debug(!"GEN FOR SORT: ")> srt;
+     <debug(!"With subsorts: ")> <strip-annos> srt*
    with
     x_pkgname := <gen-package-name>
   

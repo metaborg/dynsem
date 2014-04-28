@@ -22,7 +22,7 @@ type rules
     and (ty_t* == ty* or ty_t* <: ty*)
     else error "types of sub-terms do not match constructor definition" on c
 
-  InjDecl(ty, p-ty, _) :-
+  InjDecl(ty, p-ty) :-
   where store ty <: p-ty
 
 type rules
