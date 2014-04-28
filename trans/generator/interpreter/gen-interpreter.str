@@ -1,4 +1,4 @@
-module gen-interpreter/gen-interpreter
+module generator/interpreter/gen-interpreter
 
 imports
 	include/ds
@@ -11,7 +11,9 @@ imports
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/relations/-
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/index/-
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
+	generator/interpreter/java-templates
   names
+  libjava-front
   
 rules
   
@@ -69,10 +71,7 @@ rules /* merge ovelapping rules */
     with
       cons-arity* := <collect-all(\ ConsDecl(cons, args, _, _) -> (cons, <length> args) \); make-set> body*;
       rule* := <collect-all(?Rule(_, _, _))> body*;
-    	// debug(!"A ");
-      // merged-rule* := <map(group-rules(|rule*)); debug(!1); unzip; debug(!2); Snd; debug(!3); map(merge-rules); debug(!4); concat; debug(!5)> cons-arity*
       merged-rule* := <map(group-rules(|rule*)); unzip; Snd; map(merge-rules); concat> cons-arity*
-    	// ;debug(!"B ")
   
   group-rules(|rule*):
     (cons, arity) -> (cons, cons-rule*)
@@ -168,12 +167,15 @@ rules /* optimize environments */
 rules /* generate interfaces for declared sorts */
 
   sorts-to-java-interpreter:
-    Module(mod, body*) -> <id>
+    Module(mod, body*) -> <map(sort-to-java-interpreter)> sort-pair*
     with
+      debug(!1);
       decl* := <collect-all(?SortDecl(_, _) + ?InjDecl(_, _, _))> body*;
+      debug(!2);
       decl-pair* := <map(match-with-injected-sort(|decl*))> decl*;
-      sort-pair* := <map((get-sort-name, map(get-sort-name); add-term-sort))> decl-pair*
-      ;debug(!1)
+      debug(!3);
+      sort-pair* := <map((get-sort-name, map(get-sort-name)); add-term-sort)> decl-pair*
+      ;debug(!4)
   
   match-with-injected-sort(|decl*):
     sdec -> (sdec, ssdec*)
@@ -188,3 +190,36 @@ rules /* generate interfaces for declared sorts */
   
   get-sort-name = ?SortDecl(<id>, _) + ?InjDecl(<id>, _, _)
 
+  // backend for Sort -> Java
+  sort-to-java-interpreter:
+    (srt, srt*) ->
+			JAVA_INTERFACE_MULTIPLE(
+			  |[ package x_pkgname; ]|
+			  ,  [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
+			  , $[I_[srt]]
+			  , <map(get-sort-java-name; string-to-java-iface-name)> srt*
+			)
+	 with
+	 	x_pkgname := <gen-package-name>
+  
+  string-to-java-iface-name:
+  	s -> InterfaceType(TypeName(Id(s)), None())
+  	where
+  		is-string
+  
+  get-sort-java-name = get-native-sort-java-name <+ get-user-sort-java-name
+  
+  get-native-sort-java-name:
+  	"Term" -> "INode"
+  
+  get-native-sort-java-name:
+  	"Value" -> "Value"
+  
+  get-native-sort-java-name:
+  	"Map" -> "I_InterpreterFrame"
+  
+  get-user-sort-java-name:
+  	term -> $[I_[term]]
+  	where
+  		is-string
+  

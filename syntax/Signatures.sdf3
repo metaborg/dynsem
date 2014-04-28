@@ -26,8 +26,8 @@ templates
   
   SignatureAnnos.SignatureAnnos = <{ <SignatureAnno*; separator=", "> }>
 
-  SignatureAnno.ValueAnno = <value>
-  SignatureAnno.NativeAnno = <native>
-  SignatureAnno.InternalAnno = <internal>
+  SignatureAnno.NativeTermAnno = <native-term>
+  SignatureAnno.NativeFunAnno  = <native-operator>
+  SignatureAnno.InternalAnno   = <semantic-operator>
   
 

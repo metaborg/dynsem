@@ -18,15 +18,15 @@ binding rules
     defines Module name
     scopes Variable, Constructor, Sort
     implicitly defines Sort "Term"
-      of cons-annos SignatureAnnos([NativeAnno()])
+      of cons-annos SignatureAnnos([NativeTermAnno()])
     implicitly defines Sort "Int"
-      of cons-annos SignatureAnnos([NativeAnno()])
+      of cons-annos SignatureAnnos([NativeTermAnno()])
     implicitly defines Sort "String"
-      of cons-annos SignatureAnnos([NativeAnno()])
+      of cons-annos SignatureAnnos([NativeTermAnno()])
     implicitly defines Sort "Value"
-      of cons-annos SignatureAnnos([NativeAnno(), ValueAnno()])
-    implicitly defines Sort "PMap"
-      of cons-annos SignatureAnnos([NativeAnno()])
+      of cons-annos SignatureAnnos([NativeTermAnno()])
+    implicitly defines Sort "Map"
+      of cons-annos SignatureAnnos([NativeTermAnno()])
     
   v@Var(x) :
   	defines Variable x of type t
