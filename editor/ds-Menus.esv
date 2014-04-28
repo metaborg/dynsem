@@ -36,12 +36,12 @@ menus
 
     action  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
     action  : "Generate Coq"           = generate-coq (openeditor)
-    action  : "Generate interpreter"   = generate-interpreter (openeditor)
+    action  : "Generate interpreter"   = generate-interpreter
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)     
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)       
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) 
     action  : "Explicate"              = explicate-editor (openeditor) (realtime)   
-    action  : "Explicate + Factorize"  = explicate-factorize-editor (openeditor) (realtime)   
+    action  : "Explicate + Factorize"  = explicate-factorize-editor (openeditor) (realtime)
     separator
     
     action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime)

@@ -7,19 +7,21 @@ imports
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
   generator/interpreter/sorts-to-java
   generator/interpreter/pre-generation
+  generator/interpreter/java-utils
   
 rules
   
   gen-package-name = !$[[<language>].generated.interpreter]
   
   generate-interpreter:
-    (selected, position, ast, path, project-path) -> (filename, result)
+    (selected, position, ast, path, project-path) -> None()
     with
     	task-setup(|project-path);
     	index-setup(|<language>, project-path)
     with
       filename := <guarantee-extension(|"interpreter.aterm")> path;
-      result   := <to-java-interpreter> ast
+      class*   := <to-java-interpreter> ast;
+      <emit-java-classes(overwrite-merge-strategy, id | <gen-package-name>, $[[project-path]/src])> class*
 
 rules
   

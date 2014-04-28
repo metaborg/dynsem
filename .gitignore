@@ -4,7 +4,6 @@
 /editor/java/trans
 /.settings/org.eclipse.jdt.core.prefs
 /utils
-/lib
 syntax/ds*.generated.esv
 syntax/ds.generated.pp
 ds-Outliner.generated.str
