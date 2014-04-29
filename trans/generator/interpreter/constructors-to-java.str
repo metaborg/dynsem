@@ -1,0 +1,12 @@
+module generator/interpreter/constructors-to-java
+
+imports
+  include/ds
+
+rules
+  
+  constructors-to-java-interpreter:
+    Module(mod, body*) -> java-class*
+    with
+      java-class* := <fail>
+

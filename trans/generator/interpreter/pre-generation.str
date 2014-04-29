@@ -27,10 +27,16 @@ rules /* rename variables */
 rules
   
   fuse-sections:
-    Module(mod, body*) -> Module(mod, [Signatures([sort-decl*, cons-decl*]), rule-decl*])
+    Module(mod, body*) -> Module(mod, [Signatures(signatures), rule-decl*])
     with
       sort-decl* := <collect-all(?Sorts(<id>)); concat> body*;
+      semcomp-decl* := <collect-all(?SemanticComponents(<id>)); concat> body*;
+      intsort-decl* := <collect-all(?InternalSorts(<id>)); concat> body*;
       cons-decl* := <collect-all(?Constructors(<id>)); concat> body*;
+      intcons-decl* := <collect-all(?InternalConstructors(<id>)); concat> body*;
+      natops-decl* := <collect-all(?NativeOperators(<id>)); concat> body*;
+      values-decl* := <collect-all(?Values(<id>)); concat> body*;
+      signatures := [sort-decl*, cons-decl*, semcomp-decl*, intsort-decl*, cons-decl*, intcons-decl*, values-decl*];
       rule-decl* := <collect-all(?Rules(<id>)); concat> body*
 
 signature

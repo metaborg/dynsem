@@ -33,13 +33,13 @@ templates // semantic component declarations
 
   SignatureSection.SemanticComponents = <
     semantic-components
-      <SemanticCompDecl; separator="\n">>
+      <SemanticCompDecl*; separator="\n">>
   
   SemanticCompDecl.SemanticComponent = [[ID] -> Map]
 
 templates // internal sort declarations
   
-  SignatureSection.Sorts = <
+  SignatureSection.InternalSorts = <
     internal-sorts
       <InternalSortDecl*; separator="\n">>
   
@@ -63,7 +63,7 @@ templates // value term declarations
 
 templates // internal constructor declarations
 
-  SignatureSection.Constructors = <
+  SignatureSection.InternalConstructors = <
     internal-constructors
       <InternalConsDecl*; separator="\n">>
 
