@@ -46,21 +46,33 @@ rules // generate a base interface extending INode with the language-specific ev
       x_sort := <get-sort-java-name> ty;
       jiface := type |[ x_sort ]|
 
-rules // generate a language-specific class for the source and target semantic components
+rules // generate a language-specific class for the result of an evaluation step
   
-  // inout-to-java-class:
-  //   Module(mod, body*) ->
-  //     compilation-unit |[
-  //       package x_pkgname;
-  //       import org.metaborg.meta.interpreter.framework.*;
-  //       
-  //       public class x_returnclass {
-  //         ~fdec*
-  //       }
-  //     ]|
-  //   with
-  //     x_pkgname := <gen-package-name>;
-  //     x_returnclass := $[[<language>]_Result]
+  step-result-to-java-class:
+    Module(mod, body*) ->
+      compilation-unit |[
+        package x_pkgname;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        
+        public class x_resultclass {
+          public Value value;
+           
+          ~fdec*
+        }
+      ]|
+    with
+      x_pkgname := <gen-package-name>;
+      x_resultclass := $[[<language>]_Result];
+      example-heap* := <collect-one(get-rule-conclusion-outheaps)> body*;
+      fdec* := <map-with-index(step-result-to-java-field)> example-heap*
+
+  step-result-to-java-field:
+    (idx, LabelComp(ty, _)) -> class-body-dec |[ public ~type:jiface x_idx; ]|
+    with
+      x_idx := <conc-strings> ("_", <int-to-string> idx);
+      x_sortname := <get-sort-java-name> ty;
+      jiface := type |[ x_sortname ]|
 
 rules // backend for normal constructor to Java
 
@@ -180,4 +192,7 @@ rules // utilities for filtering rules
   
   get-rule-conclusion-inheaps:
     Rule(_, _, Relation(_, Source(_, heap*), _, _)) -> heap*
+
+  get-rule-conclusion-outheaps:
+    Rule(_, _, Relation(_, _, _, Target(_, heap*))) -> heap*
 
