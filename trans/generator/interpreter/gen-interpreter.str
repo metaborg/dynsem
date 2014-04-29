@@ -27,9 +27,10 @@ rules
 rules
   
   to-java-interpreter:
-    mod@Module(_, _) -> [sort-iface*, cons-class*]
+    mod@Module(_, _) -> [sort-iface*, inode-iface, cons-class*]
     with
       mod' := <pre-generation-transform> mod;
       sort-iface* := <sorts-to-java-interpreter> mod';
+      inode-iface := <reads-to-inode-interface> mod';
       cons-class* := <constructors-to-java-interpreter> mod' 
     

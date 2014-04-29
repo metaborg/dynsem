@@ -6,19 +6,61 @@ imports
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
   generator/interpreter/gen-interpreter
   generator/interpreter/sorts-to-java
+  lib/editor-common.generated
   
 rules
   
   constructors-to-java-interpreter:
     Module(mod, body*) -> node-class*
     with
-    	strip-annos; debug(!"A ");
       rule* := <collect-all(?Rules(<id>)); concat> body*;
-    	strip-annos; debug(!"B ");
       node-name* := <collect-all(?ConsDecl(<id>, _, _))> body*;
-    	debug(!"C ");
       node-class* := <map(node-to-java-interpreter(|rule*))> node-name*
-    	;debug(!"D ")
+
+rules // generate a base interface extending INode with the language-specific evaluate function 
+  
+  reads-to-inode-interface:
+  	Module(mod, body*) -> 
+	  	compilation-unit |[
+	  		package x_pkgname;
+	  		
+	  		import org.metaborg.meta.interpreter.framework.*;
+	  		
+	  		public interface x_inodeface extends INode {
+	  			
+	  			public x_returnclass evaluate(param*);
+	  		}
+	  	]|
+  	with
+  		x_pkgname := <gen-package-name>;
+  		x_returnclass := $[[<language>]_Result];
+  		x_inodeface := <get-basesort-java-name> "Term";
+  		example-read* := <collect-one(get-rule-conclusion-environments)> body*;
+  		example-heap* := <collect-one(get-rule-conclusion-inheaps)> body*;
+  		param* := <map-with-index(read-to-inode-evaluate-params)> [example-read*, example-heap*]
+
+  read-to-inode-evaluate-params:
+    (idx, LabelComp(ty, _)) -> param |[ ~type:jiface x_idx ]|
+    with
+      x_idx := $[_[idx]];
+      x_sort := <get-sort-java-name> ty;
+      jiface := type |[ x_sort ]|
+
+rules // generate a language-specific class for the source and target semantic components
+  
+  // inout-to-java-class:
+  //   Module(mod, body*) ->
+  //     compilation-unit |[
+  //       package x_pkgname;
+  //       import org.metaborg.meta.interpreter.framework.*;
+  //       
+  //       public class x_returnclass {
+  //         ~fdec*
+  //       }
+  //     ]|
+  //   with
+  //     x_pkgname := <gen-package-name>;
+  //     x_returnclass := $[[<language>]_Result]
 
 rules // backend for normal constructor to Java
 
@@ -132,3 +174,10 @@ rules // utilities for filtering rules
       
   get-rule-matchedterm:
     Rule(_, _, Relation(_, Source(ma, _), _, _)) -> ma
+  
+  get-rule-conclusion-environments:
+    Rule(_, _, Relation(Reads(read*), _, _, _)) -> read*
+  
+  get-rule-conclusion-inheaps:
+    Rule(_, _, Relation(_, Source(_, heap*), _, _)) -> heap*
+

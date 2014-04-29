@@ -6,7 +6,8 @@ imports
   generator/interpreter/gen-interpreter
   names
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
-
+  lib/editor-common.generated
+  
 signature overlays
   
   JAVA_INTERFACE_MULTIPLE(pkgdec, imports, name, extended-ifaces) =
@@ -87,7 +88,9 @@ rules /* generate interfaces for declared sorts */
   get-sort-java-name = get-native-sort-java-name <+ get-user-sort-java-name
   
   get-native-sort-java-name:
-    "Term" -> "INode"
+    "Term" -> <get-basesort-java-name>
+    
+  get-basesort-java-name = !$[I_[<language>]Node]
 
   get-native-sort-java-name:
     "String" -> "String"
@@ -106,7 +109,6 @@ rules /* generate interfaces for declared sorts */
       is-string
   
   get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
-
 
   is-sort-native = not(is-string); get-sort-name; is-sort-native
   
