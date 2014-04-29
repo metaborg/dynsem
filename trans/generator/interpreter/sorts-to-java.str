@@ -39,9 +39,7 @@ rules /* generate interfaces for declared sorts */
     	language-sort-interface* := <map(sort-to-java-interpreter)> [language-sort-pair*, internal-sort*]
     with
       semanticcomponent-sort* := <collect-all(?SemanticComponent(_); get-sort-name)> body*;
-      debug(!1);
       semanticcomponent-interface* := <map(semanticcomponent-to-java-interpreter)> semanticcomponent-sort*
-      ;debug(!2)
   
   match-with-injected-sort(|decl*):
     sdec -> (sdec, ssdec*)
@@ -58,7 +56,8 @@ rules /* generate interfaces for declared sorts */
     (srt, []) -> (srt, ["Term"])
   
   get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _) + ?SemanticComponent(<id>) + ?InternalSortDecl(<id>)
-
+  get-sort-name = ?SimpleSort(<id>)
+  
   // backend for Sort -> Java
   sort-to-java-interpreter:
     (srt, srt*) ->
@@ -89,14 +88,29 @@ rules /* generate interfaces for declared sorts */
   
   get-native-sort-java-name:
     "Term" -> "INode"
+
+  get-native-sort-java-name:
+    "String" -> "String"
   
   get-native-sort-java-name:
     "Value" -> "Value"
   
   get-native-sort-java-name:
     "Map" -> "I_InterpreterFrame"
+
+  get-native-sort-java-name = not(is-string); get-sort-name; get-native-sort-java-name
   
   get-user-sort-java-name:
     term -> $[I_[term]]
     where
       is-string
+  
+  get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
+
+
+  is-sort-native = not(is-string); get-sort-name; is-sort-native
+  
+  is-sort-native = ?"String"
+  
+  
+  

@@ -8,6 +8,7 @@ imports
   generator/interpreter/sorts-to-java
   generator/interpreter/pre-generation
   generator/interpreter/java-utils
+  generator/interpreter/constructors-to-java
   
 rules
   
@@ -25,8 +26,10 @@ rules
 
 rules
   
-  to-java-interpreter =
-    pre-generation-transform;
-    ?mod@Module(_, _);
-    where(!""; debug(!9));
-    sort-iface* := <sorts-to-java-interpreter> mod
+  to-java-interpreter:
+    mod@Module(_, _) -> [sort-iface*, cons-class*]
+    with
+      mod' := <pre-generation-transform> mod;
+      sort-iface* := <sorts-to-java-interpreter> mod';
+      cons-class* := <constructors-to-java-interpreter> mod' 
+    

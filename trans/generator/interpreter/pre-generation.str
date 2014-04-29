@@ -27,27 +27,28 @@ rules /* rename variables */
 rules
   
   fuse-sections:
-    Module(mod, body*) -> Module(mod, [Signatures(signatures), rule-decl*])
+    Module(mod, body*) -> Module(mod, [Signatures(signatures), Rules(rule-decl*)])
     with
-      sort-decl* := <collect-all(?Sorts(<id>)); concat> body*;
+      sort-decl*    := <collect-all(?Sorts(<id>)); concat> body*;
       semcomp-decl* := <collect-all(?SemanticComponents(<id>)); concat> body*;
       intsort-decl* := <collect-all(?InternalSorts(<id>)); concat> body*;
-      cons-decl* := <collect-all(?Constructors(<id>)); concat> body*;
+      cons-decl*    := <collect-all(?Constructors(<id>)); concat> body*;
       intcons-decl* := <collect-all(?InternalConstructors(<id>)); concat> body*;
-      natops-decl* := <collect-all(?NativeOperators(<id>)); concat> body*;
-      values-decl* := <collect-all(?Values(<id>)); concat> body*;
-      signatures := [sort-decl*, cons-decl*, semcomp-decl*, intsort-decl*, cons-decl*, intcons-decl*, values-decl*];
-      rule-decl* := <collect-all(?Rules(<id>)); concat> body*
+      natops-decl*  := <collect-all(?NativeOperators(<id>)); concat> body*;
+      values-decl*  := <collect-all(?Values(<id>)); concat> body*;
+      signatures    := [ sort-decl*, cons-decl*, semcomp-decl*, intsort-decl*, cons-decl*, intcons-decl*, values-decl* ];
+      rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
 
 signature
   constructors
+    
     MergePoint: List(MergeAlternative)-> Premise
     MergeAlternative: Premise * List(Premise) -> MergeAlternative
 
 rules /* merge ovelapping rules */
 
   merge-overlapping-rules:
-    Module(mod, body*) -> Module(mod, [sig*, merged-rule*])
+    Module(mod, body*) -> Module(mod, [sig*, Rules(merged-rule*)])
     with
       sig* := <collect-all(?Signatures(_))> body*
     with
