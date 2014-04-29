@@ -35,7 +35,7 @@ rules /* generate interfaces for declared sorts */
       language-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
       language-decl-pair* := <map(match-with-injected-sort(|language-decl*))> language-decl*;
       language-sort-pair* := <map((get-sort-name, map(get-sort-name)); add-term-sort)> language-decl-pair*;
-    	internal-sort* := <collect-all(\ d@InternalSortDecl(_) -> (d, []) \; add-term-sort)> body*;
+    	internal-sort* := <collect-all(\ InternalSortDecl(s) -> (s, []) \; add-term-sort)> body*;
     	language-sort-interface* := <map(sort-to-java-interpreter)> [language-sort-pair*, internal-sort*]
     with
       semanticcomponent-sort* := <collect-all(?SemanticComponent(_))> body*;
