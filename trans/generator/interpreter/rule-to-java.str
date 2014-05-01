@@ -1,0 +1,51 @@
+module generator/interpreter/rule-to-java
+
+imports
+  include/ds
+  ds
+  lib/editor-common.generated
+  generator/interpreter/constructors-to-java
+  generator/interpreter/sorts-to-java
+
+rules // generate a dummy-bodied evaluate method
+	
+	rule-to-java-dummy-evalmethod:
+		rule* ->
+		  class-body-dec |[
+		  	public x_returnclass evaluate(param*) {
+		  		throw new InterpreterException("Not supported");
+		  	}
+		  ]|
+		with
+      x_returnclass := $[[<language>]_Result];
+      env* := <collect-one(get-rule-conclusion-environments)> rule*;
+      heap* := <collect-one(get-rule-conclusion-inheaps)> rule*;
+      param* := <map(rule-reads-to-evaluate-params)> [env*, heap*]
+
+rules // generate a full-bodied evaluate method
+  
+  rule-to-java-evalmethod:
+    r@Rule(prem*, _, Relation(reads, source, _, target)) ->
+      class-body-dec |[
+        public x_returnclass evaluate(param*) {
+        	return null;
+        }
+      ]|
+    with
+      debug(!"A ");
+      x_returnclass := $[[<language>]_Result];
+      debug(!"B ");
+      env* := <get-rule-conclusion-environments> r;
+      debug(!"C ");
+      heap* := <get-rule-conclusion-inheaps> r;
+      debug(!"D ");
+      param* := <map(rule-reads-to-evaluate-params)> [env*, heap*]
+      ;debug(!"E ")
+  
+  rule-reads-to-evaluate-params:
+  	LabelComp(ty, Var(x_name)) -> param |[ ~type:jiface x_name ]|
+  	with
+  		x_sort := <get-sort-java-name> ty;
+      jiface := type |[ x_sort ]|
+
+

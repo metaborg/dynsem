@@ -6,6 +6,7 @@ imports
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
   generator/interpreter/gen-interpreter
   generator/interpreter/sorts-to-java
+  generator/interpreter/rule-to-java
   lib/editor-common.generated
   
 rules
@@ -89,11 +90,7 @@ rules // backend for normal constructor to Java
           
           ~body1
           
-          // @Override
-          // public Value evaluate(I_InterpreterFrame frame) {
-          //   bstm1*
-          // }
-          
+          ~evalmethod
         }
       ]|
     with
@@ -110,8 +107,16 @@ rules // backend for normal constructor to Java
       debug(!6);
       body1 := <node-args-to-java-constructor> (x_consname, ty*);
       debug(!7);
-    	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*
-      ;debug(!8)
+    	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
+      debug(!8);
+      if <?[]> node-rule* then
+        debug(!"9a");
+      	evalmethod := <rule-to-java-dummy-evalmethod> rule*
+      else
+        debug(!"9b");
+        evalmethod := <Hd;rule-to-java-evalmethod> node-rule*
+      end
+      ;debug(!10)
 
   node-args-to-java-constructor:
     (x_consname, ty*) ->
