@@ -5,6 +5,7 @@ imports
   include/ds
   generator/interpreter/gen-interpreter
   names
+  names.manual
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
   lib/editor-common.generated
   lib-ds
@@ -112,6 +113,8 @@ rules /* generate interfaces for declared sorts */
   get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
 
   is-sort-native = not(is-string); get-sort-name; is-sort-native
+  
+  is-sort-native = get-sort-name; get-sort-kind => SemanticComponent()
   
   is-sort-native = ?"String" + ?"Int"
   

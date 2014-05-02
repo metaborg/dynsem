@@ -15,7 +15,7 @@ rules
     Module(mod, body*) -> node-class*
     with
       rule* := <collect-all(?Rules(<id>)); concat> body*;
-      node-name* := <collect-all(?ConsDecl(<id>, _, _))> body*;
+      node-name* := <collect-all(?ConsDecl(<id>, _, _) + ?InternalConsDecl(<id>, _, _))> body*;
       node-class* := <map(node-to-java-interpreter(|rule*))> node-name*
 
 rules // generate a base interface extending INode with the language-specific evaluate function 
@@ -29,7 +29,7 @@ rules // generate a base interface extending INode with the language-specific ev
 	  		
 	  		public interface x_inodeface extends INode {
 	  			
-	  			public x_returnclass evaluate(param*);
+	  			public x_returnclass execute(param*);
 	  		}
 	  	]|
   	with

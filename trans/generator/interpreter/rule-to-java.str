@@ -12,8 +12,8 @@ rules // generate a dummy-bodied evaluate method
 	rule-to-java-dummy-evalmethod:
 		rule* ->
 		  class-body-dec |[
-		  	public x_returnclass evaluate(param*) {
-		  		throw new InterpreterException("Not supported");
+		  	public x_returnclass execute(param*) {
+		  		throw new InterpreterException("Non executable node");
 		  	}
 		  ]|
 		with
@@ -27,8 +27,8 @@ rules // generate a full-bodied evaluate method
   rule-to-java-evalmethod:
     r@Rule(prem*, _, Relation(reads, source, _, target)) ->
       class-body-dec |[
-        public x_returnclass evaluate(param*) {
-        	return null;
+        public x_returnclass execute(param*) {
+        	throw new RuntimeException("Not implemented");
         }
       ]|
     with
