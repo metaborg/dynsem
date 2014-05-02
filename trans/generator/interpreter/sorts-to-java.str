@@ -91,6 +91,9 @@ rules /* generate interfaces for declared sorts */
   get-basesort-java-name = !$[I_[<language>]Node]
 
   get-native-sort-java-name:
+    "Int" -> "int"
+
+  get-native-sort-java-name:
     "String" -> "String"
   
   get-native-sort-java-name:
@@ -110,7 +113,7 @@ rules /* generate interfaces for declared sorts */
 
   is-sort-native = not(is-string); get-sort-name; is-sort-native
   
-  is-sort-native = ?"String"
+  is-sort-native = ?"String" + ?"Int"
   
   
   
