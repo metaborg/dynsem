@@ -6,7 +6,8 @@ imports
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
   include/ds
   names
-    
+  ds
+  
 rules
  
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
@@ -22,6 +23,13 @@ rules
     LabelComp(s-ref, t) -> LabelComp(s-ref, t')
     with
       t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [s-ref])> (1, t)
+  
+  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
+    Match(lhs@VarRef(refv), vdef@Var(_)) -> Match(lhs, v')
+    with
+      def-v := <nabl-use-candidate(|lang, ctx, uri*, refv)> UseCandidate(NablNsVariable(), [], Current(), (), ()); 
+      lhs-ty := <type-lookup(|ctx)> def-v;
+      v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [lhs-ty])> (1, vdef) 
   
   attach-expected-type-to-term(|ctx, old-uri*, new-uri*, tys):
     (i, term{a*}) -> term{(NablProp_expected-type(), term-ty), a*}
