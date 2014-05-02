@@ -13,6 +13,11 @@ imports
 
 // utilities for DynSem analysis
 
+rules // projections for sorts
+  
+  get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _) + ?SemanticComponent(<id>) + ?InternalSortDecl(<id>)
+  get-sort-name = ?SimpleSort(<id>)
+
 rules // extract components        
   
   extract-components =
@@ -65,13 +70,13 @@ rules // component operations
     map(mk-label-comp(|num))
    
   mk-label-comp(|num) :
-    name -> LabelComp(name, Var(<comp-var(|num)> name))
+    name -> LabelComp(name, Var(<get-sort-name; comp-var(|num)> name))
 
   mk-label-comp-str(|num) :
-    name -> $[[name]([<comp-var(|num)> name])]
+    name -> $[[name]([<get-sort-name; comp-var(|num)> name])]
 
   mk-label-comp(default|num) :
-    name -> <default <+ mk-label-comp(|num)> name
+    name -> <get-sort-name; default <+ mk-label-comp(|num)> name
     
 signature
   constructors

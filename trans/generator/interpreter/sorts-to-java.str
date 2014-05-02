@@ -7,6 +7,7 @@ imports
   names
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
   lib/editor-common.generated
+  lib-ds
   
 signature overlays
   
@@ -55,9 +56,6 @@ rules /* generate interfaces for declared sorts */
   
   add-term-sort:
     (srt, []) -> (srt, ["Term"])
-  
-  get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _) + ?SemanticComponent(<id>) + ?InternalSortDecl(<id>)
-  get-sort-name = ?SimpleSort(<id>)
   
   // backend for Sort -> Java
   sort-to-java-interpreter:

@@ -30,11 +30,11 @@ rules
   explicate-rule :
     Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), DynamicEmitted(e1*), Target(rhs, tc1*))) ->   
     Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), DynamicEmitted(e2*), Target(rhs, tc2*)))
-    where 
+    where
       r2* := <ReadableComps; mk-label-comps(|1)>;
       sc2* := <ChangeableComps; mk-label-comps(|1)>;
-      init* := <exp-label-comp-inits(|1)> [r1*, sc1*]; 
-      (num, prem2*) := <explicate-premisses(|1)> prem1*;
+      init* := <exp-label-comp-inits(|1)> [r1*, sc1*];
+      (num, prem2*) := <debug(!"EX IN: "); explicate-premisses(|1); debug(!"EX OUT: ")> prem1*;
       e2* := <WritableComps; map(copy-comp(|e1*) <+ concat-changeables(|num))>;  
       tc2* := <ChangeableComps; map(mk-label-comp(copy-comp(|tc1*)|num))>;  
       prem3* := [init* | prem2*]
@@ -45,7 +45,7 @@ rules // components from lhs
     map(exp-label-comp-init(|num))
   
   exp-label-comp-init(|num):
-    LabelComp(name, t) -> Formula(TermEq(Var(<comp-var(|num)> name), t))
+    LabelComp(name, t) -> Formula(Match(Var(<get-sort-name; comp-var(|num)> name), t))
  
 rules // components in rhs
            
@@ -71,9 +71,14 @@ rules // premisses
         
   explicate-premisses(|num1):
     [prem1 | prem1*] -> (num3, [prem2*, prem3*])
-    where (num2, prem2*) := <explicate-premisse(|num1)> prem1;
-          (num3, prem3*) := <explicate-premisses(|num2)> prem1*
-                   
+    where
+      debug(!"A ");
+      (num2, prem2*) := <explicate-premisse(|num1)> prem1;
+      (num3, prem3*) := <explicate-premisses(|num2)> prem1*
+  
+  explicate-premisse(|num):
+    form@Formula(Match(lhs, rhs)) -> (num, [form])
+  
   explicate-premisse(|num):
     form@Formula(TermEq(lhs, rhs)) -> (num, [form])
   
@@ -85,12 +90,19 @@ rules // premisses
     (num-next, 
       [Formula(Relation(Reads(r2*), Source(lhs, sc2*), DynamicEmitted(e2*), Target(rhs, tc2*))) | init*])
     where
-      num-next := <inc>num-prev;
+    	strip-annos; debug(!"1 ");
+      num-next := <inc> num-prev;
+    	strip-annos; debug(!"2 ");
       r2*   := <ReadableComps;   map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))>;  
+    	strip-annos; debug(!"3 ");
       sc2*  := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> sc1* \|num-prev))>;
+    	strip-annos; debug(!"4 ");
       e2*   := <WritableComps; mk-label-comps(|num-next)>;
+    	strip-annos; debug(!"5 ");
       tc2*  := <ChangeableComps; mk-label-comps(|num-next)>;
+    	strip-annos; debug(!"6 ");
       init* := <exp-label-comp-inits(|num-next)> [e1*, tc1*]
+    	;strip-annos; debug(!"7 ")
         
  
                                                            
