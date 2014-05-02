@@ -90,22 +90,17 @@ rules // premisses
     (num-next, 
       [Formula(Relation(Reads(r2*), Source(lhs, sc2*), DynamicEmitted(e2*), Target(rhs, tc2*))) | init*])
     where
-    	strip-annos; debug(!"1 ");
       num-next := <inc> num-prev;
-    	strip-annos; debug(!"2 ");
-      r2*   := <ReadableComps;   map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))>;  
-    	strip-annos; debug(!"3 ");
+    	if <?[]> r1* then
+        r2*   := <ReadableComps;   map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))>
+      else
+        r2*   := r1*
+      end;  
       sc2*  := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> sc1* \|num-prev))>;
-    	strip-annos; debug(!"4 ");
       e2*   := <WritableComps; mk-label-comps(|num-next)>;
-    	strip-annos; debug(!"5 ");
       tc2*  := <ChangeableComps; mk-label-comps(|num-next)>;
-    	strip-annos; debug(!"6 ");
       init* := <exp-label-comp-inits(|num-next)> [e1*, tc1*]
-    	;strip-annos; debug(!"7 ")
         
- 
-                                                           
 
       
       
