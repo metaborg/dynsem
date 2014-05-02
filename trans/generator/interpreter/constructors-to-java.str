@@ -12,11 +12,13 @@ imports
 rules
   
   constructors-to-java-interpreter:
-    Module(mod, body*) -> node-class*
+    Module(mod, body*) -> [node-class*, value-class*]
     with
       rule* := <collect-all(?Rules(<id>)); concat> body*;
       node-name* := <collect-all(?ConsDecl(<id>, _, _) + ?InternalConsDecl(<id>, _, _))> body*;
-      node-class* := <map(node-to-java-interpreter(|rule*))> node-name*
+      node-class* := <map(node-to-java-interpreter(|rule*))> node-name*;
+      value-name* := <collect-all(?ValueDecl(<id>, _))> body*;
+      value-class* := <map(value-to-java-interpreter)> value-name*
 
 rules // generate a base interface extending INode with the language-specific evaluate function 
   
@@ -94,29 +96,18 @@ rules // backend for normal constructor to Java
         }
       ]|
     with
-      debug(!1);
       x_pkgname := <gen-package-name>;
-      debug(!2);
       x_consname := <get-cons-java-name> node-name;
-      debug(!3);
       (ty*, ty) := <get-type> node-name;
-      debug(!4);
       x_sortname := <get-sort-java-name> ty;
-      debug(!5);
-      fdec* := <map-with-index(node-arg-to-java-field)> ty*;
-      debug(!6);
+      fdec* := <map-with-index(node-arg-to-java-child-field)> ty*;
       body1 := <node-args-to-java-constructor> (x_consname, ty*);
-      debug(!7);
     	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
-      debug(!8);
       if <?[]> node-rule* then
-        debug(!"9a");
       	evalmethod := <rule-to-java-dummy-evalmethod> rule*
       else
-        debug(!"9b");
         evalmethod := <Hd;rule-to-java-evalmethod> node-rule*
       end
-      ;debug(!10)
 
   node-args-to-java-constructor:
     (x_consname, ty*) ->
@@ -160,7 +151,7 @@ rules // backend for normal constructor to Java
       (ty*, _) := <get-type> term;
       arity := <length> ty*
   
-  node-arg-to-java-field:
+  node-arg-to-java-child-field:
     (idx, ty) ->
       class-body-dec |[
         @Child
@@ -174,7 +165,33 @@ rules // backend for normal constructor to Java
 rules // backend for value constructors to Java
   
   value-to-java-interpreter:
-    value-name -> <fail> // TODO
+    value-name ->
+      compilation-unit |[
+        package x_pkgname;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        
+        public class x_value implements Value {
+          
+          ~fdec*
+          
+        }
+      ]|
+    with
+      x_pkgname := <gen-package-name>;
+      x_value := <get-cons-java-name> value-name;
+      (ty*, _) := <get-type> value-name;
+      fdec* := <map-with-index(node-arg-to-java-field)> ty*
+
+  node-arg-to-java-field:
+    (idx, ty) ->
+      class-body-dec |[
+        public ~type:jiface x_idx;
+      ]|
+    with
+      x_idx := <conc-strings> ("_", <int-to-string> idx);
+      x_sortname := <get-sort-java-name> ty;
+      jiface := type |[ x_sortname ]|
 
 rules // utilities for filtering rules
 
