@@ -158,11 +158,18 @@ rules // backend for normal constructor to Java
         @Child
         public ~type:jiface x_idx;
       ]|
+    where
+      <not(is-sort-native)> ty
     with
       x_idx := <conc-strings> ("_", <int-to-string> idx);
       x_sortname := <get-sort-java-name> ty;
       jiface := type |[ x_sortname ]|
-  
+      
+  node-arg-to-java-child-field:
+    (idx, ty) -> <node-arg-to-java-field> (idx, ty)
+    where
+      <is-sort-native> ty 
+    
 rules // backend for value constructors to Java
   
   value-to-java-interpreter:
