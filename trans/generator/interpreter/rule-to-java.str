@@ -4,8 +4,12 @@ imports
   include/ds
   ds
   lib/editor-common.generated
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
   generator/interpreter/constructors-to-java
   generator/interpreter/sorts-to-java
+  names
+  names.manual
 
 rules // generate a dummy-bodied evaluate method
 	
@@ -22,13 +26,17 @@ rules // generate a dummy-bodied evaluate method
       heap* := <collect-one(get-rule-conclusion-inheaps)> rule*;
       param* := <map(rule-reads-to-evaluate-params)> [env*, heap*]
 
+signature
+  constructors
+    OpSeq: Op * Op -> Op
+        
 rules // generate a full-bodied evaluate method
   
   rule-to-java-evalmethod:
     r@Rule(prem*, _, Relation(reads, source, _, target)) ->
       class-body-dec |[
         public x_returnclass execute(param*) {
-        	throw new RuntimeException("Not implemented");
+          bstm*
         }
       ]|
     with
@@ -39,13 +47,141 @@ rules // generate a full-bodied evaluate method
       debug(!"C ");
       heap* := <get-rule-conclusion-inheaps> r;
       debug(!"D ");
-      param* := <map(rule-reads-to-evaluate-params)> [env*, heap*]
-      ;debug(!"E ")
-  
+      param* := <map(rule-reads-to-evaluate-params)> [env*, heap*];
+      debug(!"E ");
+      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
+      strip-annos; debug(!"F ");
+      bstm* := <ops-to-java> opweave;
+      debug(!"G ")
+      
   rule-reads-to-evaluate-params:
   	LabelComp(ty, Var(x_name)) -> param |[ ~type:jiface x_name ]|
   	with
   		x_sort := <get-sort-java-name> ty;
       jiface := type |[ x_sort ]|
+
+rules // bottomup right to left compilation of operations
+  
+  ops-to-java:
+    OpSeq(op1, op2) -> bstm*
+    with
+      debug(!1);
+      stm-down* := <ops-to-java> op2;
+      <debug(!2)> (op1, stm-down*);
+      bstm* := <op-to-java> (op1, stm-down*)
+      ;debug(!3)
+
+  ops-to-java:
+    op -> <debug(!4); op-to-java; debug(!5)> (op, [])
+    where
+      not(?OpSeq(_, _))
+  
+rules // compilation of individual operations
+  
+  // source part. we ignore data-part because it is bound in the execute header
+  op-to-java:
+    (Source(Con(_, arg*), _), stm*) -> [var-bind*, stm*]
+    with
+      debug(!6);
+      var-bind* := <map-with-index(debug(!"IN "); field-to-varbind; debug(!"OUT "))> arg*
+      ; debug(!7)
+
+  field-to-varbind:
+    (idx, var@Var(x_v)) -> bstm* |[ final x_type x_v = x_idx; ]|
+    with
+      debug(!8);
+      x_idx := $[_[<int-to-string> idx]];
+      debug(!9);
+      var-ty := <get-type> var;
+      debug(!10);
+      x_type := <get-sort-java-name> var-ty
+      ;debug(!11)
+
+  op-to-java:
+    (Target(VarRef(x_v), data-out*), []) ->
+      bstm* |[
+        final x_langresult x_resname = new x_langresult(x_v, e*);
+        // x_resname.value = x_v;
+        // bstm*
+        return x_resname;
+      ]|
+    with
+      debug(!12);
+      x_langresult := $[[<language>]_Result];
+      debug(!13);
+      x_resname := <newname>;
+      debug(!14);
+      // bstm* := <map-with-index(numbered-assign-to-java(|e |[ x_resname ]|))> data-out*
+      e* := <map(?LabelComp(_, <id>); exp-to-java)> data-out*
+      ; debug(!15)
+  
+  numbered-assign-to-java(|e_parent):
+    (idx, LabelComp(_, ref)) -> bstm |[ e_parent.x_idx = e; ]|
+    with
+      x_idx := $[_[idx]];
+      e := <exp-to-java> ref 
+
+  op-to-java:
+    (Formula(Match(lhs, rvar@Var(x_rvar))), bstm2*) ->
+      bstm* |[
+        bstm1*
+        final x_type x_rvar = e_lvar;
+        bstm2*
+      ]|
+    with
+    	debug(!16);
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+    	debug(!17);
+      x_type := <get-type> rvar
+    	;debug(!18)
+  
+  build-to-var:
+    VarRef(x_vref) -> ([], e |[ x_vref ]|)
+  
+  build-to-var:
+    Con(cons, args) -> 
+      (
+      	bstm* |[
+      		bstm*
+      		final x_consname x_builtvar = new x_consname(e*);
+        ]|, e |[ x_builtvar ]|
+      )
+    where
+    	debug(!19);
+      cons-kind := <get-cons-kind> cons;
+    	debug(!20);
+      <not(?NativeOperator())> cons-kind
+    with
+    	debug(!21);
+    	x_builtvar := <newname> "tmpbuild";
+    	debug(!22);
+    	x_consname := <get-cons-java-name> cons;
+    	debug(!23);
+    	(bstms*, e*) := <map(build-to-var); unzip> args;
+    	debug(!24);
+    	bstm* := <concat> bstms*
+    	;debug(!25)
+
+  build-to-var:
+    Con(cons, args) -> ([], <fail>)
+    where
+      cons-kind := <get-cons-kind> cons;
+      <not(?NativeOperator())> cons-kind
+  
+  op-to-java:
+    (something, bstm*) ->
+      bstm* |[
+        return "something unsupported";
+        bstm*
+      ]|
+    with
+      debug(!">>>> UNHANDLED OP >>>> ")
+
+
+rules // expressions to java
+  
+  exp-to-java:
+    VarRef(x_name) ->  e |[ x_name ]|
+
 
 

@@ -30,6 +30,14 @@ rules
       def-v := <nabl-use-candidate(|lang, ctx, uri*, refv)> UseCandidate(NablNsVariable(), [], Current(), (), ()); 
       lhs-ty := <type-lookup(|ctx)> def-v;
       v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [lhs-ty])> (1, vdef) 
+
+  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
+    Match(lhs@Con(cons, _), vdef@Var(_)) -> Match(lhs, v')
+    with
+      def-cons := <nabl-use-candidate(|lang, ctx, uri*, cons)> UseCandidate(NablNsConstructor(), [], Current(), (), ()); 
+      lhs-ty := <type-lookup(|ctx)> def-cons;
+      cons-ty := <new-task(|ctx)> Rewrite("proj21", lhs-ty); task-create-id(|ctx, [lhs-ty]);
+      v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [cons-ty])> (1, vdef)
   
   attach-expected-type-to-term(|ctx, old-uri*, new-uri*, tys):
     (i, term{a*}) -> term{(NablProp_expected-type(), term-ty), a*}

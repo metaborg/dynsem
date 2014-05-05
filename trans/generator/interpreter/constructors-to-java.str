@@ -62,6 +62,7 @@ rules // generate a language-specific class for the result of an evaluation step
           public Value value;
            
           ~fdec*
+          
         }
       ]|
     with
@@ -69,7 +70,7 @@ rules // generate a language-specific class for the result of an evaluation step
       x_resultclass := $[[<language>]_Result];
       example-heap* := <collect-one(get-rule-conclusion-outheaps)> body*;
       fdec* := <map-with-index(step-result-to-java-field)> example-heap*
-
+  
   step-result-to-java-field:
     (idx, LabelComp(ty, _)) -> class-body-dec |[ public ~type:jiface x_idx; ]|
     with
@@ -175,13 +176,29 @@ rules // backend for value constructors to Java
           
           ~fdec*
           
+          ~body1
         }
       ]|
     with
       x_pkgname := <gen-package-name>;
       x_value := <get-cons-java-name> value-name;
       (ty*, _) := <get-type> value-name;
-      fdec* := <map-with-index(node-arg-to-java-field)> ty*
+      fdec* := <map-with-index(node-arg-to-java-field)> ty*;
+      body1 := <value-args-to-java-constructor> (x_value, ty*)
+  
+  value-args-to-java-constructor:
+    (x_consname, ty*) ->
+      class-body-dec |[
+        public x_consname(param*) {
+          bstm*
+        }
+      ]|
+    with
+      param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
+      bstm* := <map-with-index(node-arg-to-fieldinit)> ty*
+  
+  step-result-to-type:
+    LabelComp(ty, _) -> ty
 
   node-arg-to-java-field:
     (idx, ty) ->
