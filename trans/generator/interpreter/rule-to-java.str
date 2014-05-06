@@ -12,6 +12,7 @@ imports
   generator/interpreter/pre-generation
   names
   names.manual
+  libjava-front
 
 rules // generate a dummy-bodied evaluate method
 	
@@ -363,22 +364,22 @@ rules // expressions to java
       (e_key, key-pre*) := <exp-to-java> key;
       (value-pre*, e_value) := <build-to-var> value
 
-//   mapop-to-java(|ds-cons*, ds-srt*):
-//     [ v@Var(_) | xsbind ] -> Invoke(Method(e_xsbind, None(), Id("update")), [e_v])
-//     where
-//       <not(?[])> xsbind
-//     with
-//       e_xsbind := <mapop-to-java(|ds-cons*, ds-srt*)> xsbind
-//       ; e_v := <var-read-to-java(|ds-cons*, ds-srt*)> v
-//   
-//   mapop-to-java(|ds-cons*, ds-srt*):
-//     [ Bind(key, value) | xsbind ] -> Invoke(Method(e_xsbind, None(), Id("update")), [e_key, e_value])
-//     where
-//       <not(?[])> xsbind
-//     with
-//       e_xsbind := <mapop-to-java(|ds-cons*, ds-srt*)> xsbind
-//       ; e_key := <var-read-to-java(|ds-cons*, ds-srt*)> key
-//       ; e_value := <term-construction-to-java(|ds-cons*, ds-srt*) <+ var-read-to-java(|ds-cons*, ds-srt*)> value
+  exp-to-java:
+    [ v@VarRef(_) | xsbind ] -> ( Invoke(Method(e_xsbind, None(), Id("update")), [e_v]), [value-stm*, xsbind-stm*] )
+    where
+      <not(?[])> xsbind
+    with
+     (e_xsbind, xsbind-stm*) := <exp-to-java> xsbind;
+     (value-stm*, e_v) := <build-to-var> v
+
+  exp-to-java:
+    [ Bind(key, value) | xsbind ] -> (Invoke(Method(e_xsbind, None(), Id("update")), [e_key, e_value]), [key-stm*, value-stm*, xsbind-stm*])
+    where
+      <not(?[])> xsbind
+    with
+      (e_xsbind, xsbind-stm*) := <exp-to-java> xsbind;
+      (e_key, key-stm*) := <exp-to-java> key;
+      (value-stm*, e_value) := <build-to-var> value
 
 
 
