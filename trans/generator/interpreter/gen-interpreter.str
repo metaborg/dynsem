@@ -14,6 +14,8 @@ rules
   
   gen-package-name = !$[[<language>].generated.interpreter]
   
+  man-package-name = !$[[<language>].manual.interpreter]
+  
   generate-interpreter:
     (selected, position, ast, path, project-path) -> None()
     with
