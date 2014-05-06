@@ -137,7 +137,7 @@ rules // backend for normal constructor to Java
 			      return false;
 			    }
 			    
-			    x_nodename other = (x_nodename) obj;
+			    final x_nodename other = (x_nodename) obj;
 			    
 			    bstm*
 			  
