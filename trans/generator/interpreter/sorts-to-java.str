@@ -116,7 +116,9 @@ rules /* generate interfaces for declared sorts */
   
   is-sort-native = get-sort-name; get-sort-kind => SemanticComponent()
   
-  is-sort-native = ?"String" + ?"Int"
+  is-sort-native = is-sort-string + is-sort-int
   
+  is-sort-string = try(not(is-string); get-sort-name); ?"String"
   
-  
+  is-sort-int = try(not(is-string); get-sort-name); ?"Int"
+

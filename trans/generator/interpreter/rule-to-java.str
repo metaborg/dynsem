@@ -9,6 +9,7 @@ imports
   generator/interpreter/gen-interpreter
   generator/interpreter/constructors-to-java
   generator/interpreter/sorts-to-java
+  generator/interpreter/pre-generation
   names
   names.manual
 
@@ -52,7 +53,7 @@ rules // generate a full-bodied evaluate method
       debug(!"E ");
       opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
       strip-annos; debug(!"F ");
-      bstm* := <ops-to-java> opweave;
+      bstm* := <ops-to-java> (opweave, []);
       debug(!"G ")
       
   rule-reads-to-evaluate-params:
@@ -64,18 +65,24 @@ rules // generate a full-bodied evaluate method
 rules // bottomup right to left compilation of operations
   
   ops-to-java:
-    OpSeq(op1, op2) -> bstm*
+    (OpSeq(op1, op2), stm-pre*) -> stm*
     with
-      debug(!1);
-      stm-down* := <ops-to-java> op2;
-      <debug(!2)> (op1, stm-down*);
-      bstm* := <op-to-java> (op1, stm-down*)
-      ;debug(!3)
+      stm-down* := <ops-to-java> (op2, stm-pre*);
+      stm* := <op-to-java> (op1, stm-down*)
+
+  // ops-to-java:
+  //   OpSeq(op1, op2) -> bstm*
+  //   with
+  //     debug(!1);
+  //     stm-down* := <ops-to-java> op2;
+  //     <debug(!2)> (op1, stm-down*);
+  //     bstm* := <op-to-java> (op1, stm-down*)
+  //     ;debug(!3)
 
   ops-to-java:
-    op -> <debug(!4); op-to-java; debug(!5)> (op, [])
+    (op, stm-pre*) -> <debug(!4); op-to-java; debug(!5)> (op, stm-pre*)
     where
-      not(?OpSeq(_, _))
+      <not(?OpSeq(_, _))> op
   
 rules // compilation of individual operations
   
@@ -145,6 +152,9 @@ rules // compilation of individual operations
     	bstm2* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
   
   build-to-var:
+    Int(i) -> ([], e |[ i ]|)
+  
+  build-to-var:
     VarRef(x_vref) -> ([], e |[ x_vref ]|)
   
   build-to-var:
@@ -211,7 +221,95 @@ rules // compilation of individual operations
     	x_type := <get-type; get-sort-java-name> v-out;
     	x_vout := v-out;
     	x_idx := $[_[idx]]
+
+rules // term equality and inequality
+
+  op-to-java:
+    (f@Formula(TermEq(_, _)), bstm3*) ->
+      bstm* |[
+        bstm1*
+        bstm2*
+        if(e) {
+        	bstm3*
+        } else {
+        	throw new InterpreterException("Equality check failed");
+        }
+      ]|
+    with
+      (bstm1*, bstm2*, e) := <eq-to-java> f
   
+  op-to-java:
+    (f@Formula(TermNeq(_, _)), bstm3*) ->
+      bstm* |[
+        bstm1*
+        bstm2*
+        if(e) {
+          bstm3*
+        } else {
+          throw new InterpreterException("Inequality check failed");
+        }
+      ]|
+    with
+      (bstm1*, bstm2*, e) := <eq-to-java> f
+  
+  eq-to-java:
+    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar.equals(e_rvar) ]|)
+    where
+      <get-type; not(is-sort-int)> lhs;
+      <get-type; not(is-sort-int)> rhs
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      (bstm2*, e_rvar) := <build-to-var> rhs
+
+  eq-to-java:
+    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == e_rvar ]|)
+    where
+      <get-type; is-sort-int> lhs;
+      <get-type; is-sort-int> rhs 
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      (bstm2*, e_rvar) := <build-to-var> rhs
+
+  eq-to-java:
+    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ !e_lvar.equals(e_rvar) ]|)
+    where
+      <get-type; not(is-sort-int)> lhs;
+      <get-type; not(is-sort-int)> rhs
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      (bstm2*, e_rvar) := <build-to-var> rhs
+
+  eq-to-java:
+    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != e_rvar ]|)
+    where
+      <get-type; is-sort-int> lhs;
+      <get-type; is-sort-int> rhs 
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      (bstm2*, e_rvar) := <build-to-var> rhs
+  
+rules // merge alternative
+  
+  op-to-java:
+    (MergePoint(guard, lbranch*@[lx | lxs], rbranch*@[rx | rxs]), bstm_rest*) ->
+      bstm* |[
+        bstm1*
+        bstm2*
+        if(e) {
+          bstm_l*
+        } else {
+          bstm_r*
+        }
+      ]|
+    with
+      (bstm1*, bstm2*, e) := <eq-to-java> guard;
+      lopweave := <foldr(!lx, \ (op, weave) -> OpSeq(op, weave) \)> lxs;
+      ropweave := <foldr(!rx, \ (op, weave) -> OpSeq(op, weave) \)> rxs;
+      bstm_l* := <ops-to-java> (lopweave, bstm_rest*);
+      bstm_r* := <ops-to-java> (ropweave, bstm_rest*)
+
+rules // fallback
+
   op-to-java:
     (something, bstm*) ->
       bstm* |[
