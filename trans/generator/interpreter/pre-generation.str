@@ -42,8 +42,7 @@ rules
 signature
   constructors
     
-    MergePoint: MergeAlternative * MergeAlternative -> Premise
-    MergeAlternative: Premise * List(Premise) -> MergeAlternative
+    MergePoint: Formula * List(Formula) * List(Formula) -> Premise
 
 rules /* merge ovelapping rules */
 
@@ -100,7 +99,7 @@ rules /* merge ovelapping rules */
   
   // the first premises are not the same
   merge-premises:
-    ([p1 | p1xs], [p2 | p2xs]) -> [ MergePoint(MergeAlternative(p1, p1xs), MergeAlternative(p2, p2xs))]
+    ([p1 | p1xs], [p2 | p2xs]) -> [ MergePoint(p1, p1xs, [p2 | p2xs]) ]
     where
       <strip-annos; not(eq)> (p1, p2)
   
