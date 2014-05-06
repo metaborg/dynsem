@@ -270,7 +270,7 @@ rules // backend for value constructors to Java
       ]|
     with
       param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
-      bstm* := <map-with-index(node-arg-to-fieldinit)> ty*
+      bstm* := <map-with-index(value-arg-to-fieldinit)> ty*
   
   step-result-to-type:
     LabelComp(ty, _) -> ty
@@ -284,6 +284,11 @@ rules // backend for value constructors to Java
       x_idx := <conc-strings> ("_", <int-to-string> idx);
       x_sortname := <get-sort-java-name> ty;
       jiface := type |[ x_sortname ]|
+
+  value-arg-to-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = x_idx; ]|
+    with
+      x_idx := $[_[idx]]
 
 rules // utilities for filtering rules
 
