@@ -59,11 +59,11 @@ rules // generate a language-specific class for the result of an evaluation step
         import org.metaborg.meta.interpreter.framework.*;
         
         public class x_resultclass {
-          public final Value value;
+          public final IValue value;
            
           ~fdec*
           
-          public x_resultclass(Value value, param*) {
+          public x_resultclass(IValue value, param*) {
             this.value = value;
             bstm*
           }
@@ -247,7 +247,7 @@ rules // backend for value constructors to Java
         
         import org.metaborg.meta.interpreter.framework.*;
         
-        public class x_value implements Value {
+        public class x_value implements IValue {
           
           ~fdec*
           

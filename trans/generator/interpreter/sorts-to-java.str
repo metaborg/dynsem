@@ -98,10 +98,10 @@ rules /* generate interfaces for declared sorts */
     "String" -> "String"
   
   get-native-sort-java-name:
-    "Value" -> "Value"
+    "Value" -> "IValue"
   
   get-native-sort-java-name:
-    "Map" -> "I_PersistentMap"
+    "Map" -> "IPersistentMap"
 
   get-native-sort-java-name = not(is-string); get-sort-name; get-native-sort-java-name
   

@@ -210,7 +210,7 @@ rules // compilation of individual operations
       bstm* |[
         bstm1*
         final x_resultclass x_result = e_vin.execute(e*);
-        final Value x_vout = x_result.value;
+        final IValue x_vout = x_result.value;
         bstm3*
         bstm4*
       ]|
