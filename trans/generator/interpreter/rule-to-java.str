@@ -42,19 +42,12 @@ rules // generate a full-bodied evaluate method
         }
       ]|
     with
-      debug(!"A ");
       x_returnclass := $[[<language>]_Result];
-      debug(!"B ");
       env* := <get-rule-conclusion-environments> r;
-      debug(!"C ");
       heap* := <get-rule-conclusion-inheaps> r;
-      debug(!"D ");
       param* := <map(rule-reads-to-evaluate-params)> [env*, heap*];
-      debug(!"E ");
       opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
-      strip-annos; debug(!"F ");
-      bstm* := <ops-to-java> (opweave, []);
-      debug(!"G ")
+      bstm* := <ops-to-java> (opweave, [])
       
   rule-reads-to-evaluate-params:
   	LabelComp(ty, Var(x_name)) -> param |[ ~type:jiface x_name ]|
@@ -70,17 +63,8 @@ rules // bottomup right to left compilation of operations
       stm-down* := <ops-to-java> (op2, stm-pre*);
       stm* := <op-to-java> (op1, stm-down*)
 
-  // ops-to-java:
-  //   OpSeq(op1, op2) -> bstm*
-  //   with
-  //     debug(!1);
-  //     stm-down* := <ops-to-java> op2;
-  //     <debug(!2)> (op1, stm-down*);
-  //     bstm* := <op-to-java> (op1, stm-down*)
-  //     ;debug(!3)
-
   ops-to-java:
-    (op, stm-pre*) -> <debug(!4); op-to-java; debug(!5)> (op, stm-pre*)
+    (op, stm-pre*) -> <op-to-java> (op, stm-pre*)
     where
       <not(?OpSeq(_, _))> op
   
@@ -90,37 +74,33 @@ rules // compilation of individual operations
   op-to-java:
     (Source(Con(_, arg*), _), stm*) -> [var-bind*, stm*]
     with
-      debug(!6);
       var-bind* := <map-with-index(debug(!"IN "); field-to-varbind; debug(!"OUT "))> arg*
-      ; debug(!7)
 
   field-to-varbind:
     (idx, var@Var(x_v)) -> bstm* |[ final x_type x_v = x_idx; ]|
     with
-      debug(!8);
       x_idx := $[_[<int-to-string> idx]];
-      debug(!9);
       var-ty := <get-type> var;
-      debug(!10);
       x_type := <get-sort-java-name> var-ty
-      ;debug(!11)
 
   op-to-java:
     (Target(VarRef(x_v), data-out*), []) ->
       bstm* |[
+        bstm1*
         final x_langresult x_resname = new x_langresult(x_v, e*);
         return x_resname;
       ]|
     with
       x_langresult := $[[<language>]_Result];
       x_resname := <newname>;
-      e* := <map(?LabelComp(_, <id>); exp-to-java)> data-out*
+      (e*, bstms*) := <map(?LabelComp(_, <id>); exp-to-java); unzip> data-out*;
+      bstm1* := <concat> bstms*
   
-  numbered-assign-to-java(|e_parent):
-    (idx, LabelComp(_, ref)) -> bstm |[ e_parent.x_idx = e; ]|
-    with
-      x_idx := $[_[idx]];
-      e := <exp-to-java> ref 
+  // numbered-assign-to-java(|e_parent):
+  //   (idx, LabelComp(_, ref)) -> bstm* |[ bstm1* e_parent.x_idx = e; ]|
+  //   with
+  //     x_idx := $[_[idx]];
+  //     (e, bstm1*) := <exp-to-java> ref 
 
   op-to-java:
     (Formula(Match(lhs, rvar@Var(x_rvar))), bstm2*) ->
@@ -130,8 +110,11 @@ rules // compilation of individual operations
         bstm2*
       ]|
     with
+      debug(!"A>>");
       (bstm1*, e_lvar) := <build-to-var> lhs;
-      x_type := <get-type; get-sort-java-name> rvar
+      debug(!"B>>");
+      x_type := <debug(!"Ba "); get-type; debug(!"Bb "); get-sort-java-name; debug(!"Bc ")> rvar
+      ; debug(!"C>>")
   
   op-to-java:
     (Formula(Match(lhs, rhs@Con(cons, bound-var*))), bstm3*) ->
@@ -156,6 +139,18 @@ rules // compilation of individual operations
   
   build-to-var:
     VarRef(x_vref) -> ([], e |[ x_vref ]|)
+  
+  build-to-var:
+  	MapSelect(map, key) ->
+  	 ([map-pre*, key-pre*, 
+  	   bstm |[
+  	     final Object x_builtvar = e_map.read(e_key);
+  	   ]|
+  	  ], e |[ x_builtvar ]|)
+  	with
+  		(map-pre*, e_map) := <build-to-var> map;
+  		(key-pre*, e_key) := <build-to-var> key;
+  	  x_builtvar := <newname> "tmpbuild"
   
   build-to-var:
     Con(cons, args) -> 
@@ -194,31 +189,41 @@ rules // compilation of individual operations
       bstm* := <concat> bstms*
   
   op-to-java:
-    (Formula(Relation(Reads(read*), Source(ref@VarRef(_), heap-in*), _, Target(Var(v-out), heap-out*))), bstm2*) ->
+    (Formula(Relation(Reads(read*), Source(ref@VarRef(_), heap-in*), _, Target(Var(v-out), heap-out*))), bstm4*) ->
       bstm* |[
+        bstm1*
         final x_resultclass x_result = e_vin.execute(e*);
         final Value x_vout = x_result.value;
-        bstm1*
-        bstm2*
+        bstm3*
+        bstm4*
       ]|
     with
+      debug(!1);
       x_resultclass := $[[<language>]_Result];
+      debug(!2);
       x_result := <newname> "tmpresult";
-      e* := <map(exp-to-java)> [read*, heap-in*];
-      e_vin := <exp-to-java> ref;
+      debug(!3);
+      (e*, bstms1*) := <map(debug(!"3a "); exp-to-java; debug(!"3b ")); debug(!"3c "); unzip> [read*, heap-in*];
+      debug(!4);
+      bstm1* := <debug(!"4a "); concat> bstms1*;
+      debug(!5);
+      (e_vin, bstm2*) := <exp-to-java> ref;
+      debug(!6);
       x_vout := v-out;
-      bstm1* := <map-with-index(read-out-to-vardec(|x_result))> heap-out*
+      debug(!7);
+      bstm3* := <map-with-index(read-out-to-vardec(|x_result))> heap-out*
+      ;debug(!8)
   
   read-out-to-vardec(|x_result):
   	(idx, LabelComp(ty, v@Var(_))) -> <read-out-to-vardec(|x_result)> (idx, v)
   
   read-out-to-vardec(|x_result):
-    (idx, Var(v-out)) ->
+    (idx, vdef@Var(v-out)) ->
       bstm |[
       	final x_type x_vout = x_result.x_idx;
       ]|
     with
-    	x_type := <get-type; get-sort-java-name> v-out;
+    	x_type := <get-type; get-sort-java-name> vdef;
     	x_vout := v-out;
     	x_idx := $[_[idx]]
 
@@ -288,7 +293,7 @@ rules // term equality and inequality
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
   
-rules // merge alternative
+rules // backend for merge points
   
   op-to-java:
     (MergePoint(guard, lbranch*@[lx | lxs], rbranch*@[rx | rxs]), bstm_rest*) ->
@@ -323,10 +328,41 @@ rules // fallback
 rules // expressions to java
   
   exp-to-java:
-    VarRef(x_name) ->  e |[ x_name ]|
+    VarRef(x_name) ->  (e |[ x_name ]|, [])
   
   exp-to-java:
-  	LabelComp(_, VarRef(x_name)) -> e |[ x_name ]|
+  	LabelComp(_, VarRef(x_name)) -> (e |[ x_name ]|, [])
+
+  exp-to-java:
+    LabelComp(_, OptMap(mapbit*)) -> <exp-to-java> mapbit*
+
+  // special case for a single VarRef specified as an environment optimization
+  exp-to-java:
+    [ v@VarRef(_) ] -> <exp-to-java> v
+
+  // special case for an environment with a single mapping
+  exp-to-java:
+    [ Bind(key, value) ] -> (e |[ new PersistentFrame().update(e_key, e_value) ]|, [key-pre*, value-pre*])
+    with
+      (e_key, key-pre*) := <exp-to-java> key;
+      (value-pre*, e_value) := <build-to-var> value
+
+//   mapop-to-java(|ds-cons*, ds-srt*):
+//     [ v@Var(_) | xsbind ] -> Invoke(Method(e_xsbind, None(), Id("update")), [e_v])
+//     where
+//       <not(?[])> xsbind
+//     with
+//       e_xsbind := <mapop-to-java(|ds-cons*, ds-srt*)> xsbind
+//       ; e_v := <var-read-to-java(|ds-cons*, ds-srt*)> v
+//   
+//   mapop-to-java(|ds-cons*, ds-srt*):
+//     [ Bind(key, value) | xsbind ] -> Invoke(Method(e_xsbind, None(), Id("update")), [e_key, e_value])
+//     where
+//       <not(?[])> xsbind
+//     with
+//       e_xsbind := <mapop-to-java(|ds-cons*, ds-srt*)> xsbind
+//       ; e_key := <var-read-to-java(|ds-cons*, ds-srt*)> key
+//       ; e_value := <term-construction-to-java(|ds-cons*, ds-srt*) <+ var-read-to-java(|ds-cons*, ds-srt*)> value
 
 
 

@@ -118,7 +118,10 @@ rules /* optimize environments */
   optimize-environments = alltd(optimize-environment)
 
   optimize-environment:
-    mex@MapExtend(_, _) -> OptMap(<implode-env-extend; eliminate-env-blanks> mex)
+    mex@MapExtend(_, _) -> <debug(!"optimized to ")> OptMap(<implode-env-extend; eliminate-env-blanks> mex)
+
+  optimize-environment:
+    map@Map(_) -> <debug(!"optimized to ")> OptMap(<implode-env-extend; eliminate-env-blanks> map)
 
   implode-env-extend:
     MapExtend(map1, map2) -> [ bind1*, bind2* ]

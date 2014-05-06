@@ -22,6 +22,8 @@ type rules
     and (ty_t* == ty* or ty_t* <: ty*)
     else error "types of sub-terms do not match constructor definition" on c
 
+  MapSelect(map, key) : SimpleSort("Term")
+
   InjDecl(ty, p-ty) :-
   where store ty <: p-ty
 
