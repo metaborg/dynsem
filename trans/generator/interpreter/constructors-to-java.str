@@ -59,9 +59,14 @@ rules // generate a language-specific class for the result of an evaluation step
         import org.metaborg.meta.interpreter.framework.*;
         
         public class x_resultclass {
-          public Value value;
+          public final Value value;
            
           ~fdec*
+          
+          public x_resultclass(Value value, param*) {
+            this.value = value;
+            bstm*
+          }
           
         }
       ]|
@@ -69,15 +74,18 @@ rules // generate a language-specific class for the result of an evaluation step
       x_pkgname := <gen-package-name>;
       x_resultclass := $[[<language>]_Result];
       example-heap* := <collect-one(get-rule-conclusion-outheaps)> body*;
-      fdec* := <map-with-index(step-result-to-java-field)> example-heap*
-  
+      fdec* := <map-with-index(step-result-to-java-field)> example-heap*;
+      ty* := <map(?LabelComp(<id>, _))> example-heap*;
+      param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
+      bstm* := <map-with-index(node-arg-to-fieldinit)> ty*
+
   step-result-to-java-field:
-    (idx, LabelComp(ty, _)) -> class-body-dec |[ public ~type:jiface x_idx; ]|
+    (idx, LabelComp(ty, _)) -> class-body-dec |[ public final ~type:jiface x_idx; ]|
     with
       x_idx := <conc-strings> ("_", <int-to-string> idx);
       x_sortname := <get-sort-java-name> ty;
       jiface := type |[ x_sortname ]|
-
+  
 rules // backend for normal constructor to Java
 
   node-to-java-interpreter(|rule*):
