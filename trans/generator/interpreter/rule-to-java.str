@@ -101,19 +101,12 @@ rules // compilation of individual operations
     (Target(VarRef(x_v), data-out*), []) ->
       bstm* |[
         final x_langresult x_resname = new x_langresult(x_v, e*);
-        // x_resname.value = x_v;
-        // bstm*
         return x_resname;
       ]|
     with
-      debug(!12);
       x_langresult := $[[<language>]_Result];
-      debug(!13);
       x_resname := <newname>;
-      debug(!14);
-      // bstm* := <map-with-index(numbered-assign-to-java(|e |[ x_resname ]|))> data-out*
       e* := <map(?LabelComp(_, <id>); exp-to-java)> data-out*
-      ; debug(!15)
   
   numbered-assign-to-java(|e_parent):
     (idx, LabelComp(_, ref)) -> bstm |[ e_parent.x_idx = e; ]|
@@ -129,11 +122,8 @@ rules // compilation of individual operations
         bstm2*
       ]|
     with
-    	debug(!16);
       (bstm1*, e_lvar) := <build-to-var> lhs;
-    	debug(!17);
       x_type := <get-type> rvar
-    	;debug(!18)
   
   build-to-var:
     VarRef(x_vref) -> ([], e |[ x_vref ]|)
@@ -147,20 +137,13 @@ rules // compilation of individual operations
         ]|, e |[ x_builtvar ]|
       )
     where
-    	debug(!19);
       cons-kind := <get-cons-kind> cons;
-    	debug(!20);
       <not(?NativeOperator())> cons-kind
     with
-    	debug(!21);
     	x_builtvar := <newname> "tmpbuild";
-    	debug(!22);
     	x_consname := <get-cons-java-name> cons;
-    	debug(!23);
     	(bstms*, e*) := <map(build-to-var); unzip> args;
-    	debug(!24);
     	bstm* := <concat> bstms*
-    	;debug(!25)
 
   build-to-var:
     Con(cons, args) -> ([], <fail>)
