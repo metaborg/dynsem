@@ -49,15 +49,18 @@ binding rules // sorts
 
   SortDecl(ty) :
     defines Sort ty
+      of type SimpleSort(ty)
       of sort-kind Language()
   
   InjDecl(ty, parent) :
     defines Sort ty
+      of type SimpleSort(ty)
       of sort-kind Language()
     refers to Sort parent
 
   SemanticComponent(ty) :
     defines Sort ty
+      of type SimpleSort(ty)
       of sort-kind SemanticComponent()
   
   InternalSortDecl(ty) :

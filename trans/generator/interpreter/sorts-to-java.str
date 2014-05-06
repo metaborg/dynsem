@@ -33,7 +33,7 @@ signature overlays
 rules /* generate interfaces for declared sorts */
 
   sorts-to-java-interpreter:
-    Module(mod, body*) -> [semanticcomponent-interface*, language-sort-interface*]
+    Module(mod, body*) -> language-sort-interface*
     with
       language-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
       language-decl-pair* := <map(match-with-injected-sort(|language-decl*))> language-decl*;
@@ -41,8 +41,8 @@ rules /* generate interfaces for declared sorts */
     	internal-sort* := <collect-all(\ d@InternalSortDecl(_) -> (<get-sort-name> d, []) \; add-term-sort)> body*;
     	language-sort-interface* := <map(sort-to-java-interpreter)> [language-sort-pair*, internal-sort*]
     with
-      semanticcomponent-sort* := <collect-all(?SemanticComponent(_); get-sort-name)> body*;
-      semanticcomponent-interface* := <map(semanticcomponent-to-java-interpreter)> semanticcomponent-sort*
+      semanticcomponent-sort* := <collect-all(?SemanticComponent(_); get-sort-name)> body*
+      // semanticcomponent-interface* := <map(semanticcomponent-to-java-interpreter)> semanticcomponent-sort*
   
   match-with-injected-sort(|decl*):
     sdec -> (sdec, ssdec*)
@@ -70,14 +70,14 @@ rules /* generate interfaces for declared sorts */
    with
     x_pkgname := <gen-package-name>
   
-  semanticcomponent-to-java-interpreter:
-    srt ->
-      JAVA_INTERFACE_MULTIPLE(
-        |[ package x_pkgname; ]|
-        , [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
-        , $[I_[srt]], [<string-to-java-iface-name> "I_PersistentMap"])
-    with
-      x_pkgname := <gen-package-name>
+  // semanticcomponent-to-java-interpreter:
+  //   srt ->
+  //     JAVA_INTERFACE_MULTIPLE(
+  //       |[ package x_pkgname; ]|
+  //       , [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
+  //       , $[I_[srt]], [<string-to-java-iface-name> "I_PersistentMap"])
+  //   with
+  //     x_pkgname := <gen-package-name>
   
   string-to-java-iface-name:
     s -> InterfaceType(TypeName(Id(s)), None())
@@ -101,14 +101,21 @@ rules /* generate interfaces for declared sorts */
     "Value" -> "Value"
   
   get-native-sort-java-name:
-    "Map" -> "I_InterpreterFrame"
+    "Map" -> "I_PersistentMap"
 
   get-native-sort-java-name = not(is-string); get-sort-name; get-native-sort-java-name
   
   get-user-sort-java-name:
     term -> $[I_[term]]
     where
-      is-string
+      is-string;
+      <get-sort-kind; not(?SemanticComponent())> term
+
+  get-user-sort-java-name:
+    term -> <get-native-sort-java-name> "Map"
+    where
+      is-string;
+      <get-sort-kind; ?SemanticComponent()> term
   
   get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
 

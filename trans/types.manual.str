@@ -20,9 +20,11 @@ rules
       t'* := <map-with-index(attach-expected-type-to-term(|ctx, uri*, uri'*, tys))> t*
   
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
-    LabelComp(s-ref, t) -> LabelComp(s-ref, t')
+    LabelComp(s-ref@SimpleSort(s), t) -> LabelComp(s-ref, t')
     with
-      t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [s-ref])> (1, t)
+      s-def := <nabl-use-candidate(|lang, ctx, uri*, s)> UseCandidate(NablNsSort(), [], Current(), (), ());
+      s-ty := <type-lookup(|ctx)> s-def;
+      t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [s-ty])> (1, t)
   
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
     Match(lhs@VarRef(refv), vdef@Var(_)) -> Match(lhs, v')
@@ -39,6 +41,12 @@ rules
       cons-ty := <new-task(|ctx)> Rewrite("proj21", lhs-ty); task-create-id(|ctx, [lhs-ty]);
       v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [cons-ty])> (1, vdef)
   
+  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
+    Match(lhs@MapSelect(_, _), vdef@Var(_)) -> Match(lhs, v')
+    with
+      lhs-ty := <type-task(|ctx)> lhs;
+      v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [lhs-ty])> (1, vdef)
+        
   attach-expected-type-to-term(|ctx, old-uri*, new-uri*, tys):
     (i, term{a*}) -> term{(NablProp_expected-type(), term-ty), a*}
     with
