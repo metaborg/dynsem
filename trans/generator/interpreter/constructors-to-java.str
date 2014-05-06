@@ -94,6 +94,9 @@ rules // backend for normal constructor to Java
           ~body1
           
           ~evalmethod
+          
+          ~equalsmethod
+          
         }
       ]|
     with
@@ -108,7 +111,64 @@ rules // backend for normal constructor to Java
       	evalmethod := <rule-to-java-dummy-evalmethod> rule*
       else
         evalmethod := <Hd;rule-to-java-evalmethod> node-rule*
-      end
+      end;
+      equalsmethod := <node-to-java-equalsmethod> node-name
+  
+  node-to-java-equalsmethod:
+    node-name -> 
+      class-body-dec |[
+        @Override
+			  public boolean equals(Object obj) {
+			    if (this == obj) {
+			      return true;
+			    }
+			    if (obj == null) {
+			      return false;
+			    }
+			    if (getClass() != obj.getClass()) {
+			      return false;
+			    }
+			    
+			    x_nodename other = (x_nodename) obj;
+			    
+			    bstm*
+			  
+			    return true;
+			  }
+      ]|
+    with
+      x_nodename := <get-cons-java-name> node-name;
+      (ty*, _) := <get-type> node-name;
+      bstm* := <map-with-index(node-to-java-equalsmethods-fieldcheck)> ty*
+  
+  node-to-java-equalsmethods-fieldcheck:
+    (idx, ty) -> 
+      bstm* |[
+        if (x_idx != other.x_idx) {
+          return false;
+        }
+      ]|
+    where
+      <is-sort-native> ty
+    with
+      x_idx := $[_[idx]]
+
+  node-to-java-equalsmethods-fieldcheck:
+    (idx, ty) -> 
+      bstm* |[
+        if (x_idx == null) {
+          if (other.x_idx != null) {
+            return false;
+          }
+        } else if (!x_idx.equals(other.x_idx)) {
+          return false;
+        }
+      ]|
+    where
+      <not(is-sort-native)> ty
+    with
+      x_idx := $[_[idx]]
+ 
 
   node-args-to-java-constructor:
     (x_consname, ty*) ->
