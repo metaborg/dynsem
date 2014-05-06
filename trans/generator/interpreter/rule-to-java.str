@@ -6,6 +6,7 @@ imports
   lib/editor-common.generated
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
+  generator/interpreter/gen-interpreter
   generator/interpreter/constructors-to-java
   generator/interpreter/sorts-to-java
   names
@@ -123,7 +124,25 @@ rules // compilation of individual operations
       ]|
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
-      x_type := <get-type> rvar
+      x_type := <get-type; get-sort-java-name> rvar
+  
+  op-to-java:
+    (Formula(Match(lhs, rhs@Con(cons, bound-var*))), bstm3*) ->
+      bstm* |[
+      	bstm1*
+      	if(e_lvar instanceof x_consname) {
+      		final x_consname x_tempvar = (x_consname) e_lvar;
+      		bstm2* // pattern-bound variables
+      		bstm3* // rest of statements
+      	} else {
+      		throw new InterpreterException("Premise match failure");
+      	}
+      ]|
+    with
+    	(bstm1*, e_lvar) := <build-to-var> lhs;
+    	x_consname := <get-cons-java-name> cons;
+    	x_tempvar := <newname> "tmpbuild";
+    	bstm2* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
   
   build-to-var:
     VarRef(x_vref) -> ([], e |[ x_vref ]|)
@@ -146,10 +165,52 @@ rules // compilation of individual operations
     	bstm* := <concat> bstms*
 
   build-to-var:
-    Con(cons, args) -> ([], <fail>)
+    Con(cons, args) ->
+      (
+        bstm* |[
+          bstm*
+          final x_type x_builtvar = x_pkg.Natives.x_consname(e*);
+        ]|, e |[ x_builtvar ]|)
     where
       cons-kind := <get-cons-kind> cons;
-      <not(?NativeOperator())> cons-kind
+      <?NativeOperator()> cons-kind
+    with
+      (_, ty) := <get-type> cons;
+      x_type := <get-sort-java-name> ty;
+      x_builtvar := <newname> "tmpbuild";
+      x_consname := <get-cons-java-name> cons;
+      x_pkg := <man-package-name>;
+      (bstms*, e*) := <map(build-to-var); unzip> args;
+      bstm* := <concat> bstms*
+  
+  op-to-java:
+    (Formula(Relation(Reads(read*), Source(ref@VarRef(_), heap-in*), _, Target(Var(v-out), heap-out*))), bstm2*) ->
+      bstm* |[
+        final x_resultclass x_result = e_vin.execute(e*);
+        final Value x_vout = x_result.value;
+        bstm1*
+        bstm2*
+      ]|
+    with
+      x_resultclass := $[[<language>]_Result];
+      x_result := <newname> "tmpresult";
+      e* := <map(exp-to-java)> [read*, heap-in*];
+      e_vin := <exp-to-java> ref;
+      x_vout := v-out;
+      bstm1* := <map-with-index(read-out-to-vardec(|x_result))> heap-out*
+  
+  read-out-to-vardec(|x_result):
+  	(idx, LabelComp(ty, v@Var(_))) -> <read-out-to-vardec(|x_result)> (idx, v)
+  
+  read-out-to-vardec(|x_result):
+    (idx, Var(v-out)) ->
+      bstm |[
+      	final x_type x_vout = x_result.x_idx;
+      ]|
+    with
+    	x_type := <get-type; get-sort-java-name> v-out;
+    	x_vout := v-out;
+    	x_idx := $[_[idx]]
   
   op-to-java:
     (something, bstm*) ->
@@ -165,6 +226,9 @@ rules // expressions to java
   
   exp-to-java:
     VarRef(x_name) ->  e |[ x_name ]|
+  
+  exp-to-java:
+  	LabelComp(_, VarRef(x_name)) -> e |[ x_name ]|
 
 
 
