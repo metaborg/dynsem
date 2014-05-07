@@ -23,8 +23,14 @@ binding rules
     defines Module name
     scopes Variable, Constructor, Sort
     implicitly defines Sort "Term"
+      of type SimpleSort("Term")
+      of sort-kind Internal()
     implicitly defines Sort "Int"
+      of type SimpleSort("Int")
+      of sort-kind Internal()
     implicitly defines Sort "String"
+      of type SimpleSort("String")
+      of sort-kind Internal()
     
   v@Var(x) :
     defines Variable x of type t

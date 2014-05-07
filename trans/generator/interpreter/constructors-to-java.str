@@ -29,7 +29,7 @@ rules // generate a base interface extending INode with the language-specific ev
 	  		
 	  		import org.metaborg.meta.interpreter.framework.*;
 	  		
-	  		public interface x_inodeface extends INode {
+	  		public interface x_inodeface extends INode, IMatchable {
 	  			
 	  			public x_returnclass execute(param*);
 	  		}
@@ -59,14 +59,16 @@ rules // generate a language-specific class for the result of an evaluation step
         import org.metaborg.meta.interpreter.framework.*;
         
         public class x_resultclass {
-          public final IValue value;
+          public final AValue value;
            
           ~fdec*
           
-          public x_resultclass(IValue value, param*) {
+          public x_resultclass(AValue value, param*) {
             this.value = value;
             bstm*
           }
+          
+          ~fget*
           
         }
       ]|
@@ -77,7 +79,8 @@ rules // generate a language-specific class for the result of an evaluation step
       fdec* := <map-with-index(step-result-to-java-field)> example-heap*;
       ty* := <map(?LabelComp(<id>, _))> example-heap*;
       param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
-      bstm* := <map-with-index(node-arg-to-fieldinit)> ty*
+      bstm* := <map-with-index(node-arg-to-fieldinit)> ty*;
+      fget* := <map-with-index(node-arg-to-java-fieldget)> ty*
 
   step-result-to-java-field:
     (idx, LabelComp(ty, _)) -> class-body-dec |[ public final ~type:jiface x_idx; ]|
@@ -100,8 +103,10 @@ rules // backend for normal constructor to Java
           ~fdec*
           
           ~body1
-          
+
           ~evalmethod
+          
+          ~fget*
           
           ~equalsmethod
           
@@ -113,6 +118,7 @@ rules // backend for normal constructor to Java
       (ty*, ty) := <get-type> node-name;
       x_sortname := <get-sort-java-name> ty;
       fdec* := <map-with-index(node-arg-to-java-child-field)> ty*;
+      fget* := <map-with-index(node-arg-to-java-fieldget)> ty*;
       body1 := <node-args-to-java-constructor> (x_consname, ty*);
     	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
       if <?[]> node-rule* then
@@ -220,11 +226,23 @@ rules // backend for normal constructor to Java
       (ty*, _) := <get-type> term;
       arity := <length> ty*
   
+  node-arg-to-java-fieldget:
+    (idx, ty) ->
+      class-body-dec |[
+        public x_fieldtype x_getter() {
+          return this.x_idx;
+        }
+      ]|
+    with
+      x_fieldtype := <get-sort-java-name> ty;
+      x_getter := $[get_[idx]];
+      x_idx := $[_[idx]]
+  
   node-arg-to-java-child-field:
     (idx, ty) ->
       class-body-dec |[
         @Child
-        public ~type:jiface x_idx;
+        private ~type:jiface x_idx;
       ]|
     where
       <not(is-sort-native)> ty
@@ -247,11 +265,11 @@ rules // backend for value constructors to Java
         
         import org.metaborg.meta.interpreter.framework.*;
         
-        public class x_value implements IValue {
+        public class x_value extends AValue {
           
           ~fdec*
-          
           ~body1
+          ~fget*
         }
       ]|
     with
@@ -259,6 +277,7 @@ rules // backend for value constructors to Java
       x_value := <get-cons-java-name> value-name;
       (ty*, _) := <get-type> value-name;
       fdec* := <map-with-index(node-arg-to-java-field)> ty*;
+      fget* := <map-with-index(node-arg-to-java-fieldget)> ty*;
       body1 := <value-args-to-java-constructor> (x_value, ty*)
   
   value-args-to-java-constructor:

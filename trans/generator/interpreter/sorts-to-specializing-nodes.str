@@ -18,17 +18,11 @@ rules
   sorts-to-specializing-nodes:
     Module(mod, body*) -> generic-node-class*
     with
-      strip-annos; debug(!"A ");
       example-read* := <collect-one(get-rule-conclusion-environments)> body*;
-      strip-annos; debug(!"B ");
       example-heap* := <collect-one(get-rule-conclusion-inheaps)> body*;
-      strip-annos; debug(!"C ");
       sort-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
-      strip-annos; debug(!"D ");
       sort-specialization-decl* := <map(match-with-cons(|body*))> sort-decl*;
-      strip-annos; debug(!"E ");
-      generic-node-class* := <map(sort-cons-to-generic-node(|[example-read*, example-heap*]))> sort-specialization-decl*;
-      strip-annos; debug(!"F ")
+      generic-node-class* := <map(sort-cons-to-generic-node(|[example-read*, example-heap*]))> sort-specialization-decl*
   
   match-with-cons(|body*):
     sort-decl -> (sort-decl, cons*)
@@ -89,7 +83,7 @@ rules
     [] -> []
 
   specializations-to-java(|read*):
-  	[InjDecl(_, sort-name) | xs] ->
+  	[InjDecl(sort-name, _) | xs] ->
   	  bstm* |[
   	 	 try {
   	 		 return replace(new x_gennodename(getSourceInfo(), aterm)).execute(e*);

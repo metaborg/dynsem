@@ -13,7 +13,8 @@ imports
   names
   names.manual
   libjava-front
-
+  lib-ds
+  
 rules // generate a dummy-bodied evaluate method
 	
 	rule-to-java-dummy-evalmethod:
@@ -121,8 +122,8 @@ rules // compilation of individual operations
     (Formula(Match(lhs, rhs@Con(cons, bound-var*))), bstm3*) ->
       bstm* |[
       	bstm1*
-      	if(e_lvar instanceof x_consname) {
-      		final x_consname x_tempvar = (x_consname) e_lvar;
+        final x_consname x_tempvar = e_lvar.match(x_consname.class);
+      	if(x_tempvar != null) {
       		bstm2* // pattern-bound variables
       		bstm3* // rest of statements
       	} else {
@@ -145,7 +146,7 @@ rules // compilation of individual operations
   	MapSelect(map, key) ->
   	 ([map-pre*, key-pre*, 
   	   bstm |[
-  	     final Object x_builtvar = e_map.read(e_key);
+  	     final IMatchable x_builtvar = e_map.read(e_key);
   	   ]|
   	  ], e |[ x_builtvar ]|)
   	with
@@ -210,26 +211,18 @@ rules // compilation of individual operations
       bstm* |[
         bstm1*
         final x_resultclass x_result = e_vin.execute(e*);
-        final IValue x_vout = x_result.value;
+        final AValue x_vout = x_result.value;
         bstm3*
         bstm4*
       ]|
     with
-      debug(!1);
       x_resultclass := $[[<language>]_Result];
-      debug(!2);
       x_result := <newname> "tmpresult";
-      debug(!3);
       (e*, bstms1*) := <map(debug(!"3a "); exp-to-java; debug(!"3b ")); debug(!"3c "); unzip> [read*, heap-in*];
-      debug(!4);
       bstm1* := <debug(!"4a "); concat> bstms1*;
-      debug(!5);
       (e_vin, bstm2*) := <exp-to-java> ref;
-      debug(!6);
       x_vout := v-out;
-      debug(!7);
       bstm3* := <map-with-index(read-out-to-vardec(|x_result))> heap-out*
-      ;debug(!8)
   
   read-out-to-vardec(|x_result):
   	(idx, LabelComp(ty, v@Var(_))) -> <read-out-to-vardec(|x_result)> (idx, v)
@@ -237,12 +230,38 @@ rules // compilation of individual operations
   read-out-to-vardec(|x_result):
     (idx, vdef@Var(v-out)) ->
       bstm |[
-      	final x_type x_vout = x_result.x_idx;
+      	final x_type x_vout = x_result.x_getidx();
       ]|
+    // where
+    // 	debug(!1);
+    //   sort-kind := <get-type; debug(!"1a "); get-sort-name; debug(!"1b "); get-sort-kind> vdef;
+    // 	debug(!2);
+    //   not(?Value())
     with
+    	debug(!3);
     	x_type := <get-type; get-sort-java-name> vdef;
+    	debug(!4);
     	x_vout := v-out;
-    	x_idx := $[_[idx]]
+    	debug(!5);
+    	x_getidx := $[get_[idx]]
+    	;debug(!6)
+
+  // read-out-to-vardec(|x_result):
+  //   (idx, vdef@Var(v-out)) ->
+  //     bstm |[
+  //     	final x_type x_vout = x_result.x_idx;
+  //     ]|
+  //   where
+  //   	debug(!7);
+  //     <get-type; debug(!"7a "); debug(!"7b "); get-sort-kind> vdef => Value()
+  //   with
+  //   	debug(!8);
+  //   	x_type := <get-type; get-sort-java-name> vdef;
+  //   	debug(!9);
+  //   	x_vout := v-out;
+  //   	debug(!10);
+  //   	x_idx := $[_[idx]]
+  //   	; debug(!11)
 
 rules // term equality and inequality
 

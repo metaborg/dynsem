@@ -42,7 +42,6 @@ rules /* generate interfaces for declared sorts */
     	language-sort-interface* := <map(sort-to-java-interpreter)> [language-sort-pair*, internal-sort*]
     with
       semanticcomponent-sort* := <collect-all(?SemanticComponent(_); get-sort-name)> body*
-      // semanticcomponent-interface* := <map(semanticcomponent-to-java-interpreter)> semanticcomponent-sort*
   
   match-with-injected-sort(|decl*):
     sdec -> (sdec, ssdec*)
@@ -70,15 +69,6 @@ rules /* generate interfaces for declared sorts */
    with
     x_pkgname := <gen-package-name>
   
-  // semanticcomponent-to-java-interpreter:
-  //   srt ->
-  //     JAVA_INTERFACE_MULTIPLE(
-  //       |[ package x_pkgname; ]|
-  //       , [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
-  //       , $[I_[srt]], [<string-to-java-iface-name> "I_PersistentMap"])
-  //   with
-  //     x_pkgname := <gen-package-name>
-  
   string-to-java-iface-name:
     s -> InterfaceType(TypeName(Id(s)), None())
     where
@@ -98,7 +88,7 @@ rules /* generate interfaces for declared sorts */
     "String" -> "String"
   
   get-native-sort-java-name:
-    "Value" -> "IValue"
+    "Value" -> "AValue"
   
   get-native-sort-java-name:
     "Map" -> "IPersistentMap"
