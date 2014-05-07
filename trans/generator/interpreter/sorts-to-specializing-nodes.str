@@ -31,7 +31,7 @@ rules
       strip-annos; debug(!"F ")
   
   match-with-cons(|body*):
-    sort-decl -> (sort-decl, <map(?ConsDecl(<id>, _, _) + ?InternalConsDecl(<id>, _, _) + ?InjDecl(<id>, _))> cons*)
+    sort-decl -> (sort-decl, cons*)
     where
       s := <get-sort-name> sort-decl
     with
@@ -45,21 +45,25 @@ rules
         
         import org.metaborg.meta.interpreter.framework.*;
         import org.spoofax.interpreter.terms.*;
+        import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+        import org.spoofax.interpreter.core.Tools;
         
         public class x_gennodename extends AbstractNode implements x_sortname {
           
-          private IStrategoTerm term;
+          private IStrategoTerm aterm;
           
           public x_gennodename(INodeSource source, IStrategoTerm term) {
             this.setSourceInfo(source);
-            this.term = term;
+            this.aterm = term;
           }
           
           @Override
           public x_resultname execute(param*) {
-            if (subterm instanceof IStrategoAppl) {
-              final IStrategoAppl term = (IStrategoAppl) subterm;
+            if (aterm instanceof IStrategoAppl) {
+              final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
+              final ImploderNodeSource source = term.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
+                        term.getAttachment(ImploderAttachment.TYPE)) : null;
               bstm1*
             }
             
@@ -71,71 +75,74 @@ rules
         }
       ]|
     with
-      debug(!1);
       x_pkgname := <gen-package-name>;
-      debug(!2);
       sort-name := <get-sort-name> sort-decl;
-      debug(!3);
       x_gennodename := $[Generic_[sort-name]];
-      debug(!4);
       x_sortname := <get-sort-java-name> sort-name;
-      debug(!5);
       x_resultname := $[[<language>]_Result];
-      debug(!6);
       param* := <map-with-index(read-to-inode-evaluate-params)> read*;
-      debug(!7);
       (cons-decl*, inj-decl*) := <partition(not(?InjDecl(_, _)))> specialization-decl*;
-      debug(!8);
       bstm1* := <specializations-to-java(|read*)> cons-decl*;
-      debug(!9);
-      bstm2* := <specializations-to-java(|read*)> inj-decl*;  
-      debug(!10)
+      bstm2* := <specializations-to-java(|read*)> inj-decl*  
 
   specializations-to-java(|read*):
     [] -> []
 
   specializations-to-java(|read*):
-  	[InjDecl(_, sort) | xs] ->
+  	[InjDecl(_, sort-name) | xs] ->
   	  bstm* |[
   	 	 try {
-  	 		 return replace(new x_gennodename(getSourceInfo(), term)).execute(e*);
+  	 		 return replace(new x_gennodename(getSourceInfo(), aterm)).execute(e*);
   	 	 } catch(RewritingException x_exname) {
   	 		 bstm*
   	 	 }
   	 ]|
     with
-      debug(!16);
     	x_exname := <newname>;
-      debug(!17);
-    	sort-name := <get-sort-name> sort;
-      debug(!18);
     	x_gennodename := $[Generic_[sort-name]];
-      debug(!19);
     	e* := <map-with-index(read-to-varref)> read*;
-      debug(!20);
     	bstm* := <specializations-to-java(|read*)> xs
-      ;debug(!21)
   
   specializations-to-java(|read*):
-    [cons-name | xs] ->
+    [cons-decl | xs] ->
       bstm* |[
         if(name.equals(e) && term.getSubtermCount() == i_arity) {
-          // bstm1*   
+          return replace(new x_consname(source, e*)).execute(_1, _2);
         } else {
           bstm2*
         }
-        throw new RewritingException();
       ]|
+    where
+      <?ConsDecl(cons-name, _, _) + ?InternalConsDecl(cons-name, _, _)> cons-decl
     with
-      debug(!11);
       e := Lit(String([Chars(<escape> cons-name)]));
-      debug(!12);
       (ty*, ty) := <get-type> cons-name;
-      debug(!13);
+      x_consname := <get-cons-java-name> cons-name;
+      e* := <map-with-index(gen-gennode-instantiation)> ty*;
       i_arity := $[[<length> ty*]];
-      debug(!14);
       bstm2* := <specializations-to-java(|read*)> xs
-      ;debug(!15)
+
+  gen-gennode-instantiation:
+    (idx, s) -> e |[ new x_gensortname(source, term.getSubterm(i)) ]|
+    where
+      <not(is-sort-native)> s
+    with
+      i := <dec; int-to-string> idx;
+      x_gensortname := $[Generic_[<get-sort-name> s]]
+  
+  gen-gennode-instantiation:
+    (idx, s) -> e |[ Tools.asJavaString(term.getSubterm(i)) ]|
+    where
+    	<get-sort-name; is-sort-string> s
+    with
+    	i := <dec; int-to-string> idx
+
+  gen-gennode-instantiation:
+    (idx, s) -> e |[ Tools.asJavaInt(term.getSubterm(i)) ]|
+    where
+    	<get-sort-name; is-sort-int> s
+    with
+    	i := <dec; int-to-string> idx
 
   read-to-varref:
     (idx, _) -> e |[ x_idx ]|
