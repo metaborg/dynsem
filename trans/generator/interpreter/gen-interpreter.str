@@ -9,6 +9,7 @@ imports
   generator/interpreter/pre-generation
   generator/interpreter/java-utils
   generator/interpreter/constructors-to-java
+  generator/interpreter/sorts-to-specializing-nodes
   
 rules
   
@@ -29,11 +30,12 @@ rules
 rules
   
   to-java-interpreter:
-    mod@Module(_, _) -> [sort-iface*, inode-iface, result-class, cons-class*]
+    mod@Module(_, _) -> [sort-iface*, sort-node*, inode-iface, result-class, cons-class*]
     with
       mod' := <pre-generation-transform> mod;
       sort-iface* := <sorts-to-java-interpreter> mod';
+      sort-node* := <sorts-to-specializing-nodes> mod';
       inode-iface := <reads-to-inode-interface> mod';
       result-class := <step-result-to-java-class> mod';
-      cons-class* := <constructors-to-java-interpreter> mod' 
+      cons-class* := <constructors-to-java-interpreter> mod'
     
