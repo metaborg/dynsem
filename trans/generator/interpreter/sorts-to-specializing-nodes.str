@@ -52,7 +52,16 @@ rules
           }
           
           @Override
-          public x_resultname execute(param*) {
+					public x_resultname execute(param*) {
+					  return replace(computeReplacement()).execute(e*);
+					}
+					
+					@Override
+					public <T> T match(Class<T> clazz) {
+					  return replace(computeReplacement()).match(clazz);
+					}
+          
+          private x_basenodename computeReplacement() {
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
@@ -74,7 +83,9 @@ rules
       x_gennodename := $[Generic_[sort-name]];
       x_sortname := <get-sort-java-name> sort-name;
       x_resultname := $[[<language>]_Result];
+      x_basenodename := <get-basesort-java-name>;
       param* := <map-with-index(read-to-inode-evaluate-params)> read*;
+      e* := <map-with-index(read-to-varref)> read*;
       (cons-decl*, inj-decl*) := <partition(not(?InjDecl(_, _)))> specialization-decl*;
       bstm1* := <specializations-to-java(|read*)> cons-decl*;
       bstm2* := <specializations-to-java(|read*)> inj-decl*  
@@ -86,7 +97,7 @@ rules
   	[InjDecl(sort-name, _) | xs] ->
   	  bstm* |[
   	 	 try {
-  	 		 return replace(new x_gennodename(getSourceInfo(), aterm)).execute(e*);
+  	 		 return new x_gennodename(getSourceInfo(), aterm);
   	 	 } catch(RewritingException x_exname) {
   	 		 bstm*
   	 	 }
@@ -94,14 +105,13 @@ rules
     with
     	x_exname := <newname>;
     	x_gennodename := $[Generic_[sort-name]];
-    	e* := <map-with-index(read-to-varref)> read*;
     	bstm* := <specializations-to-java(|read*)> xs
   
   specializations-to-java(|read*):
     [cons-decl | xs] ->
       bstm* |[
         if(name.equals(e) && term.getSubtermCount() == i_arity) {
-          return replace(new x_consname(source, e*)).execute(_1, _2);
+          return new x_consname(source, e*);
         } else {
           bstm2*
         }

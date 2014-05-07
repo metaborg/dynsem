@@ -242,7 +242,7 @@ rules // backend for normal constructor to Java
     (idx, ty) ->
       class-body-dec |[
         @Child
-        private ~type:jiface x_idx;
+        public ~type:jiface x_idx;
       ]|
     where
       <not(is-sort-native)> ty
@@ -266,10 +266,16 @@ rules // backend for value constructors to Java
         import org.metaborg.meta.interpreter.framework.*;
         
         public class x_value extends AValue {
+
+          @Override
+          public String toString() {
+            return NodeUtils.toString(this);
+          }
           
           ~fdec*
           ~body1
           ~fget*
+          
         }
       ]|
     with
