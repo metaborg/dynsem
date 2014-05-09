@@ -3,6 +3,7 @@ module coq-semantics/formula
 imports
   libstratego-gpp
   coq-semantics/-
+  coq-semantics/coq-syntax/-
   lib/runtime/index/-
   lib/runtime/nabl/-
   lib/runtime/properties/-
@@ -55,7 +56,7 @@ rules // Folding rules
     (LabelComp(_, e), (p , b*, i)) -> (n, <union> (b*, b'*), i')
     where
       (e', b'*, i') := <term-to-coq(|i)> e
-    ; n             := <?() < !e' + !Product(e', p)> p
+    ; n             := <?() < !e' + !Arrow(e', p)> p
 
 overlays
   COQ_NEQ(e1, e2) = Apply(Ref("not"), COQ_EQ(e1, e2))

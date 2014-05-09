@@ -1,0 +1,87 @@
+module Function.pp.generated
+
+imports
+  lib/runtime/tmpl/pp
+  libstratego-gpp
+  trans/coq-semantics/coq-syntax/-
+
+strategies
+  prettyprint-Term :
+    Function(a, b, c, d, e) -> [ H(
+                                   [SOpt(HS(), "0")]
+                                 , [ S("Function ")
+                                   , a495
+                                   , S(" ")
+                                   , b242
+                                   , c89
+                                   , S(" : ")
+                                   , d43
+                                   ]
+                                 )
+                               , e17
+                               ]
+    where a495 := <pp-one-Z(prettyprint-Ident)> a
+    where b242 := <pp-H-list(prettyprint-Binder|" ")> b
+    where c89 := <pp-one-Z(prettyprint-OptDecreaseAnnot)> c
+    where d43 := <pp-one-Z(prettyprint-Type)> d
+    where e17 := <pp-indent(|"2")> [<pp-one-Z(prettyprint-Term)> e]
+
+  prettyprint-example =
+    prettyprint-Term
+
+
+strategies
+  prettyprint-OptDecreaseAnnot :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptDecreaseAnnot :
+    DecreaseAnnot(a) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S(" {"), a496, S("}")]
+                          )
+                        ]
+    where a496 := <pp-one-Z(prettyprint-DecreaseAnnot)> a
+
+  prettyprint-DecreaseAnnot :
+    DecreaseStruct(a) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("struct "), a497]
+                           )
+                         ]
+    where a497 := <pp-one-Z(prettyprint-Ident)> a
+
+  prettyprint-DecreaseAnnot :
+    DecreaseMeasure(a, b) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [ S("measure ")
+                                 , a498
+                                 , S(" ")
+                                 , b243
+                                 ]
+                               )
+                             ]
+    where a498 := <pp-one-Z(prettyprint-Term)> a
+    where b243 := <pp-one-Z(prettyprint-Ident)> b
+
+  prettyprint-DecreaseAnnot :
+    DecreaseWF(a, b) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [ S("wf ")
+                            , a499
+                            , S(" ")
+                            , b244
+                            ]
+                          )
+                        ]
+    where a499 := <pp-one-Z(prettyprint-Term)> a
+    where b244 := <pp-one-Z(prettyprint-Ident)> b
+
+  prettyprint-example =
+    prettyprint-OptDecreaseAnnot
+
+  prettyprint-example =
+    prettyprint-DecreaseAnnot

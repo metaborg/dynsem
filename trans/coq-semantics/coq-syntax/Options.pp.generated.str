@@ -1,0 +1,208 @@
+module Options.pp.generated
+
+imports
+  lib/runtime/tmpl/pp
+  libstratego-gpp
+  trans/coq-semantics/coq-syntax/-
+
+strategies
+  prettyprint-OptType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptType :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [S(" : "), a457]
+           )
+         ]
+    where a457 := <pp-one-Z(prettyprint-Term)> a
+
+  prettyprint-OptInTerm :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptInTerm :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [S(" in "), a458]
+           )
+         ]
+    where a458 := <pp-one-Z(prettyprint-Term)> a
+
+  prettyprint-OptDepRetType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptDepRetType :
+    DepRet(a, b) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [a459, S(" "), b230]
+                      )
+                    ]
+    where a459 := <pp-one-Z(prettyprint-OptAlias)> a
+    where b230 := <pp-one-Z(prettyprint-ReturnType)> b
+
+  prettyprint-OptAlias :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptAlias :
+    As(a) -> [ H(
+                 [SOpt(HS(), "0")]
+               , [S(" as "), a460]
+               )
+             ]
+    where a460 := <pp-one-Z(prettyprint-Name)> a
+
+  prettyprint-OptReturnType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptReturnType :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [S(" "), a461]
+           )
+         ]
+    where a461 := <pp-one-Z(prettyprint-ReturnType)> a
+
+  prettyprint-OptBinders :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptBinders :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [S(" "), a462]
+           )
+         ]
+    where a462 := <pp-H-list(prettyprint-Binder|" ")> a
+
+  prettyprint-OptTerms :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptTerms :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [S(" "), a463]
+           )
+         ]
+    where a463 := <pp-H-list(prettyprint-Term|" ")> a
+
+  prettyprint-OptSort :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptSort :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [S(" : "), a464]
+           )
+         ]
+    where a464 := <pp-one-Z(prettyprint-Sort)> a
+
+  prettyprint-OptAnnotation :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptAnnotation :
+    Anno(a) -> [ H(
+                   [SOpt(HS(), "0")]
+                 , [S(" { struct "), a465, S(" }")]
+                 )
+               ]
+    where a465 := <pp-one-Z(prettyprint-Ident)> a
+
+  prettyprint-example =
+    prettyprint-OptType
+
+  prettyprint-example =
+    prettyprint-OptInTerm
+
+  prettyprint-example =
+    prettyprint-OptDepRetType
+
+  prettyprint-example =
+    prettyprint-OptAlias
+
+  prettyprint-example =
+    prettyprint-OptReturnType
+
+  prettyprint-example =
+    prettyprint-OptBinders
+
+  prettyprint-example =
+    prettyprint-OptTerms
+
+  prettyprint-example =
+    prettyprint-OptSort
+
+  prettyprint-example =
+    prettyprint-OptAnnotation
+
+
+strategies
+  prettyprint-OptIdents :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptIdents :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [S(" "), a466]
+           )
+         ]
+    where a466 := <pp-H-list(prettyprint-Ident|" ")> a
+
+  prettyprint-OptWhereNotation :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptWhereNotation :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [S(" where "), a467]
+           )
+         ]
+    where a467 := <pp-H-list(prettyprint-Notation|" where")> a
+
+  prettyprint-example =
+    prettyprint-OptIdents
+
+  prettyprint-example =
+    prettyprint-OptWhereNotation

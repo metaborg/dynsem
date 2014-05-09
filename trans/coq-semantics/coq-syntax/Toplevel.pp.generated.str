@@ -1,0 +1,77 @@
+module Toplevel.pp.generated
+
+imports
+  lib/runtime/tmpl/pp
+  libstratego-gpp
+  trans/coq-semantics/coq-syntax/-
+
+strategies
+  prettyprint-Reserved =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-Reserved
+
+
+strategies
+  prettyprint-Sentence :
+    Ltac(a, b) -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [a602, S("Ltac "), b288]
+                    )
+                  ]
+    where a602 := <pp-one-Z(prettyprint-OptLocalPrefix)> a
+    where b288 := <pp-H-list(prettyprint-LtacDef|" with")> b
+
+  prettyprint-Tactic :
+    Tactic(a) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [a603, S(".")]
+                   )
+                 ]
+    where a603 := <pp-one-Z(prettyprint-TExpr)> a
+
+  prettyprint-example =
+    prettyprint-Sentence
+
+  prettyprint-example =
+    prettyprint-Tactic
+
+
+strategies
+  prettyprint-OptLocalPrefix :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  prettyprint-OptLocalPrefix :
+    LocalTactic() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("Local ")]
+                       )
+                     ]
+
+  prettyprint-example =
+    prettyprint-OptLocalPrefix
+
+
+strategies
+  prettyprint-LtacDef :
+    LtacDef(a, b, c) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [ a604
+                            , S(" ")
+                            , b289
+                            , S(" := ")
+                            , c111
+                            ]
+                          )
+                        ]
+    where a604 := <pp-one-Z(prettyprint-QualId)> a
+    where b289 := <pp-H-list(prettyprint-Ident)> b
+    where c111 := <pp-one-Z(prettyprint-TExpr)> c
+
+  prettyprint-example =
+    prettyprint-LtacDef

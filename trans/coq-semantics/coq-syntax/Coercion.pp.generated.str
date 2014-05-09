@@ -1,0 +1,48 @@
+module Coercion.pp.generated
+
+imports
+  lib/runtime/tmpl/pp
+  libstratego-gpp
+  trans/coq-semantics/coq-syntax/-
+
+strategies
+  prettyprint-Sentence :
+    Coercion(a, b, c) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [ S("Coercion ")
+                             , a493
+                             , S(" : ")
+                             , b241
+                             , S(" >-> ")
+                             , c88
+                             , S(".")
+                             ]
+                           )
+                         ]
+    where a493 := <pp-one-Z(prettyprint-QualId)> a
+    where b241 := <pp-one-Z(prettyprint-Class)> b
+    where c88 := <pp-one-Z(prettyprint-Class)> c
+
+  prettyprint-example =
+    prettyprint-Sentence
+
+
+strategies
+  prettyprint-Reserved =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-Reserved
+
+
+strategies
+  prettyprint-Class :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a494]
+           )
+         ]
+    where a494 := <pp-one-Z(prettyprint-Term)> a
+
+  prettyprint-example =
+    prettyprint-Class

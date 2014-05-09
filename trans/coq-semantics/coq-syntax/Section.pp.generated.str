@@ -1,0 +1,36 @@
+module Section.pp.generated
+
+imports
+  lib/runtime/tmpl/pp
+  libstratego-gpp
+  trans/coq-semantics/coq-syntax/-
+
+strategies
+  prettyprint-Sentence :
+    Section(a, b, c) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("Section "), a533, S(".")]
+                          )
+                        , H(
+                            [SOpt(HS(), "0")]
+                          , [b264]
+                          )
+                        , H(
+                            [SOpt(HS(), "0")]
+                          , [S("End "), c103, S(".")]
+                          )
+                        ]
+    where a533 := <pp-one-Z(prettyprint-Ident)> a
+    where b264 := <pp-V-list(prettyprint-Sentence|"1")> b
+    where c103 := <pp-one-Z(prettyprint-Ident)> c
+
+  prettyprint-example =
+    prettyprint-Sentence
+
+
+strategies
+  prettyprint-Reserved =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-Reserved

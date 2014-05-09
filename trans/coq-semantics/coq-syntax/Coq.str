@@ -1,0 +1,295 @@
+module Coq
+
+signature
+  constructors
+                           : Module -> CoqFile
+                           : Sentence -> CoqFile
+                           : List(CoqFile) -> Start
+    Admitted               : List(Tactic) -> Proof
+    Defined                : List(Tactic) -> Proof
+    Qed                    : List(Tactic) -> Proof
+    Assertion              : AssertionKeyword * Ident * OptBinders * Term -> Assertion
+    CoFixpoint             : List(CoFixBody) -> Fixpoint
+    Fixpoint               : List(FixBody) -> Fixpoint
+    ConsDecl               : Ident * OptBinders * OptType -> ConsDecl
+    ListDecl               : List(ConsDecl) -> ConsDecls
+    ListDeclBar            : List(ConsDecl) -> ConsDecls
+    Induc                  : Ident * OptBinders * Term * ConsDecls -> IndBody
+    CoInductive            : List(IndBody) -> Inductive
+    Inductive              : List(IndBody) -> Inductive
+    Let                    : Ident * OptBinders * OptType * Term -> Definition
+    Definition             : Ident * OptBinders * OptType * Term -> Definition
+    Pars                   : List(Ident) * Term -> AssumsPar
+    Terms                  : List(AssumsPar) -> Assums
+    Term                   : List(Ident) * Term -> Assums
+    Assumption             : AssumptionKeyword * Assums -> Assumption
+    AssertionExample       : AssertionKeyword
+    AssertionDefinition    : AssertionKeyword
+    AssertionProposition   : AssertionKeyword
+    AssertionCorollary     : AssertionKeyword
+    AssertionFact          : AssertionKeyword
+    AssertionRemark        : AssertionKeyword
+    AssertionLemma         : AssertionKeyword
+    AssertionTheorem       : AssertionKeyword
+    AssumptionHypotheses   : AssumptionKeyword
+    AssumptionHypothesis   : AssumptionKeyword
+    AssumptionVariables    : AssumptionKeyword
+    AssumptionVariable     : AssumptionKeyword
+    AssumptionParameters   : AssumptionKeyword
+    AssumptionParameter    : AssumptionKeyword
+    AssumptionConjecture   : AssumptionKeyword
+    AssumptionAxiom        : AssumptionKeyword
+    LtacDef                : QualId * List(Ident) * TExpr -> LtacDef
+    LocalTactic            : OptLocalPrefix
+    None                   : OptLocalPrefix
+    Tactic                 : TExpr -> Tactic
+    RedPattern             : RedExpr
+    RedFold                : RedExpr
+    RedUnfold              : RedExpr
+    RedLazy                : RedExpr
+    RedCbv                 : RedExpr
+    RedSimpl               : RedExpr
+    RedCompute             : RedExpr
+    RedHnf                 : RedExpr
+    RedRed                 : RedExpr
+                           : Pattern -> OptPattern
+    None                   : OptPattern
+                           : Ident -> OptIdent
+    None                   : OptIdent
+    MatchWld               : TExpr -> MatchRule
+    MatchAppContext        : OptIdent * OptPattern * TExpr -> MatchRule
+    MatchContext           : OptIdent * OptPattern * TExpr -> MatchRule
+    MatchPattern           : Pattern * TExpr -> MatchRule
+    OptCPattern            : Pattern -> OptCPattern
+    None                   : OptCPattern
+    ContextHypAssign       : Name * Pattern * OptCPattern -> ContextHyp
+    ContextHyp             : Name * Pattern -> ContextHyp
+                           : List(ContextHyp) -> OptContextHyps
+    None                   : OptContextHyps
+    WldContext             : TExpr -> ContextRule
+    PatContext             : OptContextHyps * Pattern * TExpr -> ContextRule
+                           : List(Name) -> OptNames
+    None                   : OptNames
+    LetClause              : Ident * OptNames * TExpr -> LetClause
+                           : Term -> TacArg
+    AtomArg                : TAtom -> TacArg
+    Unit                   : TacArg
+                           : QualId -> TacArg
+                           : Num -> MsgToken
+                           : Ident -> MsgToken
+                           : String -> MsgToken
+    Unit                   : TAtom
+                           : Num -> TAtom
+                           : QualId -> TAtom
+                           : Term -> OptTerm
+    None                   : OptTerm
+                           : Num -> OptString
+    None                   : OptString
+                           : Num -> OptNatural
+    None                   : OptNatural
+                           : List(MsgToken) -> OptMsgTokens
+    None                   : OptMsgTokens
+    Rec                    : OptRec
+    None                   : OptRec
+                           : TExpr -> TacExpr1
+                           : TAtom -> TacExpr1
+    QualTactic             : QualId * List(TacArg) -> TacExpr1
+                           : AtomicTactic -> TacExpr1
+    ConstrTerm             : Term -> TacExpr1
+    External               : String * String * List(TacArg) -> TacExpr1
+    TypeOf                 : Term -> TacExpr1
+    Eval                   : RedExpr * Term -> TacExpr1
+    Context                : Ident * OptTerm -> TacExpr1
+    Fresh                  : OptString -> TacExpr1
+    Fail                   : OptNatural * OptMsgTokens -> TacExpr1
+    IdTac                  : List(MsgToken) -> TacExpr1
+    Solve                  : List(TExpr) -> TacExpr1
+    First                  : List(TExpr) -> TacExpr1
+    AbstractUsing          : TAtom * Ident -> TacExpr1
+    Abstract               : TAtom -> TacExpr1
+    LMatchExpr             : TExpr * List(MatchRule) -> TacExpr1
+    LMatchRevGoal          : List(ContextRule) -> TacExpr1
+    LMatchGoal             : List(ContextRule) -> TacExpr1
+    MatchExpr              : TExpr * List(MatchRule) -> TacExpr1
+    MatchRevGoal           : List(ContextRule) -> TacExpr1
+    MatchGoal              : List(ContextRule) -> TacExpr1
+    LetTac                 : OptRec * List(LetClause) * TAtom -> TacExpr1
+    Fun                    : List(Ident) * TAtom -> TacExpr1
+                           : TacExpr1 -> TacExpr2
+    Alts                   : TacExpr1 * TacExpr3 -> TacExpr2
+                           : Ident -> OptTime
+    Natural                : Num -> OptTime
+    None                   : OptTime
+                           : TacExpr2 -> TacExpr3
+    Timeout                : OptTime * TacExpr3 -> TacExpr3
+    Try                    : TacExpr3 -> TacExpr3
+    Repeat                 : TacExpr3 -> TacExpr3
+    Progress               : TacExpr3 -> TacExpr3
+    DoTac                  : OptTime * TacExpr3 -> TacExpr3
+                           : TacExpr3 -> TExpr
+    ExprSeqAlts            : TExpr * List(TExpr) -> TExpr
+    ExprSeq                : TExpr * TExpr -> TExpr
+    Discriminate           : ATactic
+    Reflexivity            : ATactic
+    Right                  : ATactic
+    Left                   : ATactic
+    Destruct               : QualId -> ATactic
+    Induction              : QualId -> ATactic
+    Subst                  : ATactic
+    Inversion              : QualId -> ATactic
+    Assumption             : ATactic
+    EAuto                  : ATactic
+    Auto                   : ATactic
+    Intros                 : ATactic
+    None                   : OptNumPrefix
+    AtomicTactic           : OptNumPrefix * ATactic -> AtomicTactic
+                           : Term -> Class
+    None                   : OptRequirePrefix
+    InlineAssumption       : AssumptionKeyword * Assums -> ModTypeContent
+                           : ModContent -> ModTypeContent
+    ModuleBangExpression   : List(QualId) -> ModuleExpression
+    ModuleExpression       : List(QualId) -> ModuleExpression
+    Include                : List(Ident) -> ModContent
+                           : Module -> ModContent
+                           : Sentence -> ModContent
+                           : List(ModuleBinding) -> OptModuleBindings
+    None                   : OptModuleBindings
+    ModuleBinding          : OptModuleBindingKeywordPrefix * List(Ident) * ModuleType -> ModuleBinding
+    None                   : OptModuleTypes
+    QualifiedModuleBangSeq : QualId * List(QualId) -> ModuleType
+    QualifiedModuleSeq     : QualId * List(QualId) -> ModuleType
+    ModuleWithModule       : ModuleType * QualId * QualId -> ModuleType
+    ModuleWithDefinition   : ModuleType * QualId * Term -> ModuleType
+    QualifiedModule        : QualId -> ModuleType
+                           : ModuleBindingKeyword -> OptModuleBindingKeywordPrefix
+    None                   : OptModuleBindingKeywordPrefix
+    Export                 : ModuleBindingKeyword
+    Import                 : ModuleBindingKeyword
+    ModuleTypeDef          : Ident * OptModuleBindings * List(ModuleType) -> Module
+    ModuleType             : Ident * OptModuleBindings * List(ModTypeContent) * Ident -> Module
+    ModuleDefs             : Ident * OptModuleBindings * List(ModuleExpression) -> Module
+    ModuleDef              : Ident * OptModuleBindings * OptModuleTypes * ModuleExpression -> Module
+    InteractiveModule      : OptModuleBindingKeywordPrefix * Ident * OptModuleBindings * OptModuleTypes * List(ModContent) * Ident -> Module
+    RecExplicitFld         : Ident * OptBinders * OptType * Term -> RecordField
+    RecFld                 : Ident * OptBinders * Type * OptWhereNotation -> RecordField
+    Record                 : RecordKeyword * Ident * OptBinders * OptSort * OptIdents * List(RecordField) -> Record
+    AssertionProof         : Assertion * Proof -> Sentence
+                           : Fixpoint -> Sentence
+                           : Inductive -> Sentence
+                           : Definition -> Sentence
+                           : Assumption -> Sentence
+    Ltac                   : OptLocalPrefix * List(LtacDef) -> Sentence
+    Coercion               : QualId * Class * Class -> Sentence
+    Export                 : OptRequirePrefix * QualId -> Sentence
+    Import                 : OptRequirePrefix * QualId -> Sentence
+    Section                : Ident * List(Sentence) * Ident -> Sentence
+                           : Record -> Sentence
+    RecordCoInductive      : RecordKeyword
+    RecordInductive        : RecordKeyword
+    RecordStructure        : RecordKeyword
+    RecordRecord           : RecordKeyword
+                           : Term -> Type
+                           : List(Pattern) -> OrPattern
+    OrPattern              : List(OrPattern) -> Pattern
+                           : Num -> Pattern
+    Wld                    : Pattern
+                           : QualId -> Pattern
+    XPattern               : Pattern * Ident -> Pattern
+    AsPattern              : Pattern * Ident -> Pattern
+    QidPattern             : QualId * List(Pattern) -> Pattern
+                           : List(Pattern) -> MultPattern
+    Eq                     : List(MultPattern) * Term -> Equation
+    Return                 : Term -> ReturnType
+    MatchItem              : Term * OptAlias * OptInTerm -> MatchItem
+    CoFixBody              : Ident * OptBinders * OptType * Term -> CoFixBody
+    With                   : CoFixBody * List(CoFixBody) * Ident -> CoFixBodies
+                           : CoFixBody -> CoFixBodies
+    FixBody                : Ident * List(Binder) * OptAnnotation * OptType * Term -> FixBody
+    With                   : FixBody * List(FixBody) * Ident -> FixBodies
+                           : FixBody -> FixBodies
+    ListEq                 : List(Equation) -> Equations
+    ListEqBar              : List(Equation) -> Equations
+    Type                   : Sort
+    Set                    : Sort
+    Prop                   : Sort
+    WldName                : Name
+                           : Ident -> Name
+    Assign                 : Name * OptType * Term -> Binder
+    Binds                  : List(Name) * Term -> Binder
+    Bind                   : Name -> Binder
+    ImplicitArg            : Ident * Term -> Arg
+    DecreaseWF             : Term * Ident -> DecreaseAnnot
+    DecreaseMeasure        : Term * Ident -> DecreaseAnnot
+    DecreaseStruct         : Ident -> DecreaseAnnot
+    DecreaseAnnot          : DecreaseAnnot -> OptDecreaseAnnot
+    None                   : OptDecreaseAnnot
+    ProjQualArgs           : Term * QualId * List(Term) -> Term
+    ProjArgs               : Term * QualId * List(Arg) -> Term
+    Projection             : Term * QualId -> Term
+    And                    : Term * Term -> Term
+    NotE                   : Term * Term -> Term
+    Eq                     : Term * Term -> Term
+    Prod                   : Term * Term -> Term
+    Tuple                  : Term * List(Term) -> Term
+    List                   : List(Term) -> Term
+    WldTerm                : Term
+    Num                    : Num -> Term
+    Sort                   : Sort -> Term
+    Ref                    : QualId -> Term
+    Match                  : List(MatchItem) * OptReturnType * Equations -> Term
+    ScopeRef               : Term * Ident -> Term
+    UnHide                 : QualId * OptTerms -> Term
+    ApplyImplicit          : Term * Arg -> Term
+    Apply                  : Term * Term -> Term
+    Arrow                  : Term * Term -> Term
+    Coerce                 : Term -> Term
+    Check                  : Term * Term -> Term
+    Cast                   : Term * Term -> Term
+    If                     : Term * OptDepRetType * Term * Term -> Term
+    LetPat                 : SingleQuote * Pattern * OptInTerm * Term * OptReturnType * Term -> Term
+    LetTuple               : List(Name) * OptDepRetType * Term * Term -> Term
+    LetCoFix               : CoFixBody * Term -> Term
+    LetFix                 : FixBody * Term -> Term
+    Let                    : Ident * OptBinders * OptType * Term * Term -> Term
+    CoFix                  : CoFixBodies -> Term
+    Fix                    : FixBodies -> Term
+    Fun                    : List(Binder) * Term -> Term
+    ForAll                 : List(Binder) * Term -> Term
+    Function               : Ident * List(Binder) * OptDecreaseAnnot * Type * Term -> Term
+    None                   : OptWhereNotation
+                           : List(Ident) -> OptIdents
+    None                   : OptIdents
+    Anno                   : Ident -> OptAnnotation
+    None                   : OptAnnotation
+    None                   : OptSort
+                           : List(Term) -> OptTerms
+    None                   : OptTerms
+                           : List(Binder) -> OptBinders
+    None                   : OptBinders
+                           : ReturnType -> OptReturnType
+    None                   : OptReturnType
+    As                     : Name -> OptAlias
+    None                   : OptAlias
+    DepRet                 : OptAlias * ReturnType -> OptDepRetType
+    None                   : OptDepRetType
+    None                   : OptInTerm
+    None                   : OptType
+    QId                    : QualId * Ident -> QualId
+                           : Ident -> QualId
+                           : String -> SingleQuote
+                           : String -> String
+                           : String -> Num
+                           : String -> Ident
+
+
+signature
+  constructors
+    Some : a -> Option(a)
+    None : Option(a)
+
+
+signature
+  constructors
+    Cons : a * List(a) -> List(a)
+    Nil  : List(a)
+    Conc : List(a) * List(a) -> List(a)

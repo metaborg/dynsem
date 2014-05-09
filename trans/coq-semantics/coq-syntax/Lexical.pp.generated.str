@@ -1,5 +1,10 @@
 module Lexical.pp.generated
 
+imports
+  lib/runtime/tmpl/pp
+  libstratego-gpp
+  trans/coq-semantics/coq-syntax/-
+
 strategies
   prettyprint-LAYOUT =
     ![S(<is-string>)]
@@ -34,6 +39,9 @@ strategies
   prettyprint-Reserved =
     ![S(<is-string>)]
 
+  prettyprint-SingleQuote =
+    ![S(<is-string>)]
+
   prettyprint-example =
     prettyprint-LAYOUT
 
@@ -66,3 +74,19 @@ strategies
 
   prettyprint-example =
     prettyprint-Reserved
+
+  prettyprint-example =
+    prettyprint-SingleQuote
+
+
+strategies
+  prettyprint-Notation :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a456]
+           )
+         ]
+    where a456 := <pp-one-Z(prettyprint-Ident)> a
+
+  prettyprint-example =
+    prettyprint-Notation

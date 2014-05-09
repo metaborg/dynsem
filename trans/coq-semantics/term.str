@@ -3,6 +3,7 @@ module coq-semantics/term
 imports
   libstratego-gpp
   coq-semantics/-
+  coq-semantics/coq-syntax/-
   lib/runtime/index/-
   lib/runtime/nabl/-
   lib/runtime/properties/-

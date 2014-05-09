@@ -1,0 +1,706 @@
+module Gallina.pp.generated
+
+imports
+  lib/runtime/tmpl/pp
+  libstratego-gpp
+  trans/coq-semantics/coq-syntax/-
+
+strategies
+  prettyprint-Term :
+    ForAll(a, b) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [ S("forall ")
+                        , a402
+                        , S(", ")
+                        , b197
+                        ]
+                      )
+                    ]
+    where a402 := <pp-H-list(prettyprint-Binder)> a
+    where b197 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    Fun(a, b) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [ S("fun ")
+                     , a403
+                     , S(" => ")
+                     , b198
+                     ]
+                   )
+                 ]
+    where a403 := <pp-H-list(prettyprint-Binder)> a
+    where b198 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    Fix(a) -> [ H(
+                  [SOpt(HS(), "0")]
+                , [S("fix "), a404]
+                )
+              ]
+    where a404 := <pp-one-Z(prettyprint-FixBodies)> a
+
+  prettyprint-Term :
+    CoFix(a) -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [S("cofix "), a405]
+                  )
+                ]
+    where a405 := <pp-one-Z(prettyprint-CoFixBodies)> a
+
+  prettyprint-Term :
+    Let(a, b, c, d, e) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [ S("let ")
+                              , a406
+                              , b199
+                              , c72
+                              , S(" :=")
+                              ]
+                            )
+                          , d33
+                          , H(
+                              [SOpt(HS(), "0")]
+                            , [S("in")]
+                            )
+                          , e14
+                          ]
+    where a406 := <pp-one-Z(prettyprint-Ident)> a
+    where b199 := <pp-one-Z(prettyprint-OptBinders)> b
+    where c72 := <pp-one-Z(prettyprint-OptType)> c
+    where d33 := <pp-indent(|"2")> [<pp-one-Z(prettyprint-Term)> d]
+    where e14 := <pp-indent(|"2")> [<pp-one-Z(prettyprint-Term)> e]
+
+  prettyprint-Term :
+    LetFix(a, b) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [ S("let fix ")
+                        , a407
+                        , S(" in ")
+                        , b200
+                        ]
+                      )
+                    ]
+    where a407 := <pp-one-Z(prettyprint-FixBody)> a
+    where b200 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    LetCoFix(a, b) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [ S("let fix ")
+                          , a408
+                          , S(" in ")
+                          , b201
+                          ]
+                        )
+                      ]
+    where a408 := <pp-one-Z(prettyprint-CoFixBody)> a
+    where b201 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    LetTuple(a, b, c, d) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [ S("let (")
+                                , a409
+                                , S(")")
+                                , b202
+                                , S(" := ")
+                                , c73
+                                , S(" in ")
+                                , d34
+                                ]
+                              )
+                            ]
+    where a409 := <pp-H-list(prettyprint-Name|", ")> a
+    where b202 := <pp-one-Z(prettyprint-OptDepRetType)> b
+    where c73 := <pp-one-Z(prettyprint-Term)> c
+    where d34 := <pp-one-Z(prettyprint-Term)> d
+
+  prettyprint-Term :
+    LetPat(a, b, c, d, e, f) -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [ S("let ")
+                                    , a410
+                                    , S(" ")
+                                    , b203
+                                    , c74
+                                    , S(" := ")
+                                    , d35
+                                    , e15
+                                    , S(" in ")
+                                    , f5
+                                    ]
+                                  )
+                                ]
+    where a410 := <pp-one-Z(prettyprint-SingleQuote)> a
+    where b203 := <pp-one-Z(prettyprint-Pattern)> b
+    where c74 := <pp-one-Z(prettyprint-OptInTerm)> c
+    where d35 := <pp-one-Z(prettyprint-Term)> d
+    where e15 := <pp-one-Z(prettyprint-OptReturnType)> e
+    where f5 := <pp-one-Z(prettyprint-Term)> f
+
+  prettyprint-Term :
+    If(a, b, c, d) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [ S("if ")
+                          , a411
+                          , b204
+                          , S(" then ")
+                          , c75
+                          , S(" else ")
+                          , d36
+                          ]
+                        )
+                      ]
+    where a411 := <pp-one-Z(prettyprint-Term)> a
+    where b204 := <pp-one-Z(prettyprint-OptDepRetType)> b
+    where c75 := <pp-one-Z(prettyprint-Term)> c
+    where d36 := <pp-one-Z(prettyprint-Term)> d
+
+  prettyprint-Term :
+    Cast(a, b) -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [a412, S(" : "), b205]
+                    )
+                  ]
+    where a412 := <pp-one-Z(prettyprint-Term)> a
+    where b205 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    Check(a, b) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [a413, S(" <: "), b206]
+                     )
+                   ]
+    where a413 := <pp-one-Z(prettyprint-Term)> a
+    where b206 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    Coerce(a) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [a414, S(" :>")]
+                   )
+                 ]
+    where a414 := <pp-one-Z(prettyprint-Term)> a
+
+  prettyprint-Term :
+    Arrow(a, b) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [a415, S(" -> "), b207]
+                     )
+                   ]
+    where a415 := <pp-one-Z(prettyprint-Term)> a
+    where b207 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    Apply(a, b) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [a416, S(" "), b208]
+                     )
+                   ]
+    where a416 := <pp-one-Z(prettyprint-Term)> a
+    where b208 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    ApplyImplicit(a, b) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [a417, S(" "), b209]
+                             )
+                           ]
+    where a417 := <pp-one-Z(prettyprint-Term)> a
+    where b209 := <pp-one-Z(prettyprint-Arg)> b
+
+  prettyprint-Term :
+    UnHide(a, b) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("@"), a418, b210]
+                      )
+                    ]
+    where a418 := <pp-one-Z(prettyprint-QualId)> a
+    where b210 := <pp-one-Z(prettyprint-OptTerms)> b
+
+  prettyprint-Term :
+    ScopeRef(a, b) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [a419, S(" % "), b211]
+                        )
+                      ]
+    where a419 := <pp-one-Z(prettyprint-Term)> a
+    where b211 := <pp-one-Z(prettyprint-Ident)> b
+
+  prettyprint-Term :
+    Match(a, b, c) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [ S("match ")
+                          , a420
+                          , b212
+                          , S(" with")
+                          ]
+                        )
+                      , c76
+                      ]
+    where a420 := <pp-H-list(prettyprint-MatchItem|", ")> a
+    where b212 := <pp-one-Z(prettyprint-OptReturnType)> b
+    where c76 := <pp-indent(|"2")> [ <pp-one-Z(prettyprint-Equations)> c
+                                   , S(" end")
+                                   ]
+
+  prettyprint-Term :
+    Ref(a) -> [ H(
+                  [SOpt(HS(), "0")]
+                , [a421]
+                )
+              ]
+    where a421 := <pp-one-Z(prettyprint-QualId)> a
+
+  prettyprint-Term :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a422]
+           )
+         ]
+    where a422 := <pp-one-Z(prettyprint-Sort)> a
+
+  prettyprint-Term :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a423]
+           )
+         ]
+    where a423 := <pp-one-Z(prettyprint-Num)> a
+
+  prettyprint-Term :
+    WldTerm() -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("_")]
+                   )
+                 ]
+
+  prettyprint-Term :
+    Parenthetical(a) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("("), a424, S(")")]
+                          )
+                        ]
+    where a424 := <pp-one-Z(prettyprint-Term)> a
+
+  prettyprint-example =
+    prettyprint-Term
+
+
+strategies
+  prettyprint-Arg :
+    ImplicitArg(a, b) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [ S("(")
+                             , a425
+                             , S(" := ")
+                             , b213
+                             , S(")")
+                             ]
+                           )
+                         ]
+    where a425 := <pp-one-Z(prettyprint-Ident)> a
+    where b213 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-example =
+    prettyprint-Arg
+
+
+strategies
+  prettyprint-Binder :
+    Bind(a) -> [ H(
+                   [SOpt(HS(), "0")]
+                 , [a426]
+                 )
+               ]
+    where a426 := <pp-one-Z(prettyprint-Name)> a
+
+  prettyprint-Binder :
+    Binds(a, b) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [ S("(")
+                       , a427
+                       , S(": ")
+                       , b214
+                       , S(")")
+                       ]
+                     )
+                   ]
+    where a427 := <pp-H-list(prettyprint-Name|" ")> a
+    where b214 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Binder :
+    Assign(a, b, c) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [ S("(")
+                           , a428
+                           , b215
+                           , S(" := ")
+                           , c77
+                           , S(")")
+                           ]
+                         )
+                       ]
+    where a428 := <pp-one-Z(prettyprint-Name)> a
+    where b215 := <pp-one-Z(prettyprint-OptType)> b
+    where c77 := <pp-one-Z(prettyprint-Term)> c
+
+  prettyprint-example =
+    prettyprint-Binder
+
+
+strategies
+  prettyprint-Name :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a429]
+           )
+         ]
+    where a429 := <pp-one-Z(prettyprint-Ident)> a
+
+  prettyprint-Name :
+    WldName() -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("_")]
+                   )
+                 ]
+
+  prettyprint-example =
+    prettyprint-Name
+
+
+strategies
+  prettyprint-Sort :
+    Prop() -> [ H(
+                  [SOpt(HS(), "0")]
+                , [S("Prop")]
+                )
+              ]
+
+  prettyprint-Sort :
+    Set() -> [ H(
+                 [SOpt(HS(), "0")]
+               , [S("Set")]
+               )
+             ]
+
+  prettyprint-Sort :
+    Type() -> [ H(
+                  [SOpt(HS(), "0")]
+                , [S("Type")]
+                )
+              ]
+
+  prettyprint-example =
+    prettyprint-Sort
+
+
+strategies
+  prettyprint-Equations :
+    ListEqBar(a) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("| "), a430]
+                      )
+                    ]
+    where a430 := <pp-H-list(prettyprint-Equation|"| ")> a
+
+  prettyprint-Equations :
+    ListEq(a) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [a431]
+                   )
+                 ]
+    where a431 := <pp-H-list(prettyprint-Equation|"| ")> a
+
+  prettyprint-example =
+    prettyprint-Equations
+
+
+strategies
+  prettyprint-FixBodies :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a432]
+           )
+         ]
+    where a432 := <pp-one-Z(prettyprint-FixBody)> a
+
+  prettyprint-FixBodies :
+    With(a, b, c) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [ a433
+                         , S(" with ")
+                         , b216
+                         , S(" for ")
+                         , c78
+                         ]
+                       )
+                     ]
+    where a433 := <pp-one-Z(prettyprint-FixBody)> a
+    where b216 := <pp-H-list(prettyprint-FixBody|"with ")> b
+    where c78 := <pp-one-Z(prettyprint-Ident)> c
+
+  prettyprint-FixBody :
+    FixBody(a, b, c, d, e) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [ a434
+                                  , S(" ")
+                                  , b217
+                                  , c79
+                                  , d37
+                                  , S(" :=")
+                                  ]
+                                )
+                              , e16
+                              ]
+    where a434 := <pp-one-Z(prettyprint-Ident)> a
+    where b217 := <pp-H-list(prettyprint-Binder|" ")> b
+    where c79 := <pp-one-Z(prettyprint-OptAnnotation)> c
+    where d37 := <pp-one-Z(prettyprint-OptType)> d
+    where e16 := <pp-indent(|"2")> [<pp-one-Z(prettyprint-Term)> e]
+
+  prettyprint-CoFixBodies :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a435]
+           )
+         ]
+    where a435 := <pp-one-Z(prettyprint-CoFixBody)> a
+
+  prettyprint-CoFixBodies :
+    With(a, b, c) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [ a436
+                         , S(" with ")
+                         , b218
+                         , S(" for ")
+                         , c80
+                         ]
+                       )
+                     ]
+    where a436 := <pp-one-Z(prettyprint-CoFixBody)> a
+    where b218 := <pp-H-list(prettyprint-CoFixBody|"with ")> b
+    where c80 := <pp-one-Z(prettyprint-Ident)> c
+
+  prettyprint-CoFixBody :
+    CoFixBody(a, b, c, d) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [a437, b219, c81, S(" := "), d38]
+                               )
+                             ]
+    where a437 := <pp-one-Z(prettyprint-Ident)> a
+    where b219 := <pp-one-Z(prettyprint-OptBinders)> b
+    where c81 := <pp-one-Z(prettyprint-OptType)> c
+    where d38 := <pp-one-Z(prettyprint-Term)> d
+
+  prettyprint-MatchItem :
+    MatchItem(a, b, c) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [a438, b220, c82]
+                            )
+                          ]
+    where a438 := <pp-one-Z(prettyprint-Term)> a
+    where b220 := <pp-one-Z(prettyprint-OptAlias)> b
+    where c82 := <pp-one-Z(prettyprint-OptInTerm)> c
+
+  prettyprint-ReturnType :
+    Return(a) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("return "), a439]
+                   )
+                 ]
+    where a439 := <pp-one-Z(prettyprint-Term)> a
+
+  prettyprint-Equation :
+    Eq(a, b) -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [a440, S(" => "), b221]
+                  )
+                , H(
+                    []
+                  , [S("")]
+                  )
+                ]
+    where a440 := <pp-H-list(prettyprint-MultPattern|" | ")> a
+    where b221 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-MultPattern :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a441]
+           )
+         ]
+    where a441 := <pp-H-list(prettyprint-Pattern|", ")> a
+
+  prettyprint-Pattern :
+    QidPattern(a, b) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [a442, S(" "), b222]
+                          )
+                        ]
+    where a442 := <pp-one-Z(prettyprint-QualId)> a
+    where b222 := <pp-H-list(prettyprint-Pattern|" ")> b
+
+  prettyprint-Pattern :
+    AsPattern(a, b) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [a443, S(" as "), b223]
+                         )
+                       ]
+    where a443 := <pp-one-Z(prettyprint-Pattern)> a
+    where b223 := <pp-one-Z(prettyprint-Ident)> b
+
+  prettyprint-Pattern :
+    XPattern(a, b) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [a444, S(" % "), b224]
+                        )
+                      ]
+    where a444 := <pp-one-Z(prettyprint-Pattern)> a
+    where b224 := <pp-one-Z(prettyprint-Ident)> b
+
+  prettyprint-Pattern :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a445]
+           )
+         ]
+    where a445 := <pp-one-Z(prettyprint-QualId)> a
+
+  prettyprint-Pattern :
+    Wld() -> [ H(
+                 [SOpt(HS(), "0")]
+               , [S("_")]
+               )
+             ]
+
+  prettyprint-Pattern :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a446]
+           )
+         ]
+    where a446 := <pp-one-Z(prettyprint-Num)> a
+
+  prettyprint-Pattern :
+    OrPattern(a) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("("), a447, S(")")]
+                      )
+                    ]
+    where a447 := <pp-H-list(prettyprint-OrPattern|", ")> a
+
+  prettyprint-OrPattern :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a448]
+           )
+         ]
+    where a448 := <pp-H-list(prettyprint-Pattern|" | ")> a
+
+  prettyprint-example =
+    prettyprint-FixBodies
+
+  prettyprint-example =
+    prettyprint-FixBody
+
+  prettyprint-example =
+    prettyprint-CoFixBodies
+
+  prettyprint-example =
+    prettyprint-CoFixBody
+
+  prettyprint-example =
+    prettyprint-MatchItem
+
+  prettyprint-example =
+    prettyprint-ReturnType
+
+  prettyprint-example =
+    prettyprint-Equation
+
+  prettyprint-example =
+    prettyprint-MultPattern
+
+  prettyprint-example =
+    prettyprint-Pattern
+
+  prettyprint-example =
+    prettyprint-OrPattern
+
+
+strategies
+  prettyprint-Term :
+    List(a) -> [ H(
+                   [SOpt(HS(), "0")]
+                 , [S("["), a449, S("]")]
+                 )
+               ]
+    where a449 := <pp-H-list(prettyprint-Term|";")> a
+
+  prettyprint-Term :
+    Tuple(a, b) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [ S("(")
+                       , a450
+                       , S(",")
+                       , b225
+                       , S(")")
+                       ]
+                     )
+                   ]
+    where a450 := <pp-one-Z(prettyprint-Term)> a
+    where b225 := <pp-H-list(prettyprint-Term|",")> b
+
+  prettyprint-Term :
+    Prod(a, b) -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [a451, S(" * "), b226]
+                    )
+                  ]
+    where a451 := <pp-one-Z(prettyprint-Term)> a
+    where b226 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    Eq(a, b) -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [a452, S(" = "), b227]
+                  )
+                ]
+    where a452 := <pp-one-Z(prettyprint-Term)> a
+    where b227 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    NotE(a, b) -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [a453, S(" <> "), b228]
+                    )
+                  ]
+    where a453 := <pp-one-Z(prettyprint-Term)> a
+    where b228 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-Term :
+    And(a, b) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [a454, S(" /\\ "), b229]
+                   )
+                 ]
+    where a454 := <pp-one-Z(prettyprint-Term)> a
+    where b229 := <pp-one-Z(prettyprint-Term)> b
+
+  prettyprint-example =
+    prettyprint-Term
+
+
+strategies
+  prettyprint-Type :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a455]
+           )
+         ]
+    where a455 := <pp-one-Z(prettyprint-Term)> a
+
+  prettyprint-example =
+    prettyprint-Type

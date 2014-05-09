@@ -3,6 +3,7 @@ module coq-semantics/main
 imports
   libstratego-gpp
   coq-semantics/-
+  coq-semantics/coq-syntax/-
   lib/runtime/index/-
   lib/runtime/nabl/-
   lib/runtime/properties/-
@@ -20,14 +21,14 @@ rules
     ; filename := <guarantee-extension(|"v")> path
     ; coq-file := <strip-annos; module-to-coq> ast
     with
-       result := <parenthesize-Coq; prettyprint-CoqFile; box2text-string(|100)> coq-file
+       result := <parenthesize-Coq; prettyprint-Start; debug(|"C"); box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-example) ; debug(!"cannot pp ")))> coq-file
     ;  result := ""
 
 rules
   
   module-to-coq:
-  	Module(name, rule*) -> Sent([IND_SEMANTICS(definition*)])
+  	Module(name, rule*) -> [IND_SEMANTICS(definition*)]
 		where
 		  rule'*      := <filter(?Rules(<id>)); concat> rule*
 		; definition* := <foldl(fold-rule); Fst; reverse> (rule'*, ([], []))
@@ -63,33 +64,29 @@ rules // Fold rules
       (p', b'*, i') := <formula-to-coq(|i)> p
   
   fold-type: // Composes parts of a type
-    (x, y) -> Product(x, y)
+    (x, y) -> Arrow(x, y)
 
 overlays
 
   IND_SEMANTICS(terms) =
 		Inductive(
-      Ind(
-        [ Induc(
-            "semantics_cbn"
-          , []
-          , Type(
-              Product(
-                Ref("Env")
-              , Product(Ref("term"), Product(Ref("value"), Sort(Prop())))
-              )
-            )
-          , ListDeclBar(terms)
+      [ Induc(
+          "semantics_cbn"
+        , None()
+        , Arrow(
+            Ref("Env")
+          , Arrow(Ref("term"), Arrow(Ref("value"), Prop()))
           )
-        ]
-      )
+        , ListDeclBar(terms)
+        )
+      ]
     )
 
   DECL(name, binds, type) =
 		ConsDecl(
 		  name
 		, binds
-		, Type(type)
+		, type
     )
     
 	CONS(hd, tl) = APPLY2(Ref("cons"), hd, tl)

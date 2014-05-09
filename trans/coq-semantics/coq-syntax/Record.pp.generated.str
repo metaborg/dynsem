@@ -1,0 +1,159 @@
+module Record.pp.generated
+
+imports
+  lib/runtime/tmpl/pp
+  libstratego-gpp
+  trans/coq-semantics/coq-syntax/-
+
+strategies
+  prettyprint-RecordKeyword :
+    RecordRecord() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("Record")]
+                        )
+                      ]
+
+  prettyprint-RecordKeyword :
+    RecordStructure() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Structure")]
+                           )
+                         ]
+
+  prettyprint-RecordKeyword :
+    RecordInductive() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Inductive")]
+                           )
+                         ]
+
+  prettyprint-RecordKeyword :
+    RecordCoInductive() -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S("CoInductive")]
+                             )
+                           ]
+
+  prettyprint-example =
+    prettyprint-RecordKeyword
+
+
+strategies
+  prettyprint-Sentence :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a525]
+           )
+         ]
+    where a525 := <pp-one-Z(prettyprint-Record)> a
+
+  prettyprint-example =
+    prettyprint-Sentence
+
+
+strategies
+  prettyprint-Record :
+    Record(a, b, c, d, e, f) -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [ a526
+                                    , S(" ")
+                                    , b258
+                                    , c98
+                                    , d47
+                                    , S(" :=")
+                                    ]
+                                  )
+                                , e19
+                                , f7
+                                , a527
+                                ]
+    where a526 := <pp-one-Z(prettyprint-RecordKeyword)> a
+    where b258 := <pp-one-Z(prettyprint-Ident)> b
+    where c98 := <pp-one-Z(prettyprint-OptBinders)> c
+    where d47 := <pp-one-Z(prettyprint-OptSort)> d
+    where e19 := <pp-indent(|"1")> [ <pp-one-Z(prettyprint-OptIdents)> e
+                                   , S(" {")
+                                   ]
+    where f7 := <pp-indent(|"4")> [ <pp-V-list(prettyprint-RecordField|"0", ";")> f
+                                  ]
+    where a527 := <pp-indent(|"2")> [S("}.")]
+
+  prettyprint-example =
+    prettyprint-Record
+
+
+strategies
+  prettyprint-RecordField :
+    RecFld(a, b, c, d) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [a528, b259, S(" : "), c99, d48]
+                            )
+                          ]
+    where a528 := <pp-one-Z(prettyprint-Ident)> a
+    where b259 := <pp-one-Z(prettyprint-OptBinders)> b
+    where c99 := <pp-one-Z(prettyprint-Type)> c
+    where d48 := <pp-one-Z(prettyprint-OptWhereNotation)> d
+
+  prettyprint-RecordField :
+    RecExplicitFld(a, b, c, d) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [a529, b260, c100, S(" := "), d49]
+                                    )
+                                  ]
+    where a529 := <pp-one-Z(prettyprint-Ident)> a
+    where b260 := <pp-one-Z(prettyprint-OptBinders)> b
+    where c100 := <pp-one-Z(prettyprint-OptType)> c
+    where d49 := <pp-one-Z(prettyprint-Term)> d
+
+  prettyprint-example =
+    prettyprint-RecordField
+
+
+strategies
+  prettyprint-Term :
+    Projection(a, b) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [ a530
+                            , S(".(")
+                            , b261
+                            , S(")")
+                            ]
+                          )
+                        ]
+    where a530 := <pp-one-Z(prettyprint-Term)> a
+    where b261 := <pp-one-Z(prettyprint-QualId)> b
+
+  prettyprint-Term :
+    ProjArgs(a, b, c) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [ a531
+                             , S(".(")
+                             , b262
+                             , S(" ")
+                             , c101
+                             , S(")")
+                             ]
+                           )
+                         ]
+    where a531 := <pp-one-Z(prettyprint-Term)> a
+    where b262 := <pp-one-Z(prettyprint-QualId)> b
+    where c101 := <pp-H-list(prettyprint-Arg)> c
+
+  prettyprint-Term :
+    ProjQualArgs(a, b, c) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [ a532
+                                 , S(".(@")
+                                 , b263
+                                 , S(" ")
+                                 , c102
+                                 , S(")")
+                                 ]
+                               )
+                             ]
+    where a532 := <pp-one-Z(prettyprint-Term)> a
+    where b263 := <pp-one-Z(prettyprint-QualId)> b
+    where c102 := <pp-H-list(prettyprint-Term)> c
+
+  prettyprint-example =
+    prettyprint-Term
