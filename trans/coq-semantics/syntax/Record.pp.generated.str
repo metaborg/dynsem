@@ -1,0 +1,158 @@
+module Record.pp.generated
+imports
+  trans/coq-semantics/syntax/-
+  libstratego-gpp
+  lib/runtime/tmpl/pp
+
+strategies
+  prettyprintCoq-RecordKeyword :
+    RecordRecord() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("Record")]
+                        )
+                      ]
+
+  prettyprintCoq-RecordKeyword :
+    RecordStructure() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Structure")]
+                           )
+                         ]
+
+  prettyprintCoq-RecordKeyword :
+    RecordInductive() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Inductive")]
+                           )
+                         ]
+
+  prettyprintCoq-RecordKeyword :
+    RecordCoInductive() -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S("CoInductive")]
+                             )
+                           ]
+
+  prettyprintCoq-example =
+    prettyprintCoq-RecordKeyword
+
+
+strategies
+  prettyprintCoq-Sentence :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a126]
+           )
+         ]
+    where a126 := <pp-one-Z(prettyprintCoq-Record)> a
+
+  prettyprintCoq-example =
+    prettyprintCoq-Sentence
+
+
+strategies
+  prettyprintCoq-Record :
+    Record(a, b, c, d, e, f) -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [ a127
+                                    , S(" ")
+                                    , b61
+                                    , c26
+                                    , d14
+                                    , S(" :=")
+                                    ]
+                                  )
+                                , e8
+                                , f2
+                                , a128
+                                ]
+    where a127 := <pp-one-Z(prettyprintCoq-RecordKeyword)> a
+    where b61 := <pp-one-Z(prettyprintCoq-Ident)> b
+    where c26 := <pp-one-Z(prettyprintCoq-OptBinders)> c
+    where d14 := <pp-one-Z(prettyprintCoq-OptSort)> d
+    where e8 := <pp-indent(|"1")> [ <pp-one-Z(prettyprintCoq-OptIdents)> e
+                                  , S(" {")
+                                  ]
+    where f2 := <pp-indent(|"4")> [ <pp-V-list(prettyprintCoq-RecordField|"0", ";")> f
+                                  ]
+    where a128 := <pp-indent(|"2")> [S("}.")]
+
+  prettyprintCoq-example =
+    prettyprintCoq-Record
+
+
+strategies
+  prettyprintCoq-RecordField :
+    RecFld(a, b, c, d) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [a129, b62, S(" : "), c27, d15]
+                            )
+                          ]
+    where a129 := <pp-one-Z(prettyprintCoq-Ident)> a
+    where b62 := <pp-one-Z(prettyprintCoq-OptBinders)> b
+    where c27 := <pp-one-Z(prettyprintCoq-Type)> c
+    where d15 := <pp-one-Z(prettyprintCoq-OptWhereNotation)> d
+
+  prettyprintCoq-RecordField :
+    RecExplicitFld(a, b, c, d) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [a130, b63, c28, S(" := "), d16]
+                                    )
+                                  ]
+    where a130 := <pp-one-Z(prettyprintCoq-Ident)> a
+    where b63 := <pp-one-Z(prettyprintCoq-OptBinders)> b
+    where c28 := <pp-one-Z(prettyprintCoq-OptType)> c
+    where d16 := <pp-one-Z(prettyprintCoq-Term)> d
+
+  prettyprintCoq-example =
+    prettyprintCoq-RecordField
+
+
+strategies
+  prettyprintCoq-Term :
+    Projection(a, b) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [ a131
+                            , S(".(")
+                            , b64
+                            , S(")")
+                            ]
+                          )
+                        ]
+    where a131 := <pp-one-Z(prettyprintCoq-Term)> a
+    where b64 := <pp-one-Z(prettyprintCoq-QualId)> b
+
+  prettyprintCoq-Term :
+    ProjArgs(a, b, c) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [ a132
+                             , S(".(")
+                             , b65
+                             , S(" ")
+                             , c29
+                             , S(")")
+                             ]
+                           )
+                         ]
+    where a132 := <pp-one-Z(prettyprintCoq-Term)> a
+    where b65 := <pp-one-Z(prettyprintCoq-QualId)> b
+    where c29 := <pp-H-list(prettyprintCoq-Arg)> c
+
+  prettyprintCoq-Term :
+    ProjQualArgs(a, b, c) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [ a133
+                                 , S(".(@")
+                                 , b66
+                                 , S(" ")
+                                 , c30
+                                 , S(")")
+                                 ]
+                               )
+                             ]
+    where a133 := <pp-one-Z(prettyprintCoq-Term)> a
+    where b66 := <pp-one-Z(prettyprintCoq-QualId)> b
+    where c30 := <pp-H-list(prettyprintCoq-Term)> c
+
+  prettyprintCoq-example =
+    prettyprintCoq-Term

@@ -1,0 +1,38 @@
+module Coq.pp.generated
+imports
+  trans/coq-semantics/syntax/-
+  libstratego-gpp
+  lib/runtime/tmpl/pp
+
+strategies
+  prettyprintCoq-Start :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a0]
+           )
+         ]
+    where a0 := <pp-V-list(prettyprintCoq-CoqFile|"1")> a
+
+  prettyprintCoq-example =
+    prettyprintCoq-Start
+
+
+strategies
+  prettyprintCoq-CoqFile :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a1]
+           )
+         ]
+    where a1 := <pp-one-Z(prettyprintCoq-Sentence)> a
+
+  prettyprintCoq-CoqFile :
+    a -> [ H(
+             [SOpt(HS(), "0")]
+           , [a2]
+           )
+         ]
+    where a2 := <pp-one-Z(prettyprintCoq-Module)> a
+
+  prettyprintCoq-example =
+    prettyprintCoq-CoqFile

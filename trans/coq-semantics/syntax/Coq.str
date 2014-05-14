@@ -233,8 +233,8 @@ signature
     Tuple                  : Term * List(Term) -> Term
     List                   : List(Term) -> Term
     WldTerm                : Term
-    Num                    : Num -> Term
-    Sort                   : Sort -> Term
+                           : Num -> Term
+                           : Sort -> Term
     Ref                    : QualId -> Term
     Match                  : List(MatchItem) * OptReturnType * Equations -> Term
     ScopeRef               : Term * Ident -> Term

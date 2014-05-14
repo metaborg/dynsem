@@ -1,137 +1,136 @@
 module AtomicTactic.pp.generated
-
 imports
-  lib/runtime/tmpl/pp
+  trans/coq-semantics/syntax/-
   libstratego-gpp
-  trans/coq-semantics/coq-syntax/-
+  lib/runtime/tmpl/pp
 
 strategies
-  prettyprint-Reserved =
+  prettyprintCoq-Reserved =
     ![S(<is-string>)]
 
-  prettyprint-example =
-    prettyprint-Reserved
+  prettyprintCoq-example =
+    prettyprintCoq-Reserved
 
 
 strategies
-  prettyprint-AtomicTactic :
+  prettyprintCoq-AtomicTactic :
     AtomicTactic(a, b) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [a534, b265]
+                            , [a135, b68]
                             )
                           ]
-    where a534 := <pp-one-Z(prettyprint-OptNumPrefix)> a
-    where b265 := <pp-one-Z(prettyprint-ATactic)> b
+    where a135 := <pp-one-Z(prettyprintCoq-OptNumPrefix)> a
+    where b68 := <pp-one-Z(prettyprintCoq-ATactic)> b
 
-  prettyprint-OptNumPrefix :
+  prettyprintCoq-OptNumPrefix :
     None() -> [ H(
                   []
                 , [S("")]
                 )
               ]
 
-  prettyprint-OptNumPrefix :
+  prettyprintCoq-OptNumPrefix :
     a -> [ H(
              [SOpt(HS(), "0")]
-           , [a535, S(" : ")]
+           , [a136, S(" : ")]
            )
          ]
-    where a535 := <pp-one-Z(prettyprint-Num)> a
+    where a136 := <pp-one-Z(prettyprintCoq-Num)> a
 
-  prettyprint-example =
-    prettyprint-AtomicTactic
+  prettyprintCoq-example =
+    prettyprintCoq-AtomicTactic
 
-  prettyprint-example =
-    prettyprint-OptNumPrefix
+  prettyprintCoq-example =
+    prettyprintCoq-OptNumPrefix
 
 
 strategies
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Intros() -> [ H(
                     [SOpt(HS(), "0")]
                   , [S("intros")]
                   )
                 ]
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Auto() -> [ H(
                   [SOpt(HS(), "0")]
                 , [S("auto")]
                 )
               ]
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     EAuto() -> [ H(
                    [SOpt(HS(), "0")]
                  , [S("eauto")]
                  )
                ]
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Assumption() -> [ H(
                         [SOpt(HS(), "0")]
                       , [S("assumption")]
                       )
                     ]
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Inversion(a) -> [ H(
                         [SOpt(HS(), "0")]
-                      , [S("inversion "), a536]
+                      , [S("inversion "), a137]
                       )
                     ]
-    where a536 := <pp-one-Z(prettyprint-QualId)> a
+    where a137 := <pp-one-Z(prettyprintCoq-QualId)> a
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Subst() -> [ H(
                    [SOpt(HS(), "0")]
                  , [S("subst")]
                  )
                ]
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Induction(a) -> [ H(
                         [SOpt(HS(), "0")]
-                      , [S("induction "), a537]
+                      , [S("induction "), a138]
                       )
                     ]
-    where a537 := <pp-one-Z(prettyprint-QualId)> a
+    where a138 := <pp-one-Z(prettyprintCoq-QualId)> a
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Destruct(a) -> [ H(
                        [SOpt(HS(), "0")]
-                     , [S("destruct "), a538]
+                     , [S("destruct "), a139]
                      )
                    ]
-    where a538 := <pp-one-Z(prettyprint-QualId)> a
+    where a139 := <pp-one-Z(prettyprintCoq-QualId)> a
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Left() -> [ H(
                   [SOpt(HS(), "0")]
                 , [S("left")]
                 )
               ]
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Right() -> [ H(
                    [SOpt(HS(), "0")]
                  , [S("right")]
                  )
                ]
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Reflexivity() -> [ H(
                          [SOpt(HS(), "0")]
                        , [S("reflexivity")]
                        )
                      ]
 
-  prettyprint-ATactic :
+  prettyprintCoq-ATactic :
     Discriminate() -> [ H(
                           [SOpt(HS(), "0")]
                         , [S("discriminate")]
                         )
                       ]
 
-  prettyprint-example =
-    prettyprint-ATactic
+  prettyprintCoq-example =
+    prettyprintCoq-ATactic

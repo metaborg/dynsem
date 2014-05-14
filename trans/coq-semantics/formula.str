@@ -3,7 +3,7 @@ module coq-semantics/formula
 imports
   libstratego-gpp
   coq-semantics/-
-  coq-semantics/coq-syntax/-
+  coq-semantics/syntax/-
   lib/runtime/index/-
   lib/runtime/nabl/-
   lib/runtime/properties/-
@@ -15,27 +15,27 @@ imports
 rules // Formula
   
   formula-to-coq(|i):
-    Relation(r, src, rel, dst) -> (SEMANTICS_CBN(env, src', dst'), bind*, i-dst)
+    Relation(r, src, rel, dst) -> (T|[semantics_cbn env t0' t1']|, bind*, i-dst)
     where
       (env , b-env*, i-env) := <reads-to-coq(|i)> r
-    ; (dst', b-dst*, i-dst) := <src-dst-to-coq(|i-env)> dst
-    ; (src', b-src*, i-src) := <src-dst-to-coq(|i-dst)> src
+    ; (t1' , b-dst*, i-dst) := <src-dst-to-coq(|i-env)> dst
+    ; (t0' , b-src*, i-src) := <src-dst-to-coq(|i-dst)> src
     ; bind*                 := <union> (b-env*, <union> (b-src*, b-dst*))
 
   formula-to-coq(|i):
-    TermEq(MapSelect(Var(env), Var(x)), rhs) -> (GET_ENV(x, env, e, env'), bind*, i)
+    TermEq(MapSelect(Var(env), Var(x)), rhs) -> (T|[get_env x env t env']|, bind*, i)
     where
-      Con("T", [Var(e), Var(env')]) := rhs
-    ; bind* := <map(!Bind(<id>))> [env, x, e, env']
+      Con("T", [Var(t), Var(env')]) := rhs
+    ; bind* := <map(!Bind(<id>))> [env, x, t, env']
 
   formula-to-coq(|i):
-    TermEq(Var(x), t) -> (COQ_EQ(Ref(x), t'), bind*, i')
+    TermEq(Var(x), t) -> (T|[x = t']|, bind*, i')
     where
       (t', b*, i') := <term-to-coq(|i)> t
     ; bind*        := <union> ([Bind("env")], <union> ([Bind(x)], b*))
   
   formula-to-coq(|i):
-    TermNeq(Var(x), t) -> (COQ_NEQ(Ref(x), t'), bind*, i')
+    TermNeq(Var(x), t) -> (T|[x <> t']|, bind*, i')
     where
       (t', b*, i') := <term-to-coq(|i)> t
     ; bind*        := <union> ([Bind("env")], <union> ([Bind(x)], b*))
@@ -57,12 +57,3 @@ rules // Folding rules
     where
       (e', b'*, i') := <term-to-coq(|i)> e
     ; n             := <?() < !e' + !Arrow(e', p)> p
-
-overlays
-  COQ_NEQ(e1, e2) = Apply(Ref("not"), COQ_EQ(e1, e2))
-
-  COQ_EQ(e1, e2) = APPLY2(Ref("eq"), e1, e2)
-
-  GET_ENV(x, env, e, env') = APPLY2(APPLY2(Ref("get_env"), Ref(x), Ref(env)), Ref(e), Ref(env'))
-  
-	SEMANTICS_CBN(env, t1, t2) = APPLY2(Apply(Ref("semantics_cbn"), env), t1, t2)

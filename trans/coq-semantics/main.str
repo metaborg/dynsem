@@ -3,7 +3,7 @@ module coq-semantics/main
 imports
   libstratego-gpp
   coq-semantics/-
-  coq-semantics/coq-syntax/-
+  coq-semantics/syntax/-
   lib/runtime/index/-
   lib/runtime/nabl/-
   lib/runtime/properties/-
@@ -21,22 +21,22 @@ rules
     ; filename := <guarantee-extension(|"v")> path
     ; coq-file := <strip-annos; module-to-coq> ast
     with
-       result := <parenthesize-Coq; prettyprint-Start; debug(|"C"); box2text-string(|100)> coq-file
-    <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-example) ; debug(!"cannot pp ")))> coq-file
+       result := <parenthesize-Coq; prettyprintCoq-Start; box2text-string(|100)> coq-file
+    <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprintCoq-example) ; debug(!"cannot pp ")))> coq-file
     ;  result := ""
 
 rules
   
   module-to-coq:
-  	Module(name, rule*) -> [IND_SEMANTICS(definition*)]
+  	Module(name, rule*) -> C|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
 		where
-		  rule'*      := <filter(?Rules(<id>)); concat> rule*
-		; definition* := <foldl(fold-rule); Fst; reverse> (rule'*, ([], []))
+		  rule'* := <filter(?Rules(<id>)); concat> rule*
+		; decls  := <foldl(fold-rule); Fst; reverse; !ListDeclBar(<id>)> (rule'*, ([], []))
 
 rules
   
   rule-to-coq(|n*):
-    RuleW(formula, prem*) -> (DECL(name', <union> (p-bind*, f-bind*), type), [(name, count), n*])
+    RuleW(formula, prem*) -> (ConsDecl(name', <union> (p-bind*, f-bind*), type), [(name, count), n*])
     where
       (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
     ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
@@ -64,39 +64,4 @@ rules // Fold rules
       (p', b'*, i') := <formula-to-coq(|i)> p
   
   fold-type: // Composes parts of a type
-    (x, y) -> Arrow(x, y)
-
-overlays
-
-  IND_SEMANTICS(terms) =
-		Inductive(
-      [ Induc(
-          "semantics_cbn"
-        , None()
-        , Arrow(
-            Ref("Env")
-          , Arrow(Ref("term"), Arrow(Ref("value"), Prop()))
-          )
-        , ListDeclBar(terms)
-        )
-      ]
-    )
-
-  DECL(name, binds, type) =
-		ConsDecl(
-		  name
-		, binds
-		, type
-    )
-    
-	CONS(hd, tl) = APPLY2(Ref("cons"), hd, tl)
-	PAIR(a, b) = APPLY2(Ref("pair"), a, b)
-	
-	APPLY2(constr, fst, snd) =
-	  Apply(
-	    Apply(
-	      constr
-	    , fst
-	    )
-	  , snd
-	  )
+    (x, y) -> T|[x -> y]|

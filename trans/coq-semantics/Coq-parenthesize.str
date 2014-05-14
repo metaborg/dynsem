@@ -1,8 +1,8 @@
-module include/Coq-parenthesize
+module trans/coq-semantics/Coq-parenthesize
 
 imports
   libstratego-lib
-  trans/coq-semantics/coq-syntax/Coq
+  trans/coq-semantics/syntax/Coq
 
 
 strategies
