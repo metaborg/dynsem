@@ -40,6 +40,13 @@ rules
       lhs-ty := <type-lookup(|ctx)> def-cons;
       cons-ty := <new-task(|ctx)> Rewrite("proj21", lhs-ty); task-create-id(|ctx, [lhs-ty]);
       v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [cons-ty])> (1, vdef)
+
+  // nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
+  //   Match(lhs@SortFunCall(f, parent-ref, _), vdef@Var(_)) -> Match(lhs, v')
+  //   with
+  //     def-f := <nabl-use-candidate(|lang, ctx, uri*, f)> UseCandidate(NablNsSortFunction(), [], Current(), (), ());
+  //     f-ty := <type-lookup(|ctx)> def-f;
+  //     v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [f-ty])> (1, vdef)
   
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
     Match(lhs@MapSelect(_, _), vdef@Var(_)) -> Match(lhs, v')

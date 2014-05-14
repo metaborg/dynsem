@@ -45,6 +45,24 @@ templates // internal sort declarations
   
   InternalSortDecl.InternalSortDecl = <<ID>>
 
+templates // native data types
+
+  SignatureSection.NativeDataTypes = <
+    native-datatypes
+      <NativeTypeDecl*; separator="\n">>
+  
+  NativeTypeDecl.NativeBaseTypeDecl =
+    [[JID] as [ID] { [NativeFunctionDecl*; separator="\n"] } ]
+  
+  NativeTypeDecl.NativeSubTypeDecl =
+    [[JID] as [ID] -> [ID] { [NativeFunctionDecl*; separator="\n"] } ]
+  
+  NativeFunctionDecl.NativeFunctionDecl =
+    [[ID] : [Type*; separator=" * "] -> [Type]] 
+  
+  NativeFunctionDecl.NativeNoArgFunctionDecl =
+    [[ID] : [Type]]
+
 templates // native operator declarations
 
   SignatureSection.NativeOperators = <

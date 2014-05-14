@@ -30,6 +30,7 @@ templates // rules
   ]
      
   Premise.Formula = [[Formula]]
+  Premise.AllFail = <all-fail>
 
   ID = <rules> {reject}
   ID = <fresh> {reject}
@@ -37,7 +38,7 @@ templates // rules
 templates // formulas
 
   Formula.Match    = [[Term] => [Term]]
-  // Formula.TermEq   = [[Term] = [Term]]
+  Formula.NMatch   = [[Term] =!=> [Term]] 
   Formula.TermEq   = [[Term] == [Term]]  
   Formula.TermNeq  = [[Term] != [Term]]
   
@@ -81,6 +82,8 @@ templates // terms
   Term.MapSelect = <<Term>[<Term>]>
   Term.MapExtend = [[Term] + [Term]] {assoc}
   //Term.MapExtend = [[Term] + [Term]]
+
+  Term.SortFunCall = <<ID>[<Term>](<Term*; separator=", ">)>
 
 context-free priorities
 

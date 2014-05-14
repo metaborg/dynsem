@@ -26,6 +26,9 @@ type rules
 
   InjDecl(ty, p-ty) :-
   where store ty <: p-ty
+  
+  NativeSubTypeDecl(_, ty, sup-ty, _) :-
+  where store ty <: sup-ty
 
 type rules
   
@@ -35,13 +38,13 @@ type rules
   eq@TermEq(l, r) :-
   where l : l-ty
     and r : r-ty
-    and (r-ty == l-ty or r-ty <: l-ty)
+    and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
       else error "unlikely to succeed" on eq
   
   neq@TermNeq(l, r) :-
   where l : l-ty
     and r : r-ty
-    and (r-ty == l-ty or r-ty <: l-ty)
+    and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
       else error "very likely to always succeed" on neq
   
 relations

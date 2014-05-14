@@ -14,8 +14,14 @@ rules // desugaring
   desugar-all = mark-var-defs-in-rules; innermost(desugar); alltd(rules-concat)
   
   desugar :
+    SortDecl(ty) -> InjDecl(ty, "Term")
+  
+  desugar :
+    NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
+  
+  desugar :
     RuleW(form, prem*) -> Rule(prem*, "---", form)
-    
+  
   desugar :
     NoReads() -> Reads([])
    
@@ -45,14 +51,17 @@ rules // desugaring
            list := <map( \ param -> Seqstrict(con,[param],params2) \)> params1
      // this converts a Rule into a list of Rules
      // so they must later be concatenated, post-desugaring:
-     
+  
   rules-concat :
   	 Rules(list) -> Rules(list1)
   	 where list1 := <map(?Cons(_,_) <+ ( \ n -> Cons(n,Nil()) \)); concat> list
-    
+
 rules // sugaring
   
   sugar-all = innermost(sugar)
+  
+  sugar :
+    NativeFunctionDecl(name, [], type) -> NativeNoArgFunctionDecl(name, type)
   
   sugar :
   	Rule([],infer,conc) -> Axiom(conc)

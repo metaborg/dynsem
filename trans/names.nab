@@ -10,13 +10,15 @@ namespaces
   Variable
   Constructor
   Sort
+  SortFunction
 
 
 properties
   expected-type of Term : Sort
-  sort-kind of Sort : SortKind // Language(), SemanticComponent(), Internal()
+  sort-kind of Sort : SortKind // Language(), SemanticComponent(), Internal(), NativeType()
   cons-kind of Constructor : ConsKind // Language(), Value(), NativeOperator(), Internal()
-
+  java-id of Sort : JID
+  
 binding rules // module and imports
 
   Module(name, section*) :
@@ -25,15 +27,31 @@ binding rules // module and imports
     implicitly defines Sort "Term"
       of type SimpleSort("Term")
       of sort-kind Internal()
+      in section*
     implicitly defines Sort "Int"
       of type SimpleSort("Int")
       of sort-kind Internal()
+      in section*
+    implicitly defines Sort "Bool"
+      of type SimpleSort("Bool")
+      of sort-kind Internal()
+      in section*
     implicitly defines Sort "String"
       of type SimpleSort("String")
       of sort-kind Internal()
+      in section*
     implicitly defines Sort "Value"
       of type SimpleSort("Value")
       of sort-kind Internal()
+      in section*
+    implicitly defines Constructor "True"
+      of type ([], "Bool")
+      of cons-kind Internal()
+      in section*
+    implicitly defines Constructor "False"
+      of type ([], "Bool")
+      of cons-kind Internal()
+      in section*
 
   Import(name):
   	imports Sort, Constructor from Module name
@@ -81,10 +99,38 @@ binding rules // sorts
     defines Sort ty
       of sort-kind Internal()
 
+binding rules // native datatypes
+
+  NativeBaseTypeDecl(java-id, ty, member*):
+    scopes SortFunction
+    defines Sort ty
+      of type SimpleSort(ty)
+      of sort-kind NativeType()
+      of java-id java-id
+
+  NativeSubTypeDecl(java-id, ty, supty, member*):
+    scopes SortFunction
+  	defines Sort ty
+  	  of type SimpleSort(ty)
+  	  of sort-kind NativeType()
+  	  of java-id java-id
+  	refers to Sort supty
+
+  NativeFunctionDecl(name, arg*, ty):
+    defines SortFunction name
+      of type (arg*, ty)
+  
 binding rules // constructors
 
   Con(c, t*) :
   	refers to Constructor c
+
+  SortFunCall(f, parent-ref, arg*):
+    refers to SortFunction f
+      in Sort parent
+      where parent-ref has type SimpleSort(parent-ty)
+      and parent-ty refers to Sort parent
+      and parent has sort-kind NativeType()
 
   ConsDecl(c, ty*, ty) :
     defines Constructor c
@@ -106,10 +152,3 @@ binding rules // constructors
       of type (ty*, ty)
       of cons-kind Internal()
 
-binding rules // others
-
-  LabelComp(s, _) :
-    refers to Sort s
- 
-
-  	
