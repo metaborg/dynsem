@@ -59,8 +59,8 @@ binding rules // module and imports
 binding rules
 
   v@Var(x) :
-    defines Variable x of type t
-      where v has expected-type t
+    defines Variable x of type ty
+    where v has expected-type ty
   
   VarRef(x) :
   	refers to Variable x
@@ -126,8 +126,7 @@ binding rules // constructors
   	refers to Constructor c
 
   SortFunCall(f, parent-ref, arg*):
-    refers to SortFunction f
-      in Sort parent
+    refers to SortFunction f in Sort parent
       where parent-ref has type SimpleSort(parent-ty)
       and parent-ty refers to Sort parent
       and parent has sort-kind NativeType()
@@ -151,4 +150,11 @@ binding rules // constructors
     defines Constructor c
       of type (ty*, ty)
       of cons-kind Internal()
+
+binding rules // variable definitions in matches
+
+  Formula(Match(lhs, MatchedVar(x))):
+    defines Variable x
+      of type ty
+      where lhs has type ty
 

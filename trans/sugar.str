@@ -3,6 +3,7 @@ module sugar
 imports
 	include/ds
 	mark-references
+	ds
 	
 signature
   constructors
@@ -12,6 +13,9 @@ signature
 rules // desugaring
 	
   desugar-all = mark-var-defs-in-rules; innermost(desugar); alltd(rules-concat)
+  
+  desugar:
+    Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
   
   desugar :
     SortDecl(ty) -> InjDecl(ty, "Term")
@@ -83,6 +87,9 @@ rules // sugaring
     
   sugar :
     Rule(prem*, _, form) -> RuleW(form, prem*)
+  
+  sugar :
+  	MatchedVar(v) -> Var(v)
   
 rules // desugaring maps
   

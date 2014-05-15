@@ -30,6 +30,7 @@ signature
   constructors
     Var : LID -> Term
     Var : ID -> Term
+    MatchedVar : ID -> Term
 
 rules // Analysis
 	

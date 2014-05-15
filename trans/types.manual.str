@@ -26,34 +26,6 @@ rules
       s-ty := <type-lookup(|ctx)> s-def;
       t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [s-ty])> (1, t)
   
-  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
-    Match(lhs@VarRef(refv), vdef@Var(_)) -> Match(lhs, v')
-    with
-      def-v := <nabl-use-candidate(|lang, ctx, uri*, refv)> UseCandidate(NablNsVariable(), [], Current(), (), ()); 
-      lhs-ty := <type-lookup(|ctx)> def-v;
-      v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [lhs-ty])> (1, vdef) 
-
-  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
-    Match(lhs@Con(cons, _), vdef@Var(_)) -> Match(lhs, v')
-    with
-      def-cons := <nabl-use-candidate(|lang, ctx, uri*, cons)> UseCandidate(NablNsConstructor(), [], Current(), (), ()); 
-      lhs-ty := <type-lookup(|ctx)> def-cons;
-      cons-ty := <new-task(|ctx)> Rewrite("proj21", lhs-ty); task-create-id(|ctx, [lhs-ty]);
-      v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [cons-ty])> (1, vdef)
-
-  // nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
-  //   Match(lhs@SortFunCall(f, parent-ref, _), vdef@Var(_)) -> Match(lhs, v')
-  //   with
-  //     def-f := <nabl-use-candidate(|lang, ctx, uri*, f)> UseCandidate(NablNsSortFunction(), [], Current(), (), ());
-  //     f-ty := <type-lookup(|ctx)> def-f;
-  //     v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [f-ty])> (1, vdef)
-  
-  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
-    Match(lhs@MapSelect(_, _), vdef@Var(_)) -> Match(lhs, v')
-    with
-      lhs-ty := <type-task(|ctx)> lhs;
-      v' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [lhs-ty])> (1, vdef)
-        
   attach-expected-type-to-term(|ctx, old-uri*, new-uri*, tys):
     (i, term{a*}) -> term{(NablProp_expected-type(), term-ty), a*}
     with
@@ -65,4 +37,4 @@ rules
   task-rewrite :
     ("proj20", (ty_, _)) -> ty_
     
-  // create-expected-type-task(|task*) = id
+  // create-expected-type-task(|task*) = task-create-fail(|task*)

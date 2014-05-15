@@ -10,10 +10,7 @@ relations
 
 type rules
 
-  Var(x): ty
-  where definition of x : ty
-
-  VarRef(x) : ty
+  Var(x) + VarRef(x) + MatchedVar(x): ty
   where definition of x : ty
   
   Con(c, t*) : ty
@@ -21,6 +18,9 @@ type rules
     and t* : ty_t*
     and (ty_t* == ty* or ty_t* <: ty*)
     else error "types of sub-terms do not match constructor definition" on c
+
+  SortFunCall(f, _, _) : ty
+  where definition of f : (_, ty)
 
   MapSelect(map, key) : SimpleSort("Term")
 
@@ -35,6 +35,12 @@ type rules
   Int(i): SimpleSort("Int")
   String(s): SimpleSort("String")
   
+  m@Match(l, r) :-
+  where l : l-ty
+    and r : r-ty
+    and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
+      else error "unlikely to succeed" on m
+   
   eq@TermEq(l, r) :-
   where l : l-ty
     and r : r-ty
