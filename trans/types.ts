@@ -35,23 +35,23 @@ type rules
   Int(i): SimpleSort("Int")
   String(s): SimpleSort("String")
   
-  m@Match(l, r) :-
-  where l : l-ty
-    and r : r-ty
-    and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
-      else error "unlikely to succeed" on m
-   
-  eq@TermEq(l, r) :-
-  where l : l-ty
-    and r : r-ty
-    and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
-      else error "unlikely to succeed" on eq
-  
-  neq@TermNeq(l, r) :-
-  where l : l-ty
-    and r : r-ty
-    and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
-      else error "very likely to always succeed" on neq
+  // m@Match(l, r) :-
+  // where l : l-ty
+  //   and r : r-ty
+  //   and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
+  //     else error "unlikely to succeed" on m
+  //  
+  // eq@TermEq(l, r) :-
+  // where l : l-ty
+  //   and r : r-ty
+  //   and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
+  //     else error "unlikely to succeed" on eq
+  // 
+  // neq@TermNeq(l, r) :-
+  // where l : l-ty
+  //   and r : r-ty
+  //   and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
+  //     else error "very likely to always succeed" on neq
   
 relations
 

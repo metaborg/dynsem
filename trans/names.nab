@@ -107,6 +107,7 @@ binding rules // native datatypes
 
   NativeSubTypeDecl(java-id, ty, supty, member*):
     scopes SortFunction
+    imports SortFunction from Sort supty
   	defines Sort ty
   	  of type SimpleSort(ty)
   	  of sort-kind NativeType()
