@@ -20,7 +20,7 @@ rules
       t'* := <map-with-index(attach-expected-type-to-term(|ctx, uri*, uri'*, tys))> t*
   
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
-    lt@ListTail([e], es){anno*} -> ListTail([e'], es){anno*}
+    lt@ListTail([e], es){anno*} -> ListTail([e'], es'){anno*}
     with
       // l-ty-1 := <type-task(|ctx)> lt;
       l-ty := <expected-type-task(|ctx)> lt;
@@ -48,7 +48,7 @@ rules
     ("proj20", (ty_, _)) -> ty_
   
   task-rewrite :
-  	("proj22", ListSort(ty)) -> SimpleSort(ty)
+  	("proj22", ListSort(ty)) -> ty
   	
     
   // create-expected-type-task(|task*) = task-create-fail(|task*)

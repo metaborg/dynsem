@@ -27,7 +27,7 @@ templates // constructor declarations
   ConsDecl.ConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
 
   Type.SimpleSort = <<ID>>
-  Type.ListSort = <List(<ID>)> 
+  Type.ListSort = <List(<Type>)> 
   
 templates // semantic component declarations
 

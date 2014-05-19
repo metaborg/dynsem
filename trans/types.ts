@@ -19,16 +19,14 @@ type rules
     and (ty_t* == ty* or ty_t* <: ty*)
     else error "types of sub-terms do not match constructor definition" on c
 
-  List([]) : ListSort("Term")
+  List([]) : ListSort(SimpleSort("Term"))
   
   // l@ListTail(_, _) : ty
   // where
   //   l has expected-type ty
   
-  ListTail([x], _) : ListSort(sort)
-  where
-    x : x-ty
-    and x-ty => SimpleSort(sort)
+  ListTail([x], _) : ListSort(x-ty)
+  where x : x-ty
   
   // l@ListTail([x], xs) : ListSort(x-ty)
   // where
