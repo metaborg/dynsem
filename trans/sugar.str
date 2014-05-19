@@ -27,14 +27,23 @@ rules // desugaring
     RuleW(form, prem*) -> Rule(prem*, "---", form)
   
   desugar :
+    List(x*) -> ListTail(x*, List([]))
+    where <not(?[])> x* 
+
+  desugar :
+    ListTail([x | xs*], xxs) -> ListTail([x], ListTail(xs*, xxs))
+    where
+      <not(?[])> xs*
+
+  desugar :
     NoReads() -> Reads([])
-   
+
   desugar :
     Source(lhs) -> Source(lhs, [])
-    
+
   desugar :
     Target(rhs) -> Target(rhs, [])
-    
+
   desugar :
     Dynamic() -> DynamicEmitted([])
     

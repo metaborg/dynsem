@@ -20,6 +20,16 @@ rules
       t'* := <map-with-index(attach-expected-type-to-term(|ctx, uri*, uri'*, tys))> t*
   
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
+    lt@ListTail([e], es){anno*} -> ListTail([e'], es){anno*}
+    with
+      // l-ty-1 := <type-task(|ctx)> lt;
+      l-ty := <expected-type-task(|ctx)> lt;
+      // l-ty := <task-create-choice(|ctx)> [l-ty-1, l-ty-2];
+      e-ty := <new-task(|ctx)> Rewrite("proj22", l-ty); task-create-id(|ctx, [l-ty]);
+      e' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [e-ty])> (1, e);
+      es' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [l-ty])> (1, es)
+  
+  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
     LabelComp(s-ref@SimpleSort(s), t) -> LabelComp(s-ref, t')
     with
       s-def := <nabl-use-candidate(|lang, ctx, uri*, s)> UseCandidate(NablNsSort(), [], Current(), (), ());
@@ -36,5 +46,9 @@ rules
   
   task-rewrite :
     ("proj20", (ty_, _)) -> ty_
+  
+  task-rewrite :
+  	("proj22", ListSort(ty)) -> SimpleSort(ty)
+  	
     
   // create-expected-type-task(|task*) = task-create-fail(|task*)

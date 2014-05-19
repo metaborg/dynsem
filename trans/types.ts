@@ -19,6 +19,24 @@ type rules
     and (ty_t* == ty* or ty_t* <: ty*)
     else error "types of sub-terms do not match constructor definition" on c
 
+  List([]) : ListSort("Term")
+  
+  // l@ListTail(_, _) : ty
+  // where
+  //   l has expected-type ty
+  
+  ListTail([x], _) : ListSort(sort)
+  where
+    x : x-ty
+    and x-ty => SimpleSort(sort)
+  
+  // l@ListTail([x], xs) : ListSort(x-ty)
+  // where
+  //   x : x-ty
+  //   // and xs : ListSort(xs-ty)
+  //   // and (x-ty == xs-ty or x-ty <: xs-ty or xs-ty <: x-ty)
+  //   else error "incosistent list types" on l 
+
   SortFunCall(f, _, _) : ty
   where definition of f : (_, ty)
 
@@ -58,3 +76,6 @@ relations
   // this makes no sense but it's here for some generator bug reason
   Var(x) <: VarRef(y)
   where x == y
+  
+  ListSort(x-ty) <: ListSort(r-ty)
+  where x-ty <: r-ty
