@@ -21,20 +21,9 @@ type rules
 
   List([]) : ListSort(SimpleSort("Term"))
   
-  // l@ListTail(_, _) : ty
-  // where
-  //   l has expected-type ty
-  
   ListTail([x], _) : ListSort(x-ty)
   where x : x-ty
   
-  // l@ListTail([x], xs) : ListSort(x-ty)
-  // where
-  //   x : x-ty
-  //   // and xs : ListSort(xs-ty)
-  //   // and (x-ty == xs-ty or x-ty <: xs-ty or xs-ty <: x-ty)
-  //   else error "incosistent list types" on l 
-
   SortFunCall(f, _, _) : ty
   where definition of f : (_, ty)
 
