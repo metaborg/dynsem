@@ -15,8 +15,8 @@ language General properties
   table         : include/ds.tbl
   start symbols : Module
   
-  provider      : include/ds.ctree
-  // provider      : include/ds-java.jar                                                                  
+  provider      : include/ds.jar
+  provider      : include/ds-java.jar                                                                  
                                                                                                   
   observer      : editor-analyze           (multifile) 
   // on save       : editor-save

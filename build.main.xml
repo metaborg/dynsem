@@ -51,7 +51,7 @@
 	</path>
 
 	<!-- Main target -->
-	<target name="all" depends="link-lib-files, spoofaximp.default.ctree" />
+	<target name="all" depends="link-lib-files, spoofaximp.default.jar" />
 
 	<target name="os-detection">
 		<condition property="isWin">
