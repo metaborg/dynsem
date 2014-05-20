@@ -1,6 +1,8 @@
 module Signatures
 
-imports Common
+imports
+  Common
+  ds
 
 templates
 
@@ -86,3 +88,12 @@ templates // internal constructor declarations
       <InternalConsDecl*; separator="\n">>
 
   InternalConsDecl.InternalConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+
+templates
+  
+  SignatureSection.ArrowDeclarations = <
+    arrows
+      <ArrowDeclaration*; separator="\n">>
+  
+  ArrowDeclaration.ArrowDecl = [[Type] -- [ID]> [Type]]
+  ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]

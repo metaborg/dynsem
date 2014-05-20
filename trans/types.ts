@@ -11,6 +11,8 @@ imports
 relations
 
   define transitive <:
+  
+  define <compat:
 
 type rules
 
@@ -31,13 +33,20 @@ type rules
   ListTail([x], _) : ListSort(x-ty)
   where x : x-ty
   
-  // SortFunCall(f, _, _) : ty
-  // where definition of f : (_, ty)
   SortFunCall(f, parent-ref, aparam*): ty
   where definition of f : (fparam_ty*, ty)
     and aparam* : aparam_ty*
     and (aparam_ty* == fparam_ty* or aparam_ty* <: fparam_ty*)
-    else error "actual parameter types are inconsistent with formal parameter types" on f
+    else error "actual parameter types are incompatible with formal parameter types" on f
+
+  rel@Relation(_, Source(s, _), NamedDynamic(arrow),  Target(t, _)) :-
+  where
+    definition of arrow : (l-ty, r-ty)
+    and s : s-ty
+    and t : t-ty
+    and s-ty <compat: l-ty
+    and t-ty <compat: r-ty 
+    else error "source and target types are incompatible with arrow definition types" on rel
 
   MapSelect(map, key) : SimpleSort("Term")
 
@@ -76,5 +85,11 @@ relations
   Var(x) <: VarRef(y)
   where x == y
   
-  ListSort(x-ty) <: ListSort(r-ty)
-  where x-ty <: r-ty
+  ListSort(x-ty) <: ListSort(y-ty)
+  where x-ty => Any()
+    or x-ty <: y-ty
+  
+  s-ty <compat: l-ty
+  where s-ty == l-ty
+    or s-ty <: l-ty
+

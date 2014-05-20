@@ -18,13 +18,22 @@ rules // desugaring
     Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
   
   desugar :
-    SortDecl(ty) -> InjDecl(ty, "Term")
+    SortDecl(ty) -> InjDecl(ty, SimpleSort("Term"))
   
   desugar :
     NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
   
   desugar :
     RuleW(form, prem*) -> Rule(prem*, "---", form)
+  
+  desugar :
+    DefaultArrowDecl(l-ty, r-ty) -> ArrowDecl(l-ty, "default", r-ty)
+  
+  desugar :
+    Dynamic() -> NamedDynamic("default")
+  
+  desugar :
+    DynamicEmitted(e) -> NamedDynamicEmitted(e, "default")
   
   desugar :
     List(x*) -> ListTail(x*, List([]))

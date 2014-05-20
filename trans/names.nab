@@ -2,18 +2,23 @@ module names
 
 imports
   include/ds
+  lib/editor-common.generated
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
-	names.manual
-	
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/properties/-
+  ds
+  names.manual
+  	
 namespaces
   Module
   Variable
+  Arrow
   Sort
   SortFunction
   ImplicitSort
   Constructor
   ImplicitConstructor
-
 
 properties
   expected-type of Term : Sort
@@ -25,7 +30,7 @@ binding rules // module and imports
 
   Module(name, section*) :
     defines Module name
-    scopes Variable, Constructor, Sort, ImplicitSort, ImplicitConstructor
+    scopes Variable, Constructor, Sort, Arrow, ImplicitSort, ImplicitConstructor
     implicitly defines ImplicitSort "Term"
       of type SimpleSort("Term")
       of sort-kind Internal()
@@ -49,7 +54,7 @@ binding rules // module and imports
       of cons-kind Internal()
 
   Import(name):
-  	imports Sort, Constructor from Module name
+  	imports Sort, Constructor, Arrow from Module name
 
 binding rules
 
@@ -143,13 +148,24 @@ binding rules // constructors
   
   ValueDecl(c, ty*):
     defines Constructor c
-      of type (ty*, "Value")
+      of type (ty*, SimpleSort("Value"))
       of cons-kind Value()
   
   InternalConsDecl(c, ty*, ty) :
     defines Constructor c
       of type (ty*, ty)
       of cons-kind Internal()
+
+binding rules // arrows
+
+  ArrowDecl(l-ty, name, r-ty):
+    defines Arrow name of type (l-ty, r-ty)
+  
+  NamedDynamic(name):
+    refers to Arrow name
+
+  NamedDynamicEmitted(_, name):
+    refers to Arrow name
 
 binding rules // variable definitions in matches
 
