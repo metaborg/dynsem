@@ -3,6 +3,10 @@ module types
 imports
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/relations/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
+  names
+  include/ds
+  ds
   
 relations
 
@@ -19,13 +23,21 @@ type rules
     and (ty_t* == ty* or ty_t* <: ty*)
     else error "types of sub-terms do not match constructor definition" on c
 
-  List([]) : ListSort(SimpleSort("Term"))
+  l@List([]) : l-ty
+  where
+    l has expected-type l-ty
+    or ListSort(SimpleSort("Term")) => l-ty
   
   ListTail([x], _) : ListSort(x-ty)
   where x : x-ty
   
-  SortFunCall(f, _, _) : ty
-  where definition of f : (_, ty)
+  // SortFunCall(f, _, _) : ty
+  // where definition of f : (_, ty)
+  SortFunCall(f, parent-ref, aparam*): ty
+  where definition of f : (fparam_ty*, ty)
+    and aparam* : aparam_ty*
+    and (aparam_ty* == fparam_ty* or aparam_ty* <: fparam_ty*)
+    else error "actual parameter types are inconsistent with formal parameter types" on f
 
   MapSelect(map, key) : SimpleSort("Term")
 
