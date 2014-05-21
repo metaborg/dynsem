@@ -6,7 +6,7 @@ imports
 
 rules
 
-  outline-strategy = simple-label-outline(to-outline-label)
+  outline-strategy = !Node("", []) // simple-label-outline(to-outline-label)
   outline-expand-to-level = !3
 
   to-outline-label: Module(name, _) -> name

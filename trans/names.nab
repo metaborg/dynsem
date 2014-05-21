@@ -30,26 +30,26 @@ binding rules // module and imports
 
   Module(name, section*) :
     defines Module name
-    scopes Variable, Constructor, Sort, Arrow, ImplicitSort, ImplicitConstructor
-    implicitly defines ImplicitSort "Term"
+    scopes Variable, Constructor, Sort, Arrow
+    implicitly defines non-unique ImplicitSort "Term"
       of type SimpleSort("Term")
       of sort-kind Internal()
-    implicitly defines ImplicitSort "Int"
+    implicitly defines non-unique ImplicitSort "Int"
       of type SimpleSort("Int")
       of sort-kind Internal()
-    implicitly defines ImplicitSort "Bool"
+    implicitly defines non-unique ImplicitSort "Bool"
       of type SimpleSort("Bool")
       of sort-kind Internal()
-    implicitly defines ImplicitSort "String"
+    implicitly defines non-unique ImplicitSort "String"
       of type SimpleSort("String")
       of sort-kind Internal()
-    implicitly defines ImplicitSort "Value"
+    implicitly defines non-unique ImplicitSort "Value"
       of type SimpleSort("Value")
       of sort-kind Internal()
-    implicitly defines ImplicitConstructor "True"
+    implicitly defines non-unique ImplicitConstructor "True"
       of type ([], "Bool")
       of cons-kind Internal()
-    implicitly defines ImplicitConstructor "False"
+    implicitly defines non-unique ImplicitConstructor "False"
       of type ([], "Bool")
       of cons-kind Internal()
 

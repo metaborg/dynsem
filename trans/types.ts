@@ -85,11 +85,12 @@ relations
   Var(x) <: VarRef(y)
   where x == y
   
-  ListSort(x-ty) <: ListSort(y-ty)
-  where x-ty => Any()
-    or x-ty <: y-ty
+  // ListSort(x-ty) <: ListSort(y-ty)
+  // where x-ty => Any()
+  //   or x-ty <: y-ty
   
   s-ty <compat: l-ty
-  where s-ty == l-ty
+  where
+    s-ty == l-ty
     or s-ty <: l-ty
 
