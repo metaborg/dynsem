@@ -12,43 +12,14 @@ imports
   
 strategies
   
-  // explicate-module :
-  //   mod@Module(name, section*) -> Module(name, section'*) 
-  //   where
-  //     <extract-writables> mod;
-  //     <extract-readables> mod;
-  //     <extract-changeables> mod;
-  //     section'* := <map(try(explicate-rules))> section*
-
   explicate-module :
     mod@Module(name, section*) -> Module(name, section'*) //Module(name, section'*) 
     where
-    	debug(!1);
       rule-name* := <collect-all(?ArrowDecl(_, <id>, _)); make-set> section*;
-    	debug(!2);
-      rule-group* := <collect-all(?Rules(<id>); concat); group-rules(|rule-name*)> section*;
-    	debug(!3);
-      section'* := <map(!Rules(<id>))> rule-group*
-    	;debug(!4)
+      rule-group* := <filter(?Rules(<id>)); concat; debug(!"2a"); group-rules(|rule-name*)> section*;
+    	rule-group'* := <map(in-extracted-components(map(try(explicate-rules))))> rule-group*;
+      section'* := <map(!Rules(<id>))> rule-group'*
       
-      // 
-      // in-extracted-components(
-      //   fail
-      // | mod)
-      
-      // in-extracted-components(
-      //   section'* := <map(try(explicate-rules))> section* 
-      // | mod
-      // )
-      // section'* := <in-extracted-components(fail|mod)> section*
-      // 
-      // <extract-writables> mod;
-      // <extract-readables> mod;
-      // <extract-changeables> mod;
-      // section'* := <map(try(explicate-rules))> section*
-                
-  // explicate-rules assumes rules to be desugared
-  
   explicate-rules :
     rs -> <alltd(explicate-rule)> rs
 
@@ -58,15 +29,15 @@ rules // group rules by name
     [] -> <map(![])> rule-name*
 
   group-rules(|rule-name*):
-    [r | rxs] -> <fail>
+    [r | rxs] -> grouped-r*
     with
       grouped-rxs* := <group-rules(|rule-name*)> rxs;
       r-name := <get-rule-name> r;
-      r-idx := <get-index> (r-name, rule-name*);
-      grouped-r* := <at-index(![r | <id>])> (r-idx, grouped-rxs*)
+      r-idx := <get-index; dec> (r-name, rule-name*);
+      grouped-r* := <at-index(\ xs -> [r | xs] \)> (r-idx, grouped-rxs*)
 
   get-rule-name :
-  	Relation(_, _, NamedDynamicEmitted(arrow, _), _) -> arrow
+  	Rule(_, _, Relation(_, _, NamedDynamicEmitted(arrow, _), _))  -> arrow
   
 rules
   
@@ -77,7 +48,7 @@ rules
       r2* := <ReadableComps; mk-label-comps(|1)>;
       sc2* := <ChangeableComps; mk-label-comps(|1)>;
       init* := <exp-label-comp-inits(|1)> [r1*, sc1*];
-      (num, prem2*) := <debug(!"EX IN: "); explicate-premisses(|1); debug(!"EX OUT: ")> prem1*;
+      (num, prem2*) := <explicate-premisses(|1)> prem1*;
       e2* := <WritableComps; map(copy-comp(|e1*) <+ concat-changeables(|num))>;  
       tc2* := <ChangeableComps; map(mk-label-comp(copy-comp(|tc1*)|num))>;  
       prem3* := [init* | prem2*]

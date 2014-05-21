@@ -20,12 +20,13 @@ rules // projections for sorts
 
 rules // extract components        
   
-  in-extracted-components(s|ast) =
+  in-extracted-components(s) =
     { CompList, NonWriteables, NonReadables, CompPatLhs, CompPatRhs, CompsLhs, CompsRhs:
       where(
-        <extract-writables> ast;
-        <extract-readables> ast;
-        <extract-changeables> ast
+        ?t;
+        <extract-writables> t;
+        <extract-readables> t;
+        <extract-changeables> t
       );
       s
     }
