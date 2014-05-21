@@ -16,9 +16,7 @@ namespaces
   Arrow
   Sort
   SortFunction
-  ImplicitSort
   Constructor
-  ImplicitConstructor
 
 properties
   expected-type of Term : Sort
@@ -31,27 +29,6 @@ binding rules // module and imports
   Module(name, section*) :
     defines Module name
     scopes Variable, Constructor, Sort, Arrow
-    implicitly defines non-unique ImplicitSort "Term"
-      of type SimpleSort("Term")
-      of sort-kind Internal()
-    implicitly defines non-unique ImplicitSort "Int"
-      of type SimpleSort("Int")
-      of sort-kind Internal()
-    implicitly defines non-unique ImplicitSort "Bool"
-      of type SimpleSort("Bool")
-      of sort-kind Internal()
-    implicitly defines non-unique ImplicitSort "String"
-      of type SimpleSort("String")
-      of sort-kind Internal()
-    implicitly defines non-unique ImplicitSort "Value"
-      of type SimpleSort("Value")
-      of sort-kind Internal()
-    implicitly defines non-unique ImplicitConstructor "True"
-      of type ([], "Bool")
-      of cons-kind Internal()
-    implicitly defines non-unique ImplicitConstructor "False"
-      of type ([], "Bool")
-      of cons-kind Internal()
 
   Import(name):
   	imports Sort, Constructor, Arrow from Module name
@@ -78,7 +55,6 @@ binding rules // sorts
 
   SimpleSort(ty) :
   	refers to Sort ty
-  	otherwise refers to ImplicitSort ty
 
   SortDecl(ty) :
     defines Sort ty
@@ -90,7 +66,6 @@ binding rules // sorts
       of type SimpleSort(ty)
       of sort-kind Language()
     refers to Sort parent
-    otherwise refers to ImplicitSort parent
 
   SemanticComponent(ty) :
     defines Sort ty
@@ -118,7 +93,6 @@ binding rules // native datatypes
   	  of sort-kind NativeType()
   	  of java-id java-id
   	refers to Sort supty
-  	otherwise refers to ImplicitSort supty
 
   NativeFunctionDecl(name, arg*, ty):
     defines SortFunction name
@@ -128,7 +102,6 @@ binding rules // constructors
 
   Con(c, t*) :
   	refers to Constructor c
-  	otherwise refers to ImplicitConstructor c
 
   SortFunCall(f, parent-ref, arg*):
     refers to SortFunction f in Sort parent

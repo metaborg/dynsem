@@ -193,3 +193,29 @@ rules // Builders
       filename := <guarantee-extension(|"unstrict.ds")> path;
       result   := <unstrict-rules; pp-debug> selected
 
+rules // Builtins
+	
+	analysis-builtin-partitions = 
+		![
+			("base.ds", Module(
+			  "base"
+			, [ Signatures(
+			      [ InternalSorts([InternalSortDecl("Term")])
+			      , Sorts(
+			          [ InjDecl("Int", "Term")
+			          , InjDecl("Bool", "Term")
+			          , InjDecl("String", "Term")
+			          , InjDecl("Value", "Term")
+			          ]
+			        )
+			      , InternalConstructors(
+			          [ InternalConsDecl("True", [], SimpleSort("Bool"))
+			          , InternalConsDecl("False", [], SimpleSort("Bool"))
+			          ]
+			        )
+			      ]
+			    )
+			  ]
+			)
+		)
+	]
