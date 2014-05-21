@@ -13,12 +13,13 @@ imports
 strategies
   
   explicate-module :
-    mod@Module(name, section*) -> Module(name, section'*) //Module(name, section'*) 
+    mod@Module(name, section*) -> Module(name, [section'*, section''*]) //Module(name, section'*) 
     where
       rule-name* := <collect-all(?ArrowDecl(_, <id>, _)); make-set> section*;
-      rule-group* := <filter(?Rules(<id>)); concat; debug(!"2a"); group-rules(|rule-name*)> section*;
+      rule-group* := <filter(?Rules(<id>)); concat; group-rules(|rule-name*)> section*;
     	rule-group'* := <map(in-extracted-components(map(try(explicate-rules))))> rule-group*;
-      section'* := <map(!Rules(<id>))> rule-group'*
+    	section'* := <filter(not(?Rules(_)))> section*;
+      section''* := <map(!Rules(<id>))> rule-group'*
       
   explicate-rules :
     rs -> <alltd(explicate-rule)> rs

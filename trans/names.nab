@@ -137,7 +137,7 @@ binding rules // arrows
   NamedDynamic(name):
     refers to Arrow name
 
-  NamedDynamicEmitted(_, name):
+  NamedDynamicEmitted(name, _):
     refers to Arrow name
 
 binding rules // variable definitions in matches
