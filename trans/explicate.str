@@ -13,7 +13,7 @@ imports
 strategies
   
   explicate-module :
-    mod@Module(name, section*) -> Module(name, [section'*, section''*]) //Module(name, section'*) 
+    mod@Module(name, section*) -> Module($[[name]_explicated], [section'*, section''*])
     where
       rule-name* := <collect-all(?ArrowDecl(_, <id>, _)); make-set> section*;
       rule-group* := <filter(?Rules(<id>)); concat; group-rules(|rule-name*)> section*;
@@ -87,7 +87,6 @@ rules // premisses
   explicate-premisses(|num1):
     [prem1 | prem1*] -> (num3, [prem2*, prem3*])
     where
-      debug(!"A ");
       (num2, prem2*) := <explicate-premisse(|num1)> prem1;
       (num3, prem3*) := <explicate-premisses(|num2)> prem1*
   

@@ -25,6 +25,7 @@ imports
 	types.generated
 	types.manual
 	generator/interpreter/gen-interpreter
+	resolve-includes
 	
 signature
   constructors
@@ -160,25 +161,25 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      result   := <desugar-all; explicate-module; sugar-all; pp-debug> selected
+      result   := <resolve-includes; desugar-all; explicate-module; sugar-all; pp-debug> selected
 
   explicate-factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.factorized.ds")> path;
-      result   := <desugar-all; explicate-module; factorize-module; sugar-all; pp-debug> selected
+      result   := <resolve-includes; desugar-all; explicate-module; factorize-module; sugar-all; pp-debug> selected
 
   explicate-factorize-editor-ast:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.factorized.aterm")> path;
-      result   := <desugar-all; explicate-module; factorize-module> selected
+      result   := <resolve-includes; desugar-all; explicate-module; factorize-module> selected
 
   explicate-editor-ast:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.aterm")> path;
-      result   := <desugar-all; explicate-module> selected
+      result   := <resolve-includes; desugar-all; explicate-module> selected
 
   // format rules
   format-editor:
