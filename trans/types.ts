@@ -22,7 +22,7 @@ type rules
   Con(c, t*) : ty
   where definition of c : (ty*, ty)
     and t* : ty_t*
-    and (ty_t* == ty* or ty_t* <: ty*)
+    and ty_t* <compat: ty*
     else error "types of sub-terms do not match constructor definition" on c
 
   l@List([]) : l-ty
@@ -36,7 +36,7 @@ type rules
   SortFunCall(f, parent-ref, aparam*): ty
   where definition of f : (fparam_ty*, ty)
     and aparam* : aparam_ty*
-    and (aparam_ty* == fparam_ty* or aparam_ty* <: fparam_ty*)
+    and aparam_ty* <compat: fparam_ty*
     else error "actual parameter types are incompatible with formal parameter types" on f
 
   rel@Relation(_, Source(s, _), NamedDynamic(arrow),  Target(t, _)) :-
@@ -93,4 +93,3 @@ relations
   where
     s-ty == l-ty
     or s-ty <: l-ty
-
