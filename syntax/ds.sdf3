@@ -54,10 +54,10 @@ templates // formulas
   Target.Target = [[Term]]
   Target.Target = [([Term], [LabelComp+; separator=", "])]
   
-  Rel.NamedDynamic = [-- [ID] >]
+  Rel.NamedDynamic = [-- [ID] ->]
   Rel.Dynamic = [-->]
   
-  Rel.NamedDynamicEmitted = [-- [LabelComp+; separator=", "] --[ID]>]
+  Rel.NamedDynamicEmitted = [-- [LabelComp+; separator=", "] --[ID]->]
   Rel.DynamicEmitted = [-- [LabelComp+; separator=", "] -->]
   
   LabelComp.LabelComp = [[Type] [Term]]
