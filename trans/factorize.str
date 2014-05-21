@@ -23,9 +23,9 @@ rules
   
   factorize-rule :
     Rule(prem1*, infer, 
-          Relation(reads, Source(lhs,sc*), DynamicEmitted(em1*), Target(rhs,tc*))) -> 
+          Relation(reads, Source(lhs,sc*), NamedDynamicEmitted(arrow, em1*), Target(rhs,tc*))) -> 
     Rule(prem5*, infer, 
-          Relation(reads, Source(lhs',sc*), DynamicEmitted(em1*), Target(rhs',tc*)))
+          Relation(reads, Source(lhs',sc*), NamedDynamicEmitted(arrow, em1*), Target(rhs',tc*)))
     with
       (prem2*, lhs') := <lift-constructors-from-match> lhs;
       (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
