@@ -40,11 +40,11 @@ menus
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)     
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)       
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) 
-    action  : "Explicate"              = explicate-editor (openeditor) (realtime)   
-    action  : "Explicate + Factorize"  = explicate-factorize-editor (openeditor) (realtime)
+    action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
+    action  : "Explicate + Factorize"  = explicate-factorize-editor (openeditor) (realtime) (source)
     separator
     
-    action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime)
-    action  : "Explicate + Factorize AST"  = explicate-factorize-editor-ast (openeditor) (realtime)      
+    action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime) (source)
+    action  : "Explicate + Factorize AST"  = explicate-factorize-editor-ast (openeditor) (realtime) (source)      
      
                 

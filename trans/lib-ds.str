@@ -20,6 +20,16 @@ rules // projections for sorts
 
 rules // extract components        
   
+  in-extracted-components(s|ast) =
+    { CompList, NonWriteables, NonReadables, CompPatLhs, CompPatRhs, CompsLhs, CompsRhs:
+      where(
+        <extract-writables> ast;
+        <extract-readables> ast;
+        <extract-changeables> ast
+      );
+      s
+    }
+  
   extract-components =
     collect-all(?LabelComp(<id>, _), union) => comps; 
     <filter(not(IsWritable))> comps => non-writeables; 
@@ -43,7 +53,7 @@ rules // extract components
   extract-writables  :
     rs -> comps
     where
-      collect-all(?DynamicEmitted(<map(?LabelComp(<id>,_))>), union); concat; make-set => comps;
+      collect-all(?NamedDynamicEmitted(_, <map(?LabelComp(<id>,_))>), union); concat; make-set => comps;
       rules( WritableComps : _ -> comps );
       map({?comp; rules( IsWritable : comp -> comp )})
 

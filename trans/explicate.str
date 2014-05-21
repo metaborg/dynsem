@@ -12,19 +12,62 @@ imports
   
 strategies
   
+  // explicate-module :
+  //   mod@Module(name, section*) -> Module(name, section'*) 
+  //   where
+  //     <extract-writables> mod;
+  //     <extract-readables> mod;
+  //     <extract-changeables> mod;
+  //     section'* := <map(try(explicate-rules))> section*
+
   explicate-module :
-    mod@Module(name, section*) -> Module(name, section'*) 
+    mod@Module(name, section*) -> Module(name, section'*) //Module(name, section'*) 
     where
-      <extract-writables> mod;
-      <extract-readables> mod;
-      <extract-changeables> mod;
-      section'* := <map(try(explicate-rules))> section*
+    	debug(!1);
+      rule-name* := <collect-all(?ArrowDecl(_, <id>, _)); make-set> section*;
+    	debug(!2);
+      rule-group* := <collect-all(?Rules(<id>); concat); group-rules(|rule-name*)> section*;
+    	debug(!3);
+      section'* := <map(!Rules(<id>))> rule-group*
+    	;debug(!4)
+      
+      // 
+      // in-extracted-components(
+      //   fail
+      // | mod)
+      
+      // in-extracted-components(
+      //   section'* := <map(try(explicate-rules))> section* 
+      // | mod
+      // )
+      // section'* := <in-extracted-components(fail|mod)> section*
+      // 
+      // <extract-writables> mod;
+      // <extract-readables> mod;
+      // <extract-changeables> mod;
+      // section'* := <map(try(explicate-rules))> section*
                 
   // explicate-rules assumes rules to be desugared
   
   explicate-rules :
     rs -> <alltd(explicate-rule)> rs
 
+rules // group rules by name
+  
+  group-rules(|rule-name*):
+    [] -> <map(![])> rule-name*
+
+  group-rules(|rule-name*):
+    [r | rxs] -> <fail>
+    with
+      grouped-rxs* := <group-rules(|rule-name*)> rxs;
+      r-name := <get-rule-name> r;
+      r-idx := <get-index> (r-name, rule-name*);
+      grouped-r* := <at-index(![r | <id>])> (r-idx, grouped-rxs*)
+
+  get-rule-name :
+  	Relation(_, _, NamedDynamicEmitted(arrow, _), _) -> arrow
+  
 rules
   
   explicate-rule :
