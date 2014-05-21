@@ -28,8 +28,8 @@ strategies
 rules
   
   explicate-rule :
-    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), DynamicEmitted(e1*), Target(rhs, tc1*))) ->   
-    Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), DynamicEmitted(e2*), Target(rhs, tc2*)))
+    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc1*))) ->   
+    Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e2*), Target(rhs, tc2*)))
     where
       r2* := <ReadableComps; mk-label-comps(|1)>;
       sc2* := <ChangeableComps; mk-label-comps(|1)>;
@@ -86,9 +86,9 @@ rules // premisses
     form@Formula(TermNeq(lhs, rhs)) -> (num, [form])
     
   explicate-premisse(|num-prev) :
-    Formula(Relation(Reads(r1*), Source(lhs, sc1*), DynamicEmitted(e1*), Target(rhs, tc1*))) -> 
+    Formula(Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc1*))) -> 
     (num-next, 
-      [Formula(Relation(Reads(r2*), Source(lhs, sc2*), DynamicEmitted(e2*), Target(rhs, tc2*))) | init*])
+      [Formula(Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e2*), Target(rhs, tc2*))) | init*])
     where
       num-next := <inc> num-prev;
     	if <?[]> r1* then

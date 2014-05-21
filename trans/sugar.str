@@ -36,6 +36,9 @@ rules // desugaring
     DynamicEmitted(e) -> NamedDynamicEmitted(e, "default")
   
   desugar :
+    NamedDynamic(n) -> NamedDynamicEmitted(n, [])
+  
+  desugar :
     List(x*) -> ListTail(x*, List([]))
     where <not(?[])> x* 
 
@@ -53,9 +56,6 @@ rules // desugaring
   desugar :
     Target(rhs) -> Target(rhs, [])
 
-  desugar :
-    Dynamic() -> DynamicEmitted([])
-    
   desugar :
     Axiom(form) -> Rule([], "---------", form)
     
@@ -92,7 +92,7 @@ rules // sugaring
   	Reads([]) -> NoReads()
 
   sugar :
-  	DynamicEmitted([]) -> Dynamic()
+  	NamedDynamicEmitted(e, []) -> NamedDynamic(e)
 
   sugar :
   	Target(term,[]) -> Target(term)
