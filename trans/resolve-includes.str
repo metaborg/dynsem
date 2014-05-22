@@ -6,31 +6,28 @@ imports
   
 rules
   
-  resolve-includes:
+  resolve-includes(|f-path, p-path):
     Module(name, section*) -> Module(name, section'*)
     where
-      debug(!"A ");
-      (import*, section-noimports*) := <partition(?Imports(<id>))> section*;
-      debug(!"B ");
-      section'* := <include-imports(|[])> (import*, section-noimports*)
-      ;debug(!"C ")
+      parent-dir := <string-tokenize(|['/']); reverse; Tl; reverse; concat-strings> f-path;
+      include-dir := <concat-strings> [p-path, "/", parent-dir];
+      (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
+      section'* := <include-imports(|include-dir, [])> (import*, section-noimports*)
   
-  include-imports(|imported*):
+  include-imports(|include-dir, imported*):
     ([], section*) -> section*
 
-  include-imports(|imported*):
-  	([Import(i) | ixs], section*) -> <include-imports(|[i, imported*])> ([ixs | new-import*], section'*)
+  include-imports(|include-dir, imported*):
+    ([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [i, imported*])> (ixs*, section*)
+    where
+      <fetch-elem(?i)> imported*
+
+  include-imports(|include-dir, imported*):
+  	([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [i, imported*])> ([ixs*, new-import*], section'*)
+  	where
+  	  <not(fetch-elem(?i))> imported*
     with
-    	<debug(!"Importing ")> i;
-    	if <not(fetch-elem(?i))> imported* then
-    		debug(!1);
-    		Module(_, imported-section*) := <parse-ds-file> i;
-    		debug(!2);
-    		(new-import*, imported-section-noimports*) := <partition(?Imports(<id>))> imported-section*;
-    		debug(!3);
-        section'* := [section* | imported-section-noimports*]
-    		;debug(!4)
-    	else
-    		debug(!"Skipping ...");
-    		section'* := section*
-      end
+  		Module(_, imported-section*) := <concat-strings; parse-ds-file> [include-dir, "/", i, ".ds"];
+  		(new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*;
+      section'* := [section* | imported-section-noimports*]
+
