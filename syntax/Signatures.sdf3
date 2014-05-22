@@ -95,5 +95,5 @@ templates
     arrows
       <ArrowDeclaration*; separator="\n">>
   
-  ArrowDeclaration.ArrowDecl = [[Type] -- [ID]> [Type]]
+  ArrowDeclaration.ArrowDecl = [[Type] - [ID] -> [Type]]
   ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]
