@@ -32,10 +32,15 @@ rules // group rules by name
   group-rules(|rule-name*):
     [r | rxs] -> grouped-r*
     with
+      debug(!1);
       grouped-rxs* := <group-rules(|rule-name*)> rxs;
-      r-name := <get-rule-name> r;
+      debug(!2);
+      r-name := <debug(!"2a "); get-rule-name> r;
+      debug(!3);
       r-idx := <get-index; dec> (r-name, rule-name*);
+      debug(!4);
       grouped-r* := <at-index(\ xs -> [r | xs] \)> (r-idx, grouped-rxs*)
+      ; debug(!5)
 
   get-rule-name :
   	Rule(_, _, Relation(_, _, NamedDynamicEmitted(arrow, _), _))  -> arrow

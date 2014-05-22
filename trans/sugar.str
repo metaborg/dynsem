@@ -15,10 +15,6 @@ rules // desugaring
   desugar-all = mark-var-defs-in-rules; innermost(desugar); alltd(rules-concat)
   
   desugar:
-    Module(name, section*) -> Module(name, [ Imports([Import("base")]), section* ])
-    where <not(collect-one(?Import("base")))> section*
-  
-  desugar:
     Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
   
   desugar :
