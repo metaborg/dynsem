@@ -4,6 +4,7 @@ imports
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/editor/-
   include/ds
   names
   ds
@@ -39,14 +40,16 @@ rules
       t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [s-ty])> (1, t)
   
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
-    Relation(reads, Source(s, ls){annos*}, NamedDynamicEmitted(arrow, e*){annoa*}, Target(t, ts){annot*}){anno*} -> Relation(reads, Source(s', ls){annos*}, NamedDynamicEmitted(arrow, e*){annoa*}, Target(t', ts){annot*}){anno*}
+    r@Relation(reads, Source(s, ls){annos*}, NamedDynamicEmitted(arrow, e*){annoa*}, Target(t, ts){annot*}){anno*} -> r'
     with
       arrow-def := <nabl-use-candidate(|lang, ctx, uri*, arrow)> UseCandidate(NablNsArrow(), [], Current(), (), ());
       arrow-ty := <type-lookup(|ctx)> arrow-def;
       l-ty := <new-task(|ctx)> Rewrite("proj20", arrow-ty); task-create-id(|ctx, [arrow-ty]);
       r-ty := <new-task(|ctx)> Rewrite("proj21", arrow-ty); task-create-id(|ctx, [arrow-ty]);
       s' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [l-ty])> (1, s);
-      t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [r-ty])> (1, t)
+      t' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [r-ty])> (1, t);
+      r' := <origin-location-offset-set(|<origin-location-offset> r)> Relation(reads, Source(s', ls){annos*}, NamedDynamicEmitted(arrow, e*){annoa*}, Target(t', ts){annot*}){anno*}
+      
   
   attach-expected-type-to-term(|ctx, old-uri*, new-uri*, tys):
     (i, term{a*}) -> term{(NablProp_expected-type(), term-ty), a*}
