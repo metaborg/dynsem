@@ -161,8 +161,8 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      // result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; sugar-all; pp-debug> selected
-      result   := <resolve-includes(|path, project-path); desugar-all;  pp-debug> selected
+      result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; sugar-all; pp-debug> selected
+      // result   := <resolve-includes(|path, project-path); desugar-all;  pp-debug> selected
 
   explicate-factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
