@@ -79,7 +79,7 @@ rules /* generate interfaces for declared sorts */
   get-native-sort-java-name:
     "Term" -> <get-basesort-java-name>
     
-  get-basesort-java-name = !$[I_[<language>]Node]
+  get-basesort-java-name = !$[I_Node]
 
   get-native-sort-java-name:
     "Int" -> "int"

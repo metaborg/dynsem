@@ -18,11 +18,17 @@ rules
   sorts-to-specializing-nodes:
     Module(mod, body*) -> generic-node-class*
     with
-      example-read* := <collect-one(get-rule-conclusion-environments)> body*;
-      example-heap* := <collect-one(get-rule-conclusion-inheaps)> body*;
+      debug(!1);
+      example-read* := <collect-one(get-rule-nonwritables)> body*;
+      debug(!2);
+      example-heap* := <collect-one(get-rule-writables)> body*;
+      debug(!3);
       sort-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
+      debug(!4);
       sort-specialization-decl* := <map(match-with-cons(|body*))> sort-decl*;
+      debug(!5);
       generic-node-class* := <map(sort-cons-to-generic-node(|[example-read*, example-heap*]))> sort-specialization-decl*
+      ; debug(!6)
   
   match-with-cons(|body*):
     sort-decl -> (sort-decl, cons*)

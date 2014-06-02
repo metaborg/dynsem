@@ -26,8 +26,8 @@ rules // generate a dummy-bodied evaluate method
 		  ]|
 		with
       x_returnclass := $[[<language>]_Result];
-      env* := <collect-one(get-rule-conclusion-environments)> rule*;
-      heap* := <collect-one(get-rule-conclusion-inheaps)> rule*;
+      env* := <collect-one(get-rule-nonwritables)> rule*;
+      heap* := <collect-one(get-rule-writables)> rule*;
       param* := <map(rule-reads-to-evaluate-params)> [env*, heap*]
 
 signature
@@ -45,8 +45,8 @@ rules // generate a full-bodied evaluate method
       ]|
     with
       x_returnclass := $[[<language>]_Result];
-      env* := <get-rule-conclusion-environments> r;
-      heap* := <get-rule-conclusion-inheaps> r;
+      env* := <get-rule-nonwritables> r;
+      heap* := <get-rule-writables> r;
       param* := <map(rule-reads-to-evaluate-params)> [env*, heap*];
       opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
       bstm* := <ops-to-java> (opweave, [])

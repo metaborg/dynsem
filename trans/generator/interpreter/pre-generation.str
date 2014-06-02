@@ -14,8 +14,9 @@ rules
     // factorize-module;
     alltd(escape-variable-names);
     fuse-sections;
-    merge-overlapping-rules;
+    // merge-overlapping-rules;
     optimize-environments
+    // id
 
 rules /* rename variables */
 
@@ -36,7 +37,8 @@ rules
       intcons-decl* := <collect-all(?InternalConstructors(<id>)); concat> body*;
       natops-decl*  := <collect-all(?NativeOperators(<id>)); concat> body*;
       values-decl*  := <collect-all(?Values(<id>)); concat> body*;
-      signatures    := [ sort-decl*, cons-decl*, semcomp-decl*, intsort-decl*, cons-decl*, intcons-decl*, values-decl* ];
+      arrow-decl*   := <collect-all(?ArrowDeclarations(<id>)); concat> body*;
+      signatures    := [ sort-decl*, cons-decl*, semcomp-decl*, intsort-decl*, cons-decl*, intcons-decl*, values-decl*, arrow-decl* ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
 
 signature

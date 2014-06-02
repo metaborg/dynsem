@@ -22,7 +22,7 @@ rules
 
 rules // generate a base interface extending INode with the language-specific evaluate function 
   
-  reads-to-inode-interface:
+  module-to-inode-interface:
   	Module(mod, body*) -> 
 	  	compilation-unit |[
 	  		package x_pkgname;
@@ -31,17 +31,27 @@ rules // generate a base interface extending INode with the language-specific ev
 	  		
 	  		public interface x_inodeface extends INode, IMatchable {
 	  			
-	  			public x_returnclass execute(param*);
+	  			~exec*
 	  		}
 	  	]|
   	with
   		x_pkgname := <gen-package-name>;
-  		x_returnclass := $[[<language>]_Result];
   		x_inodeface := <get-basesort-java-name> "Term";
-  		example-read* := <collect-one(get-rule-conclusion-environments)> body*;
-  		example-heap* := <collect-one(get-rule-conclusion-inheaps)> body*;
-  		param* := <map-with-index(read-to-inode-evaluate-params)> [example-read*, example-heap*]
-
+  		arrow-decl* := <get-arrow-declarations> body*;
+  		exec* := <map(arrow-to-exec-iface(|body*))> arrow-decl*
+  
+  arrow-to-exec-iface(|body*):
+    ArrowDecl(source, name, target) ->
+  	  class-body-dec |[
+  	  	public x_returnclass x_execname(param*);
+  	  ]|
+  	with
+  	  x_returnclass := $[[name]_Result];
+  	  x_execname := $[exec_[name]];
+  	  nonwritable* := <get-module-arrow-nonwritables(|name)> body*;
+  	  writable* := <get-module-arrow-writables(|name)> body*;
+  	  param* := <map-with-index(read-to-inode-evaluate-params)> [nonwritable*, writable*]
+  
   read-to-inode-evaluate-params:
     (idx, LabelComp(ty, _)) -> param |[ ~type:jiface x_idx ]|
     with
@@ -51,8 +61,14 @@ rules // generate a base interface extending INode with the language-specific ev
 
 rules // generate a language-specific class for the result of an evaluation step
   
-  step-result-to-java-class:
-    Module(mod, body*) ->
+  reductions-to-java-result-classes:
+    Module(mod, body*) -> java-class*
+    with
+      arrow-name* := <get-arrow-declarations; map(get-arrow-name)> body*;
+      java-class* := <map(reduction-to-java-result-class(|body*))> arrow-name*
+  
+  reduction-to-java-result-class(|body*):
+    arrow-name -> 
       compilation-unit |[
         package x_pkgname;
         
@@ -73,16 +89,25 @@ rules // generate a language-specific class for the result of an evaluation step
         }
       ]|
     with
+      debug(!"e1 ");
       x_pkgname := <gen-package-name>;
-      x_resultclass := $[[<language>]_Result];
-      example-heap* := <collect-one(get-rule-conclusion-outheaps)> body*;
-      fdec* := <map-with-index(step-result-to-java-field)> example-heap*;
-      ty* := <map(?LabelComp(<id>, _))> example-heap*;
+      debug(!"e2 ");
+      x_resultclass := $[[arrow-name]_Result];
+      debug(!"e3 ");
+      writable* := <get-module-arrow-writables(|arrow-name)> body*;
+      debug(!"e4 ");
+      fdec* := <map-with-index(reduction-to-java-result-field)> writable*;
+      debug(!"e5 ");
+      ty* := <map(?LabelComp(<id>, _))> writable*;
+      debug(!"e6 ");
       param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
+      debug(!"e7 ");
       bstm* := <map-with-index(node-arg-to-fieldinit)> ty*;
+      debug(!"e8 ");
       fget* := <map-with-index(node-arg-to-java-fieldget)> ty*
+      ;debug(!"e9 ")
 
-  step-result-to-java-field:
+  reduction-to-java-result-field:
     (idx, LabelComp(ty, _)) -> class-body-dec |[ public final ~type:jiface x_idx; ]|
     with
       x_idx := <conc-strings> ("_", <int-to-string> idx);
@@ -327,16 +352,40 @@ rules // utilities for filtering rules
     	<eq> (cons-def, resolved-def);
     	(ty*, _) := <get-type> cons-def;
     	<eq> (<length> ty*, <length> arg*)
-      
+  
+  get-arrow-declarations = collect-all(?ArrowDecl(_, _, _))
+  
   get-rule-matchedterm:
     Rule(_, _, Relation(_, Source(ma, _), _, _)) -> ma
   
-  get-rule-conclusion-environments:
-    Rule(_, _, Relation(Reads(read*), _, _, _)) -> read*
+  get-module-arrow-nonwritables(|arrow-name) =
+    where(arrow-name' := <strip-annos> arrow-name);
+    collect-one(where(get-rule-arrow-name; strip-annos; ?arrow-name'); get-rule-nonwritables)
+    <+ ![]
   
-  get-rule-conclusion-inheaps:
-    Rule(_, _, Relation(_, Source(_, heap*), _, _)) -> heap*
+  get-module-arrow-writables(|arrow-name) =
+    where(arrow-name' := <strip-annos> arrow-name);
+    collect-one(where(get-rule-arrow-name; strip-annos; ?arrow-name'); get-rule-writables)
+    <+ ![]
+  
+  get-rule-nonwritables:
+    Rule(_, _, Relation(Reads(nonwritable*), _, _, _)) -> nonwritable*
+  
+  get-rule-writables:
+    Rule(_, _, Relation(_, Source(_, writable*), _, _)) -> writable*
 
-  get-rule-conclusion-outheaps:
-    Rule(_, _, Relation(_, _, _, Target(_, heap*))) -> heap*
+  get-rule-arrow-name:
+    Rule(_, _, Relation(_, _, arrow, _)) -> <get-arrow-name> arrow
+  
+  get-arrow-name:
+    ArrowDecl(_, name, _) -> name
+  
+  get-arrow-name:
+    NamedDynamicEmitted(name, _) -> name
+  
+  get-arrow-name:
+  	NamedDynamic(name) -> name
 
+    
+    
+    
