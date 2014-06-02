@@ -39,7 +39,7 @@ type rules
     and aparam_ty* <compat: fparam_ty*
     else error "actual parameter types are incompatible with formal parameter types" on f
 
-  rel@Relation(_, Source(s, _), NamedDynamic(arrow),  Target(t, _)) :-
+  rel@Relation(_, Source(s, _), NamedDynamicEmitted(arrow, _),  Target(t, _)) :-
   where
     definition of arrow : (l-ty, r-ty)
     and s : s-ty
