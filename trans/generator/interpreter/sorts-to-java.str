@@ -113,8 +113,9 @@ rules /* generate interfaces for declared sorts */
       is-string;
       <get-sort-kind; ?NativeType()> term
   
-  
   get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
+
+  is-sort-list = ?ListSort(_)
 
   is-sort-native = not(is-string); get-sort-name; is-sort-native
   

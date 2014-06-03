@@ -17,19 +17,32 @@ imports
   
 rules // generate a dummy-bodied evaluate method
 	
-	rule-to-java-dummy-evalmethod:
-		rule* ->
-		  class-body-dec |[
-		  	public x_returnclass execute(param*) {
-		  		throw new InterpreterException("Non executable node");
-		  	}
-		  ]|
-		with
-      x_returnclass := $[[<language>]_Result];
-      env* := <collect-one(get-rule-nonwritables)> rule*;
-      heap* := <collect-one(get-rule-writables)> rule*;
-      param* := <map(rule-reads-to-evaluate-params)> [env*, heap*]
+	// rule-to-java-dummy-evalmethod:
+	// 	rule* ->
+	// 	  class-body-dec |[
+	// 	  	public x_returnclass execute(param*) {
+	// 	  		throw new InterpreterException("Non executable node");
+	// 	  	}
+	// 	  ]|
+	// 	with
+ //      x_returnclass := $[[<language>]_Result];
+ //      env* := <collect-one(get-rule-nonwritables)> rule*;
+ //      heap* := <collect-one(get-rule-writables)> rule*;
+ //      param* := <map(rule-reads-to-evaluate-params)> [env*, heap*]
 
+  gen-arrow-node-exec-method(|node-rule*, body*):
+    arrow-name ->
+      class-body-dec |[
+        public x_returnclass x_execname(param*) {
+          throw new InterpreterException("Not implemented");
+        }
+      ]|
+    with
+      x_returnclass := $[[arrow-name]_Result];
+      x_execname := $[exec_[arrow-name]];
+      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+      param* := <map-with-index(read-to-inode-evaluate-params)> [nonwritable*, writable*]
+    
 signature
   constructors
     OpSeq: Op * Op -> Op

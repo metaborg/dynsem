@@ -17,6 +17,8 @@ rules // projections for sorts
   
   get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _) + ?SemanticComponent(<id>) + ?InternalSortDecl(<id>)
   get-sort-name = ?SimpleSort(<id>)
+  
+  get-listsort-elementname = ?ListSort(<get-sort-name>)
 
 rules // extract components        
   

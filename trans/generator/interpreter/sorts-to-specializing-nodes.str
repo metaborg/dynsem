@@ -143,10 +143,18 @@ rules
   gen-gennode-instantiation:
     (idx, s) -> e |[ new x_gensortname(source, term.getSubterm(i)) ]|
     where
-      <not(is-sort-native)> s
+      <not(is-sort-native + is-sort-list)> s
     with
       i := <dec; int-to-string> idx;
       x_gensortname := $[Generic_[<get-sort-name> s]]
+  
+  gen-gennode-instantiation:
+  	(idx, s) -> e |[ new GenericNodeList<x_sortname>(term.getSubterm(i)) ]|
+  	where
+  		<is-sort-list> s
+    with
+      i := <dec; int-to-string> idx;
+      x_sortname := <get-listsort-elementname; get-sort-java-name> s
   
   gen-gennode-instantiation:
     (idx, s) -> e |[ Tools.asJavaString(term.getSubterm(i)) ]|

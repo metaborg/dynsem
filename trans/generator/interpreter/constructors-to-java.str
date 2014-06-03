@@ -8,17 +8,24 @@ imports
   generator/interpreter/sorts-to-java
   generator/interpreter/rule-to-java
   lib/editor-common.generated
+  lib-ds
   
 rules
   
   constructors-to-java-interpreter:
     Module(mod, body*) -> [node-class*, value-class*]
     with
+      debug(!"f1 ");
       rule* := <collect-all(?Rules(<id>)); concat> body*;
+      debug(!"f2 ");
       node-name* := <collect-all(?ConsDecl(<id>, _, _) + ?InternalConsDecl(<id>, _, _))> body*;
-      node-class* := <map(node-to-java-interpreter(|rule*))> node-name*;
+      debug(!"f3 ");
+      node-class* := <map(node-to-java-interpreter(|rule*, body*))> node-name*;
+      debug(!"f4 ");
       value-name* := <collect-all(?ValueDecl(<id>, _))> body*;
+      debug(!"f5 ");
       value-class* := <map(value-to-java-interpreter)> value-name*
+      ; debug(!"f6 ")
 
 rules // generate a base interface extending INode with the language-specific evaluate function 
   
@@ -108,7 +115,7 @@ rules // generate a language-specific class for the result of an evaluation step
   
 rules // backend for normal constructor to Java
 
-  node-to-java-interpreter(|rule*):
+  node-to-java-interpreter(|rule*, body*):
     node-name ->
       compilation-unit |[
         package x_pkgname;
@@ -121,7 +128,7 @@ rules // backend for normal constructor to Java
           
           ~body1
 
-          ~evalmethod
+          ~exec-method*
           
           ~fget*
           
@@ -138,11 +145,13 @@ rules // backend for normal constructor to Java
       fget* := <map-with-index(node-arg-to-java-fieldget)> ty*;
       body1 := <node-args-to-java-constructor> (x_consname, ty*);
     	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
-      if <?[]> node-rule* then
-      	evalmethod := <rule-to-java-dummy-evalmethod> rule*
-      else
-        evalmethod := <Hd;rule-to-java-evalmethod> node-rule*
-      end;
+    	arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+    	exec-method* := <map(gen-arrow-node-exec-method(|node-rule*, body*))> arrow-name*;
+      // if <?[]> node-rule* then
+      // 	evalmethod := <rule-to-java-dummy-evalmethod> rule*
+      // else
+      //   evalmethod := <Hd;rule-to-java-evalmethod> node-rule*
+      // end;
       equalsmethod := <node-to-java-equalsmethod> node-name
   
   node-to-java-equalsmethod:
@@ -215,10 +224,20 @@ rules // backend for normal constructor to Java
   
   node-arg-to-constr-param-decl:
     (idx, ty) -> param |[ ~type:jiface x_idx ]|
+    where
+      <not(is-sort-list)> ty
     with
       x_idx := $[_[idx]];
       x_sort := <get-sort-java-name> ty;
       jiface := type |[ x_sort ]|
+
+  node-arg-to-constr-param-decl:
+    (idx, ty) -> param |[ INodeList<x_sort> x_idx ]|
+    where
+      <is-sort-list> ty
+    with
+      x_idx := $[_[idx]];
+      x_sort := <get-listsort-elementname; get-sort-java-name> ty
 
   node-arg-to-fieldinit:
     (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
@@ -250,8 +269,24 @@ rules // backend for normal constructor to Java
           return this.x_idx;
         }
       ]|
+    where
+      <not(is-sort-list)> ty
     with
       x_fieldtype := <get-sort-java-name> ty;
+      x_getter := $[get_[idx]];
+      x_idx := $[_[idx]]
+
+  node-arg-to-java-fieldget:
+    (idx, ty) ->
+      class-body-dec |[
+        public INodeList<x_elemtype> x_getter() {
+          return this.x_idx;
+        }
+      ]|
+    where
+      <is-sort-list> ty
+    with
+      x_elemtype := <get-listsort-elementname; get-sort-java-name> ty;
       x_getter := $[get_[idx]];
       x_idx := $[_[idx]]
   
@@ -262,16 +297,28 @@ rules // backend for normal constructor to Java
         public ~type:jiface x_idx;
       ]|
     where
-      <not(is-sort-native)> ty
+      <not(is-sort-native + is-sort-list)> ty
     with
       x_idx := <conc-strings> ("_", <int-to-string> idx);
       x_sortname := <get-sort-java-name> ty;
       jiface := type |[ x_sortname ]|
       
   node-arg-to-java-child-field:
+    (idx, ty) ->
+      class-body-dec |[
+        @Child
+        public INodeList<x_sortname> x_idx;
+      ]|
+    where
+      <is-sort-list> ty
+    with
+      x_idx := <conc-strings> ("_", <int-to-string> idx);
+      x_sortname := <get-listsort-elementname; get-sort-java-name> ty
+      
+  node-arg-to-java-child-field:
     (idx, ty) -> <node-arg-to-java-field> (idx, ty)
     where
-      <is-sort-native> ty 
+      <is-sort-native> ty
     
 rules // backend for value constructors to Java
   
