@@ -39,8 +39,7 @@ rules
       debug(!"C ");
       sort-iface* := <sorts-to-java-interpreter> mod';
       debug(!"D ");
-      // sort-node* := <sorts-to-specializing-nodes> mod';
-      sort-node* := [];
+      sort-node* := <sorts-to-specializing-nodes> mod';
       debug(!"E ");
       result-class* := <reductions-to-java-result-classes> mod';
       debug(!"F ");

@@ -15,25 +15,12 @@ imports
   
 rules
   
-  /*
-  [ (ArrowName, nonwritable*, writable*) ]
-  
-  */
-  
   sorts-to-specializing-nodes:
     Module(mod, body*) -> generic-node-class*
     with
-      debug(!"d1 ");
-      example-read* := <collect-one(get-rule-nonwritables)> body*;
-      debug(!"d2 ");
-      example-heap* := <collect-one(get-rule-writables)> body*;
-      debug(!"d3 ");
       sort-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
-      debug(!"d4 ");
       sort-specialization-decl* := <map(match-with-cons(|body*))> sort-decl*;
-      debug(!"d5 ");
-      generic-node-class* := <map(sort-cons-to-generic-node(|[example-read*, example-heap*]))> sort-specialization-decl*
-      ;debug(!"d6 ")
+      generic-node-class* := <map(sort-cons-to-generic-node(|body*))> sort-specialization-decl*
   
   match-with-cons(|body*):
     sort-decl -> (sort-decl, cons*)
@@ -43,7 +30,7 @@ rules
       sdef := <get-annos; fetch-elem(?Def(_))> s;
       cons* := <collect-all(where((?ConsDecl(_, _, <id>) + ?InternalConsDecl(_, _, <id>) + ?InjDecl(_, <id>)); nabl-collect-one-resolved-def; ?sdef))> body*
   
-  sort-cons-to-generic-node(|read*):
+  sort-cons-to-generic-node(|body*):
     (sort-decl, specialization-decl*) ->
       compilation-unit |[ 
       	package x_pkgname;
@@ -62,11 +49,6 @@ rules
             this.aterm = term;
           }
           
-          @Override
-					public x_resultname execute(param*) {
-					  return replace(computeReplacement()).execute(e*);
-					}
-					
 					@Override
 					public <T> T match(Class<T> clazz) {
 					  return replace(computeReplacement()).match(clazz);
@@ -86,6 +68,8 @@ rules
             throw new RewritingException();
           }
           
+          ~exec_method*
+          
         }
       ]|
     with
@@ -93,18 +77,37 @@ rules
       sort-name := <get-sort-name> sort-decl;
       x_gennodename := $[Generic_[sort-name]];
       x_sortname := <get-sort-java-name> sort-name;
-      x_resultname := $[[<language>]_Result];
       x_basenodename := <get-basesort-java-name>;
-      param* := <map-with-index(read-to-inode-evaluate-params)> read*;
-      e* := <map-with-index(read-to-varref)> read*;
+      exec_method* := <gen-generic-exec-methods> body*;
       (cons-decl*, inj-decl*) := <partition(not(?InjDecl(_, _)))> specialization-decl*;
-      bstm1* := <specializations-to-java(|read*)> cons-decl*;
-      bstm2* := <specializations-to-java(|read*)> inj-decl*  
+      bstm1* := <specializations-to-java> cons-decl*;
+      bstm2* := <specializations-to-java> inj-decl*  
 
-  specializations-to-java(|read*):
+  gen-generic-exec-methods:
+    body* -> exec-method*
+    with
+      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+      exec-method* := <map(gen-generic-exec-method(|body*))> arrow-name*
+
+  gen-generic-exec-method(|body*):
+    arrow-name -> 
+      class-body-dec |[
+         @Override
+         public x_returnclass x_execname(param*) {
+           return replace(computeReplacement()).x_execname(e*);
+         }
+      ]|
+    with
+      x_returnclass := $[[arrow-name]_Result];
+      x_execname := $[exec_[arrow-name]];
+      (arrow-name, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+      param* := <map-with-index(read-to-inode-evaluate-params)> [nonwritable*, writable*];
+      e* := <map-with-index(read-to-varref)> [nonwritable*, writable*]
+
+  specializations-to-java:
     [] -> []
 
-  specializations-to-java(|read*):
+  specializations-to-java:
   	[InjDecl(sort-name, _) | xs] ->
   	  bstm* |[
   	 	 try {
@@ -116,9 +119,9 @@ rules
     with
     	x_exname := <newname>;
     	x_gennodename := $[Generic_[sort-name]];
-    	bstm* := <specializations-to-java(|read*)> xs
+    	bstm* := <specializations-to-java> xs
   
-  specializations-to-java(|read*):
+  specializations-to-java:
     [cons-decl | xs] ->
       bstm* |[
         if(name.equals(e) && term.getSubtermCount() == i_arity) {
@@ -135,7 +138,7 @@ rules
       x_consname := <get-cons-java-name> cons-name;
       e* := <map-with-index(gen-gennode-instantiation)> ty*;
       i_arity := $[[<length> ty*]];
-      bstm2* := <specializations-to-java(|read*)> xs
+      bstm2* := <specializations-to-java> xs
 
   gen-gennode-instantiation:
     (idx, s) -> e |[ new x_gensortname(source, term.getSubterm(i)) ]|
