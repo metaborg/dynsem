@@ -30,14 +30,14 @@ rules
 rules
   
   to-java-interpreter:
-    mod@Module(_, _) -> [inode-iface, result-class*] //sort-iface*, , sort-node*, cons-class*]
+    mod@Module(_, _) -> [inode-iface, sort-iface*, result-class*] // , , sort-node*, cons-class*]
     with
       debug(!"A ");
       mod' := <pre-generation-transform> mod;
       debug(!"B ");
       inode-iface := <module-to-inode-interface> mod';
       debug(!"C ");
-      // sort-iface* := <sorts-to-java-interpreter> mod';
+      sort-iface* := <sorts-to-java-interpreter> mod';
       debug(!"D ");
       // sort-node* := <sorts-to-specializing-nodes> mod';
       debug(!"E ");

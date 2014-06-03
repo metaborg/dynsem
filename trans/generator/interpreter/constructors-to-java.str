@@ -89,23 +89,14 @@ rules // generate a language-specific class for the result of an evaluation step
         }
       ]|
     with
-      debug(!"e1 ");
       x_pkgname := <gen-package-name>;
-      debug(!"e2 ");
       x_resultclass := $[[arrow-name]_Result];
-      debug(!"e3 ");
       writable* := <get-module-arrow-writables(|arrow-name)> body*;
-      debug(!"e4 ");
       fdec* := <map-with-index(reduction-to-java-result-field)> writable*;
-      debug(!"e5 ");
       ty* := <map(?LabelComp(<id>, _))> writable*;
-      debug(!"e6 ");
       param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
-      debug(!"e7 ");
       bstm* := <map-with-index(node-arg-to-fieldinit)> ty*;
-      debug(!"e8 ");
       fget* := <map-with-index(node-arg-to-java-fieldget)> ty*
-      ;debug(!"e9 ")
 
   reduction-to-java-result-field:
     (idx, LabelComp(ty, _)) -> class-body-dec |[ public final ~type:jiface x_idx; ]|

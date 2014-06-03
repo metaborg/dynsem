@@ -33,12 +33,13 @@ rules
       sort-decl*    := <collect-all(?Sorts(<id>)); concat> body*;
       semcomp-decl* := <collect-all(?SemanticComponents(<id>)); concat> body*;
       intsort-decl* := <collect-all(?InternalSorts(<id>)); concat> body*;
+      natty-decl*   := <collect-all(?NativeDataTypes(<id>)); concat> body*;
       cons-decl*    := <collect-all(?Constructors(<id>)); concat> body*;
       intcons-decl* := <collect-all(?InternalConstructors(<id>)); concat> body*;
       natops-decl*  := <collect-all(?NativeOperators(<id>)); concat> body*;
       values-decl*  := <collect-all(?Values(<id>)); concat> body*;
       arrow-decl*   := <collect-all(?ArrowDeclarations(<id>)); concat> body*;
-      signatures    := [ sort-decl*, cons-decl*, semcomp-decl*, intsort-decl*, cons-decl*, intcons-decl*, values-decl*, arrow-decl* ];
+      signatures    := [ sort-decl*, natty-decl*, cons-decl*, semcomp-decl*, intsort-decl*, cons-decl*, intcons-decl*, values-decl*, arrow-decl* ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
 
 signature
