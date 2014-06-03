@@ -27,16 +27,21 @@ rules
     Rule(prem5*, infer, 
           Relation(reads, Source(lhs',sc*), NamedDynamicEmitted(arrow, em1*), Target(rhs',tc*)))
     with
-      (prem2*, lhs') := <lift-constructors-from-match> lhs;
-      (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-      prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*];
-      prem5* := <lift-mapselect-from-premises> prem4*
+    	while-counting(
+	      (prem2*, lhs') := <lift-constructors-from-match> lhs;
+	      (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
+	      prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*];
+	      prem5* := <lift-mapselect-from-premises> prem4*
+	    )
           
   factorize-rule :
     Rule(prem1*, infer, TermEq(lhs, rhs)) -> Rule(prem4*, infer, TermEq(lhs', rhs'))
-    with (prem2*, lhs') := <lift-constructors-from-match> lhs;
-          (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-          prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*]
+    with
+    	while-counting(
+	    	(prem2*, lhs') := <lift-constructors-from-match> lhs;
+	      (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
+	      prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*]
+	    )
           
 rules // lift constructor sub-terms in match
       
@@ -50,17 +55,17 @@ rules // lift constructor sub-terms in match
 
   lift-constructor-from-match:
     t@Con(c, _) -> ([Formula(Match(Var(x), t))], Var(x))
-    with x := <new>
+    with x := <next-variable>
 
   lift-constructor-from-match = lift-constant-from-match
 
   lift-constant-from-match:
     t@Int(i) -> ([Formula(TermEq(Var(x), t))], Var(x))
-    with x := <new>
+    with x := <next-variable>
 
   lift-constant-from-match:
     t@String(s) -> ([Formula(TermEq(Var(x), t))], Var(x))
-    with x := <new>
+    with x := <next-variable>
 
   lift-constructor-from-match:
     t -> ([], t)
@@ -71,7 +76,7 @@ rules // lift constructor sub-terms in build
   lift-constructors-from-rhs:
     t@Con(c, t*) -> ([Formula(Match(t, Var(x)))], Var(x))
     where
-      x := <new>
+      x := <next-variable>
 
   lift-constructors-from-rhs:
     t -> ([], t)
@@ -89,7 +94,7 @@ rules // lift from build
     
   lift-constructor-from-build :
     t@Con(c, _) -> ([Formula(TermEq(t, Var(x)))], Var(x))
-    where x := <new>   
+    where x := <next-variable>   
     
   lift-constructor-from-build :
     t -> ([], t)
@@ -124,7 +129,7 @@ rules // lift constructors from sub-terms in premises
     Formula(Relation(reads, source, relation, Target(con@Con(_, _), tc*))) ->
       <lift-constructors-from-premises> [Formula(Relation(reads, source, relation, Target(Var(x), tc*))), Formula(Match(Var(x), con)) ]
     with
-      x := <new>
+      x := <next-variable>
 
 rules // lift map access from premises that do both match and bind
   
@@ -150,11 +155,26 @@ rules // lift map access from premises that do both match and bind
       +
       <?Int(_)> rhs
     with
-      x := <new>
+      x := <next-variable>
   
   lift-mapselect-from-premise:
     Formula(TermEq(lhs@MapSelect(_, _), rhs@VarRef(_))) ->
       [Formula(TermEq(lhs, Var(x))), Formula(TermEq(VarRef(x), rhs))]
     with
-      x := <new>
+      x := <next-variable>
 
+rules // utils for deterministic variable name generation
+	
+	while-counting(s) =
+		{| NextVarIdx:
+			NextVarIdx < s + rules(NextVarIdx : _ -> 0); s
+		|}
+	
+	next-variable =
+		i := <NextVarIdx; inc>;
+		rules(NextVarIdx :- _);
+		rules(NextVarIdx : _ -> i);
+		!$[lifted_[i]]
+
+  
+	
