@@ -35,20 +35,13 @@ rules /* generate interfaces for declared sorts */
   sorts-to-java-interpreter:
     Module(mod, body*) -> language-sort-interface*
     with
-      debug(!"d1 ");
       language-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
-      debug(!"d2 ");
       language-decl-pair* := <map(match-with-injected-sort(|language-decl*))> language-decl*;
-      debug(!"d3 ");
       language-sort-pair* := <map((get-sort-name, map(get-sort-name)); add-term-sort)> language-decl-pair*;
-      debug(!"d4 ");
     	internal-sort* := <collect-all(\ d@InternalSortDecl(_) -> (<get-sort-name> d, []) \; add-term-sort)> body*;
-      debug(!"d5 ");
     	language-sort-interface* := <map(sort-to-java-interpreter)> [language-sort-pair*, internal-sort*]
     with
-      debug(!"d6 ");
       semanticcomponent-sort* := <collect-all(?SemanticComponent(_); get-sort-name)> body*
-      ;debug(!"d7 ")
   
   match-with-injected-sort(|decl*):
     sdec -> (sdec, ssdec*)

@@ -15,20 +15,25 @@ imports
   
 rules
   
+  /*
+  [ (ArrowName, nonwritable*, writable*) ]
+  
+  */
+  
   sorts-to-specializing-nodes:
     Module(mod, body*) -> generic-node-class*
     with
-      debug(!1);
+      debug(!"d1 ");
       example-read* := <collect-one(get-rule-nonwritables)> body*;
-      debug(!2);
+      debug(!"d2 ");
       example-heap* := <collect-one(get-rule-writables)> body*;
-      debug(!3);
+      debug(!"d3 ");
       sort-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
-      debug(!4);
+      debug(!"d4 ");
       sort-specialization-decl* := <map(match-with-cons(|body*))> sort-decl*;
-      debug(!5);
+      debug(!"d5 ");
       generic-node-class* := <map(sort-cons-to-generic-node(|[example-read*, example-heap*]))> sort-specialization-decl*
-      ; debug(!6)
+      ;debug(!"d6 ")
   
   match-with-cons(|body*):
     sort-decl -> (sort-decl, cons*)
