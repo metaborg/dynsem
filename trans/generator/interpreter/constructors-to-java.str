@@ -74,11 +74,11 @@ rules // generate a language-specific class for the result of an evaluation step
         import org.metaborg.meta.interpreter.framework.*;
         
         public class x_resultclass {
-          public final AValue value;
+          public final x_valuesort value;
            
           ~fdec*
           
-          public x_resultclass(AValue value, param*) {
+          public x_resultclass(x_valuesort value, param*) {
             this.value = value;
             bstm*
           }
@@ -90,7 +90,8 @@ rules // generate a language-specific class for the result of an evaluation step
     with
       x_pkgname := <gen-package-name>;
       x_resultclass := $[[arrow-name]_Result];
-      // ArrowDecl(source, _, target) := <get-module-arrow-declaration(|arrow-name)> body*;
+      ArrowDecl(_, _, target) := <get-module-arrow-declaration(|arrow-name)> body*;
+      x_valuesort := <get-sort-java-name> target;
       (_, _, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
       fdec* := <map-with-index(reduction-to-java-result-field)> writable*;
       ty* := <map(?LabelComp(<id>, _))> writable*;

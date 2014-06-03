@@ -99,13 +99,20 @@ rules /* generate interfaces for declared sorts */
     term -> $[I_[term]]
     where
       is-string;
-      <get-sort-kind; not(?SemanticComponent())> term
+      <get-sort-kind; not(?SemanticComponent() + ?NativeType())> term
 
   get-user-sort-java-name:
     term -> <get-native-sort-java-name> "Map"
     where
       is-string;
       <get-sort-kind; ?SemanticComponent()> term
+  
+  get-user-sort-java-name:
+    term -> <get-java-id> term
+    where
+      is-string;
+      <get-sort-kind; ?NativeType()> term
+  
   
   get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
 
