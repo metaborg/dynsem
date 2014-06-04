@@ -72,17 +72,8 @@ rules /* merge ovelapping rules */
       // a list of lists of rules: [ [ [z...], [y...], [x...] ] ]
       cons-arrow-grouped-rule* := <map(group-rules-by-arrow(|arrow-name*))> cons-grouped-rule*;
       debug(!"A4 ");
-      // merged-rule* := <map(map(merge-rules)); debug(!"A5 "); flatten-list; filter(not(?[]))> cons-arrow-grouped-rule*
-      merged-rule* := <map(map(merge-rules)); debug(!"A5 "); flatten-list> cons-arrow-grouped-rule*
-      // merged-rule* := []
+      merged-rule* := <map(map({ ?allfail; merge-rules })); debug(!"A5 "); flatten-list> cons-arrow-grouped-rule*
       ; debug(!"A6 ")
-      // merged-rule* := <
-      // 	map(
-      // 	 debug(!"A1 ");
-      // 	 group-rules(|rule*);
-      // 	 debug(!"A2 "));
-      // 	 unzip; Snd;
-      // 	 map(debug(!"A3 "); merge-rules; debug(!"A4 ")); debug(!"A5 "); concat; debug(!"A6 ")> cons-arity*
   
   group-rules-by-cons(|rule*):
     (cons, arity) -> <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
@@ -105,8 +96,11 @@ rules /* merge ovelapping rules */
       r* := <foldl(merge-rules)> (xs, x)
       ; debug(!"M1 ")
 
+  // normal merge
   merge-rules:
   	(Rule(l-prem*, l-bar, l-rel), Rule(r-prem*, r-bar, r-rel)) -> Rule(merged-prem*, l-bar, l-rel)
+  	where
+  	  <not(collect-one(?AllFail()))> l-prem*
   	where
   		debug(!"M2 ");
   		<strip-annos; eq> (l-rel, r-rel);
@@ -115,10 +109,35 @@ rules /* merge ovelapping rules */
       debug(!"M4 ");
       merged-prem* := <merge-premises> (r-prem*, l-prem*);
       debug(!"M5 ")
-  
+
+  // merge with an all-fail rule
+  merge-rules:
+  	(Rule(l-prem*, l-bar, l-rel), Rule(r-prem*, r-bar, r-rel)) -> Rule([TryOr(r-prem*, l-prem'*)], l-bar, l-rel)
+  	where
+  	  <collect-one(?AllFail())> l-prem*
+  	where
+  		debug(!"M6 ");
+  		<strip-annos; eq> (l-rel, r-rel);
+  		debug(!"M7 ")
+  	with
+  	  l-prem'* := <filter(not(?AllFail()))> l-prem*;
+  	  debug(!"M8 ")
+
   // there are no premises
   merge-premises:
     ([], []) -> []
+  
+  /*
+  * IF the first premise on LHS is a TryOr(t*, o*)
+  *
+  * THEN we merge between t* and RHS
+  *
+  * NB: this can only happen if the TryOr is the only premise on the LHS  
+  */
+  merge-premises:
+    ([ TryOr(try*, or*) ], [r | rxs]) -> [ TryOr(try-merged*, or*) ]
+    with
+      try-merged* := <merge-premises> (try*, [r | rxs])
   
   /*
   * IF the first premise on LHS is a merge point and the merge condition is the same as the right premise.
@@ -132,7 +151,7 @@ rules /* merge ovelapping rules */
     where
       <strip-annos; eq> (cond, r)
     with
-      then'* := <merge-premises> ( then*, rxs)
+      then'* := <merge-premises> (then*, rxs)
   
   /*
   * IF the first premise on the LHS is a merge point and the merge condition is NOT the same as the right premise.
@@ -146,7 +165,7 @@ rules /* merge ovelapping rules */
     where
       <strip-annos; not(eq)> (cond, r)
     with
-      else'* := <merge-premises> ( else*, [r | rxs])
+      else'* := <merge-premises> (else*, [r | rxs])
   
   /*
   * IF the first premise on LHS is not a merge point, and it is equal to the first premise on the RHS.

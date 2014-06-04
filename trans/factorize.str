@@ -6,6 +6,7 @@ imports
   libstratego-aterm
   include/ds
   ds
+  lib-ds
   lib/editor-common.generated
   sugar
   mark-references
@@ -68,8 +69,12 @@ rules // lift constructor sub-terms in match
     with x := <next-variable(|"lifted")>
 
   lift-constructor-from-match:
+  	Var(x) -> ([Formula(Match(VarRef(x-new), MatchedVar(x)))], Var(x-new))
+  	with x-new := <next-variable(|"lifted")>
+
+  lift-constructor-from-match:
     t -> ([], t)
-    where <not(?Con(_,_))> t
+    where <not(?Con(_,_) + ?Var(_))> t
 
 rules // lift constructor sub-terms in build
   

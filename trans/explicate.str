@@ -142,6 +142,9 @@ rules // premisses
       (num3, prem3*) := <explicate-premisses(|num2)> prem1*
   
   explicate-premisse(|num):
+    f@AllFail() -> (num, [f])
+  
+  explicate-premisse(|num):
     form@Formula(Match(lhs, rhs)) -> (num, [form])
   
   explicate-premisse(|num):
