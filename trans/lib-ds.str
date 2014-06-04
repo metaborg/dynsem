@@ -13,12 +13,71 @@ imports
 
 // utilities for DynSem analysis
 
+rules // utils for deterministic variable name generation
+  
+  while-counting(s) =
+    {| NextVarIdx:
+      NextVarIdx < s + rules(NextVarIdx : _ -> 0); s
+    |}
+  
+  next-variable(|prefix) =
+    i := <NextVarIdx; inc>;
+    rules(NextVarIdx :- _);
+    rules(NextVarIdx : _ -> i);
+    !$[[prefix]_[i]]
+
 rules // projections for sorts
   
   get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _) + ?SemanticComponent(<id>) + ?InternalSortDecl(<id>)
   get-sort-name = ?SimpleSort(<id>)
   
   get-listsort-elementname = ?ListSort(<get-sort-name>)
+
+rules
+    
+  // util for getting a set of arrows and their nonwritables and writables
+  get-module-arrows-elements:
+    mod -> <map(\ arrow-name -> <get-module-arrow-elements(|arrow-name)> mod \)> arrow-name*
+    with
+      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> mod
+  
+  get-module-arrow-declaration(|arrow-name) = collect-one(?ArrowDecl(_, arrow-name, _))
+  
+  get-module-arrow-declarations = collect-all(?ArrowDecl(_, _, _))
+
+  get-module-arrow-elements(|arrow-name):
+    mod -> (arrow-name, nonwritable*, writable*)
+    with
+      nonwritable* := <get-module-arrow-nonwritables(|arrow-name)> mod;
+      writable* := <get-module-arrow-writables(|arrow-name)> mod
+  
+  get-module-arrow-nonwritables(|arrow-name) =
+    where(arrow-name' := <strip-annos> arrow-name);
+    collect-one(where(get-rule-arrow-name; strip-annos; ?arrow-name'); get-rule-nonwritables)
+    <+ ![]
+  
+  get-module-arrow-writables(|arrow-name) =
+    where(arrow-name' := <strip-annos> arrow-name);
+    collect-one(where(get-rule-arrow-name; strip-annos; ?arrow-name'); get-rule-writables)
+    <+ ![]
+  
+  get-rule-nonwritables:
+    Rule(_, _, Relation(Reads(nonwritable*), _, _, _)) -> nonwritable*
+  
+  get-rule-writables:
+    Rule(_, _, Relation(_, Source(_, writable*), _, _)) -> writable*
+
+  get-rule-arrow-name:
+    Rule(_, _, Relation(_, _, arrow, _)) -> <get-arrow-name> arrow
+  
+  get-arrow-name:
+    ArrowDecl(_, name, _) -> name
+  
+  get-arrow-name:
+    NamedDynamicEmitted(name, _) -> name
+  
+  get-arrow-name:
+    NamedDynamic(name) -> name
 
 rules // extract components        
   

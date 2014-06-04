@@ -55,17 +55,17 @@ rules // lift constructor sub-terms in match
 
   lift-constructor-from-match:
     t@Con(c, _) -> ([Formula(Match(Var(x), t))], Var(x))
-    with x := <next-variable>
+    with x := <next-variable(|"lifted")>
 
   lift-constructor-from-match = lift-constant-from-match
 
   lift-constant-from-match:
     t@Int(i) -> ([Formula(TermEq(Var(x), t))], Var(x))
-    with x := <next-variable>
+    with x := <next-variable(|"lifted")>
 
   lift-constant-from-match:
     t@String(s) -> ([Formula(TermEq(Var(x), t))], Var(x))
-    with x := <next-variable>
+    with x := <next-variable(|"lifted")>
 
   lift-constructor-from-match:
     t -> ([], t)
@@ -76,7 +76,7 @@ rules // lift constructor sub-terms in build
   lift-constructors-from-rhs:
     t@Con(c, t*) -> ([Formula(Match(t, Var(x)))], Var(x))
     where
-      x := <next-variable>
+      x := <next-variable(|"lifted")>
 
   lift-constructors-from-rhs:
     t -> ([], t)
@@ -94,7 +94,7 @@ rules // lift from build
     
   lift-constructor-from-build :
     t@Con(c, _) -> ([Formula(TermEq(t, Var(x)))], Var(x))
-    where x := <next-variable>   
+    where x := <next-variable(|"lifted")>   
     
   lift-constructor-from-build :
     t -> ([], t)
@@ -129,7 +129,7 @@ rules // lift constructors from sub-terms in premises
     Formula(Relation(reads, source, relation, Target(con@Con(_, _), tc*))) ->
       <lift-constructors-from-premises> [Formula(Relation(reads, source, relation, Target(Var(x), tc*))), Formula(Match(Var(x), con)) ]
     with
-      x := <next-variable>
+      x := <next-variable(|"lifted")>
 
 rules // lift map access from premises that do both match and bind
   
@@ -155,26 +155,12 @@ rules // lift map access from premises that do both match and bind
       +
       <?Int(_)> rhs
     with
-      x := <next-variable>
+      x := <next-variable(|"lifted")>
   
   lift-mapselect-from-premise:
     Formula(TermEq(lhs@MapSelect(_, _), rhs@VarRef(_))) ->
       [Formula(TermEq(lhs, Var(x))), Formula(TermEq(VarRef(x), rhs))]
     with
-      x := <next-variable>
+      x := <next-variable(|"lifted")>
 
-rules // utils for deterministic variable name generation
-	
-	while-counting(s) =
-		{| NextVarIdx:
-			NextVarIdx < s + rules(NextVarIdx : _ -> 0); s
-		|}
-	
-	next-variable =
-		i := <NextVarIdx; inc>;
-		rules(NextVarIdx :- _);
-		rules(NextVarIdx : _ -> i);
-		!$[lifted_[i]]
-
-  
 	

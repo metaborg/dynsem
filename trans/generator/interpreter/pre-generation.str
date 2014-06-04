@@ -3,6 +3,7 @@ module generator/interpreter/pre-generation
 imports
   include/ds
   ds
+  lib-ds
   sugar
   explicate
   factorize
@@ -14,9 +15,8 @@ rules
     // factorize-module;
     alltd(escape-variable-names);
     fuse-sections;
-    // merge-overlapping-rules;
+    merge-overlapping-rules;
     optimize-environments
-    // id
 
 rules /* rename variables */
 
@@ -56,12 +56,29 @@ rules /* merge ovelapping rules */
     with
       cons-arity* := <collect-all(\ ConsDecl(cons, args, _) -> (cons, <length> args) \); make-set> body*;
       rule* := <collect-all(?Rule(_, _, _))> body*;
-      merged-rule* := <map(group-rules(|rule*)); unzip; Snd; map(merge-rules); concat> cons-arity*
+      debug(!"A1 ");
+      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+      debug(!"A2 ");
+      cons-grouped-rule* := <map(group-rules-by-cons(|rule*))> cons-arity*;
+      debug(!"A3 ");
+      cons-arrow-grouped-rule* := <map(group-rules-by-arrow(|arrow-name*))> cons-grouped-rule*;
+      debug(!"A4 ");
+      merged-rule* := []
+      // merged-rule* := <map(map(merge-rules)); debug(!"A5 "); flatten-list; filter(not(?[]))> cons-arrow-grouped-rule*
+      // ; debug(!"A6 ")
+      // merged-rule* := <
+      // 	map(
+      // 	 debug(!"A1 ");
+      // 	 group-rules(|rule*);
+      // 	 debug(!"A2 "));
+      // 	 unzip; Snd;
+      // 	 map(debug(!"A3 "); merge-rules; debug(!"A4 ")); debug(!"A5 "); concat; debug(!"A6 ")> cons-arity*
   
-  group-rules(|rule*):
-    (cons, arity) -> (cons, cons-rule*)
-    with
-      cons-rule* := <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
+  group-rules-by-cons(|rule*):
+    (cons, arity) -> <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
+  
+  group-rules-by-arrow(|arrow-name*):
+  	rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
   
   is-rule-matching-cons(|cons-goal, arity) =
     ?Rule(_, _, Relation(_, Source(Con(cons-actual, conargs), _), _, _));
@@ -71,46 +88,57 @@ rules /* merge ovelapping rules */
   merge-rules:
     [] -> []
 
-  merge-rules:
-    rule*@[x | xs] -> rule'*
-    with
-      rule'* := <foldl(merge-rules)> (xs, [x])
-
-  merge-rules:
-    (r1@Rule(_, _, rel1), rule*) -> [rule'*, merged-rule]
-    where
-      r2 := <fetch-elem(where(?Rule(_, _, <strip-annos> rel1)))> rule*
-    with
-      merged-rule := <merge-rule> (r1, r2)
-      ; rule'* := <filter(not(?r2))> rule*
-  
-  merge-rules:
-    (r1@Rule(_, _, rel1), rule*) -> [rule*, r1]
-    where
-      <not(fetch-elem(?Rule(_, _, <strip-annos> rel1)))> rule*
-  
-  merge-rule:
-    (Rule(prem1*, bar1, rel1), Rule(prem2*, bar2, rel2)) -> Rule(prem-merged*, bar1, rel1)
-    where
-      <strip-annos; eq> (rel1, rel2)
-    with
-      prem-merged* := <merge-premises> (prem1*, prem2*)
-  
-  // there are no premises
-  merge-premises:
-    ([], []) -> []
-  
-  // the first premises are not the same
-  merge-premises:
-    ([p1 | p1xs], [p2 | p2xs]) -> [ MergePoint(p1, p1xs, [p2 | p2xs]) ]
-    where
-      <strip-annos; not(eq)> (p1, p2)
-  
-  // the first premises are the same
-  merge-premises:
-    ([p1 | p1xs], [p2 | p2xs]) -> [p1 | <merge-premises> (p1xs, p2xs)]
-    where
-      <strip-annos; eq> (p1, p2)
+//   merge-rules:
+//     rule*@[x | xs] -> rule'*
+//     with
+//       debug(!"M0 ");
+//       rule'* := <foldl(merge-rules)> (xs, [x])
+//       ; debug(!"M! ")
+// 
+//   merge-rules:
+//     (r1@Rule(_, _, rel1), rule*) -> [rule'*, merged-rule]
+//     where
+//       debug(!"M2 ");
+//       r2 := <fetch-elem(where(?Rule(_, _, <strip-annos> rel1)))> rule*
+//     with
+//       debug(!"M3 ");
+//       merged-rule := <merge-rule> (r1, r2);
+//       debug(!"M4 ");
+//       rule'* := <filter(not(?r2))> rule*
+//       ; debug(!"M5 ")
+//   
+//   merge-rules:
+//     (r1@Rule(_, _, rel1), rule*) -> [rule*, r1]
+//     where
+//       debug(!"M6 ");
+//       <not(fetch-elem(?Rule(_, _, <strip-annos> rel1)))> rule*
+//       ; debug(!"M7 ")
+//   
+//   merge-rule:
+//     (Rule(prem1*, bar1, rel1), Rule(prem2*, bar2, rel2)) -> Rule(prem-merged*, bar1, rel1)
+//     where
+//       debug(!"M8 ");
+//       <strip-annos; eq> (rel1, rel2)
+//     with
+//       debug(!"M9 ");
+//       prem-merged* := <merge-premises> (prem1*, prem2*)
+//       ; debug(!"M10 ")
+//   
+//   // there are no premises
+//   merge-premises:
+//     ([], []) -> []
+//   
+//   // the first premises are not the same
+//   merge-premises:
+//     ([p1 | p1xs], [p2 | p2xs]) -> [ MergePoint(p1, p1xs, [p2 | p2xs]) ]
+//     where
+//       <strip-annos; not(eq)> (p1, p2)
+//   
+//   // the first premises are the same
+//   merge-premises:
+//     ([p1 | p1xs], [p2 | p2xs]) -> [p1 | <merge-premises> (p1xs, p2xs)]
+//     where
+//       <strip-annos; eq> (p1, p2)
 
 signature
   constructors

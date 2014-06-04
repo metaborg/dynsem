@@ -137,22 +137,29 @@ rules // backend for normal constructor to Java
         }
       ]|
     with
+    	debug(!"f3A ");
       x_pkgname := <gen-package-name>;
+    	debug(!"f3B ");
       x_consname := <get-cons-java-name> node-name;
+    	debug(!"f3C ");
       (ty*, ty) := <get-type> node-name;
+    	debug(!"f3D ");
       x_sortname := <get-sort-java-name> ty;
+    	debug(!"f3E ");
       fdec* := <map-with-index(node-arg-to-java-child-field)> ty*;
+    	debug(!"f3F ");
       fget* := <map-with-index(node-arg-to-java-fieldget)> ty*;
+    	debug(!"f3G ");
       body1 := <node-args-to-java-constructor> (x_consname, ty*);
+    	debug(!"f3H ");
     	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
+    	debug(!"f3I ");
     	arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+    	debug(!"f3J ");
     	exec-method* := <map(gen-arrow-node-exec-method(|node-rule*, body*))> arrow-name*;
-      // if <?[]> node-rule* then
-      // 	evalmethod := <rule-to-java-dummy-evalmethod> rule*
-      // else
-      //   evalmethod := <Hd;rule-to-java-evalmethod> node-rule*
-      // end;
+    	debug(!"f3K ");
       equalsmethod := <node-to-java-equalsmethod> node-name
+    	;debug(!"f3L ")
   
   node-to-java-equalsmethod:
     node-name -> 
@@ -384,61 +391,21 @@ rules // utilities for filtering rules
   is-rule-matching-constructor(|cons-name):
     rule -> rule
     with
+    	debug(!"f3H1 ");
       Con(cons-name', arg*) := <get-rule-matchedterm> rule;
+      debug(!"f3H2 ");
       resolved-def := <nabl-collect-one-resolved-def> cons-name';
+      debug(!"f3H3 ");
       cons-def := <get-annos; fetch-elem(?Def(_))> cons-name
     where
+    	debug(!"f3H4 ");
     	<eq> (cons-def, resolved-def);
+    	debug(!"f3H5 ");
     	(ty*, _) := <get-type> cons-def;
+    	debug(!"f3H6 ");
     	<eq> (<length> ty*, <length> arg*)
-  
-  // util for getting a set of arrows and their nonwritables and writables
-  get-module-arrows-elements:
-  	mod -> <map(\ arrow-name -> <get-module-arrow-elements(|arrow-name)> mod \)> arrow-name*
-  	with
-  		arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> mod
-  
-  get-module-arrow-declaration(|arrow-name) = collect-one(?ArrowDecl(_, arrow-name, _))
-  
-  get-module-arrow-declarations = collect-all(?ArrowDecl(_, _, _))
-  
+    	;debug(!"f3H7 ")
+
   get-rule-matchedterm:
-    Rule(_, _, Relation(_, Source(ma, _), _, _)) -> ma
-
-  get-module-arrow-elements(|arrow-name):
-    mod -> (arrow-name, nonwritable*, writable*)
-    with
-    	nonwritable* := <get-module-arrow-nonwritables(|arrow-name)> mod;
-    	writable* := <get-module-arrow-writables(|arrow-name)> mod
+    Rule(_, _, Relation(_, Source(ma, _), _, _)) -> ma  
   
-  get-module-arrow-nonwritables(|arrow-name) =
-    where(arrow-name' := <strip-annos> arrow-name);
-    collect-one(where(get-rule-arrow-name; strip-annos; ?arrow-name'); get-rule-nonwritables)
-    <+ ![]
-  
-  get-module-arrow-writables(|arrow-name) =
-    where(arrow-name' := <strip-annos> arrow-name);
-    collect-one(where(get-rule-arrow-name; strip-annos; ?arrow-name'); get-rule-writables)
-    <+ ![]
-  
-  get-rule-nonwritables:
-    Rule(_, _, Relation(Reads(nonwritable*), _, _, _)) -> nonwritable*
-  
-  get-rule-writables:
-    Rule(_, _, Relation(_, Source(_, writable*), _, _)) -> writable*
-
-  get-rule-arrow-name:
-    Rule(_, _, Relation(_, _, arrow, _)) -> <get-arrow-name> arrow
-  
-  get-arrow-name:
-    ArrowDecl(_, name, _) -> name
-  
-  get-arrow-name:
-    NamedDynamicEmitted(name, _) -> name
-  
-  get-arrow-name:
-  	NamedDynamic(name) -> name
-
-    
-    
-    

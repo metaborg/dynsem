@@ -22,7 +22,7 @@ strategies
       section''* := <map(!Rules(<id>))> rule-group'*
       
   explicate-rules :
-    rs -> <alltd(explicate-rule)> rs
+    rs -> <alltd(explicate-rule; rename-rule-inputs)> rs
 
 rules // group rules by name
   
@@ -58,7 +58,53 @@ rules
       e2* := <WritableComps; map(copy-comp(|e1*) <+ concat-changeables(|num))>;  
       tc2* := <ChangeableComps; map(mk-label-comp(copy-comp(|tc1*)|num))>;  
       prem3* := [init* | prem2*]
+  
+  rename-rule-inputs:
+    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc1*))) ->
+    Rule(prem2*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc2*)))
+    with
+      while-counting(
+	      debug(!"R2 ");
+	      (r2*, extraprem1*) := <rename-inputs> r1*;
+	      debug(!"R3 ");
+	      (sc2*, extraprem2*) := <rename-inputs> sc1*
+      );
+      while-counting(
+	      debug(!"R4 ");
+	      (tc2*, extraprem3*) := <rename-outputs> tc1*;
+	      debug(!"R5 ");
+	      prem2* := [extraprem1*, extraprem2*, prem1*, extraprem3*]
+	      ; debug(!"R6 ")
+      )
+  
+  rename-inputs:
+    [x | xs] -> ([x' | xs''], [p1, p2*])
+    with
+      (x', p1) := <rename-input> x;
+      (xs'', p2*) := <rename-inputs> xs 
+  
+  rename-inputs:
+    [] -> ([], [])  
 
+  rename-input:
+    LabelComp(name, Var(v-orig)) -> (LabelComp(name, Var(v-new)), Formula(Match(VarRef(v-new), MatchedVar(v-orig))) )
+    with
+      v-new := <next-variable(|"lifted_in")>
+
+  rename-outputs:
+    [x | xs] -> ([x' | xs''], [p1, p2*])
+    with
+      (x', p1) := <rename-output> x;
+      (xs'', p2*) := <rename-outputs> xs 
+  
+  rename-outputs:
+    [] -> ([], [])  
+  
+  rename-output:
+    LabelComp(name, Var(v-orig)) -> (LabelComp(name, VarRef(v-new)), Formula(Match(VarRef(v-orig), MatchedVar(v-new))) )
+    with
+      v-new := <next-variable(|"lifted_out")>
+    
 rules // components from lhs
 
   exp-label-comp-inits(|num) = 
