@@ -3,6 +3,7 @@ module generator/interpreter/pre-generation
 imports
   include/ds
   ds
+  pp
   lib-ds
   sugar
   explicate
@@ -10,13 +11,19 @@ imports
   
 rules
   
+  pre-generation-transform-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"pregen.ds")> path;
+      result   := <desugar-all; pre-generation-transform; sugar-all; pp-debug> selected
+      
   pre-generation-transform =
     // explicate-module;
     // factorize-module;
     alltd(escape-variable-names);
     fuse-sections;
     merge-overlapping-rules;
-    optimize-environments
+    id // optimize-environments
 
 rules /* rename variables */
 
@@ -28,18 +35,19 @@ rules /* rename variables */
 rules
   
   fuse-sections:
-    Module(mod, body*) -> Module(mod, [Signatures(signatures), Rules(rule-decl*)])
+    Module(mod, body*) -> Module(mod, [import, Signatures(signatures), Rules(rule-decl*)]) 
     with
-      sort-decl*    := <collect-all(?Sorts(<id>)); concat> body*;
-      semcomp-decl* := <collect-all(?SemanticComponents(<id>)); concat> body*;
-      intsort-decl* := <collect-all(?InternalSorts(<id>)); concat> body*;
-      natty-decl*   := <collect-all(?NativeDataTypes(<id>)); concat> body*;
-      cons-decl*    := <collect-all(?Constructors(<id>)); concat> body*;
-      intcons-decl* := <collect-all(?InternalConstructors(<id>)); concat> body*;
-      natops-decl*  := <collect-all(?NativeOperators(<id>)); concat> body*;
-      values-decl*  := <collect-all(?Values(<id>)); concat> body*;
-      arrow-decl*   := <collect-all(?ArrowDeclarations(<id>)); concat> body*;
-      signatures    := [ sort-decl*, natty-decl*, cons-decl*, semcomp-decl*, intsort-decl*, cons-decl*, intcons-decl*, values-decl*, arrow-decl* ];
+      import       := <collect-all(?Imports(<id>)); concat; !Imports(<id>)> body*;
+      sort-decl    := <collect-all(?Sorts(<id>)); concat; !Sorts(<id>)> body*;
+      semcomp-decl := <collect-all(?SemanticComponents(<id>)); concat; !SemanticComponents(<id>)> body*;
+      intsort-decl := <collect-all(?InternalSorts(<id>)); concat; !InternalSorts(<id>)> body*;
+      natty-decl   := <collect-all(?NativeDataTypes(<id>)); concat; !NativeDataTypes(<id>)> body*;
+      cons-decl    := <collect-all(?Constructors(<id>)); concat; !Constructors(<id>)> body*;
+      intcons-decl := <collect-all(?InternalConstructors(<id>)); concat; !InternalConstructors(<id>)> body*;
+      natops-decl  := <collect-all(?NativeOperators(<id>)); concat; !NativeOperators(<id>)> body*;
+      values-decl  := <collect-all(?Values(<id>)); concat; !Values(<id>)> body*;
+      arrow-decl   := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
+      signatures    := [ sort-decl, natty-decl, cons-decl, semcomp-decl, intsort-decl, intcons-decl, values-decl, arrow-decl ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
 
 signature
@@ -50,22 +58,24 @@ signature
 rules /* merge ovelapping rules */
 
   merge-overlapping-rules:
-    Module(mod, body*) -> Module(mod, [sig*, Rules(merged-rule*)])
+    Module(mod, [imports, signatures, Rules(rule*)]) -> Module(mod, [imports, signatures, Rules(merged-rule*)])
+    // with
+    //   sig* := <collect-all(?Signatures(_))> body*
     with
-      sig* := <collect-all(?Signatures(_))> body*
-    with
-      cons-arity* := <collect-all(\ ConsDecl(cons, args, _) -> (cons, <length> args) \); make-set> body*;
-      rule* := <collect-all(?Rule(_, _, _))> body*;
+      cons-arity* := <collect-all(\ ConsDecl(cons, args, _) -> (cons, <length> args) \); make-set> signatures;
+      // rule* := <collect-all(?Rule(_, _, _))> body*;
       debug(!"A1 ");
-      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
       debug(!"A2 ");
       cons-grouped-rule* := <map(group-rules-by-cons(|rule*))> cons-arity*;
       debug(!"A3 ");
+      // a list of lists of rules: [ [ [z...], [y...], [x...] ] ]
       cons-arrow-grouped-rule* := <map(group-rules-by-arrow(|arrow-name*))> cons-grouped-rule*;
       debug(!"A4 ");
-      merged-rule* := []
       // merged-rule* := <map(map(merge-rules)); debug(!"A5 "); flatten-list; filter(not(?[]))> cons-arrow-grouped-rule*
-      // ; debug(!"A6 ")
+      merged-rule* := <map(map(merge-rules)); debug(!"A5 "); flatten-list> cons-arrow-grouped-rule*
+      // merged-rule* := []
+      ; debug(!"A6 ")
       // merged-rule* := <
       // 	map(
       // 	 debug(!"A1 ");
@@ -88,57 +98,76 @@ rules /* merge ovelapping rules */
   merge-rules:
     [] -> []
 
-//   merge-rules:
-//     rule*@[x | xs] -> rule'*
-//     with
-//       debug(!"M0 ");
-//       rule'* := <foldl(merge-rules)> (xs, [x])
-//       ; debug(!"M! ")
-// 
-//   merge-rules:
-//     (r1@Rule(_, _, rel1), rule*) -> [rule'*, merged-rule]
-//     where
-//       debug(!"M2 ");
-//       r2 := <fetch-elem(where(?Rule(_, _, <strip-annos> rel1)))> rule*
-//     with
-//       debug(!"M3 ");
-//       merged-rule := <merge-rule> (r1, r2);
-//       debug(!"M4 ");
-//       rule'* := <filter(not(?r2))> rule*
-//       ; debug(!"M5 ")
-//   
-//   merge-rules:
-//     (r1@Rule(_, _, rel1), rule*) -> [rule*, r1]
-//     where
-//       debug(!"M6 ");
-//       <not(fetch-elem(?Rule(_, _, <strip-annos> rel1)))> rule*
-//       ; debug(!"M7 ")
-//   
-//   merge-rule:
-//     (Rule(prem1*, bar1, rel1), Rule(prem2*, bar2, rel2)) -> Rule(prem-merged*, bar1, rel1)
-//     where
-//       debug(!"M8 ");
-//       <strip-annos; eq> (rel1, rel2)
-//     with
-//       debug(!"M9 ");
-//       prem-merged* := <merge-premises> (prem1*, prem2*)
-//       ; debug(!"M10 ")
-//   
-//   // there are no premises
-//   merge-premises:
-//     ([], []) -> []
-//   
-//   // the first premises are not the same
-//   merge-premises:
-//     ([p1 | p1xs], [p2 | p2xs]) -> [ MergePoint(p1, p1xs, [p2 | p2xs]) ]
-//     where
-//       <strip-annos; not(eq)> (p1, p2)
-//   
-//   // the first premises are the same
-//   merge-premises:
-//     ([p1 | p1xs], [p2 | p2xs]) -> [p1 | <merge-premises> (p1xs, p2xs)]
-//     where
-//       <strip-annos; eq> (p1, p2)
+  merge-rules:
+    [x | xs] -> r*
+    with
+      debug(!"M0 ");
+      r* := <foldl(merge-rules)> (xs, x)
+      ; debug(!"M1 ")
+
+  merge-rules:
+  	(Rule(l-prem*, l-bar, l-rel), Rule(r-prem*, r-bar, r-rel)) -> Rule(merged-prem*, l-bar, l-rel)
+  	where
+  		debug(!"M2 ");
+  		<strip-annos; eq> (l-rel, r-rel);
+  		debug(!"M3 ")
+    with
+      debug(!"M4 ");
+      merged-prem* := <merge-premises> (r-prem*, l-prem*);
+      debug(!"M5 ")
+  
+  // there are no premises
+  merge-premises:
+    ([], []) -> []
+  
+  /*
+  * IF the first premise on LHS is a merge point and the merge condition is the same as the right premise.
+  *
+  * THEN we eliminate the duplicate condition and merge the then branch of the merge with the remainder of the RHS
+  *
+  * NB: this can only happen if the merge point is the last premise on LHS
+  */
+  merge-premises:
+    ([ MergePoint(cond, then*, else*) ], [r | rxs]) -> [ MergePoint(cond, then'*, else*) ]
+    where
+      <strip-annos; eq> (cond, r)
+    with
+      then'* := <merge-premises> ( then*, rxs)
+  
+  /*
+  * IF the first premise on the LHS is a merge point and the merge condition is NOT the same as the right premise.
+  *
+  * THEN we merge the else branch of the merge with the entire RHS block.
+  *
+  * NB: this can only happen if the merge point is the last premise on LHS
+  */
+  merge-premises:
+    ([ MergePoint(cond, then*, else*) ], [r | rxs]) -> [ MergePoint(cond, then*, else'*) ]
+    where
+      <strip-annos; not(eq)> (cond, r)
+    with
+      else'* := <merge-premises> ( else*, [r | rxs])
+  
+  /*
+  * IF the first premise on LHS is not a merge point, and it is equal to the first premise on the RHS.
+  *
+  * THEN share the first premise and continue merging the rest
+  */
+  merge-premises:
+    ([l | lxs], [r | rxs]) -> [l | <merge-premises> (lxs, rxs)]
+    where
+      <not(?MergePoint(_, _, _))> l;
+      <strip-annos; eq> (l, r)
+  /*
+  * IF the first premise on LHS is not a merge point, and it is not equal to the first premise on the RHS.
+  *
+  * THEN create a merge point
+  */
+  merge-premises:
+    ([l | lxs], [r | rxs]) -> [ MergePoint(l, lxs, [r | rxs]) ]
+    where
+      <not(?MergePoint(_, _, _))> l;
+      <strip-annos; not(eq)> (l, r)
 
 signature
   constructors
@@ -149,16 +178,16 @@ rules /* optimize environments */
   optimize-environments = alltd(optimize-environment)
 
   optimize-environment:
-    mex@MapExtend(_, _) -> OptMap(<implode-env-extend; eliminate-env-blanks> mex)
+    mex@MapExtend(_, _) -> <implode-env-extend; eliminate-env-blanks> mex
 
   optimize-environment:
-    map@Map(_) -> OptMap(<implode-env-extend; eliminate-env-blanks> map)
+    map@Map(_) -> <implode-env-extend; eliminate-env-blanks> map
 
   implode-env-extend:
     MapExtend(map1, map2) -> [ bind1*, bind2* ]
     with
-      bind1* := <implode-env-extend> map1
-      ; bind2* := <implode-env-extend> map2
+      bind1* := <implode-env-extend> map1;
+      bind2* := <implode-env-extend> map2
 
   implode-env-extend:
     Map([]) -> [ Map([]) ]

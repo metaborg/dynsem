@@ -32,6 +32,19 @@ templates // rules
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail>
 
+  Premise.MergePoint = 
+    [
+      [Premise]
+      <
+      {
+        [Premise+; separator=",\n"]
+      }
+      +
+      {
+        [Premise+; separator=",\n"]
+      }
+    ]
+
   ID = <rules> {reject}
   ID = <fresh> {reject}
   
