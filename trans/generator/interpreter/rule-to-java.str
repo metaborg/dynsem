@@ -156,7 +156,7 @@ rules // compilation of individual operations
     	debug(!"M7 ");
       bstm_patbound* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
     	; debug(!"M8 ")
-  
+
   op-to-java:
     (ma@Formula(Match(_, _)), bstm2*) ->
 	    bstm* |[
@@ -180,35 +180,6 @@ rules // compilation of individual operations
         ]|
       end
     	; debug(!"MADIS2 ")
-  
-  // op-to-java:
-  //   (Formula(Match(lhs, rvar@MatchedVar(x_rvar))), bstm2*) ->
-  //     bstm* |[
-  //       bstm1*
-  //       final x_type x_rvar = e_lvar;
-  //       bstm2*
-  //     ]|
-  //   with
-  //     (bstm1*, e_lvar) := <build-to-var> lhs;
-  //     x_type := <get-type; get-sort-java-name> rvar
-  
-  // op-to-java:
-  //   (Formula(Match(lhs, rhs@Con(cons, bound-var*))), bstm3*) ->
-  //     bstm* |[
-  //     	bstm1*
-  //       final x_consname x_tempvar = e_lvar.match(x_consname.class);
-  //     	if(x_tempvar != null) {
-  //     		bstm2* // pattern-bound variables
-  //     		bstm3* // rest of statements
-  //     	} else {
-  //     		throw new InterpreterException("Premise match failure");
-  //     	}
-  //     ]|
-  //   with
-  //   	(bstm1*, e_lvar) := <build-to-var> lhs;
-  //   	x_consname := <get-cons-java-name> cons;
-  //   	x_tempvar := <newname> "tmpbuild";
-  //   	bstm2* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
   
   build-to-var:
     Int(i) -> ([], e |[ i ]|)
@@ -278,6 +249,21 @@ rules // compilation of individual operations
       x_consname := <get-cons-java-name> cons;
       x_pkg := <man-package-name>;
       (bstms*, e*) := <map(build-to-var); unzip> args;
+      bstm* := <concat> bstms*
+  
+  build-to-var:
+  	SortFunCall(x_funname, VarRef(x_on), args) ->
+  	  (
+  	 	  bstm* |[
+  	 	  	bstm*
+  	 	 	  final x_type x_builtvar = x_on.x_funname(e*);
+  	 	  ]|, e |[ x_builtvar ]|
+  	  )
+  	with
+  		x_builtvar := <newname> "tmpbuild";
+  		(_, ty) := <get-type> x_funname;
+  		x_type := <get-sort-java-name> ty;
+  		(bstms*, e*) := <map(build-to-var); unzip> args;
       bstm* := <concat> bstms*
   
   op-to-java:
