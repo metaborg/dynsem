@@ -23,6 +23,7 @@ properties
   sort-kind of Sort : SortKind // Language(), SemanticComponent(), Internal(), NativeType()
   cons-kind of Constructor : ConsKind // Language(), Value(), NativeOperator(), Internal()
   java-id of Sort : JID
+  stored-tys of Sort : Term
   
 binding rules // module and imports
 
@@ -67,10 +68,11 @@ binding rules // sorts
       of sort-kind Language()
     refers to Sort parent
 
-  SemanticComponent(ty) :
-    defines Sort ty
-      of type SimpleSort(ty)
+  SemanticComponent(name, key-ty, val-ty) :
+    defines Sort name
+      of type SimpleSort(name)
       of sort-kind SemanticComponent()
+      of stored-tys (key-ty, val-ty)
   
   InternalSortDecl(ty) :
     defines Sort ty

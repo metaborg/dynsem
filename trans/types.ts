@@ -48,7 +48,14 @@ type rules
     and t-ty <compat: r-ty 
     else error "source and target types are incompatible with arrow definition types" on rel
 
-  MapSelect(map, key) : SimpleSort("Term")
+  ms@MapSelect(map, key) : def-val-ty
+  where
+    definition of map : map-ty
+    and definition of map-ty has stored-tys key-val-tys
+    and key-val-tys => (def-key-ty, def-val-ty)
+    and key : use-key-ty
+    and use-key-ty <compat: def-key-ty
+    else error "incompatible map access" on ms
 
   InjDecl(ty, p-ty) :-
   where store ty <: p-ty

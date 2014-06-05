@@ -37,7 +37,7 @@ templates // semantic component declarations
     semantic-components
       <SemanticCompDecl*; separator="\n">>
   
-  SemanticCompDecl.SemanticComponent = [[ID] -> Map]
+  SemanticCompDecl.SemanticComponent = [[ID] -> Map<[Type],[Type]>]
 
 templates // internal sort declarations
   
