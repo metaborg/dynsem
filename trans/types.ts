@@ -48,6 +48,19 @@ type rules
     and t-ty <compat: r-ty 
     else error "source and target types are incompatible with arrow definition types" on rel
 
+  Map([]) : MapSort(SimpleSort("Term"), SimpleSort("Term"))
+  
+  Map([Bind(key, val)]) : MapSort(key-ty, val-ty)
+  where
+    key : key-ty
+    and val : val-ty
+
+  // TODO here we need to take LUB(key1-ty, key2-ty) and LUB(val1-ty, val2-ty)
+  MapExtend(map1, map2) : map2-ty
+  where
+    map1 : map1-ty
+    and map2 : map2-ty
+    
   ms@MapSelect(map, key) : def-val-ty
   where
     definition of map : map-ty
@@ -56,6 +69,9 @@ type rules
     and key : use-key-ty
     and use-key-ty <compat: def-key-ty
     else error "incompatible map access" on ms
+
+  // SemanticComponent(ty, map-type) :-
+  // where store ty <: map-type
 
   InjDecl(ty, p-ty) :-
   where store ty <: p-ty
@@ -94,9 +110,22 @@ relations
   Var(x) <: VarRef(y)
   where x == y
   
-  // ListSort(x-ty) <: ListSort(y-ty)
-  // where x-ty => Any()
-  //   or x-ty <: y-ty
+  // s-map-ty <mapcompat: t-map-ty
+  // where
+  //   ( // at least one of them is a map
+  //     s-map-ty => MapSort(dc1, dc2)
+  //     or t-map-ty => MapSort(dc3, dc4)
+  //     or s-map-ty <: MapSort(dc5, dc6)
+  //   )
+  //   and (
+  //     s-map-ty <compat: t-map-ty
+	 //    or (
+	 //      s-map-ty => MapSort(s-key-ty, s-val-ty)
+	 //      and t-map-ty => MapSort(t-key-ty, t-val-ty)
+	 //      and s-key-ty <compat: t-key-ty
+	 //      and s-val-ty <compat: t-val-ty
+	 //    )
+  //   )
   
   s-ty <compat: l-ty
   where

@@ -30,6 +30,9 @@ templates // constructor declarations
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
+  Type = [[MapType]]
+  
+  MapType.MapSort = [Map<[Type],[Type]>]
   
 templates // semantic component declarations
 
@@ -37,7 +40,7 @@ templates // semantic component declarations
     semantic-components
       <SemanticCompDecl*; separator="\n">>
   
-  SemanticCompDecl.SemanticComponent = [[ID] -> Map<[Type],[Type]>]
+  SemanticCompDecl.SemanticComponent = [[ID] -> [MapType]]
 
 templates // internal sort declarations
   

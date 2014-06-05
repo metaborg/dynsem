@@ -67,10 +67,10 @@ binding rules // sorts
       of type SimpleSort(ty)
       of sort-kind Language()
     refers to Sort parent
-
-  SemanticComponent(name, key-ty, val-ty) :
-    defines Sort name
-      of type SimpleSort(name)
+  
+  SemanticComponent(ty, MapSort(key-ty, val-ty)):
+    defines Sort ty
+      of type SimpleSort(ty)
       of sort-kind SemanticComponent()
       of stored-tys (key-ty, val-ty)
   
