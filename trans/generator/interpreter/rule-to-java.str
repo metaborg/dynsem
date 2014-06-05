@@ -132,7 +132,7 @@ rules // compilation of individual operations
 	      bstm* |[
 	        bstm1*
 	        final x_type x_rvar = e_lvar;
-	      ]|, [], e |[ true ]|)
+	      ]|, [], e |[ true ]|, [])
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       x_type := <get-type; get-sort-java-name> rvar
@@ -142,7 +142,7 @@ rules // compilation of individual operations
       bstm* |[
         bstm1*
         final x_consname x_tempvar = e_lvar.match(x_consname.class);
-      ]|, bstm_patbound*, e |[ x_tempvar != null ]|)
+      ]|, [], e |[ x_tempvar != null ]|, bstm_patbound*)
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       x_consname := <get-cons-java-name> cons;
@@ -152,11 +152,12 @@ rules // compilation of individual operations
   op-to-java:
     (ma@Formula(Match(_, _)), bstm2*) ->
 	    bstm* |[
-	      bstm_match*
+	      bstm_matchlhs*
+	      bstm_matchrhs*
 	      bstm_work*
 	    ]|
     with
-      (bstm_match*, bstm_patbound*, e) := <ma-to-java> ma;
+      (bstm_matchlhs*, bstm_matchrhs*, e, bstm_patbound*) := <ma-to-java> ma;
       if <?e |[ true ]|> e then
         bstm_work* := bstm* |[
           bstm_patbound*
@@ -296,35 +297,37 @@ rules // compilation of individual operations
 rules // term equality and inequality
 
   op-to-java:
-    (f@Formula(TermEq(_, _)), bstm3*) ->
-      bstm* |[
-        bstm1*
-        bstm2*
-        if(e) {
-        	bstm3*
-        } else {
-        	throw new InterpreterException("Equality check failed");
-        }
-      ]|
-    with
-      (bstm1*, bstm2*, e) := <eq-to-java> f
-  
-  op-to-java:
-    (f@Formula(TermNeq(_, _)), bstm3*) ->
+    (f@Formula(TermEq(_, _)), bstm_rest*) ->
       bstm* |[
         bstm1*
         bstm2*
         if(e) {
           bstm3*
+        	bstm_rest*
+        } else {
+        	throw new InterpreterException("Equality check failed");
+        }
+      ]|
+    with
+      (bstm1*, bstm2*, e, bstm3*) := <eq-to-java> f
+  
+  op-to-java:
+    (f@Formula(TermNeq(_, _)), bstm_rest*) ->
+      bstm* |[
+        bstm1*
+        bstm2*
+        if(e) {
+          bstm3*
+          bstm_rest*
         } else {
           throw new InterpreterException("Inequality check failed");
         }
       ]|
     with
-      (bstm1*, bstm2*, e) := <eq-to-java> f
+      (bstm1*, bstm2*, e, bstm3*) := <eq-to-java> f
   
   eq-to-java:
-    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar.equals(e_rvar) ]|)
+    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar.equals(e_rvar) ]|, [])
     where
       <get-type; not(is-sort-int)> lhs;
       <get-type; not(is-sort-int)> rhs
@@ -333,7 +336,7 @@ rules // term equality and inequality
       (bstm2*, e_rvar) := <build-to-var> rhs
 
   eq-to-java:
-    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == e_rvar ]|)
+    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == e_rvar ]|, [])
     where
       <get-type; is-sort-int> lhs;
       <get-type; is-sort-int> rhs 
@@ -342,7 +345,7 @@ rules // term equality and inequality
       (bstm2*, e_rvar) := <build-to-var> rhs
 
   eq-to-java:
-    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ !e_lvar.equals(e_rvar) ]|)
+    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ !e_lvar.equals(e_rvar) ]|, [])
     where
       <get-type; not(is-sort-int)> lhs;
       <get-type; not(is-sort-int)> rhs
@@ -351,7 +354,7 @@ rules // term equality and inequality
       (bstm2*, e_rvar) := <build-to-var> rhs
 
   eq-to-java:
-    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != e_rvar ]|)
+    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != e_rvar ]|, [])
     where
       <get-type; is-sort-int> lhs;
       <get-type; is-sort-int> rhs 
@@ -362,11 +365,12 @@ rules // term equality and inequality
 rules // backend for merge points
   
   op-to-java:
-    (MergePoint(guard, lbranch*@[lx | lxs], rbranch*@[rx | rxs]), bstm_rest*) ->
+    (MergePoint(guard, l*@[_ | _], r*@[_ | _]), bstm_rest*) ->
       bstm* |[
         bstm1*
         bstm2*
         if(e) {
+          bstm3*
           bstm_l*
         } else {
           bstm_r*
@@ -374,16 +378,20 @@ rules // backend for merge points
       ]|
     with
       debug(!"MP2 ");
-      (bstm1*, bstm2*, e) := <eq-to-java> guard;
-      debug(!"MP3 ");
-      lopweave := <foldr(!lx, \ (op, weave) -> OpSeq(op, weave) \)> lxs;
+      (bstm1*, bstm2*, e, bstm3*) := <eq-to-java <+ ma-to-java> guard;
       debug(!"MP4 ");
-      ropweave := <foldr(!rx, \ (op, weave) -> OpSeq(op, weave) \)> rxs;
+      [lx | lxs] := <reverse> l*;
       debug(!"MP5 ");
-      bstm_l* := <ops-to-java> (lopweave, bstm_rest*);
+      lopweave := <foldr(!lx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> lxs;
       debug(!"MP6 ");
+      bstm_l* := <debug(!"MP5++ "); ops-to-java> (lopweave, bstm_rest*);
+      debug(!"MP7 ");
+      [rx | rxs] := <reverse> r*;
+      debug(!"MP8 ");
+      ropweave := <foldr(!rx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> rxs;
+      debug(!"MP9 ");
       bstm_r* := <ops-to-java> (ropweave, bstm_rest*)
-      ;debug(!"MP7 ")
+      ;debug(!"MP10 ")
 
 rules // fallback
 
