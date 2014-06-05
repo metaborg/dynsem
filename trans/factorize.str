@@ -25,14 +25,15 @@ rules
   factorize-rule :
     Rule(prem1*, infer, 
           Relation(reads, Source(lhs,sc*), NamedDynamicEmitted(arrow, em1*), Target(rhs,tc*))) -> 
-    Rule(prem5*, infer, 
-          Relation(reads, Source(lhs',sc*), NamedDynamicEmitted(arrow, em1*), Target(rhs',tc*)))
+    Rule(prem6*, infer, 
+          Relation(reads, Source(lhs',sc*), NamedDynamicEmitted(arrow, em1*), Target(rhs',tc'*)))
     with
     	while-counting(
 	      (prem2*, lhs') := <lift-constructors-from-match> lhs;
 	      (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-	      prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*];
-	      prem5* := <lift-mapselect-from-premises> prem4*
+	      (prem4*, tc'*) := <lift-constructors-from-tc> tc*;
+	      prem5* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*, prem4*];
+	      prem6* := <lift-mapselect-from-premises> prem5*
 	    )
           
   factorize-rule :
@@ -93,7 +94,7 @@ rules
     [] -> ([], [])  
   
   rename-output:
-    LabelComp(name, Var(v-orig)) -> (LabelComp(name, VarRef(v-new)), Formula(Match(VarRef(v-orig), MatchedVar(v-new))) )
+    LabelComp(name, VarRef(v-orig)) -> (LabelComp(name, VarRef(v-new)), Formula(Match(VarRef(v-orig), MatchedVar(v-new))) )
     with
       v-new := <next-variable(|"lifted_out")>
   
@@ -101,6 +102,7 @@ rules
     VarRef(v-orig) -> (VarRef(v-new), Formula(Match(VarRef(v-orig), MatchedVar(v-new))))
     with
       v-new := <next-variable(|"lifted_out")>
+
 rules // lift constructor sub-terms in match
       
   lift-constructors-from-match:
@@ -143,6 +145,25 @@ rules // lift constructor sub-terms in build
   lift-constructors-from-rhs:
     t -> ([], t)
     where <not(?Con(_,_))> t
+
+rules // lift from output components
+  
+  lift-constructors-from-tc:
+    [] -> ([], [])
+  
+  lift-constructors-from-tc:
+    [ x | xs ] -> ([prem1*, prem2*], [x' | xs'])
+    with
+      (prem1*, x') := <lift-constructors-from-tc> x;
+      (prem2*, xs') := <lift-constructors-from-tc> xs
+
+  lift-constructors-from-tc:
+    tc@LabelComp(name, VarRef(_)) -> ([], tc)
+  
+  lift-constructors-from-tc:
+    LabelComp(name, t) -> ([Formula(Match(t, MatchedVar(x)))], LabelComp(name, VarRef(x)))
+    with
+      x := <next-variable(|"lifted")>
   
 rules // lift from build
   
