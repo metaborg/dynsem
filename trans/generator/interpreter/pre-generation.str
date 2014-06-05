@@ -57,7 +57,7 @@ rules /* merge ovelapping rules */
     // with
     //   sig* := <collect-all(?Signatures(_))> body*
     with
-      cons-arity* := <collect-all(\ ConsDecl(cons, args, _) -> (cons, <length> args) \); make-set> signatures;
+      cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
       // rule* := <collect-all(?Rule(_, _, _))> body*;
       debug(!"A1 ");
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
@@ -69,6 +69,12 @@ rules /* merge ovelapping rules */
       debug(!"A4 ");
       merged-rule* := <map(map({ ?allfail; merge-rules })); debug(!"A5 "); flatten-list> cons-arrow-grouped-rule*
       ; debug(!"A6 ")
+  
+  cons-decl-pair-arity:
+    ConsDecl(cons, args, _) -> (cons, <length> args)
+  
+  cons-decl-pair-arity:
+    InternalConsDecl(cons, args, _) -> (cons, <length> args)
   
   group-rules-by-cons(|rule*):
     (cons, arity) -> <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
