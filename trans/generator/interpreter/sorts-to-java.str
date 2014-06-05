@@ -33,36 +33,20 @@ signature overlays
 rules /* generate interfaces for declared sorts */
 
   sorts-to-java-interpreter:
-    Module(mod, body*) -> language-sort-interface*
+    Module(mod, body*) -> sort-interface*
     with
-      language-decl* := <collect-all(?SortDecl(_) + ?InjDecl(_, _))> body*;
-      language-decl-pair* := <map(match-with-injected-sort(|language-decl*))> language-decl*;
-      language-sort-pair* := <map((get-sort-name, map(get-sort-name)); add-term-sort)> language-decl-pair*;
-    	internal-sort* := <collect-all(\ d@InternalSortDecl(_) -> (<get-sort-name> d, []) \; add-term-sort)> body*;
-    	language-sort-interface* := <map(sort-to-java-interpreter)> [language-sort-pair*, internal-sort*]
-  
-  match-with-injected-sort(|decl*):
-    sdec -> (sdec, ssdec*)
-    where
-      srt := <get-sort-name> sdec
-    with
-      sdef := <get-annos; fetch-elem(?Def(_))> srt;
-      ssdec* := <filter(where(?InjDecl(_, <id>); nabl-collect-one-resolved-def; ?sdef))> decl*
-  
-  add-term-sort:
-    (srt, srt*@[_|_]) -> (srt, srt*)
-  
-  add-term-sort:
-    (srt, []) -> (srt, ["Term"])
+      sort-decl* := <collect-all(?InjDecl(_, _))> body*;
+      sort-interface* := <map(sort-to-java-interpreter)> sort-decl* 
   
   // backend for Sort -> Java
   sort-to-java-interpreter:
-    (srt, srt*) ->
+    InjDecl(srt, extended-srt) ->
       JAVA_INTERFACE_MULTIPLE(
         |[ package x_pkgname; ]|
         ,  [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
-        , $[I_[srt]]
-        , <map(get-sort-java-name; string-to-java-iface-name)> srt*
+        , <get-sort-java-name> srt
+        // , <map(get-sort-java-name; string-to-java-iface-name)> srt*
+        , [ <get-sort-java-name; string-to-java-iface-name> extended-srt ]
       )
    with
     x_pkgname := <gen-package-name>
