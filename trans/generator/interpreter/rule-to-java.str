@@ -17,36 +17,25 @@ imports
   
 rules // generate a dummy-bodied evaluate method
 	
-	// rule-to-java-dummy-evalmethod:
-	// 	rule* ->
-	// 	  class-body-dec |[
-	// 	  	public x_returnclass execute(param*) {
-	// 	  		throw new InterpreterException("Non executable node");
-	// 	  	}
-	// 	  ]|
-	// 	with
- //      x_returnclass := $[[<language>]_Result];
- //      env* := <collect-one(get-rule-nonwritables)> rule*;
- //      heap* := <collect-one(get-rule-writables)> rule*;
- //      param* := <map(rule-reads-to-evaluate-params)> [env*, heap*]
-
+	is-rule-for-arrow(|arrow-name) = get-rule-arrow-name; !(<id>, arrow-name); strip-annos; eq
+	
   gen-arrow-node-exec-method(|node-rule*, body*):
-    arrow-name ->
-      class-body-dec |[
+    arrow-name ->[
+    	class-body-dec |[
         public x_returnclass x_execname(param*) {
           throw new InterpreterException("Not implemented");
         }
-      ]|
+      ]|]
+    where
+      // i.e. there is no reduction rule for this arrow
+      <not(fetch-elem(is-rule-for-arrow(|arrow-name)))> node-rule*
     with
-      debug(!"f3A ");
-      x_returnclass := $[[arrow-name]_Result];
-      debug(!"f3B ");
-      x_execname := $[exec_[arrow-name]];
-      debug(!"f3C ");
-      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
-      debug(!"f3D ");
-      param* := <map-with-index(read-to-inode-evaluate-params)> [nonwritable*, writable*]
-      ;debug(!"f3E ")
+      m-with-arrow-name(
+	      x_returnclass := <get-arrow-result-type>;
+	      x_execname := <get-arrow-exec-name>;
+	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*]
+	    |<strip-annos> arrow-name)
     
 signature
   constructors
@@ -54,25 +43,47 @@ signature
         
 rules // generate a full-bodied evaluate method
   
-  rule-to-java-evalmethod:
-    r@Rule(prem*, _, Relation(reads, source, _, target)) ->
+  m-with-arrow-name(s|arrow-name) =
+    {| ArrowName:
+      rules(ArrowName: _ -> arrow-name);
+      s
+    |}
+  
+  gen-arrow-node-exec-method(|node-rule*, body*):
+    arrow-name -> [
       class-body-dec |[
-        public x_returnclass execute(param*) {
+        public x_returnclass x_execname(param*) {
           bstm*
+          
+          throw new InterpreterException("Rule failure");
         }
-      ]|
+      ]|]
+    where
+      <debug(!"G6 ")> <debug(!"G6- "); map(get-rule-matchedterm); try(?[<id>])> node-rule*;
+      // i.e. find and match the rule for this arrow name
+      Rule(prem*, _, Relation(reads, source, _, target)) := <fetch-elem(where(is-rule-for-arrow(|arrow-name)))> node-rule*
     with
-      x_returnclass := $[[<language>]_Result];
-      env* := <get-rule-nonwritables> r;
-      heap* := <get-rule-writables> r;
-      param* := <map(rule-reads-to-evaluate-params)> [env*, heap*];
-      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
-      bstm* := <ops-to-java> (opweave, [])
-      
-  rule-reads-to-evaluate-params:
-  	LabelComp(ty, Var(x_name)) -> param |[ ~type:jiface x_name ]|
-  	with
-  		x_sort := <get-sort-java-name> ty;
+      m-with-arrow-name(
+	      debug(!"G7 ");
+	      x_returnclass := <get-arrow-result-type>;
+	      debug(!"G8 ");
+	      x_execname := <get-arrow-exec-name>;
+	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*];
+	      debug(!"G9 ");
+	      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
+	      debug(!"G10 ");
+	      bstm* := <ops-to-java> (opweave, [])
+	      ; debug(!"G11 ")
+      |<strip-annos> arrow-name)
+
+  get-arrow-result-type = !$[[<ArrowName>]_Result]
+  get-arrow-exec-name   = !$[exec_[<ArrowName>]]
+  
+  rule-reads-to-inode-exec-params:
+    LabelComp(ty, Var(x_name)) -> param |[ ~type:jiface x_name ]|
+    with
+      x_sort := <get-sort-java-name> ty;
       jiface := type |[ x_sort ]|
 
 rules // bottomup right to left compilation of operations
@@ -94,7 +105,7 @@ rules // compilation of individual operations
   op-to-java:
     (Source(Con(_, arg*), _), stm*) -> [var-bind*, stm*]
     with
-      var-bind* := <map-with-index(debug(!"IN "); field-to-varbind; debug(!"OUT "))> arg*
+      var-bind* := <map-with-index(field-to-varbind)> arg*
 
   field-to-varbind:
     (idx, var@Var(x_v)) -> bstm* |[ final x_type x_v = x_idx; ]|
@@ -107,52 +118,97 @@ rules // compilation of individual operations
     (Target(VarRef(x_v), data-out*), []) ->
       bstm* |[
         bstm1*
-        final x_langresult x_resname = new x_langresult(x_v, e*);
+        final x_execresult x_resname = new x_execresult(x_v, e*);
         return x_resname;
       ]|
     with
-      x_langresult := $[[<language>]_Result];
+      x_execresult := <get-arrow-result-type>;
       x_resname := <newname>;
       (e*, bstms*) := <map(?LabelComp(_, <id>); exp-to-java); unzip> data-out*;
       bstm1* := <concat> bstms*
+      
+  ma-to-java:
+    Formula(Match(lhs, rvar@MatchedVar(x_rvar))) -> (
+	      bstm* |[
+	        bstm1*
+	        final x_type x_rvar = e_lvar;
+	      ]|, [], e |[ true ]|)
+    with
+    	debug(!"M1 ");
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+    	debug(!"M2 ");
+      x_type := <get-type; get-sort-java-name> rvar
+    	; debug(!"M3 ")
   
-  // numbered-assign-to-java(|e_parent):
-  //   (idx, LabelComp(_, ref)) -> bstm* |[ bstm1* e_parent.x_idx = e; ]|
-  //   with
-  //     x_idx := $[_[idx]];
-  //     (e, bstm1*) := <exp-to-java> ref 
-
-  op-to-java:
-    (Formula(Match(lhs, rvar@Var(x_rvar))), bstm2*) ->
+  ma-to-java:
+    Formula(Match(lhs, rhs@Con(cons, bound-var*))) -> (
       bstm* |[
         bstm1*
-        final x_type x_rvar = e_lvar;
-        bstm2*
-      ]|
+        final x_consname x_tempvar = e_lvar.match(x_consname.class);
+      ]|, bstm_patbound*, e |[ x_tempvar != null ]|)
     with
-      debug(!"A>>");
+    	debug(!"M4 ");
       (bstm1*, e_lvar) := <build-to-var> lhs;
-      debug(!"B>>");
-      x_type := <debug(!"Ba "); get-type; debug(!"Bb "); get-sort-java-name; debug(!"Bc ")> rvar
-      ; debug(!"C>>")
+    	debug(!"M5 ");
+      x_consname := <get-cons-java-name> cons;
+    	debug(!"M6 ");
+      x_tempvar := <newname> "tmpbuild";
+    	debug(!"M7 ");
+      bstm_patbound* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
+    	; debug(!"M8 ")
   
   op-to-java:
-    (Formula(Match(lhs, rhs@Con(cons, bound-var*))), bstm3*) ->
-      bstm* |[
-      	bstm1*
-        final x_consname x_tempvar = e_lvar.match(x_consname.class);
-      	if(x_tempvar != null) {
-      		bstm2* // pattern-bound variables
-      		bstm3* // rest of statements
-      	} else {
-      		throw new InterpreterException("Premise match failure");
-      	}
-      ]|
+    (ma@Formula(Match(_, _)), bstm2*) ->
+	    bstm* |[
+	      bstm_match*
+	      bstm_work*
+	    ]|
     with
-    	(bstm1*, e_lvar) := <build-to-var> lhs;
-    	x_consname := <get-cons-java-name> cons;
-    	x_tempvar := <newname> "tmpbuild";
-    	bstm2* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
+    	debug(!"MADIS1 ");
+      (bstm_match*, bstm_patbound*, e) := <ma-to-java> ma;
+      if <?e |[ true ]|> e then
+        bstm_work* := bstm* |[
+          bstm_patbound*
+          bstm2*
+        ]|
+      else
+        bstm_work* := bstm* |[
+          if(e){
+            bstm_patbound*
+            bstm2*
+          }
+        ]|
+      end
+    	; debug(!"MADIS2 ")
+  
+  // op-to-java:
+  //   (Formula(Match(lhs, rvar@MatchedVar(x_rvar))), bstm2*) ->
+  //     bstm* |[
+  //       bstm1*
+  //       final x_type x_rvar = e_lvar;
+  //       bstm2*
+  //     ]|
+  //   with
+  //     (bstm1*, e_lvar) := <build-to-var> lhs;
+  //     x_type := <get-type; get-sort-java-name> rvar
+  
+  // op-to-java:
+  //   (Formula(Match(lhs, rhs@Con(cons, bound-var*))), bstm3*) ->
+  //     bstm* |[
+  //     	bstm1*
+  //       final x_consname x_tempvar = e_lvar.match(x_consname.class);
+  //     	if(x_tempvar != null) {
+  //     		bstm2* // pattern-bound variables
+  //     		bstm3* // rest of statements
+  //     	} else {
+  //     		throw new InterpreterException("Premise match failure");
+  //     	}
+  //     ]|
+  //   with
+  //   	(bstm1*, e_lvar) := <build-to-var> lhs;
+  //   	x_consname := <get-cons-java-name> cons;
+  //   	x_tempvar := <newname> "tmpbuild";
+  //   	bstm2* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
   
   build-to-var:
     Int(i) -> ([], e |[ i ]|)
@@ -225,22 +281,24 @@ rules // compilation of individual operations
       bstm* := <concat> bstms*
   
   op-to-java:
-    (Formula(Relation(Reads(read*), Source(ref@VarRef(_), heap-in*), _, Target(Var(v-out), heap-out*))), bstm4*) ->
+    (Formula(Relation(Reads(read*), Source(ref@VarRef(_), sc*), NamedDynamicEmitted(arrow-name, _), Target(Var(x_vout), tc*))), bstm4*) ->
       bstm* |[
         bstm1*
-        final x_resultclass x_result = e_vin.execute(e*);
+        final x_resultclass x_result = e_vin.x_execname(e*);
         final AValue x_vout = x_result.value;
         bstm3*
         bstm4*
       ]|
     with
-      x_resultclass := $[[<language>]_Result];
-      x_result := <newname> "tmpresult";
-      (e*, bstms1*) := <map(debug(!"3a "); exp-to-java; debug(!"3b ")); debug(!"3c "); unzip> [read*, heap-in*];
-      bstm1* := <debug(!"4a "); concat> bstms1*;
-      (e_vin, bstm2*) := <exp-to-java> ref;
-      x_vout := v-out;
-      bstm3* := <map-with-index(read-out-to-vardec(|x_result))> heap-out*
+    	m-with-arrow-name(
+	      x_resultclass := <get-arrow-result-type>;
+	      x_execname := <get-arrow-exec-name>;
+	      x_result := <newname> "tmpresult";
+	      (e*, bstms1*) := <map(exp-to-java); unzip> [read*, sc*];
+	      bstm1* := <concat> bstms1*;
+	      (e_vin, bstm2*) := <exp-to-java> ref;
+	      bstm3* := <map-with-index(read-out-to-vardec(|x_result))> tc*
+      |<strip-annos> arrow-name)
   
   read-out-to-vardec(|x_result):
   	(idx, LabelComp(ty, v@Var(_))) -> <read-out-to-vardec(|x_result)> (idx, v)
@@ -250,11 +308,6 @@ rules // compilation of individual operations
       bstm |[
       	final x_type x_vout = x_result.x_getidx();
       ]|
-    // where
-    // 	debug(!1);
-    //   sort-kind := <get-type; debug(!"1a "); get-sort-name; debug(!"1b "); get-sort-kind> vdef;
-    // 	debug(!2);
-    //   not(?Value())
     with
     	debug(!3);
     	x_type := <get-type; get-sort-java-name> vdef;
@@ -263,23 +316,6 @@ rules // compilation of individual operations
     	debug(!5);
     	x_getidx := $[get_[idx]]
     	;debug(!6)
-
-  // read-out-to-vardec(|x_result):
-  //   (idx, vdef@Var(v-out)) ->
-  //     bstm |[
-  //     	final x_type x_vout = x_result.x_idx;
-  //     ]|
-  //   where
-  //   	debug(!7);
-  //     <get-type; debug(!"7a "); debug(!"7b "); get-sort-kind> vdef => Value()
-  //   with
-  //   	debug(!8);
-  //   	x_type := <get-type; get-sort-java-name> vdef;
-  //   	debug(!9);
-  //   	x_vout := v-out;
-  //   	debug(!10);
-  //   	x_idx := $[_[idx]]
-  //   	; debug(!11)
 
 rules // term equality and inequality
 
@@ -361,11 +397,17 @@ rules // backend for merge points
         }
       ]|
     with
+      debug(!"MP2 ");
       (bstm1*, bstm2*, e) := <eq-to-java> guard;
+      debug(!"MP3 ");
       lopweave := <foldr(!lx, \ (op, weave) -> OpSeq(op, weave) \)> lxs;
+      debug(!"MP4 ");
       ropweave := <foldr(!rx, \ (op, weave) -> OpSeq(op, weave) \)> rxs;
+      debug(!"MP5 ");
       bstm_l* := <ops-to-java> (lopweave, bstm_rest*);
+      debug(!"MP6 ");
       bstm_r* := <ops-to-java> (ropweave, bstm_rest*)
+      ;debug(!"MP7 ")
 
 rules // fallback
 

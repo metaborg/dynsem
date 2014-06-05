@@ -137,29 +137,18 @@ rules // backend for normal constructor to Java
         }
       ]|
     with
-    	debug(!"f3A ");
       x_pkgname := <gen-package-name>;
-    	debug(!"f3B ");
       x_consname := <get-cons-java-name> node-name;
-    	debug(!"f3C ");
       (ty*, ty) := <get-type> node-name;
-    	debug(!"f3D ");
       x_sortname := <get-sort-java-name> ty;
-    	debug(!"f3E ");
       fdec* := <map-with-index(node-arg-to-java-child-field)> ty*;
-    	debug(!"f3F ");
       fget* := <map-with-index(node-arg-to-java-fieldget)> ty*;
-    	debug(!"f3G ");
       body1 := <node-args-to-java-constructor> (x_consname, ty*);
-    	debug(!"f3H ");
     	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
-    	debug(!"f3I ");
     	arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
-    	debug(!"f3J ");
-    	exec-method* := <map(gen-arrow-node-exec-method(|node-rule*, body*))> arrow-name*;
-    	debug(!"f3K ");
+    	exec-method* := <map(debug(!"GEN ARROW "); gen-arrow-node-exec-method(|node-rule*, body*); debug(!"DONE GEN ARROW ")); concat> arrow-name*;
+    	debug(!"LOGIC GEN DONE ");
       equalsmethod := <node-to-java-equalsmethod> node-name
-    	;debug(!"f3L ")
   
   node-to-java-equalsmethod:
     node-name -> 
