@@ -136,6 +136,12 @@ rules // lift constructors from sub-terms in premises
     with
       x := <next-variable(|"lifted")>
 
+  lift-constructors-from-premise :
+    Formula(Relation(reads, Source(con@Con(_, _), sc*), relation, target)) ->
+      <lift-constructors-from-premises> [Formula(Match(con, MatchedVar(x))), Formula(Relation(reads, Source(VarRef(x), sc*), relation, target))]
+    with
+      x := <next-variable(|"lifted")>
+
 rules // lift map access from premises that do both match and bind
   
   lift-mapselect-from-premises:
