@@ -30,6 +30,7 @@ rules // generate a dummy-bodied evaluate method
       // i.e. there is no reduction rule for this arrow
       <not(fetch-elem(is-rule-for-arrow(|arrow-name)))> node-rule*
     with
+      <debug((!$[GENARROW EMPTY [arrow-name] ]))> node-rule*;
       m-with-arrow-name(
 	      x_returnclass := <get-arrow-result-type>;
 	      x_execname := <get-arrow-exec-name>;
@@ -326,15 +327,13 @@ rules // term equality and inequality
         if(e) {
           bstm3*
           bstm_rest*
-        } else {
-          throw new InterpreterException("Inequality check failed");
         }
       ]|
     with
       (bstm1*, bstm2*, e, bstm3*) := <eq-to-java> f
   
   eq-to-java:
-    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar.equals(e_rvar) ]|, [])
+    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != null && e_lvar.equals(e_rvar) ]|, [])
     where
       <get-type; not(is-sort-int)> lhs;
       <get-type; not(is-sort-int)> rhs
@@ -352,7 +351,7 @@ rules // term equality and inequality
       (bstm2*, e_rvar) := <build-to-var> rhs
 
   eq-to-java:
-    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ !e_lvar.equals(e_rvar) ]|, [])
+    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == null || !e_lvar.equals(e_rvar) ]|, [])
     where
       <get-type; not(is-sort-int)> lhs;
       <get-type; not(is-sort-int)> rhs
