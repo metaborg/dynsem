@@ -61,7 +61,7 @@ rules
   
   rename-rule-inputs:
     Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc1*))) ->
-    Rule(prem2*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc2*)))
+    Rule(prem2*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e1*), Target(rhs', tc2*)))
     with
       while-counting(
 	      debug(!"R2 ");
@@ -70,12 +70,13 @@ rules
 	      (sc2*, extraprem2*) := <rename-inputs> sc1*
       );
       while-counting(
-	      debug(!"R4 ");
-	      (tc2*, extraprem3*) := <rename-outputs> tc1*;
+        debug(!"R4 ");
+        (rhs', extraprem3*) := <rename-outputs> rhs;
 	      debug(!"R5 ");
-	      prem2* := [extraprem1*, extraprem2*, prem1*, extraprem3*]
-	      ; debug(!"R6 ")
-      )
+	      (tc2*, extraprem4*) := <rename-outputs> tc1*
+      );
+      debug(!"R6 ");
+      prem2* := [extraprem1*, extraprem2*, prem1*, extraprem3*, extraprem4*]
   
   rename-inputs:
     [x | xs] -> ([x' | xs''], [p1, p2*])
@@ -98,13 +99,28 @@ rules
       (xs'', p2*) := <rename-outputs> xs 
   
   rename-outputs:
+    Con(t, args) -> (Con(t, args'), p*)
+    with
+      (args', p*) := <rename-outputs> args
+  
+  rename-outputs:
+    vref@VarRef(_) -> (vref', [p])
+    with
+      (vref', p) := <rename-output> 
+  
+  rename-outputs:
     [] -> ([], [])  
   
   rename-output:
     LabelComp(name, Var(v-orig)) -> (LabelComp(name, VarRef(v-new)), Formula(Match(VarRef(v-orig), MatchedVar(v-new))) )
     with
       v-new := <next-variable(|"lifted_out")>
-    
+  
+  rename-output:
+    VarRef(v-orig) -> (VarRef(v-new), Formula(Match(VarRef(v-orig), MatchedVar(v-new))))
+    with
+      v-new := <next-variable(|"lifted_out")>
+
 rules // components from lhs
 
   exp-label-comp-inits(|num) = 
