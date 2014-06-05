@@ -148,7 +148,7 @@ rules // component operations
     name -> $[[name]([<get-sort-name; comp-var(|num)> name])]
 
   mk-label-comp(default|num) :
-    name -> <get-sort-name; default <+ mk-label-comp(|num)> name
+    name -> <default <+ mk-label-comp(|num)> name
     
 signature
   constructors
