@@ -182,19 +182,27 @@ rules // compilation of individual operations
     Int(i) -> ([], e |[ i ]|)
   
   build-to-var:
+  	True() -> ([], e |[ true ]|)
+  
+  build-to-var:
+  	False() -> ([], e |[ false ]|)
+  
+  build-to-var:
     VarRef(x_vref) -> ([], e |[ x_vref ]|)
   
   build-to-var:
   	MapSelect(map, key) ->
   	 ([map-pre*, key-pre*, 
   	   bstm |[
-  	     final IMatchable x_builtvar = e_map.read(e_key);
+  	     final x_mapvalueclass x_builtvar = (x_mapvalueclass) e_map.read(e_key);
   	   ]|
   	  ], e |[ x_builtvar ]|)
   	with
   		(map-pre*, e_map) := <build-to-var> map;
   		(key-pre*, e_key) := <build-to-var> key;
-  	  x_builtvar := <newname> "tmpbuild"
+  	  x_builtvar := <newname> "tmpbuild";
+  	  (_, val-ty) := <get-type; get-stored-tys> map;
+  	  x_mapvalueclass := <get-sort-java-name> val-ty
   
   build-to-var:
     Con(cons, args) -> 
@@ -335,8 +343,8 @@ rules // term equality and inequality
   eq-to-java:
     Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != null && e_lvar.equals(e_rvar) ]|, [])
     where
-      <get-type; not(is-sort-int)> lhs;
-      <get-type; not(is-sort-int)> rhs
+      <get-type; not(is-sort-int + is-sort-bool)> lhs;
+      <get-type; not(is-sort-int + is-sort-bool)> rhs
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
@@ -344,8 +352,8 @@ rules // term equality and inequality
   eq-to-java:
     Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == e_rvar ]|, [])
     where
-      <get-type; is-sort-int> lhs;
-      <get-type; is-sort-int> rhs 
+      <get-type; (is-sort-int + is-sort-bool)> lhs;
+      <get-type; (is-sort-int + is-sort-bool)> rhs 
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
@@ -353,8 +361,8 @@ rules // term equality and inequality
   eq-to-java:
     Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == null || !e_lvar.equals(e_rvar) ]|, [])
     where
-      <get-type; not(is-sort-int)> lhs;
-      <get-type; not(is-sort-int)> rhs
+      <get-type; not(is-sort-int + is-sort-bool)> lhs;
+      <get-type; not(is-sort-int + is-sort-bool)> rhs
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
@@ -362,8 +370,8 @@ rules // term equality and inequality
   eq-to-java:
     Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != e_rvar ]|, [])
     where
-      <get-type; is-sort-int> lhs;
-      <get-type; is-sort-int> rhs 
+      <get-type; (is-sort-int + is-sort-bool)> lhs;
+      <get-type; (is-sort-int + is-sort-bool)> rhs 
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
