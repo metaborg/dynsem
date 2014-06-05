@@ -23,7 +23,7 @@ rules
     alltd(escape-variable-names);
     fuse-sections;
     merge-overlapping-rules;
-    id // optimize-environments
+    optimize-environments
 
 rules /* rename variables */
 
