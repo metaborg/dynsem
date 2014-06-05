@@ -28,7 +28,7 @@ rules
 rules /* rename variables */
 
   escape-variable-names:
-    t -> <alltd(Var(escape-identifier) <+ VarRef(escape-identifier))> t
+    t -> <alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))> t
   
   escape-identifier = string-replace(|"'", "_")
 
