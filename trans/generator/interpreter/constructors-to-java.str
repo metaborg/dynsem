@@ -15,17 +15,11 @@ rules
   constructors-to-java-interpreter:
     Module(mod, body*) -> [node-class*, value-class*]
     with
-      debug(!"f1 ");
       rule* := <collect-all(?Rules(<id>)); concat> body*;
-      debug(!"f2 ");
       node-name* := <collect-all(?ConsDecl(<id>, _, _) + ?InternalConsDecl(<id>, _, _))> body*;
-      debug(!"f3 ");
       node-class* := <map(node-to-java-interpreter(|rule*, body*))> node-name*;
-      debug(!"f4 ");
       value-name* := <collect-all(?ValueDecl(<id>, _))> body*;
-      debug(!"f5 ");
       value-class* := <map(value-to-java-interpreter)> value-name*
-      ; debug(!"f6 ")
 
 rules // generate a base interface extending INode with the language-specific evaluate function 
   
@@ -137,6 +131,7 @@ rules // backend for normal constructor to Java
         }
       ]|
     with
+      debug(!"GENNODE ");
       x_pkgname := <gen-package-name>;
       x_consname := <get-cons-java-name> node-name;
       (ty*, ty) := <get-type> node-name;
@@ -146,8 +141,7 @@ rules // backend for normal constructor to Java
       body1 := <node-args-to-java-constructor> (x_consname, ty*);
     	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
     	arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
-    	exec-method* := <map(debug(!"GEN ARROW "); gen-arrow-node-exec-method(|node-rule*, body*); debug(!"DONE GEN ARROW ")); concat> arrow-name*;
-    	debug(!"LOGIC GEN DONE ");
+    	exec-method* := <map(debug(!$[GENARROW [node-name] ]); gen-arrow-node-exec-method(|node-rule*, body*); debug(!"GENARROW DONE ")); concat> arrow-name*;
       equalsmethod := <node-to-java-equalsmethod> node-name
   
   node-to-java-equalsmethod:
@@ -386,8 +380,8 @@ rules // utilities for filtering rules
       resolved-def := <nabl-collect-one-resolved-def> cons-name';
       debug(!"f3H3 ");
       cons-def := <get-annos; fetch-elem(?Def(_))> cons-name
+    	;debug(!"f3H4 ")
     where
-    	debug(!"f3H4 ");
     	<eq> (cons-def, resolved-def);
     	debug(!"f3H5 ");
     	(ty*, _) := <get-type> cons-def;
