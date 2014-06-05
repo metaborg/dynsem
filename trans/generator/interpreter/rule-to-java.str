@@ -134,11 +134,8 @@ rules // compilation of individual operations
 	        final x_type x_rvar = e_lvar;
 	      ]|, [], e |[ true ]|)
     with
-    	debug(!"M1 ");
       (bstm1*, e_lvar) := <build-to-var> lhs;
-    	debug(!"M2 ");
       x_type := <get-type; get-sort-java-name> rvar
-    	; debug(!"M3 ")
   
   ma-to-java:
     Formula(Match(lhs, rhs@Con(cons, bound-var*))) -> (
@@ -147,15 +144,10 @@ rules // compilation of individual operations
         final x_consname x_tempvar = e_lvar.match(x_consname.class);
       ]|, bstm_patbound*, e |[ x_tempvar != null ]|)
     with
-    	debug(!"M4 ");
       (bstm1*, e_lvar) := <build-to-var> lhs;
-    	debug(!"M5 ");
       x_consname := <get-cons-java-name> cons;
-    	debug(!"M6 ");
       x_tempvar := <newname> "tmpbuild";
-    	debug(!"M7 ");
       bstm_patbound* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
-    	; debug(!"M8 ")
 
   op-to-java:
     (ma@Formula(Match(_, _)), bstm2*) ->
@@ -164,7 +156,6 @@ rules // compilation of individual operations
 	      bstm_work*
 	    ]|
     with
-    	debug(!"MADIS1 ");
       (bstm_match*, bstm_patbound*, e) := <ma-to-java> ma;
       if <?e |[ true ]|> e then
         bstm_work* := bstm* |[
@@ -179,7 +170,6 @@ rules // compilation of individual operations
           }
         ]|
       end
-    	; debug(!"MADIS2 ")
   
   build-to-var:
     Int(i) -> ([], e |[ i ]|)
