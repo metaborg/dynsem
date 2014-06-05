@@ -55,7 +55,7 @@ rules // generate a full-bodied evaluate method
         public x_returnclass x_execname(param*) {
           bstm*
           
-          throw new InterpreterException("Rule failure");
+          bstm_fallback*
         }
       ]|]
     where
@@ -73,8 +73,13 @@ rules // generate a full-bodied evaluate method
 	      debug(!"G9 ");
 	      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
 	      debug(!"G10 ");
-	      bstm* := <ops-to-java> (opweave, [])
-	      ; debug(!"G11 ")
+	      bstm* := <ops-to-java> (opweave, []);
+	      debug(!"G11 ");
+	      if <collect-one(?TryOr(_, _))> prem* then
+	      	bstm_fallback* := []
+        else
+         	bstm_fallback* := [ bstm |[ throw new InterpreterException("Rule failure"); ]| ]
+        end
       |<strip-annos> arrow-name)
 
   get-arrow-result-type = !$[[<ArrowName>]_Result]
@@ -379,23 +384,29 @@ rules // backend for merge points
         }
       ]|
     with
-      debug(!"MP2 ");
       (bstm1*, bstm2*, e, bstm3*) := <eq-to-java <+ ma-to-java> guard;
-      debug(!"MP4 ");
       [lx | lxs] := <reverse> l*;
-      debug(!"MP5 ");
       lopweave := <foldr(!lx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> lxs;
-      debug(!"MP6 ");
-      bstm_l* := <debug(!"MP5++ "); ops-to-java> (lopweave, bstm_rest*);
-      debug(!"MP7 ");
+      bstm_l* := <ops-to-java> (lopweave, bstm_rest*);
       [rx | rxs] := <reverse> r*;
-      debug(!"MP8 ");
       ropweave := <foldr(!rx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> rxs;
-      debug(!"MP9 ");
       bstm_r* := <ops-to-java> (ropweave, bstm_rest*)
-      ;debug(!"MP10 ")
 
 rules // fallback
+
+  op-to-java:
+  	(TryOr(try*, or*), bstm_rest*) ->
+  	  bstm* |[
+  	  	bstm_try*
+  	  	bstm_or*
+  	  ]|
+  	with
+  		[tryx | tryxs] := <reverse> try*;
+      tryopweave := <foldr(!tryx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> tryxs;
+  		bstm_try* := <ops-to-java> (tryopweave, bstm_rest*);
+  		[orx | orxs] := <reverse> or*;
+      oropweave := <foldr(!orx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> orxs;
+  		bstm_or* := <ops-to-java> (oropweave, bstm_rest*)
 
   op-to-java:
     (something, bstm*) ->
