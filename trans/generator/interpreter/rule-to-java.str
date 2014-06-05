@@ -397,8 +397,12 @@ rules // fallback
   op-to-java:
   	(TryOr(try*, or*), bstm_rest*) ->
   	  bstm* |[
-  	  	bstm_try*
-  	  	bstm_or*
+  	    {
+  	  	  bstm_try*
+  	  	}
+  	  	{
+  	  	  bstm_or*
+  	  	}
   	  ]|
   	with
   		[tryx | tryxs] := <reverse> try*;
