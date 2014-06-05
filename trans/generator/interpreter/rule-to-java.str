@@ -262,7 +262,7 @@ rules // compilation of individual operations
       bstm* |[
         bstm1*
         final x_resultclass x_result = e_vin.x_execname(e*);
-        final AValue x_vout = x_result.value;
+        final x_valueclass x_vout = x_result.value;
         bstm3*
         bstm4*
       ]|
@@ -271,6 +271,8 @@ rules // compilation of individual operations
 	      x_resultclass := <get-arrow-result-type>;
 	      x_execname := <get-arrow-exec-name>;
 	      x_result := <newname> "tmpresult";
+	      (_, r-ty) := <get-type> arrow-name;
+	      x_valueclass := <get-sort-java-name> r-ty;
 	      (e*, bstms1*) := <map(exp-to-java); unzip> [read*, sc*];
 	      bstm1* := <concat> bstms1*;
 	      (e_vin, bstm2*) := <exp-to-java> ref;
