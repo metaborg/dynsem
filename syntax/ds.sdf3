@@ -98,6 +98,9 @@ templates // terms
   Term.ListTail = <[ <Term*; separator=", "> | <Term>]>
   
   Term.Fresh  = [fresh]
+  Term.True   = [true]
+  Term.False  = [false]
+  
   Term.Map    = [{[Entry*;separator=", "]}]
   Entry.Bind  = [[Term] |--> [Term]] 
   Entry.Binds = [[Term] |*-> [Term]]

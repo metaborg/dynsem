@@ -67,6 +67,8 @@ type rules
   
   Int(i): SimpleSort("Int")
   String(s): SimpleSort("String")
+  True() : SimpleSort("Bool")
+  False() : SimpleSort("Bool")
   
   // m@Match(l, r) :-
   // where l : l-ty
