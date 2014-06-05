@@ -50,11 +50,6 @@ rules
       signatures    := [ sort-decl, natty-decl, cons-decl, semcomp-decl, intsort-decl, intcons-decl, values-decl, arrow-decl ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
 
-signature
-  constructors
-    
-    MergePoint: Formula * List(Formula) * List(Formula) -> Premise
-
 rules /* merge ovelapping rules */
 
   merge-overlapping-rules:
