@@ -205,6 +205,11 @@ rules // compilation of individual operations
   	  x_mapvalueclass := <get-sort-java-name> val-ty
   
   build-to-var:
+    OptMap(mapbit*) -> (bstm*, e)
+    with
+      (e, bstm*) := <exp-to-java> mapbit*
+  
+  build-to-var:
     Con(cons, args) -> 
       (
       	bstm* |[
@@ -428,7 +433,6 @@ rules // fallback
     with
       debug(!">>>> UNHANDLED OP >>>> ")
 
-
 rules // expressions to java
   
   exp-to-java:
@@ -437,8 +441,8 @@ rules // expressions to java
   exp-to-java:
   	LabelComp(_, VarRef(x_name)) -> (e |[ x_name ]|, [])
 
-  exp-to-java:
-    LabelComp(_, OptMap(mapbit*)) -> <exp-to-java> mapbit*
+  // exp-to-java:
+  //   LabelComp(_, OptMap(mapbit*)) -> <exp-to-java> mapbit*
 
   // special case for a single VarRef specified as an environment optimization
   exp-to-java:
