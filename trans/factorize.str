@@ -86,9 +86,11 @@ rules
       (args', p*) := <rename-outputs> args
   
   rename-outputs:
-    vref@VarRef(_) -> (vref', [p])
+    vref -> (vref', [p])
+    where
+      ?VarRef(_) + ?Var(_)
     with
-      (vref', p) := <rename-output> 
+      (vref', p) := <rename-output> vref
   
   rename-outputs:
     [] -> ([], [])  
