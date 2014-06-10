@@ -194,7 +194,7 @@ rules // compilation of individual operations
   	MapSelect(map, key) ->
   	 ([map-pre*, key-pre*, 
   	   bstm |[
-  	     final x_mapvalueclass x_builtvar = (x_mapvalueclass) e_map.read(e_key);
+  	     final x_mapvalueclass x_builtvar = (x_mapvalueclass) e_map.get(e_key);
   	   ]|
   	  ], e |[ x_builtvar ]|)
   	with
@@ -450,13 +450,14 @@ rules // expressions to java
 
   // special case for an environment with a single mapping
   exp-to-java:
-    [ Bind(key, value) ] -> (e |[ new PersistentFrame().update(e_key, e_value) ]|, [key-pre*, value-pre*])
+    [ Bind(key, value) ] -> (e |[ new com.github.krukow.clj_lang.PersistentTreeMap<Object, Object>().put(e_key, e_value) ]|, [key-pre*, value-pre*])
     with
       (e_key, key-pre*) := <exp-to-java> key;
       (value-pre*, e_value) := <build-to-var> value
 
   exp-to-java:
-    [ v@VarRef(_) | xsbind ] -> ( Invoke(Method(e_xsbind, None(), Id("update")), [e_v]), [value-stm*, xsbind-stm*] )
+  	
+    [ v@VarRef(_) | xsbind ] -> ( Invoke(Method(e_xsbind, None(), Id("plus")), [e_v]), [value-stm*, xsbind-stm*] )
     where
       <not(?[])> xsbind
     with
@@ -464,7 +465,7 @@ rules // expressions to java
      (value-stm*, e_v) := <build-to-var> v
 
   exp-to-java:
-    [ Bind(key, value) | xsbind ] -> (Invoke(Method(e_xsbind, None(), Id("update")), [e_key, e_value]), [key-stm*, value-stm*, xsbind-stm*])
+    [ Bind(key, value) | xsbind ] -> (Invoke(Method(e_xsbind, None(), Id("plus")), [e_key, e_value]), [key-stm*, value-stm*, xsbind-stm*])
     where
       <not(?[])> xsbind
     with
