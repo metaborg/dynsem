@@ -325,8 +325,6 @@ rules // term equality and inequality
         if(e) {
           bstm3*
         	bstm_rest*
-        } else {
-        	throw new InterpreterException("Equality check failed");
         }
       ]|
     with
