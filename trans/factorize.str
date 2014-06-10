@@ -219,6 +219,12 @@ rules // lift constructors from sub-terms in premises
           (not(<?[]> prem1*) <+ not(<?[]> prem2*))
   
   lift-constructors-from-premise :
+    Formula(Match(lhs, Con(c, t1*))) -> [Formula(Match(lhs, Con(c, t2*))), ma*]
+    where
+      <fetch-elem(?Con(_, _))> t1*;
+      (ma*, t2*) := <map(lift-constructor-from-match); unzip; (concat, id)> t1*
+  
+  lift-constructors-from-premise :
     Formula(Relation(reads, source, relation, Target(con@Con(_, _), tc*))) ->
       <lift-constructors-from-premises> [Formula(Relation(reads, source, relation, Target(Var(x), tc*))), Formula(Match(Var(x), con)) ]
     with
