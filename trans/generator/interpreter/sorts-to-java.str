@@ -78,6 +78,11 @@ rules /* generate interfaces for declared sorts */
   get-native-sort-java-name:
     "Map" -> "com.github.krukow.clj_ds.PersistentMap<Object, Object>"
 
+  get-native-sort-java-name:
+    ListSort(t) -> $[INodeList<[elem-sort-name]>]
+    with
+      elem-sort-name := <get-sort-java-name> t
+
   get-native-sort-java-name = not(is-string); get-sort-name; get-native-sort-java-name
   
   get-user-sort-java-name:
