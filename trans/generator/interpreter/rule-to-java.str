@@ -298,6 +298,36 @@ rules // compilation of individual operations
   		(bstms*, e*) := <map(build-to-var); unzip> args;
       bstm* := <concat> bstms*
   
+  build-to-var:
+    l@List([]) -> 
+      (
+        bstm* |[
+          final x_listty x_builtvar = NodeList.NIL(x_listelemty.class);
+        ]|, e |[ x_builtvar ]|
+      )
+    with
+      l-ty := <get-type> l;
+      x_listty := <get-sort-java-name> l-ty;
+      x_listelemty := <get-listsort-elementname; get-sort-java-name> l-ty;
+      x_builtvar := <newname> "tmpbuild"
+  
+  build-to-var:
+    tl@ListTail([elem], xs) -> 
+      (
+        bstm* |[
+          bstm_head*
+          bstm_tail*
+          final x_listty x_builtvar = new NodeList<x_listelemty>(e_head, e_tail);
+        ]|, e |[ x_builtvar ]|
+      )
+    with
+      tl-ty := <get-type> tl;
+      x_listty := <get-sort-java-name> tl-ty;
+      x_listelemty := <get-listsort-elementname; get-sort-java-name> tl-ty;
+      (bstm_head*, e_head) := <build-to-var> elem;
+      (bstm_tail*, e_tail) := <build-to-var> xs; 
+      x_builtvar := <newname> "tmpbuild"
+
   op-to-java:
     (Formula(Relation(Reads(read*), Source(ref@VarRef(_), sc*), NamedDynamicEmitted(arrow-name, _), Target(Var(x_vout), tc*))), bstm4*) ->
       bstm* |[
