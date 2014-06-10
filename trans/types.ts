@@ -30,8 +30,10 @@ type rules
     l has expected-type l-ty
     or ListSort(SimpleSort("Term")) => l-ty
   
-  ListTail([x], _) : ListSort(x-ty)
-  where x : x-ty
+  lt@ListTail([x], _) : lt-ty
+  where
+    lt has expected-type lt-ty
+    or (x : x-ty and ListSort(x-ty) => lt-ty)
   
   SortFunCall(f, parent-ref, aparam*): ty
   where definition of f : (fparam_ty*, ty)

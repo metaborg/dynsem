@@ -25,6 +25,20 @@ rules
       t'* := <map-with-index(attach-expected-type-to-term(|ctx, uri*, uri'*, tys))> t*
   
   nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
+    Match(VarRef(lhs), l@List([])){anno*} -> Match(lhs, l'){anno*}
+    with
+      lhs-def := <nabl-use-candidate(|lang, ctx, uri*, lhs)> UseCandidate(NablNsVariable(), [], Current(), (), ());
+      lhs-ty := <type-lookup(|ctx)> lhs-def;
+      l' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [lhs-ty])> (1, l)
+  
+  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
+    Match(VarRef(lhs), lt@ListTail(_, _)){anno*} -> Match(lhs, lt'){anno*}
+    with
+      lhs-def := <nabl-use-candidate(|lang, ctx, uri*, lhs)> UseCandidate(NablNsVariable(), [], Current(), (), ());
+      lhs-ty := <type-lookup(|ctx)> lhs-def;
+      lt' := <attach-expected-type-to-term(|ctx, uri*, uri'*, [lhs-ty])> (1, lt)
+  
+  nabl-collect-rewrite(|lang, ctx, uri*, uri'*):
     lt@ListTail([e], es){anno*} -> ListTail([e'], es'){anno*}
     with
       l-ty := <expected-type-task(|ctx)> lt;
