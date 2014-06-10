@@ -155,6 +155,28 @@ rules // compilation of individual operations
       x_tempvar := <newname> "tmpbuild";
       bstm_patbound* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
 
+  ma-to-java:
+    Formula(Match(lhs, List([]))) -> (
+      bstm* |[
+        bstm1*
+      ]|, [],  e |[ e_lvar != null && e_lvar.isEmpty() ]|, [])
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs
+
+  ma-to-java:
+    Formula(Match(lhs, lt@ListTail([Var(x_x)], Var(x_xs)))) -> (
+      bstm* |[
+        bstm1*
+      ]|, [], e |[ e_lvar != null && !e_lvar.isEmpty() ]|, 
+      bstm* |[
+        final x_xty x_x = e_lvar.head();
+        final x_xsty x_xs = e_lvar.tail();
+      ]|)
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      x_xty := <get-type; get-sort-java-name> x_x;
+      x_xsty := <get-type; get-sort-java-name> x_xs
+
   op-to-java:
     (ma@Formula(Match(_, _)), bstm2*) ->
 	    bstm* |[
