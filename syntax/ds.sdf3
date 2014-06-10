@@ -95,7 +95,7 @@ templates // terms
   Term.Int      = [[INT]]
   Term.Con      = [[ID]([Term*; separator=", "])]
   Term.List     = <[ <Term*; separator=", "> ]>
-  Term.ListTail = <[ <Term*; separator=", "> | <Term>]>
+  Term.ListTail = <[ <Term*; separator=", "> | <Term> ]>
   
   Term.Fresh  = [fresh]
   Term.True   = [true]
@@ -108,7 +108,6 @@ templates // terms
   
   Term.MapSelect = <<Term>[<Term>]>
   Term.MapExtend = [[Term] + [Term]] {assoc}
-  //Term.MapExtend = [[Term] + [Term]]
 
   Term.SortFunCall = <<ID>[<Term>](<Term*; separator=", ">)>
 
