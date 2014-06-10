@@ -210,11 +210,6 @@ rules // Builtins
 			          , InjDecl("Value", "Term")
 			          ]
 			        )
-			      , InternalConstructors(
-			          [ InternalConsDecl("True", [], SimpleSort("Bool"))
-			          , InternalConsDecl("False", [], SimpleSort("Bool"))
-			          ]
-			        )
 			      ]
 			    )
 			  ]
