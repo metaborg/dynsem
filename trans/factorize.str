@@ -240,10 +240,28 @@ rules // lift constructors from sub-terms in premises
       x := <next-variable(|"lifted")>
 
   lift-constructors-from-premise :
+    Formula(Relation(reads, Source(s, sc*), relation, target)) ->
+      <lift-constructors-from-premises> [prem*, Formula(Relation(reads, Source(s, sc'*), relation, target))]
+    where
+      <fetch-elem(?LabelComp(_, MapExtend(_, _)))> sc*
+    with
+      (prem*, sc'*) := <map(lift-mapextend-from-comp); unzip; (concat, id)> sc*
+      
+  lift-constructors-from-premise :
     Formula(Relation(reads, Source(con@Con(_, _), sc*), relation, target)) ->
       <lift-constructors-from-premises> [Formula(Match(con, MatchedVar(x))), Formula(Relation(reads, Source(VarRef(x), sc*), relation, target))]
     with
       x := <next-variable(|"lifted")>
+
+  lift-mapextend-from-comp :
+    LabelComp(name, mex@MapExtend(_, _)) -> ([Formula(Match(mex, MatchedVar(x)))], LabelComp(name, VarRef(x)))
+    with
+      x := <next-variable(|"lifted")>
+  
+  lift-mapextend-from-comp :
+    lc@LabelComp(name, t) -> ([], lc)
+    where
+      <not(?MapExtend(_, _))> t 
 
 rules // lift map access from premises that do both match and bind
   
