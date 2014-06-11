@@ -51,18 +51,12 @@ rules
     Rule(prem2*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e1*), Target(rhs', tc2*)))
     with
       while-counting(
-        debug(!1);
         (r2*, extraprem1*) := <rename-inputs> r1*;
-        debug(!2);
         (sc2*, extraprem2*) := <rename-inputs> sc1*
-        ; debug(!3)
       );
       while-counting(
-        debug(!4);
         (rhs', extraprem3*) := <rename-outputs> rhs;
-        debug(!5);
         (tc2*, extraprem4*) := <rename-outputs> tc1*
-        ;debug(!6)
       );
       prem2* := [extraprem1*, extraprem2*, prem1*, extraprem3*, extraprem4*]
   
