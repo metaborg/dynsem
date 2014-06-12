@@ -35,6 +35,13 @@ type rules
     lt has expected-type lt-ty
     or (x : x-ty and ListSort(x-ty) => lt-ty)
   
+  LabelComp(lc, e) :-
+  where
+    definition of lc : lc-ty
+    and e : e-ty
+    and e-ty <compat: lc-ty
+    else error "expression type is incompatible with component type" on e 
+  
   SortFunCall(f, parent-ref, aparam*): ty
   where definition of f : (fparam_ty*, ty)
     and aparam* : aparam_ty*
