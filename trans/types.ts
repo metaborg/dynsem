@@ -95,46 +95,11 @@ type rules
   True() : SimpleSort("Bool")
   False() : SimpleSort("Bool")
   
-  // m@Match(l, r) :-
-  // where l : l-ty
-  //   and r : r-ty
-  //   and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
-  //     else error "unlikely to succeed" on m
-  //  
-  // eq@TermEq(l, r) :-
-  // where l : l-ty
-  //   and r : r-ty
-  //   and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
-  //     else error "unlikely to succeed" on eq
-  // 
-  // neq@TermNeq(l, r) :-
-  // where l : l-ty
-  //   and r : r-ty
-  //   and (r-ty == l-ty or r-ty <: l-ty or l-ty <: r-ty)
-  //     else error "very likely to always succeed" on neq
-  
 relations
 
   // this makes no sense but it's here for some generator bug reason
   Var(x) <: VarRef(y)
   where x == y
-  
-  // s-map-ty <mapcompat: t-map-ty
-  // where
-  //   ( // at least one of them is a map
-  //     s-map-ty => MapSort(dc1, dc2)
-  //     or t-map-ty => MapSort(dc3, dc4)
-  //     or s-map-ty <: MapSort(dc5, dc6)
-  //   )
-  //   and (
-  //     s-map-ty <compat: t-map-ty
-	 //    or (
-	 //      s-map-ty => MapSort(s-key-ty, s-val-ty)
-	 //      and t-map-ty => MapSort(t-key-ty, t-val-ty)
-	 //      and s-key-ty <compat: t-key-ty
-	 //      and s-val-ty <compat: t-val-ty
-	 //    )
-  //   )
   
   s-ty <compat: l-ty
   where
