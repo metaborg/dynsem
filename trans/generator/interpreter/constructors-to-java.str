@@ -131,7 +131,6 @@ rules // backend for normal constructor to Java
         }
       ]|
     with
-      debug(!"GENNODE ");
       x_pkgname := <gen-package-name>;
       x_consname := <get-cons-java-name> node-name;
       (ty*, ty) := <get-type> node-name;
@@ -141,7 +140,7 @@ rules // backend for normal constructor to Java
       body1 := <node-args-to-java-constructor> (x_consname, ty*);
     	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
     	arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
-    	exec-method* := <map(debug(!$[GENARROW [node-name] ]); gen-arrow-node-exec-method(|node-rule*, body*); debug(!"GENARROW DONE ")); concat> arrow-name*;
+    	exec-method* := <map(gen-arrow-node-exec-method(|node-rule*, body*)); concat> arrow-name*;
       equalsmethod := <node-to-java-equalsmethod> node-name
   
   node-to-java-equalsmethod:
@@ -374,20 +373,13 @@ rules // utilities for filtering rules
   is-rule-matching-constructor(|cons-name):
     rule -> rule
     with
-    	debug(!"f3H1 ");
       Con(cons-name', arg*) := <get-rule-matchedterm> rule;
-      debug(!"f3H2 ");
       resolved-def := <nabl-collect-one-resolved-def> cons-name';
-      debug(!"f3H3 ");
       cons-def := <get-annos; fetch-elem(?Def(_))> cons-name
-    	;debug(!"f3H4 ")
     where
     	<eq> (cons-def, resolved-def);
-    	debug(!"f3H5 ");
     	(ty*, _) := <get-type> cons-def;
-    	debug(!"f3H6 ");
     	<eq> (<length> ty*, <length> arg*)
-    	;debug(!"f3H7 ")
 
   get-rule-matchedterm:
     Rule(_, _, Relation(_, Source(ma, _), _, _)) -> ma  

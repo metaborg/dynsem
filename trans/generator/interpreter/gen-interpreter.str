@@ -32,17 +32,38 @@ rules
   to-java-interpreter:
     mod@Module(_, _) -> [inode-iface, sort-iface*, sort-node*, result-class*, cons-class*]
     with
-      debug(!"A ");
-      mod' := <pre-generation-transform> mod;
-      debug(!"B ");
-      inode-iface := <module-to-inode-interface> mod';
-      debug(!"C ");
-      sort-iface* := <sorts-to-java-interpreter> mod';
-      debug(!"D ");
-      sort-node* := <sorts-to-specializing-nodes> mod';
-      debug(!"E ");
-      result-class* := <reductions-to-java-result-classes> mod';
-      debug(!"F ");
-      cons-class* := <constructors-to-java-interpreter> mod';
-      debug(!"G ")
+      log-timed(   
+        mod' := <pre-generation-transform> mod
+      |"Pre-generation");
+      log-timed(   
+        inode-iface := <module-to-inode-interface> mod'
+      |"Base INode generation");
+      log-timed(   
+        sort-iface* := <sorts-to-java-interpreter> mod'
+      |"Sort INode generation");
+      log-timed(   
+        sort-node* := <sorts-to-specializing-nodes> mod'
+      |"Generic sort nodes generation");
+      log-timed(   
+        result-class* := <reductions-to-java-result-classes> mod'
+      |"Arrow-specific result class generation");
+      log-timed(   
+        cons-class* := <constructors-to-java-interpreter> mod'
+      |"Constructor node generation")
     
+rules // util
+  
+  log-timed(s|msg) =
+      where(times => starttime)
+    ; s
+    ; where(
+        <diff-times>(<times>,starttime)
+      ; <concat-strings>[ <align-left>(' ', msg, 27)
+                        , " : [user/system] = ["
+                        , <self-children-user-time; ticks-to-seconds ; real-to-string(|2)>
+                        , "s/"
+                        , <self-children-sys-time; ticks-to-seconds ; real-to-string(|2)>
+                        , "s]"
+                        ]
+      ; log(|Info(),<id>)
+      )

@@ -54,21 +54,13 @@ rules /* merge ovelapping rules */
 
   merge-overlapping-rules:
     Module(mod, [imports, signatures, Rules(rule*)]) -> Module(mod, [imports, signatures, Rules(merged-rule*)])
-    // with
-    //   sig* := <collect-all(?Signatures(_))> body*
     with
       cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
-      // rule* := <collect-all(?Rule(_, _, _))> body*;
-      debug(!"A1 ");
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
-      debug(!"A2 ");
       cons-grouped-rule* := <map(group-rules-by-cons(|rule*))> cons-arity*;
-      debug(!"A3 ");
       // a list of lists of rules: [ [ [z...], [y...], [x...] ] ]
       cons-arrow-grouped-rule* := <map(group-rules-by-arrow(|arrow-name*))> cons-grouped-rule*;
-      debug(!"A4 ");
-      merged-rule* := <map(map({ ?allfail; merge-rules })); debug(!"A5 "); flatten-list> cons-arrow-grouped-rule*
-      ; debug(!"A6 ")
+      merged-rule* := <map(map({ ?allfail; merge-rules })); flatten-list> cons-arrow-grouped-rule*
   
   cons-decl-pair-arity:
     ConsDecl(cons, args, _) -> (cons, <length> args)
@@ -93,9 +85,7 @@ rules /* merge ovelapping rules */
   merge-rules:
     [x | xs] -> r*
     with
-      debug(!"M0 ");
       r* := <foldl(merge-rules)> (xs, x)
-      ; debug(!"M1 ")
 
   // normal merge
   merge-rules:
@@ -103,13 +93,9 @@ rules /* merge ovelapping rules */
   	where
   	  <not(collect-one(?AllFail()))> l-prem*
   	where
-  		debug(!"M2 ");
-  		<strip-annos; eq> (l-rel, r-rel);
-  		debug(!"M3 ")
+  		<strip-annos; eq> (l-rel, r-rel)
     with
-      debug(!"M4 ");
-      merged-prem* := <merge-premises> (r-prem*, l-prem*);
-      debug(!"M5 ")
+      merged-prem* := <merge-premises> (r-prem*, l-prem*)
 
   // merge with an all-fail rule
   merge-rules:
@@ -117,12 +103,9 @@ rules /* merge ovelapping rules */
   	where
   	  <collect-one(?AllFail())> l-prem*
   	where
-  		debug(!"M6 ");
-  		<strip-annos; eq> (l-rel, r-rel);
-  		debug(!"M7 ")
+  		<strip-annos; eq> (l-rel, r-rel)
   	with
-  	  l-prem'* := <filter(not(?AllFail()))> l-prem*;
-  	  debug(!"M8 ")
+  	  l-prem'* := <filter(not(?AllFail()))> l-prem*
 
   // there are no premises
   merge-premises:

@@ -30,7 +30,6 @@ rules // generate a dummy-bodied evaluate method
       // i.e. there is no reduction rule for this arrow
       <not(fetch-elem(is-rule-for-arrow(|arrow-name)))> node-rule*
     with
-      <debug((!$[GENARROW EMPTY [arrow-name] ]))> node-rule*;
       m-with-arrow-name(
 	      x_returnclass := <get-arrow-result-type>;
 	      x_execname := <get-arrow-exec-name>;
@@ -60,22 +59,16 @@ rules // generate a full-bodied evaluate method
         }
       ]|]
     where
-      <debug(!"G6 ")> <debug(!"G6- "); map(get-rule-matchedterm); try(?[<id>])> node-rule*;
       // i.e. find and match the rule for this arrow name
       Rule(prem*, _, Relation(reads, source, _, target)) := <fetch-elem(where(is-rule-for-arrow(|arrow-name)))> node-rule*
     with
       m-with-arrow-name(
-	      debug(!"G7 ");
 	      x_returnclass := <get-arrow-result-type>;
-	      debug(!"G8 ");
 	      x_execname := <get-arrow-exec-name>;
 	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
 	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*];
-	      debug(!"G9 ");
 	      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
-	      debug(!"G10 ");
 	      bstm* := <ops-to-java> (opweave, []);
-	      debug(!"G11 ");
 	      if <collect-one(?TryOr(_, _))> prem* then
 	      	bstm_fallback* := []
         else
@@ -359,13 +352,9 @@ rules // compilation of individual operations
       	final x_type x_vout = x_result.x_getidx();
       ]|
     with
-    	debug(!3);
     	x_type := <get-type; get-sort-java-name> vdef;
-    	debug(!4);
     	x_vout := v-out;
-    	debug(!5);
     	x_getidx := $[get_[idx]]
-    	;debug(!6)
 
 rules // term equality and inequality
 
@@ -474,14 +463,14 @@ rules // fallback
       oropweave := <foldr(!orx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> orxs;
   		bstm_or* := <ops-to-java> (oropweave, bstm_rest*)
 
-  op-to-java:
-    (something, bstm*) ->
-      bstm* |[
-        return "something unsupported";
-        bstm*
-      ]|
-    with
-      debug(!">>>> UNHANDLED OP >>>> ")
+  // op-to-java:
+  //   (something, bstm*) ->
+  //     bstm* |[
+  //       return "something unsupported";
+  //       bstm*
+  //     ]|
+  //   with
+  //     debug(!">>>> UNHANDLED OP >>>> ")
 
 rules // expressions to java
   
