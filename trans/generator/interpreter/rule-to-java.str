@@ -206,6 +206,9 @@ rules // compilation of individual operations
     VarRef(x_vref) -> ([], e |[ x_vref ]|)
   
   build-to-var:
+    m@Map([]) -> ([] , e |[ new PersistentMap() ]|)
+    	
+  build-to-var:
   	MapSelect(map, key) ->
   	 ([map-pre*, key-pre*, 
   	   bstm |[
