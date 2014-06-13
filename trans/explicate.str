@@ -108,11 +108,7 @@ rules // premisses
       [Formula(Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e2*), Target(rhs, tc2*))) | init*])
     where
       num-next := <inc> num-prev;
-    	if <?[]> r1* then
-        r2*   := <ReadableComps;   map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))>
-      else
-        r2*   := r1*
-      end;  
+      r2*   := <ReadableComps;  map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))> ;
       sc2*  := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> sc1* \|num-prev))>;
       e2*   := <WritableComps; mk-label-comps(|num-next)>;
       tc2*  := <ChangeableComps; mk-label-comps(|num-next)>;
