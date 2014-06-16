@@ -63,6 +63,13 @@ type rules
   where
     key : key-ty
     and val : val-ty
+  
+  Map([Binds(key, val)]) : MapSort(key-ty, val-ty)
+  where
+    key : keys-ty
+    and val : vals-ty
+    and keys-ty => ListSort(key-ty)
+    and vals-ty => ListSort(val-ty)
 
   // TODO here we need to take LUB(key1-ty, key2-ty) and LUB(val1-ty, val2-ty)
   MapExtend(map1, map2) : map2-ty
