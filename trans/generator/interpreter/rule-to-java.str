@@ -60,7 +60,7 @@ rules // generate a full-bodied evaluate method
       ]|]
     where
       // i.e. find and match the rule for this arrow name
-      Rule(prem*, _, Relation(reads, source, _, target)) := <fetch-elem(where(is-rule-for-arrow(|arrow-name)))> node-rule*
+      rule@Rule(prem*, _, Relation(reads, source, _, target)) := <fetch-elem(where(is-rule-for-arrow(|arrow-name)))> node-rule*
     with
       m-with-arrow-name(
 	      x_returnclass := <get-arrow-result-type>;
@@ -69,15 +69,29 @@ rules // generate a full-bodied evaluate method
 	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*];
 	      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
 	      bstm* := <ops-to-java> (opweave, []);
-	      if <collect-one(?TryOr(_, _))> prem* then
-	      	bstm_fallback* := []
+	      if <is-rule-requires-throw> rule then
+       	  bstm_fallback* := [ bstm |[ throw new InterpreterException("Rule failure"); ]| ]
         else
-         	bstm_fallback* := [ bstm |[ throw new InterpreterException("Rule failure"); ]| ]
+	      	bstm_fallback* := []
         end
       |<strip-annos> arrow-name)
 
   get-arrow-result-type = !$[[<ArrowName>]_Result]
   get-arrow-exec-name   = !$[exec_[<ArrowName>]]
+  
+  is-rule-requires-throw = not(is-rule-try-or); is-rule-can-fail
+  
+  is-rule-try-or = ?Rule(_, _, _); collect-one(?TryOr(_, _))
+  
+  is-rule-can-fail =
+    ?Rule(<id>, _, _);
+    collect-one(
+      ?Match(_, Con(_, _))
+      + ?Match(_, List(_))
+      + ?Match(_, ListTail(_, _))
+      + ?TermEq(_, _)
+      + ?TermNeq(_, _))
+      + ?MergePoint(_, _, _)
   
   rule-reads-to-inode-exec-params:
     LabelComp(ty, Var(x_name)) -> param |[ ~type:jiface x_name ]|
