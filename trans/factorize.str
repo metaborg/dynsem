@@ -24,9 +24,9 @@ rules
   
   factorize-rule :
     Rule(prem1*, infer, 
-          Relation(reads, Source(lhs,sc*), NamedDynamicEmitted(arrow, em1*), Target(rhs,tc*))) -> 
+          Relation(reads, Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) -> 
     Rule(prem6*, infer, 
-          Relation(reads, Source(lhs',sc*), NamedDynamicEmitted(arrow, em1*), Target(rhs',tc'*)))
+          Relation(reads, Source(lhs',sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
     with
     	while-counting(
 	      (prem2*, lhs') := <lift-constructors-from-match> lhs;
@@ -47,8 +47,8 @@ rules
 rules
   
   rename-rule-inputs:
-    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc1*))) ->
-    Rule(prem2*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e1*), Target(rhs', tc2*)))
+    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(e1*, arrow), Target(rhs, tc1*))) ->
+    Rule(prem2*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(e1*, arrow), Target(rhs', tc2*)))
     with
       while-counting(
         (r2*, extraprem1*) := <rename-inputs> r1*;

@@ -13,45 +13,48 @@ imports
 strategies
   
   explicate-module :
-    mod@Module(name, section*) -> Module($[[name]_explicated], [section'*, section''*])
+    mod@Module(name, section*) -> Module($[[name]_explicated], section'*)
     where
-      rule-name* := <collect-all(?ArrowDecl(_, <id>, _)); make-set> section*;
-      rule-group* := <filter(?Rules(<id>)); concat; group-rules(|rule-name*)> section*;
-    	rule-group'* := <map(in-extracted-components(map(try(explicate-rules))))> rule-group*;
-    	section'* := <filter(not(?Rules(_)))> section*;
-      section''* := <map(!Rules(<id>))> rule-group'*
+      section'* := <m-in-extracted-components(explicate-rules)> section*
+      // rule-name* := <collect-all(?ArrowDecl(_, <id>, _)); make-set> section*;
+      // rule-group* := <filter(?Rules(<id>)); concat; group-rules(|rule-name*)> section*;
+      // rule-group'* := [];
+    	// rule-group'* := <map(in-extracted-components(map(try(explicate-rules))))> rule-group*;
+    	// section'* := <filter(not(?Rules(_)))> section*;
+     //  section''* := <map(!Rules(<id>))> rule-group'*
       
   explicate-rules :
     rs -> <alltd(explicate-rule)> rs
 
 rules // group rules by name
   
-  group-rules(|rule-name*):
-    [] -> <map(![])> rule-name*
-
-  group-rules(|rule-name*):
-    [r | rxs] -> grouped-r*
-    with
-      grouped-rxs* := <group-rules(|rule-name*)> rxs;
-      r-name := <get-rule-name> r;
-      r-idx := <get-index; dec> (r-name, rule-name*);
-      grouped-r* := <at-index(\ xs -> [r | xs] \)> (r-idx, grouped-rxs*)
-
-  get-rule-name :
-  	Rule(_, _, Relation(_, _, NamedDynamicEmitted(arrow, _), _))  -> arrow
+//   group-rules(|rule-name*):
+//     [] -> <map(![])> rule-name*
+// 
+//   group-rules(|rule-name*):
+//     [r | rxs] -> grouped-r*
+//     with
+//       grouped-rxs* := <group-rules(|rule-name*)> rxs;
+//       r-name := <get-rule-name> r;
+//       r-idx := <get-index; dec> (r-name, rule-name*);
+//       grouped-r* := <at-index(\ xs -> [r | xs] \)> (r-idx, grouped-rxs*)
+// 
+//   get-rule-name :
+//   	Rule(_, _, Relation(_, _, NamedDynamicEmitted(arrow, _), _))  -> arrow
   
 rules
   
   explicate-rule :
-    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc1*))) ->   
-    Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e2*), Target(rhs, tc2*)))
+    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(e1*, arrow), Target(rhs, tc1*))) ->   
+    Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(e2*, arrow), Target(rhs, tc2*)))
     where
-      r2* := <ReadableComps; mk-label-comps(|1)>;
-      sc2* := <ChangeableComps; mk-label-comps(|1)>;
+    	arrow' := <strip-annos> arrow;
+      r2* := <ReadableComps; mk-label-comps(|1)> arrow';
+      sc2* := <ChangeableComps; mk-label-comps(|1)> arrow';
       init* := <exp-label-comp-inits(|1)> [r1*, sc1*];
-      (num, prem2*) := <explicate-premisses(|1)> prem1*;
-      e2* := <WritableComps; map(copy-comp(|e1*) <+ concat-changeables(|num))>;  
-      tc2* := <ChangeableComps; map(mk-label-comp(copy-comp(|tc1*)|num))>;  
+      (num, prem2*) := <explicate-premises(|1)> prem1*;
+      e2* := <WritableComps; map(copy-comp(|e1*) <+ concat-changeables(|num))> arrow';  
+      tc2* := <ChangeableComps; map(mk-label-comp(copy-comp(|tc1*)|num))> arrow';  
       prem3* := [init* | prem2*]
   
 rules // components from lhs
@@ -81,37 +84,38 @@ rules // components in rhs
     
 rules // premisses
                         
-  explicate-premisses(|num) :
+  explicate-premises(|num) :
     [] -> (num, [])
         
-  explicate-premisses(|num1):
+  explicate-premises(|num1):
     [prem1 | prem1*] -> (num3, [prem2*, prem3*])
     where
-      (num2, prem2*) := <explicate-premisse(|num1)> prem1;
-      (num3, prem3*) := <explicate-premisses(|num2)> prem1*
+      (num2, prem2*) := <explicate-premise(|num1)> prem1;
+      (num3, prem3*) := <explicate-premises(|num2)> prem1*
   
-  explicate-premisse(|num):
+  explicate-premise(|num):
     f@AllFail() -> (num, [f])
   
-  explicate-premisse(|num):
+  explicate-premise(|num):
     form@Formula(Match(lhs, rhs)) -> (num, [form])
   
-  explicate-premisse(|num):
+  explicate-premise(|num):
     form@Formula(TermEq(lhs, rhs)) -> (num, [form])
   
-  explicate-premisse(|num):
+  explicate-premise(|num):
     form@Formula(TermNeq(lhs, rhs)) -> (num, [form])
     
-  explicate-premisse(|num-prev) :
-    Formula(Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(arrow, e1*), Target(rhs, tc1*))) -> 
+  explicate-premise(|num-prev) :
+    Formula(Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(e1*, arrow), Target(rhs, tc1*))) -> 
     (num-next, 
-      [Formula(Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(arrow, e2*), Target(rhs, tc2*))) | init*])
+      [Formula(Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(e2*, arrow), Target(rhs, tc2*))) | init*])
     where
+    	arrow' := <strip-annos> arrow;
       num-next := <inc> num-prev;
-      r2*   := <ReadableComps;  map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))> ;
-      sc2*  := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> sc1* \|num-prev))>;
-      e2*   := <WritableComps; mk-label-comps(|num-next)>;
-      tc2*  := <ChangeableComps; mk-label-comps(|num-next)>;
+      r2*   := <ReadableComps;  map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))> arrow' ;
+      sc2*  := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> sc1* \|num-prev))> arrow';
+      e2*   := <WritableComps; mk-label-comps(|num-next)> arrow';
+      tc2*  := <ChangeableComps; mk-label-comps(|num-next)> arrow';
       init* := <exp-label-comp-inits(|num-next)> [e1*, tc1*]
         
 

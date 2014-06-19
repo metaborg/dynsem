@@ -17,7 +17,7 @@ imports
   
 rules // generate a dummy-bodied evaluate method
 	
-	is-rule-for-arrow(|arrow-name) = get-rule-arrow-name; !(<id>, arrow-name); strip-annos; eq
+	is-rule-for-arrow(|arrow-name) = get-rule-relation; get-relation-arrow-name; !(<id>, arrow-name); strip-annos; eq
 	
   gen-arrow-node-exec-method(|node-rule*, body*):
     arrow-name ->[
@@ -339,7 +339,7 @@ rules // compilation of individual operations
       x_builtvar := <newname> "tmpbuild"
 
   op-to-java:
-    (Formula(Relation(Reads(read*), Source(ref@VarRef(_), sc*), NamedDynamicEmitted(arrow-name, _), Target(Var(x_vout), tc*))), bstm4*) ->
+    (Formula(Relation(Reads(read*), Source(ref@VarRef(_), sc*), NamedDynamicEmitted(_, arrow-name), Target(Var(x_vout), tc*))), bstm4*) ->
       bstm* |[
         bstm1*
         final x_resultclass x_result = e_vin.x_execname(e*);

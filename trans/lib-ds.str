@@ -53,12 +53,12 @@ rules
   
   get-module-arrow-nonwritables(|arrow-name) =
     where(arrow-name' := <strip-annos> arrow-name);
-    collect-one(where(get-rule-arrow-name; strip-annos; ?arrow-name'); get-rule-nonwritables)
+    collect-one(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name'); get-rule-nonwritables)
     <+ ![]
   
   get-module-arrow-writables(|arrow-name) =
     where(arrow-name' := <strip-annos> arrow-name);
-    collect-one(where(get-rule-arrow-name; strip-annos; ?arrow-name'); get-rule-writables)
+    collect-one(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name'); get-rule-writables)
     <+ ![]
   
   get-rule-nonwritables:
@@ -67,72 +67,104 @@ rules
   get-rule-writables:
     Rule(_, _, Relation(_, Source(_, writable*), _, _)) -> writable*
 
-  get-rule-arrow-name:
-    Rule(_, _, Relation(_, _, arrow, _)) -> <get-arrow-name> arrow
+
+
+rules
+
+  get-rule-premises:
+    Rule(prem*, _, _) -> prem*
+
+  get-rule-relation:
+    Rule(_, _, rel) -> rel
+
+  get-formula-relation:
+    Formula(rel) -> rel
+
+  get-component-sort:
+    LabelComp(s, _) -> s
+
+  get-relation-writables:
+    Relation(_, _, NamedDynamicEmitted(comps, _), _) -> comps
+
+  get-relation-readables:
+    Relation(Reads(read*), _, _, _) -> read*
+
+  get-relation-changeables:
+    Relation(_, Source(_, sc*), _, Target(_, tc*)) -> [sc*, tc*]
+    
+  get-relation-arrow-name:
+    Relation(_, _, arrow, _) -> <get-arrow-name> arrow
   
   get-arrow-name:
     ArrowDecl(_, name, _) -> name
   
   get-arrow-name:
-    NamedDynamicEmitted(name, _) -> name
+    NamedDynamicEmitted(_, name) -> name
   
   get-arrow-name:
     NamedDynamic(name) -> name
 
+rules // new extracted components (working for inference of components on multiple arrow types)
+  
+  m-in-extracted-components(s) =
+  	{ WritableComps, ReadableComps, ChangeableComps:
+  		where(
+        ?t;
+        arrow* := <get-module-arrow-declarations; map(get-arrow-name)> t;
+        <map({
+          ?arrow;
+          rules(
+            WritableComps: arrow -> []
+            ReadableComps: arrow -> []
+            ChangeableComps: arrow -> []
+          )
+          })> arrow*;
+        rule* := <collect-all(?Rule(_, _, _))> t;
+        <maptwice(where(extract-writables); where(extract-readables); where(extract-changeables))> rule*
+  		);
+  		s
+  	}
+
+  maptwice(s) = where(map(s)); map(s)
+
 rules // extract components        
   
-  in-extracted-components(s) =
-    { CompList, NonWriteables, NonReadables, CompPatLhs, CompPatRhs, CompsLhs, CompsRhs:
-      where(
-        ?t;
-        <extract-writables> t;
-        <extract-readables> t;
-        <extract-changeables> t
-      );
-      s
-    }
+  extract-writables :
+    rule -> rule
+    with
+      relation    := <get-rule-relation> rule;
+      arrow       := <get-relation-arrow-name; strip-annos> relation;
+      this-comp*  := <get-relation-writables; map(get-component-sort)> relation;
+      prev-comp*  := <WritableComps> arrow;
+      used-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name); strip-annos> rule;
+      req-comp*   := <map(WritableComps); concat> used-arrow*;
+      comp*       := <make-set> [this-comp*, prev-comp*, req-comp*];
+      rules( WritableComps : arrow -> comp* )
   
-  extract-components =
-    collect-all(?LabelComp(<id>, _), union) => comps; 
-    <filter(not(IsWritable))> comps => non-writeables; 
-    <filter(not(IsReadable))> comps => non-readables; 
-    rules(
-      CompList : _ -> comps
-      NonWriteables : _ -> non-writeables
-      NonReadables : _ -> non-readables
-      
-      CompPatLhs : num -> $<[<<separate-by(|",")>lst>]>
-        where <map(mk-label-comp-str(|num))> non-writeables => lst     
-        
-      CompPatRhs : num -> $<[<<separate-by(|",")>lst>]>
-        where <map(mk-label-comp-str(|num))> non-readables => lst     
-        
-      CompsLhs : num -> <mk-label-comps(|num)> non-writeables
-      
-      CompsRhs : num -> <mk-label-comps(|num)> non-readables       
-    )
-
-  extract-writables  :
-    rs -> comps
-    where
-      collect-all(?NamedDynamicEmitted(_, <map(?LabelComp(<id>,_))>), union); concat; make-set => comps;
-      rules( WritableComps : _ -> comps );
-      map({?comp; rules( IsWritable : comp -> comp )})
-
   extract-readables :
-    rs -> comps
-    where
-      collect-all(?Reads(<map(?LabelComp(<id>,_))>), union); concat; make-set => comps;
-      rules( ReadableComps : _ -> comps );
-      map({?comp; rules( IsReadable : comp -> comp )})
+  	rule -> rule
+  	with
+  		relation    := <get-rule-relation> rule;
+  		arrow       := <get-relation-arrow-name; strip-annos> relation;
+  		this-comp*  := <get-relation-readables; map(get-component-sort)> relation;
+  		prev-comp*  := <ReadableComps> arrow;
+  		used-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name); strip-annos> rule;
+      req-comp*   := <map(ReadableComps); concat> used-arrow*;
+      comp*       := <make-set> [this-comp*, prev-comp*, req-comp*];
+      rules( ReadableComps : arrow -> comp* )
 
   extract-changeables :
-    rs -> comps
-    where
-      collect-all((?Source(_, <id>) <+ ?Target(_, <id>)); map(?LabelComp(<id>,_)), union); concat; make-set => comps;
-      rules( ChangeableComps : _ -> comps );
-      map({?comp; rules( IsChangeable : comp -> comp )})
-      
+  	rule -> rule
+  	with
+  		relation    := <get-rule-relation> rule;
+  		arrow       := <get-relation-arrow-name; strip-annos> relation;
+  		this-comp*  := <get-relation-changeables; map(get-component-sort)> relation;
+  		prev-comp*  := <ChangeableComps> arrow;
+  		used-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name); strip-annos> rule;
+      req-comp*   := <map(ChangeableComps); concat> used-arrow*;
+      comp*       := <make-set> [this-comp*, prev-comp*, req-comp*];
+      rules( ChangeableComps : arrow -> comp* )
+
 rules // component operations
   
   comp-var(|num) :

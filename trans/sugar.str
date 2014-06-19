@@ -36,7 +36,7 @@ rules // desugaring
     DynamicEmitted(e) -> NamedDynamicEmitted(e, "default")
   
   desugar :
-    NamedDynamic(n) -> NamedDynamicEmitted(n, [])
+    NamedDynamic(n) -> NamedDynamicEmitted([], n)
   
   desugar :
     List(x*) -> ListTail(x*, List([]))
@@ -92,7 +92,7 @@ rules // sugaring
   	Reads([]) -> NoReads()
 
   sugar :
-  	NamedDynamicEmitted(e, []) -> NamedDynamic(e)
+  	NamedDynamicEmitted([], name) -> NamedDynamic(name)
 
   sugar :
   	Target(term,[]) -> Target(term)

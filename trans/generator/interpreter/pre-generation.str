@@ -72,7 +72,7 @@ rules /* merge ovelapping rules */
     (cons, arity) -> <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
   
   group-rules-by-arrow(|arrow-name*):
-  	rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
+  	rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
   
   is-rule-matching-cons(|cons-goal, arity) =
     ?Rule(_, _, Relation(_, Source(Con(cons-actual, conargs), _), _, _));
