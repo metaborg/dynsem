@@ -34,7 +34,7 @@ menus
                                                                                                                                                                                          
   menu: "Semantics"
 
-    action  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
+    // action  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
     action  : "Generate Coq"           = generate-coq (openeditor)
     action  : "Generate interpreter"   = generate-interpreter
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)     
@@ -47,6 +47,7 @@ menus
     
     action  : "Pregeneration"          = pre-generation-transform-editor (openeditor) (meta)
     action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime) (source) (meta)
-    action  : "Explicate + Factorize AST"  = explicate-factorize-editor-ast (openeditor) (realtime) (source) (meta)      
+    action  : "Explicate + Factorize AST"  = explicate-factorize-editor-ast (openeditor) (realtime) (source) (meta)    
+    action  : "Resolve imports"        = includes-editor (openeditor) (realtime) (source) (meta)  
      
                 

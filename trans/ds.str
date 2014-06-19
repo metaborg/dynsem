@@ -15,7 +15,6 @@ imports
 	pp
 	names
 	check
-	generate-str
 	refocus
 	factorize
 	explicate
@@ -42,8 +41,8 @@ rules // Analysis
 	analysis-multiple-default-interface = 
 		analysis-multiple-default(parse-file <+ !(), desugar-all, id, id|<language>, <project-path>)
 	
-	editor-save = 
-	  where(generate-stratego; write-string-to-file); analysis-save-default(|<language>)
+	// editor-save = 
+	//   where(generate-stratego; write-string-to-file); analysis-save-default(|<language>)
 
 rules
   
@@ -134,11 +133,11 @@ rules // Debugging
 rules // Builders
   
   // Transforms a selection to Stratego
-  generate-stratego:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"generated.str")> path;
-      result   := <explicate-module; to-stratego(|filename)> selected
+  // generate-stratego:
+  //   (selected, position, ast, path, project-path) -> (filename, result)
+  //   with
+  //     filename := <guarantee-extension(|"generated.str")> path;
+  //     result   := <explicate-module; to-stratego(|filename)> selected
       
   prettyprint-ID = ![S(<id>)]
   prettyprint-INFER = ![S(<id>)]
@@ -151,6 +150,12 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
+  includes-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"noimports.ds")> path;
+      result   := <resolve-includes(|path, project-path); pp-debug> selected
+
   factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
@@ -162,7 +167,6 @@ rules // Builders
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; sugar-all; pp-debug> selected
-      // result   := <resolve-includes(|path, project-path); desugar-all;  pp-debug> selected
 
   explicate-factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
