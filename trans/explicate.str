@@ -16,31 +16,11 @@ strategies
     mod@Module(name, section*) -> Module($[[name]_explicated], section'*)
     where
       section'* := <m-in-extracted-components(explicate-rules)> section*
-      // rule-name* := <collect-all(?ArrowDecl(_, <id>, _)); make-set> section*;
-      // rule-group* := <filter(?Rules(<id>)); concat; group-rules(|rule-name*)> section*;
-      // rule-group'* := [];
-    	// rule-group'* := <map(in-extracted-components(map(try(explicate-rules))))> rule-group*;
-    	// section'* := <filter(not(?Rules(_)))> section*;
-     //  section''* := <map(!Rules(<id>))> rule-group'*
       
   explicate-rules :
     rs -> <alltd(explicate-rule)> rs
 
 rules // group rules by name
-  
-//   group-rules(|rule-name*):
-//     [] -> <map(![])> rule-name*
-// 
-//   group-rules(|rule-name*):
-//     [r | rxs] -> grouped-r*
-//     with
-//       grouped-rxs* := <group-rules(|rule-name*)> rxs;
-//       r-name := <get-rule-name> r;
-//       r-idx := <get-index; dec> (r-name, rule-name*);
-//       grouped-r* := <at-index(\ xs -> [r | xs] \)> (r-idx, grouped-rxs*)
-// 
-//   get-rule-name :
-//   	Rule(_, _, Relation(_, _, NamedDynamicEmitted(arrow, _), _))  -> arrow
   
 rules
   

@@ -67,8 +67,6 @@ rules
   get-rule-writables:
     Rule(_, _, Relation(_, Source(_, writable*), _, _)) -> writable*
 
-
-
 rules
 
   get-rule-premises:
@@ -120,51 +118,75 @@ rules // new extracted components (working for inference of components on multip
           )
           })> arrow*;
         rule* := <collect-all(?Rule(_, _, _))> t;
-        <maptwice(where(extract-writables); where(extract-readables); where(extract-changeables))> rule*
+        <repeat(where(extract-components(|arrow*)))> rule*
   		);
   		s
   	}
 
-  maptwice(s) = where(map(s)); map(s)
+  
+  extract-components(|arrow*):
+    rule* -> rule*
+    with
+      init-arrow-comps := <map(CompList)> arrow*;
+      <map(extract-components-from-conclusion)> rule*;
+      <map(extract-components-from-premises)> rule*;
+      exit-arrow-comps := <map(CompList)> arrow*
+    where
+      <not(eq)> (init-arrow-comps, exit-arrow-comps)
 
 rules // extract components        
+
+  CompList:
+    arrow -> <make-set> [readable*, changeable*, writable*]
+    with
+      readable* := <ReadableComps> arrow;
+      changeable* := <ChangeableComps> arrow;
+      writable* := <WritableComps> arrow
   
-  extract-writables :
+  extract-components-from-conclusion:
     rule -> rule
     with
-      relation    := <get-rule-relation> rule;
-      arrow       := <get-relation-arrow-name; strip-annos> relation;
-      this-comp*  := <get-relation-writables; map(get-component-sort)> relation;
-      prev-comp*  := <WritableComps> arrow;
-      used-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name); strip-annos> rule;
-      req-comp*   := <map(WritableComps); concat> used-arrow*;
-      comp*       := <make-set> [this-comp*, prev-comp*, req-comp*];
-      rules( WritableComps : arrow -> comp* )
+      relation := <get-rule-relation> rule;
+      arrow := <get-relation-arrow-name> relation;
+      locl-readable* := <get-relation-readables; map(get-component-sort)> relation;
+      locl-writable* := <get-relation-writables; map(get-component-sort)> relation;
+      locl-changeable* := <get-relation-changeables; map(get-component-sort)> relation;
+      glob-readable* := <ReadableComps> arrow;
+      glob-writable* := <WritableComps> arrow;
+      glob-changeable* := <ChangeableComps> arrow;
+      readable* := <make-set> [locl-readable*, glob-readable*];
+      writable* := <make-set> [locl-writable*, glob-writable*];
+      changeable* := <make-set> [locl-changeable*, glob-changeable*];
+      rules(
+        ReadableComps : arrow -> readable*
+        WritableComps : arrow -> writable*
+        ChangeableComps : arrow -> changeable*
+      )
   
-  extract-readables :
-  	rule -> rule
-  	with
-  		relation    := <get-rule-relation> rule;
-  		arrow       := <get-relation-arrow-name; strip-annos> relation;
-  		this-comp*  := <get-relation-readables; map(get-component-sort)> relation;
-  		prev-comp*  := <ReadableComps> arrow;
-  		used-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name); strip-annos> rule;
-      req-comp*   := <map(ReadableComps); concat> used-arrow*;
-      comp*       := <make-set> [this-comp*, prev-comp*, req-comp*];
-      rules( ReadableComps : arrow -> comp* )
-
-  extract-changeables :
-  	rule -> rule
-  	with
-  		relation    := <get-rule-relation> rule;
-  		arrow       := <get-relation-arrow-name; strip-annos> relation;
-  		this-comp*  := <get-relation-changeables; map(get-component-sort)> relation;
-  		prev-comp*  := <ChangeableComps> arrow;
-  		used-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name); strip-annos> rule;
-      req-comp*   := <map(ChangeableComps); concat> used-arrow*;
-      comp*       := <make-set> [this-comp*, prev-comp*, req-comp*];
-      rules( ChangeableComps : arrow -> comp* )
-
+  extract-components-from-premises:
+    rule -> rule
+    with
+      conc-arrow := <get-rule-relation; get-relation-arrow-name> rule;
+      conc-readable* := <ReadableComps> conc-arrow;
+      conc-writable* := <WritableComps> conc-arrow;
+      conc-changeable* := <ChangeableComps> conc-arrow;
+      conc-comps := <make-set> [conc-readable*, conc-writable*, conc-changeable*];
+      prem-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name; not(?conc-arrow)); make-set> rule;
+      prem-readable* := <map(ReadableComps); concat; make-set> prem-arrow*;
+      prem-writable* := <map(WritableComps); concat; make-set> prem-arrow*;
+      prem-changeable* := <map(ChangeableComps); concat; make-set> prem-arrow*;
+      new-readable* := <diff> (prem-readable*, conc-comps);
+      new-writable* := <diff> (prem-writable*, conc-comps);
+      new-changeable* := <diff> (prem-changeable*, conc-comps);
+      readable* := <make-set> [new-readable*, conc-readable*];
+      writable* := <make-set> [new-writable*, conc-writable*];
+      changeable* := <make-set> [new-changeable*, conc-changeable*];
+      rules(
+        ReadableComps : conc-arrow -> readable*
+        WritableComps : conc-arrow -> writable*
+        ChangeableComps : conc-arrow -> changeable*
+      )
+      
 rules // component operations
   
   comp-var(|num) :
