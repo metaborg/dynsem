@@ -143,6 +143,18 @@ rules // extract components
       changeable* := <ChangeableComps> arrow;
       writable* := <WritableComps> arrow
   
+  NonWritableComps:
+  	arrow -> <make-set> [readable*, changeable*]
+  	with
+  		readable* := <ReadableComps> arrow;
+  		changeable* := <ChangeableComps> arrow
+  
+  NonReadableComps:
+  	arrow -> <make-set> [writable*, changeable*]
+    with
+      writable* := <WritableComps> arrow;
+      changeable* := <ChangeableComps> arrow
+  
   extract-components-from-conclusion:
     rule -> rule
     with
@@ -191,7 +203,7 @@ rules // component operations
   
   comp-var(|num) :
     name -> $[[<lower-case>name]_[num]]
-    
+  
   mk-label-comps(|num) = 
     map(mk-label-comp(|num))
    

@@ -27,20 +27,22 @@ rules
   explicate-rule :
     Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(e1*, arrow), Target(rhs, tc1*))) ->   
     Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(e2*, arrow), Target(rhs, tc2*)))
-    where
-    	arrow' := <strip-annos> arrow;
-      r2* := <ReadableComps; mk-label-comps(|1)> arrow';
-      sc2* := <ChangeableComps; mk-label-comps(|1)> arrow';
-      init* := <exp-label-comp-inits(|1)> [r1*, sc1*];
-      (num, prem2*) := <explicate-premises(|1)> prem1*;
-      e2* := <WritableComps; map(copy-comp(|e1*) <+ concat-changeables(|num))> arrow';  
-      tc2* := <ChangeableComps; map(mk-label-comp(copy-comp(|tc1*)|num))> arrow';  
+    with { CompNum:
+      rules( CompNum: LabelComp(name, _) -> <CompNum> name ); // auto-unbox
+      <CompList; map({?comp; rules( CompNum: comp -> 1 )})> arrow;
+    	r2*    := <ReadableComps; map(\ comp -> <mk-label-comp(|<CompNum> comp)> comp \)> arrow;
+      sc2*   := <ChangeableComps; map(\ comp -> <mk-label-comp(|<CompNum> comp)> comp \)> arrow;
+      init*  := <map(\ comp -> <exp-label-comp-init(|<CompNum> comp)> comp \)> [r1*, sc1*];
+      tc2*   := <ChangeableComps; map(\ comp -> <mk-label-comp(copy-comp(|tc1*)|<CompNum> comp)> comp \)> arrow;
+      e2*    := <WritableComps; map(\ comp -> <copy-comp(|e1*) <+ concat-changeables(|<CompNum> comp)> comp \)> arrow;
+      prem2* := <explicate-premises> prem1*;
       prem3* := [init* | prem2*]
+    }
   
 rules // components from lhs
 
-  exp-label-comp-inits(|num) = 
-    map(exp-label-comp-init(|num))
+  // exp-label-comp-inits(|num) = 
+  //   map(exp-label-comp-init(|num))
   
   exp-label-comp-init(|num):
     LabelComp(name, t) -> Formula(Match(Var(<get-sort-name; comp-var(|num)> name), t))
@@ -64,40 +66,43 @@ rules // components in rhs
     
 rules // premisses
                         
-  explicate-premises(|num) :
-    [] -> (num, [])
+  explicate-premises:
+    [] -> []
         
-  explicate-premises(|num1):
-    [prem1 | prem1*] -> (num3, [prem2*, prem3*])
-    where
-      (num2, prem2*) := <explicate-premise(|num1)> prem1;
-      (num3, prem3*) := <explicate-premises(|num2)> prem1*
+  explicate-premises:
+    [prem1 | prem1*] -> [prem2*, prem3*]
+    with
+      prem2* := <explicate-premise> prem1;
+      prem3* := <explicate-premises> prem1*
   
-  explicate-premise(|num):
-    f@AllFail() -> (num, [f])
+  explicate-premise:
+    f@AllFail() -> [f]
   
-  explicate-premise(|num):
-    form@Formula(Match(lhs, rhs)) -> (num, [form])
+  explicate-premise:
+    form@Formula(Match(lhs, rhs)) -> [form]
   
-  explicate-premise(|num):
-    form@Formula(TermEq(lhs, rhs)) -> (num, [form])
+  explicate-premise:
+    form@Formula(TermEq(lhs, rhs)) -> [form]
   
-  explicate-premise(|num):
-    form@Formula(TermNeq(lhs, rhs)) -> (num, [form])
+  explicate-premise:
+    form@Formula(TermNeq(lhs, rhs)) -> [form]
     
-  explicate-premise(|num-prev) :
+  explicate-premise :
     Formula(Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(e1*, arrow), Target(rhs, tc1*))) -> 
-    (num-next, 
-      [Formula(Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(e2*, arrow), Target(rhs, tc2*))) | init*])
-    where
-    	arrow' := <strip-annos> arrow;
-      num-next := <inc> num-prev;
-      r2*   := <ReadableComps;  map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> r1* \|1))> arrow' ;
-      sc2*  := <ChangeableComps; map(mk-label-comp(\ comp -> <fetch-elem(?LabelComp(comp,_))> sc1* \|num-prev))> arrow';
-      e2*   := <WritableComps; mk-label-comps(|num-next)> arrow';
-      tc2*  := <ChangeableComps; mk-label-comps(|num-next)> arrow';
-      init* := <exp-label-comp-inits(|num-next)> [e1*, tc1*]
-        
+      [Formula(Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(e2*, arrow), Target(rhs, tc2*))) | init*]
+    with
+      r2*   := <ReadableComps;  map(\ comp -> <mk-label-comp(copy-comp(|r1*)| <CompNum> comp)> comp \)> arrow; 
+      sc2*  := <ChangeableComps;  map(\ comp -> <mk-label-comp(copy-comp(|sc1*)| <CompNum> comp)> comp \)> arrow;
+      e2*   := <WritableComps; map(inc-comp-num; \ comp -> <mk-label-comp(|<CompNum> comp )> comp \)> arrow;
+      tc2*  := <ChangeableComps; map(inc-comp-num; \ comp -> <mk-label-comp(|<CompNum> comp)> comp \)> arrow;
+      if <?([], [_|_])> (e2*, e1*) then
+        fatal-err-msg(|$[Arrow [arrow] does NOT emit writables, but they are explicitly expected in premises reducing over [arrow]])
+      end;
+      init* := <map(\ comp -> <exp-label-comp-init(|<CompNum> comp)> comp \)> [e1*, tc1*]
 
-      
-      
+  inc-comp-num:
+    comp -> comp
+    with 
+      next-num := <CompNum; inc> comp;
+      rules( CompNum : comp -> next-num )
+
