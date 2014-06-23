@@ -264,12 +264,15 @@ rules // lift constructors from sub-terms in premises
       x := <next-variable(|"lifted")>
 
   lift-constructors-from-premise :
-    Formula(Relation(reads, Source(s, sc*), relation, target)) ->
-      <lift-constructors-from-premises> [prem*, Formula(Relation(reads, Source(s, sc'*), relation, target))]
+    Formula(Relation(Reads(rd*), Source(s, sc*), relation, target)) ->
+      <lift-constructors-from-premises> [prem1*, prem2*, Formula(Relation(Reads(rd'*), Source(s, sc'*), relation, target))]
     where
       <fetch-elem(?LabelComp(_, MapExtend(_, _)))> sc*
+      <+
+      <fetch-elem(?LabelComp(_, MapExtend(_, _)))> rd*
     with
-      (prem*, sc'*) := <map(lift-mapextend-from-comp); unzip; (concat, id)> sc*
+      (prem1*, sc'*) := <map(lift-mapextend-from-comp); unzip; (concat, id)> sc*;
+      (prem2*, rd'*) := <map(lift-mapextend-from-comp); unzip; (concat, id)> rd*
       
   lift-constructors-from-premise :
     Formula(Relation(reads, Source(con@Con(_, _), sc*), relation, target)) ->
