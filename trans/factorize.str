@@ -164,8 +164,18 @@ rules // lift constructor sub-terms in build
       x := <next-variable(|"lifted")>
 
   lift-constructors-from-rhs:
+    l@List([]) -> ([Formula(Match(l, Var(x)))], Var(x))
+    where
+      x := <next-variable(|"lifted")>
+
+  lift-constructors-from-rhs:
+    l@ListTail(_, _) -> ([Formula(Match(l, Var(x)))], Var(x))
+    where
+      x := <next-variable(|"lifted")>
+
+  lift-constructors-from-rhs:
     t -> ([], t)
-    where <not(?Con(_,_) + ?MapExtend(_, _) + ?Map(_))> t
+    where <not(?Con(_,_) + ?MapExtend(_, _) + ?Map(_) + ?List(_) + ?ListTail(_, _))> t
 
 rules // lift from output components
   
