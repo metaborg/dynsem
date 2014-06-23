@@ -56,11 +56,13 @@ templates // native data types
     native-datatypes
       <NativeTypeDecl*; separator="\n">>
   
+  JSNIPPET = <<STRING>>
+  
   NativeTypeDecl.NativeBaseTypeDecl =
-    [[JID] as [ID] { [NativeFunctionDecl*; separator="\n"] } ]
+    [[JSNIPPET] as [ID] { [NativeFunctionDecl*; separator="\n"] } ]
   
   NativeTypeDecl.NativeSubTypeDecl =
-    [[JID] as [ID] -> [ID] { [NativeFunctionDecl*; separator="\n"] } ]
+    [[JSNIPPET] as [ID] -> [ID] { [NativeFunctionDecl*; separator="\n"] } ]
   
   NativeFunctionDecl.NativeFunctionDecl =
     [[ID] : [Type*; separator=" * "] -> [Type]] 
