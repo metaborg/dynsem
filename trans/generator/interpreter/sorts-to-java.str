@@ -76,7 +76,7 @@ rules /* generate interfaces for declared sorts */
     "Value" -> "AValue"
   
   get-native-sort-java-name:
-    "Map" -> "com.github.krukow.clj_ds.PersistentMap<Object, Object>"
+    "Map" -> "PersistentMap<Object, Object>"
   
   get-native-sort-java-name:
   	MapSort(_, _) -> <get-native-sort-java-name> "Map"
