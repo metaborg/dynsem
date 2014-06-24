@@ -98,7 +98,7 @@ rules // generate a language-specific class for the result of an evaluation step
       ty* := <map(?LabelComp(<id>, _))> writable*;
       param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
       bstm* := <map-with-index(node-arg-to-fieldinit)> ty*;
-      fget* := <map-with-index(node-arg-to-java-fieldget)> ty*
+      fget* := <map-with-index(result-arg-to-java-fieldget)> ty*
 
   reduction-to-java-result-field:
     (idx, LabelComp(ty, _)) -> class-body-dec |[ public final ~type:jiface x_idx; ]|
@@ -255,6 +255,7 @@ rules // backend for normal constructor to Java
     (idx, ty) ->
       class-body-dec |[
         public x_fieldtype x_getter() {
+          bstm_specializer*
           return this.x_idx;
         }
       ]|
@@ -263,7 +264,16 @@ rules // backend for normal constructor to Java
     with
       x_fieldtype := <get-sort-java-name> ty;
       x_getter := $[get_[idx]];
-      x_idx := $[_[idx]]
+      x_idx := $[_[idx]];
+      if <not(is-sort-native + is-sort-nativetype)> ty then
+        bstm_specializer* := bstm* |[ 
+          if (this.x_idx instanceof IGenericNode) {
+            this.replaceChild(this.x_idx, ((IGenericNode) this.x_idx).computeReplacement());
+          }
+        ]|
+      else
+        bstm_specializer* := []
+      end
 
   node-arg-to-java-fieldget:
     (idx, ty) ->
@@ -278,6 +288,35 @@ rules // backend for normal constructor to Java
       x_elemtype := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty;
       x_getter := $[get_[idx]];
       x_idx := $[_[idx]]
+  
+  result-arg-to-java-fieldget:
+    (idx, ty) ->
+      class-body-dec |[
+        public x_fieldtype x_getter() {
+          return this.x_idx;
+        }
+      ]|
+    where
+      <not(is-sort-list)> ty
+    with
+      x_fieldtype := <get-sort-java-name> ty;
+      x_getter := $[get_[idx]];
+      x_idx := $[_[idx]]
+
+  result-arg-to-java-fieldget:
+    (idx, ty) ->
+      class-body-dec |[
+        public INodeList<x_elemtype> x_getter() {
+          return this.x_idx;
+        }
+      ]|
+    where
+      <is-sort-list> ty
+    with
+      x_elemtype := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty;
+      x_getter := $[get_[idx]];
+      x_idx := $[_[idx]]
+  
   
   node-arg-to-java-child-field:
     (idx, ty) ->
