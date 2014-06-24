@@ -220,7 +220,7 @@ rules // compilation of individual operations
     VarRef(x_vref) -> ([], e |[ x_vref ]|)
   
   build-to-var:
-    m@Map([]) -> ([] , e |[ new PersistentMap<Object, Object>() ]|)
+    m@Map([]) -> ([] , e |[ new com.github.krukow.clj_lang.PersistentTreeMap<Object, Object>() ]|)
     	
   build-to-var:
   	MapSelect(map, key) ->
@@ -502,17 +502,18 @@ rules // expressions to java
       (e_key, key-pre*) := <exp-to-java> key;
       (value-pre*, e_value) := <build-to-var> value
 
+  // add multiple bindings at once
   exp-to-java:
-  	
-    [ v@VarRef(_) | xsbind ] -> ( Invoke(Method(e_xsbind, None(), Id("plus")), [e_v]), [value-stm*, xsbind-stm*] )
+    [ v@VarRef(_) | xsbind ] -> ( e |[ MapUtils.plus(e_xsbind, e_v) ]|, [value-stm*, xsbind-stm*] )
     where
       <not(?[])> xsbind
     with
      (e_xsbind, xsbind-stm*) := <exp-to-java> xsbind;
      (value-stm*, e_v) := <build-to-var> v
 
+  // add single binding
   exp-to-java:
-    [ Bind(key, value) | xsbind ] -> (Invoke(Method(e_xsbind, None(), Id("plus")), [e_key, e_value]), [key-stm*, value-stm*, xsbind-stm*])
+    [ Bind(key, value) | xsbind ] -> ( e |[ e_xsbind.plus(e_key, e_value) ]|, [key-stm*, value-stm*, xsbind-stm*])
     where
       <not(?[])> xsbind
     with
