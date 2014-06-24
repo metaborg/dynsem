@@ -120,6 +120,10 @@ rules
 
   is-sort-list = ?ListSort(_)
 
+  is-sort-nativetype = not(is-string); get-sort-name; is-sort-nativetype
+  
+  is-sort-nativetype = get-sort-kind; ?NativeType()
+
   is-sort-native = not(is-string); get-sort-name; is-sort-native
   
   is-sort-native = get-sort-name; get-sort-kind => SemanticComponent()

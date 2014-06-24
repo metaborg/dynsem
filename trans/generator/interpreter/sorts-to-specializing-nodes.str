@@ -40,7 +40,7 @@ rules
         import org.spoofax.jsglr.client.imploder.ImploderAttachment;
         import org.spoofax.interpreter.core.Tools;
         
-        public class x_gennodename extends AbstractNode implements x_sortname {
+        public class x_gennodename extends AbstractNode implements x_sortname, IGenericNode {
           
           private IStrategoTerm aterm;
           
@@ -54,7 +54,7 @@ rules
 					  return replace(computeReplacement()).match(clazz);
 					}
           
-          private x_basenodename computeReplacement() {
+          public x_basenodename computeReplacement() {
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
@@ -149,12 +149,18 @@ rules
       x_gensortname := $[Generic_[<get-sort-name> s]]
   
   gen-gennode-instantiation:
-  	(idx, s) -> e |[ new GenericNodeList<x_sortname>(term.getSubterm(i)) ]|
+  	(idx, s) -> e |[ new GenericNodeList<x_sortname>(term.getSubterm(i), x_gensortname.class) ]|
   	where
   		<is-sort-list> s
     with
       i := <dec; int-to-string> idx;
-      x_sortname := <get-listsort-elementname; get-sort-java-name; box-java-sort> s
+      sortname := <get-listsort-elementname> s;
+      if <is-sort-int + is-sort-string + is-sort-nativetype> sortname then
+        x_gensortname := <get-sort-java-name; box-java-sort> sortname
+      else
+        x_gensortname := $[Generic_[sortname]]
+      end;
+      x_sortname := <get-sort-java-name; box-java-sort> sortname
   
   gen-gennode-instantiation:
     (idx, s) -> e |[ Tools.asJavaString(term.getSubterm(i)) ]|
