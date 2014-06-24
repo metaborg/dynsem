@@ -101,21 +101,12 @@ rules /* generate interfaces for declared sorts */
       <get-sort-kind; ?SemanticComponent()> term
   
   get-user-sort-java-name:
-    term -> <get-java-id; debugit(!"X "); string-as-chars(unquote); debugit(!"Y ")> term
+    term -> <get-java-id; unquote(?'"')> term
     where
       is-string;
       <get-sort-kind; ?NativeType()> term
   
-signature
-  constructors
-    DEBUGW: Term -> Term
-
 rules
-
-  unquote = filter(not(?'"'))
-  
-  debugit(s) = where(!DEBUGW(<id>); debug(s))
-
 
   get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
 
