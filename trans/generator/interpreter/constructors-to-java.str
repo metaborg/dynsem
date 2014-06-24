@@ -259,8 +259,6 @@ rules // backend for normal constructor to Java
           return this.x_idx;
         }
       ]|
-    where
-      <not(is-sort-list)> ty
     with
       x_fieldtype := <get-sort-java-name> ty;
       x_getter := $[get_[idx]];
@@ -275,20 +273,6 @@ rules // backend for normal constructor to Java
         bstm_specializer* := []
       end
 
-  node-arg-to-java-fieldget:
-    (idx, ty) ->
-      class-body-dec |[
-        public INodeList<x_elemtype> x_getter() {
-          return this.x_idx;
-        }
-      ]|
-    where
-      <is-sort-list> ty
-    with
-      x_elemtype := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty;
-      x_getter := $[get_[idx]];
-      x_idx := $[_[idx]]
-  
   result-arg-to-java-fieldget:
     (idx, ty) ->
       class-body-dec |[

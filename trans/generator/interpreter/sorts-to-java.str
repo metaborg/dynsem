@@ -125,9 +125,7 @@ rules
   is-sort-nativetype = get-sort-kind; ?NativeType()
 
   is-sort-native = not(is-string); get-sort-name; is-sort-native
-  
   is-sort-native = get-sort-name; get-sort-kind => SemanticComponent()
-  
   is-sort-native = is-sort-string + is-sort-int + is-sort-bool
   
   is-sort-string = try(not(is-string); get-sort-name); ?"String"
