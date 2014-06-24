@@ -280,52 +280,21 @@ rules // backend for normal constructor to Java
           return this.x_idx;
         }
       ]|
-    where
-      <not(is-sort-list)> ty
     with
       x_fieldtype := <get-sort-java-name> ty;
       x_getter := $[get_[idx]];
       x_idx := $[_[idx]]
 
-  result-arg-to-java-fieldget:
-    (idx, ty) ->
-      class-body-dec |[
-        public INodeList<x_elemtype> x_getter() {
-          return this.x_idx;
-        }
-      ]|
-    where
-      <is-sort-list> ty
-    with
-      x_elemtype := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty;
-      x_getter := $[get_[idx]];
-      x_idx := $[_[idx]]
-  
-  
   node-arg-to-java-child-field:
     (idx, ty) ->
       class-body-dec |[
         @Child
         public ~type:jiface x_idx;
       ]|
-    where
-      <not(is-sort-native + is-sort-list)> ty
     with
       x_idx := <conc-strings> ("_", <int-to-string> idx);
       x_sortname := <get-sort-java-name> ty;
       jiface := type |[ x_sortname ]|
-      
-  node-arg-to-java-child-field:
-    (idx, ty) ->
-      class-body-dec |[
-        @Child
-        public INodeList<x_sortname> x_idx;
-      ]|
-    where
-      <is-sort-list> ty
-    with
-      x_idx := <conc-strings> ("_", <int-to-string> idx);
-      x_sortname := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty
       
   node-arg-to-java-child-field:
     (idx, ty) -> <node-arg-to-java-field> (idx, ty)
