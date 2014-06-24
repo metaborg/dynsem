@@ -154,7 +154,7 @@ rules
   		<is-sort-list> s
     with
       i := <dec; int-to-string> idx;
-      x_sortname := <get-listsort-elementname; get-sort-java-name> s
+      x_sortname := <get-listsort-elementname; get-sort-java-name; box-java-sort> s
   
   gen-gennode-instantiation:
     (idx, s) -> e |[ Tools.asJavaString(term.getSubterm(i)) ]|

@@ -84,8 +84,16 @@ rules /* generate interfaces for declared sorts */
   get-native-sort-java-name:
     ListSort(t) -> $[INodeList<[elem-sort-name]>]
     with
-      elem-sort-name := <get-sort-java-name> t
+      elem-sort-name := <get-sort-java-name; box-java-sort> t
 
+  box-java-sort = try(box-primitive-java-sort)
+  
+  box-primitive-java-sort:
+    "int" -> "Integer"
+  
+  box-primitive-java-sort:
+    "boolean" -> "Boolean"
+  
   get-native-sort-java-name = not(is-string); get-sort-name; get-native-sort-java-name
   
   get-user-sort-java-name:

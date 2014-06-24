@@ -226,7 +226,7 @@ rules // backend for normal constructor to Java
       <is-sort-list> ty
     with
       x_idx := $[_[idx]];
-      x_sort := <get-listsort-elementname; get-sort-java-name> ty
+      x_sort := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty
 
   node-arg-to-fieldinit:
     (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
@@ -275,7 +275,7 @@ rules // backend for normal constructor to Java
     where
       <is-sort-list> ty
     with
-      x_elemtype := <get-listsort-elementname; get-sort-java-name> ty;
+      x_elemtype := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty;
       x_getter := $[get_[idx]];
       x_idx := $[_[idx]]
   
@@ -302,7 +302,7 @@ rules // backend for normal constructor to Java
       <is-sort-list> ty
     with
       x_idx := <conc-strings> ("_", <int-to-string> idx);
-      x_sortname := <get-listsort-elementname; get-sort-java-name> ty
+      x_sortname := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty
       
   node-arg-to-java-child-field:
     (idx, ty) -> <node-arg-to-java-field> (idx, ty)
