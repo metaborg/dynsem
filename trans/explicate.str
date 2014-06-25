@@ -33,9 +33,9 @@ rules
     	r2*    := <ReadableComps; map(\ comp -> <mk-label-comp(|<CompNum> comp)> comp \)> arrow;
       sc2*   := <ChangeableComps; map(\ comp -> <mk-label-comp(|<CompNum> comp)> comp \)> arrow;
       init*  := <map(\ comp -> <exp-label-comp-init(|<CompNum> comp)> comp \)> [r1*, sc1*];
+      prem2* := <explicate-premises> prem1*;
       tc2*   := <ChangeableComps; map(\ comp -> <mk-label-comp(copy-comp(|tc1*)|<CompNum> comp)> comp \)> arrow;
       e2*    := <WritableComps; map(\ comp -> <copy-comp(|e1*) <+ concat-changeables(|<CompNum> comp)> comp \)> arrow;
-      prem2* := <explicate-premises> prem1*;
       prem3* := [init* | prem2*]
     }
   
