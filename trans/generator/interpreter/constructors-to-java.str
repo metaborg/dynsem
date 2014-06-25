@@ -231,7 +231,14 @@ rules // backend for normal constructor to Java
   node-arg-to-fieldinit:
     (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
     where
-      <not(is-sort-native)> ty
+      <not(is-sort-native + is-sort-list) <+ is-sort-list; get-listsort-elementname; is-sort-unchildable> ty
+    with
+      x_idx := $[_[idx]]
+  
+  node-arg-to-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = adoptChildren(x_idx); ]|
+    where
+      <is-sort-list; get-listsort-elementname; is-sort-childable> ty
     with
       x_idx := $[_[idx]]
 
@@ -291,6 +298,21 @@ rules // backend for normal constructor to Java
         @Child
         public ~type:jiface x_idx;
       ]|
+    where
+      <not(is-sort-list)> ty
+    with
+      x_idx := <conc-strings> ("_", <int-to-string> idx);
+      x_sortname := <get-sort-java-name> ty;
+      jiface := type |[ x_sortname ]|
+
+  node-arg-to-java-child-field:
+    (idx, ty) ->
+      class-body-dec |[
+        @Children
+        public ~type:jiface x_idx;
+      ]|
+    where
+      <is-sort-list> ty
     with
       x_idx := <conc-strings> ("_", <int-to-string> idx);
       x_sortname := <get-sort-java-name> ty;

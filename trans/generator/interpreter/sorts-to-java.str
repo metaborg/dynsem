@@ -116,6 +116,14 @@ rules /* generate interfaces for declared sorts */
   
 rules
 
+  is-sort-unchildable =
+    is-sort-native
+    + get-sort-kind => SemanticComponent()
+    + get-sort-kind => NativeType()
+    + is-sort-list; get-listsort-elementname; is-sort-unchildable
+
+  is-sort-childable = not(is-sort-unchildable)
+
   get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
 
   is-sort-list = ?ListSort(_)

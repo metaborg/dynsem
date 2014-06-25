@@ -42,7 +42,7 @@ rules
         
         public class x_gennodename extends AbstractNode implements x_sortname, IGenericNode {
           
-          private IStrategoTerm aterm;
+          public IStrategoTerm aterm;
           
           public x_gennodename(INodeSource source, IStrategoTerm term) {
             this.setSourceInfo(source);
@@ -111,7 +111,7 @@ rules
   	[InjDecl(sort-name, _) | xs] ->
   	  bstm* |[
   	 	 try {
-  	 		 return new x_gennodename(getSourceInfo(), aterm);
+  	 		 return new x_gennodename(getSourceInfo(), aterm).computeReplacement();
   	 	 } catch(RewritingException x_exname) {
   	 		 bstm*
   	 	 }
@@ -149,7 +149,9 @@ rules
       x_gensortname := $[Generic_[<get-sort-name> s]]
   
   gen-gennode-instantiation:
-  	(idx, s) -> e |[ new GenericNodeList<x_sortname>(term.getSubterm(i), x_gensortname.class) ]|
+  	(idx, s) -> e |[ 
+  		(INodeList) NodeUtils.makeList(term.getSubterm(i).getSubtermCount(), term.getSubterm(i), x_gensortname.class) 
+  		]|
   	where
   		<is-sort-list> s
     with
