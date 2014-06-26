@@ -220,6 +220,9 @@ rules // compilation of individual operations
     VarRef(x_vref) -> ([], e |[ x_vref ]|)
   
   build-to-var:
+    String(s) -> ([], Lit(String([Chars(<unquote(?'"')> s)])))
+  
+  build-to-var:
     m@Map([]) -> ([] , e |[ new com.github.krukow.clj_lang.PersistentTreeMap<Object, Object>() ]|)
     	
   build-to-var:
