@@ -89,6 +89,7 @@ rules // generate a full-bodied evaluate method
       ?Match(_, Con(_, _))
       + ?Match(_, List(_))
       + ?Match(_, ListTail(_, _))
+      + ?NMatch(_, ListTail(_, _))
       + ?TermEq(_, _)
       + ?TermNeq(_, _))
       + ?MergePoint(_, _, _)
@@ -183,6 +184,29 @@ rules // compilation of individual operations
       (bstm1*, e_lvar) := <build-to-var> lhs;
       x_xty := <get-type; get-sort-java-name> x_x;
       x_xsty := <get-type; get-sort-java-name> x_xs
+
+  nma-to-java:
+    Formula(NMatch(lhs, rhs@Con(cons, _))) -> (
+      bstm* |[
+        bstm1*
+        final x_consname x_tempvar = e_lvar.match(x_consname.class);
+      ]|, [], e |[ x_tempvar == null ]|, [])
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      x_consname := <get-cons-java-name> cons;
+      x_tempvar := <newname> "tmpbuild"
+
+  op-to-java:
+    (ma@Formula(NMatch(_, _)), bstm2*) ->
+      bstm* |[
+        bstm_matchlhs*
+        bstm_matchrhs*
+        if(e) {
+          bstm2*
+        }
+      ]|
+    with
+      (bstm_matchlhs*, bstm_matchrhs*, e, bstm_patbound*) := <nma-to-java> ma
 
   op-to-java:
     (ma@Formula(Match(_, _)), bstm2*) ->

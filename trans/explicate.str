@@ -80,6 +80,9 @@ rules // premisses
   
   explicate-premise:
     form@Formula(Match(lhs, rhs)) -> [form]
+
+  explicate-premise:
+    form@Formula(NMatch(lhs, rhs)) -> [form]
   
   explicate-premise:
     form@Formula(TermEq(lhs, rhs)) -> [form]
