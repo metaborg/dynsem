@@ -134,9 +134,9 @@ rules // compilation of individual operations
     with
       if <is-sort-childable> var-ty then
         bstm_childrepl* := bstm* |[ 
-          if(x_idx instanceof IGenericNode) {
-            x_idx.replace(((IGenericNode) x_idx).computeReplacement());
-          }
+          // if(x_idx instanceof IGenericNode) {
+          //   x_idx.replace(((IGenericNode) x_idx).computeReplacement());
+          // }
         ]|
       else
         bstm_childrepl* := []
