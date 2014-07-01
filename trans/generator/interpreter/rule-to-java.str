@@ -119,14 +119,28 @@ rules // compilation of individual operations
   op-to-java:
     (Source(Con(_, arg*), _), stm*) -> [var-bind*, stm*]
     with
-      var-bind* := <map-with-index(field-to-varbind)> arg*
+      var-bind* := <map-with-index(field-to-varbind); concat> arg*
 
   field-to-varbind:
-    (idx, var@Var(x_v)) -> bstm* |[ final x_type x_v = x_idx; ]|
+    (idx, var@Var(x_v)) ->
+    bstm* |[
+      bstm_childrepl*
+      final x_type x_v = x_idx;
+    ]|
     with
       x_idx := $[_[<int-to-string> idx]];
       var-ty := <get-type> var;
       x_type := <get-sort-java-name> var-ty
+    with
+      if <is-sort-childable> var-ty then
+        bstm_childrepl* := bstm* |[ 
+          if(x_idx instanceof IGenericNode) {
+            x_idx.replace(((IGenericNode) x_idx).computeReplacement());
+          }
+        ]|
+      else
+        bstm_childrepl* := []
+      end
 
   op-to-java:
     (Target(VarRef(x_v), data-out*), []) ->
