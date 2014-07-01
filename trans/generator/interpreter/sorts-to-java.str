@@ -35,19 +35,21 @@ rules /* generate interfaces for declared sorts */
   sorts-to-java-interpreter:
     Module(mod, body*) -> sort-interface*
     with
-      sort-decl* := <collect-all(?InjDecl(_, _))> body*;
+      sort-decl* := <collect-all(?InjDecl(_, _) + ?InternalInjDecl(_, _))> body*;
       sort-interface* := <map(sort-to-java-interpreter)> sort-decl* 
   
   // backend for Sort -> Java
   sort-to-java-interpreter:
-    InjDecl(srt, extended-srt) ->
+    inj ->
       JAVA_INTERFACE_MULTIPLE(
         |[ package x_pkgname; ]|
         ,  [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
         , <get-sort-java-name> srt
-        // , <map(get-sort-java-name; string-to-java-iface-name)> srt*
         , [ <get-sort-java-name; string-to-java-iface-name> extended-srt ]
       )
+   where
+   	?InjDecl(srt, extended-srt)
+   	+ ?InternalInjDecl(srt, extended-srt)
    with
     x_pkgname := <gen-package-name>
   

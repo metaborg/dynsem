@@ -49,6 +49,7 @@ templates // internal sort declarations
       <InternalSortDecl*; separator="\n">>
   
   InternalSortDecl.InternalSortDecl = <<ID>>
+  InternalSortDecl.InternalInjDecl = [[ID] -> [ID]]
 
 templates // native data types
 

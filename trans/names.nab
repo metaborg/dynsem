@@ -78,6 +78,12 @@ binding rules // sorts
     defines Sort ty
       of sort-kind Internal()
 
+  InternalInjDecl(ty, parent) :
+    defines Sort ty
+      of type SimpleSort(ty)
+      of sort-kind Internal()
+    refers to Sort parent
+
 binding rules // native datatypes
 
   NativeBaseTypeDecl(java-id, ty, member*):

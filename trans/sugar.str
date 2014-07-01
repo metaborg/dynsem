@@ -24,6 +24,9 @@ rules // desugaring
     SortDecl(ty) -> InjDecl(ty, "Term")
   
   desugar :
+    InternalSortDecl(ty) -> InternalInjDecl(ty, "Term")
+    
+  desugar :
     NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
   
   desugar :
