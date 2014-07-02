@@ -273,6 +273,17 @@ rules // lift constructors from sub-terms in premises
     with
       (prem1*, sc'*) := <map(lift-mapextend-from-comp); unzip; (concat, id)> sc*;
       (prem2*, rd'*) := <map(lift-mapextend-from-comp); unzip; (concat, id)> rd*
+
+  lift-constructors-from-premise :
+    Formula(Relation(Reads(rd*), Source(s, sc*), relation, target)) ->
+      <lift-constructors-from-premises> [prem1*, prem2*, Formula(Relation(Reads(rd'*), Source(s, sc'*), relation, target))]
+    where
+      <fetch-elem(?LabelComp(_, True()) + ?LabelComp(_, False()))> sc*
+      <+
+      <fetch-elem(?LabelComp(_, True()) + ?LabelComp(_, False()))> rd*
+    with
+      (prem1*, sc'*) := <map(lift-boollit-from-comp); unzip; (concat, id)> sc*;
+      (prem2*, rd'*) := <map(lift-boollit-from-comp); unzip; (concat, id)> rd*
       
   lift-constructors-from-premise :
     Formula(Relation(reads, Source(con@Con(_, _), sc*), relation, target)) ->
@@ -289,6 +300,18 @@ rules // lift constructors from sub-terms in premises
     lc@LabelComp(name, t) -> ([], lc)
     where
       <not(?MapExtend(_, _))> t 
+
+  lift-boollit-from-comp :
+    LabelComp(name, lit) -> ([Formula(Match(lit, MatchedVar(x)))], LabelComp(name, VarRef(x)))
+    where
+      <?True() + ?False()> lit
+    with
+      x := <next-variable(|"lifted")>
+  
+  lift-boollit-from-comp :
+    lc@LabelComp(name, t) -> ([], lc)
+    where
+      <not(?True() + ?False())> t 
 
 rules // lift map access from premises that do both match and bind
   
