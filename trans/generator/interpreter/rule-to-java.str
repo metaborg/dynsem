@@ -23,7 +23,7 @@ rules // generate a dummy-bodied evaluate method
     arrow-name ->[
     	class-body-dec |[
         public x_returnclass x_execname(param*) {
-          throw new InterpreterException("Not implemented");
+          throw new InterpreterException("Operation not supported");
         }
       ]|]
     where
