@@ -335,19 +335,20 @@ rules // compilation of individual operations
       bstm* := <concat> bstms*
   
   build-to-var:
-  	SortFunCall(x_funname, VarRef(x_on), args) ->
+  	SortFunCall(x_funname, on_expr, args) ->
   	  (
   	 	  bstm* |[
-  	 	  	bstm*
-  	 	 	  final x_type x_builtvar = x_on.x_funname(e*);
+  	 	  	bstm_1*
+  	 	  	bstm_2*
+  	 	 	  final x_type x_builtvar = e_on.x_funname(e*);
   	 	  ]|, e |[ x_builtvar ]|
   	  )
   	with
   		x_builtvar := <newname> "tmpbuild";
+  		(bstm_1*, e_on) := <build-to-var> on_expr;
   		(_, ty) := <get-type> x_funname;
   		x_type := <get-sort-java-name> ty;
-  		(bstms*, e*) := <map(build-to-var); unzip> args;
-      bstm* := <concat> bstms*
+  		(bstm_2*, e*) := <map(build-to-var); unzip; (concat, id)> args
   
   build-to-var:
     l@List([]) -> 
