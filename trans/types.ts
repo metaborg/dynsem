@@ -71,6 +71,11 @@ type rules
     and keys-ty => ListSort(key-ty)
     and vals-ty => ListSort(val-ty)
 
+  MapUnbind(map1, map2) : map2-ty
+  where
+    map1 : map1-ty
+    and map2 : map2-ty
+
   // TODO here we need to take LUB(key1-ty, key2-ty) and LUB(val1-ty, val2-ty)
   MapExtend(map1, map2) : map2-ty
   where

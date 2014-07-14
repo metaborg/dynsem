@@ -108,6 +108,7 @@ templates // terms
   
   Term.MapSelect = <<Term>[<Term>]>
   Term.MapExtend = [[Term] + [Term]] {assoc}
+  Term.MapUnbind = [[Term] \ [Term]] {assoc}
 
   Term.SortFunCall = <<ID>[<Term>](<Term*; separator=", ">)>
 
