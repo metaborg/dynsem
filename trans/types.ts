@@ -16,6 +16,8 @@ relations
 
 type rules
 
+  Fresh() : SimpleSort("Int")
+
   Var(x) + VarRef(x) + MatchedVar(x): ty
   where definition of x : ty
   

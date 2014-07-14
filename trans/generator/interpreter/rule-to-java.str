@@ -246,6 +246,11 @@ rules // compilation of individual operations
       end
   
   build-to-var:
+    Fresh() -> ([], e |[ x_pkg.Natives.fresh() ]|)
+    with
+      x_pkg := <man-package-name>
+  
+  build-to-var:
     Int(i) -> ([], e |[ i ]|)
   
   build-to-var:
