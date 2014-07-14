@@ -271,8 +271,8 @@ rules // backend for normal constructor to Java
       x_fieldtype := <get-sort-java-name> ty;
       x_getter := $[get_[idx]];
       x_idx := $[_[idx]];
-      if <not(is-sort-native + is-sort-nativetype)> ty then
-        bstm_specializer* := bstm* |[ 
+      if <not(is-sort-native + is-sort-nativetype + is-sort-unchildable)> ty then
+        bstm_specializer* := bstm* |[
           if (this.x_idx instanceof IGenericNode) {
             this.replaceChild(this.x_idx, ((IGenericNode) this.x_idx).computeReplacement());
           }
