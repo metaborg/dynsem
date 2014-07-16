@@ -544,7 +544,7 @@ rules // expressions to java
 
   // special case for an environment with a single mapping
   exp-to-java:
-    [ Bind(key, value) ] -> (e |[ new PersistentMap<Object, Object>().put(e_key, e_value) ]|, [key-pre*, value-pre*])
+    [ Bind(key, value) ] -> (e |[ new com.github.krukow.clj_lang.PersistentTreeMap<Object, Object>().plus(e_key, e_value) ]|, [key-pre*, value-pre*])
     with
       (e_key, key-pre*) := <exp-to-java> key;
       (value-pre*, e_value) := <build-to-var> value
