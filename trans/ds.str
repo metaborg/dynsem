@@ -209,6 +209,7 @@ rules // Builtins
 			      [ InternalSorts([InternalSortDecl("Term")])
 			      , Sorts(
 			          [ InjDecl("Int", "Term")
+			          , InjDecl("Real", "Term")
 			          , InjDecl("Bool", "Term")
 			          , InjDecl("String", "Term")
 			          , InjDecl("Value", "Term")

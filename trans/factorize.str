@@ -139,7 +139,11 @@ rules // lift constructor sub-terms in match
   lift-constructor-from-match = lift-constant-from-match
 
   lift-constant-from-match:
-    t@Int(i) -> ([Formula(TermEq(Var(x), t))], Var(x))
+    t@Int(_) -> ([Formula(TermEq(Var(x), t))], Var(x))
+    with x := <next-variable(|"lifted")>
+
+  lift-constant-from-match:
+    t@Real(_) -> ([Formula(TermEq(Var(x), t))], Var(x))
     with x := <next-variable(|"lifted")>
 
   lift-constant-from-match:
@@ -332,10 +336,9 @@ rules // lift map access from premises that do both match and bind
       [Formula(TermEq(lhs, Var(x))), Formula(TermEq(VarRef(x), rhs))]
     where
       <?Con(_, _)> rhs
-      +
-      <?String(_)> rhs
-      +
-      <?Int(_)> rhs
+      + <?String(_)> rhs
+      + <?Int(_)> rhs
+      + <?Real(_)> rhs
     with
       x := <next-variable(|"lifted")>
   

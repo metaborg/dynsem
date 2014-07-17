@@ -67,6 +67,9 @@ rules /* generate interfaces for declared sorts */
 
   get-native-sort-java-name:
     "Int" -> "int"
+
+  get-native-sort-java-name:
+    "Real" -> "double"
   
   get-native-sort-java-name:
     "Bool" -> "boolean"
@@ -92,6 +95,9 @@ rules /* generate interfaces for declared sorts */
   
   box-primitive-java-sort:
     "int" -> "Integer"
+
+  box-primitive-java-sort:
+    "double" -> "Double"
   
   box-primitive-java-sort:
     "boolean" -> "Boolean"
@@ -139,11 +145,13 @@ rules
 
   is-sort-native = not(is-string); get-sort-name; is-sort-native
   is-sort-native = get-sort-name; get-sort-kind => SemanticComponent()
-  is-sort-native = is-sort-string + is-sort-int + is-sort-bool
+  is-sort-native = is-sort-string + is-sort-int + is-sort-real + is-sort-bool
   
   is-sort-string = try(not(is-string); get-sort-name); ?"String"
   
   is-sort-int = try(not(is-string); get-sort-name); ?"Int"
+
+  is-sort-real = try(not(is-string); get-sort-name); ?"Real"
   
   is-sort-bool = try(not(is-string); get-sort-name); ?"Bool"
 

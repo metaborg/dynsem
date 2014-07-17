@@ -93,6 +93,7 @@ templates // terms
   
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
+  Term.Real     = [[REAL]]
   Term.Con      = [[ID]([Term*; separator=", "])]
   Term.List     = <[ <Term*; separator=", "> ]>
   Term.ListTail = <[ <Term*; separator=", "> | <Term> ]>

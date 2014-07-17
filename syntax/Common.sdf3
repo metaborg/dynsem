@@ -8,6 +8,8 @@ module Common
     [a-zA-Z][a-zA-Z0-9\'\_]* -> ID
     [a-zA-Z][a-zA-Z0-9\_\.]* -> JID
     "-"? [0-9]+          -> INT
+    "-"? [0-9] "." [0-9]+ -> REAL
+    "-"? "." [0-9]+       -> REAL
     
     "\"" StringChar* "\"" -> STRING
     ~[\"\n]               -> StringChar

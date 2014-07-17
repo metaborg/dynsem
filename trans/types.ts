@@ -105,6 +105,7 @@ type rules
 type rules
   
   Int(i): SimpleSort("Int")
+  Real(r): SimpleSort("Real")
   String(s): SimpleSort("String")
   True() : SimpleSort("Bool")
   False() : SimpleSort("Bool")

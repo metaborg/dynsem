@@ -178,6 +178,13 @@ rules
     with
     	i := <dec; int-to-string> idx
 
+  gen-gennode-instantiation:
+    (idx, s) -> e |[ Tools.asJavaDouble(term.getSubterm(i)) ]|
+    where
+    	<get-sort-name; is-sort-real> s
+    with
+    	i := <dec; int-to-string> idx
+
   read-to-varref:
     (idx, _) -> e |[ x_idx ]|
     with

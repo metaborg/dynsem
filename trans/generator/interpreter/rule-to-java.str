@@ -451,8 +451,8 @@ rules // term equality and inequality
   eq-to-java:
     Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != null && e_lvar.equals(e_rvar) ]|, [])
     where
-      <get-type; not(is-sort-int + is-sort-bool)> lhs;
-      <get-type; not(is-sort-int + is-sort-bool)> rhs
+      <get-type; not(is-sort-int + is-sort-bool + is-sort-real)> lhs;
+      <get-type; not(is-sort-int + is-sort-bool + is-sort-real)> rhs
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
@@ -460,8 +460,8 @@ rules // term equality and inequality
   eq-to-java:
     Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == e_rvar ]|, [])
     where
-      <get-type; (is-sort-int + is-sort-bool)> lhs;
-      <get-type; (is-sort-int + is-sort-bool)> rhs 
+      <get-type; (is-sort-int + is-sort-bool + is-sort-real)> lhs;
+      <get-type; (is-sort-int + is-sort-bool + is-sort-real)> rhs 
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
@@ -469,8 +469,8 @@ rules // term equality and inequality
   eq-to-java:
     Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == null || !e_lvar.equals(e_rvar) ]|, [])
     where
-      <get-type; not(is-sort-int + is-sort-bool)> lhs;
-      <get-type; not(is-sort-int + is-sort-bool)> rhs
+      <get-type; not(is-sort-int + is-sort-bool + is-sort-real)> lhs;
+      <get-type; not(is-sort-int + is-sort-bool + is-sort-real)> rhs
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
@@ -478,8 +478,8 @@ rules // term equality and inequality
   eq-to-java:
     Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != e_rvar ]|, [])
     where
-      <get-type; (is-sort-int + is-sort-bool)> lhs;
-      <get-type; (is-sort-int + is-sort-bool)> rhs 
+      <get-type; (is-sort-int + is-sort-bool + is-sort-real)> lhs;
+      <get-type; (is-sort-int + is-sort-bool + is-sort-real)> rhs 
     with
       (bstm1*, e_lvar) := <build-to-var> lhs;
       (bstm2*, e_rvar) := <build-to-var> rhs
