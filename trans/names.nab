@@ -113,9 +113,12 @@ binding rules // constructors
 
   SortFunCall(f, parent-ref, arg*):
     refers to SortFunction f in Sort parent
-      where parent-ref has type SimpleSort(parent-ty)
-      and parent-ty refers to Sort parent
+      where parent-ref has type SimpleSort(parent)
       and parent has sort-kind NativeType()
+    // refers to SortFunction f in Sort parent
+    //   where parent-ref has type SimpleSort(parent-ty)
+    //   and parent-ty refers to Sort parent
+    //   and parent has sort-kind NativeType()
 
   ConsDecl(c, ty*, ty) :
     defines Constructor c
