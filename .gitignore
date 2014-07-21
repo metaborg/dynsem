@@ -2,7 +2,6 @@
 /.cache
 /include
 /editor/java/trans
-/.settings/org.eclipse.jdt.core.prefs
 /utils
 syntax/ds*.generated.esv
 syntax/ds.generated.pp
