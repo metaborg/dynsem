@@ -21,7 +21,7 @@ namespaces
 properties
   expected-type of Term : Sort
   sort-kind of Sort : SortKind // Language(), SemanticComponent(), Internal(), NativeType()
-  cons-kind of Constructor : ConsKind // Language(), Value(), NativeOperator(), Internal()
+  cons-kind of Constructor : ConsKind // Language(), Value(), NativeOperator(), NativeConstructor(), Internal()
   java-id of Sort : JID
   stored-tys of Sort : Term
   
@@ -115,10 +115,6 @@ binding rules // constructors
     refers to SortFunction f in Sort parent
       where parent-ref has type SimpleSort(parent)
       and parent has sort-kind NativeType()
-    // refers to SortFunction f in Sort parent
-    //   where parent-ref has type SimpleSort(parent-ty)
-    //   and parent-ty refers to Sort parent
-    //   and parent has sort-kind NativeType()
 
   ConsDecl(c, ty*, ty) :
     defines Constructor c
@@ -139,6 +135,11 @@ binding rules // constructors
     defines Constructor c
       of type (ty*, ty)
       of cons-kind Internal()
+  
+  NativeConsDecl(c, ty*, ty) :
+    defines Constructor c
+      of type (ty*, ty)
+      of cons-kind NativeConstructor()
 
 binding rules // arrows
 

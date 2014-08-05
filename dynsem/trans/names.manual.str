@@ -17,6 +17,7 @@ signature
     Language: ConsKind
     Value: ConsKind
     NativeOperator: ConsKind
+    NativeConstructor: ConsKind
     Internal: ConsKind
   
     

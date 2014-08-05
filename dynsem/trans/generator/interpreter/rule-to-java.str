@@ -297,12 +297,29 @@ rules // compilation of individual operations
       )
     where
       cons-kind := <get-cons-kind> cons;
-      <not(?NativeOperator() + ?Value())> cons-kind
+      <not(?NativeOperator() + ?Value() + ?NativeConstructor())> cons-kind
     with
     	x_builtvar := <newname> "tmpbuild";
     	x_consname := <get-cons-java-name> cons;
     	(bstms*, e*) := <map(build-to-var); unzip> args;
     	bstm* := <concat> bstms*
+  
+  build-to-var:
+    Con(cons, args) -> 
+      (
+        bstm* |[
+          bstm*
+          final x_pkg.x_consname x_builtvar = new x_pkg.x_consname(getSourceInfo(), e*);
+        ]|, e |[ x_builtvar ]|
+      )
+    where
+      <get-cons-kind> cons => NativeConstructor()
+    with
+      x_pkg := <man-package-name>;
+      x_builtvar := <newname> "tmpbuild";
+      x_consname := <get-cons-java-name> cons;
+      (bstms*, e*) := <map(build-to-var); unzip> args;
+      bstm* := <concat> bstms*
 
   build-to-var:
     Con(cons, args) -> 
