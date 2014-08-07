@@ -3,6 +3,9 @@
  */
 package org.metaborg.meta.interpreter.framework;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * @author vladvergu
  *
@@ -101,6 +104,34 @@ public final class NodeList<T> extends AbstractNode implements INodeList<T> {
 		} else if (!tail.equals(other.tail))
 			return false;
 		return true;
+	}
+
+	@Override
+	public Iterator<T> iterator() {
+		return new Iterator<T>() {
+			private INodeList<T> tail = NodeList.this;
+
+			@Override
+			public boolean hasNext() {
+				return !tail.isEmpty();
+			}
+
+			@Override
+			public T next() {
+				if (!hasNext()) {
+					throw new NoSuchElementException();
+				}
+
+				T t = tail.head();
+				tail = tail.tail();
+				return t;
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 
 }

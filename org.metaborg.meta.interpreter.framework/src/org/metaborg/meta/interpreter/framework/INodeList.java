@@ -1,6 +1,6 @@
 package org.metaborg.meta.interpreter.framework;
 
-public interface INodeList<T> extends INode {
+public interface INodeList<T> extends INode, Iterable<T> {
 
 	public T head();
 
