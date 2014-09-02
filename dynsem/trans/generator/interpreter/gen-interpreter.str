@@ -27,7 +27,7 @@ rules
 	      filename := <guarantee-extension(|"interpreter.aterm")> path;
 	      class*   := <to-java-interpreter> ast;
 	      log-timed(   
-	        <emit-java-classes(overwrite-merge-strategy, id | <gen-package-name>, $[[project-path]/src])> class*
+	        <emit-java-classes(overwrite-merge-strategy, id | <gen-package-name>, $[[project-path]/src-gen])> class*
 	      |"Writing files")
 	    |"All")
 
