@@ -20,22 +20,10 @@ rules // generate a dummy-bodied evaluate method
 	is-rule-for-arrow(|arrow-name) = get-rule-relation; get-relation-arrow-name; !(<id>, arrow-name); strip-annos; eq
 	
   gen-arrow-node-exec-method(|node-rule*, body*):
-    arrow-name ->[
-    	class-body-dec |[
-        public x_returnclass x_execname(param*) {
-          throw new InterpreterException("Operation not supported");
-        }
-      ]|]
+    arrow-name -> []
     where
       // i.e. there is no reduction rule for this arrow
       <not(fetch-elem(is-rule-for-arrow(|arrow-name)))> node-rule*
-    with
-      m-with-arrow-name(
-	      x_returnclass := <get-arrow-result-type>;
-	      x_execname := <get-arrow-exec-name>;
-	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
-	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*]
-	    |<strip-annos> arrow-name)
     
 signature
   constructors

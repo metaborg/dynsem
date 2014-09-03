@@ -116,7 +116,7 @@ rules // backend for normal constructor to Java
         
         import org.metaborg.meta.interpreter.framework.*;
 
-        public class x_consname extends AbstractNode implements x_sortname {
+        public class x_consname extends NoOpNode implements x_sortname {
           
           ~fdec*
           

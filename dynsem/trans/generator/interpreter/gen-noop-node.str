@@ -1,0 +1,43 @@
+module generator/interpreter/gen-noop-node
+
+imports
+  include/ds
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
+  lib/editor-common.generated
+  lib-ds
+  generator/interpreter/gen-interpreter
+  generator/interpreter/sorts-to-java
+  generator/interpreter/constructors-to-java
+  
+rules
+  
+  module-2-noop-node:
+    Module(mod, body*) -> 
+      compilation-unit |[
+        package x_pkgname;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        
+        public abstract class NoOpNode extends AbstractNode implements I_Node {
+          
+          ~exec*
+        }
+      ]|
+    with
+      x_pkgname := <gen-package-name>;
+      arrow-decl* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+      exec* := <map(arrow-2-exec-noop-node(|body*))> arrow-decl*
+  
+  arrow-2-exec-noop-node(|body*):
+    arrow-name ->
+      class-body-dec |[
+        public x_returnclass x_execname(param*){
+        	throw new InterpreterException("Operation not supported");
+        }
+      ]|
+    with
+      x_returnclass := $[[arrow-name]_Result];
+      x_execname := $[exec_[arrow-name]];
+      (arrow-name, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+      param* := <map-with-index(read-to-inode-evaluate-params)> [nonwritable*, writable*]
