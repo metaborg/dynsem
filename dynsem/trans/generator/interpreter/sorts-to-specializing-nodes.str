@@ -51,10 +51,14 @@ rules
           
 					@Override
 					public <T> T match(Class<T> clazz) {
-					  return replace(computeReplacement()).match(clazz);
+					  return specialize(1).match(clazz);
 					}
           
-          public x_basenodename computeReplacement() {
+          public void specializeChildren(int depth){
+            throw new InterpreterException("Operation not supported");
+          }
+          
+          public x_basenodename specialize(int depth) {
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
@@ -62,10 +66,12 @@ rules
                         term.getAttachment(ImploderAttachment.TYPE)) : null;
               bstm1*
             }
+            IGenericNode replacement = null;
             
             bstm2*
             
             throw new RewritingException();
+            
           }
           
           ~exec_method*
@@ -94,7 +100,7 @@ rules
       class-body-dec |[
          @Override
          public x_returnclass x_execname(param*) {
-           return replace(computeReplacement()).x_execname(e*);
+           return specialize(1).x_execname(e*);
          }
       ]|
     with
@@ -111,7 +117,11 @@ rules
   	[InjDecl(sort-name, _) | xs] ->
   	  bstm* |[
   	 	 try {
-  	 		 return new x_gennodename(getSourceInfo(), aterm).computeReplacement();
+  	 	   if(replacement != null) {
+  	 	     replacement.replace(this);
+  	 	   }
+         replacement = new x_gennodename(getSourceInfo(), aterm);
+         return (I_Node) replace(replacement).specialize(1);
   	 	 } catch(RewritingException x_exname) {
   	 		 bstm*
   	 	 }
@@ -125,7 +135,11 @@ rules
     [cons-decl | xs] ->
       bstm* |[
         if(name.equals(e) && term.getSubtermCount() == i_arity) {
-          return new x_consname(source, e*);
+        	I_Node replacement = replace(new x_consname(source, e*));
+        	if (depth > 0) {
+            replacement.specializeChildren(depth - 1);
+          }
+          return replacement;
         } else {
           bstm2*
         }

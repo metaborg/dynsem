@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  * @author vladvergu
  *
  */
-public final class NodeList<T> extends AbstractNode implements INodeList<T> {
+public class NodeList<T> implements INodeList<T> {
 
 	public T head;
 	public INodeList<T> tail;

@@ -56,7 +56,7 @@ rules // generate a full-bodied evaluate method
 	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
 	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*];
 	      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
-	      bstm* := <ops-to-java> (opweave, []);
+	      bstm* := [ bstm |[ this.specializeChildren(0); ]| | <ops-to-java> (opweave, []) ];
 	      if <is-rule-requires-throw> rule then
        	  bstm_fallback* := [ bstm |[ throw new InterpreterException("Rule failure"); ]| ]
         else

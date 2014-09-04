@@ -21,6 +21,10 @@ rules
         
         public abstract class NoOpNode extends AbstractNode implements I_Node {
           
+          public void specializeChildren(int depth){
+            throw new InterpreterException("Operation not supported");
+          }
+          
           ~exec*
         }
       ]|

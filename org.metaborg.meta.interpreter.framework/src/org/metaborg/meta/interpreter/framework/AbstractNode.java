@@ -1,6 +1,5 @@
 package org.metaborg.meta.interpreter.framework;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 /**

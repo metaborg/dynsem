@@ -24,42 +24,6 @@ public class NodeUtils {
 		return s;
 	}
 
-	public static INode eagerReplacement(INode node) {
-		INode outNode = node;
-		if (outNode instanceof IGenericNode) {
-			// specialize the generic node
-			outNode = outNode.replace(((IGenericNode) outNode)
-					.computeReplacement());
-		}
-
-		// specialize the children
-		try {
-			for (Field f : outNode.getClass().getDeclaredFields()) {
-				if (f.isAnnotationPresent(Child.class)) {
-					// single case
-					Object newChildNode = f.get(outNode);
-					while (newChildNode instanceof IGenericNode) {
-						newChildNode = eagerReplacement((INode) newChildNode);
-					}
-				} else if (f.isAnnotationPresent(Children.class)) {
-					INodeList list = (INodeList) f.get(outNode);
-					while (list.size() > 0) {
-						Object newChildNode = list.head();
-						while (newChildNode instanceof IGenericNode) {
-							newChildNode = eagerReplacement((INode) newChildNode);
-						}
-						list.replaceHead(newChildNode);
-						list = list.tail();
-					}
-				}
-			}
-		} catch (IllegalAccessException e) {
-			throw new RewritingException(e);
-		}
-
-		return outNode;
-	}
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <T extends INode> T replaceChild(INode parent,
 			INode oldChild, T newChild) {
@@ -71,7 +35,7 @@ public class NodeUtils {
 					if (f.get(parent) == oldChild) {
 						// do the replacement
 						// ask the parent to adopt the child
-						newChild.setReplacedBy(oldChild);
+						oldChild.setReplacedBy(newChild);
 						parent.adoptChild(newChild);
 						f.set(parent, newChild);
 						return newChild;
@@ -83,7 +47,7 @@ public class NodeUtils {
 							// do the replacement
 							// ask the parent to adopt the child
 							list.replaceHead(newChild);
-							parent.adoptChildren((INodeList) f.get(parent));
+							parent.adoptChild(newChild);
 							return newChild;
 						}
 						list = list.tail();
