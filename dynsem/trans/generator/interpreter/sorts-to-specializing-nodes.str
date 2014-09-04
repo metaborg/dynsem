@@ -59,6 +59,7 @@ rules
           }
           
           public x_basenodename specialize(int depth) {
+            System.out.println("Specializing " + this.getClass().getSimpleName() + " instance " + this + " at depth " + depth);
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();

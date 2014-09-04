@@ -123,6 +123,8 @@ rules // backend for normal constructor to Java
           
           ~body1
           
+          private boolean hasSpecialized;
+          
           ~body2
 
           ~exec-method*
@@ -207,7 +209,10 @@ rules // backend for normal constructor to Java
     (x_consname, ty*) ->
       class-body-dec |[
         public void specializeChildren(int depth) {
-          bstm*
+          if (!hasSpecialized) {
+            bstm*
+            hasSpecialized = true;
+          }
         }
       ]|
     with
