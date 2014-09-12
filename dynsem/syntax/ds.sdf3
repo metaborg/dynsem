@@ -90,6 +90,7 @@ templates // terms
 
   Term.Var      = [[ID]]
   Term.Var      = [[LID]]
+  Term.Wld      = <_>
   
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]

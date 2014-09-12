@@ -59,6 +59,9 @@ type rules
     and t-ty <compat: r-ty 
     else error "source and target types are incompatible with arrow definition types" on rel
 
+  w@Wld() : ty
+  where w has expected-type ty 
+
   Map([]) : MapSort(SimpleSort("Term"), SimpleSort("Term"))
   
   Map([Bind(key, val)]) : MapSort(key-ty, val-ty)
