@@ -134,4 +134,15 @@ public class NodeList<T> implements INodeList<T> {
 		};
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("[");
+		for (T elem : this) {
+			sb.append(elem.toString());
+			sb.append(", ");
+		}
+		sb.append(" ]");
+		return sb.toString();
+	}
+
 }

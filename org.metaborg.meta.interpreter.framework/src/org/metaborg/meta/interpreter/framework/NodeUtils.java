@@ -17,13 +17,13 @@ public class NodeUtils {
 			try {
 				s += f.get(o) + ", ";
 			} catch (IllegalAccessException e) {
-				// s += "<INACCESSIBLE>";
+				 s += "<" + f.getName() + " INACCESSIBLE>";
 			}
 		}
 		s += ")";
 		return s;
 	}
-
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <T extends INode> T replaceChild(INode parent,
 			INode oldChild, T newChild) {
