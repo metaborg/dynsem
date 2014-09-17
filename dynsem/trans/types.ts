@@ -18,7 +18,7 @@ type rules
 
   Fresh() : SimpleSort("Int")
 
-  Var(x) + VarRef(x) + MatchedVar(x): ty
+  Var(x) + VarRef(x) + MatchedVar(x) + As(x, t): ty
   where definition of x : ty
   
   Con(c, t*) : ty

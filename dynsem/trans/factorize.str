@@ -256,18 +256,27 @@ rules // lift constructors from sub-terms in premises
       <fetch-elem(?Con(_, _) + ?ListTail(_, _) + ?List(_))> t1*;
       (ma*, t2*) := <map(lift-constructor-from-match); unzip; (concat, id)> t1*
 
-  lift-constructors-from-premise:
+  lift-constructors-from-premise :
+    Formula(Match(lhs, As(x, t))) -> <lift-constructors-from-premises> [Formula(Match(lhs, t)), Formula(Match(lhs, Var(x)))]
+
+  lift-constructors-from-premise :
     Formula(Match(lhs, ListTail([c@Con(_, _)], xs))) -> <lift-constructors-from-premises> [Formula(Match(lhs, ListTail([Var(x)], xs))), Formula(Match(Var(x), c))]
     where
       x := <next-variable(|"lifted")>
   
-  lift-constructors-from-premise:
+  lift-constructors-from-premise :
     Formula(Match(lhs, ListTail([elem], xs))) -> <lift-constructors-from-premises> [Formula(Match(lhs, ListTail([elem], Var(xs-lifted)))), Formula(Match(Var(xs-lifted), xs))]
     where
       <not(?Var(_) + ?VarRef(_))> xs
     where
       xs-lifted := <next-variable(|"lifted")>
   
+  lift-constructors-from-premise :
+    Formula(Relation(reads, source, relation, Target(As(v, t), tc*))) ->
+      <lift-constructors-from-premises> [Formula(Relation(reads, source, relation, Target(Var(x), tc*))), Formula(Match(Var(x), As(v, t))) ]
+      with
+      	x := <next-variable(|"lifted")>
+
   lift-constructors-from-premise :
     Formula(Relation(reads, source, relation, Target(con@Con(_, _), tc*))) ->
       <lift-constructors-from-premises> [Formula(Relation(reads, source, relation, Target(Var(x), tc*))), Formula(Match(Var(x), con)) ]

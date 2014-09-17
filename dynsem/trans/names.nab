@@ -40,6 +40,10 @@ binding rules
     defines Variable x of type ty
     where v has expected-type ty
   
+  As(x, t) :
+    defines Variable x of type ty
+    where t has type ty
+  
   VarRef(x) :
   	refers to Variable x
   	
