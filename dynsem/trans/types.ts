@@ -18,7 +18,7 @@ type rules
 
   Fresh() : SimpleSort("Int")
 
-  Var(x) + VarRef(x) + MatchedVar(x): ty
+  Var(x) + VarRef(x) + MatchedVar(x) + As(x, t): ty
   where definition of x : ty
   
   Con(c, t*) : ty
@@ -58,6 +58,9 @@ type rules
     and s-ty <compat: l-ty
     and t-ty <compat: r-ty 
     else error "source and target types are incompatible with arrow definition types" on rel
+
+  w@Wld() : ty
+  where w has expected-type ty 
 
   Map([]) : MapSort(SimpleSort("Term"), SimpleSort("Term"))
   

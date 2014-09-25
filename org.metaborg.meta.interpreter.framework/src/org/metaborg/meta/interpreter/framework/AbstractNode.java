@@ -1,6 +1,5 @@
 package org.metaborg.meta.interpreter.framework;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 /**
@@ -49,8 +48,9 @@ public abstract class AbstractNode implements INode, IMatchable {
 
 	@Override
 	public <T extends INode> T replace(T newNode) {
-		if (getParent() != null) {
-			return getParent().replaceChild(this, newNode);
+		final INode parent = getParent();
+		if (parent != null) {
+			parent.replaceChild(this, newNode);
 		}
 		return newNode;
 	}

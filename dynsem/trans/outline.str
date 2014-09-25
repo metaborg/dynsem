@@ -6,15 +6,14 @@ imports
 
 rules
 
-  outline-strategy = !Node("", []) // simple-label-outline(to-outline-label)
-  outline-expand-to-level = !3
+  outline-strategy = fail
+  outline-expand-to-level = !0
 
-  to-outline-label: Module(name, _) -> name
+  // outline-strategy = !Node("", []) // simple-label-outline(to-outline-label)
+
+  // to-outline-label: Module(name, _) -> name
   // UNDONE (VV): constructors not found in language
   // to-outline-label: Entity(name, _) -> name
   // to-outline-label: Property(name, _) -> name
   
-  to-outline-label: Rule(name, _, _) -> name
-  
-  
- 
+  // to-outline-label: Rule(name, _, _) -> name

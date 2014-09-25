@@ -10,6 +10,7 @@ imports
   generator/interpreter/java-utils
   generator/interpreter/constructors-to-java
   generator/interpreter/sorts-to-specializing-nodes
+  generator/interpreter/gen-noop-node
   
 rules
   
@@ -27,14 +28,14 @@ rules
 	      filename := <guarantee-extension(|"interpreter.aterm")> path;
 	      class*   := <to-java-interpreter> ast;
 	      log-timed(   
-	        <emit-java-classes(overwrite-merge-strategy, id | <gen-package-name>, $[[project-path]/src])> class*
+	        <emit-java-classes(overwrite-merge-strategy, id | <gen-package-name>, $[[project-path]/src-gen])> class*
 	      |"Writing files")
 	    |"All")
 
 rules
   
   to-java-interpreter:
-    mod@Module(_, _) -> [inode-iface, sort-iface*, sort-node*, result-class*, cons-class*]
+    mod@Module(_, _) -> [inode-iface, noop-node, sort-iface*, sort-node*, result-class*, cons-class*]
     with
       log-timed(   
         mod' := <pre-generation-transform> mod
@@ -42,6 +43,9 @@ rules
       log-timed(   
         inode-iface := <module-to-inode-interface> mod'
       |"Base INode generation");
+      log-timed(
+        noop-node := <module-2-noop-node> mod'
+      |"Noop node generation");
       log-timed(   
         sort-iface* := <sorts-to-java-interpreter> mod'
       |"Sort INode generation");

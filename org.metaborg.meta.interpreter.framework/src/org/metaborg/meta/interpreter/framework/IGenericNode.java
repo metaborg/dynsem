@@ -9,5 +9,5 @@ package org.metaborg.meta.interpreter.framework;
  */
 public interface IGenericNode extends INode {
 
-	public INode computeReplacement();
+	public INode specialize(int depth);
 }

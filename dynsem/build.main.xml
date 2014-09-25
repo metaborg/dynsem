@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="ds" default="all">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="all" name="ds">
 
 	<!-- Key input modules -->
-	<property name="sdfmodule" value="ds" />
-	<property name="metasdfmodule" value="Stratego-ds" />
-	<property name="esvmodule" value="ds" />
-	<property name="strmodule" value="ds" />
+	<property name="sdfmodule" value="ds"/>
+	<property name="metasdfmodule" value="Stratego-ds"/>
+	<property name="esvmodule" value="ds"/>
+	<property name="strmodule" value="ds"/>
 
 	<!-- Project directories -->
-	<property name="trans" location="trans" />
-	<property name="src-gen" location="editor/java" />
-	<property name="syntax" location="syntax" />
-	<property name="include" location="include" />
-	<property name="lib" location="lib" />
-	<property name="build" location="bin" />
-	<property name="dist" location="bin/dist" />
+	<property location="trans" name="trans"/>
+	<property location="editor/java" name="src-gen"/>
+	<property location="syntax" name="syntax"/>
+	<property location="include" name="include"/>
+	<property location="lib" name="lib"/>
+	<property location="target/classes" name="build"/>
+	<property location="bin/dist" name="dist"/>
 
 	<!-- Imports -->
 	<property name="build.sdf.imports" value="
@@ -27,7 +27,6 @@
                     -I &quot;${basedir}&quot;
 		                -I &quot;${basedir}/lib/runtime-libraries/org.spoofax.meta.runtime.libraries&quot;
                     -la stratego-lib -la stratego-sglr -la stratego-gpp -la stratego-xtc -la stratego-aterm -la stratego-parallel" />
-
 	<!-- Optional: external .def and .jar locations
     <property name="externaldef" location="syntax/${sdfmodule}.def"/>
     <property name="externaljar" value="../lib.jar"/>
@@ -36,34 +35,34 @@
 	<!-- <property name="externaljarflags" value="-la org.metaborg.runtime.task.interop" /> -->
 
 	<!-- Environment configuration for command-line builds -->
-	<condition property="build.strategoxt.sdf" value="${eclipse.spoofaximp.nativeprefix}" else="">
-		<isset property="eclipse.spoofaximp.nativeprefix" />
+	<condition else="" property="build.strategoxt.sdf" value="${eclipse.spoofaximp.nativeprefix}">
+		<isset property="eclipse.spoofaximp.nativeprefix"/>
 	</condition>
-	<property name="build.strategoxt.stratego" location="${user.home}/.nix-profile/bin" />
+	<property location="${user.home}/.nix-profile/bin" name="build.strategoxt.stratego"/>
 
 	<!-- used for building inside of Eclipse -->
-	<import file="build.generated.xml" />
+	<import file="build.generated.xml"/>
 
 	<!-- The files for which the on-save handler is called before building. -->
 	<path id="call-onsave.files">
 		<fileset dir=".">
-			<include name="**/*.sdf3" />
-			<include name="**/*.nab" />
-			<include name="**/*.ts" />
+			<include name="**/*.sdf3"/>
+			<include name="**/*.nab"/>
+			<include name="**/*.ts"/>
 		</fileset>
 	</path>
 
 	<!-- Main target -->
-	<target name="all" depends="link-lib-files, spoofaximp.default.jar" />
+	<target depends="link-lib-files, spoofaximp.default.jar" name="all"/>
 
 	<target name="os-detection">
 		<condition property="isWin">
-			<os family="windows" />
+			<os family="windows"/>
 		</condition>
 	</target>
 
-	<target name="link-lib-files" unless="isWin" depends="os-detection">
-		<symlink resource="${basedir}/../../runtime-libraries/" link="${basedir}/lib/runtime-libraries" overwrite="true" />
+	<target depends="os-detection" name="link-lib-files" unless="isWin">
+		<symlink link="${basedir}/lib/runtime-libraries" overwrite="true" resource="${basedir}/../../runtime-libraries/"/>
 	</target>
 
 </project>

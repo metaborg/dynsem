@@ -44,10 +44,11 @@ rules
       natty-decl   := <collect-all(?NativeDataTypes(<id>)); concat; !NativeDataTypes(<id>)> body*;
       cons-decl    := <collect-all(?Constructors(<id>)); concat; !Constructors(<id>)> body*;
       intcons-decl := <collect-all(?InternalConstructors(<id>)); concat; !InternalConstructors(<id>)> body*;
+      natcons-decl := <collect-all(?NativeConstructors(<id>)); concat; !NativeConstructors(<id>)> body*;
       natops-decl  := <collect-all(?NativeOperators(<id>)); concat; !NativeOperators(<id>)> body*;
       values-decl  := <collect-all(?Values(<id>)); concat; !Values(<id>)> body*;
       arrow-decl   := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
-      signatures    := [ sort-decl, natty-decl, cons-decl, semcomp-decl, intsort-decl, intcons-decl, values-decl, arrow-decl ];
+      signatures    := [ sort-decl, natty-decl, cons-decl, semcomp-decl, intsort-decl, intcons-decl, natcons-decl, values-decl, arrow-decl ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
 
 rules /* merge ovelapping rules */

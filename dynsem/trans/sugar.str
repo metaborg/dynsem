@@ -16,7 +16,7 @@ rules // desugaring
   
   desugar:
     Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
-
+    
   desugar:
     NMatch(lhs, Var(v)) -> NMatch(lhs, MatchedVar(v))
   

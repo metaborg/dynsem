@@ -1,22 +1,19 @@
 Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Ds Plug-in
+Eclipse-RegisterBuddy: org.strategoxt.imp.runtime
 Bundle-SymbolicName: dynsem; singleton:=true
+Export-Package: dynsem
+Bundle-Name: Ds Plug-in
 Bundle-Version: 1.0.0
+Require-Bundle:  org.spoofax.jsglr, org.eclipse.ui.workbench.textedito
+ r,org.eclipse.core.runtime, org.strategoxt.strj, org.eclipse.jface.te
+ xt, org.eclipse.core.resources, org.eclipse.ui, org.eclipse.ui.editor
+ s, org.eclipse.imp.runtime, org.strategoxt.imp.runtime, lpg.runtime,o
+ rg.spoofax.terms,org.spoofax.interpreter.core,org.spoofax.jsglr,org.s
+ poofax.interpreter.externaldeps,org.strategoxt.strj,org.strategoxt.im
+ p.runtime
+Bundle-ManifestVersion: 2
 Bundle-Activator: dynsem.Activator
-Import-Package: org.osgi.framework;version="1.3.0"
-Require-Bundle: org.eclipse.core.runtime,
-  org.eclipse.core.resources,
-  org.eclipse.imp.runtime,
-  org.eclipse.ui,
-  lpg.runtime,
-  org.eclipse.jface.text,
-  org.eclipse.ui.editors,
-  org.eclipse.ui.workbench.texteditor,
-  org.strategoxt.imp.runtime,
-  org.spoofax.jsglr,
-  org.strategoxt.strj
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
-Export-Package: dynsem
-Eclipse-RegisterBuddy: org.strategoxt.imp.runtime
+Import-Package: org.osgi.framework;version="1.3.0"
+

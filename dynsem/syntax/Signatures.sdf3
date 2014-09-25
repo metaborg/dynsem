@@ -95,6 +95,14 @@ templates // internal constructor declarations
 
   InternalConsDecl.InternalConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
 
+templates // internal constructor declarations
+
+  SignatureSection.NativeConstructors = <
+    native-constructors
+      <NativeConsDecl*; separator="\n">>
+
+  NativeConsDecl.NativeConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+
 templates
   
   SignatureSection.ArrowDeclarations = <

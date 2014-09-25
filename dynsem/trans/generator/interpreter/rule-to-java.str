@@ -20,22 +20,10 @@ rules // generate a dummy-bodied evaluate method
 	is-rule-for-arrow(|arrow-name) = get-rule-relation; get-relation-arrow-name; !(<id>, arrow-name); strip-annos; eq
 	
   gen-arrow-node-exec-method(|node-rule*, body*):
-    arrow-name ->[
-    	class-body-dec |[
-        public x_returnclass x_execname(param*) {
-          throw new InterpreterException("Operation not supported");
-        }
-      ]|]
+    arrow-name -> []
     where
       // i.e. there is no reduction rule for this arrow
       <not(fetch-elem(is-rule-for-arrow(|arrow-name)))> node-rule*
-    with
-      m-with-arrow-name(
-	      x_returnclass := <get-arrow-result-type>;
-	      x_execname := <get-arrow-exec-name>;
-	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
-	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*]
-	    |<strip-annos> arrow-name)
     
 signature
   constructors
@@ -68,7 +56,7 @@ rules // generate a full-bodied evaluate method
 	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
 	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*];
 	      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
-	      bstm* := <ops-to-java> (opweave, []);
+	      bstm* := [ bstm |[ this.specializeChildren(0); ]| | <ops-to-java> (opweave, []) ];
 	      if <is-rule-requires-throw> rule then
        	  bstm_fallback* := [ bstm |[ throw new InterpreterException("Rule failure"); ]| ]
         else
@@ -297,12 +285,29 @@ rules // compilation of individual operations
       )
     where
       cons-kind := <get-cons-kind> cons;
-      <not(?NativeOperator() + ?Value())> cons-kind
+      <not(?NativeOperator() + ?Value() + ?NativeConstructor())> cons-kind
     with
     	x_builtvar := <newname> "tmpbuild";
     	x_consname := <get-cons-java-name> cons;
     	(bstms*, e*) := <map(build-to-var); unzip> args;
     	bstm* := <concat> bstms*
+  
+  build-to-var:
+    Con(cons, args) -> 
+      (
+        bstm* |[
+          bstm*
+          final x_pkg.x_consname x_builtvar = new x_pkg.x_consname(getSourceInfo(), e*);
+        ]|, e |[ x_builtvar ]|
+      )
+    where
+      <get-cons-kind> cons => NativeConstructor()
+    with
+      x_pkg := <man-package-name>;
+      x_builtvar := <newname> "tmpbuild";
+      x_consname := <get-cons-java-name> cons;
+      (bstms*, e*) := <map(build-to-var); unzip> args;
+      bstm* := <concat> bstms*
 
   build-to-var:
     Con(cons, args) -> 

@@ -57,7 +57,7 @@ templates // formulas
 
   Formula.Match    = [[Term] => [Term]]
   Formula.NMatch   = [[Term] =!=> [Term]] 
-  Formula.TermEq   = [[Term] == [Term]]  
+  Formula.TermEq   = [[Term] == [Term]]
   Formula.TermNeq  = [[Term] != [Term]]
   
   Formula.Relation = [[Reads][Source] [Rel] [Target]]
@@ -82,14 +82,14 @@ templates // formulas
   
 templates // terms
 
-  // Term.MatchVar = [[ID]] {avoid}
-  // Term.MatchVar = [[LID]] {avoid}
+  Term.As       = [[ID]@[Term]]
 
   Term.VarRef   = [[ID]] {avoid}
   Term.VarRef   = [[LID]] {avoid}
 
   Term.Var      = [[ID]]
   Term.Var      = [[LID]]
+  Term.Wld      = <_>
   
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
