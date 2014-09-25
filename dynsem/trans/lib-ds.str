@@ -26,6 +26,8 @@ rules // utils for deterministic variable name generation
     rules(NextVarIdx : _ -> i);
     !$[[prefix]_[i]]
 
+  next-variable = next-variable(|"lifted")
+
 rules // projections for sorts
   
   get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _) + ?SemanticComponent(<id>, _) + ?InternalSortDecl(<id>)
