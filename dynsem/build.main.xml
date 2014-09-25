@@ -63,7 +63,7 @@
 	</target>
 
 	<target name="link-lib-files" unless="isWin" depends="os-detection">
-		<symlink resource="${basedir}/../runtime-libraries/" link="${basedir}/lib/runtime-libraries" overwrite="true" />
+		<symlink resource="${basedir}/../../runtime-libraries/" link="${basedir}/lib/runtime-libraries" overwrite="true" />
 	</target>
 
 </project>
