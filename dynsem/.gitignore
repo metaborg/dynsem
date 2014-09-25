@@ -7,3 +7,4 @@ syntax/ds*.generated.esv
 syntax/ds.generated.pp
 ds-Outliner.generated.str
 trans/*generated*
+/src-gen
