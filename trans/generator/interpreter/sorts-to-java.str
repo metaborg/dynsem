@@ -1,0 +1,157 @@
+module generator/interpreter/sorts-to-java
+
+imports
+  libjava-front
+  include/ds
+  generator/interpreter/gen-interpreter
+  names
+  names.manual
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+  lib/editor-common.generated
+  lib-ds
+  
+signature overlays
+  
+  JAVA_INTERFACE_MULTIPLE(pkgdec, imports, name, extended-ifaces) =
+      CompilationUnit(
+      Some(pkgdec)
+      , imports
+      , [ InterfaceDec(
+            InterfaceDecHead(
+              [Public()]
+            , Id(name)
+            , None()
+            , Some(
+                ExtendsInterfaces(extended-ifaces)
+              )
+            )
+          , []
+          )
+        ]
+      )
+
+rules /* generate interfaces for declared sorts */
+
+  sorts-to-java-interpreter:
+    Module(mod, body*) -> sort-interface*
+    with
+      sort-decl* := <collect-all(?InjDecl(_, _) + ?InternalInjDecl(_, _))> body*;
+      sort-interface* := <map(sort-to-java-interpreter)> sort-decl* 
+  
+  // backend for Sort -> Java
+  sort-to-java-interpreter:
+    inj ->
+      JAVA_INTERFACE_MULTIPLE(
+        |[ package x_pkgname; ]|
+        ,  [ |[ import org.metaborg.meta.interpreter.framework.*; ]| ]
+        , <get-sort-java-name> srt
+        , [ <get-sort-java-name; string-to-java-iface-name> extended-srt ]
+      )
+   where
+   	?InjDecl(srt, extended-srt)
+   	+ ?InternalInjDecl(srt, extended-srt)
+   with
+    x_pkgname := <gen-package-name>
+  
+  string-to-java-iface-name:
+    s -> InterfaceType(TypeName(Id(s)), None())
+    where
+      is-string
+  
+  get-sort-java-name = get-native-sort-java-name <+ get-user-sort-java-name
+  
+  get-native-sort-java-name:
+    "Term" -> <get-basesort-java-name>
+    
+  get-basesort-java-name = !$[I_Node]
+
+  get-native-sort-java-name:
+    "Int" -> "int"
+
+  get-native-sort-java-name:
+    "Real" -> "double"
+  
+  get-native-sort-java-name:
+    "Bool" -> "boolean"
+
+  get-native-sort-java-name:
+    "String" -> "String"
+  
+  get-native-sort-java-name:
+    "Value" -> "AValue"
+  
+  get-native-sort-java-name:
+    "Map" -> "com.github.krukow.clj_ds.PersistentMap<Object, Object>"
+  
+  get-native-sort-java-name:
+  	MapSort(_, _) -> <get-native-sort-java-name> "Map"
+  
+  get-native-sort-java-name:
+    ListSort(t) -> $[INodeList<[elem-sort-name]>]
+    with
+      elem-sort-name := <get-sort-java-name; box-java-sort> t
+
+  box-java-sort = try(box-primitive-java-sort)
+  
+  box-primitive-java-sort:
+    "int" -> "Integer"
+
+  box-primitive-java-sort:
+    "double" -> "Double"
+  
+  box-primitive-java-sort:
+    "boolean" -> "Boolean"
+  
+  get-native-sort-java-name = not(is-string); get-sort-name; get-native-sort-java-name
+  
+  get-user-sort-java-name:
+    term -> $[I_[term]]
+    where
+      is-string;
+      <get-sort-kind; not(?SemanticComponent() + ?NativeType())> term
+
+  get-user-sort-java-name:
+    term -> <get-native-sort-java-name> "Map"
+    where
+      is-string;
+      <get-sort-kind; ?SemanticComponent()> term
+  
+  get-user-sort-java-name:
+    term -> <get-java-id; unquote(?'"')> term
+    where
+      is-string;
+      <get-sort-kind; ?NativeType()> term
+  
+rules
+
+  is-sort-unchildable =
+    is-sort-native
+    + get-sort-kind => SemanticComponent()
+    + get-sort-kind => NativeType()
+    + is-sort-value
+    + is-sort-list; get-listsort-elementname; is-sort-unchildable
+
+  is-sort-childable = not(is-sort-unchildable)
+
+  get-user-sort-java-name = not(is-string); get-sort-name; get-user-sort-java-name
+
+  is-sort-value = try(get-sort-name); ?"Value"
+
+  is-sort-list = ?ListSort(_)
+
+  is-sort-nativetype = not(is-string); get-sort-name; is-sort-nativetype
+  
+  is-sort-nativetype = get-sort-kind; ?NativeType()
+
+  is-sort-native = not(is-string); get-sort-name; is-sort-native
+  is-sort-native = get-sort-name; get-sort-kind => SemanticComponent()
+  is-sort-native = is-sort-string + is-sort-int + is-sort-real + is-sort-bool
+  
+  is-sort-string = try(not(is-string); get-sort-name); ?"String"
+  
+  is-sort-int = try(not(is-string); get-sort-name); ?"Int"
+
+  is-sort-real = try(not(is-string); get-sort-name); ?"Real"
+  
+  is-sort-bool = try(not(is-string); get-sort-name); ?"Bool"
+

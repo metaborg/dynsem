@@ -1,0 +1,36 @@
+module resolve-includes
+
+imports
+  include/ds
+  lib/editor-common.generated
+  
+rules
+  
+  resolve-includes(|f-path, p-path):
+    Module(name, section*) -> Module(name, [Imports([Import("base")]), section'* ])
+    where
+      parent-dir := <string-tokenize(|['/']); reverse; Tl; reverse; concat-strings> f-path;
+      include-dir := <concat-strings> [p-path, "/", parent-dir];
+      (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
+      section'* := <include-imports(|include-dir, [])> (import*, section-noimports*)
+  
+  include-imports(|include-dir, imported*):
+    ([], section*) -> section*
+
+  include-imports(|include-dir, imported*):
+    ([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [i, imported*])> (ixs*, section*)
+    where
+      <fetch-elem(?i)> imported*
+      <+
+      <?"base"> i
+
+  include-imports(|include-dir, imported*):
+  	([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [i, imported*])> ([ixs*, new-import*], section'*)
+  	where
+  	  <not(fetch-elem(?i))> imported*;
+  	  <not(?"base")> i
+    with
+  		Module(_, imported-section*) := <concat-strings; parse-ds-file> [include-dir, "/", i, ".ds"];
+  		(new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*;
+      section'* := [section* | imported-section-noimports*]
+

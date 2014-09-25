@@ -5,9 +5,9 @@ menus
   menu: "Syntax"
     
     action: "Format"               = format-editor (openeditor) 
-    action: "Show Abstract Syntax" = debug-show-aterm (openeditor) (meta) 
-    action: "Show Analyzed Syntax" = debug-show-analyzed-selection (openeditor) (meta)
-    action: "Show Desugared Syntax" = debug-show-desugared (openeditor) (meta) 
+    action: "Show Abstract Syntax" = debug-show-aterm (source) (openeditor) (meta) 
+    action: "Show Analyzed Syntax" = debug-show-analyzed (openeditor) (meta)
+    action: "Show Desugared Syntax" = debug-show-desugared (source) (openeditor) (meta) 
     
   menu: "Analysis"
     
@@ -34,16 +34,20 @@ menus
                                                                                                                                                                                          
   menu: "Semantics"
 
-    action  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
+    // action  : "Generate Stratego"      = generate-stratego (openeditor) (realtime)
     action  : "Generate Coq"           = generate-coq (openeditor)
-    action  : "Generate Truffle"       = generate-truffle
+    action  : "Generate interpreter"   = generate-interpreter
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)     
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)       
-    action  : "Factorize"              = factorize-editor (openeditor) (realtime) 
-    action  : "Explicate"              = explicate-editor (openeditor) (realtime)   
+    action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
+    action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
+    action  : "Explicate + Factorize"  = explicate-factorize-editor (openeditor) (realtime) (source)
     
     separator
     
-    action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime)   
+    action  : "Pregeneration"          = pre-generation-transform-editor (openeditor) (meta)
+    action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime) (source) (meta)
+    action  : "Explicate + Factorize AST"  = explicate-factorize-editor-ast (openeditor) (realtime) (source) (meta)    
+    action  : "Resolve imports"        = includes-editor (openeditor) (realtime) (source) (meta)  
      
                 

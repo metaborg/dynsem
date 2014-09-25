@@ -1,33 +1,105 @@
 module Signatures
 
-imports Common
+imports
+  Common
+  ds
 
 templates
 
   ModuleSection.Signatures = <
     signature
         <SignatureSection*; separator="\n">>
-  
+
+templates // sort declarations
+
   SignatureSection.Sorts = <
     sorts
       <SortDecl*; separator="\n">>
   
-  SortDecl.SortDecl = <<ID> <SignatureAnnos?>>
-  SortDecl.InjDecl = [[ID] -> [ID] [SignatureAnnos?]]
+  SortDecl.SortDecl = <<ID>>
+  SortDecl.InjDecl = [[ID] -> [ID]]
   
+
+templates // constructor declarations
+
   SignatureSection.Constructors = <
     constructors
       <ConsDecl*; separator="\n">>
 
-  ConsDecl.ConsDecl = [[ID] : [Type*; separator=" * "] -> [Type] [SignatureAnnos?]]
+  ConsDecl.ConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
 
   Type.SimpleSort = <<ID>>
-  Type.ListSort = <List(<ID>)> 
+  Type.ListSort = <List(<Type>)> 
+  Type = [[MapType]]
   
-  SignatureAnnos.SignatureAnnos = <{ <SignatureAnno*; separator=", "> }>
-
-  SignatureAnno.ValueAnno = <value>
-  SignatureAnno.NativeAnno = <native>
-  SignatureAnno.InternalAnno = <internal>
+  MapType.MapSort = [Map<[Type],[Type]>]
   
+templates // semantic component declarations
 
+  SignatureSection.SemanticComponents = <
+    semantic-components
+      <SemanticCompDecl*; separator="\n">>
+  
+  SemanticCompDecl.SemanticComponent = [[ID] -> [MapType]]
+
+templates // internal sort declarations
+  
+  SignatureSection.InternalSorts = <
+    internal-sorts
+      <InternalSortDecl*; separator="\n">>
+  
+  InternalSortDecl.InternalSortDecl = <<ID>>
+  InternalSortDecl.InternalInjDecl = [[ID] -> [ID]]
+
+templates // native data types
+
+  SignatureSection.NativeDataTypes = <
+    native-datatypes
+      <NativeTypeDecl*; separator="\n">>
+  
+  JSNIPPET = <<STRING>>
+  
+  NativeTypeDecl.NativeBaseTypeDecl =
+    [[JSNIPPET] as [ID] { [NativeFunctionDecl*; separator="\n"] } ]
+  
+  NativeTypeDecl.NativeSubTypeDecl =
+    [[JSNIPPET] as [ID] -> [ID] { [NativeFunctionDecl*; separator="\n"] } ]
+  
+  NativeFunctionDecl.NativeFunctionDecl =
+    [[ID] : [Type*; separator=" * "] -> [Type]] 
+  
+  NativeFunctionDecl.NativeNoArgFunctionDecl =
+    [[ID] : [Type]]
+
+templates // native operator declarations
+
+  SignatureSection.NativeOperators = <
+    native-operators
+      <NativeOpDecl*; separator="\n">>
+  
+  NativeOpDecl.NativeOpDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+
+templates // value term declarations
+
+  SignatureSection.Values = <
+    values
+      <ValueDecl*; separator="\n">>
+
+  ValueDecl.ValueDecl = [[ID] : [Type*; separator=" * "]]
+
+templates // internal constructor declarations
+
+  SignatureSection.InternalConstructors = <
+    internal-constructors
+      <InternalConsDecl*; separator="\n">>
+
+  InternalConsDecl.InternalConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+
+templates
+  
+  SignatureSection.ArrowDeclarations = <
+    arrows
+      <ArrowDeclaration*; separator="\n">>
+  
+  ArrowDeclaration.ArrowDecl = [[Type] - [ID] -> [Type]]
+  ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]

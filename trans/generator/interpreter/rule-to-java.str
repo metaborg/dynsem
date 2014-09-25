@@ -1,0 +1,572 @@
+module generator/interpreter/rule-to-java
+
+imports
+  include/ds
+  ds
+  lib/editor-common.generated
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
+  generator/interpreter/gen-interpreter
+  generator/interpreter/constructors-to-java
+  generator/interpreter/sorts-to-java
+  generator/interpreter/pre-generation
+  names
+  names.manual
+  libjava-front
+  lib-ds
+  
+rules // generate a dummy-bodied evaluate method
+	
+	is-rule-for-arrow(|arrow-name) = get-rule-relation; get-relation-arrow-name; !(<id>, arrow-name); strip-annos; eq
+	
+  gen-arrow-node-exec-method(|node-rule*, body*):
+    arrow-name ->[
+    	class-body-dec |[
+        public x_returnclass x_execname(param*) {
+          throw new InterpreterException("Operation not supported");
+        }
+      ]|]
+    where
+      // i.e. there is no reduction rule for this arrow
+      <not(fetch-elem(is-rule-for-arrow(|arrow-name)))> node-rule*
+    with
+      m-with-arrow-name(
+	      x_returnclass := <get-arrow-result-type>;
+	      x_execname := <get-arrow-exec-name>;
+	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*]
+	    |<strip-annos> arrow-name)
+    
+signature
+  constructors
+    OpSeq: Op * Op -> Op
+        
+rules // generate a full-bodied evaluate method
+  
+  m-with-arrow-name(s|arrow-name) =
+    {| ArrowName:
+      rules(ArrowName: _ -> arrow-name);
+      s
+    |}
+  
+  gen-arrow-node-exec-method(|node-rule*, body*):
+    arrow-name -> [
+      class-body-dec |[
+        public x_returnclass x_execname(param*) {
+          bstm*
+          
+          bstm_fallback*
+        }
+      ]|]
+    where
+      // i.e. find and match the rule for this arrow name
+      rule@Rule(prem*, _, Relation(reads, source, _, target)) := <fetch-elem(where(is-rule-for-arrow(|arrow-name)))> node-rule*
+    with
+      m-with-arrow-name(
+	      x_returnclass := <get-arrow-result-type>;
+	      x_execname := <get-arrow-exec-name>;
+	      (_, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+	      param* := <map(rule-reads-to-inode-exec-params)> [nonwritable*, writable*];
+	      opweave := <foldr(!target, \ (op, weave) -> OpSeq(op, weave) \)> [source, prem*];
+	      bstm* := <ops-to-java> (opweave, []);
+	      if <is-rule-requires-throw> rule then
+       	  bstm_fallback* := [ bstm |[ throw new InterpreterException("Rule failure"); ]| ]
+        else
+	      	bstm_fallback* := []
+        end
+      |<strip-annos> arrow-name)
+
+  get-arrow-result-type = !$[[<ArrowName>]_Result]
+  get-arrow-exec-name   = !$[exec_[<ArrowName>]]
+  
+  is-rule-requires-throw = not(is-rule-try-or); is-rule-can-fail
+  
+  is-rule-try-or = ?Rule(_, _, _); collect-one(?TryOr(_, _))
+  
+  is-rule-can-fail =
+    ?Rule(<id>, _, _);
+    collect-one(
+      ?Match(_, Con(_, _))
+      + ?Match(_, List(_))
+      + ?Match(_, ListTail(_, _))
+      + ?NMatch(_, ListTail(_, _))
+      + ?TermEq(_, _)
+      + ?TermNeq(_, _))
+      + ?MergePoint(_, _, _)
+  
+  rule-reads-to-inode-exec-params:
+    LabelComp(ty, Var(x_name)) -> param |[ ~type:jiface x_name ]|
+    with
+      x_sort := <get-sort-java-name> ty;
+      jiface := type |[ x_sort ]|
+
+rules // bottomup right to left compilation of operations
+  
+  ops-to-java:
+    (OpSeq(op1, op2), stm-pre*) -> stm*
+    with
+      stm-down* := <ops-to-java> (op2, stm-pre*);
+      stm* := <op-to-java> (op1, stm-down*)
+
+  ops-to-java:
+    (op, stm-pre*) -> <op-to-java> (op, stm-pre*)
+    where
+      <not(?OpSeq(_, _))> op
+  
+rules // compilation of individual operations
+  
+  // source part. we ignore data-part because it is bound in the execute header
+  op-to-java:
+    (Source(Con(_, arg*), _), stm*) -> [var-bind*, stm*]
+    with
+      var-bind* := <map-with-index(field-to-varbind); concat> arg*
+
+  field-to-varbind:
+    (idx, var@Var(x_v)) ->
+    bstm* |[
+      bstm_childrepl*
+      final x_type x_v = x_idx;
+    ]|
+    with
+      x_idx := $[_[<int-to-string> idx]];
+      var-ty := <get-type> var;
+      x_type := <get-sort-java-name> var-ty
+    with
+      if <is-sort-childable> var-ty then
+        bstm_childrepl* := bstm* |[ 
+          // if(x_idx instanceof IGenericNode) {
+          //   x_idx.replace(((IGenericNode) x_idx).computeReplacement());
+          // }
+        ]|
+      else
+        bstm_childrepl* := []
+      end
+
+  op-to-java:
+    (Target(VarRef(x_v), data-out*), []) ->
+      bstm* |[
+        bstm1*
+        final x_execresult x_resname = new x_execresult(x_v, e*);
+        return x_resname;
+      ]|
+    with
+      x_execresult := <get-arrow-result-type>;
+      x_resname := <newname>;
+      (e*, bstms*) := <map(?LabelComp(_, <id>); exp-to-java); unzip> data-out*;
+      bstm1* := <concat> bstms*
+      
+  ma-to-java:
+    Formula(Match(lhs, rvar@MatchedVar(x_rvar))) -> (
+	      bstm* |[
+	        bstm1*
+	        final x_type x_rvar = e_lvar;
+	      ]|, [], e |[ true ]|, [])
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      x_type := <get-type; get-sort-java-name> rvar
+  
+  ma-to-java:
+    Formula(Match(lhs, rhs@Con(cons, bound-var*))) -> (
+      bstm* |[
+        bstm1*
+        final x_consname x_tempvar = e_lvar.match(x_consname.class);
+      ]|, [], e |[ x_tempvar != null ]|, bstm_patbound*)
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      x_consname := <get-cons-java-name> cons;
+      x_tempvar := <newname> "tmpbuild";
+      bstm_patbound* := <map-with-index(read-out-to-vardec(|x_tempvar))> bound-var*
+
+  ma-to-java:
+    Formula(Match(lhs, List([]))) -> (
+      bstm* |[
+        bstm1*
+      ]|, [],  e |[ e_lvar != null && e_lvar.isEmpty() ]|, [])
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs
+
+  ma-to-java:
+    Formula(Match(lhs, lt@ListTail([Var(x_x)], Var(x_xs)))) -> (
+      bstm* |[
+        bstm1*
+      ]|, [], e |[ e_lvar != null && !e_lvar.isEmpty() ]|, 
+      bstm* |[
+        final x_xty x_x = e_lvar.head();
+        final x_xsty x_xs = e_lvar.tail();
+      ]|)
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      x_xty := <get-type; get-sort-java-name> x_x;
+      x_xsty := <get-type; get-sort-java-name> x_xs
+
+  nma-to-java:
+    Formula(NMatch(lhs, rhs@Con(cons, _))) -> (
+      bstm* |[
+        bstm1*
+        final x_consname x_tempvar = e_lvar.match(x_consname.class);
+      ]|, [], e |[ x_tempvar == null ]|, [])
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      x_consname := <get-cons-java-name> cons;
+      x_tempvar := <newname> "tmpbuild"
+
+  op-to-java:
+    (ma@Formula(NMatch(_, _)), bstm2*) ->
+      bstm* |[
+        bstm_matchlhs*
+        bstm_matchrhs*
+        if(e) {
+          bstm2*
+        }
+      ]|
+    with
+      (bstm_matchlhs*, bstm_matchrhs*, e, bstm_patbound*) := <nma-to-java> ma
+
+  op-to-java:
+    (ma@Formula(Match(_, _)), bstm2*) ->
+	    bstm* |[
+	      bstm_matchlhs*
+	      bstm_matchrhs*
+	      bstm_work*
+	    ]|
+    with
+      (bstm_matchlhs*, bstm_matchrhs*, e, bstm_patbound*) := <ma-to-java> ma;
+      if <?e |[ true ]|> e then
+        bstm_work* := bstm* |[
+          bstm_patbound*
+          bstm2*
+        ]|
+      else
+        bstm_work* := bstm* |[
+          if(e){
+            bstm_patbound*
+            bstm2*
+          }
+        ]|
+      end
+  
+  build-to-var:
+    Fresh() -> ([], e |[ x_pkg.Natives.fresh() ]|)
+    with
+      x_pkg := <man-package-name>
+  
+  build-to-var:
+    Int(i) -> ([], e |[ i ]|)
+  
+  build-to-var:
+  	True() -> ([], e |[ true ]|)
+  
+  build-to-var:
+  	False() -> ([], e |[ false ]|)
+  
+  build-to-var:
+    VarRef(x_vref) -> ([], e |[ x_vref ]|)
+  
+  build-to-var:
+    String(s) -> ([], Lit(String([Chars(<unquote(?'"')> s)])))
+  
+  build-to-var:
+    m@Map([]) -> ([] , e |[ new com.github.krukow.clj_lang.PersistentTreeMap<Object, Object>() ]|)
+    	
+  build-to-var:
+  	MapSelect(map, key) ->
+  	 ([map-pre*, key-pre*, 
+  	   bstm |[
+  	     final x_mapvalueclass x_builtvar = (x_mapvalueclass) e_map.get(e_key);
+  	   ]|
+  	  ], e |[ x_builtvar ]|)
+  	with
+  		(map-pre*, e_map) := <build-to-var> map;
+  		(key-pre*, e_key) := <build-to-var> key;
+  	  x_builtvar := <newname> "tmpbuild";
+  	  (_, val-ty) := <get-type; get-stored-tys> map;
+  	  x_mapvalueclass := <get-sort-java-name> val-ty
+  
+  build-to-var:
+    OptMap(mapbit*) -> (bstm*, e)
+    with
+      (e, bstm*) := <exp-to-java> mapbit*
+  
+  build-to-var:
+    Con(cons, args) -> 
+      (
+      	bstm* |[
+      		bstm*
+      		final x_consname x_builtvar = new x_consname(getSourceInfo(), e*);
+        ]|, e |[ x_builtvar ]|
+      )
+    where
+      cons-kind := <get-cons-kind> cons;
+      <not(?NativeOperator() + ?Value())> cons-kind
+    with
+    	x_builtvar := <newname> "tmpbuild";
+    	x_consname := <get-cons-java-name> cons;
+    	(bstms*, e*) := <map(build-to-var); unzip> args;
+    	bstm* := <concat> bstms*
+
+  build-to-var:
+    Con(cons, args) -> 
+      (
+        bstm* |[
+          bstm*
+          final x_consname x_builtvar = new x_consname(e*);
+        ]|, e |[ x_builtvar ]|
+      )
+    where
+      <get-cons-kind> cons => Value()
+    with
+      x_builtvar := <newname> "tmpbuild";
+      x_consname := <get-cons-java-name> cons;
+      (bstms*, e*) := <map(build-to-var); unzip> args;
+      bstm* := <concat> bstms*
+
+  build-to-var:
+    Con(cons, args) ->
+      (
+        bstm* |[
+          bstm*
+          final x_type x_builtvar = x_pkg.Natives.x_consname(e*);
+        ]|, e |[ x_builtvar ]|)
+    where
+      cons-kind := <get-cons-kind> cons;
+      <?NativeOperator()> cons-kind
+    with
+      (_, ty) := <get-type> cons;
+      x_type := <get-sort-java-name> ty;
+      x_builtvar := <newname> "tmpbuild";
+      x_consname := <get-cons-java-name> cons;
+      x_pkg := <man-package-name>;
+      (bstms*, e*) := <map(build-to-var); unzip> args;
+      bstm* := <concat> bstms*
+  
+  build-to-var:
+  	SortFunCall(x_funname, on_expr, args) ->
+  	  (
+  	 	  bstm* |[
+  	 	  	bstm_1*
+  	 	  	bstm_2*
+  	 	 	  final x_type x_builtvar = e_on.x_funname(e*);
+  	 	  ]|, e |[ x_builtvar ]|
+  	  )
+  	with
+  		x_builtvar := <newname> "tmpbuild";
+  		(bstm_1*, e_on) := <build-to-var> on_expr;
+  		(_, ty) := <get-type> x_funname;
+  		x_type := <get-sort-java-name> ty;
+  		(bstm_2*, e*) := <map(build-to-var); unzip; (concat, id)> args
+  
+  build-to-var:
+    l@List([]) -> 
+      (
+        bstm* |[
+          final x_listty x_builtvar = NodeList.NIL(x_listelemty.class);
+        ]|, e |[ x_builtvar ]|
+      )
+    with
+      l-ty := <get-type> l;
+      x_listty := <get-sort-java-name> l-ty;
+      x_listelemty := <get-listsort-elementname; get-sort-java-name> l-ty;
+      x_builtvar := <newname> "tmpbuild"
+  
+  build-to-var:
+    tl@ListTail([elem], xs) -> 
+      (
+        bstm* |[
+          bstm_head*
+          bstm_tail*
+          final x_listty x_builtvar = new NodeList<x_listelemty>(e_head, e_tail);
+        ]|, e |[ x_builtvar ]|
+      )
+    with
+      tl-ty := <get-type> tl;
+      x_listty := <get-sort-java-name> tl-ty;
+      x_listelemty := <get-listsort-elementname; get-sort-java-name> tl-ty;
+      (bstm_head*, e_head) := <build-to-var> elem;
+      (bstm_tail*, e_tail) := <build-to-var> xs; 
+      x_builtvar := <newname> "tmpbuild"
+
+  op-to-java:
+    (Formula(Relation(Reads(read*), Source(ref@VarRef(_), sc*), NamedDynamicEmitted(_, arrow-name), Target(Var(x_vout), tc*))), bstm4*) ->
+      bstm* |[
+        bstm1*
+        final x_resultclass x_result = e_vin.x_execname(e*);
+        final x_valueclass x_vout = x_result.value;
+        bstm3*
+        bstm4*
+      ]|
+    with
+    	m-with-arrow-name(
+	      x_resultclass := <get-arrow-result-type>;
+	      x_execname := <get-arrow-exec-name>;
+	      x_result := <newname> "tmpresult";
+	      (_, r-ty) := <get-type> arrow-name;
+	      x_valueclass := <get-sort-java-name> r-ty;
+	      (e*, bstms1*) := <map(exp-to-java); unzip> [read*, sc*];
+	      bstm1* := <concat> bstms1*;
+	      (e_vin, bstm2*) := <exp-to-java> ref;
+	      bstm3* := <map-with-index(read-out-to-vardec(|x_result))> tc*
+      |<strip-annos> arrow-name)
+  
+  read-out-to-vardec(|x_result):
+  	(idx, LabelComp(ty, v@Var(_))) -> <read-out-to-vardec(|x_result)> (idx, v)
+  
+  read-out-to-vardec(|x_result):
+    (idx, vdef@Var(v-out)) ->
+      bstm |[
+      	final x_type x_vout = x_result.x_getidx();
+      ]|
+    with
+    	x_type := <get-type; get-sort-java-name> vdef;
+    	x_vout := v-out;
+    	x_getidx := $[get_[idx]]
+
+rules // term equality and inequality
+
+  op-to-java:
+    (f@Formula(TermEq(_, _)), bstm_rest*) ->
+      bstm* |[
+        bstm1*
+        bstm2*
+        if(e) {
+          bstm3*
+        	bstm_rest*
+        }
+      ]|
+    with
+      (bstm1*, bstm2*, e, bstm3*) := <eq-to-java> f
+  
+  op-to-java:
+    (f@Formula(TermNeq(_, _)), bstm_rest*) ->
+      bstm* |[
+        bstm1*
+        bstm2*
+        if(e) {
+          bstm3*
+          bstm_rest*
+        }
+      ]|
+    with
+      (bstm1*, bstm2*, e, bstm3*) := <eq-to-java> f
+  
+  eq-to-java:
+    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != null && e_lvar.equals(e_rvar) ]|, [])
+    where
+      <get-type; not(is-sort-int + is-sort-bool + is-sort-real)> lhs;
+      <get-type; not(is-sort-int + is-sort-bool + is-sort-real)> rhs
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      (bstm2*, e_rvar) := <build-to-var> rhs
+
+  eq-to-java:
+    Formula(TermEq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == e_rvar ]|, [])
+    where
+      <get-type; (is-sort-int + is-sort-bool + is-sort-real)> lhs;
+      <get-type; (is-sort-int + is-sort-bool + is-sort-real)> rhs 
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      (bstm2*, e_rvar) := <build-to-var> rhs
+
+  eq-to-java:
+    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar == null || !e_lvar.equals(e_rvar) ]|, [])
+    where
+      <get-type; not(is-sort-int + is-sort-bool + is-sort-real)> lhs;
+      <get-type; not(is-sort-int + is-sort-bool + is-sort-real)> rhs
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      (bstm2*, e_rvar) := <build-to-var> rhs
+
+  eq-to-java:
+    Formula(TermNeq(lhs, rhs)) -> (bstm1*, bstm2*, e |[ e_lvar != e_rvar ]|, [])
+    where
+      <get-type; (is-sort-int + is-sort-bool + is-sort-real)> lhs;
+      <get-type; (is-sort-int + is-sort-bool + is-sort-real)> rhs 
+    with
+      (bstm1*, e_lvar) := <build-to-var> lhs;
+      (bstm2*, e_rvar) := <build-to-var> rhs
+  
+rules // backend for merge points
+  
+  op-to-java:
+    (MergePoint(guard, l*@[_ | _], r*@[_ | _]), bstm_rest*) ->
+      bstm* |[
+        bstm1*
+        bstm2*
+        if(e) {
+          bstm3*
+          bstm_l*
+        } else {
+          bstm_r*
+        }
+      ]|
+    with
+      (bstm1*, bstm2*, e, bstm3*) := <eq-to-java <+ ma-to-java> guard;
+      [lx | lxs] := <reverse> l*;
+      lopweave := <foldr(!lx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> lxs;
+      bstm_l* := <ops-to-java> (lopweave, bstm_rest*);
+      [rx | rxs] := <reverse> r*;
+      ropweave := <foldr(!rx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> rxs;
+      bstm_r* := <ops-to-java> (ropweave, bstm_rest*)
+
+rules // fallback
+
+  op-to-java:
+  	(TryOr(try*, or*), bstm_rest*) ->
+  	  bstm* |[
+  	    {
+  	  	  bstm_try*
+  	  	}
+  	  	{
+  	  	  bstm_or*
+  	  	}
+  	  ]|
+  	with
+  		[tryx | tryxs] := <reverse> try*;
+      tryopweave := <foldr(!tryx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> tryxs;
+  		bstm_try* := <ops-to-java> (tryopweave, bstm_rest*);
+  		[orx | orxs] := <reverse> or*;
+      oropweave := <foldr(!orx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> orxs;
+  		bstm_or* := <ops-to-java> (oropweave, bstm_rest*)
+
+rules // expressions to java
+  
+  exp-to-java:
+    VarRef(x_name) ->  (e |[ x_name ]|, [])
+  
+  exp-to-java:
+  	LabelComp(_, VarRef(x_name)) -> (e |[ x_name ]|, [])
+
+  // exp-to-java:
+  //   LabelComp(_, OptMap(mapbit*)) -> <exp-to-java> mapbit*
+
+  // special case for a single VarRef specified as an environment optimization
+  exp-to-java:
+    [ v@VarRef(_) ] -> <exp-to-java> v
+
+  // special case for an environment with a single mapping
+  exp-to-java:
+    [ Bind(key, value) ] -> (e |[ new com.github.krukow.clj_lang.PersistentTreeMap<Object, Object>().plus(e_key, e_value) ]|, [key-pre*, value-pre*])
+    with
+      (e_key, key-pre*) := <exp-to-java> key;
+      (value-pre*, e_value) := <build-to-var> value
+
+  // add multiple bindings at once
+  exp-to-java:
+    [ v@VarRef(_) | xsbind ] -> ( e |[ MapUtils.plus(e_xsbind, e_v) ]|, [value-stm*, xsbind-stm*] )
+    where
+      <not(?[])> xsbind
+    with
+     (e_xsbind, xsbind-stm*) := <exp-to-java> xsbind;
+     (value-stm*, e_v) := <build-to-var> v
+
+  // add single binding
+  exp-to-java:
+    [ Bind(key, value) | xsbind ] -> ( e |[ e_xsbind.plus(e_key, e_value) ]|, [key-stm*, value-stm*, xsbind-stm*])
+    where
+      <not(?[])> xsbind
+    with
+      (e_xsbind, xsbind-stm*) := <exp-to-java> xsbind;
+      (e_key, key-stm*) := <exp-to-java> key;
+      (value-stm*, e_value) := <build-to-var> value
+
+
+

@@ -6,7 +6,10 @@ module Common
   lexical syntax 
     
     [a-zA-Z][a-zA-Z0-9\'\_]* -> ID
+    [a-zA-Z][a-zA-Z0-9\_\.]* -> JID
     "-"? [0-9]+          -> INT
+    "-"? [0-9] "." [0-9]+ -> REAL
+    "-"? "." [0-9]+       -> REAL
     
     "\"" StringChar* "\"" -> STRING
     ~[\"\n]               -> StringChar
@@ -28,8 +31,9 @@ module Common
   
     CommentChar   -/- [\/]
     INT           -/- [0-9]
-    ID            -/- [a-zA-Z0-9\_]
-    
+    ID            -/- [a-zA-Z0-9\_\']
+    JID           -/- [a-zA-Z0-9\_\.]
+
     %% EOF may not be followed by any char
     
     EOF           -/- ~[]

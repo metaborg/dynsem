@@ -1,0 +1,201 @@
+module dstocoq
+
+imports
+  libstratego-lib
+  libstratego-gpp
+  libstratego-aterm
+  include/ds
+  lib/editor-common.generated
+  refocus
+  sugar
+  strict
+  lib-ds
+  explicate
+  include/Coq
+  coq/trans/Lexical.pp.generated
+  coq/trans/Qid.pp.generated
+  coq/trans/Gallina.pp.generated
+  coq/trans/Vernacular.pp.generated
+  coq/trans/Coq.pp.generated
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/tmpl/pp
+  coq/include/Coq-parenthesize
+
+signature constructors
+	Assign : T * T -> T
+
+rules 
+	
+	ds-to-coq:
+		(selected, position, ast, path, project-path) -> (filename,content)
+		where 
+			rs' := <unstrict-rules; desugar-all; explicate-rules> ast;
+            <extract-components> rs';
+            sem-rel-id := "DynSem";
+          	semterm := "Sem_T";
+          	filename :=  <guarantee-extension(|"v")> path;
+            rs'' := Inductive(Ind([Induc(sem-rel-id,[],<type-sem> (Ref("Prop"),Ref(semterm)),ListDeclBar(<translate-rules(|sem-rel-id)> rs'))]));
+            lscons := <declare-coq-constructors(|semterm)> ast;
+          	dynsemsyn := <generate-coq-semterm-type(|semterm)> lscons; 
+			contentast  := Sent([dynsemsyn,rs'']);
+			//content := contentast
+			
+			
+   			ast'    := <parenthesize-Coq> contentast;
+    		box     := V([], <my-prettyprint-CoqFile> ast');
+    		content := <box2text-string(|100)> box
+
+   	my-prettyprint-CoqFile =
+	prettyprint-CoqFile
+	<+  bottomup(try(not(is-string <+ is-list <+ prettyprint-example); debug(!"cannot pp ")))
+      
+rules // declare constructors
+	
+  type-sem:
+  	(semname,semterm) -> Product(semterm,Product(semterm,Product(semterm,Product(semterm,Product(semterm,semname))))) 
+	
+ 
+  product-left(|semterm,outtype):
+		dep -> Product(Ref(semterm), outtype) 
+  
+  list-prod-type(|semterm,outtype) :
+  	[] -> Ref(outtype)
+  	
+  list-prod-type(|semterm,outtype) :
+	[t|q] -> Product(Ref(semterm), <list-prod-type(|semterm,outtype)> q)
+	
+    
+  declare-coq-constructor(|semterm) :
+    Con(name, t*) -> ConsDecl($[[name]_[<length> t*]],[], Type(<list-prod-type(|semterm,semterm)> t*))
+
+ // declare-coq-constructor(|semterm) :
+ //   LabelComp(name, _) -> ConsDecl(name,[], Type(Product(Ref(semterm),Ref(semterm))))
+ 	
+  declare-coq-constructors(|semterm) =
+  	collect-all(declare-coq-constructor(|semterm), union)
+  	
+  generate-coq-semterm-type(|semterm) :
+	lscons -> 
+		Inductive(Ind([Induc(semterm,[],Ref("Set"),
+		 	ListDeclBar(
+		 		[ConsDecl("String_T",[],Type(Product(Ref("string"),Ref(semterm))))|
+		 		 [ConsDecl("Bind_T",[],Type(Product(Ref(semterm),Product(Ref(semterm),Ref(semterm)))))|
+		 		 lscons]]))]))
+	
+  term-to-coq:
+  	Var(ident) -> Ref(ident)
+  	
+  term-to-coq:
+  	Map([]) -> Ref("Nil_0")
+  	
+  term-to-coq:
+  	Map([a|q]) -> Apply(Apply(Ref("Cons_2"),<term-to-coq> a), <term-to-coq> Map(q))
+  
+  term-to-coq:
+  	List([]) -> Ref("Nil_0")
+
+  term-to-coq:
+  	List([a|q]) -> Apply(Apply(Ref("Cons_2"),<term-to-coq> a), <term-to-coq> List(q))
+  
+  term-to-coq:
+  	Bind(e1,e2) -> Apply(Apply(Ref("Bind_T"),<term-to-coq> e1), <term-to-coq> e2)
+  
+  term-to-coq:
+  	Con(idc,larg) -> <larg-term-to-coq(|Ref($[[idc]_[<length> larg]]))> larg
+  				 
+  term-to-coq:
+  	LabelComp(idc,t) -> <term-to-coq> t
+  
+  term-to-coq:
+  	String(s) -> Apply(Ref("String_T"),Ref(s))
+    		
+  larg-term-to-coq(|fun) :
+  	[a|q] -> <larg-term-to-coq(|Apply(fun,<term-to-coq> a))> q
+  	
+  larg-term-to-coq(|fun) :
+  	[] -> fun
+  
+rules // translate rules
+   
+  translate-rules(|sem-rel-id) =
+    collect(?Rules(<id>)); 
+    concat; 
+    filter(translate-rule(|sem-rel-id))
+    
+  translate-rule(|sem-rel-id) :
+    Rule(prem*, _, TermEq(lhs, rhs)) -> 
+      	ConsDecl(name,[Bind(Env)|[Bind(S)|vars]],Type(constype))
+    	with
+    		premises := <map(translate-premise(|sem-rel-id))> prem*;
+    		varprem := <map(Snd);concat-union> premises;  
+        	termprem := <map(Fst)> premises;
+        	name := <namerule> (lhs,rhs);
+        	vars := <union;map(bind)> (<collect-all(?Var(<id>),union)> [lhs,rhs],varprem);
+    		S := <newname> "S";
+        	Env := <newname> "Env";
+    		rettype := <apply-list(|Ref(sem-rel-id))> [Ref(Env),<term-to-coq> lhs,Ref(S),<term-to-coq> rhs,Ref(S)];
+    		constype := <product-type-list(|rettype)> termprem
+     	
+    
+         
+  translate-premise(|sem-rel-id) :
+    TermEq(lhs, rhs) -> (Eq(<term-to-coq> lhs, <term-to-coq> rhs), <collect-all(?Var(<id>),union)> [lhs,rhs]) 
+  
+rules // translate dynamic
+
+  namerule:
+  	    (_,Con(ident,_)) -> <newname> $[[ident]_R]
+
+  namerule:
+  	    (Con(ident,_),t) -> <newname> $[[ident]_R]
+	where 
+		<not(?Con(_,_))> t
+  
+  namerule:
+  	    (t,t') -> <newname> $[Sem_R]
+  	where 
+		<not(?Con(_,_))> t;
+		<not(?Con(_,_))> t'
+		
+
+  apply-list(|fun) :
+  	[] -> fun
+  	
+  apply-list(|fun) :
+  	[a|q] -> <apply-list(|Apply(fun,a))> q
+  	
+  product-type-list(|ret) :
+  	[] ->  ret
+
+  product-type-list(|ret) :
+  	[a|q] -> Product(a,<product-type-list(|ret)> q)
+ 	
+  concat-union :
+  	[] -> []
+  
+  concat-union :
+  	[a|q] -> <union> (a,<concat-union> q)
+  	
+  bind : 
+  	v -> Bind(v)
+  
+  translate-rule(|sem-rel-id) :
+    Rule(prem*, _, Relation(Reads([LabelComp("Env", env)]), Source(lhs, [_,LabelComp("State",S1)]), DynamicEmitted(e*), Target(rhs, [_,LabelComp("State",S2)]))) -> 
+    	ConsDecl(name,vars,Type(constype))
+    	with
+    		premises := <map(translate-premise(|sem-rel-id))> prem*;
+    		varprem := <map(Snd);concat-union> premises;  
+        	termprem := <map(Fst)> premises;
+        	name := <namerule> (lhs,rhs);
+    		vars := <union;map(bind)> (<collect-all(?Var(<id>),union)> [lhs,rhs,env,S1,S2],varprem);
+    		rettype := <apply-list(|Ref(sem-rel-id))> [<term-to-coq> env,<term-to-coq> lhs,<term-to-coq> S1,<term-to-coq> rhs,<term-to-coq> S2];
+    		constype := <product-type-list(|rettype)> termprem
+    
+               
+  translate-premise(|sem-rel-id) :
+    Relation(Reads([LabelComp("Env", env)]), Source(lhs, [_,LabelComp("State",S1)]), DynamicEmitted(e*), Target(rhs, [_,LabelComp("State",S2)])) ->
+    	(rettype,vars)
+    with 
+    	rettype := <apply-list(|Ref(sem-rel-id))> [<term-to-coq> env,<term-to-coq> lhs,<term-to-coq> S1,<term-to-coq> rhs,<term-to-coq> S2];  
+		vars := <collect-all(?Var(<id>),union)> [lhs,rhs,env,S1,S2]
+
+  

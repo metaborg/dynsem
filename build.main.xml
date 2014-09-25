@@ -25,6 +25,7 @@
                     --library
                     -I &quot;${trans}&quot;
                     -I &quot;${basedir}&quot;
+		                -I &quot;${basedir}/lib/runtime-libraries/org.spoofax.meta.runtime.libraries&quot;
                     -la stratego-lib -la stratego-sglr -la stratego-gpp -la stratego-xtc -la stratego-aterm -la stratego-parallel" />
 
 	<!-- Optional: external .def and .jar locations
@@ -32,7 +33,7 @@
     <property name="externaljar" value="../lib.jar"/>
     <property name="externaljarflags" value="-la org.lib"/>
     -->
-	<property name="externaljarflags" value="-la org.metaborg.runtime.task.interop" />
+	<!-- <property name="externaljarflags" value="-la org.metaborg.runtime.task.interop" /> -->
 
 	<!-- Environment configuration for command-line builds -->
 	<condition property="build.strategoxt.sdf" value="${eclipse.spoofaximp.nativeprefix}" else="">
@@ -48,9 +49,21 @@
 		<fileset dir=".">
 			<include name="**/*.sdf3" />
 			<include name="**/*.nab" />
+			<include name="**/*.ts" />
 		</fileset>
 	</path>
 
 	<!-- Main target -->
-	<target name="all" depends="spoofaximp.default.ctree" />
+	<target name="all" depends="link-lib-files, spoofaximp.default.jar" />
+
+	<target name="os-detection">
+		<condition property="isWin">
+			<os family="windows" />
+		</condition>
+	</target>
+
+	<target name="link-lib-files" unless="isWin" depends="os-detection">
+		<symlink resource="${basedir}/../runtime-libraries/" link="${basedir}/lib/runtime-libraries" overwrite="true" />
+	</target>
+
 </project>

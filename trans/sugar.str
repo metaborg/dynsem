@@ -2,6 +2,8 @@ module sugar
 
 imports
 	include/ds
+	mark-references
+	ds
 	
 signature
   constructors
@@ -10,41 +12,56 @@ signature
 	
 rules // desugaring
 	
-  desugar-all = innermost(desugar); alltd(rules-concat)
-  
-  desugar :
-    SortDecl(srt, Some(annos)) -> SortDecl(srt, annos)
-  
-  desugar :
-    SortDecl(srt, None()) -> SortDecl(srt, SignatureAnnos([]))
+  desugar-all = mark-var-defs-in-rules; innermost(desugar); alltd(rules-concat)
   
   desugar:
-    ConsDecl(cons, srtargs, srt, Some(annos)) -> ConsDecl(cons, srtargs, srt, annos)
-  
-  desugar:
-    ConsDecl(cons, srtargs, srt, None()) -> ConsDecl(cons, srtargs, srt, SignatureAnnos([]))
-  
-  desugar:
-    InjDecl(from, to, None()) -> InjDecl(from, to, SignatureAnnos([]))
+    Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
 
   desugar:
-    InjDecl(from, to, Some(annos)) -> InjDecl(from, to, annos)
+    NMatch(lhs, Var(v)) -> NMatch(lhs, MatchedVar(v))
+  
+  desugar :
+    SortDecl(ty) -> InjDecl(ty, "Term")
+  
+  desugar :
+    InternalSortDecl(ty) -> InternalInjDecl(ty, "Term")
+    
+  desugar :
+    NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
   
   desugar :
     RuleW(form, prem*) -> Rule(prem*, "---", form)
-    
+  
+  desugar :
+    DefaultArrowDecl(l-ty, r-ty) -> ArrowDecl(l-ty, "default", r-ty)
+  
+  desugar :
+    Dynamic() -> NamedDynamic("default")
+  
+  desugar :
+    DynamicEmitted(e) -> NamedDynamicEmitted(e, "default")
+  
+  desugar :
+    NamedDynamic(n) -> NamedDynamicEmitted([], n)
+  
+  desugar :
+    List(x*) -> ListTail(x*, List([]))
+    where <not(?[])> x* 
+
+  desugar :
+    ListTail([x | xs*], xxs) -> ListTail([x], ListTail(xs*, xxs))
+    where
+      <not(?[])> xs*
+
   desugar :
     NoReads() -> Reads([])
-   
+
   desugar :
     Source(lhs) -> Source(lhs, [])
-    
+
   desugar :
     Target(rhs) -> Target(rhs, [])
-    
-  desugar :
-    Dynamic() -> DynamicEmitted([])
-    
+
   desugar :
     Axiom(form) -> Rule([], "---------", form)
     
@@ -62,24 +79,18 @@ rules // desugaring
            list := <map( \ param -> Seqstrict(con,[param],params2) \)> params1
      // this converts a Rule into a list of Rules
      // so they must later be concatenated, post-desugaring:
-     
+  
   rules-concat :
   	 Rules(list) -> Rules(list1)
   	 where list1 := <map(?Cons(_,_) <+ ( \ n -> Cons(n,Nil()) \)); concat> list
-    
+
 rules // sugaring
   
   sugar-all = innermost(sugar)
   
   sugar :
-    SortDecl(srt, sa@SignatureAnnos(_)) -> SortDecl(srt, Some(sa))
+    NativeFunctionDecl(name, [], type) -> NativeNoArgFunctionDecl(name, type)
   
-  sugar :
-    ConsDecl(cons, srtargs, srt, sa@SignatureAnnos(_)) -> ConsDecl(cons, srtargs, srt, Some(sa))
-  
-  sugar :
-    InjDecl(from, to, sa@SignatureAnnos(_)) -> InjDecl(from, to, Some(sa))
-
   sugar :
   	Rule([],infer,conc) -> Axiom(conc)
 
@@ -87,7 +98,7 @@ rules // sugaring
   	Reads([]) -> NoReads()
 
   sugar :
-  	DynamicEmitted([]) -> Dynamic()
+  	NamedDynamicEmitted([], name) -> NamedDynamic(name)
 
   sugar :
   	Target(term,[]) -> Target(term)
@@ -100,6 +111,9 @@ rules // sugaring
     
   sugar :
     Rule(prem*, _, form) -> RuleW(form, prem*)
+
+  sugar :
+  	MatchedVar(v) -> Var(v)
   
 rules // desugaring maps
   

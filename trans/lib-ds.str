@@ -9,65 +9,209 @@ imports
   refocus
   sugar
   strict
+  ds
 
 // utilities for DynSem analysis
 
-rules // extract components        
+rules // utils for deterministic variable name generation
   
-  extract-components =
-    collect-all(?LabelComp(<id>, _), union) => comps; 
-    <filter(not(IsWritable))> comps => non-writeables; 
-    <filter(not(IsReadable))> comps => non-readables; 
-    rules(
-      CompList : _ -> comps
-      NonWriteables : _ -> non-writeables
-      NonReadables : _ -> non-readables
-      
-      CompPatLhs : num -> $<[<<separate-by(|",")>lst>]>
-        where <map(mk-label-comp-str(|num))> non-writeables => lst     
-        
-      CompPatRhs : num -> $<[<<separate-by(|",")>lst>]>
-        where <map(mk-label-comp-str(|num))> non-readables => lst     
-        
-      CompsLhs : num -> <mk-label-comps(|num)> non-writeables
-      
-      CompsRhs : num -> <mk-label-comps(|num)> non-readables       
-    )
+  while-counting(s) =
+    {| NextVarIdx:
+      NextVarIdx < s + rules(NextVarIdx : _ -> 0); s
+    |}
+  
+  next-variable(|prefix) =
+    i := <NextVarIdx; inc>;
+    rules(NextVarIdx :- _);
+    rules(NextVarIdx : _ -> i);
+    !$[[prefix]_[i]]
 
-  extract-writables  :
-    rs -> comps
-    where
-      collect-all(?DynamicEmitted(<map(?LabelComp(<id>,_))>), union); concat; make-set => comps;
-      rules( WritableComps : _ -> comps );
-      map({?comp; rules( IsWritable : comp -> comp )})
+rules // projections for sorts
+  
+  get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _) + ?SemanticComponent(<id>, _) + ?InternalSortDecl(<id>)
+  get-sort-name = ?SimpleSort(<id>)
+  
+  get-listsort-elementname = ?ListSort(<get-sort-name>)
 
-  extract-readables :
-    rs -> comps
-    where
-      collect-all(?Reads(<map(?LabelComp(<id>,_))>), union); concat; make-set => comps;
-      rules( ReadableComps : _ -> comps );
-      map({?comp; rules( IsReadable : comp -> comp )})
+rules
+    
+  // util for getting a set of arrows and their nonwritables and writables
+  get-module-arrows-elements:
+    mod -> <map(\ arrow-name -> <get-module-arrow-elements(|arrow-name)> mod \)> arrow-name*
+    with
+      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> mod
+  
+  get-module-arrow-declaration(|arrow-name) = collect-one(?ArrowDecl(_, arrow-name, _))
+  
+  get-module-arrow-declarations = collect-all(?ArrowDecl(_, _, _))
 
-  extract-changeables :
-    rs -> comps
+  get-module-arrow-elements(|arrow-name):
+    mod -> (arrow-name, nonwritable*, writable*)
+    with
+      nonwritable* := <get-module-arrow-nonwritables(|arrow-name)> mod;
+      writable* := <get-module-arrow-writables(|arrow-name)> mod
+  
+  get-module-arrow-nonwritables(|arrow-name) =
+    where(arrow-name' := <strip-annos> arrow-name);
+    collect-one(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name'); get-rule-nonwritables)
+    <+ ![]
+  
+  get-module-arrow-writables(|arrow-name) =
+    where(arrow-name' := <strip-annos> arrow-name);
+    collect-one(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name'); get-rule-writables)
+    <+ ![]
+  
+  get-rule-nonwritables:
+    Rule(_, _, Relation(Reads(nonwritable*), _, _, _)) -> nonwritable*
+  
+  get-rule-writables:
+    Rule(_, _, Relation(_, Source(_, writable*), _, _)) -> writable*
+
+rules
+
+  get-rule-premises:
+    Rule(prem*, _, _) -> prem*
+
+  get-rule-relation:
+    Rule(_, _, rel) -> rel
+
+  get-formula-relation:
+    Formula(rel) -> rel
+
+  get-component-sort:
+    LabelComp(s, _) -> s
+
+  get-relation-writables:
+    Relation(_, _, NamedDynamicEmitted(comps, _), _) -> comps
+
+  get-relation-readables:
+    Relation(Reads(read*), _, _, _) -> read*
+
+  get-relation-changeables:
+    Relation(_, Source(_, sc*), _, Target(_, tc*)) -> [sc*, tc*]
+    
+  get-relation-arrow-name:
+    Relation(_, _, arrow, _) -> <get-arrow-name> arrow
+  
+  get-arrow-name:
+    ArrowDecl(_, name, _) -> name
+  
+  get-arrow-name:
+    NamedDynamicEmitted(_, name) -> name
+  
+  get-arrow-name:
+    NamedDynamic(name) -> name
+
+rules // new extracted components (working for inference of components on multiple arrow types)
+  
+  m-in-extracted-components(s) =
+  	{ WritableComps, ReadableComps, ChangeableComps:
+  		where(
+        ?t;
+        arrow* := <get-module-arrow-declarations; map(get-arrow-name)> t;
+        <map({
+          ?arrow;
+          rules(
+            WritableComps: arrow -> []
+            ReadableComps: arrow -> []
+            ChangeableComps: arrow -> []
+          )
+          })> arrow*;
+        rule* := <collect-all(?Rule(_, _, _))> t;
+        <repeat(where(extract-components(|arrow*)))> rule*
+  		);
+  		s
+  	}
+
+  
+  extract-components(|arrow*):
+    rule* -> rule*
+    with
+      init-arrow-comps := <map(CompList)> arrow*;
+      <map(extract-components-from-conclusion)> rule*;
+      <map(extract-components-from-premises)> rule*;
+      exit-arrow-comps := <map(CompList)> arrow*
     where
-      collect-all((?Source(_, <id>) <+ ?Target(_, <id>)); map(?LabelComp(<id>,_)), union); concat; make-set => comps;
-      rules( ChangeableComps : _ -> comps );
-      map({?comp; rules( IsChangeable : comp -> comp )})
+      <not(eq)> (init-arrow-comps, exit-arrow-comps)
+
+rules // extract components        
+
+  CompList:
+    arrow -> <make-set> [readable*, changeable*, writable*]
+    with
+      readable* := <ReadableComps> arrow;
+      changeable* := <ChangeableComps> arrow;
+      writable* := <WritableComps> arrow
+  
+  NonWritableComps:
+  	arrow -> <make-set> [readable*, changeable*]
+  	with
+  		readable* := <ReadableComps> arrow;
+  		changeable* := <ChangeableComps> arrow
+  
+  NonReadableComps:
+  	arrow -> <make-set> [writable*, changeable*]
+    with
+      writable* := <WritableComps> arrow;
+      changeable* := <ChangeableComps> arrow
+  
+  extract-components-from-conclusion:
+    rule -> rule
+    with
+      relation := <get-rule-relation> rule;
+      arrow := <get-relation-arrow-name> relation;
+      locl-readable* := <get-relation-readables; map(get-component-sort)> relation;
+      locl-writable* := <get-relation-writables; map(get-component-sort)> relation;
+      locl-changeable* := <get-relation-changeables; map(get-component-sort)> relation;
+      glob-readable* := <ReadableComps> arrow;
+      glob-writable* := <WritableComps> arrow;
+      glob-changeable* := <ChangeableComps> arrow;
+      readable* := <make-set> [locl-readable*, glob-readable*];
+      writable* := <make-set> [locl-writable*, glob-writable*];
+      changeable* := <make-set> [locl-changeable*, glob-changeable*];
+      rules(
+        ReadableComps : arrow -> readable*
+        WritableComps : arrow -> writable*
+        ChangeableComps : arrow -> changeable*
+      )
+  
+  extract-components-from-premises:
+    rule -> rule
+    with
+      conc-arrow := <get-rule-relation; get-relation-arrow-name> rule;
+      conc-readable* := <ReadableComps> conc-arrow;
+      conc-writable* := <WritableComps> conc-arrow;
+      conc-changeable* := <ChangeableComps> conc-arrow;
+      conc-comps := <make-set> [conc-readable*, conc-writable*, conc-changeable*];
+      prem-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name; not(?conc-arrow)); make-set> rule;
+      prem-readable* := <map(ReadableComps); concat; make-set> prem-arrow*;
+      prem-writable* := <map(WritableComps); concat; make-set> prem-arrow*;
+      prem-changeable* := <map(ChangeableComps); concat; make-set> prem-arrow*;
+      new-readable* := <diff> (prem-readable*, conc-comps);
+      new-writable* := <diff> (prem-writable*, conc-comps);
+      new-changeable* := <diff> (prem-changeable*, conc-comps);
+      readable* := <make-set> [new-readable*, conc-readable*];
+      writable* := <make-set> [new-writable*, conc-writable*];
+      changeable* := <make-set> [new-changeable*, conc-changeable*];
+      rules(
+        ReadableComps : conc-arrow -> readable*
+        WritableComps : conc-arrow -> writable*
+        ChangeableComps : conc-arrow -> changeable*
+      )
       
 rules // component operations
   
   comp-var(|num) :
     name -> $[[<lower-case>name]_[num]]
-    
+  
   mk-label-comps(|num) = 
     map(mk-label-comp(|num))
    
   mk-label-comp(|num) :
-    name -> LabelComp(name, Var(<comp-var(|num)> name))
+    name -> LabelComp(name, Var(<get-sort-name; comp-var(|num)> name))
 
   mk-label-comp-str(|num) :
-    name -> $[[name]([<comp-var(|num)> name])]
+    name -> $[[name]([<get-sort-name; comp-var(|num)> name])]
 
   mk-label-comp(default|num) :
     name -> <default <+ mk-label-comp(|num)> name

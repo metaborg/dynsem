@@ -16,28 +16,50 @@ templates // rules
   Rule.Seqstrict = [seqstrict [ID] [INT+; separator=","]/[INT]]
     
   Rule.Axiom = [[Formula]]
-      
+  
   Rule.Rule = [
     [Premise+; separator=",\n"]
     [INFER]
     [Formula]
   ]
-
+  
   Rule.RuleW = [
     [Formula]
     where
       [Premise+; separator=",\n"]
   ]
-     
+  
   Premise.Formula = [[Formula]]
+  Premise.AllFail = <all-fail>
+
+  Premise.MergePoint = 
+    [
+      [Premise]
+      < {
+        [Premise+; separator=",\n"]
+      } + {
+        [Premise+; separator=",\n"]
+      }
+    ]
+  
+  Premise.TryOr = [
+  	try {
+      [Premise+; separator=",\n"]		
+  	} or {
+  		[Premise+; separator=",\n"]
+  	}
+  ]
 
   ID = <rules> {reject}
   ID = <fresh> {reject}
   
 templates // formulas
 
-  Formula.TermEq   = [[Term] = [Term]]
+  Formula.Match    = [[Term] => [Term]]
+  Formula.NMatch   = [[Term] =!=> [Term]] 
+  Formula.TermEq   = [[Term] == [Term]]  
   Formula.TermNeq  = [[Term] != [Term]]
+  
   Formula.Relation = [[Reads][Source] [Rel] [Target]]
   Formula.IsValue  = [value([Term])]
   
@@ -50,26 +72,36 @@ templates // formulas
   Target.Target = [[Term]]
   Target.Target = [([Term], [LabelComp+; separator=", "])]
   
-  Rel.Dynamic        = [-->]
-  Rel.DynamicEmitted = [-- [LabelComp+; separator=", "] -->]
+  Rel.NamedDynamic = [- [ID] ->]
+  Rel.Dynamic = [-->]
   
-  LabelComp.LabelComp = [[ID] [Term]]
+  Rel.NamedDynamicEmitted = [- [LabelComp+; separator=", "] -[ID]->]
+  Rel.DynamicEmitted = [- [LabelComp+; separator=", "] ->]
+  
+  LabelComp.LabelComp = [[Type] [Term]]
   
 templates // terms
 
-  Term.VarRef   = [[ID]]  {avoid}
+  // Term.MatchVar = [[ID]] {avoid}
+  // Term.MatchVar = [[LID]] {avoid}
+
+  Term.VarRef   = [[ID]] {avoid}
   Term.VarRef   = [[LID]] {avoid}
 
   Term.Var      = [[ID]]
   Term.Var      = [[LID]]
-
+  
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
+  Term.Real     = [[REAL]]
   Term.Con      = [[ID]([Term*; separator=", "])]
   Term.List     = <[ <Term*; separator=", "> ]>
-  Term.ListTail = <[ <Term*; separator=", "> | <Term>]>
+  Term.ListTail = <[ <Term*; separator=", "> | <Term> ]>
   
   Term.Fresh  = [fresh]
+  Term.True   = [true]
+  Term.False  = [false]
+  
   Term.Map    = [{[Entry*;separator=", "]}]
   Entry.Bind  = [[Term] |--> [Term]] 
   Entry.Binds = [[Term] |*-> [Term]]
@@ -77,7 +109,9 @@ templates // terms
   
   Term.MapSelect = <<Term>[<Term>]>
   Term.MapExtend = [[Term] + [Term]] {assoc}
-  //Term.MapExtend = [[Term] + [Term]]
+  Term.MapUnbind = [[Term] \ [Term]] {assoc}
+
+  Term.SortFunCall = <<ID>[<Term>](<Term*; separator=", ">)>
 
 context-free priorities
 

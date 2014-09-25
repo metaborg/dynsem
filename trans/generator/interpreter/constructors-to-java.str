@@ -1,0 +1,401 @@
+module generator/interpreter/constructors-to-java
+
+imports
+  include/ds
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
+  generator/interpreter/gen-interpreter
+  generator/interpreter/sorts-to-java
+  generator/interpreter/rule-to-java
+  lib/editor-common.generated
+  lib-ds
+  
+rules
+  
+  constructors-to-java-interpreter:
+    Module(mod, body*) -> [node-class*, value-class*]
+    with
+      rule* := <collect-all(?Rules(<id>)); concat> body*;
+      node-name* := <collect-all(?ConsDecl(<id>, _, _) + ?InternalConsDecl(<id>, _, _))> body*;
+      node-class* := <map(node-to-java-interpreter(|rule*, body*))> node-name*;
+      value-name* := <collect-all(?ValueDecl(<id>, _))> body*;
+      value-class* := <map(value-to-java-interpreter)> value-name*
+
+rules // generate a base interface extending INode with the language-specific evaluate function 
+  
+  module-to-inode-interface:
+  	Module(mod, body*) -> 
+	  	compilation-unit |[
+	  		package x_pkgname;
+	  		
+	  		import org.metaborg.meta.interpreter.framework.*;
+	  		
+	  		public interface x_inodeface extends INode, IMatchable {
+	  			
+	  			~exec*
+	  		}
+	  	]|
+  	with
+  		x_pkgname := <gen-package-name>;
+  		x_inodeface := <get-basesort-java-name> "Term";
+  		arrow-decl* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+  		exec* := <map(arrow-to-exec-iface(|body*))> arrow-decl*
+  
+  arrow-to-exec-iface(|body*):
+    arrow-name ->
+  	  class-body-dec |[
+  	  	public x_returnclass x_execname(param*);
+  	  ]|
+  	with
+  	  x_returnclass := $[[arrow-name]_Result];
+  	  x_execname := $[exec_[arrow-name]];
+  	  (arrow-name, nonwritable*, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+  	  param* := <map-with-index(read-to-inode-evaluate-params)> [nonwritable*, writable*]
+  
+  read-to-inode-evaluate-params:
+    (idx, LabelComp(ty, _)) -> param |[ ~type:jiface x_idx ]|
+    with
+      x_idx := $[_[idx]];
+      x_sort := <get-sort-java-name> ty;
+      jiface := type |[ x_sort ]|
+
+rules // generate a language-specific class for the result of an evaluation step
+  
+  reductions-to-java-result-classes:
+    Module(mod, body*) -> java-class*
+    with
+      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+      java-class* := <map(reduction-to-java-result-class(|body*))> arrow-name*
+  
+  reduction-to-java-result-class(|body*):
+    arrow-name -> 
+      compilation-unit |[
+        package x_pkgname;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        
+        public class x_resultclass {
+          public final x_valuesort value;
+           
+          ~fdec*
+          
+          public x_resultclass(x_valuesort value, param*) {
+            this.value = value;
+            bstm*
+          }
+          
+          ~fget*
+          
+        }
+      ]|
+    with
+      x_pkgname := <gen-package-name>;
+      x_resultclass := $[[arrow-name]_Result];
+      ArrowDecl(_, _, target) := <get-module-arrow-declaration(|arrow-name)> body*;
+      x_valuesort := <get-sort-java-name> target;
+      (_, _, writable*) := <get-module-arrow-elements(|arrow-name)> body*;
+      fdec* := <map-with-index(reduction-to-java-result-field)> writable*;
+      ty* := <map(?LabelComp(<id>, _))> writable*;
+      param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
+      bstm* := <map-with-index(node-arg-to-fieldinit)> ty*;
+      fget* := <map-with-index(result-arg-to-java-fieldget)> ty*
+
+  reduction-to-java-result-field:
+    (idx, LabelComp(ty, _)) -> class-body-dec |[ public final ~type:jiface x_idx; ]|
+    with
+      x_idx := <conc-strings> ("_", <int-to-string> idx);
+      x_sortname := <get-sort-java-name> ty;
+      jiface := type |[ x_sortname ]|
+  
+rules // backend for normal constructor to Java
+
+  node-to-java-interpreter(|rule*, body*):
+    node-name ->
+      compilation-unit |[
+        package x_pkgname;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+
+        public class x_consname extends AbstractNode implements x_sortname {
+          
+          ~fdec*
+          
+          ~body1
+
+          ~exec-method*
+          
+          ~fget*
+          
+          ~equalsmethod
+          
+        }
+      ]|
+    with
+      x_pkgname := <gen-package-name>;
+      x_consname := <get-cons-java-name> node-name;
+      (ty*, ty) := <get-type> node-name;
+      x_sortname := <get-sort-java-name> ty;
+      fdec* := <map-with-index(node-arg-to-java-child-field)> ty*;
+      fget* := <map-with-index(node-arg-to-java-fieldget)> ty*;
+      body1 := <node-args-to-java-constructor> (x_consname, ty*);
+    	node-rule* := <filter(is-rule-matching-constructor(|node-name))> rule*;
+    	arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> body*;
+    	exec-method* := <map(gen-arrow-node-exec-method(|node-rule*, body*)); concat> arrow-name*;
+      equalsmethod := <node-to-java-equalsmethod> node-name
+  
+  node-to-java-equalsmethod:
+    node-name -> 
+      class-body-dec |[
+        @Override
+			  public boolean equals(Object obj) {
+			    if (this == obj) {
+			      return true;
+			    }
+			    if (obj == null) {
+			      return false;
+			    }
+			    if (getClass() != obj.getClass()) {
+			      return false;
+			    }
+			    
+			    final x_nodename other = (x_nodename) obj;
+			    
+			    bstm*
+			  
+			    return true;
+			  }
+      ]|
+    with
+      x_nodename := <get-cons-java-name> node-name;
+      (ty*, _) := <get-type> node-name;
+      bstm* := <map-with-index(node-to-java-equalsmethods-fieldcheck)> ty*
+  
+  node-to-java-equalsmethods-fieldcheck:
+    (idx, ty) -> 
+      bstm* |[
+        if (x_idx != other.x_idx) {
+          return false;
+        }
+      ]|
+    where
+      <is-sort-native> ty
+    with
+      x_idx := $[_[idx]]
+
+  node-to-java-equalsmethods-fieldcheck:
+    (idx, ty) -> 
+      bstm* |[
+        if (x_idx == null) {
+          if (other.x_idx != null) {
+            return false;
+          }
+        } else if (!x_idx.equals(other.x_idx)) {
+          return false;
+        }
+      ]|
+    where
+      <not(is-sort-native)> ty
+    with
+      x_idx := $[_[idx]]
+ 
+
+  node-args-to-java-constructor:
+    (x_consname, ty*) ->
+      class-body-dec |[
+        public x_consname(INodeSource source, param*) {
+          this.setSourceInfo(source);
+          bstm*
+        }
+      ]|
+    with
+      param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
+      bstm* := <map-with-index(node-arg-to-fieldinit)> ty*
+  
+  node-arg-to-constr-param-decl:
+    (idx, ty) -> param |[ ~type:jiface x_idx ]|
+    where
+      <not(is-sort-list)> ty
+    with
+      x_idx := $[_[idx]];
+      x_sort := <get-sort-java-name> ty;
+      jiface := type |[ x_sort ]|
+
+  node-arg-to-constr-param-decl:
+    (idx, ty) -> param |[ INodeList<x_sort> x_idx ]|
+    where
+      <is-sort-list> ty
+    with
+      x_idx := $[_[idx]];
+      x_sort := <get-listsort-elementname; get-sort-java-name; box-java-sort> ty
+
+  node-arg-to-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
+    where
+      // <not(is-sort-native + is-sort-list) <+ is-sort-list; get-listsort-elementname; is-sort-unchildable> ty
+      <is-sort-childable> ty
+    with
+      x_idx := $[_[idx]]
+  
+  node-arg-to-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = x_idx; ]|
+    where
+      <is-sort-unchildable> ty
+    with
+      x_idx := $[_[idx]]
+  
+  node-arg-to-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = adoptChildren(x_idx); ]|
+    where
+      <is-sort-list; get-listsort-elementname; is-sort-childable> ty
+    with
+      x_idx := $[_[idx]]
+
+  get-cons-java-name:
+    term -> $[[name]_[arity]]
+    where
+      is-string
+    with
+      name := <strip-annos> term;
+      (ty*, _) := <get-type> term;
+      arity := <length> ty*
+  
+  node-arg-to-java-fieldget:
+    (idx, ty) ->
+      class-body-dec |[
+        public x_fieldtype x_getter() {
+          bstm_specializer*
+          return this.x_idx;
+        }
+      ]|
+    with
+      x_fieldtype := <get-sort-java-name> ty;
+      x_getter := $[get_[idx]];
+      x_idx := $[_[idx]];
+      if <not(is-sort-native + is-sort-nativetype + is-sort-unchildable)> ty then
+        bstm_specializer* := bstm* |[
+          if (this.x_idx instanceof IGenericNode) {
+            this.replaceChild(this.x_idx, ((IGenericNode) this.x_idx).computeReplacement());
+          }
+        ]|
+      else
+        bstm_specializer* := []
+      end
+
+  result-arg-to-java-fieldget:
+    (idx, ty) ->
+      class-body-dec |[
+        public x_fieldtype x_getter() {
+          return this.x_idx;
+        }
+      ]|
+    with
+      x_fieldtype := <get-sort-java-name> ty;
+      x_getter := $[get_[idx]];
+      x_idx := $[_[idx]]
+
+  node-arg-to-java-child-field:
+    (idx, ty) ->
+      class-body-dec |[
+        @Child
+        public ~type:jiface x_idx;
+      ]|
+    where
+      <not(is-sort-list)> ty
+    with
+      x_idx := <conc-strings> ("_", <int-to-string> idx);
+      x_sortname := <get-sort-java-name> ty;
+      jiface := type |[ x_sortname ]|
+
+  node-arg-to-java-child-field:
+    (idx, ty) ->
+      class-body-dec |[
+        @Children
+        public ~type:jiface x_idx;
+      ]|
+    where
+      <is-sort-list> ty
+    with
+      x_idx := <conc-strings> ("_", <int-to-string> idx);
+      x_sortname := <get-sort-java-name> ty;
+      jiface := type |[ x_sortname ]|
+      
+  node-arg-to-java-child-field:
+    (idx, ty) -> <node-arg-to-java-field> (idx, ty)
+    where
+      <is-sort-unchildable> ty
+    
+rules // backend for value constructors to Java
+  
+  value-to-java-interpreter:
+    value-name ->
+      compilation-unit |[
+        package x_pkgname;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        
+        public class x_value extends AValue {
+
+          @Override
+          public String toString() {
+            return NodeUtils.toString(this);
+          }
+          
+          ~fdec*
+          ~body1
+          ~fget*
+          
+        }
+      ]|
+    with
+      x_pkgname := <gen-package-name>;
+      x_value := <get-cons-java-name> value-name;
+      (ty*, _) := <get-type> value-name;
+      fdec* := <map-with-index(node-arg-to-java-field)> ty*;
+      fget* := <map-with-index(node-arg-to-java-fieldget)> ty*;
+      body1 := <value-args-to-java-constructor> (x_value, ty*)
+  
+  value-args-to-java-constructor:
+    (x_consname, ty*) ->
+      class-body-dec |[
+        public x_consname(param*) {
+          bstm*
+        }
+      ]|
+    with
+      param* := <map-with-index(node-arg-to-constr-param-decl)> ty*;
+      bstm* := <map-with-index(value-arg-to-fieldinit)> ty*
+  
+  step-result-to-type:
+    LabelComp(ty, _) -> ty
+
+  node-arg-to-java-field:
+    (idx, ty) ->
+      class-body-dec |[
+        public ~type:jiface x_idx;
+      ]|
+    with
+      x_idx := <conc-strings> ("_", <int-to-string> idx);
+      x_sortname := <get-sort-java-name> ty;
+      jiface := type |[ x_sortname ]|
+
+  value-arg-to-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = x_idx; ]|
+    with
+      x_idx := $[_[idx]]
+
+rules // utilities for filtering rules
+
+  is-rule-matching-constructor(|cons-name):
+    rule -> rule
+    with
+      Con(cons-name', arg*) := <get-rule-matchedterm> rule;
+      resolved-def := <nabl-collect-one-resolved-def> cons-name';
+      cons-def := <get-annos; fetch-elem(?Def(_))> cons-name
+    where
+    	<eq> (cons-def, resolved-def);
+    	(ty*, _) := <get-type> cons-def;
+    	<eq> (<length> ty*, <length> arg*)
+
+  get-rule-matchedterm:
+    Rule(_, _, Relation(_, Source(ma, _), _, _)) -> ma  
+  

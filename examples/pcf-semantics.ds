@@ -2,14 +2,14 @@ module pcf-semantics
 
 rules // binding
 
-  E env |- Var(x) --> v 
-  where env[x] = T(e, env'),
+  E env |- Var(x) --> v
+  where env[x] => T(e, env'),
         E env' |- e --> v
-  
-  E env |- Fun(Param(x, t), e) --> C(x, e, env)
-  
+
+  E env |- Fun(Param(x, t), e ) --> C(x, e, env)
+
   E env |- Fix(Param(x, t), e) --> v
-  where 
+  where
     E {x |--> T(Fix(Param(x,t),e),env), env} |- e --> v
   
   E env |- App(e1, e2) --> v
@@ -22,16 +22,16 @@ rules // binding
 rules // arithmetic
   
   Num(i) --> I(i)
-      
+
   Ifz(e1, e2, e3) --> v
-  where e1 --> I(i), i = 0, e2 --> v
+  where e1 --> I(i), i == 0, e2 --> v
   
   Ifz(e1, e2, e3) --> v
   where e1 --> I(i), i != 0, e3 --> v
     
   Add(e1, e2) --> I(addInt(i, j))
   where e1 --> I(i), e2 --> I(j)
- 
+  
   Sub(e1, e2) --> I(subInt(i, j))
   where e1 --> I(i), e2 --> I(j)
   
@@ -39,17 +39,10 @@ rules // arithmetic
   where e1 --> I(i), e2 --> I(j)
  
 signature
-  sorts
-    term   {native}
-    int    {native}
-    string {native}
-    value  {native}
-    E      {native}
-  
   constructors
     C : string * Exp * E -> value // closure
     I : int -> value              // integer
-    T : term * E -> value         // thunk
+    T : Exp * E -> value         // thunk
     
     addInt : int * int -> int { native }
     subInt : int * int -> int { native }
@@ -57,14 +50,14 @@ signature
     
 signature // PCF
   sorts
-    Exp
     Type
     Param
     Start
     Exp -> Start
     
   constructors
-  
+    X : -> Exp
+    Num     : int -> Exp
     Ifz     : Exp * Exp * Exp -> Exp
     FunType : Type * Type -> Type
     IntType : -> Type
@@ -73,7 +66,6 @@ signature // PCF
     Mul     : Exp * Exp -> Exp
     Sub     : Exp * Exp -> Exp
     Add     : Exp * Exp -> Exp
-    Num     : int -> Exp
     Let     : string * Type * Exp * Exp -> Exp
     App     : Exp * Exp -> Exp
     Fix     : Param * Exp -> Exp

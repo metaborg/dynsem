@@ -3,16 +3,33 @@ module pp
 imports
   libstratego-lib
   libstratego-gpp
-  lib/runtime/tmpl/pp
+  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/tmpl/pp
   Common.pp.generated
   Module.pp.generated
   ds.pp.generated
   Lexical.pp.generated
   Signatures.pp.generated
   include/ds-parenthesize
+  ds
   
 rules
-     
+  
+  prettyprint-Term :
+    MatchedVar(a) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [a813]
+                     )
+                   ]
+    where a813 := <pp-one-Z(prettyprint-ID)> a
+
+  prettyprint-Term :
+    MatchedVar(a) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [a814]
+                     )
+                   ]
+    where a814 := <pp-one-Z(prettyprint-LID)> a
+  
   pp-dynsem-string =
     parenthesize-ds
     ; prettyprint-Module
