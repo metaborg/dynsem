@@ -85,10 +85,10 @@ templates // terms
   Term.As       = [[ID]@[Term]]
 
   Term.VarRef   = [[ID]] {avoid}
-  Term.VarRef   = [[LID]] {avoid}
+  // Term.VarRef   = [[LID]] {avoid}
 
   Term.Var      = [[ID]]
-  Term.Var      = [[LID]]
+  // Term.Var      = [[LID]]
   Term.Wld      = <_>
   
   Term.String   = [[STRING]]
