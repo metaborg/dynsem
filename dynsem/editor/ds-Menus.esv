@@ -46,6 +46,7 @@ menus
     separator
     
     action  : "Pregeneration"          = pre-generation-transform-editor (openeditor) (meta)
+    action  : "Pregeneration AST"      = pre-generation-transform-editor-ast (openeditor) (meta)
     action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime) (source) (meta)
     action  : "Explicate + Factorize AST"  = explicate-factorize-editor-ast (openeditor) (realtime) (source) (meta)    
     action  : "Resolve imports"        = includes-editor (openeditor) (realtime) (source) (meta)  

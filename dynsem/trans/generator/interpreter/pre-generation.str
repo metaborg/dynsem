@@ -17,13 +17,20 @@ rules
       filename := <guarantee-extension(|"pregen.ds")> path;
       result   := <desugar-all; pre-generation-transform; sugar-all; pp-debug> selected
       
+  pre-generation-transform-editor-ast:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"pregen.ds.aterm")> path;
+      result   := <desugar-all; pre-generation-transform> selected
+      
   pre-generation-transform =
     // explicate-module;
     // factorize-module;
     alltd(escape-variable-names);
     fuse-sections;
-    merge-overlapping-rules;
-    optimize-environments
+    strip-annos;
+    merge-overlapping-rules
+    // optimize-environments
 
 rules /* rename variables */
 
@@ -51,6 +58,10 @@ rules
       signatures    := [ sort-decl, natty-decl, cons-decl, semcomp-decl, intsort-decl, intcons-decl, natcons-decl, values-decl, arrow-decl ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
 
+signature
+  constructors
+    ConstructorWRules : String * Int * List(RuleW) -> Term
+
 rules /* merge ovelapping rules */
 
   merge-overlapping-rules:
@@ -58,19 +69,35 @@ rules /* merge ovelapping rules */
     with
       cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
-      cons-grouped-rule* := <map(group-rules-by-cons(|rule*))> cons-arity*;
-      // a list of lists of rules: [ [ [z...], [y...], [x...] ] ]
-      cons-arrow-grouped-rule* := <map(group-rules-by-arrow(|arrow-name*))> cons-grouped-rule*;
-      merged-rule* := <map(map({ ?allfail; merge-rules })); flatten-list> cons-arrow-grouped-rule*
+      cons-w-rules* := <map(group-rules-by-cons(|rule*))> cons-arity*;
+      debug(!"1 ");
+      cons-w-merged-rules* := <map(merge-rules)> cons-w-rules*;
+      debug(!"2 ");
+      merged-rule* := <map(?ConstructorWRules(_, _, <id>)); concat> cons-w-merged-rules*;
+      debug(!"3 ")
+      // debug(!0);
+      // // a list of lists of rules: [ [ [z...], [y...], [x...] ] ]
+      // cons-arrow-grouped-rule* := <map(group-rules-by-arrow(|arrow-name*))> cons-grouped-rule*;
+      // debug(!1);
+      // pre-unify*@[r1, r2] := <Hd> cons-arrow-grouped-rule*;
+      // debug(!2);
+      // [(r1', r2')] := <unify(is-ds-var)> (r1, r2);
+      // debug(!3);
+      // merged-rule* := [pre-unify*, r1', r2']
+      // ;debug(!4)
+      // merged-rule* := <map(map({ ?allfail; merge-rules })); flatten-list> cons-arrow-grouped-rule*
+  
   
   cons-decl-pair-arity:
     ConsDecl(cons, args, _) -> (cons, <length> args)
   
   cons-decl-pair-arity:
     InternalConsDecl(cons, args, _) -> (cons, <length> args)
-  
+
   group-rules-by-cons(|rule*):
-    (cons, arity) -> <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
+    (cons, arity) -> ConstructorWRules(cons, arity, cons-rules)
+    with
+      cons-rules := <filter(where(is-rule-matching-cons(|cons, arity)))> rule*
   
   group-rules-by-arrow(|arrow-name*):
   	rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
@@ -79,99 +106,133 @@ rules /* merge ovelapping rules */
     ?Rule(_, _, Relation(_, Source(Con(cons-actual, conargs), _), _, _));
     <strip-annos; eq> (cons-actual, cons-goal);
     <eq> (arity, <length> conargs)
+
+
+  /*
   
-  merge-rules:
-    [] -> []
+  Algorithm for 2-way merge
+  
+  take the 2 match sides and compute a substitution S_m
+  if S_m does not exist then the rules are not matchable
+  
+  */
 
   merge-rules:
-    [x | xs] -> r*
-    with
-      r* := <foldl(merge-rules)> (xs, x)
+    c@ConstructorWRules(_, _, [r1, r2]) -> c
+    
+    // where
+    //   <lt> (<length> rule*, 2)
 
-  // normal merge
-  merge-rules:
-  	(Rule(l-prem*, l-bar, l-rel), Rule(r-prem*, r-bar, r-rel)) -> Rule(merged-prem*, l-bar, l-rel)
-  	where
-  	  <not(collect-one(?AllFail()))> l-prem*
-  	where
-  		<strip-annos; eq> (l-rel, r-rel)
-    with
-      merged-prem* := <merge-premises> (r-prem*, l-prem*)
+  // merge-rules:
+  //   ConstructorWRules(cons, arity, rule*) -> ConstructorWRules(cons, arity, rule'*)
+  //   where
+  //     <gt> (<length> rule*, 2)
+  // 
+  // merge-rules:
+  //   [r1, r2] -> <fail>
 
-  // merge with an all-fail rule
-  merge-rules:
-  	(Rule(l-prem*, l-bar, l-rel), Rule(r-prem*, r-bar, r-rel)) -> Rule([TryOr(r-prem*, l-prem'*)], l-bar, l-rel)
-  	where
-  	  <collect-one(?AllFail())> l-prem*
-  	where
-  		<strip-annos; eq> (l-rel, r-rel)
-  	with
-  	  l-prem'* := <filter(not(?AllFail()))> l-prem*
+  is-ds-var = ?Var(_)
 
-  // there are no premises
-  merge-premises:
-    ([], []) -> []
-  
-  /*
-  * IF the first premise on LHS is a TryOr(t*, o*)
-  *
-  * THEN we merge between t* and RHS
-  *
-  * NB: this can only happen if the TryOr is the only premise on the LHS  
-  */
-  merge-premises:
-    ([ TryOr(try*, or*) ], [r | rxs]) -> [ TryOr(try-merged*, or*) ]
-    with
-      try-merged* := <merge-premises> (try*, [r | rxs])
-  
-  /*
-  * IF the first premise on LHS is a merge point and the merge condition is the same as the right premise.
-  *
-  * THEN we eliminate the duplicate condition and merge the then branch of the merge with the remainder of the RHS
-  *
-  * NB: this can only happen if the merge point is the last premise on LHS
-  */
-  merge-premises:
-    ([ MergePoint(cond, then*, else*) ], [r | rxs]) -> [ MergePoint(cond, then'*, else*) ]
-    where
-      <strip-annos; eq> (cond, r)
-    with
-      then'* := <merge-premises> (then*, rxs)
-  
-  /*
-  * IF the first premise on the LHS is a merge point and the merge condition is NOT the same as the right premise.
-  *
-  * THEN we merge the else branch of the merge with the entire RHS block.
-  *
-  * NB: this can only happen if the merge point is the last premise on LHS
-  */
-  merge-premises:
-    ([ MergePoint(cond, then*, else*) ], [r | rxs]) -> [ MergePoint(cond, then*, else'*) ]
-    where
-      <strip-annos; not(eq)> (cond, r)
-    with
-      else'* := <merge-premises> (else*, [r | rxs])
-  
-  /*
-  * IF the first premise on LHS is not a merge point, and it is equal to the first premise on the RHS.
-  *
-  * THEN share the first premise and continue merging the rest
-  */
-  merge-premises:
-    ([l | lxs], [r | rxs]) -> [l | <merge-premises> (lxs, rxs)]
-    where
-      <not(?MergePoint(_, _, _))> l;
-      <strip-annos; eq> (l, r)
-  /*
-  * IF the first premise on LHS is not a merge point, and it is not equal to the first premise on the RHS.
-  *
-  * THEN create a merge point
-  */
-  merge-premises:
-    ([l | lxs], [r | rxs]) -> [ MergePoint(l, lxs, [r | rxs]) ]
-    where
-      <not(?MergePoint(_, _, _))> l;
-      <strip-annos; not(eq)> (l, r)
+
+  // merge-rules:
+  //   [] -> []
+
+//   merge-rules:
+//     [x | xs] -> r*
+//     with
+//       r* := <foldl(merge-rules)> (xs, x)
+// 
+//   // normal merge
+//   merge-rules:
+//   	(Rule(l-prem*, l-bar, l-rel), Rule(r-prem*, r-bar, r-rel)) -> Rule(merged-prem*, l-bar, l-rel)
+//   	where
+//   	  <not(collect-one(?AllFail()))> l-prem*
+//   	where
+//   		<strip-annos; eq> (l-rel, r-rel)
+//     with
+//       merged-prem* := <merge-premises> (r-prem*, l-prem*)
+// 
+//   // merge with an all-fail rule
+//   merge-rules:
+//   	(Rule(l-prem*, l-bar, l-rel), Rule(r-prem*, r-bar, r-rel)) -> Rule([TryOr(r-prem*, l-prem'*)], l-bar, l-rel)
+//   	where
+//   	  <collect-one(?AllFail())> l-prem*
+//   	where
+//   		<strip-annos; eq> (l-rel, r-rel)
+//   	with
+//   	  l-prem'* := <filter(not(?AllFail()))> l-prem*
+// 
+//   // there are no premises
+//   merge-premises:
+//     ([], []) -> []
+//   
+//   /*
+//   * IF the first premise on LHS is a TryOr(t*, o*)
+//   *
+//   * THEN we merge between t* and RHS
+//   *
+//   * NB: this can only happen if the TryOr is the only premise on the LHS  
+//   */
+//   merge-premises:
+//     ([ TryOr(try*, or*) ], [r | rxs]) -> [ TryOr(try-merged*, or*) ]
+//     with
+//       try-merged* := <merge-premises> (try*, [r | rxs])
+//   
+//   /*
+//   * IF the first premise on LHS is a merge point and the merge condition is the same as the right premise.
+//   *
+//   * THEN we eliminate the duplicate condition and merge the then branch of the merge with the remainder of the RHS
+//   *
+//   * NB: this can only happen if the merge point is the last premise on LHS
+//   */
+//   merge-premises:
+//     ([ MergePoint(cond, then*, else*) ], [r | rxs]) -> [ MergePoint(cond, then'*, else*) ]
+//     where
+//       <strip-annos; eq> (cond, r)
+//     with
+//       then'* := <merge-premises> (then*, rxs)
+//   
+//   /*
+//   * IF the first premise on the LHS is a merge point and the merge condition is NOT the same as the right premise.
+//   *
+//   * THEN we merge the else branch of the merge with the entire RHS block.
+//   *
+//   * NB: this can only happen if the merge point is the last premise on LHS
+//   */
+//   merge-premises:
+//     ([ MergePoint(cond, then*, else*) ], [r | rxs]) -> [ MergePoint(cond, then*, else'*) ]
+//     where
+//       <strip-annos; not(eq)> (cond, r)
+//     with
+//       else'* := <merge-premises> (else*, [r | rxs])
+//   
+//   /*
+//   * IF the first premise on LHS is not a merge point, and it is equal to the first premise on the RHS.
+//   *
+//   * THEN share the first premise and continue merging the rest
+//   */
+//   merge-premises:
+//     ([l | lxs], [r | rxs]) -> [l | <merge-premises> (lxs, rxs)]
+//     where
+//       <not(?MergePoint(_, _, _))> l;
+//       <strip-annos; eq> (l, r)
+//   /*
+//   * IF the first premise on LHS is not a merge point, and it is not equal to the first premise on the RHS.
+//   *
+//   * THEN create a merge point
+//   */
+//   merge-premises:
+//     ([l | lxs], [r | rxs]) -> [ MergePoint(l, lxs, [r | rxs]) ]
+//     where
+//       <not(?MergePoint(_, _, _))> l;
+//       <strip-annos; not(eq)> (l, r)
+
+
+
+
+
+
+
 
 signature
   constructors
