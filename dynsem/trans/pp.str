@@ -6,7 +6,7 @@ imports
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/tmpl/pp
   src-gen/signatures/-
   src-gen/pp/-
-  lib/ds-parenthesize
+  include/ds-parenthesize
   ds
   
 rules
