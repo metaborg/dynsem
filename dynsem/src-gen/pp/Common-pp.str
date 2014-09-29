@@ -1,0 +1,80 @@
+module src-gen/pp/Common-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  src-gen/signatures/Common-sig
+
+
+strategies
+  prettyprint-example =
+    prettyprint-NONE
+
+  prettyprint-NONE :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-NONE =
+    ?None()
+
+  is-NONE =
+    fail
+
+
+strategies
+  prettyprint-JID =
+    ![S(<is-string>)]
+
+  prettyprint-ID =
+    ![S(<is-string>)]
+
+  prettyprint-INT =
+    ![S(<is-string>)]
+
+  prettyprint-REAL =
+    ![S(<is-string>)]
+
+  prettyprint-STRING =
+    ![S(<is-string>)]
+
+  prettyprint-StringChar =
+    ![S(<is-string>)]
+
+  prettyprint-BackSlashChar =
+    ![S(<is-string>)]
+
+  prettyprint-CommentChar =
+    ![S(<is-string>)]
+
+  prettyprint-EOF =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-JID
+
+  prettyprint-example =
+    prettyprint-ID
+
+  prettyprint-example =
+    prettyprint-INT
+
+  prettyprint-example =
+    prettyprint-REAL
+
+  prettyprint-example =
+    prettyprint-STRING
+
+  prettyprint-example =
+    prettyprint-StringChar
+
+  prettyprint-example =
+    prettyprint-BackSlashChar
+
+  prettyprint-example =
+    prettyprint-CommentChar
+
+  prettyprint-example =
+    prettyprint-EOF

@@ -1,0 +1,16 @@
+module src-gen/signatures/Common-sig
+
+signature
+  constructors
+    None : NONE
+
+  constructors
+     : String -> JID
+     : String -> ID
+     : String -> INT
+     : String -> REAL
+     : String -> STRING
+     : String -> StringChar
+     : String -> BackSlashChar
+     : String -> CommentChar
+     : String -> EOF

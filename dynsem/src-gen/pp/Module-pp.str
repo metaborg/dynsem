@@ -1,0 +1,93 @@
+module src-gen/pp/Module-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  src-gen/signatures/Module-sig
+
+
+strategies
+  prettyprint-example =
+    prettyprint-Module
+
+  prettyprint-example =
+    prettyprint-ModuleSection
+
+  prettyprint-example =
+    prettyprint-ImportModule
+
+  prettyprint-Module :
+    Module(t0__, t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("module "), t0__']
+                            )
+                          , H(
+                              []
+                            , [S("")]
+                            )
+                          , H(
+                              [SOpt(HS(), "0")]
+                            , [t1__']
+                            )
+                          ]
+    with t0__' := <pp-one-Z(prettyprint-ModuleID)> t0__
+    with t1__' := <pp-V-list(prettyprint-ModuleSection|"")> t1__
+
+  is-Module =
+    ?Module(_, _)
+
+  prettyprint-ModuleSection :
+    Imports(t0__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("imports "), t0__']
+                       )
+                     ]
+    with t0__' := <pp-H-list(prettyprint-ImportModule)> t0__
+
+  is-ModuleSection =
+    ?Imports(_)
+
+  prettyprint-ImportModule :
+    ImportWildcard(t0__) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [t0__', S("/-")]
+                              )
+                            ]
+    with t0__' := <pp-one-Z(prettyprint-ModuleID)> t0__
+
+  is-ImportModule =
+    ?ImportWildcard(_)
+
+  prettyprint-ImportModule :
+    Import(t0__) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [t0__']
+                      )
+                    ]
+    with t0__' := <pp-one-Z(prettyprint-ModuleID)> t0__
+
+  is-ImportModule =
+    ?Import(_)
+
+  is-Module =
+    fail
+
+  is-ModuleSection =
+    fail
+
+  is-ImportModule =
+    fail
+
+
+strategies
+  prettyprint-ModuleID =
+    ![S(<is-string>)]
+
+  prettyprint-ModuleIDPart =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-ModuleID
+
+  prettyprint-example =
+    prettyprint-ModuleIDPart
