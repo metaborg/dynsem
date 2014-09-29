@@ -3,13 +3,29 @@
   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>dynsem</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+  <description>Spoofax meta-language for specifying dynamic semantics of languages</description>
+  <url>https://github.com/metaborg/dynsem</url>
 
   <parent>
     <groupId>org.metaborg</groupId>
-    <artifactId>org.metaborg.maven.lang.parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <relativePath>../../spoofax-deploy/org.metaborg.maven.lang.parent</relativePath>
+    <artifactId>org.metaborg.maven.parent.language</artifactId>
+    <version>1.2.0-SNAPSHOT</version>
+    <relativePath>../../spoofax-deploy/org.metaborg.maven.parent.language</relativePath>
   </parent>
+
+  <developers>
+    <developer>
+      <name>Vlad Vergu</name>
+      <email>v.a.vergu@tudelft.nl</email>
+      <organization>Delft University of Technology</organization>
+      <organizationUrl>http://www.ewi.tudelft.nl/en</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:metaborg/dynsem.git</connection>
+    <developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
+    <url>https://github.com/metaborg/dynsem</url>
+  </scm>
 </project>
