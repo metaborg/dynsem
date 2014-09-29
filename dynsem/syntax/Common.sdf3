@@ -1,30 +1,29 @@
 module Common
   
-  templates
+  context-free syntax
     NONE.None = <>
 
   lexical syntax 
     
-    [a-zA-Z][a-zA-Z0-9\'\_]* -> ID
-    [a-zA-Z][a-zA-Z0-9\_\.]* -> JID
-    "-"? [0-9]+          -> INT
-    "-"? [0-9] "." [0-9]+ -> REAL
-    "-"? "." [0-9]+       -> REAL
+    JID = [a-zA-Z][a-zA-Z0-9\_\.]*
+    ID = [a-zA-Z][a-zA-Z0-9\_\.]*
+    INT = "-"? [0-9]+
+    REAL = "-"? [0-9] "." [0-9]+
+    REAL = "-"? "." [0-9]+
+    STRING = "\"" StringChar* "\""
+    StringChar = ~[\"\n]
+    StringChar = "\\\""
+    StringChar = BackSlashChar
+    BackSlashChar = "\\"
     
-    "\"" StringChar* "\"" -> STRING
-    ~[\"\n]               -> StringChar
-    "\\\""                -> StringChar
-    BackSlashChar         -> StringChar
-    "\\"                  -> BackSlashChar
-    
-    [\ \t\n\r] -> LAYOUT
-    
-    [\*]                             -> CommentChar
-    "/*" (~[\*] | CommentChar)* "*/" -> LAYOUT
-    "//" ~[\n\r]* ([\n\r] | EOF)     -> LAYOUT
-    
-    -> EOF
+    LAYOUT = [\ \t\n\r]
   
+    CommentChar = [\*]
+    LAYOUT = "/*" (~[\*] | CommentChar)* "*/"
+    LAYOUT = "//" ~[\n\r]* ([\n\r] | EOF)
+    
+    EOF =
+    
   lexical restrictions
   
     %% Ensure greedy matching for lexicals

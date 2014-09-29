@@ -3,10 +3,8 @@ module Lexical
 imports Common 
   
   lexical syntax 
-    [\-][\-][\-][\-]*             -> INFER
-    
-    
-    [a-zA-Z][a-zA-Z0-9\'\_]* "*" -> LID
+    INFER = [\-][\-][\-][\-]*
+    LID = [a-zA-Z][a-zA-Z0-9\'\_]* "*"
 
   lexical restrictions
     INFER          -/- [\-]

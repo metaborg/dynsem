@@ -4,21 +4,21 @@ imports Common Lexical Module Signatures
  
 context-free start-symbols Module
 
-templates // rules
+context-free syntax // rules
      
   ModuleSection.Rules = [
     rules 
     
-      [Rule*; separator="\n\n"]
+      [ {Rule "\n\n"}* ]
   ] 
   
-  Rule.Strict = [strict [ID] [INT+; separator=","]/[INT]]
-  Rule.Seqstrict = [seqstrict [ID] [INT+; separator=","]/[INT]]
+  Rule.Strict = [strict [ID] [{INT ","}+]/[INT]]
+  Rule.Seqstrict = [seqstrict [ID] [{INT ","}+]/[INT]]
     
   Rule.Axiom = [[Formula]]
   
   Rule.Rule = [
-    [Premise+; separator=",\n"]
+    [{Premise ",\n"}+]
     [INFER]
     [Formula]
   ]
@@ -26,7 +26,7 @@ templates // rules
   Rule.RuleW = [
     [Formula]
     where
-      [Premise+; separator=",\n"]
+      [{Premise ",\n"}+]
   ]
   
   Premise.Formula = [[Formula]]
@@ -36,24 +36,24 @@ templates // rules
     [
       [Premise]
       < {
-        [Premise+; separator=",\n"]
+        [{Premise ",\n"}+]
       } + {
-        [Premise+; separator=",\n"]
+        [{Premise ",\n"}+]
       }
     ]
   
   Premise.TryOr = [
   	try {
-      [Premise+; separator=",\n"]		
+      [{Premise ",\n"}+]		
   	} or {
-  		[Premise+; separator=",\n"]
+  		[{Premise ",\n"}+]
   	}
   ]
 
   ID = <rules> {reject}
   ID = <fresh> {reject}
   
-templates // formulas
+context-free syntax // formulas
 
   Formula.Match    = [[Term] => [Term]]
   Formula.NMatch   = [[Term] =!=> [Term]] 
@@ -64,23 +64,23 @@ templates // formulas
   Formula.IsValue  = [value([Term])]
   
   Reads.NoReads = []
-  Reads.Reads   = [[LabelComp+; separator=", "] |- ]
+  Reads.Reads   = [[{LabelComp ", "}+] |- ]
   
   Source.Source = [[Term]]
-  Source.Source = [([Term], [LabelComp+; separator=", "])]
+  Source.Source = [([Term], [{LabelComp ", "}+])]
 
   Target.Target = [[Term]]
-  Target.Target = [([Term], [LabelComp+; separator=", "])]
+  Target.Target = [([Term], [{LabelComp ", "}+])]
   
   Rel.NamedDynamic = [- [ID] ->]
   Rel.Dynamic = [-->]
   
-  Rel.NamedDynamicEmitted = [- [LabelComp+; separator=", "] -[ID]->]
-  Rel.DynamicEmitted = [- [LabelComp+; separator=", "] ->]
+  Rel.NamedDynamicEmitted = [- [{LabelComp ", "}+] -[ID]->]
+  Rel.DynamicEmitted = [- [{LabelComp ", "}+] ->]
   
   LabelComp.LabelComp = [[Type] [Term]]
   
-templates // terms
+context-free syntax // terms
 
   Term.As       = [[ID]@[Term]]
 
@@ -94,15 +94,15 @@ templates // terms
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
   Term.Real     = [[REAL]]
-  Term.Con      = [[ID]([Term*; separator=", "])]
-  Term.List     = <[ <Term*; separator=", "> ]>
-  Term.ListTail = <[ <Term*; separator=", "> | <Term> ]>
+  Term.Con      = [[ID]([{Term ", "}*])]
+  Term.List     = <[ <{Term ", "}*> ]>
+  Term.ListTail = <[ <{Term ", "}*> | <Term> ]>
   
   Term.Fresh  = [fresh]
   Term.True   = [true]
   Term.False  = [false]
   
-  Term.Map    = [{[Entry*;separator=", "]}]
+  Term.Map    = [{[{Entry  ", "}*]}]
   Entry.Bind  = [[Term] |--> [Term]] 
   Entry.Binds = [[Term] |*-> [Term]]
   Entry.MapEntry = [[Term]]
@@ -111,7 +111,7 @@ templates // terms
   Term.MapExtend = [[Term] + [Term]] {assoc}
   Term.MapUnbind = [[Term] \ [Term]] {assoc}
 
-  Term.SortFunCall = <<ID>[<Term>](<Term*; separator=", ">)>
+  Term.SortFunCall = <<ID>[<Term>](<{Term ", "}*>)>
 
 context-free priorities
 
