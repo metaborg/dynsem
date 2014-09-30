@@ -57,6 +57,7 @@
 			<include name="**/*.sdf3" />
 			<include name="**/*.nab" />
 			<include name="**/*.ts" />
+			<exclude name="lib/**/*.*" />
 		</fileset>
 	</path>
 
