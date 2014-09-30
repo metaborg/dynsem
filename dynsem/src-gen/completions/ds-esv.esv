@@ -2,7 +2,6 @@ module src-gen/completions/ds-esv
 
 imports
   src-gen/completions/Common-esv
-  src-gen/completions/Lexical-esv
   src-gen/completions/Module-esv
   src-gen/completions/Signatures-esv
 

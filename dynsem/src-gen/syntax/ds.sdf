@@ -1,5 +1,5 @@
 module ds
-imports Common Lexical Module Signatures
+imports Common Module Signatures
 
 exports
   context-free start-symbols

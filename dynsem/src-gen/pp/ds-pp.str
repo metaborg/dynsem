@@ -8,14 +8,12 @@ imports
 
 imports
   src-gen/signatures/Common-sig
-  src-gen/signatures/Lexical-sig
   src-gen/signatures/Module-sig
   src-gen/signatures/Signatures-sig
 
 
 imports
   src-gen/pp/Common-pp
-  src-gen/pp/Lexical-pp
   src-gen/pp/Module-pp
   src-gen/pp/Signatures-pp
 

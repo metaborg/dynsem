@@ -5,8 +5,12 @@ signature
     None : NONE
 
   constructors
-     : String -> JID
+     : String -> INFER
      : String -> ID
+     : String -> LID
+
+  constructors
+     : String -> JID
      : String -> INT
      : String -> REAL
      : String -> STRING

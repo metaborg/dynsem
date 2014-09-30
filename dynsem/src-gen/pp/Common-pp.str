@@ -25,10 +25,27 @@ strategies
 
 
 strategies
-  prettyprint-JID =
+  prettyprint-INFER =
     ![S(<is-string>)]
 
   prettyprint-ID =
+    ![S(<is-string>)]
+
+  prettyprint-LID =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-INFER
+
+  prettyprint-example =
+    prettyprint-ID
+
+  prettyprint-example =
+    prettyprint-LID
+
+
+strategies
+  prettyprint-JID =
     ![S(<is-string>)]
 
   prettyprint-INT =
@@ -54,9 +71,6 @@ strategies
 
   prettyprint-example =
     prettyprint-JID
-
-  prettyprint-example =
-    prettyprint-ID
 
   prettyprint-example =
     prettyprint-INT
