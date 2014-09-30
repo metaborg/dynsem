@@ -175,15 +175,15 @@ rules // lift constructors from sub-terms in premises
   lift-constructors-from-premise :
     Formula(TermEq(lhs, rhs)) -> [prem1*, Formula(TermEq(lhs', rhs')), prem2*]  
     where (prem1*, lhs') := <lift-constructors-from-build> lhs;
-          (prem2*, rhs') := <factorize-match> rhs;
+          (prem2*, rhs') := <lift-constructors-from-build> rhs;
           (not(<?[]> prem1*) <+ not(<?[]> prem2*))
 
   lift-constructors-from-premise :
-    Formula(TermEq(lhs, rhs)) -> [prem1*, Formula(TermEq(lhs', rhs')), prem2*]  
+    Formula(TermNeq(lhs, rhs)) -> [prem1*, Formula(TermEq(lhs', rhs')), prem2*]  
     where (prem1*, lhs') := <lift-constructors-from-build> lhs;
-          (prem2*, rhs') := <factorize-match> rhs;
+          (prem2*, rhs') := <lift-constructors-from-build> rhs;
           (not(<?[]> prem1*) <+ not(<?[]> prem2*))
-  
+
   lift-constructors-from-premise :
     Formula(Match(lhs, Con(c, t1*))) -> [Formula(Match(lhs, Con(c, t2*))), ma*]
     where
