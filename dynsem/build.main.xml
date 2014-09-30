@@ -62,7 +62,9 @@
 
 	<!-- Main target -->
 	<target depends="link-lib-files, spoofaximp.default.jar" name="all" />
-
+	<target depends="generate-sources-java" name="generate-sources"/>
+	<target depends="package-java" name="package"/>
+	
 	<target name="os-detection">
 		<condition property="isWin">
 			<os family="windows" />
