@@ -4,9 +4,15 @@ module Common
     NONE.None = <>
 
   lexical syntax 
+    INFER = [\-][\-][\-][\-]*
+    ID = [a-zA-Z][a-zA-Z0-9\'\_]*
+    LID = [a-zA-Z][a-zA-Z0-9\'\_]* "*"
+
+  lexical restrictions
+
+  lexical syntax 
     
     JID = [a-zA-Z][a-zA-Z0-9\_\.]*
-    ID = [a-zA-Z][a-zA-Z0-9\_\.]*
     INT = "-"? [0-9]+
     REAL = "-"? [0-9] "." [0-9]+
     REAL = "-"? "." [0-9]+
@@ -30,8 +36,9 @@ module Common
   
     CommentChar   -/- [\/]
     INT           -/- [0-9]
-    ID            -/- [a-zA-Z0-9\_\']
     JID           -/- [a-zA-Z0-9\_\.]
+    ID            -/- [a-zA-Z0-9\_\']
+    INFER         -/- [\-]
 
     %% EOF may not be followed by any char
     
