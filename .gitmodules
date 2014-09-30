@@ -1,0 +1,3 @@
+[submodule "dynsem/lib/runtime-libraries"]
+	path = dynsem/lib/runtime-libraries
+	url = https://github.com/metaborg/runtime-libraries.git
