@@ -61,18 +61,8 @@
 	</path>
 
 	<!-- Main target -->
-	<target depends="link-lib-files, spoofaximp.default.jar" name="all" />
+	<target depends="spoofaximp.default.jar" name="all" />
 	<target depends="generate-sources-java" name="generate-sources"/>
 	<target depends="package-java" name="package"/>
 	
-	<target name="os-detection">
-		<condition property="isWin">
-			<os family="windows" />
-		</condition>
-	</target>
-
-	<target depends="os-detection" name="link-lib-files" unless="isWin">
-		<symlink link="${basedir}/lib/runtime-libraries" overwrite="true" resource="${basedir}/../../runtime-libraries/" />
-	</target>
-
 </project>
