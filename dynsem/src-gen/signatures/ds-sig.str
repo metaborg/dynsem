@@ -1,0 +1,62 @@
+module src-gen/signatures/ds-sig
+
+imports
+  src-gen/signatures/Common-sig
+  src-gen/signatures/Module-sig
+  src-gen/signatures/Signatures-sig
+
+
+signature
+  constructors
+    Rules      : List(Rule) -> ModuleSection
+    Strict     : ID * List(INT) * INT -> Rule
+    Seqstrict  : ID * List(INT) * INT -> Rule
+    Axiom      : Formula -> Rule
+    Rule       : List(Premise) * INFER * Formula -> Rule
+    RuleW      : Formula * List(Premise) -> Rule
+    Formula    : Formula -> Premise
+    AllFail    : Premise
+    MergePoint : Premise * List(Premise) * List(Premise) -> Premise
+    TryOr      : List(Premise) * List(Premise) -> Premise
+
+  constructors
+    Match               : Term * Term -> Formula
+    NMatch              : Term * Term -> Formula
+    TermEq              : Term * Term -> Formula
+    TermNeq             : Term * Term -> Formula
+    Relation            : Reads * Source * Rel * Target -> Formula
+    IsValue             : Term -> Formula
+    NoReads             : Reads
+    Reads               : List(LabelComp) -> Reads
+    Source              : Term -> Source
+    Source              : Term * List(LabelComp) -> Source
+    Target              : Term -> Target
+    Target              : Term * List(LabelComp) -> Target
+    NamedDynamic        : ID -> Rel
+    Dynamic             : Rel
+    NamedDynamicEmitted : List(LabelComp) * ID -> Rel
+    DynamicEmitted      : List(LabelComp) -> Rel
+    LabelComp           : Type * Term -> LabelComp
+
+  constructors
+    As          : ID * Term -> Term
+    VarRef      : ID -> Term
+    Var         : ID -> Term
+    Wld         : Term
+    String      : STRING -> Term
+    Int         : INT -> Term
+    Real        : REAL -> Term
+    Con         : ID * List(Term) -> Term
+    List        : List(Term) -> Term
+    ListTail    : List(Term) * Term -> Term
+    Fresh       : Term
+    True        : Term
+    False       : Term
+    Map         : List(Entry) -> Term
+    Bind        : Term * Term -> Entry
+    Binds       : Term * Term -> Entry
+    MapEntry    : Term -> Entry
+    MapSelect   : Term * Term -> Term
+    MapExtend   : Term * Term -> Term
+    MapUnbind   : Term * Term -> Term
+    SortFunCall : ID * Term * List(Term) -> Term

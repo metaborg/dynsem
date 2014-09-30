@@ -1,0 +1,61 @@
+module src-gen/signatures/Signatures-sig
+
+imports
+  src-gen/signatures/Common-sig
+  src-gen/signatures/ds-sig
+
+
+signature
+  constructors
+    Signatures : List(SignatureSection) -> ModuleSection
+
+  constructors
+    Sorts    : List(SortDecl) -> SignatureSection
+    SortDecl : ID -> SortDecl
+    InjDecl  : ID * ID -> SortDecl
+
+  constructors
+    Constructors : List(ConsDecl) -> SignatureSection
+    ConsDecl     : ID * List(Type) * Type -> ConsDecl
+    SimpleSort   : ID -> Type
+    ListSort     : Type -> Type
+                 : MapType -> Type
+    MapSort      : Type * Type -> MapType
+
+  constructors
+    SemanticComponents : List(SemanticCompDecl) -> SignatureSection
+    SemanticComponent  : ID * MapType -> SemanticCompDecl
+
+  constructors
+    InternalSorts    : List(InternalSortDecl) -> SignatureSection
+    InternalSortDecl : ID -> InternalSortDecl
+    InternalInjDecl  : ID * ID -> InternalSortDecl
+
+  constructors
+    NativeDataTypes         : List(NativeTypeDecl) -> SignatureSection
+                            : STRING -> JSNIPPET
+    NativeBaseTypeDecl      : JSNIPPET * ID * List(NativeFunctionDecl) -> NativeTypeDecl
+    NativeSubTypeDecl       : JSNIPPET * ID * ID * List(NativeFunctionDecl) -> NativeTypeDecl
+    NativeFunctionDecl      : ID * List(Type) * Type -> NativeFunctionDecl
+    NativeNoArgFunctionDecl : ID * Type -> NativeFunctionDecl
+
+  constructors
+    NativeOperators : List(NativeOpDecl) -> SignatureSection
+    NativeOpDecl    : ID * List(Type) * Type -> NativeOpDecl
+
+  constructors
+    Values    : List(ValueDecl) -> SignatureSection
+    ValueDecl : ID * List(Type) -> ValueDecl
+
+  constructors
+    InternalConstructors : List(InternalConsDecl) -> SignatureSection
+    InternalConsDecl     : ID * List(Type) * Type -> InternalConsDecl
+
+  constructors
+    NativeConstructors : List(NativeConsDecl) -> SignatureSection
+    NativeConsDecl     : ID * List(Type) * Type -> NativeConsDecl
+
+  constructors
+    ArrowDeclarations : List(ArrowDeclaration) -> SignatureSection
+    ArrowDecl         : Type * ID * Type -> ArrowDeclaration
+    DefaultArrowDecl  : Type * Type -> ArrowDeclaration

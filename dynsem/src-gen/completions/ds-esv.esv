@@ -1,0 +1,86 @@
+module src-gen/completions/ds-esv
+
+imports
+  src-gen/completions/Common-esv
+  src-gen/completions/Module-esv
+  src-gen/completions/Signatures-esv
+
+completions
+  completion template ModuleSection : "rules " =
+    "rules\n\n\t" (cursor) (blank)                
+  completion template Rule : "strict ID INT/INT" =
+    "strict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
+  completion template Rule : "seqstrict ID INT/INT" =
+    "seqstrict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
+  completion template Rule : "Premise INFER Formula" =
+    <Premise:Premise> "\n" <INFER:INFER> "\n" <Formula:Formula> (blank)  
+  completion template Rule : "Formula where Premise" =
+    <Formula:Formula> "\nwhere\n\t" <Premise:Premise> (blank)  
+  completion template Premise : "all-fail" =
+    "all-fail"                                        
+  completion template Premise : "Premise < { Premise } + { Premise }" =
+    <Premise:Premise> "\n< {\n\t" <Premise:Premise> "\n} + {\n\t" <Premise:Premise> "\n}" (blank)  
+  completion template Premise : "try { Premise } or { Premise }" =
+    "try {\n\t" <Premise:Premise> "\n} or {\n\t" <Premise:Premise> "\n}" (blank)  
+
+completions
+  completion template Formula : "Term => Term" =
+    <Term:Term> " => " <Term:Term>  
+  completion template Formula : "Term =!=> Term" =
+    <Term:Term> " =!=> " <Term:Term>  
+  completion template Formula : "Term == Term" =
+    <Term:Term> " == " <Term:Term>  
+  completion template Formula : "Term != Term" =
+    <Term:Term> " != " <Term:Term>  
+  completion template Formula : "ReadsSource Rel Target" =
+    <Reads:Reads> <Source:Source> " " <Rel:Rel> " " <Target:Target>  
+  completion template Formula : "value(Term)" =
+    "value(" <Term:Term> ")"  
+  completion template Reads : "LabelComp |- " =
+    <LabelComp:LabelComp> " |- "  
+  completion template Source : "(Term, LabelComp)" =
+    "(" <Term:Term> ", " <LabelComp:LabelComp> ")"  
+  completion template Target : "(Term, LabelComp)" =
+    "(" <Term:Term> ", " <LabelComp:LabelComp> ")"  
+  completion template Rel : "- ID ->" =
+    "- " <ID:ID> " ->"       
+  completion template Rel : "-->" =
+    "-->"                        
+  completion template Rel : "- LabelComp -ID->" =
+    "- " <LabelComp:LabelComp> " -" <ID:ID> "->"  
+  completion template Rel : "- LabelComp ->" =
+    "- " <LabelComp:LabelComp> " ->"  
+  completion template LabelComp : "Type Term" =
+    <Type:Type> " " <Term:Term>  
+
+completions
+  completion template Term : "ID@Term" =
+    <ID:ID> "@" <Term:Term>  
+  completion template Term : "_" =
+    "_"    
+  completion template Term : "ID()" =
+    <ID:ID> "(" <:Term> ")"  
+  completion template Term : "[ ]" =
+    "[ " <:Term> " ]"  
+  completion template Term : "[ | Term ]" =
+    "[ " <:Term> " | " <Term:Term> " ]"  
+  completion template Term : "fresh" =
+    "fresh"  
+  completion template Term : "true" =
+    "true"  
+  completion template Term : "false" =
+    "false"  
+  completion template Term : "{}" =
+    "{" <:Entry> "}"  
+  completion template Entry : "Term |--> Term" =
+    <Term:Term> " |--> " <Term:Term>  
+  completion template Entry : "Term |*-> Term" =
+    <Term:Term> " |*-> " <Term:Term>  
+  completion template Term : "Term[Term]" =
+    <Term:Term> "[" <Term:Term> "]"  
+  completion template Term : "Term + Term" =
+    <Term:Term> " + " <Term:Term>  
+  completion template Term : "Term \\ Term" =
+    <Term:Term> " \\ " <Term:Term>  
+  completion template Term : "ID[Term]()" =
+    <ID:ID> "[" <Term:Term> "](" <:Term> ")"  

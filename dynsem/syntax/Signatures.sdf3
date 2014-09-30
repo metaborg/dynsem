@@ -4,29 +4,29 @@ imports
   Common
   ds
 
-templates
+context-free syntax
 
   ModuleSection.Signatures = <
     signature
-        <SignatureSection*; separator="\n">>
+        <{SignatureSection "\n"}*>>
 
-templates // sort declarations
+context-free syntax // sort declarations
 
   SignatureSection.Sorts = <
     sorts
-      <SortDecl*; separator="\n">>
+      <{SortDecl "\n"}*>>
   
   SortDecl.SortDecl = <<ID>>
   SortDecl.InjDecl = [[ID] -> [ID]]
   
 
-templates // constructor declarations
+context-free syntax // constructor declarations
 
   SignatureSection.Constructors = <
     constructors
-      <ConsDecl*; separator="\n">>
+      <{ConsDecl "\n"}*>>
 
-  ConsDecl.ConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+  ConsDecl.ConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
@@ -34,80 +34,80 @@ templates // constructor declarations
   
   MapType.MapSort = [Map<[Type],[Type]>]
   
-templates // semantic component declarations
+context-free syntax // semantic component declarations
 
   SignatureSection.SemanticComponents = <
     semantic-components
-      <SemanticCompDecl*; separator="\n">>
+      <{SemanticCompDecl "\n"}*>>
   
   SemanticCompDecl.SemanticComponent = [[ID] -> [MapType]]
 
-templates // internal sort declarations
+context-free syntax // internal sort declarations
   
   SignatureSection.InternalSorts = <
     internal-sorts
-      <InternalSortDecl*; separator="\n">>
+      <{InternalSortDecl "\n"}*>>
   
   InternalSortDecl.InternalSortDecl = <<ID>>
   InternalSortDecl.InternalInjDecl = [[ID] -> [ID]]
 
-templates // native data types
+context-free syntax // native data types
 
   SignatureSection.NativeDataTypes = <
     native-datatypes
-      <NativeTypeDecl*; separator="\n">>
+      <{NativeTypeDecl "\n"}*>>
   
   JSNIPPET = <<STRING>>
   
   NativeTypeDecl.NativeBaseTypeDecl =
-    [[JSNIPPET] as [ID] { [NativeFunctionDecl*; separator="\n"] } ]
+    [[JSNIPPET] as [ID] { [{NativeFunctionDecl "\n"}*] } ]
   
   NativeTypeDecl.NativeSubTypeDecl =
-    [[JSNIPPET] as [ID] -> [ID] { [NativeFunctionDecl*; separator="\n"] } ]
+    [[JSNIPPET] as [ID] -> [ID] { [{NativeFunctionDecl "\n"}*] } ]
   
   NativeFunctionDecl.NativeFunctionDecl =
-    [[ID] : [Type*; separator=" * "] -> [Type]] 
+    [[ID] : [{Type " * "}*] -> [Type]] 
   
   NativeFunctionDecl.NativeNoArgFunctionDecl =
     [[ID] : [Type]]
 
-templates // native operator declarations
+context-free syntax // native operator declarations
 
   SignatureSection.NativeOperators = <
     native-operators
-      <NativeOpDecl*; separator="\n">>
+      <{NativeOpDecl "\n"}*>>
   
-  NativeOpDecl.NativeOpDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+  NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}*] -> [Type]]
 
-templates // value term declarations
+context-free syntax // value term declarations
 
   SignatureSection.Values = <
     values
-      <ValueDecl*; separator="\n">>
+      <{ValueDecl "\n"}*>>
 
-  ValueDecl.ValueDecl = [[ID] : [Type*; separator=" * "]]
+  ValueDecl.ValueDecl = [[ID] : [{Type " * "}*]]
 
-templates // internal constructor declarations
+context-free syntax // internal constructor declarations
 
   SignatureSection.InternalConstructors = <
     internal-constructors
-      <InternalConsDecl*; separator="\n">>
+      <{InternalConsDecl "\n"}*>>
 
-  InternalConsDecl.InternalConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+  InternalConsDecl.InternalConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
 
-templates // internal constructor declarations
+context-free syntax // internal constructor declarations
 
   SignatureSection.NativeConstructors = <
     native-constructors
-      <NativeConsDecl*; separator="\n">>
+      <{NativeConsDecl "\n"}*>>
 
-  NativeConsDecl.NativeConsDecl = [[ID] : [Type*; separator=" * "] -> [Type]]
+  NativeConsDecl.NativeConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
 
-templates
+context-free syntax
   
   SignatureSection.ArrowDeclarations = <
     arrows
-      <ArrowDeclaration*; separator="\n">>
+      <{ArrowDeclaration "\n"}*>>
   
   ArrowDeclaration.ArrowDecl = [[Type] - [ID] -> [Type]]
   ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]
