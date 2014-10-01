@@ -1,71 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>dynsem</artifactId>
-	<packaging>eclipse-plugin</packaging>
-	<description>Spoofax meta-language for specifying dynamic semantics of languages</description>
-	<url>https://github.com/metaborg/dynsem</url>
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>dynsem</artifactId>
+  <packaging>eclipse-plugin</packaging>
+  <description>Spoofax meta-language for specifying dynamic semantics of languages</description>
+  <url>https://github.com/metaborg/dynsem</url>
 
-	<parent>
-		<groupId>org.metaborg</groupId>
-		<artifactId>org.metaborg.maven.parent.language</artifactId>
-		<version>1.2.0-SNAPSHOT</version>
-		<relativePath>../../spoofax-deploy/org.metaborg.maven.parent.language</relativePath>
-	</parent>
+  <parent>
+    <groupId>org.metaborg</groupId>
+    <artifactId>org.metaborg.maven.parent.language</artifactId>
+    <version>1.2.0-SNAPSHOT</version>
+    <relativePath>../../spoofax-deploy/org.metaborg.maven.parent.language</relativePath>
+  </parent>
 
-	<build>
-		<plugins>
-			<!-- Hack to prevent the src-gen folder from being cleaned. Since the build cannot run meta-languages such as SDF3, the
-				src-gen folder is committed to the git repository. The clean goal will clean the src-gen folder, temporarily renaming 
-				it will prevent that. -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>spoofax-clean-keepsrcgen-hack-pre</id>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<phase>pre-clean</phase>
-						<configuration>
-							<skip>${skip-language-build}</skip>
-							<target>
-								<move file="src-gen" tofile="src-gen-keep" />
-							</target>
-						</configuration>
-					</execution>
-					<execution>
-						<id>spoofax-clean-keepsrcgen-hack-post</id>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<phase>post-clean</phase>
-						<configuration>
-							<skip>${skip-language-build}</skip>
-							<target>
-								<move file="src-gen-keep" tofile="src-gen" />
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+  <build>
+    <plugins>
+      <!-- Hack to prevent the src-gen folder from being cleaned. Since the build cannot run meta-languages such as SDF3, the
+        src-gen folder is committed to the git repository. The clean goal will clean the src-gen folder, temporarily renaming
+        it will prevent that. This hack overrides the spoofax-clean antrun execution from the parent POM. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>spoofax-clean</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>clean</phase>
+            <configuration>
+              <skip>${skip-language-build}</skip>
+              <target>
+                <move file="src-gen" tofile="src-gen-keep" />
+                <ant antfile="build.main.xml" inheritRefs="true">
+                  <target name="clean" />
+                </ant>
+                <move file="src-gen-keep" tofile="src-gen" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
-	<developers>
-		<developer>
-			<name>Vlad Vergu</name>
-			<email>v.a.vergu@tudelft.nl</email>
-			<organization>Delft University of Technology</organization>
-			<organizationUrl>http://www.ewi.tudelft.nl/en</organizationUrl>
-		</developer>
-	</developers>
+  <developers>
+    <developer>
+      <name>Vlad Vergu</name>
+      <email>v.a.vergu@tudelft.nl</email>
+      <organization>Delft University of Technology</organization>
+      <organizationUrl>http://www.ewi.tudelft.nl/en</organizationUrl>
+    </developer>
+  </developers>
 
-	<scm>
-		<connection>scm:git:git@github.com:metaborg/dynsem.git</connection>
-		<developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
-		<url>https://github.com/metaborg/dynsem</url>
-	</scm>
+  <scm>
+    <connection>scm:git:git@github.com:metaborg/dynsem.git</connection>
+    <developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
+    <url>https://github.com/metaborg/dynsem</url>
+  </scm>
 </project>
