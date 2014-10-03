@@ -17,38 +17,50 @@ strategies
   factorize-module :
     Module(name, section*) -> Module(name, section'*)
     where
-      section'* := <map(try(factorize-rules))> section*
+      section'* := <fixvars; map(try(factorize-rules))> section*
         
-  factorize-rules = alltd(factorize-rule; rename-rule-inputs)
+  factorize-rules = alltd(factorize-rule)
+  
+  fixvars = alltd(fixvar)
+  
+  fixvar:
+    VarRef(x) -> Var(x)
+  
+  fixvar:
+    MatchedVar(x) -> Var(x)
   
 rules
   
   factorize-rule :
     Rule(prem1*, infer, 
-          Relation(reads, Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) -> 
+          Relation(read*, Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) -> 
     Rule(prem6*, infer, 
-          Relation(reads, Source(lhs',sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
+          Relation(read'*, Source(lhs',sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
     with
     	while-counting(
-	      (prem2*, lhs') := <factorize-lhs> lhs;
-	      rhs' := rhs;
+    	  (prem2*, read'*) := <factorize-reads> read*;
+	      (prem3*, lhs') := <factorize-lhs> lhs;
+	      (prem4*, sc'*) := <factorize-source-components> sc*;
+	      
+        rhs' := rhs;
 	      tc'* := tc*;
 	      // (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
 	      // (prem4*, tc'*) := <lift-constructors-from-tc> tc*;
-	      prem6* := [prem2*]
+	      prem6* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*];
+    	  debug(!5)
 	      // prem5* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*, prem4*];
 	      // prem6* := <lift-mapselect-from-premises> prem5*
 	    )
 
-  factorize-rule :
-    Rule(prem1*, infer, TermEq(lhs, rhs)) -> Rule(prem4*, infer, TermEq(lhs', rhs'))
-    with
-    	while-counting(
-	    	(prem2*, lhs') := <factorize-lhs> lhs;
-	      (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-	      // prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*]
-	      prem4* := [prem2*, prem1*, prem3*]
-	    )
+  // factorize-rule :
+  //   Rule(prem1*, infer, TermEq(lhs, rhs)) -> Rule(prem4*, infer, TermEq(lhs', rhs'))
+  //   with
+  //   	while-counting(
+	 //    	(prem2*, lhs') := <factorize-lhs> lhs;
+	 //      (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
+	 //      // prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*]
+	 //      prem4* := [prem2*, prem1*, prem3*]
+	 //    )
 
 rules // lift constructor sub-terms in match
   
@@ -66,51 +78,117 @@ rules // lift constructor sub-terms in match
   factorize-lhs:
     [x | xs] -> [ ([Formula(Match(Var(v), x))], Var(v)) | <factorize-lhs> xs]
     where
+      <not(?Var(_))> x;
       v := <next-variable>
 
-  // try-factorize-match = factorize-match <+ !([], <id>)
-  // 
-  // factorize-match = 
-  //   factorize-constructors-in-match
-  //   <+ factorize-listtail-in-match
-  //   <+ factorize-constant-in-match
+  factorize-reads:
+    Reads(r*) -> (p*, Reads(r'*))
+    where
+      (p*, r'*) := <factorize-source-components> r*
+
+  factorize-reads:
+    nr@NoReads() -> ([], nr)
+
+  factorize-source-components = map(factorize-source-components); unzip; (concat, id)
+  
+  factorize-source-components:
+    c@LabelComp(_, Var(_)) -> ([], c)
+  
+  factorize-source-components:
+    LabelComp(ty, t) -> ([Formula(Match(Var(v), t))], LabelComp(ty, Var(v)))
+    where
+      <not(?Var(_))> t;
+      v := <next-variable>
+  
+  factorize-premises = repeat(some(factorize-premise); flatten-list)
+  
+  factorize-premise =
+    factorize-match-in-premise
+    <+ factorize-termeq-in-premise
+    <+ factorize-relation-in-premise
+    
+  factorize-match-in-premise = fail
+  
+  factorize-match-in-premise:
+    Formula(Match(lhs, rhs)) -> [p-lhs*, Formula(Match(lhs', rhs))]
+    where
+      (p-lhs*, lhs') := <factorize-build> lhs
+  
+  factorize-match-in-premise:
+    Formula(Match(lhs, rhs)) -> [Formula(Match(lhs, rhs')), p-rhs*]
+    where
+      (p-rhs*, rhs') := <factorize-match> rhs
+  
+  factorize-match-in-premise:
+    Formula(Match(lhs, rhs)) -> [Formula(TermEq(lhs, rhs))]
+    where
+      <is-constant> rhs
+  
+  factorize-termeq-in-premise = fail
+  factorize-relation-in-premise = fail
+
+rules
   
   factorize-match = 
     factorize-constructors-in-match
     <+ factorize-listtail-in-match
-    <+ factorize-constant-in-match
-    <+ !([], <id>)
+    // <+ factorize-constant-in-match
+    // <+ !([], <id>)
 
   factorize-constructors-in-match:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      (prem*, t2*) := <map(factorize-match); unzip; (concat, id)> t1*
-
-  factorize-constructors-in-match:
-    t@Con(c, _) -> ([Formula(Match(Var(x), t))], Var(x))
-    with
-      x := <next-variable>
-
-  factorize-listtail-in-match:
-  	l@List([]) -> ([Formula(Match(Var(x), l))], Var(x))
-  	with x := <next-variable>
+      let cond = ?Var(_)
+      in
+        <fetch(not(cond))> t1*;
+        (prem*, t2*) := <map(lift-match-if-cond(cond)); unzip; (concat, id)> t1*
+      end
   
+  lift-match-if-cond(s):
+    t -> ([], t)
+    where <s> t
+  
+  lift-match-if-cond(s):
+    t -> ([Formula(Match(Var(x), t))], Var(x))
+    where
+       <not(s)> t;
+       x := <next-variable>
+
   factorize-listtail-in-match:
-    lt@ListTail([elem], tl) -> ([Formula(Match(Var(x), lt))], Var(x))
-    with
-      x := <next-variable>
+    ListTail([x], xs@ListTail(_, _)) -> ([Formula(Match(Var(v), xs))], ListTail([x], Var(v)))
+    where
+    	v := <next-variable> 
+    
+  factorize-build = debug(!"WARNING: FACTORIZATION OF BUILD NOT IMPLEMENTED ")
 
-  factorize-constant-in-match:
-    t@Int(_) -> ([Formula(TermEq(Var(x), t))], Var(x))
-    with x := <next-variable>
+  is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False()
 
-  factorize-constant-in-match:
-    t@Real(_) -> ([Formula(TermEq(Var(x), t))], Var(x))
-    with x := <next-variable>
 
-  factorize-constant-in-match:
-    t@String(s) -> ([Formula(TermEq(Var(x), t))], Var(x))
-    with x := <next-variable>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 rules // lift constructor sub-terms in build
   
