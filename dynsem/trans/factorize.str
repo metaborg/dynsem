@@ -157,7 +157,12 @@ rules
   factorize-listtail-in-match:
     ListTail([x], xs@ListTail(_, _)) -> ([Formula(Match(Var(v), xs))], ListTail([x], Var(v)))
     where
-    	v := <next-variable> 
+    	v := <next-variable>
+  
+  factorize-listtail-in-match:
+    ListTail([x], xs@List(_)) -> ([Formula(Match(Var(v), xs))], ListTail([x], Var(v)))
+    where
+    	v := <next-variable>
     
   factorize-build = debug(!"WARNING: FACTORIZATION OF BUILD NOT IMPLEMENTED ")
 
