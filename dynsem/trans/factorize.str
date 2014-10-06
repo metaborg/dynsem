@@ -76,6 +76,9 @@ rules // lift constructor sub-terms in match
       v := <next-variable>
 
   factorize-rhs:
+    v@Var(_)-> ([], v)
+
+  factorize-rhs:
     t -> ([Formula(Match(t, Var(x)))], Var(x))
     where
       <not(?Var(_))> t;
