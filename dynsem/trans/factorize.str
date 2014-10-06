@@ -130,8 +130,6 @@ rules
   factorize-match = 
     factorize-constructors-in-match
     <+ factorize-listtail-in-match
-    // <+ factorize-constant-in-match
-    // <+ !([], <id>)
 
   factorize-constructors-in-match:
     Con(c, t1*) -> (prem*, Con(c, t2*))
@@ -145,7 +143,7 @@ rules
   factorize-listtail-in-match:
     ListTail([x], xs) -> (prem*, ListTail([x], xs'))
     where
-    	let cond = ?List(_) + ?ListTail(_, _)
+    	let cond = not(?Var(_))
     	in
         (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
         !success
@@ -163,30 +161,60 @@ rules
 
   factorize-build =
     factorize-constructors-in-build
-    // <+ factorize-listtail-in-build
-    // <+ factorize-mapselect-in-build
-    <+ fail
+    <+ factorize-listtail-in-build
+    <+ factorize-mapselect-in-build
 
   factorize-constructors-in-build:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      let cond = ?Var(_)
+      let cond = not(?Var(_))
       in
-        <fetch(not(cond))> t1*;
-        (prem*, t2*) := <map(lift-build-on-cond(cond)); unzip; (concat, id)> t1*
+        (prem*, t2*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
+        !success
       end
   
-  lift-build-on-cond(s):
-    t -> ([], t)
-    where <s> t
+  factorize-listtail-in-build:
+    ListTail([x], xs) -> (prem*, ListTail([x], xs'))
+    where
+      let cond = not(?Var(_))
+      in
+        (prem*, xs') := <lift-build-on-cond(cond, ?success)> xs;
+        !success
+      end
   
-  lift-build-on-cond(s):
+  factorize-mapselect-in-build:
+    MapExtend(l, r) -> (prem*, MapExtend(l, r'))
+    where
+      let cond = not(?Var(_))
+      in
+        (prem*, r') := <lift-build-on-cond(cond, ?success)> r;
+        !success
+      end
+    
+  lift-build-on-cond(c, succ):
+    t -> ([], t)
+    where <not(c)> t
+  
+  lift-build-on-cond(c, succ):
     t -> ([Formula(Match(t, Var(x)))], Var(x))
     where
-      <not(s)> t;
+      <c> t; try(succ);
       x := <next-variable>
 
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
