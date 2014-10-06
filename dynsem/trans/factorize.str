@@ -107,8 +107,6 @@ rules // lift constructor sub-terms in match
     <+ factorize-termeq-in-premise
     <+ factorize-relation-in-premise
     
-  factorize-match-in-premise = fail
-  
   factorize-match-in-premise:
     Formula(Match(lhs, rhs)) -> [p-lhs*, Formula(Match(lhs', rhs))]
     where
@@ -141,14 +139,14 @@ rules
       let cond = ?Var(_)
       in
         <fetch(not(cond))> t1*;
-        (prem*, t2*) := <map(lift-match-if-cond(cond)); unzip; (concat, id)> t1*
+        (prem*, t2*) := <map(lift-match-on-cond(cond)); unzip; (concat, id)> t1*
       end
   
-  lift-match-if-cond(s):
+  lift-match-on-cond(s):
     t -> ([], t)
     where <s> t
   
-  lift-match-if-cond(s):
+  lift-match-on-cond(s):
     t -> ([Formula(Match(Var(x), t))], Var(x))
     where
        <not(s)> t;
@@ -163,8 +161,25 @@ rules
     ListTail([x], xs@List(_)) -> ([Formula(Match(Var(v), xs))], ListTail([x], Var(v)))
     where
     	v := <next-variable>
-    
-  factorize-build = debug(!"WARNING: FACTORIZATION OF BUILD NOT IMPLEMENTED ")
+
+  factorize-build:
+    Con(c, t1*) -> (prem*, Con(c, t2*))
+    where
+      let cond = ?Var(_)
+      in
+        <fetch(not(cond))> t1*;
+        (prem*, t2*) := <map(lift-build-on-cond(cond)); unzip; (concat, id)> t1*
+      end
+  
+  lift-build-on-cond(s):
+    t -> ([], t)
+    where <s> t
+  
+  lift-build-on-cond(s):
+    t -> ([Formula(Match(t, Var(x)))], Var(x))
+    where
+      <not(s)> t;
+      x := <next-variable>
 
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False()
 
