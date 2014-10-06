@@ -136,33 +136,38 @@ rules
   factorize-constructors-in-match:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      let cond = ?Var(_)
+      let cond = not(?Var(_))
       in
-        <fetch(not(cond))> t1*;
-        (prem*, t2*) := <map(lift-match-on-cond(cond)); unzip; (concat, id)> t1*
+        (prem*, t2*) := <map(lift-match-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
+        !success
       end
   
-  lift-match-on-cond(s):
-    t -> ([], t)
-    where <s> t
+  factorize-listtail-in-match:
+    ListTail([x], xs) -> (prem*, ListTail([x], xs'))
+    where
+    	let cond = ?List(_) + ?ListTail(_, _)
+    	in
+        (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
+        !success
+      end
   
-  lift-match-on-cond(s):
+  lift-match-on-cond(c, succ):
+    t -> ([], t)
+    where <not(c)> t
+  
+  lift-match-on-cond(c, succ):
     t -> ([Formula(Match(Var(x), t))], Var(x))
     where
-       <not(s)> t;
+       <c> t; try(succ);
        x := <next-variable>
 
-  factorize-listtail-in-match:
-    ListTail([x], xs@ListTail(_, _)) -> ([Formula(Match(Var(v), xs))], ListTail([x], Var(v)))
-    where
-    	v := <next-variable>
-  
-  factorize-listtail-in-match:
-    ListTail([x], xs@List(_)) -> ([Formula(Match(Var(v), xs))], ListTail([x], Var(v)))
-    where
-    	v := <next-variable>
+  factorize-build =
+    factorize-constructors-in-build
+    // <+ factorize-listtail-in-build
+    // <+ factorize-mapselect-in-build
+    <+ fail
 
-  factorize-build:
+  factorize-constructors-in-build:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
       let cond = ?Var(_)
