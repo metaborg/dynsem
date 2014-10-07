@@ -112,20 +112,16 @@ rules // lift constructor sub-terms in match
   
   factorize-termeq-in-premise = fail
   
-  factorize-relation-in-premise = fail
-  
-  // factorize-relation-in-premise:
-  // 	Formula(Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) ->
-  //   [p1*, p2*, p3*, Formula(Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*))), p4*, p5*]
-  //   where
-  //     (p1*, read'*) := <factorize-target-components> read*;
-  //     
-  //     
-  //     (p2*, lhs') := <factorize-rhs> lhs;
-  //     (p3*, sc'*) := <factorize-target-components> sc*;
-  //     (p4*, rhs') := <factorize-lhs> rhs;
-  //     (p5*, tc'*) := <factorize-source-components> tc*;
-  //     fail
+  factorize-relation-in-premise:
+  	Formula(Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) ->
+    [p1*, p2*, p3*, Formula(Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*))), p4*, p5*]
+    where
+      (p1*, read'*) := <try-factor(factorize-target-components, ?succ)> read*;
+      (p2*, lhs') := <try-factor(factorize-rhs, ?succ)> lhs;
+      (p3*, sc'*) := <try-factor(factorize-target-components, ?succ)> sc*;
+      (p4*, rhs') := <try-factor(factorize-lhs, ?succ)> rhs;
+      (p5*, tc'*) := <try-factor(factorize-source-components, ?succ)> tc*;
+      !succ
 
 rules
 
