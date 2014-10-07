@@ -119,7 +119,7 @@ rules // lift constructor sub-terms in match
       (p1*, read'*) := <try-factor(factorize-target-components, ?succ)> read*;
       (p2*, lhs') := <try-factor(factorize-rhs, ?succ)> lhs;
       (p3*, sc'*) := <try-factor(factorize-target-components, ?succ)> sc*;
-      (p4*, rhs') := <try-factor(factorize-lhs, ?succ)> rhs;
+      (p4*, rhs') := <lift-match-on-cond(not(?Var(_)), ?succ)> rhs;
       (p5*, tc'*) := <try-factor(factorize-source-components, ?succ)> tc*;
       !succ
 
