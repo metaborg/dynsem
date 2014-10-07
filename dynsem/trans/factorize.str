@@ -17,17 +17,9 @@ strategies
   factorize-module :
     Module(name, section*) -> Module(name, section'*)
     where
-      section'* := <map(try(factorize-rules))> section*
+      section'* := <alltd(\ VarRef(x) -> Var(x) \); map(try(factorize-rules))> section*
         
   factorize-rules = alltd(factorize-rule)
-  
-  fixvars = alltd(fixvar)
-  
-  fixvar:
-    VarRef(x) -> Var(x)
-  
-  fixvar:
-    MatchedVar(x) -> Var(x)
   
 rules
   
