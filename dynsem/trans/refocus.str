@@ -7,6 +7,7 @@ imports
   include/ds
   lib/editor-common.generated
   sugar
+  ds
   
 strategies
   
@@ -16,7 +17,7 @@ strategies
       section'* := <map(try(refocus-rules))> section*
   
   refocus-rules = 
-    desugar-all; alltd(refocus); sugar-all
+    desugar-top; alltd(refocus); sugar-all
   
 rules
   

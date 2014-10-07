@@ -7,10 +7,11 @@ imports
   include/ds
   lib/editor-common.generated
   sugar
+  ds
   
 rules
 	
-	unstrict-rules = desugar-all; extract-stricts; alltd(add-value-requirements); alltd(unstrict); sugar-all
+	unstrict-rules = desugar-top; extract-stricts; alltd(add-value-requirements); alltd(unstrict); sugar-all
 	
 	unstrict : Strict(con,[param],params) -> Rule([prem],"----------",conc)
 		where param-nums := <range>(1,<add>(<string-to-int>params,1));

@@ -12,13 +12,7 @@ signature
 	
 rules // desugaring
 	
-  desugar-all = mark-var-defs-in-rules; innermost(desugar); alltd(rules-concat)
-  
-  desugar:
-    Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
-    
-  desugar:
-    NMatch(lhs, Var(v)) -> NMatch(lhs, MatchedVar(v))
+  desugar-top = innermost(desugar); alltd(rules-concat)
   
   desugar :
     SortDecl(ty) -> InjDecl(ty, "Term")
@@ -69,6 +63,12 @@ rules // desugaring
     IsValue(term) -> TermEq(Con("IsValue",[term]),Con("True",[]))
 
   desugar :
+    Map([b | b*@[_|_]]) -> MapExtend(Map([b]), Map(b*))
+    
+  desugar :
+    Map([MapEntry(x)]) -> x
+
+  desugar :
     Strict(con,params1,params2) -> list
      where Cons(_,Cons(_,_)) := params1;
            list := <map( \ param -> Strict(con,[param],params2) \)> params1
@@ -115,12 +115,3 @@ rules // sugaring
   sugar :
   	MatchedVar(v) -> Var(v)
   
-rules // desugaring maps
-  
-  desugar :
-    Map([b | b*@[_|_]]) -> MapExtend(Map([b]), Map(b*))
-    
-  desugar :
-    Map([MapEntry(x)]) -> x
-  
-          

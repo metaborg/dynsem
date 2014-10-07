@@ -8,30 +8,16 @@ imports
   sugar
   explicate
   factorize
+  mark-references
   generator/interpreter/tmp-pregeneration-extra
   
 rules
   
-  pre-generation-transform-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"pregen.ds")> path;
-      result   := <desugar-all; pre-generation-transform; sugar-all; pp-debug> selected
-      
-  pre-generation-transform-editor-ast:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"pregen.ds.aterm")> path;
-      result   := <desugar-all; pre-generation-transform> selected
-      
   pre-generation-transform =
-    // explicate-module;
-    // factorize-module;
     alltd(escape-variable-names);
     fuse-sections;
     strip-annos;
     merge-overlapping-rules
-    // optimize-environments
 
 rules /* rename variables */
 

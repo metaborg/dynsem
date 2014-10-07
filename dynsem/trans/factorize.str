@@ -17,7 +17,7 @@ strategies
   factorize-module :
     Module(name, section*) -> Module(name, section'*)
     where
-      section'* := <fixvars; map(try(factorize-rules))> section*
+      section'* := <map(try(factorize-rules))> section*
         
   factorize-rules = alltd(factorize-rule)
   
