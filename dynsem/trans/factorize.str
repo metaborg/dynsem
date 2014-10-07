@@ -33,15 +33,15 @@ rules
   
   factorize-rule :
     Rule(prem1*, infer, 
-          Relation(read*, Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) -> 
+          Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) -> 
     Rule(prem7*, infer, 
-          Relation(read'*, Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
+          Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
     with
     	while-counting(
-    	  (prem2*, read'*) := <factorize-reads> read*;
-	      (prem3*, lhs') := <factorize-lhs> lhs;
+    	  (prem2*, read'*) := <factorize-source-components> read*;
+	      (prem3*, lhs') := <try-factor(factorize-lhs)> lhs;
 	      (prem4*, sc'*) := <factorize-source-components> sc*;
-	      (prem5*, rhs') := <factorize-rhs> rhs;
+	      (prem5*, rhs') := <try-factor(factorize-rhs)> rhs;
 	      (prem6*, tc'*) := <factorize-target-components> tc*;
 	      prem7* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*, prem5*, prem6*]
 	    )
@@ -58,40 +58,18 @@ rules
 
 rules // lift constructor sub-terms in match
   
-  factorize-lhs:
-    Con(c, t1*) -> (p*, Con(c, t2*))
-    where
-      (p*, t2*) := <factorize-lhs; unzip; (concat, id)> t1*
-
-  factorize-lhs:
-    [] -> []
-
-  factorize-lhs:
-    [v@Var(_) | xs] -> [([], v) | <factorize-lhs> xs]
+  try-factor(f) = try-factor(f, id)
   
+  try-factor(f, succ) = f; try(succ) <+ !([], <id>)
+
   factorize-lhs:
-    [x | xs] -> [ ([Formula(Match(Var(v), x))], Var(v)) | <factorize-lhs> xs]
-    where
-      <not(?Var(_))> x;
-      v := <next-variable>
-
-  factorize-rhs:
-    v@Var(_)-> ([], v)
-
-  factorize-rhs:
-    t -> ([Formula(Match(t, Var(x)))], Var(x))
-    where
-      <not(?Var(_))> t;
-      x := <next-variable>
-
-  factorize-reads:
-    Reads(r*) -> (p*, Reads(r'*))
-    where
-      (p*, r'*) := <factorize-source-components> r*
-
-  factorize-reads:
-    nr@NoReads() -> ([], nr)
-
+  	Con(c, t1*) -> (p*, Con(c, t2*))
+  	where
+  		(p*, t2*) := <map(lift-match-on-cond(not(?Var(_)), ?succ)); unzip; (concat, id)> t1*;
+  		!succ
+  
+  factorize-rhs = lift-build-on-cond(not(?Var(_)), ?succ); where(!succ)
+  
   factorize-source-components = map(factorize-source-components); unzip; (concat, id)
   
   factorize-source-components:
@@ -105,11 +83,11 @@ rules // lift constructor sub-terms in match
   
   factorize-target-components = map(factorize-source-components); unzip; (concat, id)
   
-  factorize-source-components:
+  factorize-target-components:
     c@LabelComp(_, Var(_)) -> ([], c)
   
   factorize-target-components:
-    LabelComp(ty, t) -> ([Formula(Match(t, Var(v)))], Var(v))
+    LabelComp(ty, t) -> ([Formula(Match(t, Var(v)))], LabelComp(ty, Var(v)))
     where
       <not(?Var(_))> t;
       v := <next-variable>
@@ -137,10 +115,24 @@ rules // lift constructor sub-terms in match
       <is-constant> rhs
   
   factorize-termeq-in-premise = fail
+  
   factorize-relation-in-premise = fail
+  
+  // factorize-relation-in-premise:
+  // 	Formula(Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) ->
+  //   [p1*, p2*, p3*, Formula(Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*))), p4*, p5*]
+  //   where
+  //     (p1*, read'*) := <factorize-target-components> read*;
+  //     
+  //     
+  //     (p2*, lhs') := <factorize-rhs> lhs;
+  //     (p3*, sc'*) := <factorize-target-components> sc*;
+  //     (p4*, rhs') := <factorize-lhs> rhs;
+  //     (p5*, tc'*) := <factorize-source-components> tc*;
+  //     fail
 
 rules
-  
+
   factorize-match = 
     factorize-constructors-in-match
     <+ factorize-listtail-in-match
@@ -162,6 +154,8 @@ rules
         (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
         !success
       end
+
+
   
   lift-match-on-cond(c, succ):
     t -> ([], t)
@@ -172,6 +166,8 @@ rules
     where
        <c> t; try(succ);
        x := <next-variable>
+
+
 
   factorize-build =
     factorize-constructors-in-build
