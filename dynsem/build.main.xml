@@ -28,10 +28,7 @@
 
 
 	<!-- Imports -->
-	<property name="build.sdf.imports" value="
-    -Idef &quot;${basedir}/lib/Coq/Stratego-Coq.def&quot;
-    -I &quot;${basedir}/lib/Coq/&quot;
-		" />
+	<property name="build.sdf.imports" value="" />
 	<property name="build.stratego.args" value=" 
                     --library
                     -I &quot;${trans}&quot;
