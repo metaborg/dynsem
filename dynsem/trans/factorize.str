@@ -38,11 +38,11 @@ rules
           Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
     with
     	while-counting(
-    	  (prem2*, read'*) := <factorize-source-components> read*;
+    	  (prem2*, read'*) := <try-factor(factorize-source-components)> read*;
 	      (prem3*, lhs') := <try-factor(factorize-lhs)> lhs;
-	      (prem4*, sc'*) := <factorize-source-components> sc*;
+	      (prem4*, sc'*) := <try-factor(factorize-source-components)> sc*;
 	      (prem5*, rhs') := <try-factor(factorize-rhs)> rhs;
-	      (prem6*, tc'*) := <factorize-target-components> tc*;
+	      (prem6*, tc'*) := <try-factor(factorize-target-components)> tc*;
 	      prem7* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*, prem5*, prem6*]
 	    )
 
@@ -70,10 +70,8 @@ rules // lift constructor sub-terms in match
   
   factorize-rhs = lift-build-on-cond(not(?Var(_)), ?succ); where(!succ)
   
-  factorize-source-components = map(factorize-source-components); unzip; (concat, id)
-  
-  factorize-source-components:
-    c@LabelComp(_, Var(_)) -> ([], c)
+  factorize-source-components =
+    map(try-factor(factorize-source-components, ?succ)); where(!succ); unzip; (concat, id)
   
   factorize-source-components:
     LabelComp(ty, t) -> ([Formula(Match(Var(v), t))], LabelComp(ty, Var(v)))
@@ -81,10 +79,8 @@ rules // lift constructor sub-terms in match
       <not(?Var(_))> t;
       v := <next-variable>
   
-  factorize-target-components = map(factorize-source-components); unzip; (concat, id)
-  
-  factorize-target-components:
-    c@LabelComp(_, Var(_)) -> ([], c)
+  factorize-target-components =
+    map(try-factor(factorize-target-components, ?succ)); where(!succ); unzip; (concat, id)
   
   factorize-target-components:
     LabelComp(ty, t) -> ([Formula(Match(t, Var(v)))], LabelComp(ty, Var(v)))
@@ -154,8 +150,6 @@ rules
         (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
         !success
       end
-
-
   
   lift-match-on-cond(c, succ):
     t -> ([], t)
@@ -167,7 +161,15 @@ rules
        <c> t; try(succ);
        x := <next-variable>
 
-
+  lift-build-on-cond(c, succ):
+    t -> ([], t)
+    where <not(c)> t
+  
+  lift-build-on-cond(c, succ):
+    t -> ([Formula(Match(t, Var(x)))], Var(x))
+    where
+      <c> t; try(succ);
+      x := <next-variable>
 
   factorize-build =
     factorize-constructors-in-build
@@ -201,15 +203,5 @@ rules
         !success
       end
     
-  lift-build-on-cond(c, succ):
-    t -> ([], t)
-    where <not(c)> t
-  
-  lift-build-on-cond(c, succ):
-    t -> ([Formula(Match(t, Var(x)))], Var(x))
-    where
-      <c> t; try(succ);
-      x := <next-variable>
-
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False()
 	
