@@ -42,14 +42,18 @@ completions
     "(" <Term:Term> ", " <LabelComp:LabelComp> ")"  
   completion template Target : "(Term, LabelComp)" =
     "(" <Term:Term> ", " <LabelComp:LabelComp> ")"  
-  completion template Rel : "- ID ->" =
-    "- " <ID:ID> " ->"       
   completion template Rel : "-->" =
     "-->"                        
-  completion template Rel : "- LabelComp -ID->" =
-    "- " <LabelComp:LabelComp> " -" <ID:ID> "->"  
-  completion template Rel : "- LabelComp ->" =
-    "- " <LabelComp:LabelComp> " ->"  
+  completion template Rel : "-ID->" =
+    "-" <ID:ID> "->"           
+  completion template Rel : "-ID(ID)->" =
+    "-" <ID:ID> "(" <ID:ID> ")->"  
+  completion template Rel : "-LabelComp->" =
+    "-" <LabelComp:LabelComp> "->"  
+  completion template Rel : "-LabelComp-ID->" =
+    "-" <LabelComp:LabelComp> "-" <ID:ID> "->"  
+  completion template Rel : "-LabelComp-ID(ID)->" =
+    "-" <LabelComp:LabelComp> "-" <ID:ID> "(" <ID:ID> ")->"  
   completion template LabelComp : "Type Term" =
     <Type:Type> " " <Term:Term>  
 

@@ -1,3 +1,4 @@
+
 module Signatures
 imports Common ds
 
@@ -95,10 +96,14 @@ exports
     CONTENTCOMPLETE -> NativeConsDecl   {cons("COMPLETION-NativeConsDecl")}
 
   context-free syntax
-    "arrows" ArrowDeclaration* -> SignatureSection {cons("ArrowDeclarations")}
-    Type "-" ID "->" Type      -> ArrowDeclaration {cons("ArrowDecl")}
-    Type "-->" Type            -> ArrowDeclaration {cons("DefaultArrowDecl")}
+    "arrows" DeclaredArrow*                                   -> SignatureSection         {cons("ArrowDeclarations")}
+    ArrowDeclaration                                          -> DeclaredArrow            
+    ArrowTemplateDeclaration                                  -> DeclaredArrow            
+    Type "-" ID "->" Type                                     -> ArrowDeclaration         {cons("ArrowDecl")}
+    Type "-->" Type                                           -> ArrowDeclaration         {cons("DefaultArrowDecl")}
+    "forall" ID+ "," Type "-" ID "(" ID "->" ID ")" "->" Type -> ArrowTemplateDeclaration {cons("ArrowTemplDecl")}
 
   context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> ArrowDeclaration {cons("COMPLETION-ArrowDeclaration")}
+    CONTENTCOMPLETE -> SignatureSection         {cons("COMPLETION-SignatureSection")}
+    CONTENTCOMPLETE -> ArrowDeclaration         {cons("COMPLETION-ArrowDeclaration")}
+    CONTENTCOMPLETE -> ArrowTemplateDeclaration {cons("COMPLETION-ArrowTemplateDeclaration")}

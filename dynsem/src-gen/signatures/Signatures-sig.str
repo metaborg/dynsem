@@ -56,6 +56,9 @@ signature
     NativeConsDecl     : ID * List(Type) * Type -> NativeConsDecl
 
   constructors
-    ArrowDeclarations : List(ArrowDeclaration) -> SignatureSection
+    ArrowDeclarations : List(DeclaredArrow) -> SignatureSection
+                      : ArrowDeclaration -> DeclaredArrow
+                      : ArrowTemplateDeclaration -> DeclaredArrow
     ArrowDecl         : Type * ID * Type -> ArrowDeclaration
     DefaultArrowDecl  : Type * Type -> ArrowDeclaration
+    ArrowTemplDecl    : List(ID) * Type * ID * ID * ID * Type -> ArrowTemplateDeclaration

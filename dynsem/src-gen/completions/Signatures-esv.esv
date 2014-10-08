@@ -1,3 +1,4 @@
+
 module src-gen/completions/Signatures-esv
 
 imports
@@ -74,8 +75,10 @@ completions
 
 completions
   completion template SignatureSection : "arrows " =
-    "arrows\n\t" (cursor) (blank)  
-  completion template ArrowDeclaration : "Type - ID -> Type" =
-    <Type:Type> " - " <ID:ID> " -> " <Type:Type>  
+    "arrows\n\t" (cursor) (blank)             
+  completion template ArrowDeclaration : "Type -ID-> Type" =
+    <Type:Type> " -" <ID:ID> "-> " <Type:Type>  
   completion template ArrowDeclaration : "Type --> Type" =
-    <Type:Type> " --> " <Type:Type>  
+    <Type:Type> " --> " <Type:Type>     
+  completion template ArrowTemplateDeclaration : "forall ID, Type -ID(ID -> ID)-> Type" =
+    "forall " <ID:ID> ", " <Type:Type> " -" <ID:ID> "(" <ID:ID> " -> " <ID:ID> ")-> " <Type:Type>  

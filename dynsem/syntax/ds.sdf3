@@ -72,11 +72,13 @@ context-free syntax // formulas
   Target.Target = [[Term]]
   Target.Target = [([Term], [{LabelComp ", "}+])]
   
-  Rel.NamedDynamic = [- [ID] ->]
   Rel.Dynamic = [-->]
+  Rel.NamedDynamic = [-[ID]->]
+  Rel.NamedDynamicParametric = [-[ID]([ID])->]
   
-  Rel.NamedDynamicEmitted = [- [{LabelComp ", "}+] -[ID]->]
-  Rel.DynamicEmitted = [- [{LabelComp ", "}+] ->]
+  Rel.DynamicEmitted = [-[{LabelComp ", "}+]->]
+  Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[ID]->]
+  Rel.NamedDynamicEmittedParametric = [-[{LabelComp ", "}+]-[ID]([ID])->]
   
   LabelComp.LabelComp = [[Type] [Term]]
   

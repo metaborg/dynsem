@@ -107,7 +107,12 @@ context-free syntax
   
   SignatureSection.ArrowDeclarations = <
     arrows
-      <{ArrowDeclaration "\n"}*>>
+      <{DeclaredArrow "\n"}*>>
   
-  ArrowDeclaration.ArrowDecl = [[Type] - [ID] -> [Type]]
+  DeclaredArrow = ArrowDeclaration
+  DeclaredArrow = ArrowTemplateDeclaration
+  
+  ArrowDeclaration.ArrowDecl = [[Type] -[ID]-> [Type]]
   ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]
+
+  ArrowTemplateDeclaration.ArrowTemplDecl = [forall [{ID " "}+], [Type] -[ID]([ID] -> [ID])-> [Type]]
