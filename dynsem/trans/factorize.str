@@ -161,6 +161,7 @@ rules
 
   factorize-build =
     factorize-constructors-in-build
+    <+ factorize-sortfuncall-in-build
     <+ factorize-listtail-in-build
     <+ factorize-mapselect-in-build
 
@@ -170,6 +171,16 @@ rules
       let cond = not(?Var(_))
       in
         (prem*, t2*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
+        !success
+      end
+  
+  factorize-sortfuncall-in-build:
+    SortFunCall(name, on, t*) -> ([p1*, p2*], SortFunCall(name, on', t'*))
+    where
+      let cond = not(?Var(_))
+      in
+        (p1*, on') := <lift-build-on-cond(cond, ?success)> on;
+        (p2*, t'*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t*;
         !success
       end
   
