@@ -148,11 +148,11 @@ rules // Builders
   //     filename := <guarantee-extension(|"noimports.ds")> path;
   //     result   := <resolve-includes(|path, project-path); pp-debug> ast
 
-  factorize-editor:
+  factoplicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factorized.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; factorize-module; sugar-all; pp-debug> ast
+      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; sugar-all; pp-debug> ast
 
 //   explicate-editor:
 //     (selected, position, ast, path, project-path) -> (filename, result)

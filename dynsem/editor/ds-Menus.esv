@@ -38,7 +38,7 @@ menus
     action  : "Generate interpreter"   = generate-interpreter
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime) 
-    action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
+    action  : "Factoplicate"           = factoplicate-editor (openeditor) (realtime) (source)
     // action  : "Resolve imports"        = includes-editor (openeditor) (realtime) (source)
     // action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
     // action  : "Explicate + Factorize"  = explicate-factorize-editor (openeditor) (realtime) (source)
