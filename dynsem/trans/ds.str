@@ -25,6 +25,7 @@ imports
 	types.manual
 	generator/interpreter/gen-interpreter
 	resolve-includes
+	coq-semantics/main
 	
 signature
   constructors
