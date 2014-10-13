@@ -24,7 +24,8 @@ rules /* merge ovelapping rules */
       debug(!"3 ");
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       debug(!"4 ");
-      merged-rule* := [];
+      merged-rule* := <map((id, id, map(merge-rules)))> rules-by-cons-arrow*;
+      debug(!"5 ");
       fail
 
   cons-decl-pair-arity:
@@ -50,13 +51,17 @@ rules /* merge ovelapping rules */
 
 rules
   
-  merge-rules = fail
+  merge-rules = (?[] + ?[_] + ?[_, _, _ |_])
   
-  // merge-rules:
-  //   [
-  //     Rule(p1*, infer, Relation(Reads(r1*), Source(lhs1,sc1*), NamedDynamicEmitted(em1*, arrow1), Target(rhs1,tc*))),
-  //     r2
-  //    ] -> r
+  merge-rules:
+    [r1@Rule(p1*, infer, Relation(Reads(r1*), Source(lhs1, sc1*), arrow, Target(rhs1, tc1*))), 
+     r2@Rule(p2*, infer, Relation(Reads(r2*), Source(lhs2, sc2*), arrow, Target(rhs2, tc2*)))] -> [r1, r2]
+  where
+    debug(!"4a ");
+  	<unify(?VarRef(_))> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
+  	debug(!"4b ");
+  	fail
+
 
 
 

@@ -17,7 +17,7 @@ strategies
   factorize-module :
     Module(name, section*) -> Module(name, section'*)
     where
-      section'* := <alltd(\ VarRef(x) -> Var(x) \); map(try(factorize-rules))> section*
+      section'* := <map(try(factorize-rules))> section*
         
   factorize-rules = alltd(factorize-rule)
   
@@ -57,27 +57,27 @@ rules // lift constructor sub-terms in match
   factorize-lhs:
   	Con(c, t1*) -> (p*, Con(c, t2*))
   	where
-  		(p*, t2*) := <map(lift-match-on-cond(not(?Var(_)), ?succ)); unzip; (concat, id)> t1*;
+  		(p*, t2*) := <map(lift-match-on-cond(not(?VarRef(_)), ?succ)); unzip; (concat, id)> t1*;
   		!succ
   
-  factorize-rhs = lift-build-on-cond(not(?Var(_)), ?succ); where(!succ)
+  factorize-rhs = lift-build-on-cond(not(?VarRef(_)), ?succ); where(!succ)
   
   factorize-source-components =
     map(try-factor(factorize-source-components, ?succ)); where(!succ); unzip; (concat, id)
   
   factorize-source-components:
-    LabelComp(ty, t) -> ([Formula(Match(Var(v), t))], LabelComp(ty, Var(v)))
+    LabelComp(ty, t) -> ([Formula(Match(VarRef(v), t))], LabelComp(ty, VarRef(v)))
     where
-      <not(?Var(_))> t;
+      <not(?VarRef(_))> t;
       v := <next-variable>
   
   factorize-target-components =
     map(try-factor(factorize-target-components, ?succ)); where(!succ); unzip; (concat, id)
   
   factorize-target-components:
-    LabelComp(ty, t) -> ([Formula(Match(t, Var(v)))], LabelComp(ty, Var(v)))
+    LabelComp(ty, t) -> ([Formula(Match(t, VarRef(v)))], LabelComp(ty, VarRef(v)))
     where
-      <not(?Var(_))> t;
+      <not(?VarRef(_))> t;
       v := <next-variable>
   
   factorize-premises = repeat(some(factorize-premise); flatten-list)
@@ -111,7 +111,7 @@ rules // lift constructor sub-terms in match
       (p1*, read'*) := <try-factor(factorize-target-components, ?succ)> read*;
       (p2*, lhs') := <try-factor(factorize-rhs, ?succ)> lhs;
       (p3*, sc'*) := <try-factor(factorize-target-components, ?succ)> sc*;
-      (p4*, rhs') := <lift-match-on-cond(not(?Var(_)), ?succ)> rhs;
+      (p4*, rhs') := <lift-match-on-cond(not(?VarRef(_)), ?succ)> rhs;
       (p5*, tc'*) := <try-factor(factorize-source-components, ?succ)> tc*;
       !succ
 
@@ -124,7 +124,7 @@ rules
   factorize-constructors-in-match:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      let cond = not(?Var(_))
+      let cond = not(?VarRef(_))
       in
         (prem*, t2*) := <map(lift-match-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
         !success
@@ -133,7 +133,7 @@ rules
   factorize-listtail-in-match:
     ListTail([x], xs) -> (prem*, ListTail([x], xs'))
     where
-    	let cond = not(?Var(_))
+    	let cond = not(?VarRef(_))
     	in
         (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
         !success
@@ -144,7 +144,7 @@ rules
     where <not(c)> t
   
   lift-match-on-cond(c, succ):
-    t -> ([Formula(Match(Var(x), t))], Var(x))
+    t -> ([Formula(Match(VarRef(x), t))], VarRef(x))
     where
        <c> t; try(succ);
        x := <next-variable>
@@ -154,7 +154,7 @@ rules
     where <not(c)> t
   
   lift-build-on-cond(c, succ):
-    t -> ([Formula(Match(t, Var(x)))], Var(x))
+    t -> ([Formula(Match(t, VarRef(x)))], VarRef(x))
     where
       <c> t; try(succ);
       x := <next-variable>
@@ -168,7 +168,7 @@ rules
   factorize-constructors-in-build:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      let cond = not(?Var(_))
+      let cond = not(?VarRef(_))
       in
         (prem*, t2*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
         !success
@@ -177,7 +177,7 @@ rules
   factorize-sortfuncall-in-build:
     SortFunCall(name, on, t*) -> ([p1*, p2*], SortFunCall(name, on', t'*))
     where
-      let cond = not(?Var(_))
+      let cond = not(?VarRef(_))
       in
         (p1*, on') := <lift-build-on-cond(cond, ?success)> on;
         (p2*, t'*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t*;
@@ -187,7 +187,7 @@ rules
   factorize-listtail-in-build:
     ListTail([x], xs) -> (prem*, ListTail([x], xs'))
     where
-      let cond = not(?Var(_))
+      let cond = not(?VarRef(_))
       in
         (prem*, xs') := <lift-build-on-cond(cond, ?success)> xs;
         !success
@@ -196,7 +196,7 @@ rules
   factorize-mapselect-in-build:
     MapExtend(l, r) -> (prem*, MapExtend(l, r'))
     where
-      let cond = not(?Var(_))
+      let cond = not(?VarRef(_))
       in
         (prem*, r') := <lift-build-on-cond(cond, ?success)> r;
         !success

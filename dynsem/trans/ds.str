@@ -153,7 +153,7 @@ rules // Builders
    facto-plico-nify-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"factorized.ds")> path;
+      filename := <guarantee-extension(|"pregen.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; unify-module; sugar-all; pp-debug> ast
 
 //   explicate-editor:
