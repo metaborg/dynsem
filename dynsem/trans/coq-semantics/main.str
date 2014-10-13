@@ -31,7 +31,7 @@ rules
 rules
   
   module-to-coq:
-  	Module(name, rule*) -> S|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
+  	Module(name, rule*) -> <build-module(|<base-filename> name)> S|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
 		where
 		  rule'* := <filter(?Rules(<id>)); concat> rule*
 		; decls  := <foldl(fold-rule); Fst; reverse; !ListDeclBar(<id>)> (rule'*, ([], []))
@@ -39,14 +39,15 @@ rules
 rules
   
   rule-to-coq(|n*):
-    RuleW(formula, prem*) -> (ConsDecl(name', <union> (p-bind*, f-bind*), type), [(name, count), n*])
+    RuleW(formula, prem*) -> (D|[ident_name optBinders' optType']|, [(name, count), n*])
     where
       (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
     ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
-    ; type                 := <foldl(fold-type)> (prem'*, t')
+    ; optType'             := OptType(<foldl(fold-type)> (prem'*, t'))
     ; name                 := <formula-to-name> formula
     ; count                := <lookup; inc <+ !0> (name, n*)
-    ; name'                := $[[name][count]C_sem]
+    ; ident_name           := $[[name][count]C_sem]
+    ; optBinders'          := OptBinders(<union> (p-bind*, f-bind*))
   
   rule-to-coq(|n*):
   	Rule(prem*,_,formula) -> <rule-to-coq(|n*)> RuleW(formula, prem*)
