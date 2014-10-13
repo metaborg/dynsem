@@ -68,4 +68,4 @@ rules // Fold rules
       (p', b'*, i') := <formula-to-coq(|i)> p
   
   fold-type: // Composes parts of a type
-    (x, y) -> T|[x -> y]|
+    (termx, termy) -> T|[termx -> termy]|

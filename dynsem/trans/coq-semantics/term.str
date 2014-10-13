@@ -25,48 +25,51 @@ rules // Sources and targets
 rules // Terms
 	
 	term-to-coq(|i):
-		Con(ident, t*) -> (T|[Co x t' k]|, b*, i')
+		Con(ident, t*) -> (T|[Co ident_x term_t term_k]|, b*, i')
 		where not("I" := ident)
 		where not("C" := ident)
 		where not("T" := ident)
 		with
-		  k             := $[k[i]]
-	  ;	(t', bt*, i') := <foldr(!(List([]), [], <inc> i), fold-con)> t*
-	  ; b*            := <union> (bt*, <union> (<filter(?Var(<id>); !Bind(<id>))> t*, [Bind(k)]))
-	  ; x             := $[[ident]C]
+		  term_k            := $[k[i]]
+	  ;	(term_t, bt*, i') := <foldr(!(List([]), [], <inc> i), fold-con)> t*
+	  ; b*                := <union> (bt*, <union> (<filter(?Var(<id>); !Bind(<id>))> t*, [Bind(term_k)]))
+	  ; ident_x           := $[[ident]C]
 	
 	term-to-coq(|i):
-	  Con("T", [e1, e2]) -> (T|[x1' x2']|, b*, i2)
+	  Con("T", [e1, e2]) -> (T|[term_e1 term_e2]|, b*, i2)
     with
-      (x1', b1*, i1) := <term-to-coq(|i)> e1
-    ; (x2', b2*, i2) := <term-to-coq(|i1)> e2
-    ; b*             := <union> (b1*, b2*)
+      (term_e1, b1*, i1) := <term-to-coq(|i)> e1
+    ; (term_e2, b2*, i2) := <term-to-coq(|i1)> e2
+    ; b*                 := <union> (b1*, b2*)
 	
 	term-to-coq(|i):
-	  Con("C", [e1, e2, env]) -> (T|[Clos x1' x2' env']|, b*, i')
+	  Con("C", [e1, e2, env]) -> (T|[Clos term_e1 term_e2 term_env']|, b*, i')
 	  where
-	    (x1', b1*, i1)  := <term-to-coq(|i)> e1
-    ; (x2', b2*, i2)  := <term-to-coq(|i1)> e2
-    ; (env', be*, i') := <term-to-coq(|i2)> env
-    ; b*              := <union> (b1*, <union> (b2*, be*))
+	    (term_e1, b1*, i1)   := <term-to-coq(|i)> e1
+    ; (term_e2, b2*, i2)   := <term-to-coq(|i1)> e2
+    ; (term_env', be*, i') := <term-to-coq(|i2)> env
+    ; b*                   := <union> (b1*, <union> (b2*, be*))
 	
 	term-to-coq(|i):
 	  Var(x) -> (Ref(x), [Bind(x)], i)
-	  
+	   
+  term-to-coq(|i):
+    VarRef(x) -> (Ref(x), [Bind(x)], i)
+    
 	term-to-coq(|i): // Ugly, but the only one supported by Coq for now, anyways
-	  Map([Bind(e1, e2), MapEntry(Var(env))]) -> (T|[env_extend x1 x2 env]|, b*, i2)
+	  Map([Bind(e1, e2), MapEntry(Var(ident_env))]) -> (T|[env_extend term_x1 term_x2 ident_env]|, b*, i2)
 	  where
-	    (x1, b1*, i1) := <term-to-coq(|i)> e1
-	  ; (x2, b2*, i2) := <term-to-coq(|i1)> e2
-	  ; b*            := <union> ([Bind(env)], <union> (b1*, b2*))
+	    (term_x1, b1*, i1) := <term-to-coq(|i)> e1
+	  ; (term_x2, b2*, i2) := <term-to-coq(|i1)> e2
+	  ; b*                 := <union> ([Bind(ident_env)], <union> (b1*, b2*))
 	    
 	
 rules // Static definitions, hardcoded for now
-	term-to-coq(|i): Con("I", [Var(x)])                          -> (T|[Natval x]| , [Bind(x)], i)
-	term-to-coq(|i): Int(n)                                      -> (n, [], i)
-	term-to-coq(|i): Con("I", [Con("addInt", [Var(x), Var(y)])]) -> (T|[plus x y]| , <union> ([Bind(x)], [Bind(y)]), i)
-  term-to-coq(|i): Con("I", [Con("subInt", [Var(x), Var(y)])]) -> (T|[minus x y]|, <union> ([Bind(x)], [Bind(y)]), i)
-  term-to-coq(|i): Con("I", [Con("mulInt", [Var(x), Var(y)])]) -> (T|[mult x y]| , <union> ([Bind(x)], [Bind(y)]), i)
+	term-to-coq(|i): Con("I", [Var(ident_x)])                                -> (T|[Natval ident_x]| , [Bind(ident_x)], i)
+	term-to-coq(|i): Int(n)                                                  -> (n, [], i)
+	term-to-coq(|i): Con("I", [Con("addInt", [Var(ident_x), Var(ident_y)])]) -> (T|[plus ident_x ident_y]| , <union> ([Bind(ident_x)], [Bind(ident_y)]), i)
+  term-to-coq(|i): Con("I", [Con("subInt", [Var(ident_x), Var(ident_y)])]) -> (T|[minus ident_x ident_y]|, <union> ([Bind(ident_x)], [Bind(ident_y)]), i)
+  term-to-coq(|i): Con("I", [Con("mulInt", [Var(ident_x), Var(ident_y)])]) -> (T|[mult ident_x ident_y]| , <union> ([Bind(ident_x)], [Bind(ident_y)]), i)
   
 rules // Fold rules
   fold-con:
