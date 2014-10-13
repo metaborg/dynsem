@@ -3,7 +3,6 @@ module coq-semantics/formula
 imports
   libstratego-gpp
   coq-semantics/-
-  coq-semantics/syntax/-
   lib/runtime/index/-
   lib/runtime/nabl/-
   lib/runtime/properties/-
@@ -11,6 +10,10 @@ imports
   names
   lib/editor-common.generated
   include/ds
+  lib/Coq/signatures/-
+  lib/Coq/Coq-parenthesize
+  lib/Coq/pp/-
+  src-gen/signatures/ds-sig
 
 rules // Formula
   

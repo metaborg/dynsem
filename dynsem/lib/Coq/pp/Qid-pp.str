@@ -1,0 +1,43 @@
+module lib/Coq/pp/Qid-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/Qid-sig
+
+
+imports
+  lib/Coq/signatures/Lexical-sig
+
+
+imports
+  lib/Coq/pp/Lexical-pp
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-QualId
+
+  prettyprintCoq-QualId :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-QualId)
+    where t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+
+  prettyprintCoq-QualId :
+    QId(t0__, t1__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [t0__', S("."), t1__']
+                         )
+                       ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+
+  is-QualId =
+    ?QId(_, _)
+
+  is-QualId =
+    fail

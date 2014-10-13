@@ -1,0 +1,1843 @@
+definition
+module extensions/Coercion
+imports Qid Gallina
+
+exports
+  context-free syntax
+    "Coercion" QualId ":" Class ">->" Class "." -> Sentence {cons("Coercion")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Sentence {cons("COMPLETION-Sentence")}
+
+  lexical syntax
+    "Coercion" -> Reserved 
+
+  context-free syntax
+    Term -> Class 
+
+  context-free syntax
+    CONTENTCOMPLETE -> Class {cons("COMPLETION-Class")}
+
+module extensions/Record
+imports Lexical Gallina Options Qid
+
+exports
+  context-free syntax
+    "Record"      -> RecordKeyword {cons("RecordRecord")}
+    "Structure"   -> RecordKeyword {cons("RecordStructure")}
+    "Inductive"   -> RecordKeyword {cons("RecordInductive")}
+    "CoInductive" -> RecordKeyword {cons("RecordCoInductive")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> RecordKeyword {cons("COMPLETION-RecordKeyword")}
+
+  context-free syntax
+    Record -> Sentence 
+
+  context-free syntax
+    CONTENTCOMPLETE -> Sentence {cons("COMPLETION-Sentence")}
+
+  context-free syntax
+    RecordKeyword Ident OptBinders OptSort ":=" OptIdents "{" {RecordField ";"}* "}" "." -> Record {cons("Record")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Record {cons("COMPLETION-Record")}
+
+  context-free syntax
+    Ident OptBinders ":" Type OptWhereNotation -> RecordField {cons("RecFld")}
+    Ident OptBinders OptType ":=" Term         -> RecordField {cons("RecExplicitFld")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> RecordField {cons("COMPLETION-RecordField")}
+
+  context-free syntax
+    Term ".(" QualId ")"        -> Term {cons("Projection")}
+    Term ".(" QualId Arg+ ")"   -> Term {cons("ProjArgs")}
+    Term ".(@" QualId Term+ ")" -> Term {cons("ProjQualArgs")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Term {cons("COMPLETION-Term")}
+
+module Vernacular
+imports Lexical Gallina Options extensions/Record extensions/Section
+        extensions/Module extensions/Coercion tactic/Toplevel
+
+exports
+  context-free syntax
+    "Axiom"      -> AssumptionKeyword {cons("AssumptionAxiom")}
+    "Conjecture" -> AssumptionKeyword {cons("AssumptionConjecture")}
+    "Parameter"  -> AssumptionKeyword {cons("AssumptionParameter")}
+    "Parameters" -> AssumptionKeyword {cons("AssumptionParameters")}
+    "Variable"   -> AssumptionKeyword {cons("AssumptionVariable")}
+    "Variables"  -> AssumptionKeyword {cons("AssumptionVariables")}
+    "Hypothesis" -> AssumptionKeyword {cons("AssumptionHypothesis")}
+    "Hypotheses" -> AssumptionKeyword {cons("AssumptionHypotheses")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> AssumptionKeyword {cons("COMPLETION-AssumptionKeyword")}
+
+  lexical syntax
+    "Axiom"      -> Reserved 
+    "Conjecture" -> Reserved 
+    "Parameter"  -> Reserved 
+    "Parameters" -> Reserved 
+    "Variable"   -> Reserved 
+    "Variables"  -> Reserved 
+    "Hypothesis" -> Reserved 
+    "Hypotheses" -> Reserved 
+
+  context-free syntax
+    "Theorem"     -> AssertionKeyword {cons("AssertionTheorem")}
+    "Lemma"       -> AssertionKeyword {cons("AssertionLemma")}
+    "Remark"      -> AssertionKeyword {cons("AssertionRemark")}
+    "Fact"        -> AssertionKeyword {cons("AssertionFact")}
+    "Corollary"   -> AssertionKeyword {cons("AssertionCorollary")}
+    "Proposition" -> AssertionKeyword {cons("AssertionProposition")}
+    "Definition"  -> AssertionKeyword {cons("AssertionDefinition")}
+    "Example"     -> AssertionKeyword {cons("AssertionExample")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> AssertionKeyword {cons("COMPLETION-AssertionKeyword")}
+
+  lexical syntax
+    "Theorem"     -> Reserved 
+    "Lemma"       -> Reserved 
+    "Remark"      -> Reserved 
+    "Fact"        -> Reserved 
+    "Corollary"   -> Reserved 
+    "Proposition" -> Reserved 
+    "Definition"  -> Reserved 
+    "Example"     -> Reserved 
+
+  context-free syntax
+    Assumption      -> Sentence 
+    Definition      -> Sentence 
+    Inductive       -> Sentence 
+    Fixpoint        -> Sentence 
+    Assertion Proof -> Sentence {cons("AssertionProof")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Sentence {cons("COMPLETION-Sentence")}
+
+  context-free syntax
+    AssumptionKeyword Assums "." -> Assumption {cons("Assumption")}
+    Ident+ ":" Term              -> Assums     {cons("Term")}
+    AssumsPar+                   -> Assums     {cons("Terms")}
+    "(" Ident+ ":" Term ")"      -> AssumsPar  {cons("Pars")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Assumption {cons("COMPLETION-Assumption")}
+    CONTENTCOMPLETE -> Assums     {cons("COMPLETION-Assums")}
+    CONTENTCOMPLETE -> AssumsPar  {cons("COMPLETION-AssumsPar")}
+
+  context-free syntax
+    "Definition" Ident OptBinders OptType ":=" Term "." -> Definition {cons("Definition")}
+    "Let" Ident OptBinders OptType ":=" Term "."        -> Definition {cons("Let")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Definition {cons("COMPLETION-Definition")}
+
+  context-free syntax
+    "Inductive" {IndBody "with"}+ "."        -> Inductive {cons("Inductive")}
+    "CoInductive" {IndBody "with"}+ "."      -> Inductive {cons("CoInductive")}
+    Ident OptBinders ":" Term ":=" ConsDecls -> IndBody   {cons("Induc")}
+    "|" {ConsDecl "|"}+                      -> ConsDecls {cons("ListDeclBar")}
+    {ConsDecl "|"}*                          -> ConsDecls {cons("ListDecl")}
+    Ident OptBinders OptType                 -> ConsDecl  {cons("ConsDecl")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Inductive {cons("COMPLETION-Inductive")}
+    CONTENTCOMPLETE -> IndBody   {cons("COMPLETION-IndBody")}
+    CONTENTCOMPLETE -> ConsDecls {cons("COMPLETION-ConsDecls")}
+    CONTENTCOMPLETE -> ConsDecl  {cons("COMPLETION-ConsDecl")}
+
+  context-free syntax
+    "Fixpoint" {FixBody "with"}+ "."     -> Fixpoint {cons("Fixpoint")}
+    "CoFixpoint" {CoFixBody "with"}+ "." -> Fixpoint {cons("CoFixpoint")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Fixpoint {cons("COMPLETION-Fixpoint")}
+
+  context-free syntax
+    AssertionKeyword Ident OptBinders ":" Term "." -> Assertion {cons("Assertion")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Assertion {cons("COMPLETION-Assertion")}
+
+  context-free syntax
+    "Proof" "." Tactic+ "Qed" "."      -> Proof {cons("Qed")}
+    "Proof" "." Tactic+ "Defined" "."  -> Proof {cons("Defined")}
+    "Proof" "." Tactic+ "Admitted" "." -> Proof {cons("Admitted")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Proof {cons("COMPLETION-Proof")}
+
+module extensions/Function
+imports Gallina Options Lexical
+
+exports
+  context-free syntax
+    "Function" Ident Binder+ OptDecreaseAnnot ":" Type Term -> Term {cons("Function")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Term {cons("COMPLETION-Term")}
+
+  context-free syntax
+                          -> OptDecreaseAnnot {cons("None")}
+    "{" DecreaseAnnot "}" -> OptDecreaseAnnot {cons("DecreaseAnnot")}
+    "struct" Ident        -> DecreaseAnnot    {cons("DecreaseStruct")}
+    "measure" Term Ident  -> DecreaseAnnot    {cons("DecreaseMeasure")}
+    "wf" Term Ident       -> DecreaseAnnot    {cons("DecreaseWF")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> OptDecreaseAnnot {cons("COMPLETION-OptDecreaseAnnot")}
+    CONTENTCOMPLETE -> DecreaseAnnot    {cons("COMPLETION-DecreaseAnnot")}
+
+module Gallina
+imports Lexical Qid Options extensions/Function
+
+exports
+  context-free syntax
+    "forall" Binder+ "," Term                                             -> Term {cons("ForAll")}
+    "fun" Binder+ "=>" Term                                               -> Term {cons("Fun")}
+    "fix" FixBodies                                                       -> Term {cons("Fix")}
+    "cofix" CoFixBodies                                                   -> Term {cons("CoFix")}
+    "let" Ident OptBinders OptType ":=" Term "in" Term                    -> Term {cons("Let")}
+    "let" "fix" FixBody "in" Term                                         -> Term {cons("LetFix")}
+    "let" "fix" CoFixBody "in" Term                                       -> Term {cons("LetCoFix")}
+    "let" "(" {Name ","}* ")" OptDepRetType ":=" Term "in" Term           -> Term {cons("LetTuple")}
+    "let" SingleQuote Pattern OptInTerm ":=" Term OptReturnType "in" Term -> Term {cons("LetPat")}
+    "if" Term OptDepRetType "then" Term "else" Term                       -> Term {cons("If")}
+    Term ":" Term                                                         -> Term {cons("Cast"), non-assoc}
+    Term "<:" Term                                                        -> Term {cons("Check"), non-assoc}
+    Term ":>"                                                             -> Term {cons("Coerce"), non-assoc}
+    Term "->" Term                                                        -> Term {cons("Arrow"), right}
+    Term Term                                                             -> Term {cons("Apply"), left, prefer}
+    Term Arg                                                              -> Term {cons("ApplyImplicit")}
+    "@" QualId OptTerms                                                   -> Term {cons("UnHide")}
+    Term "%" Ident                                                        -> Term {cons("ScopeRef")}
+    "match" {MatchItem ","}+ OptReturnType "with" Equations "end"         -> Term {cons("Match")}
+    QualId                                                                -> Term {cons("Ref")}
+    Sort                                                                  -> Term 
+    Num                                                                   -> Term 
+    "_"                                                                   -> Term {cons("WldTerm")}
+    "(" Term ")"                                                          -> Term {bracket}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Term {cons("COMPLETION-Term")}
+
+  context-free syntax
+    "(" Ident ":=" Term ")" -> Arg {cons("ImplicitArg")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Arg {cons("COMPLETION-Arg")}
+
+  context-free syntax
+    Name                           -> Binder {cons("Bind")}
+    "(" Name+ ":" Term ")"         -> Binder {cons("Binds")}
+    "(" Name OptType ":=" Term ")" -> Binder {cons("Assign")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Binder {cons("COMPLETION-Binder")}
+
+  context-free syntax
+    Ident -> Name 
+    "_"   -> Name {cons("WldName")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Name {cons("COMPLETION-Name")}
+
+  context-free syntax
+    "Prop" -> Sort {cons("Prop")}
+    "Set"  -> Sort {cons("Set")}
+    "Type" -> Sort {cons("Type")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Sort {cons("COMPLETION-Sort")}
+
+  context-free syntax
+    "|" {Equation "|"}+ -> Equations {cons("ListEqBar")}
+    {Equation "|"}+     -> Equations {cons("ListEq")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Equations {cons("COMPLETION-Equations")}
+
+  context-free syntax
+    FixBody                                          -> FixBodies   
+    FixBody "with" {FixBody "with"}+ "for" Ident     -> FixBodies   {cons("With")}
+    Ident Binder+ OptAnnotation OptType ":=" Term    -> FixBody     {cons("FixBody")}
+    CoFixBody                                        -> CoFixBodies 
+    CoFixBody "with" {CoFixBody "with"}+ "for" Ident -> CoFixBodies {cons("With")}
+    Ident OptBinders OptType ":=" Term               -> CoFixBody   {cons("CoFixBody")}
+    Term OptAlias OptInTerm                          -> MatchItem   {cons("MatchItem")}
+    "return" Term                                    -> ReturnType  {cons("Return")}
+    {MultPattern "|"}+ "=>" Term                     -> Equation    {cons("Eq")}
+    {Pattern ","}+                                   -> MultPattern 
+    QualId Pattern+                                  -> Pattern     {cons("QidPattern")}
+    Pattern "as" Ident                               -> Pattern     {cons("AsPattern")}
+    Pattern "%" Ident                                -> Pattern     {cons("XPattern")}
+    QualId                                           -> Pattern     
+    "_"                                              -> Pattern     {cons("Wld")}
+    Num                                              -> Pattern     
+    "(" {OrPattern ","}+ ")"                         -> Pattern     {cons("OrPattern")}
+    {Pattern "|"}+                                   -> OrPattern   
+
+  context-free syntax
+    CONTENTCOMPLETE -> FixBodies   {cons("COMPLETION-FixBodies")}
+    CONTENTCOMPLETE -> FixBody     {cons("COMPLETION-FixBody")}
+    CONTENTCOMPLETE -> CoFixBodies {cons("COMPLETION-CoFixBodies")}
+    CONTENTCOMPLETE -> CoFixBody   {cons("COMPLETION-CoFixBody")}
+    CONTENTCOMPLETE -> MatchItem   {cons("COMPLETION-MatchItem")}
+    CONTENTCOMPLETE -> ReturnType  {cons("COMPLETION-ReturnType")}
+    CONTENTCOMPLETE -> Equation    {cons("COMPLETION-Equation")}
+    CONTENTCOMPLETE -> MultPattern {cons("COMPLETION-MultPattern")}
+    CONTENTCOMPLETE -> Pattern     {cons("COMPLETION-Pattern")}
+    CONTENTCOMPLETE -> OrPattern   {cons("COMPLETION-OrPattern")}
+
+  context-free syntax
+    "[" {Term ";"}* "]"          -> Term {cons("List")}
+    "(" Term "," {Term ","}+ ")" -> Term {cons("Tuple")}
+    Term "*" Term                -> Term {cons("Prod"), left}
+    Term "=" Term                -> Term {cons("Eq"), non-assoc}
+    Term "<>" Term               -> Term {cons("NotE"), non-assoc}
+    Term "/\\" Term              -> Term {cons("And")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Term {cons("COMPLETION-Term")}
+
+  context-free priorities
+    "forall" Binder+ "," Term -> Term >
+    Term Term -> Term >
+    Term "->" Term -> Term >
+    Term "*" Term -> Term >
+    {non-assoc:
+      Term "<:" Term -> Term
+      Term ":" Term -> Term
+      Term ":>" -> Term
+      Term "=" Term -> Term
+      Term "<>" Term -> Term
+    } >
+    Term "/\\" Term -> Term
+
+  context-free syntax
+    Term -> Type 
+
+  context-free syntax
+    CONTENTCOMPLETE -> Type {cons("COMPLETION-Type")}
+
+module tactic/AtomicTactic
+imports Lexical Qid
+
+exports
+  lexical syntax
+    "intros"       -> Reserved 
+    "auto"         -> Reserved 
+    "assumption"   -> Reserved 
+    "inversion"    -> Reserved 
+    "subst"        -> Reserved 
+    "eauto"        -> Reserved 
+    "induction"    -> Reserved 
+    "destruct"     -> Reserved 
+    "left"         -> Reserved 
+    "right"        -> Reserved 
+    "reflexivity"  -> Reserved 
+    "discriminate" -> Reserved 
+
+  context-free syntax
+    OptNumPrefix ATactic -> AtomicTactic {cons("AtomicTactic")}
+                         -> OptNumPrefix {cons("None")}
+    Num ":"              -> OptNumPrefix 
+
+  context-free syntax
+    CONTENTCOMPLETE -> AtomicTactic {cons("COMPLETION-AtomicTactic")}
+    CONTENTCOMPLETE -> OptNumPrefix {cons("COMPLETION-OptNumPrefix")}
+
+  context-free syntax
+    "intros"           -> ATactic {cons("Intros")}
+    "auto"             -> ATactic {cons("Auto")}
+    "eauto"            -> ATactic {cons("EAuto")}
+    "assumption"       -> ATactic {cons("Assumption")}
+    "inversion" QualId -> ATactic {cons("Inversion")}
+    "subst"            -> ATactic {cons("Subst")}
+    "induction" QualId -> ATactic {cons("Induction")}
+    "destruct" QualId  -> ATactic {cons("Destruct")}
+    "left"             -> ATactic {cons("Left")}
+    "right"            -> ATactic {cons("Right")}
+    "reflexivity"      -> ATactic {cons("Reflexivity")}
+    "discriminate"     -> ATactic {cons("Discriminate")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> ATactic {cons("COMPLETION-ATactic")}
+
+module tactic/Expr
+imports Lexical Gallina Qid Options tactic/AtomicTactic
+
+exports
+  context-free syntax
+    TExpr ";" TExpr                -> TExpr {cons("ExprSeq"), left}
+    TExpr ";" "[" {TExpr "|"}* "]" -> TExpr {cons("ExprSeqAlts")}
+    TacExpr3                       -> TExpr 
+
+  context-free syntax
+    CONTENTCOMPLETE -> TExpr {cons("COMPLETION-TExpr")}
+
+  context-free syntax
+    "do" OptTime TacExpr3      -> TacExpr3 {cons("DoTac")}
+    "progress" TacExpr3        -> TacExpr3 {cons("Progress")}
+    "repeat" TacExpr3          -> TacExpr3 {cons("Repeat")}
+    "try" TacExpr3             -> TacExpr3 {cons("Try")}
+    "timeout" OptTime TacExpr3 -> TacExpr3 {cons("Timeout")}
+    TacExpr2                   -> TacExpr3 
+
+  context-free syntax
+    CONTENTCOMPLETE -> TacExpr3 {cons("COMPLETION-TacExpr3")}
+
+  context-free syntax
+          -> OptTime {cons("None")}
+    Num   -> OptTime {cons("Natural")}
+    Ident -> OptTime 
+
+  context-free syntax
+    CONTENTCOMPLETE -> OptTime {cons("COMPLETION-OptTime")}
+
+  context-free syntax
+    TacExpr1 "||" TacExpr3 -> TacExpr2 {cons("Alts")}
+    TacExpr1               -> TacExpr2 
+
+  context-free syntax
+    CONTENTCOMPLETE -> TacExpr2 {cons("COMPLETION-TacExpr2")}
+
+  context-free syntax
+    "fun" Ident+ "=>" TAtom                                      -> TacExpr1 {cons("Fun")}
+    "let" OptRec {LetClause "with"}+ "in" TAtom                  -> TacExpr1 {cons("LetTac")}
+    "match" "goal" "with" {ContextRule "|"}+ "end"               -> TacExpr1 {cons("MatchGoal")}
+    "match" "reverse" "goal" "with" {ContextRule "|"}+ "end"     -> TacExpr1 {cons("MatchRevGoal")}
+    "match" TExpr "with" {MatchRule "|"}+ "end"                  -> TacExpr1 {cons("MatchExpr")}
+    "lazymatch" "goal" "with" {ContextRule "|"}+ "end"           -> TacExpr1 {cons("LMatchGoal")}
+    "lazymatch" "reverse" "goal" "with" {ContextRule "|"}+ "end" -> TacExpr1 {cons("LMatchRevGoal")}
+    "lazymatch" TExpr "with" {MatchRule "|"}+ "end"              -> TacExpr1 {cons("LMatchExpr")}
+    "abstract" TAtom                                             -> TacExpr1 {cons("Abstract")}
+    "abstract" TAtom "using" Ident                               -> TacExpr1 {cons("AbstractUsing")}
+    "first" "[" {TExpr "|"}+ "]"                                 -> TacExpr1 {cons("First")}
+    "solve" "[" {TExpr "|"}+ "]"                                 -> TacExpr1 {cons("Solve")}
+    "idtac" MsgToken*                                            -> TacExpr1 {cons("IdTac")}
+    "fail" OptNatural OptMsgTokens                               -> TacExpr1 {cons("Fail")}
+    "fresh" OptString                                            -> TacExpr1 {cons("Fresh")}
+    "context" Ident OptTerm                                      -> TacExpr1 {cons("Context")}
+    "eval" RedExpr "in" Term                                     -> TacExpr1 {cons("Eval")}
+    "type" "of" Term                                             -> TacExpr1 {cons("TypeOf")}
+    "external" String String TacArg+                             -> TacExpr1 {cons("External")}
+    "constr" ":" Term                                            -> TacExpr1 {cons("ConstrTerm")}
+    AtomicTactic                                                 -> TacExpr1 
+    QualId TacArg+                                               -> TacExpr1 {cons("QualTactic")}
+    TAtom                                                        -> TacExpr1 
+    "(" TExpr ")"                                                -> TacExpr1 {bracket}
+
+  context-free syntax
+    CONTENTCOMPLETE -> TacExpr1 {cons("COMPLETION-TacExpr1")}
+
+  context-free syntax
+              -> OptRec       {cons("None")}
+    "rec"     -> OptRec       {cons("Rec")}
+              -> OptMsgTokens {cons("None")}
+    MsgToken+ -> OptMsgTokens 
+              -> OptNatural   {cons("None")}
+    Num       -> OptNatural   
+              -> OptString    {cons("None")}
+    Num       -> OptString    
+              -> OptTerm      {cons("None")}
+    Term      -> OptTerm      
+
+  context-free syntax
+    CONTENTCOMPLETE -> OptRec       {cons("COMPLETION-OptRec")}
+    CONTENTCOMPLETE -> OptMsgTokens {cons("COMPLETION-OptMsgTokens")}
+    CONTENTCOMPLETE -> OptNatural   {cons("COMPLETION-OptNatural")}
+    CONTENTCOMPLETE -> OptString    {cons("COMPLETION-OptString")}
+    CONTENTCOMPLETE -> OptTerm      {cons("COMPLETION-OptTerm")}
+
+  context-free syntax
+    QualId          -> TAtom 
+    Num             -> TAtom 
+    "(" "TExpr" ")" -> TAtom {bracket}
+    "()"            -> TAtom {cons("Unit")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> TAtom {cons("COMPLETION-TAtom")}
+
+  context-free syntax
+    String -> MsgToken 
+    Ident  -> MsgToken 
+    Num    -> MsgToken 
+
+  context-free syntax
+    CONTENTCOMPLETE -> MsgToken {cons("COMPLETION-MsgToken")}
+
+  context-free syntax
+    QualId           -> TacArg 
+    "()"             -> TacArg {cons("Unit")}
+    "ltac" ":" TAtom -> TacArg {cons("AtomArg")}
+    Term             -> TacArg 
+
+  context-free syntax
+    CONTENTCOMPLETE -> TacArg {cons("COMPLETION-TacArg")}
+
+  context-free syntax
+    Ident OptNames ":=" TExpr -> LetClause {cons("LetClause")}
+                              -> OptNames  {cons("None")}
+    Name+                     -> OptNames  
+
+  context-free syntax
+    CONTENTCOMPLETE -> LetClause {cons("COMPLETION-LetClause")}
+    CONTENTCOMPLETE -> OptNames  {cons("COMPLETION-OptNames")}
+
+  context-free syntax
+    OptContextHyps "|-" Pattern "=>" TExpr -> ContextRule    {cons("PatContext")}
+    "_" "=>" TExpr                         -> ContextRule    {cons("WldContext")}
+                                           -> OptContextHyps {cons("None")}
+    {ContextHyp ","}+                      -> OptContextHyps 
+
+  context-free syntax
+    CONTENTCOMPLETE -> ContextRule    {cons("COMPLETION-ContextRule")}
+    CONTENTCOMPLETE -> OptContextHyps {cons("COMPLETION-OptContextHyps")}
+
+  context-free syntax
+    Name ":" Pattern              -> ContextHyp  {cons("ContextHyp")}
+    Name ":=" Pattern OptCPattern -> ContextHyp  {cons("ContextHypAssign")}
+                                  -> OptCPattern {cons("None")}
+    ":" Pattern                   -> OptCPattern {cons("OptCPattern")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> ContextHyp  {cons("COMPLETION-ContextHyp")}
+    CONTENTCOMPLETE -> OptCPattern {cons("COMPLETION-OptCPattern")}
+
+  context-free syntax
+    Pattern "=>" TExpr                          -> MatchRule  {cons("MatchPattern")}
+    "context" OptIdent OptPattern "=>" TExpr    -> MatchRule  {cons("MatchContext")}
+    "appcontext" OptIdent OptPattern "=>" TExpr -> MatchRule  {cons("MatchAppContext")}
+    "_" "=>" TExpr                              -> MatchRule  {cons("MatchWld")}
+                                                -> OptIdent   {cons("None")}
+    Ident                                       -> OptIdent   
+                                                -> OptPattern {cons("None")}
+    Pattern                                     -> OptPattern 
+
+  context-free syntax
+    CONTENTCOMPLETE -> MatchRule  {cons("COMPLETION-MatchRule")}
+    CONTENTCOMPLETE -> OptIdent   {cons("COMPLETION-OptIdent")}
+    CONTENTCOMPLETE -> OptPattern {cons("COMPLETION-OptPattern")}
+
+  context-free syntax
+    "red"     -> RedExpr {cons("RedRed")}
+    "hnf"     -> RedExpr {cons("RedHnf")}
+    "compute" -> RedExpr {cons("RedCompute")}
+    "simpl"   -> RedExpr {cons("RedSimpl")}
+    "cbv"     -> RedExpr {cons("RedCbv")}
+    "lazy"    -> RedExpr {cons("RedLazy")}
+    "unfold"  -> RedExpr {cons("RedUnfold")}
+    "fold"    -> RedExpr {cons("RedFold")}
+    "pattern" -> RedExpr {cons("RedPattern")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> RedExpr {cons("COMPLETION-RedExpr")}
+
+module tactic/Toplevel
+imports Qid Lexical tactic/Expr Vernacular
+
+exports
+  lexical syntax
+    "Ltac"  -> Reserved 
+    "Local" -> Reserved 
+
+  context-free syntax
+    OptLocalPrefix "Ltac" {LtacDef "with"}+ -> Sentence {cons("Ltac")}
+    TExpr "."                               -> Tactic   {cons("Tactic")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Sentence {cons("COMPLETION-Sentence")}
+    CONTENTCOMPLETE -> Tactic   {cons("COMPLETION-Tactic")}
+
+  context-free syntax
+            -> OptLocalPrefix {cons("None")}
+    "Local" -> OptLocalPrefix {cons("LocalTactic")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> OptLocalPrefix {cons("COMPLETION-OptLocalPrefix")}
+
+  context-free syntax
+    QualId Ident* ":=" TExpr -> LtacDef {cons("LtacDef")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> LtacDef {cons("COMPLETION-LtacDef")}
+
+module extensions/Section
+imports Lexical Vernacular
+
+exports
+  context-free syntax
+    "Section" Ident "." Sentence* "End" Ident "." -> Sentence {cons("Section")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Sentence {cons("COMPLETION-Sentence")}
+
+  lexical syntax
+    "Section" -> Reserved 
+
+module Qid
+imports Lexical
+
+exports
+  context-free syntax
+    Ident            -> QualId 
+    QualId "." Ident -> QualId {cons("QId")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> QualId {cons("COMPLETION-QualId")}
+
+module Options
+imports Lexical Gallina
+
+exports
+  context-free syntax
+                           -> OptType       {cons("None")}
+    ":" Term               -> OptType       {cons("OptType")}
+                           -> OptInTerm     {cons("None")}
+    "in" Term              -> OptInTerm     {cons("OptInTerm")}
+                           -> OptDepRetType {cons("None")}
+    OptAlias ReturnType    -> OptDepRetType {cons("DepRet")}
+                           -> OptAlias      {cons("None")}
+    "as" Name              -> OptAlias      {cons("As")}
+                           -> OptReturnType {cons("None")}
+    ReturnType             -> OptReturnType {cons("OptReturnType")}
+                           -> OptBinders    {cons("None")}
+    Binder+                -> OptBinders    {cons("OptBinders")}
+                           -> OptTerms      {cons("None")}
+    Term+                  -> OptTerms      {cons("OptTerms")}
+                           -> OptSort       {cons("None")}
+    ":" Sort               -> OptSort       {cons("OptSort")}
+                           -> OptAnnotation {cons("None")}
+    "{" "struct" Ident "}" -> OptAnnotation {cons("Anno")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> OptType       {cons("COMPLETION-OptType")}
+    CONTENTCOMPLETE -> OptInTerm     {cons("COMPLETION-OptInTerm")}
+    CONTENTCOMPLETE -> OptDepRetType {cons("COMPLETION-OptDepRetType")}
+    CONTENTCOMPLETE -> OptAlias      {cons("COMPLETION-OptAlias")}
+    CONTENTCOMPLETE -> OptReturnType {cons("COMPLETION-OptReturnType")}
+    CONTENTCOMPLETE -> OptBinders    {cons("COMPLETION-OptBinders")}
+    CONTENTCOMPLETE -> OptTerms      {cons("COMPLETION-OptTerms")}
+    CONTENTCOMPLETE -> OptSort       {cons("COMPLETION-OptSort")}
+    CONTENTCOMPLETE -> OptAnnotation {cons("COMPLETION-OptAnnotation")}
+
+  context-free syntax
+                                -> OptIdents        {cons("None")}
+    Ident+                      -> OptIdents        {cons("OptIdents")}
+                                -> OptWhereNotation {cons("None")}
+    "where" {Notation "where"}+ -> OptWhereNotation {cons("OptWhereNotation")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> OptIdents        {cons("COMPLETION-OptIdents")}
+    CONTENTCOMPLETE -> OptWhereNotation {cons("COMPLETION-OptWhereNotation")}
+
+module Lexical
+exports
+  lexical syntax
+    [\ \n\t\r]                    -> LAYOUT           
+    "(*" CommentChar* "*)"        -> LAYOUT           
+    ~[\"] | String                -> CommentChar      
+    [a-zA-Z\_]                    -> FirstLetter      
+    [a-zA-Z0-9\_\']               -> SubsequentLetter 
+    FirstLetter SubsequentLetter* -> Ident            
+    Reserved                      -> Ident            {reject}
+    [0-9]                         -> Digit            
+    Digit+                        -> Num              
+    "-"? Num                      -> Integer          
+    "\"" StringChar* "\""         -> String           
+    ~[\"] | "\"\""                -> StringChar       
+    "_"                           -> Reserved         
+    "as"                          -> Reserved         
+    "at"                          -> Reserved         
+    "cofix"                       -> Reserved         
+    "else"                        -> Reserved         
+    "end"                         -> Reserved         
+    "exists"                      -> Reserved         
+    "exists2"                     -> Reserved         
+    "fix"                         -> Reserved         
+    "for"                         -> Reserved         
+    "forall"                      -> Reserved         
+    "fun"                         -> Reserved         
+    "if"                          -> Reserved         
+    "IF"                          -> Reserved         
+    "in"                          -> Reserved         
+    "let"                         -> Reserved         
+    "match"                       -> Reserved         
+    "mod"                         -> Reserved         
+    "Prop"                        -> Reserved         
+    "return"                      -> Reserved         
+    "Set"                         -> Reserved         
+    "then"                        -> Reserved         
+    "Type"                        -> Reserved         
+    "using"                       -> Reserved         
+    "where"                       -> Reserved         
+    "with"                        -> Reserved         
+    "'"                           -> SingleQuote      
+
+  context-free syntax
+    Ident -> Notation 
+
+  context-free syntax
+    CONTENTCOMPLETE -> Notation {cons("COMPLETION-Notation")}
+
+  lexical restrictions
+    Ident -/- [a-zA-Z0-9\_\']
+    Num -/- [0-9]
+    String -/- [\"]
+    "Type" "Prop" -/- [a-zA-Z0-9\_\']
+
+  context-free restrictions
+    LAYOUT? -/- [\ \n\r\t]
+    LAYOUT? -/- [\(] . [\*]
+
+module extensions/Module
+imports Vernacular Gallina Lexical Options Qid extensions/Section
+
+exports
+  lexical syntax
+    "Import"  -> Reserved 
+    "Export"  -> Reserved 
+    "Include" -> Reserved 
+    "Inline"  -> Reserved 
+    "Module"  -> Reserved 
+    "End"     -> Reserved 
+    "Require" -> Reserved 
+    "Type"    -> Reserved 
+
+  context-free syntax
+    "Module" OptModuleBindingKeywordPrefix Ident OptModuleBindings OptModuleTypes "." ModContent* "End" Ident "." -> Module {cons("InteractiveModule")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Module {cons("COMPLETION-Module")}
+
+  context-free syntax
+    "Import"             -> ModuleBindingKeyword          {cons("Import")}
+    "Export"             -> ModuleBindingKeyword          {cons("Export")}
+                         -> OptModuleBindingKeywordPrefix {cons("None")}
+    ModuleBindingKeyword -> OptModuleBindingKeywordPrefix 
+
+  context-free syntax
+    CONTENTCOMPLETE -> ModuleBindingKeyword          {cons("COMPLETION-ModuleBindingKeyword")}
+    CONTENTCOMPLETE -> OptModuleBindingKeywordPrefix {cons("COMPLETION-OptModuleBindingKeywordPrefix")}
+
+  context-free syntax
+    QualId                                          -> ModuleType     {cons("QualifiedModule")}
+    ModuleType "with" "Definition" QualId ":=" Term -> ModuleType     {cons("ModuleWithDefinition")}
+    ModuleType "with" "Module" QualId ":=" QualId   -> ModuleType     {cons("ModuleWithModule")}
+    QualId QualId+                                  -> ModuleType     {cons("QualifiedModuleSeq")}
+    "!" QualId QualId+                              -> ModuleType     {cons("QualifiedModuleBangSeq")}
+    "(" ModuleType ")"                              -> ModuleType     {bracket}
+                                                    -> OptModuleTypes {cons("None")}
+    ":" ModuleType                                  -> OptModuleTypes {cons("ModType")}
+    "<:" {ModuleType "<:"}*                         -> OptModuleTypes {cons("ModSubtypes")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> ModuleType     {cons("COMPLETION-ModuleType")}
+    CONTENTCOMPLETE -> OptModuleTypes {cons("COMPLETION-OptModuleTypes")}
+
+  context-free syntax
+    "(" OptModuleBindingKeywordPrefix Ident+ ModuleType ")" -> ModuleBinding     {cons("ModuleBinding")}
+                                                            -> OptModuleBindings {cons("None")}
+    ModuleBinding+                                          -> OptModuleBindings {cons("ModBindings")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> ModuleBinding     {cons("COMPLETION-ModuleBinding")}
+    CONTENTCOMPLETE -> OptModuleBindings {cons("COMPLETION-OptModuleBindings")}
+
+  context-free syntax
+    Sentence                -> ModContent 
+    Module                  -> ModContent 
+    "Include" {Ident "<+"}+ -> ModContent {cons("Include")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> ModContent {cons("COMPLETION-ModContent")}
+
+  context-free syntax
+    "Module" Ident OptModuleBindings OptModuleTypes ":=" ModuleExpression "." -> Module {cons("ModuleDef"), prefer}
+    "Module" Ident OptModuleBindings ":=" {ModuleExpression "<+"}+            -> Module {cons("ModuleDefs")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Module {cons("COMPLETION-Module")}
+
+  context-free syntax
+    QualId+     -> ModuleExpression {cons("ModuleExpression")}
+    "!" QualId+ -> ModuleExpression {cons("ModuleBangExpression")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> ModuleExpression {cons("COMPLETION-ModuleExpression")}
+
+  context-free syntax
+    "Module" "Type" Ident OptModuleBindings "." ModTypeContent* "End" Ident "." -> Module {cons("ModuleType")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Module {cons("COMPLETION-Module")}
+
+  context-free syntax
+    ModContent                        -> ModTypeContent 
+    AssumptionKeyword "Inline" Assums -> ModTypeContent {cons("InlineAssumption")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> ModTypeContent {cons("COMPLETION-ModTypeContent")}
+
+  context-free syntax
+    "Module" "Type" Ident OptModuleBindings ":=" {ModuleType "<+"}+ -> Module {cons("ModuleTypeDef")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Module {cons("COMPLETION-Module")}
+
+  context-free syntax
+    OptRequirePrefix "Import" QualId "." -> Sentence {cons("Import")}
+    OptRequirePrefix "Export" QualId "." -> Sentence {cons("Export")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> Sentence {cons("COMPLETION-Sentence")}
+
+  context-free syntax
+              -> OptRequirePrefix {cons("None")}
+    "Require" -> OptRequirePrefix {cons("Require")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> OptRequirePrefix {cons("COMPLETION-OptRequirePrefix")}
+
+module Coq
+imports Vernacular Gallina extensions/Module extensions/Section tactic/Toplevel
+
+exports
+  context-free start-symbols
+    CoqFile
+
+  context-free syntax
+    TopLevel* -> CoqFile 
+
+  context-free syntax
+    CONTENTCOMPLETE -> CoqFile {cons("COMPLETION-CoqFile")}
+
+  context-free syntax
+    Sentence -> TopLevel 
+    Module   -> TopLevel 
+
+  context-free syntax
+    CONTENTCOMPLETE -> TopLevel {cons("COMPLETION-TopLevel")}
+
+module mix/CoqMix[E]
+
+imports
+  Coq
+  Gallina
+  Vernacular
+  
+  
+exports
+  variables
+    "term"  [a-z0-9\-\_\']+ -> Term       {prefer}
+    "decl"  [a-z0-9\-\_\']+ -> ConsDecls  {prefer}
+    "sent"  [a-z0-9\-\_\']+ -> Sentence   {prefer}
+    "ident" [a-z0-9\-\_\']+ -> Ident      {prefer}
+    "bind"  [a-z0-9\-\_\']+ -> OptBinders {prefer}
+    "equations" [a-z0-9\-\_\']+ -> Equations {prefer}
+
+  context-free syntax
+    "T" "|[" Term      "]|" -> E {cons("ToMetaExpr")}
+    "S" "|[" Sentence  "]|" -> E {cons("ToMetaExpr")}
+    "D" "|[" ConsDecl  "]|" -> E {cons("ToMetaExpr")}
+        "|[" TopLevel* "]|" -> E {cons("ToMetaListExpr")}
+
+  lexical syntax
+    "term"  [a-z0-9\-\_\']+ -> Ident {reject}
+    "decl"  [a-z0-9\-\_\']+ -> Ident {reject}
+    "sent"  [a-z0-9\-\_\']+ -> Ident {reject}
+    "ident" [a-z0-9\-\_\']+ -> Ident {reject}
+    "bind"  [a-z0-9\-\_\']+ -> Ident {reject}
+    "equations" [a-z0-9\-\_\']+ -> Ident {reject}
+  
+  
+context-free restrictions
+  Term   -/- [\_a-z0-9\']
+
+exports
+  variables
+    "optType"          [a-z0-9\-\_\']+ -> OptType          {prefer}
+    "optInTerm"        [a-z0-9\-\_\']+ -> OptInTerm        {prefer}
+    "optDepRetType"    [a-z0-9\-\_\']+ -> OptDepRetType    {prefer}
+    "optAlias"         [a-z0-9\-\_\']+ -> OptAlias         {prefer}
+    "optReturnType"    [a-z0-9\-\_\']+ -> OptReturnType    {prefer}
+    "optBinders"       [a-z0-9\-\_\']+ -> OptBinders       {prefer}
+    "optTerms"         [a-z0-9\-\_\']+ -> OptTerms         {prefer}
+    "optSort"          [a-z0-9\-\_\']+ -> OptSort          {prefer}
+    "OptAnnotation"    [a-z0-9\-\_\']+ -> OptAnnotation    {prefer}
+    "optIdents"        [a-z0-9\-\_\']+ -> OptSort          {prefer}
+    "optIdents"        [a-z0-9\-\_\']+ -> OptIdents        {prefer}
+    "optWhereNotation" [a-z0-9\-\_\']+ -> OptWhereNotation {prefer}
+    
+  lexical syntax
+    "optType"          [a-z0-9\-\_\']+ -> Ident {reject}
+    "optInTerm"        [a-z0-9\-\_\']+ -> Ident {reject}
+    "optDepRetType"    [a-z0-9\-\_\']+ -> Ident {reject}
+    "optAlias"         [a-z0-9\-\_\']+ -> Ident {reject}
+    "optReturnType"    [a-z0-9\-\_\']+ -> Ident {reject}
+    "optBinders"       [a-z0-9\-\_\']+ -> Ident {reject}
+    "optTerms"         [a-z0-9\-\_\']+ -> Ident {reject}
+    "optSort"          [a-z0-9\-\_\']+ -> Ident {reject}
+    "OptAnnotation"    [a-z0-9\-\_\']+ -> Ident {reject}
+    "optIdents"        [a-z0-9\-\_\']+ -> Ident {reject}
+    "optIdents"        [a-z0-9\-\_\']+ -> Ident {reject}
+    "optWhereNotation" [a-z0-9\-\_\']+ -> Ident {reject}
+
+module Stratego-Sugar-Overlays
+imports
+  Stratego-Core-Identifiers
+  Stratego-Sugar-Terms
+
+exports
+  sorts Overlay
+  context-free syntax
+    Id 			 "=" Term 	-> Overlay {cons("OverlayNoArgs")}
+    Id "(" {Id ","}* ")" "=" Term 	-> Overlay {cons("Overlay")}
+
+module Stratego-Sugar-DynamicRules
+imports
+  Stratego-Core-Identifiers
+  Stratego-Sugar-Strategies
+  Stratego-Sugar-Rules
+
+exports
+ 
+  sorts ScopeLabels
+  context-free syntax
+
+    "{|" ScopeLabels ":" Strategy "|}" -> Strategy {cons("DynRuleScope")}
+
+    {DynRuleScopeId ","}*   -> ScopeLabels
+    "~" Term		    -> ScopeLabels {cons("ScopeLabels")}
+
+  sorts DynRuleDef DynRuleId DynRuleScopeId RuleDec
+  context-free syntax
+
+    "rules" "(" DynRuleDef* ")" -> Strategy {cons("GenDynRules")}
+
+    Id "+" Term                 -> DynRuleDef {cons("AddScopeLabel")} 
+    DynRuleId ":-"  Term        -> DynRuleDef {cons("UndefineDynRule")}
+    DynRuleId ":"   Rule        -> DynRuleDef {cons("SetDynRule")}
+    DynRuleId ":+"  Rule        -> DynRuleDef {cons("AddDynRule")}
+    DynRuleId ":"   Term        -> DynRuleDef {cons("SetDynRuleMatch")}
+
+    DynRuleId ":="  Term        -> DynRuleDef {cons("DynRuleAssign")}
+    DynRuleId ":+="  Term       -> DynRuleDef {cons("DynRuleAssignAdd")}
+
+    DynRuleId ":"   Rule "depends" "on" Term -> DynRuleDef {cons("SetDynRuleDepends")}
+
+    RuleDec "." Term            -> DynRuleId {cons("LabeledDynRuleId")}
+    RuleDec "+" Term            -> DynRuleId {cons("AddLabelDynRuleId")}
+    RuleDec                     -> DynRuleId {cons("DynRuleId")}
+
+    Id "." Term                 -> DynRuleScopeId {cons("LabeledDynRuleScopeId")}
+    Id                          -> DynRuleScopeId {cons("DynRuleScopeId")}
+
+  context-free syntax
+
+    Id                          -> RuleDec {cons("RDecNoArgs")}
+    Id "(" {Typedid ","}* ")"   -> RuleDec {cons("RDec")}
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")"   -> RuleDec {cons("RDecT")}
+
+  sorts RuleNames
+  context-free syntax
+    {Id ","}*				  -> RuleNames
+    "~" Term				  -> RuleNames {cons("RuleNames")}
+
+    "/" RuleNames "\\*" Strategy          -> Strategy {cons("DynRuleIntersectFix")}
+
+  syntax
+    %% no space after RuleNames
+    "\\" <LAYOUT?-CF> <RuleNames-CF> "/*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleUnionFix")}
+
+    %% 1 space after RuleNames
+    "\\" <LAYOUT?-CF> <RuleNames-CF> " /*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleUnionFix")}
+
+    %% no space after RuleNames
+    "/"  <LAYOUT?-CF> <RuleNames-CF> <LAYOUT?-CF> "\\"
+        <LAYOUT?-CF> <RuleNames-CF> "/*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleIntersectUnionFix")}
+
+    %% 1 space after RuleNames
+    "/"  <LAYOUT?-CF> <RuleNames-CF> <LAYOUT?-CF> "\\"
+        <LAYOUT?-CF> <RuleNames-CF> " /*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleIntersectUnionFix")}
+
+
+  context-free syntax
+    Strategy "/" RuleNames"\\" Strategy  -> Strategy {cons("DynRuleIntersect"),right}
+    Strategy "\\" RuleNames "/" Strategy  -> Strategy {cons("DynRuleUnion"),right}
+
+    Strategy "/" RuleNames "\\" 
+                 RuleNames "/"  Strategy  -> Strategy {cons("DynRuleIntersectUnion"),right}
+
+  priorities
+    <StrategyAngle-CF> <LAYOUT?-CF> <Term-CF> -> <Strategy-CF> {cons("BA")}
+  > {
+
+    %% no space after RuleNames
+    "\\" <LAYOUT?-CF> <RuleNames-CF> "/*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleUnionFix")}
+
+    %% 1 space after RuleNames
+    "\\" <LAYOUT?-CF> <RuleNames-CF> " /*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleUnionFix")}
+
+    %% no space after RuleNames
+    "/"  <LAYOUT?-CF> <RuleNames-CF> <LAYOUT?-CF> "\\"
+        <LAYOUT?-CF> <RuleNames-CF> "/*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleIntersectUnionFix")}
+
+    %% 1 space after RuleNames
+    "/"  <LAYOUT?-CF> <RuleNames-CF> <LAYOUT?-CF> "\\"
+        <LAYOUT?-CF> <RuleNames-CF> " /*" <LAYOUT?-CF> <Strategy-CF>
+      -> <Strategy-CF> {cons("DynRuleIntersectUnionFix")}
+
+    }
+  > <Strategy-CF> <LAYOUT?-CF> "=>" <LAYOUT?-CF> <Term-CF> -> <Strategy-CF> {cons("AM")}
+
+  context-free priorities
+    StrategyAngle Term 		          -> Strategy {cons("BA")}
+  > "/" RuleNames "\\*" Strategy          -> Strategy {cons("DynRuleIntersectFix")}
+  > Strategy "=>" Term 		  	  -> Strategy {cons("AM")}
+  > Strategy "/" RuleNames "\\" Strategy  -> Strategy {cons("DynRuleIntersect"),right}
+  > Strategy "\\" RuleNames "/" Strategy  -> Strategy {cons("DynRuleUnion"),right}
+  > Strategy "/" RuleNames "\\" 
+                 RuleNames "/"  Strategy  -> Strategy {cons("DynRuleIntersectUnion"),right}
+  > Strategy ";" Strategy 		  -> Strategy {cons("Seq"),right}
+
+module Stratego-Sugar-Rules
+imports Stratego-Sugar-Strategies
+exports
+
+  sorts RuleDef
+  context-free syntax
+    Id ":" Rule 				-> RuleDef {cons("RDefNoArgs")}
+    
+    Anno+ RuleDef               -> Def {cons("AnnoDef")}
+
+    Id "(" {Typedid ","}* ")" ":" Rule 		-> RuleDef {cons("RDef")}
+
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")" ":" Rule 		-> RuleDef {cons("RDefT")}
+
+  sorts Rule RuleCond
+  context-free syntax
+    Term "->" Term           	    -> Rule {cons("RuleNoCond")} %% backward comp.
+    Term "->" Term "where" Strategy -> Rule {cons("Rule")}       %% backward comp.
+    Term "->" Term RuleCond+	    -> Rule {cons("Rule"), avoid}
+
+    "where" Strategy -> RuleCond {cons("WhereClause")}
+    "with"  Strategy -> RuleCond {cons("WithClause")}
+
+module Stratego-Sugar-Strategies
+imports
+  Stratego-Core-Strategies
+  Stratego-Sugar-Terms
+  Stratego-Sugar-Constants
+  Stratego-Sugar-Signatures
+
+exports
+  context-free syntax
+    Id  		      "=" Strategy -> StrategyDef {cons("SDefNoArgs")}
+    Id "(" {Typedid ","}* ")" "=" Strategy -> StrategyDef {cons("SDef")}
+
+  context-free syntax
+    ID 				  	  -> Typedid {cons("DefaultVarDec")}
+
+  sorts Rule
+
+  sorts StrategyParen StrategyCurly StrategyAngle
+  context-free syntax
+
+    %% Abstraction
+
+    SVar "(" {Strategy ","}* ")" 	  -> Strategy {cons("Call")}
+
+    %% Match and build
+
+    "{" Strategy "}" 			  -> Strategy {cons("ScopeDefault")}
+
+     %%"<" Strategy ">" Term 		  -> Strategy {cons("BA")}
+     StrategyAngle Term 		  -> Strategy {cons("BA")}
+     "<" Strategy ">"			  -> StrategyAngle {bracket} %% {cons("AngleStrat")}
+
+    %% Combinators
+
+    Strategy "<+" Strategy 		  -> Strategy {cons("LChoice"),right}
+
+    "rec" Id "(" Strategy ")" 		  -> Strategy {cons("Rec")}
+
+    "not"   "(" Strategy ")" 		  -> Strategy {cons("Not")}
+    "where" "(" Strategy ")" 		  -> Strategy {cons("Where")}
+    "with"  "(" Strategy ")" 		  -> Strategy {cons("With"), prefer}
+    "test"  "(" Strategy ")" 		  -> Strategy {cons("Test")}
+
+    %% Primitives
+
+    "prim" "(" String ")" 		  -> Strategy {cons("PrimNoArgs")}
+    "prim" "(" String "," {Term ","}* ")" -> Strategy {cons("Prim")}
+
+    %% Congruence operators
+
+    String 				  -> Strategy {cons("StrCong")}
+    Int 				  -> Strategy {cons("IntCong")}
+    Real 				  -> Strategy {cons("RealCong")}
+    Char 			 	  -> Strategy {cons("CharCong")}
+
+    String "(" {Strategy ","}* ")" 	  -> Strategy {cons("CongQ")}
+
+    %%"(" {Strategy ","}* ")" 		  -> Strategy {cons("TupleCong"),avoid}
+
+    Strategy StrategyCurly		  -> Strategy {cons("AnnoCong")}
+    
+    "{" Strategy "}"		  	  -> StrategyCurly {cons("StrategyCurly")}
+
+    "("  ")" 		  		  -> Strategy {cons("EmptyTupleCong")}
+   "(" Strategy  ")" 		          -> Strategy {bracket}
+    "(" Strategy "," {Strategy ","}+ ")"  -> Strategy {cons("TupleCong")}
+
+%%    Mod 	  			  -> Strategy {cons("ModCongNoArgs")}
+%%    Mod "(" {Strategy ","}* ")"	  	  -> Strategy {cons("ModCong")}
+%%    Id "^" Id				  -> Mod {cons("Mod")}
+    "[" {Strategy ","}* "]" 		  -> Strategy {cons("ListCongNoTail")}
+    "[" {Strategy ","}* "|" Strategy "]"  -> Strategy {cons("ListCong")}
+
+%%    Strategy "#" "(" StrategyInj ")" 	  -> Strategy {cons("ExplodeCong")}
+%%    Strategy "#" "(" Strategy ")" 	  -> Strategy {cons("ExplodeCong")}
+    Strategy "#" StrategyParen	  	  -> Strategy {cons("ExplodeCong")}
+
+  %% Syntactic sugar sugar
+
+  sorts SwitchCase
+  context-free syntax
+
+    SVar  		  		  -> Strategy {cons("CallNoArgs")}
+    "\\" Rule "\\" 			  -> Strategy {cons("LRule")}
+    "(" Rule ")" 			  -> Strategy {cons("SRule")}
+    Strategy "+" Strategy 		  -> Strategy {cons("Choice"),right} 
+    Strategy "+>" Strategy 		  -> Strategy {cons("RChoice"),right}
+
+    "proceed"                          -> Strategy {cons("ProceedNoArgs"), prefer}
+    "proceed" "(" {Strategy "," }+ ")" -> Strategy {cons("Proceed"), prefer}
+
+    "if" Strategy "then" Strategy 
+                  "else" Strategy "end"   -> Strategy {cons("CondChoice")}
+    "if" Strategy "then" Strategy "end"   -> Strategy {cons("IfThen")}
+
+    "switch" Strategy SwitchCase* "end"   -> Strategy {cons("SwitchChoiceNoOtherwise")}
+    "switch" Strategy SwitchCase*
+         "otherwise" ":" Strategy "end"   -> Strategy {cons("SwitchChoice")}
+
+    "case" Strategy ":" Strategy          -> SwitchCase {cons("SwitchCase")}
+
+    Strategy "=>" Term 		  	  -> Strategy {cons("AM")}
+
+    Term ":=" Term			  -> Strategy {cons("Assign")}
+
+  %% Priorities
+
+  context-free priorities
+    { Strategy StrategyCurly		  -> Strategy
+      Strategy "#" StrategyParen          -> Strategy
+    }
+  > { "!" Term 				  -> Strategy
+      "?" Term 				  -> Strategy
+    }
+  > StrategyAngle Term 		          -> Strategy
+  > Strategy "=>" Term 		  	  -> Strategy
+  > Strategy ";" Strategy 		  -> Strategy
+  > {right: 
+     Strategy "+" Strategy 		  -> Strategy
+     Strategy "<+" Strategy 		  -> Strategy
+     Strategy "+>" Strategy 		  -> Strategy
+     
+     Strategy "<" StrategyMid 
+              "+" Strategy 		  -> Strategy
+    }
+
+  context-free priorities
+    Strategy 				  -> StrategyMid
+  > Strategy "+" Strategy 		  -> Strategy
+
+  context-free priorities
+    { Strategy StrategyCurly      -> Strategy
+      Strategy "#" StrategyParen  -> Strategy
+    }
+    .> Term ":=" Term -> Strategy
+
+
+
+
+module Stratego-Sugar-Terms
+imports
+  Stratego-Core-Terms
+  Stratego-Sugar-Strategies
+
+exports
+  sorts LID
+  context-free syntax
+    LId 			-> LID  {cons("ListVar")}
+    LID				-> Var  {cons("Var")}
+    LID				-> ID
+
+  context-free syntax
+    "_" PreTerm 		 -> PreTerm {cons("BuildDefaultPT")}
+    "_" Term 			 -> Term {cons("BuildDefault"),prefer}
+
+    Char 			 -> PreTerm {cons("Char")}
+
+    PreTerm "{" {Term ","}* "}"	 -> Term {cons("AnnoList")}
+    PreTerm                      -> Term {cons("NoAnnoList")}
+
+    "<" Strategy ">" Term 	 -> PreTerm {cons("App")}
+    "<" Strategy ">" Term 	 -> Term {cons("App"),prefer}
+
+    StrategyAngle		 -> PreTerm {cons("RootApp")}
+    StrategyAngle		 -> Term {cons("RootApp"),prefer}
+
+    "(" {Term ","}* ")" 	 -> PreTerm {cons("Tuple")}
+    "[" {Term ","}* "]" 	 -> PreTerm {cons("List")}
+    "[" {Term ","}* "|" Term "]" -> PreTerm {cons("ListTail")}
+
+  context-free priorities
+    Term "#" "(" Term ")" 	 -> PreTerm {cons("Explode")}
+  > PreTerm "{" {Term ","}* "}"	 -> Term {cons("AnnoList")}
+  > Var "@" Term 		 -> Term {cons("As")}
+
+module Stratego-Sugar-Signatures
+imports
+  Stratego-Core-Signatures
+  Stratego-Sugar-Constants
+
+exports
+
+  sorts Sort
+  context-free syntax
+    "[" {Sort ","}* "]"		 -> Sort {cons("SortList")}
+    "[" {Sort ","}* "|" Sort "]" -> Sort {cons("SortListTl")}
+    "(" {Sort ","}* ")"		 -> Sort {cons("SortTuple")}
+
+  sorts Kind
+  context-free syntax
+    "*" 			-> Kind {cons("Star")}
+    "**" 			-> Kind {cons("StarStar")}
+
+module Stratego-Core-Signatures
+imports
+  Stratego-Core-Identifiers
+  Stratego-Core-Constants
+exports
+  sorts Sdecl
+  context-free syntax
+    "sorts" Sort* 		-> Sdecl {cons("Sorts")}
+    "constructors" Opdecl* 	-> Sdecl {cons("Constructors")}
+
+  sorts Sort
+  context-free syntax
+    LCID 			 -> Sort {cons("SortVar")}
+    UCID 			 -> Sort {cons("SortNoArgs")}
+    Id "(" {Sort ","}* ")" 	 -> Sort {cons("Sort")}
+
+  sorts Opdecl
+  context-free syntax
+    Id     ":" Type 		-> Opdecl {cons("OpDecl")}
+    String ":" Type 		-> Opdecl {cons("OpDeclQ")}
+           ":" Type 		-> Opdecl {cons("OpDeclInj")}
+
+  context-free syntax
+    "external" Id     ":" Type 	-> Opdecl {cons("ExtOpDecl")}
+    "external" String ":" Type 	-> Opdecl {cons("ExtOpDeclQ")}
+    "external"        ":" Type 	-> Opdecl {cons("ExtOpDeclInj")}
+
+  sorts Type ArgType ConstType FunType RetType
+  context-free syntax
+    Sort	                -> ConstType {cons("ConstType")}
+    {ArgType "*"}+ "->" RetType -> FunType {cons("FunType")}
+    "(" Type ")"                -> ArgType {bracket}
+    ConstType			-> ArgType
+    Type	                -> RetType
+    FunType			-> RetType {reject}
+
+    FunType			-> Type
+    ConstType			-> Type
+
+  %%%
+   %% Restriction is required for the Sort* in Sdecl: List(a) is
+   %% ambiguous.
+   %%%
+  context-free restrictions
+    Sort -/- [\(]
+
+module Stratego-Core-Terms
+imports
+  Stratego-Core-Identifiers
+  Stratego-Core-Constants
+
+exports
+  sorts ID Var Wld
+  context-free syntax
+    Id 				-> Var  {cons("Var")}
+    Id				-> ID
+    %% ":" Var                  -> Var  {cons("SeqVar")}
+
+  sorts Term PreTerm
+  context-free syntax
+    Var 			 -> PreTerm 
+    Var 			 -> Term {prefer}
+
+    "_" 			 -> Wld {cons("Wld")}
+    Wld 			 -> PreTerm
+    Wld 			 -> Term {prefer}
+
+    Int 			 -> PreTerm {cons("Int")}
+    Real 			 -> PreTerm {cons("Real")}
+    String 			 -> PreTerm {cons("Str")}
+
+    Id "(" {Term ","}* ")" 	 -> PreTerm {cons("Op")}
+    String "(" {Term ","}* ")" 	 -> PreTerm {cons("OpQ")}
+    Term "#" "(" Term ")" 	 -> PreTerm {cons("Explode")}
+
+    PreTerm "{^" PreTerm "}"	 -> Term {cons("Anno")}
+
+    Var "@" Term 		 -> Term {cons("As"),prefer}
+    Var "@" PreTerm 		 -> PreTerm {cons("As")}
+
+  context-free priorities
+    Term "#" "(" Term ")" 	 -> PreTerm {cons("Explode")}
+  > Var "@" Term 		 -> Term {cons("As")}
+
+module Stratego-Core-Strategies
+imports
+  Stratego-Core-Terms
+  Stratego-Core-Constants
+  Stratego-Core-Signatures
+
+exports
+  sorts Def
+  context-free syntax
+    StrategyDef					 -> Def 
+    Id						 -> SVar {cons("SVar")}
+    "let" Def* "in" Strategy "end"		 -> Strategy {cons("Let")}
+    SVar "(" {Strategy ","}* "|" {Term ","}* ")" -> Strategy {cons("CallT")}
+
+    "call" "(" Term "|" {Strategy ","}* "|" {Term ","}* ")" -> Strategy {cons("CallDynamic")}
+
+
+  sorts StrategyDef
+  context-free syntax
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")" "=" Strategy -> StrategyDef {cons("SDefT")}
+
+    Anno+ StrategyDef -> Def {cons("AnnoDef")}
+
+    "external"
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")" "=" Strategy -> StrategyDef {cons("ExtSDefInl")}
+
+    "external"
+    Id "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")"		   -> StrategyDef {cons("ExtSDef")}
+
+    "external"
+    EmptyId "(" {Typedid ","}* 
+       "|" {Typedid ","}* ")"		   -> StrategyDef {cons("ExtSDef")}
+
+
+  sorts EmptyId
+  lexical syntax
+  
+    -> EmptyId
+
+  sorts Anno
+  context-free syntax
+    "extend"      -> Anno {cons("Extend")}
+    "override"    -> Anno {cons("Override")}
+    "internal"    -> Anno {cons("Internal")}
+%%  "sealed"      -> Anno {cons("Sealed")}
+%%  "extensible"  -> Anno {cons("Extensible")}
+%%  "overridable" -> Anno {cons("Overridable")}
+
+  lexical syntax
+    
+    "extend"      -> Keyword
+    "override"    -> Keyword
+    "internal"    -> Keyword
+    "sealed"      -> Keyword
+    "extensible"  -> Keyword
+    "overridable" -> Keyword
+
+  lexical restrictions
+  
+    "extend"
+    "override"
+    "internal"
+    "sealed"
+    "extensible"
+    "overridable" -/- [a-zA-Z0-9\'\-\_]
+
+  sorts Typedid
+  context-free syntax
+    ID ":" Type 			  -> Typedid {cons("VarDec")}
+
+
+  sorts Strategy SVar StrategyParen StrategyMid 
+  context-free syntax
+    "(" Strategy ")"			  -> StrategyParen {cons("ParenStrat")}
+
+    "fail" 				  -> Strategy {cons("Fail")}
+    "id" 				  -> Strategy {cons("Id")}
+
+    "proceed" "(" {Strategy ","}* "|" {Term ","}* ")" -> Strategy {cons("ProceedT"), prefer}
+    "proceed"                                         -> Strategy {cons("ProceedNoArgs"), prefer}
+
+    %% Match and build
+
+    "?" Term 				  -> Strategy {cons("Match")}
+    "!" Term 				  -> Strategy {cons("Build")}
+    "{" {ID ","}* ":" Strategy "}" 	  -> Strategy {cons("Scope")}
+
+    %% Combinators
+
+    Strategy ";" Strategy 		  -> Strategy {cons("Seq"),right}
+    Strategy "<" StrategyMid 
+             "+" Strategy 		  -> Strategy {cons("GuardedLChoice"),right}
+    Strategy 				  -> StrategyMid
+
+    %% Primitives
+
+    "prim" "(" String "," {Strategy ","}* "|" {Term ","}*")"  -> Strategy {cons("PrimT")}
+
+    %% Traversal
+
+    "some" "(" Strategy ")" 		  -> Strategy {cons("Some")}
+    "one" "(" Strategy ")" 		  -> Strategy {cons("One")}
+    "all" "(" Strategy ")" 		  -> Strategy {cons("All")}
+
+  %% Priorities
+
+  context-free priorities
+    { "!" Term 				  -> Strategy {cons("Build")}
+      "?" Term 				  -> Strategy {cons("Match")}
+    }
+  > Strategy ";" Strategy 		  -> Strategy {cons("Seq"),right}
+  > {right: 
+     Strategy "<" StrategyMid 
+              "+" Strategy 		  -> Strategy {cons("GuardedLChoice"),right}
+    }
+
+  context-free syntax
+    "import-term" "(" ModName ")" -> Strategy {cons("ImportTerm")}
+
+module Stratego-Core-Modules
+imports
+  Stratego-Core-Identifiers
+  Stratego-Core-Strategies
+  Stratego-Core-Signatures
+
+exports 
+  sorts Module
+  context-free syntax
+    "module" ModName Decl* 	 -> Module {cons("Module")}
+    "specification" Decl*	 -> Module {cons("Specification")}
+
+  sorts Decl 
+  context-free syntax
+    "imports" ImportModName* 	-> Decl {cons("Imports")}
+    "strategies" Def* 		-> Decl {cons("Strategies")}
+    "signature" Sdecl*  	-> Decl {cons("Signature")}
+
+  sorts ImportModName
+  context-free syntax
+    ModName              -> ImportModName {cons("Import")}
+  syntax
+    <ModName-CF> "/" "-" -> <ImportModName-CF> {cons("ImportWildcard")}
+
+module Stratego-Sugar-Modules
+imports
+  Stratego-Core-Modules
+  Stratego-Sugar-Strategies
+  Stratego-Sugar-Signatures
+  Stratego-Sugar-Overlays
+  Stratego-Sugar-Rules
+
+exports 
+
+  sorts Decl Def
+  context-free syntax
+    "rules" Def* 		-> Decl {cons("Rules")}
+    "overlays" Overlay* 	-> Decl {cons("Overlays")}
+
+    RuleDef 			-> Def 
+
+
+
+
+module Stratego-Sugar-StringQuotations
+exports
+
+  sorts
+    StringQuotation
+    StringQuotedPart1 StringQuotedChars1 DollarOpen1 DollarClose1 QuotedBracket1 Dollar1
+    StringQuotedPart2 StringQuotedChars2 DollarOpen2 DollarClose2 QuotedBracket2 Dollar2
+    StringQuotedPart3 StringQuotedChars3 DollarOpen3 DollarClose3 QuotedBracket3 Dollar3
+    StringQuotedPart4 StringQuotedChars4 DollarOpen4 DollarClose4 QuotedBracket4  Dollar4
+    Padding
+
+  context-free syntax
+
+    StringQuotation -> PreTerm
+
+  syntax
+
+    StringQuotation -> <PreTerm-CF>
+
+    "$" "[" Padding StringQuotedPart1*               "]"    -> StringQuotation {cons("StringQuotation1") }
+     Padding "[" <LAYOUT?-CF> <Term-CF> <LAYOUT?-CF> "]"    -> StringQuotedPart1 {cons("StringEscape1")}
+    <StringQuotedChars1-LEX>                                -> StringQuotedPart1 {cons("QStr")}
+    <Dollar1-LEX>                                           -> StringQuotedPart1 {cons("QDollar")}
+    "$" <QuotedBracket1-LEX> "$"                            -> StringQuotedPart1 {cons("QBr")}
+    ~[\[\]\$]+                                              -> <StringQuotedChars1-LEX>
+    [\[\]]                                                  -> <QuotedBracket1-LEX>
+    "$"                                                     -> <Dollar1-LEX>
+
+    "$" "{" Padding StringQuotedPart2*               "}"    -> StringQuotation {cons("StringQuotation2") }
+     Padding "{" <LAYOUT?-CF> <Term-CF> <LAYOUT?-CF> "}"    -> StringQuotedPart2 {cons("StringEscape2")}
+    <StringQuotedChars2-LEX>                                -> StringQuotedPart2 {cons("QStr")}
+    <Dollar2-LEX>                                           -> StringQuotedPart2 {cons("QDollar")}
+    "$" <QuotedBracket2-LEX> "$"                            -> StringQuotedPart2 {cons("QBr")}
+    ~[\{\}\$]+                                              -> <StringQuotedChars2-LEX>
+    [\{\}]                                                  -> <QuotedBracket2-LEX>
+    "$"                                                     -> <Dollar2-LEX>
+
+    "$" "(" Padding StringQuotedPart3*              ")"     -> StringQuotation {cons("StringQuotation3") }
+    Padding "(" <LAYOUT?-CF> <Term-CF> <LAYOUT?-CF> ")"     -> StringQuotedPart3 {cons("StringEscape3")}
+    <StringQuotedChars3-LEX>                                -> StringQuotedPart3 {cons("QStr")}
+    <Dollar3-LEX>                                           -> StringQuotedPart3 {cons("QDollar")}
+    "$" <QuotedBracket3-LEX> "$"                            -> StringQuotedPart3 {cons("QBr")}
+    ~[\(\)\$]+                                              -> <StringQuotedChars3-LEX>
+    [\(\)]                                                  -> <QuotedBracket3-LEX>
+    "$"                                                     -> <Dollar3-LEX>
+
+    "$" "<" Padding StringQuotedPart4*               ">"    -> StringQuotation {cons("StringQuotation4") }
+    Padding "<"  <LAYOUT?-CF> <Term-CF> <LAYOUT?-CF> ">"    -> StringQuotedPart4 {cons("StringEscape4")}
+    <StringQuotedChars4-LEX>                                -> StringQuotedPart4 {cons("QStr")}
+    <Dollar4-LEX>                                           -> StringQuotedPart4 {cons("QDollar")}
+    "$" <QuotedBracket4-LEX> "$"                            -> StringQuotedPart4 {cons("QBr")}
+    ~[\<\>\$]+                                              -> <StringQuotedChars4-LEX>
+    [\<\>]                                                  -> <QuotedBracket4-LEX>
+    "$"                                                     -> <Dollar4-LEX>
+   
+    %% Padding is a dummy lexical that will contain the indentation prefix of every quotation
+    <Padding-LEX>                                           -> Padding
+                                                            -> <Padding-LEX> {indentpadding}
+
+  lexical restrictions
+
+    StringQuotedChars1 -/- ~[\[\]\$]   
+    StringQuotedChars2 -/- ~[\{\}\$]    
+    StringQuotedChars3 -/- ~[\(\)\$]    
+    StringQuotedChars4 -/- ~[\<\>\$]
+    Dollar1            -/- [\[\]] . [\$]
+    Dollar2            -/- [\{\}] . [\$]
+    Dollar3            -/- [\(\)] . [\$]
+    Dollar4            -/- [\<\>] . [\$]
+
+module Stratego-Core-Constants
+exports
+  sorts Int Real String StrChar
+  lexical syntax
+    [\-]? [0-9]+ 		-> Int
+    [\-]? [0-9]+ [\.] [0-9]+ 	-> Real
+    "\"" StrChar* "\"" 		-> String
+    ~[\"\\] 			-> StrChar
+    [\\] [\"tnr\\] 		-> StrChar
+
+
+
+
+module Stratego-Sugar-Constants
+imports
+  Stratego-Core-Identifiers
+  Stratego-Core-Constants
+  Stratego-Sugar-StringQuotations
+exports
+  sorts Char CharChar
+  lexical syntax
+    "'" CharChar "'"		-> Char
+    ~[\']			-> CharChar
+    [\\] [\'ntr\ ]		-> CharChar
+    Char		 	-> Id {reject}
+
+module Stratego-Core-Identifiers
+exports
+  sorts ModName ModNamePart
+  lexical syntax
+    {ModNamePart "/"}+ -> ModName
+    [a-zA-Z\.\_] [a-zA-Z0-9\'\.\-\_]* -> ModNamePart
+  lexical restrictions
+    ModName -/- [a-zA-Z0-9\'\.\-\_]
+  lexical syntax
+    "imports" 		-> ModName {reject}
+    "overlays" 		-> ModName {reject}
+    "rules" 		-> ModName {reject}
+    "signature" 	-> ModName {reject}
+    "strategies" 	-> ModName {reject}
+
+  sorts Id LId LCID UCID Wld
+  lexical syntax
+    [a-zA-Z\_] [a-zA-Z0-9\'\-\_]*     -> Id
+    [a-zA-Z\_] [a-zA-Z0-9\'\-\_]* "*" -> LId
+    [\'] [a-z]+                       -> Id
+
+    [a-z] [a-zA-Z0-9\'\-\_]*  -> LCID
+    [A-Z] [a-zA-Z0-9\'\-\_]*  -> UCID
+
+  lexical restrictions
+    Id   -/- [a-zA-Z0-9\'\-\_\*]
+    LId  -/- [a-zA-Z0-9\'\-\_]
+    LCID -/- [a-zA-Z0-9\'\-\_]
+    UCID -/- [a-zA-Z0-9\'\-\_]
+
+  lexical syntax
+    "_"     -> Id {reject}
+    "'"     -> Id {reject}
+
+    Keyword -> Id   {reject}
+    Keyword -> LId  {reject}
+    Keyword -> LCID {reject}
+    Keyword -> UCID {reject}
+
+  lexical restrictions
+    "all"
+    "case" %% not reserved kw
+    "constructors"
+    "else" %% not reserved kw
+    "end" %% not reserved kw
+    "external" %% not reserved kw
+    "fail"
+    "id"
+    "if" %% not reserved kw
+    "in"
+    "imports" %% not reserved kw
+    "let"
+    "module"
+    "not"
+    "one"
+    "overlays"
+    "otherwise" %% not reserved kw
+    "prim"
+    "rec" %% not reserved kw
+    "rules"
+    "script"
+    "signature"
+    "some"
+    "sorts"
+    "strategies"
+    "stratego"
+    "switch" %% not reserved kw
+    "test"
+    "then" %% not reserved kw
+    "where"
+    "import-term"
+      -/- [a-zA-Z0-9\'\-\_]
+  
+  context-free restrictions
+    Wld -/- [a-zA-Z0-9\'\-\_]
+
+  sorts Keyword
+  lexical syntax
+    "all"               -> Keyword
+    "constructors" 	-> Keyword
+    "fail" 		-> Keyword
+    "id" 		-> Keyword
+    "in" 		-> Keyword
+    "let" 		-> Keyword
+    "module" 		-> Keyword
+    "not" 		-> Keyword
+    "one" 		-> Keyword
+    "overlays" 		-> Keyword
+    "prim" 		-> Keyword
+    "rules" 		-> Keyword
+    "script" 		-> Keyword
+    "signature" 	-> Keyword
+    "some" 		-> Keyword
+    "sorts" 		-> Keyword
+    "strategies" 	-> Keyword
+    "stratego" 		-> Keyword
+    "test" 		-> Keyword
+    "where" 		-> Keyword
+    "import-term"	-> Keyword
+
+
+
+
+module Stratego-Core-Layout
+exports
+  sorts Ws ShortCom LongCom CommChar Asterisk Eof 
+  lexical syntax
+    [\t\ \n\r]			-> Ws
+
+    "//" ~[\n]* ([\n] | Eof)	-> ShortCom
+    "/*" CommChar* "*/"	-> LongCom
+				-> Eof  
+
+    ~[\*]     -> CommChar
+
+    "*"       -> Asterisk
+    Asterisk  -> CommChar
+
+  lexical restrictions
+    Asterisk -/- [\/]
+    Eof      -/- ~[]
+
+  lexical syntax
+    ShortCom 	-> LAYOUT
+    LongCom 	-> LAYOUT
+    Ws 		-> LAYOUT
+
+  context-free restrictions
+    LAYOUT? -/- [\ \t\n\r]
+    LAYOUT? -/- [\/].[\*]
+    LAYOUT? -/- [\/].[\/]
+
+module Stratego-Sugar-Layout
+imports Stratego-Core-Layout
+%%exports
+%%  sorts VeryLongCom Eof VLCchar Backslash
+%%  lexical syntax
+%%    "\\end{code}" VLCchar* "\\begin{code}" -> VeryLongCom
+%%    "\\begin{code}" 			   -> VeryLongCom
+%%    "\\end{code}" VLCchar* Eof 		   -> VeryLongCom
+%%    "\\literate" VLCchar* "\\begin{code}"  -> VeryLongCom
+%%    ~[\\] 				   -> VLCchar
+%%    Backslash 				   -> VLCchar
+%%    [\\] 				   -> Backslash
+
+%%  lexical restrictions
+%%    Backslash -/- [b].[e].[g].[i].[n].[\{].[c].[o].[d].[e].[\}]
+%%    Eof -/- ~[]
+
+%%  lexical syntax
+%%    VeryLongCom -> LAYOUT
+
+
+
+
+
+module Stratego-Sugar
+imports
+  Stratego-Sugar-Layout
+  Stratego-Core-Identifiers
+  Stratego-Sugar-Constants 
+  Stratego-Sugar-Modules
+  Stratego-Sugar-Signatures
+  Stratego-Sugar-Terms
+  Stratego-Sugar-Strategies
+  Stratego-Sugar-Rules
+  Stratego-Sugar-DynamicRules
+  Stratego-Sugar-Overlays
+
+hiddens
+  context-free start-symbols Module
+
+module Stratego
+imports Stratego-Sugar
+hiddens
+  context-free start-symbols Module
+
+module StrategoMix[Ctx0]
+imports Stratego
+          [ RuleNames          => RuleNames[[Ctx0]]
+            RuleDec            => RuleDec[[Ctx0]]
+            DynRuleScopeId     => DynRuleScopeId[[Ctx0]]
+            DynRuleId          => DynRuleId[[Ctx0]]
+            DynRuleDef         => DynRuleDef[[Ctx0]]
+            ScopeLabels        => ScopeLabels[[Ctx0]]
+            RuleCond           => RuleCond[[Ctx0]]
+            Rule               => Rule[[Ctx0]]
+            RuleDef            => RuleDef[[Ctx0]]
+            Overlay            => Overlay[[Ctx0]]
+            SwitchCase         => SwitchCase[[Ctx0]]
+            StrategyCurly      => StrategyCurly[[Ctx0]]
+            StrategyAngle      => StrategyAngle[[Ctx0]]
+            Kind               => Kind[[Ctx0]]
+            LID                => LID[[Ctx0]]
+            ImportModName      => ImportModName[[Ctx0]]
+            Decl               => Decl[[Ctx0]]
+            Module             => Module[[Ctx0]]
+            StrategyParen      => StrategyParen[[Ctx0]]
+            Typedid            => Typedid[[Ctx0]]
+            Anno               => Anno[[Ctx0]]
+            EmptyId            => EmptyId[[Ctx0]]
+            StrategyDef        => StrategyDef[[Ctx0]]
+            SVar               => SVar[[Ctx0]]
+            Def                => Def[[Ctx0]]
+            Type               => Type[[Ctx0]]
+            RetType            => RetType[[Ctx0]]
+            ArgType            => ArgType[[Ctx0]]
+            FunType            => FunType[[Ctx0]]
+            ConstType          => ConstType[[Ctx0]]
+            Opdecl             => Opdecl[[Ctx0]]
+            Sort               => Sort[[Ctx0]]
+            Sdecl              => Sdecl[[Ctx0]]
+            Wld                => Wld[[Ctx0]]
+            ID                 => ID[[Ctx0]]
+            Var                => Var[[Ctx0]]
+            CharChar           => CharChar[[Ctx0]]
+            Char               => Char[[Ctx0]]
+            Padding            => Padding[[Ctx0]]
+            Dollar4            => Dollar4[[Ctx0]]
+            QuotedBracket4     => QuotedBracket4[[Ctx0]]
+            StringQuotedChars4 => StringQuotedChars4[[Ctx0]]
+            StringQuotedPart4  => StringQuotedPart4[[Ctx0]]
+            Dollar3            => Dollar3[[Ctx0]]
+            QuotedBracket3     => QuotedBracket3[[Ctx0]]
+            StringQuotedChars3 => StringQuotedChars3[[Ctx0]]
+            StringQuotedPart3  => StringQuotedPart3[[Ctx0]]
+            Dollar2            => Dollar2[[Ctx0]]
+            QuotedBracket2     => QuotedBracket2[[Ctx0]]
+            StringQuotedChars2 => StringQuotedChars2[[Ctx0]]
+            StringQuotedPart2  => StringQuotedPart2[[Ctx0]]
+            Dollar1            => Dollar1[[Ctx0]]
+            QuotedBracket1     => QuotedBracket1[[Ctx0]]
+            StringQuotedChars1 => StringQuotedChars1[[Ctx0]]
+            StringQuotedPart1  => StringQuotedPart1[[Ctx0]]
+            StringQuotation    => StringQuotation[[Ctx0]]
+            StrChar            => StrChar[[Ctx0]]
+            String             => String[[Ctx0]]
+            Real               => Real[[Ctx0]]
+            Int                => Int[[Ctx0]]
+            Keyword            => Keyword[[Ctx0]]
+            UCID               => UCID[[Ctx0]]
+            LCID               => LCID[[Ctx0]]
+            LId                => LId[[Ctx0]]
+            Id                 => Id[[Ctx0]]
+            ModNamePart        => ModNamePart[[Ctx0]]
+            ModName            => ModName[[Ctx0]]
+            PreTerm            => PreTerm[[Ctx0]]
+            Term               => Term[[Ctx0]]
+            StrategyMid        => StrategyMid[[Ctx0]]
+            Strategy           => Strategy[[Ctx0]] ]
+
+
+module Stratego-Coq
+
+imports
+  StrategoMix[StrategoHost]
+  mix/CoqMix[ Term[[StrategoHost]] ]
+
+hiddens
+  context-free start-symbols Module[[StrategoHost]]
+  
+exports
+  variables

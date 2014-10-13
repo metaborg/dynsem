@@ -1,0 +1,91 @@
+module lib/Coq/pp/Lexical-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/Lexical-sig
+
+
+strategies
+  prettyprintCoq-CommentChar =
+    ![S(<is-string>)]
+
+  prettyprintCoq-FirstLetter =
+    ![S(<is-string>)]
+
+  prettyprintCoq-SubsequentLetter =
+    ![S(<is-string>)]
+
+  prettyprintCoq-Ident =
+    ![S(<is-string>)]
+
+  prettyprintCoq-Digit =
+    ![S(<is-string>)]
+
+  prettyprintCoq-Num =
+    ![S(<is-string>)]
+
+  prettyprintCoq-Integer =
+    ![S(<is-string>)]
+
+  prettyprintCoq-String =
+    ![S(<is-string>)]
+
+  prettyprintCoq-StringChar =
+    ![S(<is-string>)]
+
+  prettyprintCoq-Reserved =
+    ![S(<is-string>)]
+
+  prettyprintCoq-SingleQuote =
+    ![S(<is-string>)]
+
+  prettyprintCoq-example =
+    prettyprintCoq-CommentChar
+
+  prettyprintCoq-example =
+    prettyprintCoq-FirstLetter
+
+  prettyprintCoq-example =
+    prettyprintCoq-SubsequentLetter
+
+  prettyprintCoq-example =
+    prettyprintCoq-Ident
+
+  prettyprintCoq-example =
+    prettyprintCoq-Digit
+
+  prettyprintCoq-example =
+    prettyprintCoq-Num
+
+  prettyprintCoq-example =
+    prettyprintCoq-Integer
+
+  prettyprintCoq-example =
+    prettyprintCoq-String
+
+  prettyprintCoq-example =
+    prettyprintCoq-StringChar
+
+  prettyprintCoq-example =
+    prettyprintCoq-Reserved
+
+  prettyprintCoq-example =
+    prettyprintCoq-SingleQuote
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Notation
+
+  prettyprintCoq-Notation :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Notation)
+    where t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+
+  is-Notation =
+    fail

@@ -1,0 +1,13 @@
+module lib/Coq/signatures/extensions/Section-sig
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Vernacular-sig
+
+
+signature
+  constructors
+    Section : Ident * List(Sentence) * Ident -> Sentence
+
+  constructors
+     : String -> Reserved

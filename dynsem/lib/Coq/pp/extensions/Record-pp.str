@@ -1,0 +1,230 @@
+module lib/Coq/pp/extensions/Record-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/extensions/Record-sig
+
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/Qid-sig
+
+
+imports
+  lib/Coq/pp/Lexical-pp
+  lib/Coq/pp/Gallina-pp
+  lib/Coq/pp/Options-pp
+  lib/Coq/pp/Qid-pp
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-RecordKeyword
+
+  prettyprintCoq-RecordKeyword :
+    RecordRecord() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("Record")]
+                        )
+                      ]
+
+  is-RecordKeyword =
+    ?RecordRecord()
+
+  prettyprintCoq-RecordKeyword :
+    RecordStructure() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Structure")]
+                           )
+                         ]
+
+  is-RecordKeyword =
+    ?RecordStructure()
+
+  prettyprintCoq-RecordKeyword :
+    RecordInductive() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Inductive")]
+                           )
+                         ]
+
+  is-RecordKeyword =
+    ?RecordInductive()
+
+  prettyprintCoq-RecordKeyword :
+    RecordCoInductive() -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S("CoInductive")]
+                             )
+                           ]
+
+  is-RecordKeyword =
+    ?RecordCoInductive()
+
+  is-RecordKeyword =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Sentence
+
+  prettyprintCoq-Sentence :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Sentence)
+    where t0__' := <pp-one-Z(prettyprintCoq-Record)> t0__
+
+  is-Sentence =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Record
+
+  prettyprintCoq-Record :
+    Record(t0__, t1__, t2__, t3__, t4__, t5__) -> [ H(
+                                                      [SOpt(HS(), "0")]
+                                                    , [ t0__'
+                                                      , S(" ")
+                                                      , t1__'
+                                                      , t2__'
+                                                      , t3__'
+                                                      , S(" :=")
+                                                      ]
+                                                    )
+                                                  , t4__'
+                                                  , t5__'
+                                                  , t__'
+                                                  ]
+    with t0__' := <pp-one-Z(prettyprintCoq-RecordKeyword)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptBinders)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-OptSort)> t3__
+    with t4__' := <pp-indent(|"1")> [ <pp-one-Z(prettyprintCoq-OptIdents)> t4__
+                                    , S(" {")
+                                    ]
+    with t5__' := <pp-indent(|"4")> [ <pp-V-list(prettyprintCoq-RecordField|"0", ";")> t5__
+                                    ]
+    with t__' := <pp-indent(|"2")> [S("}.")]
+
+  is-Record =
+    ?Record(_, _, _, _, _, _)
+
+  is-Record =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-RecordField
+
+  prettyprintCoq-RecordField :
+    RecFld(t0__, t1__, t2__, t3__) -> [ H(
+                                          [SOpt(HS(), "0")]
+                                        , [ t0__'
+                                          , t1__'
+                                          , S(" : ")
+                                          , t2__'
+                                          , t3__'
+                                          ]
+                                        )
+                                      ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptBinders)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-Type)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-OptWhereNotation)> t3__
+
+  is-RecordField =
+    ?RecFld(_, _, _, _)
+
+  prettyprintCoq-RecordField :
+    RecExplicitFld(t0__, t1__, t2__, t3__) -> [ H(
+                                                  [SOpt(HS(), "0")]
+                                                , [ t0__'
+                                                  , t1__'
+                                                  , t2__'
+                                                  , S(" := ")
+                                                  , t3__'
+                                                  ]
+                                                )
+                                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptBinders)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptType)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-Term)> t3__
+
+  is-RecordField =
+    ?RecExplicitFld(_, _, _, _)
+
+  is-RecordField =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Term
+
+  prettyprintCoq-Term :
+    Projection(t0__, t1__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [ t0__'
+                                  , S(".(")
+                                  , t1__'
+                                  , S(")")
+                                  ]
+                                )
+                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-QualId)> t1__
+
+  is-Term =
+    ?Projection(_, _)
+
+  prettyprintCoq-Term :
+    ProjArgs(t0__, t1__, t2__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [ t0__'
+                                      , S(".(")
+                                      , t1__'
+                                      , S(" ")
+                                      , t2__'
+                                      , S(")")
+                                      ]
+                                    )
+                                  ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-QualId)> t1__
+    with t2__' := <pp-H-list(prettyprintCoq-Arg)> t2__
+
+  is-Term =
+    ?ProjArgs(_, _, _)
+
+  prettyprintCoq-Term :
+    ProjQualArgs(t0__, t1__, t2__) -> [ H(
+                                          [SOpt(HS(), "0")]
+                                        , [ t0__'
+                                          , S(".(@")
+                                          , t1__'
+                                          , S(" ")
+                                          , t2__'
+                                          , S(")")
+                                          ]
+                                        )
+                                      ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-QualId)> t1__
+    with t2__' := <pp-H-list(prettyprintCoq-Term)> t2__
+
+  is-Term =
+    ?ProjQualArgs(_, _, _)
+
+  is-Term =
+    fail

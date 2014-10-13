@@ -1,0 +1,130 @@
+module lib/Coq/pp/extensions/Function-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/extensions/Function-sig
+
+
+imports
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/Lexical-sig
+
+
+imports
+  lib/Coq/pp/Gallina-pp
+  lib/Coq/pp/Options-pp
+  lib/Coq/pp/Lexical-pp
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Term
+
+  prettyprintCoq-Term :
+    Function(t0__, t1__, t2__, t3__, t4__) -> [ H(
+                                                  [SOpt(HS(), "0")]
+                                                , [ S("Function ")
+                                                  , t0__'
+                                                  , S(" ")
+                                                  , t1__'
+                                                  , t2__'
+                                                  , S(" : ")
+                                                  , t3__'
+                                                  ]
+                                                )
+                                              , t4__'
+                                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-Binder|" ")> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptDecreaseAnnot)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-Type)> t3__
+    with t4__' := <pp-indent(|"2")> [<pp-one-Z(prettyprintCoq-Term)> t4__]
+
+  is-Term =
+    ?Function(_, _, _, _, _)
+
+  is-Term =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-OptDecreaseAnnot
+
+  prettyprintCoq-example =
+    prettyprintCoq-DecreaseAnnot
+
+  prettyprintCoq-OptDecreaseAnnot :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptDecreaseAnnot =
+    ?None()
+
+  prettyprintCoq-OptDecreaseAnnot :
+    DecreaseAnnot(t0__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [ S(" {")
+                               , t0__'
+                               , S("}")
+                               ]
+                             )
+                           ]
+    with t0__' := <pp-one-Z(prettyprintCoq-DecreaseAnnot)> t0__
+
+  is-OptDecreaseAnnot =
+    ?DecreaseAnnot(_)
+
+  prettyprintCoq-DecreaseAnnot :
+    DecreaseStruct(t0__) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [S("struct "), t0__']
+                              )
+                            ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+
+  is-DecreaseAnnot =
+    ?DecreaseStruct(_)
+
+  prettyprintCoq-DecreaseAnnot :
+    DecreaseMeasure(t0__, t1__) -> [ H(
+                                       [SOpt(HS(), "0")]
+                                     , [ S("measure ")
+                                       , t0__'
+                                       , S(" ")
+                                       , t1__'
+                                       ]
+                                     )
+                                   ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+
+  is-DecreaseAnnot =
+    ?DecreaseMeasure(_, _)
+
+  prettyprintCoq-DecreaseAnnot :
+    DecreaseWF(t0__, t1__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [ S("wf ")
+                                  , t0__'
+                                  , S(" ")
+                                  , t1__'
+                                  ]
+                                )
+                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+
+  is-DecreaseAnnot =
+    ?DecreaseWF(_, _)
+
+  is-OptDecreaseAnnot =
+    fail
+
+  is-DecreaseAnnot =
+    fail

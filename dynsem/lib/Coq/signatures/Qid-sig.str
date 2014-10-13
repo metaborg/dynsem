@@ -1,0 +1,10 @@
+module lib/Coq/signatures/Qid-sig
+
+imports
+  lib/Coq/signatures/Lexical-sig
+
+
+signature
+  constructors
+        : Ident -> QualId
+    QId : QualId * Ident -> QualId

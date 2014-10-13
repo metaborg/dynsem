@@ -1,0 +1,69 @@
+module lib/Coq/signatures/extensions/Module-sig
+
+imports
+  lib/Coq/signatures/Vernacular-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/extensions/Section-sig
+
+
+signature
+  constructors
+     : String -> Reserved
+
+  constructors
+    InteractiveModule : OptModuleBindingKeywordPrefix * Ident * OptModuleBindings * OptModuleTypes * List(ModContent) * Ident -> Module
+
+  constructors
+    Import : ModuleBindingKeyword
+    Export : ModuleBindingKeyword
+    None   : OptModuleBindingKeywordPrefix
+           : ModuleBindingKeyword -> OptModuleBindingKeywordPrefix
+
+  constructors
+    QualifiedModule        : QualId -> ModuleType
+    ModuleWithDefinition   : ModuleType * QualId * Term -> ModuleType
+    ModuleWithModule       : ModuleType * QualId * QualId -> ModuleType
+    QualifiedModuleSeq     : QualId * List(QualId) -> ModuleType
+    QualifiedModuleBangSeq : QualId * List(QualId) -> ModuleType
+    None                   : OptModuleTypes
+    ModType                : ModuleType -> OptModuleTypes
+    ModSubtypes            : List(ModuleType) -> OptModuleTypes
+
+  constructors
+    ModuleBinding : OptModuleBindingKeywordPrefix * List(Ident) * ModuleType -> ModuleBinding
+    None          : OptModuleBindings
+    ModBindings   : List(ModuleBinding) -> OptModuleBindings
+
+  constructors
+            : Sentence -> ModContent
+            : Module -> ModContent
+    Include : List(Ident) -> ModContent
+
+  constructors
+    ModuleDef  : Ident * OptModuleBindings * OptModuleTypes * ModuleExpression -> Module
+    ModuleDefs : Ident * OptModuleBindings * List(ModuleExpression) -> Module
+
+  constructors
+    ModuleExpression     : List(QualId) -> ModuleExpression
+    ModuleBangExpression : List(QualId) -> ModuleExpression
+
+  constructors
+    ModuleType : Ident * OptModuleBindings * List(ModTypeContent) * Ident -> Module
+
+  constructors
+                     : ModContent -> ModTypeContent
+    InlineAssumption : AssumptionKeyword * Assums -> ModTypeContent
+
+  constructors
+    ModuleTypeDef : Ident * OptModuleBindings * List(ModuleType) -> Module
+
+  constructors
+    Import : OptRequirePrefix * QualId -> Sentence
+    Export : OptRequirePrefix * QualId -> Sentence
+
+  constructors
+    None    : OptRequirePrefix
+    Require : OptRequirePrefix

@@ -1,0 +1,86 @@
+module lib/Coq/signatures/Gallina-sig
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/extensions/Function-sig
+
+
+signature
+  constructors
+    ForAll        : List(Binder) * Term -> Term
+    Fun           : List(Binder) * Term -> Term
+    Fix           : FixBodies -> Term
+    CoFix         : CoFixBodies -> Term
+    Let           : Ident * OptBinders * OptType * Term * Term -> Term
+    LetFix        : FixBody * Term -> Term
+    LetCoFix      : CoFixBody * Term -> Term
+    LetTuple      : List(Name) * OptDepRetType * Term * Term -> Term
+    LetPat        : SingleQuote * Pattern * OptInTerm * Term * OptReturnType * Term -> Term
+    If            : Term * OptDepRetType * Term * Term -> Term
+    Cast          : Term * Term -> Term
+    Check         : Term * Term -> Term
+    Coerce        : Term -> Term
+    Arrow         : Term * Term -> Term
+    Apply         : Term * Term -> Term
+    ApplyImplicit : Term * Arg -> Term
+    UnHide        : QualId * OptTerms -> Term
+    ScopeRef      : Term * Ident -> Term
+    Match         : List(MatchItem) * OptReturnType * Equations -> Term
+    Ref           : QualId -> Term
+                  : Sort -> Term
+                  : Num -> Term
+    WldTerm       : Term
+
+  constructors
+    ImplicitArg : Ident * Term -> Arg
+
+  constructors
+    Bind   : Name -> Binder
+    Binds  : List(Name) * Term -> Binder
+    Assign : Name * OptType * Term -> Binder
+
+  constructors
+            : Ident -> Name
+    WldName : Name
+
+  constructors
+    Prop : Sort
+    Set  : Sort
+    Type : Sort
+
+  constructors
+    ListEqBar : List(Equation) -> Equations
+    ListEq    : List(Equation) -> Equations
+
+  constructors
+               : FixBody -> FixBodies
+    With       : FixBody * List(FixBody) * Ident -> FixBodies
+    FixBody    : Ident * List(Binder) * OptAnnotation * OptType * Term -> FixBody
+               : CoFixBody -> CoFixBodies
+    With       : CoFixBody * List(CoFixBody) * Ident -> CoFixBodies
+    CoFixBody  : Ident * OptBinders * OptType * Term -> CoFixBody
+    MatchItem  : Term * OptAlias * OptInTerm -> MatchItem
+    Return     : Term -> ReturnType
+    Eq         : List(MultPattern) * Term -> Equation
+               : List(Pattern) -> MultPattern
+    QidPattern : QualId * List(Pattern) -> Pattern
+    AsPattern  : Pattern * Ident -> Pattern
+    XPattern   : Pattern * Ident -> Pattern
+               : QualId -> Pattern
+    Wld        : Pattern
+               : Num -> Pattern
+    OrPattern  : List(OrPattern) -> Pattern
+               : List(Pattern) -> OrPattern
+
+  constructors
+    List  : List(Term) -> Term
+    Tuple : Term * List(Term) -> Term
+    Prod  : Term * Term -> Term
+    Eq    : Term * Term -> Term
+    NotE  : Term * Term -> Term
+    And   : Term * Term -> Term
+
+  constructors
+     : Term -> Type

@@ -11,6 +11,9 @@ imports
   lib/editor-common.generated
   include/ds
   ds
+  lib/Coq/signatures/-
+  lib/Coq/Coq-parenthesize
+  lib/Coq/pp/-
 
 rules
   
@@ -21,14 +24,14 @@ rules
     ; filename := <guarantee-extension(|"v")> path
     ; coq-file := <strip-annos; module-to-coq> ast
     with
-       result := <parenthesize-Coq; prettyprintCoq-Start; box2text-string(|100)> coq-file
+       result := <parenthesize-Coq; prettyprintCoq-CoqFile; box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprintCoq-example) ; debug(!"cannot pp ")))> coq-file
     ;  result := ""
 
 rules
   
   module-to-coq:
-  	Module(name, rule*) -> C|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
+  	Module(name, rule*) -> S|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
 		where
 		  rule'* := <filter(?Rules(<id>)); concat> rule*
 		; decls  := <foldl(fold-rule); Fst; reverse; !ListDeclBar(<id>)> (rule'*, ([], []))

@@ -1,0 +1,29 @@
+module lib/Coq/signatures/tactic/AtomicTactic-sig
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Qid-sig
+
+
+signature
+  constructors
+     : String -> Reserved
+
+  constructors
+    AtomicTactic : OptNumPrefix * ATactic -> AtomicTactic
+    None         : OptNumPrefix
+                 : Num -> OptNumPrefix
+
+  constructors
+    Intros       : ATactic
+    Auto         : ATactic
+    EAuto        : ATactic
+    Assumption   : ATactic
+    Inversion    : QualId -> ATactic
+    Subst        : ATactic
+    Induction    : QualId -> ATactic
+    Destruct     : QualId -> ATactic
+    Left         : ATactic
+    Right        : ATactic
+    Reflexivity  : ATactic
+    Discriminate : ATactic

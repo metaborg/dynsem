@@ -1,0 +1,1184 @@
+module lib/Coq/pp/tactic/Expr-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/tactic/Expr-sig
+
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/tactic/AtomicTactic-sig
+
+
+imports
+  lib/Coq/pp/Lexical-pp
+  lib/Coq/pp/Gallina-pp
+  lib/Coq/pp/Qid-pp
+  lib/Coq/pp/Options-pp
+  lib/Coq/pp/tactic/AtomicTactic-pp
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-TExpr
+
+  prettyprintCoq-TExpr :
+    ExprSeq(t0__, t1__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [t0__', S("; "), t1__']
+                             )
+                           ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TExpr)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-TExpr)> t1__
+
+  is-TExpr =
+    ?ExprSeq(_, _)
+
+  prettyprintCoq-TExpr :
+    ExprSeqAlts(t0__, t1__) -> [ H(
+                                   [SOpt(HS(), "0")]
+                                 , [ t0__'
+                                   , S("; [")
+                                   , t1__'
+                                   , S("]")
+                                   ]
+                                 )
+                               ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TExpr)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-TExpr|" | ")> t1__
+
+  is-TExpr =
+    ?ExprSeqAlts(_, _)
+
+  prettyprintCoq-TExpr :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TExpr)
+    where t0__' := <pp-one-Z(prettyprintCoq-TacExpr3)> t0__
+
+  is-TExpr =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-TacExpr3
+
+  prettyprintCoq-TacExpr3 :
+    DoTac(t0__, t1__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [ S("do")
+                             , t0__'
+                             , S(" ")
+                             , t1__'
+                             ]
+                           )
+                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptTime)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-TacExpr3)> t1__
+
+  is-TacExpr3 =
+    ?DoTac(_, _)
+
+  prettyprintCoq-TacExpr3 :
+    Progress(t0__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("progress "), t0__']
+                        )
+                      ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TacExpr3)> t0__
+
+  is-TacExpr3 =
+    ?Progress(_)
+
+  prettyprintCoq-TacExpr3 :
+    Repeat(t0__) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("repeat "), t0__']
+                      )
+                    ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TacExpr3)> t0__
+
+  is-TacExpr3 =
+    ?Repeat(_)
+
+  prettyprintCoq-TacExpr3 :
+    Try(t0__) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("try "), t0__']
+                   )
+                 ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TacExpr3)> t0__
+
+  is-TacExpr3 =
+    ?Try(_)
+
+  prettyprintCoq-TacExpr3 :
+    Timeout(t0__, t1__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [ S("timeout")
+                               , t0__'
+                               , S(" ")
+                               , t1__'
+                               ]
+                             )
+                           ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptTime)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-TacExpr3)> t1__
+
+  is-TacExpr3 =
+    ?Timeout(_, _)
+
+  prettyprintCoq-TacExpr3 :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TacExpr3)
+    where t0__' := <pp-one-Z(prettyprintCoq-TacExpr2)> t0__
+
+  is-TacExpr3 =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-OptTime
+
+  prettyprintCoq-OptTime :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptTime =
+    ?None()
+
+  prettyprintCoq-OptTime :
+    Natural(t0__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [t0__', S(" ")]
+                       )
+                     ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Num)> t0__
+
+  is-OptTime =
+    ?Natural(_)
+
+  prettyprintCoq-OptTime :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__', S(" ")]
+              )
+            ]
+    where not(is-OptTime)
+    where t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+
+  is-OptTime =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-TacExpr2
+
+  prettyprintCoq-TacExpr2 :
+    Alts(t0__, t1__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [t0__', S(" || "), t1__']
+                          )
+                        ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TacExpr1)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-TacExpr3)> t1__
+
+  is-TacExpr2 =
+    ?Alts(_, _)
+
+  prettyprintCoq-TacExpr2 :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TacExpr2)
+    where t0__' := <pp-one-Z(prettyprintCoq-TacExpr1)> t0__
+
+  is-TacExpr2 =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-TacExpr1
+
+  prettyprintCoq-TacExpr1 :
+    Fun(t0__, t1__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [ S("fun ")
+                           , t0__'
+                           , S(" => ")
+                           , t1__'
+                           ]
+                         )
+                       ]
+    with t0__' := <pp-H-list(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-TAtom)> t1__
+
+  is-TacExpr1 =
+    ?Fun(_, _)
+
+  prettyprintCoq-TacExpr1 :
+    LetTac(t0__, t1__, t2__) -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [ S("let")
+                                    , t0__'
+                                    , S(" ")
+                                    , t1__'
+                                    , S(" in ")
+                                    , t2__'
+                                    ]
+                                  )
+                                ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptRec)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-LetClause|" with")> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-TAtom)> t2__
+
+  is-TacExpr1 =
+    ?LetTac(_, _, _)
+
+  prettyprintCoq-TacExpr1 :
+    MatchGoal(t0__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [ S("match goal with ")
+                           , t0__'
+                           , S(" end")
+                           ]
+                         )
+                       ]
+    with t0__' := <pp-H-list(prettyprintCoq-ContextRule|" |")> t0__
+
+  is-TacExpr1 =
+    ?MatchGoal(_)
+
+  prettyprintCoq-TacExpr1 :
+    MatchRevGoal(t0__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [ S("match reverse goal with ")
+                              , t0__'
+                              , S(" end")
+                              ]
+                            )
+                          ]
+    with t0__' := <pp-H-list(prettyprintCoq-ContextRule|" |")> t0__
+
+  is-TacExpr1 =
+    ?MatchRevGoal(_)
+
+  prettyprintCoq-TacExpr1 :
+    MatchExpr(t0__, t1__) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [ S("match ")
+                                 , t0__'
+                                 , S(" with ")
+                                 , t1__'
+                                 , S(" end")
+                                 ]
+                               )
+                             ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TExpr)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-MatchRule|" |")> t1__
+
+  is-TacExpr1 =
+    ?MatchExpr(_, _)
+
+  prettyprintCoq-TacExpr1 :
+    LMatchGoal(t0__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [ S("lazymatch goal with ")
+                            , t0__'
+                            , S(" end")
+                            ]
+                          )
+                        ]
+    with t0__' := <pp-H-list(prettyprintCoq-ContextRule|" |")> t0__
+
+  is-TacExpr1 =
+    ?LMatchGoal(_)
+
+  prettyprintCoq-TacExpr1 :
+    LMatchRevGoal(t0__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [ S("lazymatch reverse goal with ")
+                               , t0__'
+                               , S(" end")
+                               ]
+                             )
+                           ]
+    with t0__' := <pp-H-list(prettyprintCoq-ContextRule|" |")> t0__
+
+  is-TacExpr1 =
+    ?LMatchRevGoal(_)
+
+  prettyprintCoq-TacExpr1 :
+    LMatchExpr(t0__, t1__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [ S("lazymatch ")
+                                  , t0__'
+                                  , S(" with ")
+                                  , t1__'
+                                  , S(" end")
+                                  ]
+                                )
+                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TExpr)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-MatchRule|" |")> t1__
+
+  is-TacExpr1 =
+    ?LMatchExpr(_, _)
+
+  prettyprintCoq-TacExpr1 :
+    Abstract(t0__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("abstract "), t0__']
+                        )
+                      ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TAtom)> t0__
+
+  is-TacExpr1 =
+    ?Abstract(_)
+
+  prettyprintCoq-TacExpr1 :
+    AbstractUsing(t0__, t1__) -> [ H(
+                                     [SOpt(HS(), "0")]
+                                   , [ S("abstract ")
+                                     , t0__'
+                                     , S(" using ")
+                                     , t1__'
+                                     ]
+                                   )
+                                 ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TAtom)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+
+  is-TacExpr1 =
+    ?AbstractUsing(_, _)
+
+  prettyprintCoq-TacExpr1 :
+    First(t0__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [ S("first [ ")
+                       , t0__'
+                       , S(" ]")
+                       ]
+                     )
+                   ]
+    with t0__' := <pp-H-list(prettyprintCoq-TExpr|" |")> t0__
+
+  is-TacExpr1 =
+    ?First(_)
+
+  prettyprintCoq-TacExpr1 :
+    Solve(t0__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [ S("solve [ ")
+                       , t0__'
+                       , S(" ]")
+                       ]
+                     )
+                   ]
+    with t0__' := <pp-H-list(prettyprintCoq-TExpr|" |")> t0__
+
+  is-TacExpr1 =
+    ?Solve(_)
+
+  prettyprintCoq-TacExpr1 :
+    IdTac(t0__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [S("idtac "), t0__']
+                     )
+                   ]
+    with t0__' := <pp-H-list(prettyprintCoq-MsgToken)> t0__
+
+  is-TacExpr1 =
+    ?IdTac(_)
+
+  prettyprintCoq-TacExpr1 :
+    Fail(t0__, t1__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("fail"), t0__', t1__']
+                          )
+                        ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptNatural)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptMsgTokens)> t1__
+
+  is-TacExpr1 =
+    ?Fail(_, _)
+
+  prettyprintCoq-TacExpr1 :
+    Fresh(t0__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [S("fresh"), t0__']
+                     )
+                   ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptString)> t0__
+
+  is-TacExpr1 =
+    ?Fresh(_)
+
+  prettyprintCoq-TacExpr1 :
+    Context(t0__, t1__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S("context "), t0__', t1__']
+                             )
+                           ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptTerm)> t1__
+
+  is-TacExpr1 =
+    ?Context(_, _)
+
+  prettyprintCoq-TacExpr1 :
+    Eval(t0__, t1__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [ S("eval ")
+                            , t0__'
+                            , S(" in ")
+                            , t1__'
+                            ]
+                          )
+                        ]
+    with t0__' := <pp-one-Z(prettyprintCoq-RedExpr)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-TacExpr1 =
+    ?Eval(_, _)
+
+  prettyprintCoq-TacExpr1 :
+    TypeOf(t0__) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("type of "), t0__']
+                      )
+                    ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-TacExpr1 =
+    ?TypeOf(_)
+
+  prettyprintCoq-TacExpr1 :
+    External(t0__, t1__, t2__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [ S("external ")
+                                      , t0__'
+                                      , S(" ")
+                                      , t1__'
+                                      , S(" ")
+                                      , t2__'
+                                      ]
+                                    )
+                                  ]
+    with t0__' := <pp-one-Z(prettyprintCoq-String)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-String)> t1__
+    with t2__' := <pp-H-list(prettyprintCoq-TacArg)> t2__
+
+  is-TacExpr1 =
+    ?External(_, _, _)
+
+  prettyprintCoq-TacExpr1 :
+    ConstrTerm(t0__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("constr : "), t0__']
+                          )
+                        ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-TacExpr1 =
+    ?ConstrTerm(_)
+
+  prettyprintCoq-TacExpr1 :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TacExpr1)
+    where t0__' := <pp-one-Z(prettyprintCoq-AtomicTactic)> t0__
+
+  prettyprintCoq-TacExpr1 :
+    QualTactic(t0__, t1__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [t0__', S(" "), t1__']
+                                )
+                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-TacArg)> t1__
+
+  is-TacExpr1 =
+    ?QualTactic(_, _)
+
+  prettyprintCoq-TacExpr1 :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TacExpr1)
+    where t0__' := <pp-one-Z(prettyprintCoq-TAtom)> t0__
+
+  prettyprintCoq-TacExpr1 :
+    Parenthetical(t0__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [ S("(")
+                               , t0__'
+                               , S(")")
+                               ]
+                             )
+                           ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TExpr)> t0__
+
+  is-TacExpr1 =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-OptRec
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptMsgTokens
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptNatural
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptString
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptTerm
+
+  prettyprintCoq-OptRec :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptRec =
+    ?None()
+
+  prettyprintCoq-OptRec :
+    Rec() -> [ H(
+                 [SOpt(HS(), "0")]
+               , [S(" rec")]
+               )
+             ]
+
+  is-OptRec =
+    ?Rec()
+
+  prettyprintCoq-OptMsgTokens :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptMsgTokens =
+    ?None()
+
+  prettyprintCoq-OptMsgTokens :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [S(" "), t0__']
+              )
+            ]
+    where not(is-OptMsgTokens)
+    where t0__' := <pp-H-list(prettyprintCoq-MsgToken)> t0__
+
+  prettyprintCoq-OptNatural :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptNatural =
+    ?None()
+
+  prettyprintCoq-OptNatural :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-OptNatural)
+    where t0__' := <pp-one-Z(prettyprintCoq-Num)> t0__
+
+  prettyprintCoq-OptString :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptString =
+    ?None()
+
+  prettyprintCoq-OptString :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-OptString)
+    where t0__' := <pp-one-Z(prettyprintCoq-Num)> t0__
+
+  prettyprintCoq-OptTerm :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptTerm =
+    ?None()
+
+  prettyprintCoq-OptTerm :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-OptTerm)
+    where t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-OptRec =
+    fail
+
+  is-OptMsgTokens =
+    fail
+
+  is-OptNatural =
+    fail
+
+  is-OptString =
+    fail
+
+  is-OptTerm =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-TAtom
+
+  prettyprintCoq-TAtom :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TAtom)
+    where t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+
+  prettyprintCoq-TAtom :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TAtom)
+    where t0__' := <pp-one-Z(prettyprintCoq-Num)> t0__
+
+  prettyprintCoq-TAtom :
+    () -> [ H(
+              [SOpt(HS(), "0")]
+            , [S("(TExpr)")]
+            )
+          ]
+
+  prettyprintCoq-TAtom :
+    Unit() -> [ H(
+                  [SOpt(HS(), "0")]
+                , [S("()")]
+                )
+              ]
+
+  is-TAtom =
+    ?Unit()
+
+  is-TAtom =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-MsgToken
+
+  prettyprintCoq-MsgToken :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-MsgToken)
+    where t0__' := <pp-one-Z(prettyprintCoq-String)> t0__
+
+  prettyprintCoq-MsgToken :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-MsgToken)
+    where t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+
+  prettyprintCoq-MsgToken :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-MsgToken)
+    where t0__' := <pp-one-Z(prettyprintCoq-Num)> t0__
+
+  is-MsgToken =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-TacArg
+
+  prettyprintCoq-TacArg :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TacArg)
+    where t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+
+  prettyprintCoq-TacArg :
+    Unit() -> [ H(
+                  [SOpt(HS(), "0")]
+                , [S("()")]
+                )
+              ]
+
+  is-TacArg =
+    ?Unit()
+
+  prettyprintCoq-TacArg :
+    AtomArg(t0__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("ltac : "), t0__']
+                       )
+                     ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TAtom)> t0__
+
+  is-TacArg =
+    ?AtomArg(_)
+
+  prettyprintCoq-TacArg :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TacArg)
+    where t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-TacArg =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-LetClause
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptNames
+
+  prettyprintCoq-LetClause :
+    LetClause(t0__, t1__, t2__) -> [ H(
+                                       [SOpt(HS(), "0")]
+                                     , [t0__', t1__', S(" := "), t2__']
+                                     )
+                                   ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptNames)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-TExpr)> t2__
+
+  is-LetClause =
+    ?LetClause(_, _, _)
+
+  prettyprintCoq-OptNames :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptNames =
+    ?None()
+
+  prettyprintCoq-OptNames :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [S(" "), t0__']
+              )
+            ]
+    where not(is-OptNames)
+    where t0__' := <pp-H-list(prettyprintCoq-Name)> t0__
+
+  is-LetClause =
+    fail
+
+  is-OptNames =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-ContextRule
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptContextHyps
+
+  prettyprintCoq-ContextRule :
+    PatContext(t0__, t1__, t2__) -> [ H(
+                                        [SOpt(HS(), "0")]
+                                      , [ t0__'
+                                        , S("|- ")
+                                        , t1__'
+                                        , S(" => ")
+                                        , t2__'
+                                        ]
+                                      )
+                                    ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptContextHyps)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Pattern)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-TExpr)> t2__
+
+  is-ContextRule =
+    ?PatContext(_, _, _)
+
+  prettyprintCoq-ContextRule :
+    WldContext(t0__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("_ => "), t0__']
+                          )
+                        ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TExpr)> t0__
+
+  is-ContextRule =
+    ?WldContext(_)
+
+  prettyprintCoq-OptContextHyps :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptContextHyps =
+    ?None()
+
+  prettyprintCoq-OptContextHyps :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__', S(" ")]
+              )
+            ]
+    where not(is-OptContextHyps)
+    where t0__' := <pp-H-list(prettyprintCoq-ContextHyp|", ")> t0__
+
+  is-ContextRule =
+    fail
+
+  is-OptContextHyps =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-ContextHyp
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptCPattern
+
+  prettyprintCoq-ContextHyp :
+    ContextHyp(t0__, t1__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [t0__', S(" : "), t1__']
+                                )
+                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Name)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Pattern)> t1__
+
+  is-ContextHyp =
+    ?ContextHyp(_, _)
+
+  prettyprintCoq-ContextHyp :
+    ContextHypAssign(t0__, t1__, t2__) -> [ H(
+                                              [SOpt(HS(), "0")]
+                                            , [t0__', S(" := "), t1__', t2__']
+                                            )
+                                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Name)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Pattern)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptCPattern)> t2__
+
+  is-ContextHyp =
+    ?ContextHypAssign(_, _, _)
+
+  prettyprintCoq-OptCPattern :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptCPattern =
+    ?None()
+
+  prettyprintCoq-OptCPattern :
+    OptCPattern(t0__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S(" : "), t0__']
+                           )
+                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Pattern)> t0__
+
+  is-OptCPattern =
+    ?OptCPattern(_)
+
+  is-ContextHyp =
+    fail
+
+  is-OptCPattern =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-MatchRule
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptIdent
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptPattern
+
+  prettyprintCoq-MatchRule :
+    MatchPattern(t0__, t1__) -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [t0__', S(" => "), t1__']
+                                  )
+                                ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Pattern)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-TExpr)> t1__
+
+  is-MatchRule =
+    ?MatchPattern(_, _)
+
+  prettyprintCoq-MatchRule :
+    MatchContext(t0__, t1__, t2__) -> [ H(
+                                          [SOpt(HS(), "0")]
+                                        , [ S("context")
+                                          , t0__'
+                                          , t1__'
+                                          , S(" => ")
+                                          , t2__'
+                                          ]
+                                        )
+                                      ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptIdent)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptPattern)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-TExpr)> t2__
+
+  is-MatchRule =
+    ?MatchContext(_, _, _)
+
+  prettyprintCoq-MatchRule :
+    MatchAppContext(t0__, t1__, t2__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [ S("appcontext")
+                                             , t0__'
+                                             , t1__'
+                                             , S(" => ")
+                                             , t2__'
+                                             ]
+                                           )
+                                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptIdent)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptPattern)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-TExpr)> t2__
+
+  is-MatchRule =
+    ?MatchAppContext(_, _, _)
+
+  prettyprintCoq-MatchRule :
+    MatchWld(t0__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("_ => "), t0__']
+                        )
+                      ]
+    with t0__' := <pp-one-Z(prettyprintCoq-TExpr)> t0__
+
+  is-MatchRule =
+    ?MatchWld(_)
+
+  prettyprintCoq-OptIdent :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptIdent =
+    ?None()
+
+  prettyprintCoq-OptIdent :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [S(" "), t0__']
+              )
+            ]
+    where not(is-OptIdent)
+    where t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+
+  prettyprintCoq-OptPattern :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptPattern =
+    ?None()
+
+  prettyprintCoq-OptPattern :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [S(" "), t0__']
+              )
+            ]
+    where not(is-OptPattern)
+    where t0__' := <pp-one-Z(prettyprintCoq-Pattern)> t0__
+
+  is-MatchRule =
+    fail
+
+  is-OptIdent =
+    fail
+
+  is-OptPattern =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-RedExpr
+
+  prettyprintCoq-RedExpr :
+    RedRed() -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [S("red")]
+                  )
+                ]
+
+  is-RedExpr =
+    ?RedRed()
+
+  prettyprintCoq-RedExpr :
+    RedHnf() -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [S("hnf")]
+                  )
+                ]
+
+  is-RedExpr =
+    ?RedHnf()
+
+  prettyprintCoq-RedExpr :
+    RedCompute() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("compute")]
+                      )
+                    ]
+
+  is-RedExpr =
+    ?RedCompute()
+
+  prettyprintCoq-RedExpr :
+    RedSimpl() -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [S("simpl")]
+                    )
+                  ]
+
+  is-RedExpr =
+    ?RedSimpl()
+
+  prettyprintCoq-RedExpr :
+    RedCbv() -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [S("cbv")]
+                  )
+                ]
+
+  is-RedExpr =
+    ?RedCbv()
+
+  prettyprintCoq-RedExpr :
+    RedLazy() -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("lazy")]
+                   )
+                 ]
+
+  is-RedExpr =
+    ?RedLazy()
+
+  prettyprintCoq-RedExpr :
+    RedUnfold() -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [S("unfold")]
+                     )
+                   ]
+
+  is-RedExpr =
+    ?RedUnfold()
+
+  prettyprintCoq-RedExpr :
+    RedFold() -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("fold")]
+                   )
+                 ]
+
+  is-RedExpr =
+    ?RedFold()
+
+  prettyprintCoq-RedExpr :
+    RedPattern() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("pattern")]
+                      )
+                    ]
+
+  is-RedExpr =
+    ?RedPattern()
+
+  is-RedExpr =
+    fail

@@ -1,0 +1,211 @@
+module include/Coq-parenthesize
+
+imports
+  libstratego-lib
+  lib/Coq/signatures/- lib/Coq/signatures/tactic/-
+
+
+strategies
+  io-Coq-parenthesize =
+    io-wrap(parenthesize-Coq)
+
+  parenthesize-Coq =
+    innermost(CoqParenthesize)
+
+
+rules
+
+  CoqParenthesize :
+    ForAll(t_0, t_1) -> ForAll(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Prod(_, _)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    ForAll(t_0, t_1) -> ForAll(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Prod(_, _)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Arrow(t_0, t_1) -> Arrow(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Prod(_, _)
+            + ?Arrow(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Arrow(t_0, t_1) -> Arrow(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Prod(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Apply(t_0, t_1) -> Apply(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Prod(_, _)
+            + ?Arrow(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Apply(t_0, t_1) -> Apply(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Prod(_, _)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Prod(t_0, t_1) -> Prod(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Prod(t_0, t_1) -> Prod(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Prod(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    NotE(t_0, t_1) -> NotE(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    NotE(t_0, t_1) -> NotE(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Eq(t_0, t_1) -> Eq(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?Eq(_, _)
+            + ?NotE(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Eq(t_0, t_1) -> Eq(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?Eq(_, _)
+            + ?NotE(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Coerce(t_0) -> Coerce(Parenthetical(t_0))
+    where <(?And(_, _)
+            + ?Coerce(_)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Cast(t_0, t_1) -> Cast(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?Cast(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Check(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Cast(t_0, t_1) -> Cast(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?Cast(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Check(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Check(t_0, t_1) -> Check(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?Check(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Check(t_0, t_1) -> Check(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?Check(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Coerce(_)
+            + ?Cast(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    ExprSeq(t_0, t_1) -> ExprSeq(t_0, Parenthetical(t_1))
+    where <(?ExprSeq(_, _) + fail)> t_1
+
+
+signature
+  constructors
+    Parenthetical : Unknown -> Unknown
+

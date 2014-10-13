@@ -1,0 +1,23 @@
+module lib/Coq/signatures/tactic/Toplevel-sig
+
+imports
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/tactic/Expr-sig
+  lib/Coq/signatures/Vernacular-sig
+
+
+signature
+  constructors
+     : String -> Reserved
+
+  constructors
+    Ltac   : OptLocalPrefix * List(LtacDef) -> Sentence
+    Tactic : TExpr -> Tactic
+
+  constructors
+    None        : OptLocalPrefix
+    LocalTactic : OptLocalPrefix
+
+  constructors
+    LtacDef : QualId * List(Ident) * TExpr -> LtacDef

@@ -1,0 +1,946 @@
+module lib/Coq/pp/Gallina-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/Gallina-sig
+
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/extensions/Function-sig
+
+
+imports
+  lib/Coq/pp/Lexical-pp
+  lib/Coq/pp/Qid-pp
+  lib/Coq/pp/Options-pp
+  lib/Coq/pp/extensions/Function-pp
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Term
+
+  prettyprintCoq-Term :
+    ForAll(t0__, t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [ S("forall ")
+                              , t0__'
+                              , S(", ")
+                              , t1__'
+                              ]
+                            )
+                          ]
+    with t0__' := <pp-H-list(prettyprintCoq-Binder)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?ForAll(_, _)
+
+  prettyprintCoq-Term :
+    Fun(t0__, t1__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [ S("fun ")
+                           , t0__'
+                           , S(" => ")
+                           , t1__'
+                           ]
+                         )
+                       ]
+    with t0__' := <pp-H-list(prettyprintCoq-Binder)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?Fun(_, _)
+
+  prettyprintCoq-Term :
+    Fix(t0__) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("fix "), t0__']
+                   )
+                 ]
+    with t0__' := <pp-one-Z(prettyprintCoq-FixBodies)> t0__
+
+  is-Term =
+    ?Fix(_)
+
+  prettyprintCoq-Term :
+    CoFix(t0__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [S("cofix "), t0__']
+                     )
+                   ]
+    with t0__' := <pp-one-Z(prettyprintCoq-CoFixBodies)> t0__
+
+  is-Term =
+    ?CoFix(_)
+
+  prettyprintCoq-Term :
+    Let(t0__, t1__, t2__, t3__, t4__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [ S("let ")
+                                             , t0__'
+                                             , t1__'
+                                             , t2__'
+                                             , S(" :=")
+                                             ]
+                                           )
+                                         , t3__'
+                                         , H(
+                                             [SOpt(HS(), "0")]
+                                           , [S("in")]
+                                           )
+                                         , t4__'
+                                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptBinders)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptType)> t2__
+    with t3__' := <pp-indent(|"2")> [<pp-one-Z(prettyprintCoq-Term)> t3__]
+    with t4__' := <pp-indent(|"2")> [<pp-one-Z(prettyprintCoq-Term)> t4__]
+
+  is-Term =
+    ?Let(_, _, _, _, _)
+
+  prettyprintCoq-Term :
+    LetFix(t0__, t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [ S("let fix ")
+                              , t0__'
+                              , S(" in ")
+                              , t1__'
+                              ]
+                            )
+                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-FixBody)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?LetFix(_, _)
+
+  prettyprintCoq-Term :
+    LetCoFix(t0__, t1__) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [ S("let fix ")
+                                , t0__'
+                                , S(" in ")
+                                , t1__'
+                                ]
+                              )
+                            ]
+    with t0__' := <pp-one-Z(prettyprintCoq-CoFixBody)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?LetCoFix(_, _)
+
+  prettyprintCoq-Term :
+    LetTuple(t0__, t1__, t2__, t3__) -> [ H(
+                                            [SOpt(HS(), "0")]
+                                          , [ S("let (")
+                                            , t0__'
+                                            , S(")")
+                                            , t1__'
+                                            , S(" := ")
+                                            , t2__'
+                                            , S(" in ")
+                                            , t3__'
+                                            ]
+                                          )
+                                        ]
+    with t0__' := <pp-H-list(prettyprintCoq-Name|", ")> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptDepRetType)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-Term)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-Term)> t3__
+
+  is-Term =
+    ?LetTuple(_, _, _, _)
+
+  prettyprintCoq-Term :
+    LetPat(t0__, t1__, t2__, t3__, t4__, t5__) -> [ H(
+                                                      [SOpt(HS(), "0")]
+                                                    , [ S("let ")
+                                                      , t0__'
+                                                      , S(" ")
+                                                      , t1__'
+                                                      , t2__'
+                                                      , S(" := ")
+                                                      , t3__'
+                                                      , t4__'
+                                                      , S(" in ")
+                                                      , t5__'
+                                                      ]
+                                                    )
+                                                  ]
+    with t0__' := <pp-one-Z(prettyprintCoq-SingleQuote)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Pattern)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptInTerm)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-Term)> t3__
+    with t4__' := <pp-one-Z(prettyprintCoq-OptReturnType)> t4__
+    with t5__' := <pp-one-Z(prettyprintCoq-Term)> t5__
+
+  is-Term =
+    ?LetPat(_, _, _, _, _, _)
+
+  prettyprintCoq-Term :
+    If(t0__, t1__, t2__, t3__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [ S("if ")
+                                      , t0__'
+                                      , t1__'
+                                      , S(" then ")
+                                      , t2__'
+                                      , S(" else ")
+                                      , t3__'
+                                      ]
+                                    )
+                                  ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptDepRetType)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-Term)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-Term)> t3__
+
+  is-Term =
+    ?If(_, _, _, _)
+
+  prettyprintCoq-Term :
+    Cast(t0__, t1__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [t0__', S(" : "), t1__']
+                          )
+                        ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?Cast(_, _)
+
+  prettyprintCoq-Term :
+    Check(t0__, t1__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [t0__', S(" <: "), t1__']
+                           )
+                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?Check(_, _)
+
+  prettyprintCoq-Term :
+    Coerce(t0__) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [t0__', S(" :>")]
+                      )
+                    ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-Term =
+    ?Coerce(_)
+
+  prettyprintCoq-Term :
+    Arrow(t0__, t1__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [t0__', S(" -> "), t1__']
+                           )
+                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?Arrow(_, _)
+
+  prettyprintCoq-Term :
+    Apply(t0__, t1__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [t0__', S(" "), t1__']
+                           )
+                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?Apply(_, _)
+
+  prettyprintCoq-Term :
+    ApplyImplicit(t0__, t1__) -> [ H(
+                                     [SOpt(HS(), "0")]
+                                   , [t0__', S(" "), t1__']
+                                   )
+                                 ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Arg)> t1__
+
+  is-Term =
+    ?ApplyImplicit(_, _)
+
+  prettyprintCoq-Term :
+    UnHide(t0__, t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("@"), t0__', t1__']
+                            )
+                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptTerms)> t1__
+
+  is-Term =
+    ?UnHide(_, _)
+
+  prettyprintCoq-Term :
+    ScopeRef(t0__, t1__) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [t0__', S(" % "), t1__']
+                              )
+                            ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+
+  is-Term =
+    ?ScopeRef(_, _)
+
+  prettyprintCoq-Term :
+    Match(t0__, t1__, t2__) -> [ H(
+                                   [SOpt(HS(), "0")]
+                                 , [ S("match ")
+                                   , t0__'
+                                   , t1__'
+                                   , S(" with")
+                                   ]
+                                 )
+                               , t2__'
+                               ]
+    with t0__' := <pp-H-list(prettyprintCoq-MatchItem|", ")> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptReturnType)> t1__
+    with t2__' := <pp-indent(|"2")> [ <pp-one-Z(prettyprintCoq-Equations)> t2__
+                                    , S(" end")
+                                    ]
+
+  is-Term =
+    ?Match(_, _, _)
+
+  prettyprintCoq-Term :
+    Ref(t0__) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [t0__']
+                   )
+                 ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+
+  is-Term =
+    ?Ref(_)
+
+  prettyprintCoq-Term :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Term)
+    where t0__' := <pp-one-Z(prettyprintCoq-Sort)> t0__
+
+  prettyprintCoq-Term :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Term)
+    where t0__' := <pp-one-Z(prettyprintCoq-Num)> t0__
+
+  prettyprintCoq-Term :
+    WldTerm() -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("_")]
+                   )
+                 ]
+
+  is-Term =
+    ?WldTerm()
+
+  prettyprintCoq-Term :
+    Parenthetical(t0__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [ S("(")
+                               , t0__'
+                               , S(")")
+                               ]
+                             )
+                           ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-Term =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Arg
+
+  prettyprintCoq-Arg :
+    ImplicitArg(t0__, t1__) -> [ H(
+                                   [SOpt(HS(), "0")]
+                                 , [ S("(")
+                                   , t0__'
+                                   , S(" := ")
+                                   , t1__'
+                                   , S(")")
+                                   ]
+                                 )
+                               ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Arg =
+    ?ImplicitArg(_, _)
+
+  is-Arg =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Binder
+
+  prettyprintCoq-Binder :
+    Bind(t0__) -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [t0__']
+                    )
+                  ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Name)> t0__
+
+  is-Binder =
+    ?Bind(_)
+
+  prettyprintCoq-Binder :
+    Binds(t0__, t1__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [ S("(")
+                             , t0__'
+                             , S(": ")
+                             , t1__'
+                             , S(")")
+                             ]
+                           )
+                         ]
+    with t0__' := <pp-H-list(prettyprintCoq-Name|" ")> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Binder =
+    ?Binds(_, _)
+
+  prettyprintCoq-Binder :
+    Assign(t0__, t1__, t2__) -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [ S("(")
+                                    , t0__'
+                                    , t1__'
+                                    , S(" := ")
+                                    , t2__'
+                                    , S(")")
+                                    ]
+                                  )
+                                ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Name)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptType)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-Term)> t2__
+
+  is-Binder =
+    ?Assign(_, _, _)
+
+  is-Binder =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Name
+
+  prettyprintCoq-Name :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Name)
+    where t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+
+  prettyprintCoq-Name :
+    WldName() -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("_")]
+                   )
+                 ]
+
+  is-Name =
+    ?WldName()
+
+  is-Name =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Sort
+
+  prettyprintCoq-Sort :
+    Prop() -> [ H(
+                  [SOpt(HS(), "0")]
+                , [S("Prop")]
+                )
+              ]
+
+  is-Sort =
+    ?Prop()
+
+  prettyprintCoq-Sort :
+    Set() -> [ H(
+                 [SOpt(HS(), "0")]
+               , [S("Set")]
+               )
+             ]
+
+  is-Sort =
+    ?Set()
+
+  prettyprintCoq-Sort :
+    Type() -> [ H(
+                  [SOpt(HS(), "0")]
+                , [S("Type")]
+                )
+              ]
+
+  is-Sort =
+    ?Type()
+
+  is-Sort =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Equations
+
+  prettyprintCoq-Equations :
+    ListEqBar(t0__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("| "), t0__']
+                         )
+                       ]
+    with t0__' := <pp-H-list(prettyprintCoq-Equation|"| ")> t0__
+
+  is-Equations =
+    ?ListEqBar(_)
+
+  prettyprintCoq-Equations :
+    ListEq(t0__) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [t0__']
+                      )
+                    ]
+    with t0__' := <pp-H-list(prettyprintCoq-Equation|"| ")> t0__
+
+  is-Equations =
+    ?ListEq(_)
+
+  is-Equations =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-FixBodies
+
+  prettyprintCoq-example =
+    prettyprintCoq-FixBody
+
+  prettyprintCoq-example =
+    prettyprintCoq-CoFixBodies
+
+  prettyprintCoq-example =
+    prettyprintCoq-CoFixBody
+
+  prettyprintCoq-example =
+    prettyprintCoq-MatchItem
+
+  prettyprintCoq-example =
+    prettyprintCoq-ReturnType
+
+  prettyprintCoq-example =
+    prettyprintCoq-Equation
+
+  prettyprintCoq-example =
+    prettyprintCoq-MultPattern
+
+  prettyprintCoq-example =
+    prettyprintCoq-Pattern
+
+  prettyprintCoq-example =
+    prettyprintCoq-OrPattern
+
+  prettyprintCoq-FixBodies :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-FixBodies)
+    where t0__' := <pp-one-Z(prettyprintCoq-FixBody)> t0__
+
+  prettyprintCoq-FixBodies :
+    With(t0__, t1__, t2__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [ t0__'
+                                  , S(" with ")
+                                  , t1__'
+                                  , S(" for ")
+                                  , t2__'
+                                  ]
+                                )
+                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-FixBody)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-FixBody|"with ")> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-Ident)> t2__
+
+  is-FixBodies =
+    ?With(_, _, _)
+
+  prettyprintCoq-FixBody :
+    FixBody(t0__, t1__, t2__, t3__, t4__) -> [ H(
+                                                 [SOpt(HS(), "0")]
+                                               , [ t0__'
+                                                 , S(" ")
+                                                 , t1__'
+                                                 , t2__'
+                                                 , t3__'
+                                                 , S(" :=")
+                                                 ]
+                                               )
+                                             , t4__'
+                                             ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-Binder|" ")> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptAnnotation)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-OptType)> t3__
+    with t4__' := <pp-indent(|"2")> [<pp-one-Z(prettyprintCoq-Term)> t4__]
+
+  is-FixBody =
+    ?FixBody(_, _, _, _, _)
+
+  prettyprintCoq-CoFixBodies :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-CoFixBodies)
+    where t0__' := <pp-one-Z(prettyprintCoq-CoFixBody)> t0__
+
+  prettyprintCoq-CoFixBodies :
+    With(t0__, t1__, t2__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [ t0__'
+                                  , S(" with ")
+                                  , t1__'
+                                  , S(" for ")
+                                  , t2__'
+                                  ]
+                                )
+                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-CoFixBody)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-CoFixBody|"with ")> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-Ident)> t2__
+
+  is-CoFixBodies =
+    ?With(_, _, _)
+
+  prettyprintCoq-CoFixBody :
+    CoFixBody(t0__, t1__, t2__, t3__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [ t0__'
+                                             , t1__'
+                                             , t2__'
+                                             , S(" := ")
+                                             , t3__'
+                                             ]
+                                           )
+                                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptBinders)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptType)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-Term)> t3__
+
+  is-CoFixBody =
+    ?CoFixBody(_, _, _, _)
+
+  prettyprintCoq-MatchItem :
+    MatchItem(t0__, t1__, t2__) -> [ H(
+                                       [SOpt(HS(), "0")]
+                                     , [t0__', t1__', t2__']
+                                     )
+                                   ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptAlias)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptInTerm)> t2__
+
+  is-MatchItem =
+    ?MatchItem(_, _, _)
+
+  prettyprintCoq-ReturnType :
+    Return(t0__) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("return "), t0__']
+                      )
+                    ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-ReturnType =
+    ?Return(_)
+
+  prettyprintCoq-Equation :
+    Eq(t0__, t1__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [t0__', S(" => "), t1__']
+                        )
+                      , H(
+                          []
+                        , [S("")]
+                        )
+                      ]
+    with t0__' := <pp-H-list(prettyprintCoq-MultPattern|" | ")> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Equation =
+    ?Eq(_, _)
+
+  prettyprintCoq-MultPattern :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-MultPattern)
+    where t0__' := <pp-H-list(prettyprintCoq-Pattern|", ")> t0__
+
+  prettyprintCoq-Pattern :
+    QidPattern(t0__, t1__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [t0__', S(" "), t1__']
+                                )
+                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-Pattern|" ")> t1__
+
+  is-Pattern =
+    ?QidPattern(_, _)
+
+  prettyprintCoq-Pattern :
+    AsPattern(t0__, t1__) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [t0__', S(" as "), t1__']
+                               )
+                             ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Pattern)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+
+  is-Pattern =
+    ?AsPattern(_, _)
+
+  prettyprintCoq-Pattern :
+    XPattern(t0__, t1__) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [t0__', S(" % "), t1__']
+                              )
+                            ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Pattern)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+
+  is-Pattern =
+    ?XPattern(_, _)
+
+  prettyprintCoq-Pattern :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Pattern)
+    where t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+
+  prettyprintCoq-Pattern :
+    Wld() -> [ H(
+                 [SOpt(HS(), "0")]
+               , [S("_")]
+               )
+             ]
+
+  is-Pattern =
+    ?Wld()
+
+  prettyprintCoq-Pattern :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Pattern)
+    where t0__' := <pp-one-Z(prettyprintCoq-Num)> t0__
+
+  prettyprintCoq-Pattern :
+    OrPattern(t0__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [ S("(")
+                           , t0__'
+                           , S(")")
+                           ]
+                         )
+                       ]
+    with t0__' := <pp-H-list(prettyprintCoq-OrPattern|", ")> t0__
+
+  is-Pattern =
+    ?OrPattern(_)
+
+  prettyprintCoq-OrPattern :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-OrPattern)
+    where t0__' := <pp-H-list(prettyprintCoq-Pattern|" | ")> t0__
+
+  is-FixBodies =
+    fail
+
+  is-FixBody =
+    fail
+
+  is-CoFixBodies =
+    fail
+
+  is-CoFixBody =
+    fail
+
+  is-MatchItem =
+    fail
+
+  is-ReturnType =
+    fail
+
+  is-Equation =
+    fail
+
+  is-MultPattern =
+    fail
+
+  is-Pattern =
+    fail
+
+  is-OrPattern =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Term
+
+  prettyprintCoq-Term :
+    List(t0__) -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [ S("[")
+                      , t0__'
+                      , S("]")
+                      ]
+                    )
+                  ]
+    with t0__' := <pp-H-list(prettyprintCoq-Term|";")> t0__
+
+  is-Term =
+    ?List(_)
+
+  prettyprintCoq-Term :
+    Tuple(t0__, t1__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [ S("(")
+                             , t0__'
+                             , S(",")
+                             , t1__'
+                             , S(")")
+                             ]
+                           )
+                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-Term|",")> t1__
+
+  is-Term =
+    ?Tuple(_, _)
+
+  prettyprintCoq-Term :
+    Prod(t0__, t1__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [t0__', S(" * "), t1__']
+                          )
+                        ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?Prod(_, _)
+
+  prettyprintCoq-Term :
+    Eq(t0__, t1__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [t0__', S(" = "), t1__']
+                        )
+                      ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?Eq(_, _)
+
+  prettyprintCoq-Term :
+    NotE(t0__, t1__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [t0__', S(" <> "), t1__']
+                          )
+                        ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?NotE(_, _)
+
+  prettyprintCoq-Term :
+    And(t0__, t1__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [t0__', S(" /\\ "), t1__']
+                         )
+                       ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Term)> t1__
+
+  is-Term =
+    ?And(_, _)
+
+  is-Term =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Type
+
+  prettyprintCoq-Type :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Type)
+    where t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-Type =
+    fail

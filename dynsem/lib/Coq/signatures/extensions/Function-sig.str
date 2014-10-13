@@ -1,0 +1,18 @@
+module lib/Coq/signatures/extensions/Function-sig
+
+imports
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/Lexical-sig
+
+
+signature
+  constructors
+    Function : Ident * List(Binder) * OptDecreaseAnnot * Type * Term -> Term
+
+  constructors
+    None            : OptDecreaseAnnot
+    DecreaseAnnot   : DecreaseAnnot -> OptDecreaseAnnot
+    DecreaseStruct  : Ident -> DecreaseAnnot
+    DecreaseMeasure : Term * Ident -> DecreaseAnnot
+    DecreaseWF      : Term * Ident -> DecreaseAnnot

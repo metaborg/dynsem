@@ -1,0 +1,76 @@
+module lib/Coq/signatures/Vernacular-sig
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/extensions/Record-sig
+  lib/Coq/signatures/extensions/Section-sig
+  lib/Coq/signatures/extensions/Module-sig
+  lib/Coq/signatures/extensions/Coercion-sig
+  lib/Coq/signatures/tactic/Toplevel-sig
+
+
+signature
+  constructors
+    AssumptionAxiom      : AssumptionKeyword
+    AssumptionConjecture : AssumptionKeyword
+    AssumptionParameter  : AssumptionKeyword
+    AssumptionParameters : AssumptionKeyword
+    AssumptionVariable   : AssumptionKeyword
+    AssumptionVariables  : AssumptionKeyword
+    AssumptionHypothesis : AssumptionKeyword
+    AssumptionHypotheses : AssumptionKeyword
+
+  constructors
+     : String -> Reserved
+
+  constructors
+    AssertionTheorem     : AssertionKeyword
+    AssertionLemma       : AssertionKeyword
+    AssertionRemark      : AssertionKeyword
+    AssertionFact        : AssertionKeyword
+    AssertionCorollary   : AssertionKeyword
+    AssertionProposition : AssertionKeyword
+    AssertionDefinition  : AssertionKeyword
+    AssertionExample     : AssertionKeyword
+
+  constructors
+     : String -> Reserved
+
+  constructors
+                   : Assumption -> Sentence
+                   : Definition -> Sentence
+                   : Inductive -> Sentence
+                   : Fixpoint -> Sentence
+    AssertionProof : Assertion * Proof -> Sentence
+
+  constructors
+    Assumption : AssumptionKeyword * Assums -> Assumption
+    Term       : List(Ident) * Term -> Assums
+    Terms      : List(AssumsPar) -> Assums
+    Pars       : List(Ident) * Term -> AssumsPar
+
+  constructors
+    Definition : Ident * OptBinders * OptType * Term -> Definition
+    Let        : Ident * OptBinders * OptType * Term -> Definition
+
+  constructors
+    Inductive   : List(IndBody) -> Inductive
+    CoInductive : List(IndBody) -> Inductive
+    Induc       : Ident * OptBinders * Term * ConsDecls -> IndBody
+    ListDeclBar : List(ConsDecl) -> ConsDecls
+    ListDecl    : List(ConsDecl) -> ConsDecls
+    ConsDecl    : Ident * OptBinders * OptType -> ConsDecl
+
+  constructors
+    Fixpoint   : List(FixBody) -> Fixpoint
+    CoFixpoint : List(CoFixBody) -> Fixpoint
+
+  constructors
+    Assertion : AssertionKeyword * Ident * OptBinders * Term -> Assertion
+
+  constructors
+    Qed      : List(Tactic) -> Proof
+    Defined  : List(Tactic) -> Proof
+    Admitted : List(Tactic) -> Proof

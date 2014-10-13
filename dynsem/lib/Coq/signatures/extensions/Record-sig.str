@@ -1,0 +1,30 @@
+module lib/Coq/signatures/extensions/Record-sig
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/Qid-sig
+
+
+signature
+  constructors
+    RecordRecord      : RecordKeyword
+    RecordStructure   : RecordKeyword
+    RecordInductive   : RecordKeyword
+    RecordCoInductive : RecordKeyword
+
+  constructors
+     : Record -> Sentence
+
+  constructors
+    Record : RecordKeyword * Ident * OptBinders * OptSort * OptIdents * List(RecordField) -> Record
+
+  constructors
+    RecFld         : Ident * OptBinders * Type * OptWhereNotation -> RecordField
+    RecExplicitFld : Ident * OptBinders * OptType * Term -> RecordField
+
+  constructors
+    Projection   : Term * QualId -> Term
+    ProjArgs     : Term * QualId * List(Arg) -> Term
+    ProjQualArgs : Term * QualId * List(Term) -> Term

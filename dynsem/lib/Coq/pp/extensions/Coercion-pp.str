@@ -1,0 +1,69 @@
+module lib/Coq/pp/extensions/Coercion-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/extensions/Coercion-sig
+
+
+imports
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/Gallina-sig
+
+
+imports
+  lib/Coq/pp/Qid-pp
+  lib/Coq/pp/Gallina-pp
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Sentence
+
+  prettyprintCoq-Sentence :
+    Coercion(t0__, t1__, t2__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [ S("Coercion ")
+                                      , t0__'
+                                      , S(" : ")
+                                      , t1__'
+                                      , S(" >-> ")
+                                      , t2__'
+                                      , S(".")
+                                      ]
+                                    )
+                                  ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Class)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-Class)> t2__
+
+  is-Sentence =
+    ?Coercion(_, _, _)
+
+  is-Sentence =
+    fail
+
+
+strategies
+  prettyprintCoq-Reserved =
+    ![S(<is-string>)]
+
+  prettyprintCoq-example =
+    prettyprintCoq-Reserved
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Class
+
+  prettyprintCoq-Class :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-Class)
+    where t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-Class =
+    fail

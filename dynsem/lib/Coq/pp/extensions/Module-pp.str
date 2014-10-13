@@ -1,0 +1,580 @@
+module lib/Coq/pp/extensions/Module-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/extensions/Module-sig
+
+
+imports
+  lib/Coq/signatures/Vernacular-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/extensions/Section-sig
+
+
+imports
+  lib/Coq/pp/Vernacular-pp
+  lib/Coq/pp/Gallina-pp
+  lib/Coq/pp/Lexical-pp
+  lib/Coq/pp/Options-pp
+  lib/Coq/pp/Qid-pp
+  lib/Coq/pp/extensions/Section-pp
+
+
+strategies
+  prettyprintCoq-Reserved =
+    ![S(<is-string>)]
+
+  prettyprintCoq-example =
+    prettyprintCoq-Reserved
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Module
+
+  prettyprintCoq-Module :
+    InteractiveModule(t0__, t1__, t2__, t3__, t4__, t5__) -> [ H(
+                                                                 [SOpt(HS(), "0")]
+                                                               , [ S("Module ")
+                                                                 , t0__'
+                                                                 , t1__'
+                                                                 , t2__'
+                                                                 , t3__'
+                                                                 , S(".")
+                                                                 ]
+                                                               )
+                                                             , t4__'
+                                                             , H(
+                                                                 [SOpt(HS(), "0")]
+                                                               , [ S("End ")
+                                                                 , t5__'
+                                                                 , S(".")
+                                                                 ]
+                                                               )
+                                                             ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptModuleBindingKeywordPrefix)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Ident)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptModuleBindings)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-OptModuleTypes)> t3__
+    with t4__' := <pp-indent(|"2")> [<pp-V-list(prettyprintCoq-ModContent|"")> t4__]
+    with t5__' := <pp-one-Z(prettyprintCoq-Ident)> t5__
+
+  is-Module =
+    ?InteractiveModule(_, _, _, _, _, _)
+
+  is-Module =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-ModuleBindingKeyword
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptModuleBindingKeywordPrefix
+
+  prettyprintCoq-ModuleBindingKeyword :
+    Import() -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [S("Import")]
+                  )
+                ]
+
+  is-ModuleBindingKeyword =
+    ?Import()
+
+  prettyprintCoq-ModuleBindingKeyword :
+    Export() -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [S("Export")]
+                  )
+                ]
+
+  is-ModuleBindingKeyword =
+    ?Export()
+
+  prettyprintCoq-OptModuleBindingKeywordPrefix :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptModuleBindingKeywordPrefix =
+    ?None()
+
+  prettyprintCoq-OptModuleBindingKeywordPrefix :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__', S(" ")]
+              )
+            ]
+    where not(is-OptModuleBindingKeywordPrefix)
+    where t0__' := <pp-one-Z(prettyprintCoq-ModuleBindingKeyword)> t0__
+
+  is-ModuleBindingKeyword =
+    fail
+
+  is-OptModuleBindingKeywordPrefix =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-ModuleType
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptModuleTypes
+
+  prettyprintCoq-ModuleType :
+    QualifiedModule(t0__) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [t0__']
+                               )
+                             ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+
+  is-ModuleType =
+    ?QualifiedModule(_)
+
+  prettyprintCoq-ModuleType :
+    ModuleWithDefinition(t0__, t1__, t2__) -> [ H(
+                                                  [SOpt(HS(), "0")]
+                                                , [ t0__'
+                                                  , S(" with Definition ")
+                                                  , t1__'
+                                                  , S(" := ")
+                                                  , t2__'
+                                                  ]
+                                                )
+                                              ]
+    with t0__' := <pp-one-Z(prettyprintCoq-ModuleType)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-QualId)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-Term)> t2__
+
+  is-ModuleType =
+    ?ModuleWithDefinition(_, _, _)
+
+  prettyprintCoq-ModuleType :
+    ModuleWithModule(t0__, t1__, t2__) -> [ H(
+                                              [SOpt(HS(), "0")]
+                                            , [ t0__'
+                                              , S(" with Module ")
+                                              , t1__'
+                                              , S(" := ")
+                                              , t2__'
+                                              ]
+                                            )
+                                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-ModuleType)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-QualId)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-QualId)> t2__
+
+  is-ModuleType =
+    ?ModuleWithModule(_, _, _)
+
+  prettyprintCoq-ModuleType :
+    QualifiedModuleSeq(t0__, t1__) -> [ H(
+                                          [SOpt(HS(), "0")]
+                                        , [t0__', S(" "), t1__']
+                                        )
+                                      ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-QualId)> t1__
+
+  is-ModuleType =
+    ?QualifiedModuleSeq(_, _)
+
+  prettyprintCoq-ModuleType :
+    QualifiedModuleBangSeq(t0__, t1__) -> [ H(
+                                              [SOpt(HS(), "0")]
+                                            , [ S("!")
+                                              , t0__'
+                                              , S(" ")
+                                              , t1__'
+                                              ]
+                                            )
+                                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-QualId)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-QualId)> t1__
+
+  is-ModuleType =
+    ?QualifiedModuleBangSeq(_, _)
+
+  prettyprintCoq-ModuleType :
+    Parenthetical(t0__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [ S("(")
+                               , t0__'
+                               , S(")")
+                               ]
+                             )
+                           ]
+    with t0__' := <pp-one-Z(prettyprintCoq-ModuleType)> t0__
+
+  prettyprintCoq-OptModuleTypes :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptModuleTypes =
+    ?None()
+
+  prettyprintCoq-OptModuleTypes :
+    ModType(t0__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S(" : "), t0__']
+                       )
+                     ]
+    with t0__' := <pp-one-Z(prettyprintCoq-ModuleType)> t0__
+
+  is-OptModuleTypes =
+    ?ModType(_)
+
+  prettyprintCoq-OptModuleTypes :
+    ModSubtypes(t0__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S(" <: "), t0__']
+                           )
+                         ]
+    with t0__' := <pp-H-list(prettyprintCoq-ModuleType|" <:")> t0__
+
+  is-OptModuleTypes =
+    ?ModSubtypes(_)
+
+  is-ModuleType =
+    fail
+
+  is-OptModuleTypes =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-ModuleBinding
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptModuleBindings
+
+  prettyprintCoq-ModuleBinding :
+    ModuleBinding(t0__, t1__, t2__) -> [ H(
+                                           [SOpt(HS(), "0")]
+                                         , [ S("(")
+                                           , t0__'
+                                           , t1__'
+                                           , S(" ")
+                                           , t2__'
+                                           , S(")")
+                                           ]
+                                         )
+                                       ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptModuleBindingKeywordPrefix)> t0__
+    with t1__' := <pp-H-list(prettyprintCoq-Ident)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-ModuleType)> t2__
+
+  is-ModuleBinding =
+    ?ModuleBinding(_, _, _)
+
+  prettyprintCoq-OptModuleBindings :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptModuleBindings =
+    ?None()
+
+  prettyprintCoq-OptModuleBindings :
+    ModBindings(t0__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S(" "), t0__']
+                           )
+                         ]
+    with t0__' := <pp-H-list(prettyprintCoq-ModuleBinding|" ")> t0__
+
+  is-OptModuleBindings =
+    ?ModBindings(_)
+
+  is-ModuleBinding =
+    fail
+
+  is-OptModuleBindings =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-ModContent
+
+  prettyprintCoq-ModContent :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-ModContent)
+    where t0__' := <pp-one-Z(prettyprintCoq-Sentence)> t0__
+
+  prettyprintCoq-ModContent :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-ModContent)
+    where t0__' := <pp-one-Z(prettyprintCoq-Module)> t0__
+
+  prettyprintCoq-ModContent :
+    Include(t0__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("Include "), t0__']
+                       )
+                     ]
+    with t0__' := <pp-H-list(prettyprintCoq-Ident|"<+")> t0__
+
+  is-ModContent =
+    ?Include(_)
+
+  is-ModContent =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Module
+
+  prettyprintCoq-Module :
+    ModuleDef(t0__, t1__, t2__, t3__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [ S("Module ")
+                                             , t0__'
+                                             , t1__'
+                                             , t2__'
+                                             , S(" := ")
+                                             , t3__'
+                                             , S(".")
+                                             ]
+                                           )
+                                         ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptModuleBindings)> t1__
+    with t2__' := <pp-one-Z(prettyprintCoq-OptModuleTypes)> t2__
+    with t3__' := <pp-one-Z(prettyprintCoq-ModuleExpression)> t3__
+
+  is-Module =
+    ?ModuleDef(_, _, _, _)
+
+  prettyprintCoq-Module :
+    ModuleDefs(t0__, t1__, t2__) -> [ H(
+                                        [SOpt(HS(), "0")]
+                                      , [ S("Module ")
+                                        , t0__'
+                                        , t1__'
+                                        , S(" := ")
+                                        , t2__'
+                                        ]
+                                      )
+                                    ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptModuleBindings)> t1__
+    with t2__' := <pp-H-list(prettyprintCoq-ModuleExpression|"<+")> t2__
+
+  is-Module =
+    ?ModuleDefs(_, _, _)
+
+  is-Module =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-ModuleExpression
+
+  prettyprintCoq-ModuleExpression :
+    ModuleExpression(t0__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [t0__']
+                                )
+                              ]
+    with t0__' := <pp-H-list(prettyprintCoq-QualId)> t0__
+
+  is-ModuleExpression =
+    ?ModuleExpression(_)
+
+  prettyprintCoq-ModuleExpression :
+    ModuleBangExpression(t0__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [S("!"), t0__']
+                                    )
+                                  ]
+    with t0__' := <pp-H-list(prettyprintCoq-QualId)> t0__
+
+  is-ModuleExpression =
+    ?ModuleBangExpression(_)
+
+  is-ModuleExpression =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Module
+
+  prettyprintCoq-Module :
+    ModuleType(t0__, t1__, t2__, t3__) -> [ H(
+                                              [SOpt(HS(), "0")]
+                                            , [ S("Module Type ")
+                                              , t0__'
+                                              , t1__'
+                                              , S(".")
+                                              ]
+                                            )
+                                          , t2__'
+                                          , H(
+                                              [SOpt(HS(), "0")]
+                                            , [ S("End ")
+                                              , t3__'
+                                              , S(".")
+                                              ]
+                                            )
+                                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptModuleBindings)> t1__
+    with t2__' := <pp-indent(|"2")> [<pp-H-list(prettyprintCoq-ModTypeContent)> t2__]
+    with t3__' := <pp-one-Z(prettyprintCoq-Ident)> t3__
+
+  is-Module =
+    ?ModuleType(_, _, _, _)
+
+  is-Module =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-ModTypeContent
+
+  prettyprintCoq-ModTypeContent :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-ModTypeContent)
+    where t0__' := <pp-one-Z(prettyprintCoq-ModContent)> t0__
+
+  prettyprintCoq-ModTypeContent :
+    InlineAssumption(t0__, t1__) -> [ H(
+                                        [SOpt(HS(), "0")]
+                                      , [t0__', S(" Inline "), t1__']
+                                      )
+                                    ]
+    with t0__' := <pp-one-Z(prettyprintCoq-AssumptionKeyword)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-Assums)> t1__
+
+  is-ModTypeContent =
+    ?InlineAssumption(_, _)
+
+  is-ModTypeContent =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Module
+
+  prettyprintCoq-Module :
+    ModuleTypeDef(t0__, t1__, t2__) -> [ H(
+                                           [SOpt(HS(), "0")]
+                                         , [ S("Module Type ")
+                                           , t0__'
+                                           , t1__'
+                                           , S(" := ")
+                                           , t2__'
+                                           ]
+                                         )
+                                       ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-OptModuleBindings)> t1__
+    with t2__' := <pp-H-list(prettyprintCoq-ModuleType|" <+")> t2__
+
+  is-Module =
+    ?ModuleTypeDef(_, _, _)
+
+  is-Module =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-Sentence
+
+  prettyprintCoq-Sentence :
+    Import(t0__, t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [ t0__'
+                              , S("Import ")
+                              , t1__'
+                              , S(".")
+                              ]
+                            )
+                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptRequirePrefix)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-QualId)> t1__
+
+  is-Sentence =
+    ?Import(_, _)
+
+  prettyprintCoq-Sentence :
+    Export(t0__, t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [ t0__'
+                              , S("Export ")
+                              , t1__'
+                              , S(".")
+                              ]
+                            )
+                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptRequirePrefix)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-QualId)> t1__
+
+  is-Sentence =
+    ?Export(_, _)
+
+  is-Sentence =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-OptRequirePrefix
+
+  prettyprintCoq-OptRequirePrefix :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptRequirePrefix =
+    ?None()
+
+  prettyprintCoq-OptRequirePrefix :
+    Require() -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [S("Require ")]
+                   )
+                 ]
+
+  is-OptRequirePrefix =
+    ?Require()
+
+  is-OptRequirePrefix =
+    fail

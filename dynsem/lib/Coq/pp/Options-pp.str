@@ -1,0 +1,321 @@
+module lib/Coq/pp/Options-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/Options-sig
+
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Gallina-sig
+
+
+imports
+  lib/Coq/pp/Lexical-pp
+  lib/Coq/pp/Gallina-pp
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-OptType
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptInTerm
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptDepRetType
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptAlias
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptReturnType
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptBinders
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptTerms
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptSort
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptAnnotation
+
+  prettyprintCoq-OptType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptType =
+    ?None()
+
+  prettyprintCoq-OptType :
+    OptType(t0__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S(" : "), t0__']
+                       )
+                     ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-OptType =
+    ?OptType(_)
+
+  prettyprintCoq-OptInTerm :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptInTerm =
+    ?None()
+
+  prettyprintCoq-OptInTerm :
+    OptInTerm(t0__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S(" in "), t0__']
+                         )
+                       ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Term)> t0__
+
+  is-OptInTerm =
+    ?OptInTerm(_)
+
+  prettyprintCoq-OptDepRetType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptDepRetType =
+    ?None()
+
+  prettyprintCoq-OptDepRetType :
+    DepRet(t0__, t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [t0__', S(" "), t1__']
+                            )
+                          ]
+    with t0__' := <pp-one-Z(prettyprintCoq-OptAlias)> t0__
+    with t1__' := <pp-one-Z(prettyprintCoq-ReturnType)> t1__
+
+  is-OptDepRetType =
+    ?DepRet(_, _)
+
+  prettyprintCoq-OptAlias :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptAlias =
+    ?None()
+
+  prettyprintCoq-OptAlias :
+    As(t0__) -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [S(" as "), t0__']
+                  )
+                ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Name)> t0__
+
+  is-OptAlias =
+    ?As(_)
+
+  prettyprintCoq-OptReturnType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptReturnType =
+    ?None()
+
+  prettyprintCoq-OptReturnType :
+    OptReturnType(t0__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S(" "), t0__']
+                             )
+                           ]
+    with t0__' := <pp-one-Z(prettyprintCoq-ReturnType)> t0__
+
+  is-OptReturnType =
+    ?OptReturnType(_)
+
+  prettyprintCoq-OptBinders :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptBinders =
+    ?None()
+
+  prettyprintCoq-OptBinders :
+    OptBinders(t0__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S(" "), t0__']
+                          )
+                        ]
+    with t0__' := <pp-H-list(prettyprintCoq-Binder|" ")> t0__
+
+  is-OptBinders =
+    ?OptBinders(_)
+
+  prettyprintCoq-OptTerms :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptTerms =
+    ?None()
+
+  prettyprintCoq-OptTerms :
+    OptTerms(t0__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S(" "), t0__']
+                        )
+                      ]
+    with t0__' := <pp-H-list(prettyprintCoq-Term|" ")> t0__
+
+  is-OptTerms =
+    ?OptTerms(_)
+
+  prettyprintCoq-OptSort :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptSort =
+    ?None()
+
+  prettyprintCoq-OptSort :
+    OptSort(t0__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S(" : "), t0__']
+                       )
+                     ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Sort)> t0__
+
+  is-OptSort =
+    ?OptSort(_)
+
+  prettyprintCoq-OptAnnotation :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptAnnotation =
+    ?None()
+
+  prettyprintCoq-OptAnnotation :
+    Anno(t0__) -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [ S(" { struct ")
+                      , t0__'
+                      , S(" }")
+                      ]
+                    )
+                  ]
+    with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
+
+  is-OptAnnotation =
+    ?Anno(_)
+
+  is-OptType =
+    fail
+
+  is-OptInTerm =
+    fail
+
+  is-OptDepRetType =
+    fail
+
+  is-OptAlias =
+    fail
+
+  is-OptReturnType =
+    fail
+
+  is-OptBinders =
+    fail
+
+  is-OptTerms =
+    fail
+
+  is-OptSort =
+    fail
+
+  is-OptAnnotation =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-OptIdents
+
+  prettyprintCoq-example =
+    prettyprintCoq-OptWhereNotation
+
+  prettyprintCoq-OptIdents :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptIdents =
+    ?None()
+
+  prettyprintCoq-OptIdents :
+    OptIdents(t0__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S(" "), t0__']
+                         )
+                       ]
+    with t0__' := <pp-H-list(prettyprintCoq-Ident|" ")> t0__
+
+  is-OptIdents =
+    ?OptIdents(_)
+
+  prettyprintCoq-OptWhereNotation :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptWhereNotation =
+    ?None()
+
+  prettyprintCoq-OptWhereNotation :
+    OptWhereNotation(t0__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S(" where "), t0__']
+                                )
+                              ]
+    with t0__' := <pp-H-list(prettyprintCoq-Notation|" where")> t0__
+
+  is-OptWhereNotation =
+    ?OptWhereNotation(_)
+
+  is-OptIdents =
+    fail
+
+  is-OptWhereNotation =
+    fail

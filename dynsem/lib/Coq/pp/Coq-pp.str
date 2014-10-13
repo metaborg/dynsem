@@ -1,0 +1,65 @@
+module lib/Coq/pp/Coq-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  lib/Coq/signatures/Coq-sig
+
+
+imports
+  lib/Coq/signatures/Vernacular-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/extensions/Module-sig
+  lib/Coq/signatures/extensions/Section-sig
+  lib/Coq/signatures/tactic/Toplevel-sig
+
+
+imports
+  lib/Coq/pp/Vernacular-pp
+  lib/Coq/pp/Gallina-pp
+  lib/Coq/pp/extensions/Module-pp
+  lib/Coq/pp/extensions/Section-pp
+  lib/Coq/pp/tactic/Toplevel-pp
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-CoqFile
+
+  prettyprintCoq-CoqFile :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-CoqFile)
+    where t0__' := <pp-V-list(prettyprintCoq-TopLevel|"")> t0__
+
+  is-CoqFile =
+    fail
+
+
+strategies
+  prettyprintCoq-example =
+    prettyprintCoq-TopLevel
+
+  prettyprintCoq-TopLevel :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TopLevel)
+    where t0__' := <pp-one-Z(prettyprintCoq-Sentence)> t0__
+
+  prettyprintCoq-TopLevel :
+    t0__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t0__']
+              )
+            ]
+    where not(is-TopLevel)
+    where t0__' := <pp-one-Z(prettyprintCoq-Module)> t0__
+
+  is-TopLevel =
+    fail

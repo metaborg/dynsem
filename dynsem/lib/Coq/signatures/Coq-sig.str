@@ -1,0 +1,17 @@
+module lib/Coq/signatures/Coq-sig
+
+imports
+  lib/Coq/signatures/Vernacular-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/extensions/Module-sig
+  lib/Coq/signatures/extensions/Section-sig
+  lib/Coq/signatures/tactic/Toplevel-sig
+
+
+signature
+  constructors
+     : List(TopLevel) -> CoqFile
+
+  constructors
+     : Sentence -> TopLevel
+     : Module -> TopLevel

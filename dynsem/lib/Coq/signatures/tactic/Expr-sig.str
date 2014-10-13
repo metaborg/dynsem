@@ -1,0 +1,123 @@
+module lib/Coq/signatures/tactic/Expr-sig
+
+imports
+  lib/Coq/signatures/Lexical-sig
+  lib/Coq/signatures/Gallina-sig
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/Options-sig
+  lib/Coq/signatures/tactic/AtomicTactic-sig
+
+
+signature
+  constructors
+    ExprSeq     : TExpr * TExpr -> TExpr
+    ExprSeqAlts : TExpr * List(TExpr) -> TExpr
+                : TacExpr3 -> TExpr
+
+  constructors
+    DoTac    : OptTime * TacExpr3 -> TacExpr3
+    Progress : TacExpr3 -> TacExpr3
+    Repeat   : TacExpr3 -> TacExpr3
+    Try      : TacExpr3 -> TacExpr3
+    Timeout  : OptTime * TacExpr3 -> TacExpr3
+             : TacExpr2 -> TacExpr3
+
+  constructors
+    None    : OptTime
+    Natural : Num -> OptTime
+            : Ident -> OptTime
+
+  constructors
+    Alts : TacExpr1 * TacExpr3 -> TacExpr2
+         : TacExpr1 -> TacExpr2
+
+  constructors
+    Fun           : List(Ident) * TAtom -> TacExpr1
+    LetTac        : OptRec * List(LetClause) * TAtom -> TacExpr1
+    MatchGoal     : List(ContextRule) -> TacExpr1
+    MatchRevGoal  : List(ContextRule) -> TacExpr1
+    MatchExpr     : TExpr * List(MatchRule) -> TacExpr1
+    LMatchGoal    : List(ContextRule) -> TacExpr1
+    LMatchRevGoal : List(ContextRule) -> TacExpr1
+    LMatchExpr    : TExpr * List(MatchRule) -> TacExpr1
+    Abstract      : TAtom -> TacExpr1
+    AbstractUsing : TAtom * Ident -> TacExpr1
+    First         : List(TExpr) -> TacExpr1
+    Solve         : List(TExpr) -> TacExpr1
+    IdTac         : List(MsgToken) -> TacExpr1
+    Fail          : OptNatural * OptMsgTokens -> TacExpr1
+    Fresh         : OptString -> TacExpr1
+    Context       : Ident * OptTerm -> TacExpr1
+    Eval          : RedExpr * Term -> TacExpr1
+    TypeOf        : Term -> TacExpr1
+    External      : String * String * List(TacArg) -> TacExpr1
+    ConstrTerm    : Term -> TacExpr1
+                  : AtomicTactic -> TacExpr1
+    QualTactic    : QualId * List(TacArg) -> TacExpr1
+                  : TAtom -> TacExpr1
+
+  constructors
+    None : OptRec
+    Rec  : OptRec
+    None : OptMsgTokens
+         : List(MsgToken) -> OptMsgTokens
+    None : OptNatural
+         : Num -> OptNatural
+    None : OptString
+         : Num -> OptString
+    None : OptTerm
+         : Term -> OptTerm
+
+  constructors
+         : QualId -> TAtom
+         : Num -> TAtom
+    Unit : TAtom
+
+  constructors
+     : String -> MsgToken
+     : Ident -> MsgToken
+     : Num -> MsgToken
+
+  constructors
+            : QualId -> TacArg
+    Unit    : TacArg
+    AtomArg : TAtom -> TacArg
+            : Term -> TacArg
+
+  constructors
+    LetClause : Ident * OptNames * TExpr -> LetClause
+    None      : OptNames
+              : List(Name) -> OptNames
+
+  constructors
+    PatContext : OptContextHyps * Pattern * TExpr -> ContextRule
+    WldContext : TExpr -> ContextRule
+    None       : OptContextHyps
+               : List(ContextHyp) -> OptContextHyps
+
+  constructors
+    ContextHyp       : Name * Pattern -> ContextHyp
+    ContextHypAssign : Name * Pattern * OptCPattern -> ContextHyp
+    None             : OptCPattern
+    OptCPattern      : Pattern -> OptCPattern
+
+  constructors
+    MatchPattern    : Pattern * TExpr -> MatchRule
+    MatchContext    : OptIdent * OptPattern * TExpr -> MatchRule
+    MatchAppContext : OptIdent * OptPattern * TExpr -> MatchRule
+    MatchWld        : TExpr -> MatchRule
+    None            : OptIdent
+                    : Ident -> OptIdent
+    None            : OptPattern
+                    : Pattern -> OptPattern
+
+  constructors
+    RedRed     : RedExpr
+    RedHnf     : RedExpr
+    RedCompute : RedExpr
+    RedSimpl   : RedExpr
+    RedCbv     : RedExpr
+    RedLazy    : RedExpr
+    RedUnfold  : RedExpr
+    RedFold    : RedExpr
+    RedPattern : RedExpr

@@ -1,0 +1,16 @@
+module lib/Coq/signatures/extensions/Coercion-sig
+
+imports
+  lib/Coq/signatures/Qid-sig
+  lib/Coq/signatures/Gallina-sig
+
+
+signature
+  constructors
+    Coercion : QualId * Class * Class -> Sentence
+
+  constructors
+     : String -> Reserved
+
+  constructors
+     : Term -> Class
