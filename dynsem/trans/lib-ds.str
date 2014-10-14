@@ -207,7 +207,7 @@ rules // component operations
     map(mk-label-comp(|num))
    
   mk-label-comp(|num) :
-    name -> LabelComp(name, Var(<get-sort-name; comp-var(|num)> name))
+    name -> LabelComp(name, VarRef(<get-sort-name; comp-var(|num)> name))
 
   mk-label-comp-str(|num) :
     name -> $[[name]([<get-sort-name; comp-var(|num)> name])]

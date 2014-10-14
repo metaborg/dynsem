@@ -1,7 +1,5 @@
 module unification
 
-/* NB: NOT IMPORTED ANYWHERE */
-
 imports
   include/ds
   ds
@@ -24,9 +22,8 @@ rules /* merge ovelapping rules */
       debug(!"3 ");
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       debug(!"4 ");
-      merged-rule* := <map((id, id, map(merge-rules)))> rules-by-cons-arrow*;
-      debug(!"5 ");
-      fail
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases))>))> rules-by-cons-arrow*;
+      debug(!"5 ")
 
   cons-decl-pair-arity:
     ConsDecl(cons, args, _) -> (cons, <length> args)
@@ -51,21 +48,45 @@ rules /* merge ovelapping rules */
 
 rules
   
-  merge-rules = (?[] + ?[_] + ?[_, _, _ |_])
+  remove-aliases = repeat(remove-alias); filter-identities
+  
+  remove-alias:
+    r@Rule(p*, _, _) -> <substitute(?VarRef(_))> ([subst], r)
+    where
+      subst := <fetch-elem(mk-substitution)> p*
+  
+  filter-identities:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc), arrow, Target(rhs, tc))) ->
+      Rule(p'*, infer, Relation(Reads(r*), Source(lhs, sc), arrow, Target(rhs, tc)))
+    where
+      p'* := <filter(not(is-identity))> p*
+  
+  mk-substitution:
+    Formula(Match(a@VarRef(_), b@VarRef(_))) -> (a, b)
+    where
+        <not(eq)> (a, b)
+
+  is-identity = ?Formula(Match(a, a))
+  
+  is-identify = ?Formula(TermEq(a, a))
+
+rules
+  
+  merge-rules = ?[] + ?[_] + ?[_, _, _ |_]
   
   merge-rules:
     [r1@Rule(p1*, infer, Relation(Reads(r1*), Source(lhs1, sc1*), arrow, Target(rhs1, tc1*))), 
      r2@Rule(p2*, infer, Relation(Reads(r2*), Source(lhs2, sc2*), arrow, Target(rhs2, tc2*)))] -> [r1, r2]
   where
     debug(!"4a ");
-  	<unify(?VarRef(_))> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
+  	header-substitution* := <unify(?VarRef(_))> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
   	debug(!"4b ");
-  	fail
-
-
-
-
-
+  	(vars, subs) := <unzip> header-substitution*;
+  	debug(!"4c ");
+  	// r1' := <substitute(\ VarRef(x) -> x \)> (vars, subs, r1);
+  	// r1' := <subst-vars> (header-substitution*, r1);
+  	debug(!"4d ");
+  	debug(!"4e ")
 
 
 
