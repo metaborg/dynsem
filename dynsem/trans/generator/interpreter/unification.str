@@ -22,7 +22,7 @@ rules /* merge ovelapping rules */
       debug(!"3 ");
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       debug(!"4 ");
-      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases))>))> rules-by-cons-arrow*;
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases); debug(!"A "); merge-rules)>))> rules-by-cons-arrow*;
       debug(!"5 ")
 
   cons-decl-pair-arity:
@@ -72,24 +72,55 @@ rules
 
 rules
   
-  merge-rules = ?[] + ?[_] + ?[_, _, _ |_]
+  merge-rules = (?[] + ?[_] + ?[_, _, _ |_])
   
   merge-rules:
-    [r1@Rule(p1*, infer, Relation(Reads(r1*), Source(lhs1, sc1*), arrow, Target(rhs1, tc1*))), 
-     r2@Rule(p2*, infer, Relation(Reads(r2*), Source(lhs2, sc2*), arrow, Target(rhs2, tc2*)))] -> [r1, r2]
+    [r1@Rule(p1*, infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), 
+     r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))] -> [r1, r1', r2]
   where
     debug(!"4a ");
   	header-substitution* := <unify(?VarRef(_))> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
   	debug(!"4b ");
-  	(vars, subs) := <unzip> header-substitution*;
-  	debug(!"4c ");
-  	// r1' := <substitute(\ VarRef(x) -> x \)> (vars, subs, r1);
-  	// r1' := <subst-vars> (header-substitution*, r1);
-  	debug(!"4d ");
-  	debug(!"4e ")
+  	r1' := <substitute(?VarRef(_))> (header-substitution*, r1);
+  	debug(!"4c ")
 
 
+rules
+  
+  /*
+  Given two sets of premises P1 and P2, distinguish the following cases:
+    
+    1. P1 and P2 are unifiable meaning they are identical
+    2. P1 and P2 are not unifiable, p1 = Hd(P1), p2 = Hd(P2) and either:
+    2a. unify(p1, p2) => p1-p2-subst
+    2b.  
+  
+  
+  /*
+  
+  
+  // merge-premises:
+  //   (p1*, p2*) -> <unify(?VarRef(_))> 
 
+
+  // 
+
+
+// rules
+//   
+//   merge-premises:
+//     ([], []) -> []
+//   
+//   merge-premises:
+//     ([p1 | p1xs], [p2 | p2xs]) -> <fail>
+//     where
+//       p' := <is-mergeable> (p1, p2)
+//   
+//   is-mergeable = eq
+  
+
+
+  
 
 
 
