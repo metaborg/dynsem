@@ -120,6 +120,7 @@ rules
   factorize-match = 
     factorize-constructors-in-match
     <+ factorize-listtail-in-match
+    <+ factorize-as-in-match
 
   factorize-constructors-in-match:
     Con(c, t1*) -> (prem*, Con(c, t2*))
@@ -138,6 +139,9 @@ rules
         (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
         !success
       end
+  
+  factorize-as-in-match:
+    As(v, t) -> ([Formula(Match(VarRef(v), t))], t)
   
   lift-match-on-cond(c, succ):
     t -> ([], t)
