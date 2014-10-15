@@ -9,7 +9,7 @@ imports
   explicate
   factorize
   mark-references
-  generator/interpreter/tmp-pregeneration-extra
+  generator/interpreter/unification
   
 rules
   
@@ -17,7 +17,7 @@ rules
     alltd(escape-variable-names);
     fuse-sections;
     strip-annos;
-    merge-overlapping-rules
+    unify-module
 
 rules /* rename variables */
 
