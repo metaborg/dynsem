@@ -42,13 +42,13 @@ rules
   rule-to-coq(|n*):
     Rule(prem*, _, formula) -> (D|[ident_name optBinders' optType']|, [(name, count), n*])
     where
-      (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
-    ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
-    ; optType'             := OptType(<foldl(fold-type)> (prem'*, t'))
-    ; name                 := <formula-to-name> formula
-    ; count                := <lookup; inc <+ !0> (name, n*)
-    ; ident_name           := $[[name][count]C_sem]
-    ; optBinders'          := OptBinders(<union> (p-bind*, f-bind*))
+      (term_ret, f-bind*, i) := <formula-to-coq(|0); debug(!"Ret: ")> formula
+    ; (term_ty, p-bind*, _)  := <foldl(fold-prem); debug(!"Type: ")> (<reverse> prem*, (term_ret, f-bind*, i))
+    ; optType'               := OptType(T|[term_ty]|)
+    ; name                   := <formula-to-name> formula
+    ; count                  := <lookup; inc <+ !0> (name, n*)
+    ; ident_name             := $[[name][count]C_sem]
+    ; optBinders'            := OptBinders(p-bind*)
   
 rules // Fold rules
   
@@ -58,9 +58,7 @@ rules // Fold rules
       (p'*, n'*) := <rule-to-coq(|n*) < !([<Fst> | p*], <Snd>) + !(p*, n*)> r
   
   fold-prem:
-    (Formula(p), (p*, b*, i)) -> ([p' | p*], <union> (b*, b'*), i')
+    (Formula(p), (term_ps, b*, i)) -> (T|[term_p -> term_ps]|, <union> (b*, b'*), i')
     where
-      (p', b'*, i') := <formula-to-coq(|i)> p
+      (term_p, b'*, i') := <debug(!"Formula: "); formula-to-coq(|i)> p
   
-  fold-type: // Composes parts of a type
-    (termx, termy) -> T|[termx -> termy]|

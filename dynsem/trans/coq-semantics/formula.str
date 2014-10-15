@@ -19,17 +19,12 @@ rules // Formula
   
   formula-to-coq(|i):
     Relation(r, src, rel, dst) -> (T|[semantics_cbn termenv term0 term1]|, bind*, i-dst)
+    where not (Source(MapSelect(_,_),_) := src)
     where
-      (termenv , b-env*, i-env) := <reads-to-coq(|i)> r
-    ; (term1 , b-dst*, i-dst)   := <src-dst-to-coq(|i-env)> dst
-    ; (term0 , b-src*, i-src)   := <src-dst-to-coq(|i-dst)> src
-    ; bind*                     := <union> (b-env*, <union> (b-src*, b-dst*))
-
-  formula-to-coq(|i):
-    TermEq(MapSelect(Var(identenv), Var(identx)), rhs) -> (T|[get_env identx identenv identt identenv']|, bind*, i)
-    where
-      Con("T", [Var(identt), Var(identenv')]) := rhs
-    ; bind* := <map(!Bind(<id>))> [identenv, identx, identt, identenv']
+      (termenv , b-env*)      := <reads-to-env> r
+    ; (term1 , b-dst*, i-dst) := <src-dst-to-coq(|i)> dst
+    ; (term0 , b-src*, i-src) := <src-dst-to-coq(|i-dst)> src
+    ; bind*                   := <union> (b-env*, <union> (b-src*, b-dst*))
 
   formula-to-coq(|i):
     TermEq(Var(identx), t) -> (T|[identx = termt]|, bind*, i')
@@ -43,16 +38,17 @@ rules // Formula
       (termt, b*, i') := <term-to-coq(|i)> t
     ; bind*           := <union> ([Bind(identx)], b*)
   
+  formula-to-coq(|i):
+    Relation(r,Source(MapSelect(Var(identenv), Var(identx)),_),rel,Target(Con("T",[Var(identt),Var(identenv')]),_))
+      -> (T|[get_env identx identenv identt identenv']|, bind*, i)
+    where
+      bind* := <map(!Bind(<id>))> [identenv, identx, identt, identenv']
+
   formula-to-name = ?Relation(_, <id>, _, _); (?Source(<id>, _) <+ ?Source(<id>)); ?Con(<id>, _)
-  
+
 rules // Environments rules
   
-  reads-to-coq(|i):
-    Reads(lbl*) -> <foldl(fold-lbl)> (lbl*, (Ref("env"), [], i))
-      
-rules // Folding rules
-  
-  fold-lbl:
-    (LabelComp(_, e), (p , b*, i)) -> (Arrow(e, p), <union> (b*, b'*), i')
+  reads-to-env:
+    Reads(list) -> (Ref(termenv), [Bind(termenv)])
     where
-      (e, b'*, i') := <term-to-coq(|i)> e
+      termenv := <getfirst(?LabelComp(SimpleSort("E"), Var(value)); !value) <+ !"env"> list

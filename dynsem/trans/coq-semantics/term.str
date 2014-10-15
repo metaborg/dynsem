@@ -59,8 +59,7 @@ rules // Terms
 	    (term_x1, b1*, i1) := <term-to-coq(|i)> e1
 	  ; (term_x2, b2*, i2) := <term-to-coq(|i1)> e2
 	  ; b*                 := <union> ([Bind(ident_env)], <union> (b1*, b2*))
-	    
-	
+
 rules // Static definitions, hardcoded for now
 	term-to-coq(|i): Con("I", [Var(ident_x)])                                -> (T|[Natval ident_x]| , [Bind(ident_x)], i)
 	term-to-coq(|i): Int(n)                                                  -> (n, [], i)
