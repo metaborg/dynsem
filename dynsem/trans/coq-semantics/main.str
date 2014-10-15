@@ -8,6 +8,7 @@ imports
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/properties/-
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
   names
+  mark-references
   lib/editor-common.generated
   include/ds
   ds
@@ -21,8 +22,8 @@ rules
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       task-setup(|project-path)
-    ; filename := <guarantee-extension(|"v")> path
-    ; coq-file := <strip-annos; module-to-coq> ast
+    ; filename := "src-gen/verification/semantics.v"
+    ; coq-file := <strip-annos; make-vars; module-to-coq(|"semantics")> ast
     with
        result := <parenthesize-Coq; prettyprintCoq-CoqFile; box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprintCoq-example) ; debug(!"cannot pp ")))> coq-file
@@ -30,8 +31,8 @@ rules
 
 rules
   
-  module-to-coq:
-  	Module(name, rule*) -> <build-module(|<base-filename> name)> S|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
+  module-to-coq(|language):
+  	Module(name, rule*) -> <build-module(|language)> S|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
 		where
 		  rule'* := <filter(?Rules(<id>)); concat> rule*
 		; decls  := <foldl(fold-rule); Fst; reverse; !ListDeclBar(<id>)> (rule'*, ([], []))
@@ -39,7 +40,7 @@ rules
 rules
   
   rule-to-coq(|n*):
-    RuleW(formula, prem*) -> (D|[ident_name optBinders' optType']|, [(name, count), n*])
+    Rule(prem*, _, formula) -> (D|[ident_name optBinders' optType']|, [(name, count), n*])
     where
       (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
     ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
@@ -49,12 +50,6 @@ rules
     ; ident_name           := $[[name][count]C_sem]
     ; optBinders'          := OptBinders(<union> (p-bind*, f-bind*))
   
-  rule-to-coq(|n*):
-  	Rule(prem*,_,formula) -> <rule-to-coq(|n*)> RuleW(formula, prem*)
-  	
-  rule-to-coq(|n*):
-    Axiom(formula) -> <rule-to-coq(|n*)> RuleW(formula, [])
-
 rules // Fold rules
   
   fold-rule:

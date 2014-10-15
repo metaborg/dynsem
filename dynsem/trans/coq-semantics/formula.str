@@ -35,28 +35,24 @@ rules // Formula
     TermEq(Var(identx), t) -> (T|[identx = termt]|, bind*, i')
     where
       (termt, b*, i') := <term-to-coq(|i)> t
-    ; bind*           := <union> ([Bind("env")], <union> ([Bind(identx)], b*))
+    ; bind*           := <union> ([Bind(identx)], b*)
   
   formula-to-coq(|i):
     TermNeq(Var(identx), t) -> (T|[identx <> termt]|, bind*, i')
     where
       (termt, b*, i') := <term-to-coq(|i)> t
-    ; bind*           := <union> ([Bind("env")], <union> ([Bind(identx)], b*))
+    ; bind*           := <union> ([Bind(identx)], b*)
   
   formula-to-name = ?Relation(_, <id>, _, _); (?Source(<id>, _) <+ ?Source(<id>)); ?Con(<id>, _)
   
 rules // Environments rules
   
   reads-to-coq(|i):
-    Reads(lbl*) -> <foldl(fold-lbl)> (lbl*, ((), [], i))
-    
-  reads-to-coq(|i):
-    NoReads() -> (Ref("env"), [Bind("env")], i)
+    Reads(lbl*) -> <foldl(fold-lbl)> (lbl*, (Ref("env"), [], i))
       
 rules // Folding rules
   
   fold-lbl:
-    (LabelComp(_, e), (p , b*, i)) -> (n, <union> (b*, b'*), i')
+    (LabelComp(_, e), (p , b*, i)) -> (Arrow(e, p), <union> (b*, b'*), i')
     where
-      (e', b'*, i') := <term-to-coq(|i)> e
-    ; n             := <?() < !e' + !Arrow(e', p)> p
+      (e, b'*, i') := <term-to-coq(|i)> e

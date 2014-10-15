@@ -50,11 +50,8 @@ rules // Terms
     ; (term_env', be*, i') := <term-to-coq(|i2)> env
     ; b*                   := <union> (b1*, <union> (b2*, be*))
 	
-	term-to-coq(|i):
-	  Var(x) -> (Ref(x), [Bind(x)], i)
-	   
   term-to-coq(|i):
-    VarRef(x) -> (Ref(x), [Bind(x)], i)
+    Var(x) -> (Ref(x), [Bind(x)], i)
     
 	term-to-coq(|i): // Ugly, but the only one supported by Coq for now, anyways
 	  Map([Bind(e1, e2), MapEntry(Var(ident_env))]) -> (T|[env_extend term_x1 term_x2 ident_env]|, b*, i2)
