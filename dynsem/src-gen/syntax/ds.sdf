@@ -14,7 +14,7 @@ exports
     Formula "where" {Premise ","}+                                -> Rule          {cons("RuleW")}
     Formula                                                       -> Premise       {cons("Formula")}
     "all-fail"                                                    -> Premise       {cons("AllFail")}
-    Premise "<" "{" {Premise ","}+ "}" "+" "{" {Premise ","}+ "}" -> Premise       {cons("MergePoint")}
+    Premise "<" "{" {Premise ","}* "}" "+" "{" {Premise ","}* "}" -> Premise       {cons("MergePoint")}
     "try" "{" {Premise ","}+ "}" "or" "{" {Premise ","}+ "}"      -> Premise       {cons("TryOr")}
     "rules"                                                       -> ID            {reject}
     "fresh"                                                       -> ID            {reject}

@@ -36,9 +36,9 @@ context-free syntax // rules
     [
       [Premise]
       < {
-        [{Premise ",\n"}+]
+        [{Premise ",\n"}*]
       } + {
-        [{Premise ",\n"}+]
+        [{Premise ",\n"}*]
       }
     ]
   
