@@ -89,7 +89,11 @@ rules
   	debug(!"4c ");
   	<ds-substitute> (head-subst*, p2*) => p2'*;
   	debug(!"4d ");
-  	p* := <merge-premises> (p1'*, p2'*); 
+  	(
+  	  p* := <merge-premises> (p1'*, p2'*)
+  	  <+
+  	  log(|Critical(), "Cannot unify rules for", <try(?Con(<id>, _))> lhs1)
+  	);
   	debug(!"4e ")
 
   merge-premises:
@@ -97,7 +101,8 @@ rules
     where
       debug(!"4e1 ");
       subst* := <ds-unify> [(p1*, p2*)];
-      debug(!"4e2 ")
+      debug(!"4e2 ");
+      log(|Warning(), "Premises are identical", (p1*, p2*))
   
   merge-premises:
     (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ p | <merge-premises> (p1xs', p2xs') ]
@@ -123,7 +128,9 @@ rules
       <not(ds-unify)> [(p1, p2)];
       debug(!"4e11 ");
       <premises-alternates> (p1, p2);
-      debug(!"4e12 ")
+      debug(!"4e12 ");
+      log(|Critical(), "Cannot merge premises ", (p1, p2));
+      debug(!"4e13 ")
 
 rules
 	
@@ -156,6 +163,7 @@ rules
 	    + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
 	    + ?(Formula(TermEq(l, _)), Formula(Match(l, _)))
 	    + ?(Formula(Match(l, _)), Formula(TermEq(l, _)))
+	    
 	  )
 
 
