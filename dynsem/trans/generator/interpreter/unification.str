@@ -72,12 +72,15 @@ rules
 
 rules
   
-  merge-rules = (?[] + ?[_] + ?[_, _, _ |_])
+  // merge-rules = (?[] + ?[_] + ?[_, _, _ |_])
+  
+  merge-rules:
+    [r] -> [r]
   
   merge-rules:
     [r1@Rule(p1*, infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), 
-     r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))] ->
-      [ Rule(p*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*))) ]
+     r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*))) | xs] ->
+      <merge-rules> [ Rule(p*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*))) | xs]
   where
     debug(!"4a ");
   	head-subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
