@@ -73,7 +73,15 @@ rules
 
 rules
   
-  // merge-rules = (?[] + ?[_] + ?[_, _, _ |_])
+  // merge-rules-top:
+  //   r* -> Rule([TryOr(r-prem-m, <filter(not(?AllFail()))> r-prem-af)], r-bar-af, r-rel-af)
+  //   where
+  //     debug(!"4alpha0 ");
+  //     ([Rule(r-prem-af, r-bar-af, r-rel-af)], r'*) := <partition(where(collect-one(?AllFail())))> r*;
+  //     debug(!"4alpha1 ");
+  //     Rule(r-prem-m, r-bar-m, r-rel-m) := <merge-rules> r'*;
+  //     debug(!"4alpha2 ");
+  //     fail
   
   merge-rules:
     [] -> []
@@ -169,18 +177,16 @@ rules
 
 rules
   
-  rule-is-allfail = collect-one(?AllFail())
-  
   // premise-canfail =
   //   ?Formula(Match(_, <not(?VarRef(_))>))
   //   + ?Formula(NMatch(_, _))
   //   + ?Formula(TermEq(_, _))
   //   + ?Formula(TermNeq(_, _))
 
-  premises-equiv = 
-    eq
-    + ?(Formula(TermEq(l, r)), Formula(TermEq(r, l)))
-    + ?(Formula(TermNeq(l, r)), Formula(TermNeq(r, l)))
+  // premises-equiv = 
+  //   eq
+  //   + ?(Formula(TermEq(l, r)), Formula(TermEq(r, l)))
+  //   + ?(Formula(TermNeq(l, r)), Formula(TermNeq(r, l)))
     
   premises-alternates =
     // (where(premise-canfail), where(premise-canfail));
