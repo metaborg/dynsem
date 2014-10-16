@@ -38,7 +38,8 @@ rules
     mod@Module(_, _) -> [inode-iface, noop-node, sort-iface*, sort-node*, result-class*, cons-class*]
     with
       log-timed(   
-        mod' := <pre-generation-transform> mod
+        // mod' := <pre-generation-transform> mod
+        mod' := mod
       |"Pre-generation");
       log-timed(   
         inode-iface := <module-to-inode-interface> mod'
@@ -55,7 +56,7 @@ rules
       log-timed(   
         result-class* := <reductions-to-java-result-classes> mod'
       |"Arrow-specific result class generation");
-      log-timed(   
+      log-timed(
         cons-class* := <constructors-to-java-interpreter> mod'
       |"Constructor node generation")
     

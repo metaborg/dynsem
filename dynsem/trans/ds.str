@@ -23,6 +23,7 @@ imports
 	mark-references
 	types.generated
 	types.manual
+	generator/interpreter/pre-generation
 	generator/interpreter/gen-interpreter
 	generator/interpreter/unification
 	resolve-includes
@@ -154,7 +155,16 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"pregen.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; unify-module; sugar-all; pp-debug> ast
+      result   := <
+        resolve-includes(|path, project-path);
+        desugar-top;
+        explicate-module;
+        factorize-module;
+        escape-variable-names;
+        fuse-sections;
+        unify-module;
+        sugar-all;
+        pp-debug> ast
 
 //   explicate-editor:
 //     (selected, position, ast, path, project-path) -> (filename, result)
