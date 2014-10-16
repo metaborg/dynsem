@@ -128,9 +128,35 @@ rules
       <not(ds-unify)> [(p1, p2)];
       debug(!"4e11 ");
       <premises-alternates> (p1, p2);
-      debug(!"4e12 ");
-      log(|Critical(), "Cannot merge premises ", (p1, p2));
-      debug(!"4e13 ")
+      debug(!"4e12 ")
+
+  merge-premises:
+    (pl*@[MergePoint(p, p1-then, p1-else)], pr*@[p2 | p2xs]) -> [ MergePoint(p', p1-then'', p1-else') ]
+    where
+      debug(!"4e14 ");
+      subst* := <ds-unify> [(p, p2)];
+      debug(!"4e15 ");
+      p' := <ds-substitute> (subst*, p);
+      debug(!"4e16 ");
+      p1-then' := <ds-substitute> (subst*, p1-then);
+      debug(!"4e17 ");
+      p1-else' := <ds-substitute> (subst*, p1-else);
+      debug(!"4e18 ");
+      p2xs' := <ds-substitute> (subst*, p2xs);
+      debug(!"4e19 ");
+      p1-then'' := <merge-premises> (p1-then', p2xs');
+      debug(!"4e20 ")
+
+  merge-premises:
+    (pl*@[MergePoint(p, p1-then, p1-else)], pr*@[p2 | p2xs]) -> [ MergePoint(p, p1-then, p1-else') ]
+    where
+      debug(!"4e21 ");
+      <not(ds-unify)> [(p, p2)];
+      debug(!"4e22 ");
+      <premises-alternates> (p, p2);
+      debug(!"4e23 ");
+      p1-else' := <merge-premises> (p1-else, pr*);
+      debug(!"4e24 ")
 
 rules
 	
@@ -141,11 +167,11 @@ rules
   
   rule-is-allfail = collect-one(?AllFail())
   
-  premise-canfail =
-    ?Formula(Match(_, <not(?VarRef(_))>))
-    + ?Formula(NMatch(_, _))
-    + ?Formula(TermEq(_, _))
-    + ?Formula(TermNeq(_, _))
+  // premise-canfail =
+  //   ?Formula(Match(_, <not(?VarRef(_))>))
+  //   + ?Formula(NMatch(_, _))
+  //   + ?Formula(TermEq(_, _))
+  //   + ?Formula(TermNeq(_, _))
 
   premises-equiv = 
     eq
@@ -153,8 +179,8 @@ rules
     + ?(Formula(TermNeq(l, r)), Formula(TermNeq(r, l)))
     
   premises-alternates =
-    (where(premise-canfail), where(premise-canfail));
-    ( 
+    // (where(premise-canfail), where(premise-canfail));
+    // ( 
 	    ?(Formula(Match(l, r1)), Formula(Match(l, r2))); <not(eq)> (r1, r2)
 	    + ?(Formula(Match(l, r)), Formula(NMatch(l, r)))
       + ?(Formula(NMatch(l, r)), Formula(Match(l, r)))
@@ -163,8 +189,8 @@ rules
 	    + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
 	    + ?(Formula(TermEq(l, _)), Formula(Match(l, _)))
 	    + ?(Formula(Match(l, _)), Formula(TermEq(l, _)))
-	    
-	  )
+
+	  // )
 
 
   
