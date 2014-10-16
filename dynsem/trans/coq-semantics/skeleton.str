@@ -4,13 +4,13 @@ rules
   
     build-module(|language):
     sent_semantics -> |[
-Require Import ident_lang.
-Require Import ident_nabl_module.
+Require Import ident_sdf.
+Require Import ident_nabl.
 Require Import ts_nabl.
-
+Require Import Coq.Lists.List.
 
 Module ident_ds_gen.
-
+  Import ListNotations.
   Module ident_nabl_mod := ident_nabl_gen. 
   Export ident_nabl_mod.
   Module ident_ts_mod := ident_ts_nabl_gen. 
@@ -19,7 +19,7 @@ Module ident_ds_gen.
   Module ts_wf := TS_NaBL_def ident_sdf_gen ident_nabl_mod ident_ts_mod. 
   Import ts_wf.
 
-    Inductive Env : Set := 
+    Inductive Env : Type := 
     | Cons_Env : (Ident -> option (term * Env)) -> Env   
     .
 
@@ -28,12 +28,12 @@ Module ident_ds_gen.
       match env with Cons_Env m => m x end.
     
     Definition env_extend (env : Env) x t :=
-      Cons_Env (fun z => if eq x z then Some t else get_e z env).
+      Cons_Env (fun z => if id_eq_dec x z then Some t else get_e z env).
 
     Definition env_remove (env : Env) x :=
-      Cons_Env (fun z => if eq x z then None else get_e z env).
+      Cons_Env (fun z => if id_eq_dec x z then None else get_e z env).
     
-    Inductive value : Set :=
+    Inductive value : Type :=
     | Natval (n : nat) 
     | Clos (v : Ident) (t : term) (e : Env)
     .
@@ -42,7 +42,7 @@ Module ident_ds_gen.
     
     Inductive get_env x : Env -> term -> Env -> Prop :=
     | get_env_C t te c: 
-        c x = Some (t,te) ->
+    	  c x = Some (t,te) ->
         get_env x (Cons_Env c) t te
     .
 
@@ -52,10 +52,12 @@ End ident_ds_gen.
       ]|
       where
         ident_lang        := language;
+        ident_sdf         := "syntax";
+        ident_nabl        := "names";
         ident_nabl_module := $[names_[language]];
-        ident_sdf_gen     := $[SDF_[language]_gen];
-        ident_nabl_gen    := $[NaBL_[language]_gen];
-        ident_ts_nabl_gen := $[TS_NaBL_[language]_gen];
+        ident_sdf_gen     := $[SDF_syntax_gen];
+        ident_nabl_gen    := $[NaBL_names_gen];
+        ident_ts_nabl_gen := $[TS_NaBL_names_gen];
         ident_ds_gen      := $[DynSem_[language]_gen];
         ident_nabl_mod    := $[NaBL_[language]_mod];
         ident_ts_mod      := $[TS_[language]_mod]

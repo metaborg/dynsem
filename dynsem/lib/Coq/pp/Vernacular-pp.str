@@ -366,14 +366,19 @@ strategies
                                               , S(" :=")
                                               ]
                                             )
-                                          , t3__'
+                                          , H(
+                                              [SOpt(HS(), "0")]
+                                            , [t3__']
+                                            )
+                                          , H(
+                                              [SOpt(HS(), "0")]
+                                            , [S(".")]
+                                            )
                                           ]
     with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
     with t1__' := <pp-one-Z(prettyprintCoq-OptBinders)> t1__
     with t2__' := <pp-one-Z(prettyprintCoq-OptType)> t2__
-    with t3__' := <pp-indent(|"2")> [ <pp-one-Z(prettyprintCoq-Term)> t3__
-                                    , S(".")
-                                    ]
+    with t3__' := <pp-one-Z(prettyprintCoq-Term)> t3__
 
   is-Definition =
     ?Definition(_, _, _, _)
@@ -388,14 +393,15 @@ strategies
                                        , S(" :=")
                                        ]
                                      )
-                                   , t3__'
+                                   , H(
+                                       [SOpt(HS(), "0")]
+                                     , [t3__', S(".")]
+                                     )
                                    ]
     with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
     with t1__' := <pp-one-Z(prettyprintCoq-OptBinders)> t1__
     with t2__' := <pp-one-Z(prettyprintCoq-OptType)> t2__
-    with t3__' := <pp-indent(|"2")> [ <pp-one-Z(prettyprintCoq-Term)> t3__
-                                    , S(".")
-                                    ]
+    with t3__' := <pp-one-Z(prettyprintCoq-Term)> t3__
 
   is-Definition =
     ?Let(_, _, _, _)
@@ -455,12 +461,15 @@ strategies
                                          , S(" :=")
                                          ]
                                        )
-                                     , t3__'
+                                     , H(
+                                         [SOpt(HS(), "0")]
+                                       , [t3__']
+                                       )
                                      ]
     with t0__' := <pp-one-Z(prettyprintCoq-Ident)> t0__
     with t1__' := <pp-one-Z(prettyprintCoq-OptBinders)> t1__
     with t2__' := <pp-one-Z(prettyprintCoq-Term)> t2__
-    with t3__' := <pp-indent(|"2")> [<pp-one-Z(prettyprintCoq-ConsDecls)> t3__]
+    with t3__' := <pp-one-Z(prettyprintCoq-ConsDecls)> t3__
 
   is-IndBody =
     ?Induc(_, _, _, _)

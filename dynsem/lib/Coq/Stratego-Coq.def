@@ -142,7 +142,7 @@ exports
     "CoInductive" {IndBody "with"}+ "."      -> Inductive {cons("CoInductive")}
     Ident OptBinders ":" Term ":=" ConsDecls -> IndBody   {cons("Induc")}
     "|" {ConsDecl "|"}+                      -> ConsDecls {cons("ListDeclBar")}
-    {ConsDecl "|"}*                          -> ConsDecls {cons("ListDecl")}
+    {ConsDecl "|"}+                          -> ConsDecls {cons("ListDecl")}
     Ident OptBinders OptType                 -> ConsDecl  {cons("ConsDecl")}
 
   context-free syntax
@@ -306,14 +306,27 @@ exports
     CONTENTCOMPLETE -> Term {cons("COMPLETION-Term")}
 
   context-free priorities
-    "forall" Binder+ "," Term -> Term >
+    "match" {MatchItem ","}+ OptReturnType "with" Equations "end" -> Term >
+    Term "%" Ident -> Term >
+    "@" QualId OptTerms -> Term >
     Term Term -> Term >
     Term "->" Term -> Term >
+    Term ":>" -> Term >
+    Term "<:" Term -> Term >
+    Term ":" Term -> Term >
+    "if" Term OptDepRetType "then" Term "else" Term -> Term >
+    "let" SingleQuote Pattern OptInTerm ":=" Term OptReturnType "in" Term ->
+    Term >
+    "let" "(" {Name ","}* ")" OptDepRetType ":=" Term "in" Term -> Term >
+    "let" "fix" CoFixBody "in" Term -> Term >
+    "let" "fix" FixBody "in" Term -> Term >
+    "let" Ident OptBinders OptType ":=" Term "in" Term -> Term >
+    "cofix" CoFixBodies -> Term >
+    "fix" FixBodies -> Term >
+    "fun" Binder+ "=>" Term -> Term >
+    "forall" Binder+ "," Term -> Term >
     Term "*" Term -> Term >
     {non-assoc:
-      Term "<:" Term -> Term
-      Term ":" Term -> Term
-      Term ":>" -> Term
       Term "=" Term -> Term
       Term "<>" Term -> Term
     } >
