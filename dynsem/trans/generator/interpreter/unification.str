@@ -22,7 +22,7 @@ rules /* merge ovelapping rules */
       debug(!"3 ");
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       debug(!"4 ");
-      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases); debug(!"A "); merge-rules)>))> rules-by-cons-arrow*;
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases); merge-rules)>))> rules-by-cons-arrow*;
       debug(!"5 ")
 
   cons-decl-pair-arity:
@@ -76,48 +76,86 @@ rules
   
   merge-rules:
     [r1@Rule(p1*, infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), 
-     r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))] -> [r1, r1', r2]
+     r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))] ->
+      [ Rule(p*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*))) ]
   where
     debug(!"4a ");
-  	header-substitution* := <unify(?VarRef(_))> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
+  	head-subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
   	debug(!"4b ");
-  	r1' := <substitute(?VarRef(_))> (header-substitution*, r1);
-  	debug(!"4c ")
+  	<ds-substitute> (head-subst*, r1) => Rule(p1'*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*)));
+  	debug(!"4c ");
+  	<ds-substitute> (head-subst*, p2*) => p2'*;
+  	debug(!"4d ");
+  	p* := <merge-premises> (p1'*, p2'*); 
+  	debug(!"4e ")
 
+  merge-premises:
+    (p1*, p2*) -> <ds-substitute> (subst*, p1*)
+    where
+      debug(!"4e1 ");
+      subst* := <ds-unify> [(p1*, p2*)];
+      debug(!"4e2 ")
+  
+  merge-premises:
+    (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ p | <merge-premises> (p1xs', p2xs') ]
+    where
+      debug(!"4e3 ");
+      <not(ds-unify)> [(pl*, pr*)];
+      debug(!"4e4 ");
+      subst* := <ds-unify> [(p1, p2)];
+      debug(!"4e5 ");
+      p := <ds-substitute> (subst*, p1);
+      debug(!"4e6 ");
+      p1xs' := <ds-substitute> (subst*, p1xs);
+      debug(!"4e7 ");
+      p2xs' := <ds-substitute> (subst*, p2xs);
+      debug(!"4e8 ")
+      
+  merge-premises:
+    (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ MergePoint(p1, p1xs, pr*) ]
+    where
+      debug(!"4e9 ");
+      <not(ds-unify)> [(pl*, pr*)];
+      debug(!"4e10 ");
+      <not(ds-unify)> [(p1, p2)];
+      debug(!"4e11 ");
+      <premises-alternates> (p1, p2);
+      debug(!"4e12 ")
+
+rules
+	
+	ds-substitute = substitute(?VarRef(_))
+	ds-unify = unify(?VarRef(_))
 
 rules
   
-  /*
-  Given two sets of premises P1 and P2, distinguish the following cases:
+  rule-is-allfail = collect-one(?AllFail())
+  
+  premise-canfail =
+    ?Formula(Match(_, <not(?VarRef(_))>))
+    + ?Formula(NMatch(_, _))
+    + ?Formula(TermEq(_, _))
+    + ?Formula(TermNeq(_, _))
+
+  premises-equiv = 
+    eq
+    + ?(Formula(TermEq(l, r)), Formula(TermEq(r, l)))
+    + ?(Formula(TermNeq(l, r)), Formula(TermNeq(r, l)))
     
-    1. P1 and P2 are unifiable meaning they are identical
-    2. P1 and P2 are not unifiable, p1 = Hd(P1), p2 = Hd(P2) and either:
-    2a. unify(p1, p2) => p1-p2-subst
-    2b.  
-  
-  
-  /*
-  
-  
-  // merge-premises:
-  //   (p1*, p2*) -> <unify(?VarRef(_))> 
-
-
-  // 
-
-
-// rules
-//   
-//   merge-premises:
-//     ([], []) -> []
-//   
-//   merge-premises:
-//     ([p1 | p1xs], [p2 | p2xs]) -> <fail>
-//     where
-//       p' := <is-mergeable> (p1, p2)
-//   
-//   is-mergeable = eq
-  
+  premises-alternates =
+    (where(premise-canfail), where(premise-canfail));
+    ( 
+	    ?(Formula(Match(l, r1)), Formula(Match(l, r2))); <not(eq)> (r1, r2)
+	    + (
+	        ?(Formula(Match(l, r)), Formula(NMatch(l, r)))
+	      + ?(Formula(NMatch(l, r)), Formula(Match(l, r)))
+	    )
+	    + ?(Formula(TermEq(l, r1)), Formula(TermEq(l, r2))); <not(eq)> (r1, r2)
+	    + (
+	        ?(Formula(TermEq(l, r)), Formula(TermNeq(l, r)))
+	      + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
+	    )
+	  )
 
 
   
