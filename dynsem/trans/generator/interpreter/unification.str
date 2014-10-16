@@ -76,6 +76,9 @@ rules
   // merge-rules = (?[] + ?[_] + ?[_, _, _ |_])
   
   merge-rules:
+    [] -> []
+  
+  merge-rules:
     [r] -> [r]
   
   merge-rules:
