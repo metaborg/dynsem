@@ -146,15 +146,13 @@ rules
     (where(premise-canfail), where(premise-canfail));
     ( 
 	    ?(Formula(Match(l, r1)), Formula(Match(l, r2))); <not(eq)> (r1, r2)
-	    + (
-	        ?(Formula(Match(l, r)), Formula(NMatch(l, r)))
-	      + ?(Formula(NMatch(l, r)), Formula(Match(l, r)))
-	    )
+	    + ?(Formula(Match(l, r)), Formula(NMatch(l, r)))
+      + ?(Formula(NMatch(l, r)), Formula(Match(l, r)))
 	    + ?(Formula(TermEq(l, r1)), Formula(TermEq(l, r2))); <not(eq)> (r1, r2)
-	    + (
-	        ?(Formula(TermEq(l, r)), Formula(TermNeq(l, r)))
-	      + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
-	    )
+	    + ?(Formula(TermEq(l, r)), Formula(TermNeq(l, r)))
+	    + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
+	    + ?(Formula(TermEq(l, _)), Formula(Match(l, _)))
+	    + ?(Formula(Match(l, _)), Formula(TermEq(l, _)))
 	  )
 
 
