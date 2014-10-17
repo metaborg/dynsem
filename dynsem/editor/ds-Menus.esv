@@ -34,7 +34,7 @@ menus
                                                                                                                                                                                          
   menu: "Semantics"
 
-    action  : "Generate Coq"           = generate-coq (openeditor) (meta)
+    action  : "Generate Coq"           = generate-coq (openeditor) (source) (meta)
     action  : "Generate interpreter"   = generate-interpreter
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime) 

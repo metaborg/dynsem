@@ -12,6 +12,7 @@ imports
   lib/editor-common.generated
   include/ds
   ds
+  sugar
   lib/Coq/signatures/-
   lib/Coq/Coq-parenthesize
   lib/Coq/pp/-
@@ -23,7 +24,7 @@ rules
     with
       task-setup(|project-path)
     ; filename := "src-gen/verification/semantics.v"
-    ; coq-file := <strip-annos; make-vars; module-to-coq(|"semantics")> ast
+    ; coq-file := <desugar-top; make-vars; module-to-coq(|"semantics")> ast
     with
        result := <parenthesize-Coq; prettyprintCoq-CoqFile; box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprintCoq-example) ; debug(!"cannot pp ")))> coq-file
@@ -35,30 +36,39 @@ rules
   	Module(name, rule*) -> <build-module(|language)> S|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
 		where
 		  rule'* := <filter(?Rules(<id>)); concat> rule*
-		; decls  := <foldl(fold-rule); Fst; reverse; !ListDeclBar(<id>)> (rule'*, ([], []))
+		; decls  := <rules-to-coq; !ListDeclBar(<id>)> rule'*
 
 rules
   
+  rules-to-coq = rules-to-coq(|[])
+  
+  rules-to-coq(|n*):
+    [] -> []
+    
+  rules-to-coq(|n*):
+    [x | xs] -> [r | rs]
+    where (r, m*) := <rule-to-coq(|n*)> x
+        ; rs := <rules-to-coq(|m*)> xs
+  
   rule-to-coq(|n*):
-    Rule(prem*, _, formula) -> (D|[ident_name optBinders' optType']|, [(name, count), n*])
+    Rule(prem*, _, conclusion) -> (D|[identname optBinders' optType']|, [(name, count), n*])
+    where debug(!"Rule: ")
     where
-      (term_ret, f-bind*, i) := <formula-to-coq(|0); debug(!"Ret: ")> formula
-    ; (term_ty, p-bind*, _)  := <foldl(fold-prem); debug(!"Type: ")> (<reverse> prem*, (term_ret, f-bind*, i))
-    ; optType'               := OptType(T|[term_ty]|)
-    ; name                   := <formula-to-name> formula
-    ; count                  := <lookup; inc <+ !0> (name, n*)
-    ; ident_name             := $[[name][count]C_sem]
-    ; optBinders'            := OptBinders(p-bind*)
+      (concl, cb*, i) := <formula-to-coq(|0)> conclusion
+    ; (termty, bind*) := <premisses-to-coq(|i, (concl, cb*))> prem*
+    ; optType'        := OptType(T|[termty]|)
+    ; optBinders'     := OptBinders(<nub> bind*)
+    ; name            := <relation-to-name> conclusion
+    ; count           := <lookup; inc <+ !0> (name, n*) // Increases the count for a particular constructor, in case there are several.
+    ; identname       := $[[name][count]C_sem]
   
 rules // Fold rules
   
-  fold-rule:
-    (r, (p*, n*)) -> (p'*, n'*)
+  premisses-to-coq(|i,ret):
+    [p | ps] -> (T|[termp -> termps]|, [b*, bs*])
     where
-      (p'*, n'*) := <rule-to-coq(|n*) < !([<Fst> | p*], <Snd>) + !(p*, n*)> r
-  
-  fold-prem:
-    (Formula(p), (term_ps, b*, i)) -> (T|[term_p -> term_ps]|, <union> (b*, b'*), i')
-    where
-      (term_p, b'*, i') := <debug(!"Formula: "); formula-to-coq(|i)> p
-  
+      (termp, b*, i') := <formula-to-coq(|i)> p
+    ; (termps, bs*)   := <premisses-to-coq(|i', ret)> ps
+    
+  premisses-to-coq(|i,ret):
+    [] -> ret
