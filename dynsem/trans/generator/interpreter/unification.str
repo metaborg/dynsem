@@ -23,7 +23,7 @@ rules /* merge ovelapping rules */
       debug(!"3 ");
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       debug(!"4 ");
-      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases); merge-rules)>))> rules-by-cons-arrow*;
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases); merge-rules-top)>))> rules-by-cons-arrow*;
       debug(!"5 ")
 
   cons-decl-pair-arity:
@@ -73,15 +73,20 @@ rules
 
 rules
   
-  // merge-rules-top:
-  //   r* -> Rule([TryOr(r-prem-m, <filter(not(?AllFail()))> r-prem-af)], r-bar-af, r-rel-af)
-  //   where
-  //     debug(!"4alpha0 ");
-  //     ([Rule(r-prem-af, r-bar-af, r-rel-af)], r'*) := <partition(where(collect-one(?AllFail())))> r*;
-  //     debug(!"4alpha1 ");
-  //     Rule(r-prem-m, r-bar-m, r-rel-m) := <merge-rules> r'*;
-  //     debug(!"4alpha2 ");
-  //     fail
+
+  merge-rules-top:
+    r* -> r-norm' // <merge-all-fail> (r-allfail, r-norm')
+    where
+      r-allfail := <fetch-elem(where(collect-one(?AllFail())))> r*;
+      r-norm* := <filter(not(?r-allfail))> r*;
+      r-norm' := <merge-rules> r-norm*
+
+  merge-rules-top:
+    r* -> <merge-rules> r*
+    where
+      <not(fetch-elem(collect-one(?AllFail())))> r*
+
+  merge-rules-allfail = fail
   
   merge-rules:
     [] -> []
@@ -177,20 +182,7 @@ rules
 
 rules
   
-  // premise-canfail =
-  //   ?Formula(Match(_, <not(?VarRef(_))>))
-  //   + ?Formula(NMatch(_, _))
-  //   + ?Formula(TermEq(_, _))
-  //   + ?Formula(TermNeq(_, _))
-
-  // premises-equiv = 
-  //   eq
-  //   + ?(Formula(TermEq(l, r)), Formula(TermEq(r, l)))
-  //   + ?(Formula(TermNeq(l, r)), Formula(TermNeq(r, l)))
-    
   premises-alternates =
-    // (where(premise-canfail), where(premise-canfail));
-    // ( 
 	    ?(Formula(Match(l, r1)), Formula(Match(l, r2))); <not(eq)> (r1, r2)
 	    + ?(Formula(Match(l, r)), Formula(NMatch(l, r)))
       + ?(Formula(NMatch(l, r)), Formula(Match(l, r)))
