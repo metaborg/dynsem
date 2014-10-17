@@ -109,7 +109,11 @@ rules
   	(
   	  p* := <merge-premises> (p1'*, p2'*)
   	  <+
-  	  log(|Critical(), "Cannot unify rules for", <try(?Con(<id>, _))> lhs1)
+  	  r1-str := <sugar-all; pp-dynsem-Rule-string> r1;
+  	  r2-str := <sugar-all; pp-dynsem-Rule-string> r2;
+  	  log(|Critical(), "Cannot unify rules for", <try(?Con(<id>, _))> lhs1);
+  	  !$[\n[r1-str]\n\n\n[r2-str]\n];
+  	  debug(!"FAILURE\n")
   	);
   	debug(!"4e ")
 
@@ -191,9 +195,11 @@ rules
 	    + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
 	    + ?(Formula(TermEq(l, _)), Formula(Match(l, _)))
 	    + ?(Formula(Match(l, _)), Formula(TermEq(l, _)))
-
-	  // )
-
+	    
+	    + ?(Formula(TermEq(_, _)), Formula(TermEq(_, _)))
+      + ?(Formula(TermEq(_, _)), Formula(TermNeq(_, _)))
+	    + ?(Formula(TermNeq(_, _)), Formula(TermNeq(_, _)))
+      + ?(Formula(TermNeq(_, _)), Formula(TermEq(_, _)))
 
   
 
