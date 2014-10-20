@@ -30,10 +30,11 @@ rules // Terms
 		where not("C" := ident)
 		where not("T" := ident)
 		with
-		  term_k            := $[k[i]]
-	  ;	(term_t, bt*, i') := <foldr(!(List([]), [], <inc> i), fold-con)> t*
-	  ; b*                := <union> (bt*, <union> (<filter(?Var(<id>); !Bind(<id>))> t*, [Bind(term_k)]))
-	  ; ident_x           := $[[ident]C]
+		  term_k               := $[k[i]]
+		; sig*                 := <get-sig; reverse> ident
+	  ;	(term_t, bt*, i', _) := <foldr(!(List([]), [], <inc> i, sig*), fold-con)> t*
+	  ; b*                   := [Bind(term_k), bt*]
+	  ; ident_x              := $[[ident]C]
 	
 	term-to-coq(|i):
 	  Con("T", [e1, e2]) -> (T|[(term_e1, term_e2)]|, b*, i2)
@@ -68,10 +69,31 @@ rules // Static definitions, hardcoded for now
 	term-to-coq(|i): Con("I", [Con("addInt", [Var(ident_x), Var(ident_y)])]) -> (T|[plus ident_x ident_y]| , [Bind(ident_x), Bind(ident_y)], i)
   term-to-coq(|i): Con("I", [Con("subInt", [Var(ident_x), Var(ident_y)])]) -> (T|[minus ident_x ident_y]|, [Bind(ident_x), Bind(ident_y)], i)
   term-to-coq(|i): Con("I", [Con("mulInt", [Var(ident_x), Var(ident_y)])]) -> (T|[mult ident_x ident_y]| , [Bind(ident_x), Bind(ident_y)], i)
-  
+
+rules // Checking for known literals
+  // Two cases interest us: INTCs and Ids
+  arg-to-coq(|i, const):
+    Var(identx) -> (T|[Id identx identk]|, bind*, <inc> i)
+    where "String" := const
+    with
+      identk := $[k[i]]
+    ; bind*  := [Bind(identx), Bind(identk)]
+    
+  arg-to-coq(|i, const):
+    Var(identx) -> (T|[Co (INTC identx) [] identk]|, bind*, <inc> i)
+    where "Int" := const
+    with
+      identk := $[k[i]]
+    ; bind*  := [Bind(identx), Bind(identk)]
+    
+  arg-to-coq(|i, const):
+    x -> <term-to-coq(|i)> x
+    where not ("String" := const)
+    where not ("Int" := const)
+
 rules // Fold rules
   fold-con:
-  	(x, (List(tl*), b*, i)) -> (List([x' | tl*]), b'*, i')
+  	(x, (List(tl*), b*, i, [s | ss])) -> (List([x' | tl*]), b'*, i', ss)
   	with
-  	  (x', bx*, i') := <term-to-coq(|i)> x
+  	  (x', bx*, i') := <arg-to-coq(|i, s)> x
   	; b'*           := <union> (bx*, b*)
