@@ -36,7 +36,21 @@ rules
   	Module(name, rule*) -> <build-module(|language)> S|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
 		where
 		  rule'* := <filter(?Rules(<id>)); concat> rule*
+		; sig*   := <make-sig-mapping> rule*
+		; rules(get-sig: x -> <lookup> (x,sig*))
 		; decls  := <rules-to-coq; !ListDeclBar(<id>)> rule'*
+
+rules
+
+  make-sig-mapping = filter(?Signatures(<id>)); concat
+                   ; filter(?Constructors(<id>)); concat
+                   ; map(cons-to-tuple); remove-all(default-sigs)
+                     
+  default-sigs = ?"E" <+ ?"C" <+ ?"I" <+ ?"T"
+  
+  cons-to-tuple:
+    ConsDecl(ident,argsort*,_) -> (ident,arg*)
+    where arg* := <map(?SimpleSort(<id>) <+ id)> argsort*
 
 rules
   
@@ -52,7 +66,6 @@ rules
   
   rule-to-coq(|n*):
     Rule(prem*, _, conclusion) -> (D|[identname optBinders' optType']|, [(name, count), n*])
-    where debug(!"Rule: ")
     where
       (concl, cb*, i) := <formula-to-coq(|0)> conclusion
     ; (termty, bind*) := <premisses-to-coq(|i, (concl, cb*))> prem*
