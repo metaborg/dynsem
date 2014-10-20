@@ -22,7 +22,6 @@ rules // Formula
   
   formula-to-coq(|i):
     Relation(r, src, rel, dst) -> (T|[semantics_cbn terme term0 term1]|, bind*, i-dst)
-    where not (Source(MapSelect(_,_),_) := src)
     where
       (terme, b-env*, i-env) := <reads-to-env(|i)> r
     ; (term1, b-dst*, i-dst) := <src-dst-to-coq(|i-env)> dst
@@ -42,7 +41,7 @@ rules // Formula
     ; bind*           := [Bind(identx), b*]
   
   formula-to-coq(|i):
-    Relation(r,Source(MapSelect(Var(identenv), Var(identx)),_),rel,Target(Con("T",[Var(identt),Var(identenv')]),_))
+    Match(MapSelect(Var(identenv), Var(identx)), Con("T", [Var(identt), Var(identenv')]))
       -> (T|[get_env identx identenv identt identenv']|, bind*, i)
     where
       bind* := <map(!Bind(<id>))> [identenv, identx, identt, identenv']
