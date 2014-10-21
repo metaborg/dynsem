@@ -57,7 +57,7 @@ rules // lift constructor sub-terms in match
   factorize-lhs:
   	Con(c, t1*) -> (p*, Con(c, t2*))
   	where
-  		(p*, t2*) := <map(lift-match-on-cond(not(?VarRef(_)), ?succ)); unzip; (concat, id)> t1*;
+  		(p*, t2*) := <map(lift-match-on-cond(not(is-prime-factor), ?succ)); unzip; (concat, id)> t1*;
   		!succ
   
   factorize-rhs = lift-build-on-cond(not(?VarRef(_)), ?succ); where(!succ)
@@ -125,7 +125,7 @@ rules
   factorize-constructors-in-match:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      let cond = not(?VarRef(_))
+      let cond = not(is-prime-factor)
       in
         (prem*, t2*) := <map(lift-match-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
         !success
@@ -134,7 +134,7 @@ rules
   factorize-listtail-in-match:
     ListTail([x], xs) -> (prem*, ListTail([x], xs'))
     where
-    	let cond = not(?VarRef(_))
+    	let cond = not(is-prime-factor)
     	in
         (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
         !success
@@ -206,5 +206,7 @@ rules
         !success
       end
     
-  is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False()
+  is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List([])
+  
+  is-prime-factor = ?VarRef(_) + ?Wld()
 	

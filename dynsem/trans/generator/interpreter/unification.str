@@ -113,9 +113,8 @@ rules
   	  r2-str := <sugar-all; pp-dynsem-Rule-string> r2;
   	  log(|Critical(), "Cannot unify rules for", <try(?Con(<id>, _))> lhs1);
   	  !$[\n[r1-str]\n\n\n[r2-str]\n];
-  	  debug(!"FAILURE\n")
-  	);
-  	debug(!"4e ")
+  	  debug
+  	)
 
   merge-premises:
     (p1*, p2*) -> <ds-substitute> (subst*, p1*)
@@ -188,8 +187,8 @@ rules
   
   premises-alternates =
 	    ?(Formula(Match(l, r1)), Formula(Match(l, r2))); <not(eq)> (r1, r2)
-	    + ?(Formula(Match(l, r)), Formula(NMatch(l, r)))
-      + ?(Formula(NMatch(l, r)), Formula(Match(l, r)))
+	    + ?(Formula(Match(l, _)), Formula(NMatch(l, _)))
+      + ?(Formula(NMatch(l, _)), Formula(Match(l, _)))
 	    + ?(Formula(TermEq(l, r1)), Formula(TermEq(l, r2))); <not(eq)> (r1, r2)
 	    + ?(Formula(TermEq(l, r)), Formula(TermNeq(l, r)))
 	    + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
