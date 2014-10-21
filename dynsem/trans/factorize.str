@@ -15,7 +15,7 @@ imports
 strategies
     
   factorize-module :
-    Module(name, section*) -> Module(name, section'*)
+    Module(name, section*) -> Module($[[name]_factorized], section'*)
     where
       section'* := <map(try(factorize-rules))> section*
         

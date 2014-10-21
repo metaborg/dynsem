@@ -31,6 +31,9 @@ strategies
     prettyprint-Rule
 
   prettyprint-example =
+    prettyprint-PremisesBlock
+
+  prettyprint-example =
     prettyprint-Premise
 
   prettyprint-ModuleSection :
@@ -158,6 +161,21 @@ strategies
   is-Premise =
     ?AllFail()
 
+  prettyprint-PremisesBlock :
+    PremiseBlock(t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("{")]
+                            )
+                          , t1__'
+                          , t2__'
+                          ]
+    with t1__' := <pp-indent(|"6")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+                                    ]
+    with t2__' := <pp-indent(|"4")> [S("}")]
+
+  is-PremisesBlock =
+    ?PremiseBlock(_)
+
   prettyprint-Premise :
     MergePoint(t1__, t2__, t3__) -> [ H(
                                         [SOpt(HS(), "0")]
@@ -165,24 +183,16 @@ strategies
                                       )
                                     , H(
                                         [SOpt(HS(), "0")]
-                                      , [S("< {")]
-                                      )
-                                    , t2__'
-                                    , H(
-                                        [SOpt(HS(), "0")]
-                                      , [S("} + {")]
-                                      )
-                                    , t3__'
-                                    , H(
-                                        [SOpt(HS(), "0")]
-                                      , [S("}")]
+                                      , [ S("< ")
+                                        , t2__'
+                                        , S(" + ")
+                                        , t3__'
+                                        ]
                                       )
                                     ]
     with t1__' := <pp-one-Z(prettyprint-Premise)> t1__
-    with t2__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t2__
-                                    ]
-    with t3__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t3__
-                                    ]
+    with t2__' := <pp-one-Z(prettyprint-PremisesBlock)> t2__
+    with t3__' := <pp-one-Z(prettyprint-PremisesBlock)> t3__
 
   is-Premise =
     ?MergePoint(_, _, _)
@@ -190,23 +200,15 @@ strategies
   prettyprint-Premise :
     TryOr(t1__, t2__) -> [ H(
                              [SOpt(HS(), "0")]
-                           , [S("try {")]
-                           )
-                         , t1__'
-                         , H(
-                             [SOpt(HS(), "0")]
-                           , [S("} or {")]
-                           )
-                         , t2__'
-                         , H(
-                             [SOpt(HS(), "0")]
-                           , [S("}")]
+                           , [ S("try ")
+                             , t1__'
+                             , S(" or ")
+                             , t2__'
+                             ]
                            )
                          ]
-    with t1__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
-                                    ]
-    with t2__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t2__
-                                    ]
+    with t1__' := <pp-one-Z(prettyprint-PremisesBlock)> t1__
+    with t2__' := <pp-one-Z(prettyprint-PremisesBlock)> t2__
 
   is-Premise =
     ?TryOr(_, _)
@@ -215,6 +217,9 @@ strategies
     fail
 
   is-Rule =
+    fail
+
+  is-PremisesBlock =
     fail
 
   is-Premise =

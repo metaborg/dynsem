@@ -7,9 +7,9 @@ imports
 
 completions
   completion template ModuleSection : "rules " =
-    "rules\n\n\t" (cursor) (blank)  
+    "rules\n\n\t" (cursor) (blank)                     
   completion template Rule : "strict ID INT/INT" =
-    "strict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
+    "strict " <ID:ID> " " <INT:INT> "/" <INT:INT>    
   completion template Rule : "seqstrict ID INT/INT" =
     "seqstrict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
   completion template Rule : "Premise INFER Formula" =
@@ -17,11 +17,13 @@ completions
   completion template Rule : "Formula where Premise" =
     <Formula:Formula> "\nwhere\n\t" <Premise:Premise> (blank)  
   completion template Premise : "all-fail" =
-    "all-fail"                       
-  completion template Premise : "Premise < { } + { }" =
-    <Premise:Premise> "\n< {\n\t" (cursor) "\n} + {\n}" (blank)  
-  completion template Premise : "try { Premise } or { Premise }" =
-    "try {\n\t" <Premise:Premise> "\n} or {\n\t" <Premise:Premise> "\n}" (blank)  
+    "all-fail"                                             
+  completion template PremisesBlock : "{ }" =
+    "{\n\t\t\t" (cursor) "\n\t\t}" (blank)                
+  completion template Premise : "Premise < PremisesBlock + PremisesBlock" =
+    <Premise:Premise> "\n< " <PremisesBlock:PremisesBlock> " + " <PremisesBlock:PremisesBlock> (blank)  
+  completion template Premise : "try PremisesBlock or PremisesBlock" =
+    "try " <PremisesBlock:PremisesBlock> " or " <PremisesBlock:PremisesBlock> (blank)  
 
 completions
   completion template Formula : "Term => Term" =

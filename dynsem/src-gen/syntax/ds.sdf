@@ -6,22 +6,24 @@ exports
     Module
 
   context-free syntax
-    "rules" Rule*                                                 -> ModuleSection {cons("Rules")}
-    "strict" ID {INT ","}+ "/" INT                                -> Rule          {cons("Strict")}
-    "seqstrict" ID {INT ","}+ "/" INT                             -> Rule          {cons("Seqstrict")}
-    Formula                                                       -> Rule          {cons("Axiom")}
-    {Premise ","}+ INFER Formula                                  -> Rule          {cons("Rule")}
-    Formula "where" {Premise ","}+                                -> Rule          {cons("RuleW")}
-    Formula                                                       -> Premise       {cons("Formula")}
-    "all-fail"                                                    -> Premise       {cons("AllFail")}
-    Premise "<" "{" {Premise ","}* "}" "+" "{" {Premise ","}* "}" -> Premise       {cons("MergePoint")}
-    "try" "{" {Premise ","}+ "}" "or" "{" {Premise ","}+ "}"      -> Premise       {cons("TryOr")}
-    "rules"                                                       -> ID            {reject}
-    "fresh"                                                       -> ID            {reject}
+    "rules" Rule*                               -> ModuleSection {cons("Rules")}
+    "strict" ID {INT ","}+ "/" INT              -> Rule          {cons("Strict")}
+    "seqstrict" ID {INT ","}+ "/" INT           -> Rule          {cons("Seqstrict")}
+    Formula                                     -> Rule          {cons("Axiom")}
+    {Premise ","}+ INFER Formula                -> Rule          {cons("Rule")}
+    Formula "where" {Premise ","}+              -> Rule          {cons("RuleW")}
+    Formula                                     -> Premise       {cons("Formula")}
+    "all-fail"                                  -> Premise       {cons("AllFail")}
+    "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
+    Premise "<" PremisesBlock "+" PremisesBlock -> Premise       {cons("MergePoint")}
+    "try" PremisesBlock "or" PremisesBlock      -> Premise       {cons("TryOr")}
+    "rules"                                     -> ID            {reject}
+    "fresh"                                     -> ID            {reject}
 
   context-free syntax
     CONTENTCOMPLETE -> ModuleSection {cons("COMPLETION-ModuleSection")}
     CONTENTCOMPLETE -> Rule          {cons("COMPLETION-Rule")}
+    CONTENTCOMPLETE -> PremisesBlock {cons("COMPLETION-PremisesBlock")}
     CONTENTCOMPLETE -> Premise       {cons("COMPLETION-Premise")}
     CONTENTCOMPLETE -> ID            {cons("COMPLETION-ID")}
 
