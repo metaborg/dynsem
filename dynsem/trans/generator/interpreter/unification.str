@@ -14,17 +14,17 @@ rules /* merge ovelapping rules */
   unify-module:
     Module(mod, [imports, signatures, Rules(rule*)]) -> Module(mod, [imports, signatures, Rules(merged-rule*)])
     with
-      debug(!"0 ");
+      // debug(!"0 ");
       cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
-      debug(!"1 ");
+      // debug(!"1 ");
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
-      debug(!"2 ");
+      // debug(!"2 ");
       rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
-      debug(!"3 ");
+      // debug(!"3 ");
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
-      debug(!"4 ");
-      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases); merge-rules-top)>))> rules-by-cons-arrow*;
-      debug(!"5 ")
+      // debug(!"4 ");
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases); merge-rules-top)>))> rules-by-cons-arrow*
+      // debug(!"5 ")
 
   cons-decl-pair-arity:
     ConsDecl(cons, args, _) -> (cons, <length> args)
@@ -99,84 +99,84 @@ rules
      r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*))) | xs] ->
       <merge-rules> [ Rule(p*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*))) | xs]
   where
-    debug(!"4a ");
+    // debug(!"4a ");
   	head-subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
-  	debug(!"4b ");
+  	// debug(!"4b ");
   	<ds-substitute> (head-subst*, r1) => Rule(p1'*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*)));
-  	debug(!"4c ");
+  	// debug(!"4c ");
   	<ds-substitute> (head-subst*, p2*) => p2'*;
-  	debug(!"4d ");
+  	// debug(!"4d ");
   	(
   	  p* := <merge-premises> (p1'*, p2'*)
   	  <+
   	  r1-str := <sugar-all; pp-dynsem-Rule-string> r1;
   	  r2-str := <sugar-all; pp-dynsem-Rule-string> r2;
-  	  log(|Critical(), "Cannot unify rules for", <try(?Con(<id>, _))> lhs1);
-  	  !$[\n[r1-str]\n\n\n[r2-str]\n];
-  	  debug
+  	  log(|Critical(), "Cannot unify rules for", <try(?Con(<id>, _))> lhs1)
+  	  // !$[\n[r1-str]\n\n\n[r2-str]\n];
+  	  // debug
   	)
 
   merge-premises:
     (p1*, p2*) -> <ds-substitute> (subst*, p1*)
     where
-      debug(!"4e1 ");
+      // debug(!"4e1 ");
       subst* := <ds-unify> [(p1*, p2*)];
-      debug(!"4e2 ");
+      // debug(!"4e2 ");
       log(|Warning(), "Premises are identical", (p1*, p2*))
   
   merge-premises:
     (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ p | <merge-premises> (p1xs', p2xs') ]
     where
-      debug(!"4e3 ");
+      // debug(!"4e3 ");
       <not(ds-unify)> [(pl*, pr*)];
-      debug(!"4e4 ");
+      // debug(!"4e4 ");
       subst* := <ds-unify> [(p1, p2)];
-      debug(!"4e5 ");
+      // debug(!"4e5 ");
       p := <ds-substitute> (subst*, p1);
-      debug(!"4e6 ");
+      // debug(!"4e6 ");
       p1xs' := <ds-substitute> (subst*, p1xs);
-      debug(!"4e7 ");
-      p2xs' := <ds-substitute> (subst*, p2xs);
-      debug(!"4e8 ")
+      // debug(!"4e7 ");
+      p2xs' := <ds-substitute> (subst*, p2xs)
+      // debug(!"4e8 ")
       
   merge-premises:
     (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ MergePoint(p1, p1xs, pr*) ]
     where
-      debug(!"4e9 ");
+      // debug(!"4e9 ");
       <not(ds-unify)> [(pl*, pr*)];
-      debug(!"4e10 ");
+      // debug(!"4e10 ");
       <not(ds-unify)> [(p1, p2)];
-      debug(!"4e11 ");
-      <premises-alternates> (p1, p2);
-      debug(!"4e12 ")
+      // debug(!"4e11 ");
+      <premises-alternates> (p1, p2)
+      // debug(!"4e12 ")
 
   merge-premises:
     (pl*@[MergePoint(p, p1-then, p1-else)], pr*@[p2 | p2xs]) -> [ MergePoint(p', p1-then'', p1-else') ]
     where
-      debug(!"4e14 ");
+      // debug(!"4e14 ");
       subst* := <ds-unify> [(p, p2)];
-      debug(!"4e15 ");
+      // debug(!"4e15 ");
       p' := <ds-substitute> (subst*, p);
-      debug(!"4e16 ");
+      // debug(!"4e16 ");
       p1-then' := <ds-substitute> (subst*, p1-then);
-      debug(!"4e17 ");
+      // debug(!"4e17 ");
       p1-else' := <ds-substitute> (subst*, p1-else);
-      debug(!"4e18 ");
+      // debug(!"4e18 ");
       p2xs' := <ds-substitute> (subst*, p2xs);
-      debug(!"4e19 ");
-      p1-then'' := <merge-premises> (p1-then', p2xs');
-      debug(!"4e20 ")
+      // debug(!"4e19 ");
+      p1-then'' := <merge-premises> (p1-then', p2xs')
+      // debug(!"4e20 ")
 
   merge-premises:
     (pl*@[MergePoint(p, p1-then, p1-else)], pr*@[p2 | p2xs]) -> [ MergePoint(p, p1-then, p1-else') ]
     where
-      debug(!"4e21 ");
+      // debug(!"4e21 ");
       <not(ds-unify)> [(p, p2)];
-      debug(!"4e22 ");
+      // debug(!"4e22 ");
       <premises-alternates> (p, p2);
-      debug(!"4e23 ");
-      p1-else' := <merge-premises> (p1-else, pr*);
-      debug(!"4e24 ")
+      // debug(!"4e23 ");
+      p1-else' := <merge-premises> (p1-else, pr*)
+      // debug(!"4e24 ")
 
 rules
 	
