@@ -42,7 +42,7 @@ rules
       natops-decl  := <collect-all(?NativeOperators(<id>)); concat; !NativeOperators(<id>)> body*;
       values-decl  := <collect-all(?Values(<id>)); concat; !Values(<id>)> body*;
       arrow-decl   := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
-      signatures    := [ sort-decl, natty-decl, cons-decl, semcomp-decl, intsort-decl, intcons-decl, natcons-decl, values-decl, arrow-decl ];
+      signatures    := [ sort-decl, natty-decl, cons-decl, semcomp-decl, intsort-decl, intcons-decl, natcons-decl, natops-decl, values-decl, arrow-decl ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
 
 
