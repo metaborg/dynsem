@@ -19,7 +19,7 @@ rules /* merge ovelapping rules */
       rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       debug(!"4 ");
-      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; debug(!"4a0 "); rename-components); merge-rules-top)>))> rules-by-cons-arrow*
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; rename-components); merge-rules-top)>))> rules-by-cons-arrow*
       ;debug(!"5 ")
 
   cons-decl-pair-arity:
@@ -90,8 +90,7 @@ rules
 rules
   
   merge-rules-top:
-    // r* -> r-norm' // <merge-all-fail> (r-allfail, r-norm')
-    r* -> r*
+    r* -> r-norm' // <merge-all-fail> (r-allfail, r-norm')
     where
       r-allfail := <fetch-elem(where(collect-one(?AllFail())))> r*;
       r-norm* := <filter(not(?r-allfail))> r*;
