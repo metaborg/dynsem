@@ -49,13 +49,9 @@ rules
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arrow, Target(rhs, tc*))) ->
       Rule([p1*, p2*, p*, p3*], infer, Relation(Reads(r'*), Source(lhs, sc'*), arrow, Target(rhs, tc'*)))
     where
-    	debug(!"4a1 ");
     	(p1*, r'*) := <map(rename-in-component); unzip; (concat, id)> r*;
-    	debug(!"4a2 ");
-    	(p2*, sc'*) := <debug(!"4a2a "); map(rename-in-component); debug(!"4a2ab "); unzip; debug(!"4a2c "); (concat, id); debug(!"4a2d ")> sc*;
-    	debug(!"4a3 ");
+    	(p2*, sc'*) := <map(rename-in-component); unzip; (concat, id)> sc*;
     	(p3*, tc'*) := <map(rename-out-component); unzip; (concat, id)> tc*
-    	;debug(!"4a4 ")
 
   rename-in-component:
   	LabelComp(ty, v) -> ([Formula(Match(v', v))], LabelComp(ty, v'))
@@ -66,9 +62,6 @@ rules
   	LabelComp(ty, v) -> ([Formula(Match(v, v'))], LabelComp(ty, v'))
   	where
   		v' := VarRef($[[<get-sort-name> ty]_out])
-
-  // rename-var(|suffix):
-  //   VarRef(v) -> VarRef($[[v]_[suffix]])
 
 rules
   
