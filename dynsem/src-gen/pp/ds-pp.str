@@ -169,9 +169,9 @@ strategies
                           , t1__'
                           , t2__'
                           ]
-    with t1__' := <pp-indent(|"6")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+    with t1__' := <pp-indent(|"4")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
                                     ]
-    with t2__' := <pp-indent(|"4")> [S("}")]
+    with t2__' := <pp-indent(|"2")> [S("}")]
 
   is-PremisesBlock =
     ?PremiseBlock(_)
@@ -183,11 +183,11 @@ strategies
                                       )
                                     , H(
                                         [SOpt(HS(), "0")]
-                                      , [ S("< ")
-                                        , t2__'
-                                        , S(" + ")
-                                        , t3__'
-                                        ]
+                                      , [S("< "), t2__']
+                                      )
+                                    , H(
+                                        [SOpt(HS(), "0")]
+                                      , [S("+ "), t3__']
                                       )
                                     ]
     with t1__' := <pp-one-Z(prettyprint-Premise)> t1__
@@ -200,11 +200,11 @@ strategies
   prettyprint-Premise :
     TryOr(t1__, t2__) -> [ H(
                              [SOpt(HS(), "0")]
-                           , [ S("try ")
-                             , t1__'
-                             , S(" or ")
-                             , t2__'
-                             ]
+                           , [S("try "), t1__']
+                           )
+                         , H(
+                             [SOpt(HS(), "0")]
+                           , [S("or  "), t2__']
                            )
                          ]
     with t1__' := <pp-one-Z(prettyprint-PremisesBlock)> t1__
