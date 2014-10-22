@@ -90,7 +90,7 @@ rules
 rules
   
   merge-rules-top:
-    r* -> r-norm' // <merge-all-fail> (r-allfail, r-norm')
+    r* -> <merge-allfail> (r-allfail, r-norm')
     where
       r-allfail := <fetch-elem(where(collect-one(?AllFail())))> r*;
       r-norm* := <filter(not(?r-allfail))> r*;
@@ -101,7 +101,18 @@ rules
     where
       <not(fetch-elem(collect-one(?AllFail())))> r*
 
-  merge-rules-allfail = fail
+  merge-allfail:
+    (r1@Rule(p1*, infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), 
+     [r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))]) ->
+      [Rule([TryOr(PremiseBlock(p1''*), PremiseBlock(p2*))], infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))]
+    where
+      debug(!"4a1 ");
+      subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
+      debug(!"4a2 ");
+      p1'* := <filter(not(?AllFail()))> p1*;
+      debug(!"4a3 ");
+      p1''* := <ds-substitute> (subst*, p1*)
+      ;debug(!"4a4 ")
   
   merge-rules:
     [] -> []
