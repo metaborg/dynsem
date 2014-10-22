@@ -13,12 +13,6 @@ imports
   
 rules
   
-  // pre-generation-transform =
-  //   alltd(escape-variable-names);
-  //   fuse-sections;
-  //   strip-annos;
-  //   unify-module
-
 rules /* rename variables */
 
   escape-variable-names:
