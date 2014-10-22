@@ -150,8 +150,11 @@ rules // compilation of individual operations
 	        final x_type x_rvar = e_lvar;
 	      ]|, [], e |[ true ]|, [])
     with
+      debug(!"MaA1 ");
       (bstm1*, e_lvar) := <build-to-var> lhs;
-      x_type := <get-type; get-sort-java-name> rvar
+      debug(!"MaA2 ");
+      x_type := <get-type; debug(!"MaA3 "); get-sort-java-name> rvar
+      ;debug(!"MaA4 ")
   
   ma-to-java:
     Formula(Match(lhs, rhs@Con(cons, bound-var*))) -> (
@@ -504,13 +507,22 @@ rules // backend for merge points
         }
       ]|
     with
+      debug(!"OpMpA1 ");
       (bstm1*, bstm2*, e, bstm3*) := <eq-to-java <+ ma-to-java> guard;
+      debug(!"OpMpA2 ");
       [lx | lxs] := <reverse> l*;
+      debug(!"OpMpA3 ");
       lopweave := <foldr(!lx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> lxs;
+      debug(!"OpMpA4 ");
       bstm_l* := <ops-to-java> (lopweave, bstm_rest*);
+      debug(!"OpMpA5 ");
       [rx | rxs] := <reverse> r*;
+      debug(!"OpMpA6 ");
       ropweave := <foldr(!rx, \ (op, weave) -> OpSeq(op, weave) \)> <reverse> rxs;
+      <debug(!"OpMpA7 ")> ropweave;
+      <debug(!"OpMpA8 ")> bstm_rest*;
       bstm_r* := <ops-to-java> (ropweave, bstm_rest*)
+      ;debug(!"OpMpA9 ")
 
 rules // fallback
 
