@@ -14,17 +14,13 @@ rules /* merge ovelapping rules */
   unify-module:
     Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules(merged-rule*)])
     with
-      // debug(!"0 ");
       cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
-      // debug(!"1 ");
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
-      // debug(!"2 ");
       rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
-      // debug(!"3 ");
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
-      // debug(!"4 ");
-      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases); merge-rules-top)>))> rules-by-cons-arrow*
-      // debug(!"5 ")
+      debug(!"4 ");
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; debug(!"4a0 "); rename-components); merge-rules-top)>))> rules-by-cons-arrow*
+      ;debug(!"5 ")
 
   cons-decl-pair-arity:
     ConsDecl(cons, args, _) -> (cons, <length> args)
@@ -46,6 +42,33 @@ rules /* merge ovelapping rules */
 
   group-rules-by-arrow(|arrow-name*):
     rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
+
+rules
+  
+  rename-components:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arrow, Target(rhs, tc*))) ->
+      Rule([p1*, p2*, p*, p3*], infer, Relation(Reads(r'*), Source(lhs, sc'*), arrow, Target(rhs, tc'*)))
+    where
+    	debug(!"4a1 ");
+    	(p1*, r'*) := <map(rename-in-component); unzip; (concat, id)> r*;
+    	debug(!"4a2 ");
+    	(p2*, sc'*) := <debug(!"4a2a "); map(rename-in-component); debug(!"4a2ab "); unzip; debug(!"4a2c "); (concat, id); debug(!"4a2d ")> sc*;
+    	debug(!"4a3 ");
+    	(p3*, tc'*) := <map(rename-out-component); unzip; (concat, id)> tc*
+    	;debug(!"4a4 ")
+
+  rename-in-component:
+  	LabelComp(ty, v) -> ([Formula(Match(v', v))], LabelComp(ty, v'))
+  	where
+  		v' := VarRef($[[<get-sort-name> ty]_in])
+
+  rename-out-component:
+  	LabelComp(ty, v) -> ([Formula(Match(v, v'))], LabelComp(ty, v'))
+  	where
+  		v' := VarRef($[[<get-sort-name> ty]_out])
+
+  // rename-var(|suffix):
+  //   VarRef(v) -> VarRef($[[v]_[suffix]])
 
 rules
   
@@ -73,9 +96,9 @@ rules
 
 rules
   
-
   merge-rules-top:
-    r* -> r-norm' // <merge-all-fail> (r-allfail, r-norm')
+    // r* -> r-norm' // <merge-all-fail> (r-allfail, r-norm')
+    r* -> r*
     where
       r-allfail := <fetch-elem(where(collect-one(?AllFail())))> r*;
       r-norm* := <filter(not(?r-allfail))> r*;
@@ -99,88 +122,55 @@ rules
      r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*))) | xs] ->
       <merge-rules> [ Rule(p*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*))) | xs]
   where
-    debug(!"4a ");
-  	// head-subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
-  	// head-subst* := <ds-unify> [ ([r1*, lhs1, sc1*, rhs1, tc1*], [r2*, lhs2, sc2*, rhs2, tc2*]) ];
-  	head-subst* := <ds-unify> [(Rule([], infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), Rule([], infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*))))];
-  	debug(!"4b1 ");
-  	<ds-unify> [(Rule([], infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*))), Rule([], infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))))];
-  	debug(!"4b2 ");
+  	head-subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
   	<ds-substitute> (head-subst*, r1) => Rule(p1'*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*)));
-  	// debug(!"4c ");
   	<ds-substitute> (head-subst*, p2*) => p2'*;
-  	// debug(!"4d ");
   	(
   	  p* := <merge-premises> (p1'*, p2'*)
   	  <+
   	  r1-str := <sugar-all; pp-dynsem-Rule-string> r1;
   	  r2-str := <sugar-all; pp-dynsem-Rule-string> r2;
   	  log(|Critical(), "Cannot unify rules for", <try(?Con(<id>, _))> lhs1)
-  	  // !$[\n[r1-str]\n\n\n[r2-str]\n];
-  	  // debug
   	)
 
   merge-premises:
     (p1*, p2*) -> <ds-substitute> (subst*, p1*)
     where
-      // debug(!"4e1 ");
       subst* := <ds-unify> [(p1*, p2*)];
-      // debug(!"4e2 ");
       log(|Warning(), "Premises are identical", (p1*, p2*))
   
   merge-premises:
     (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ p | <merge-premises> (p1xs', p2xs') ]
     where
-      // debug(!"4e3 ");
       <not(ds-unify)> [(pl*, pr*)];
-      // debug(!"4e4 ");
       subst* := <ds-unify> [(p1, p2)];
-      // debug(!"4e5 ");
       p := <ds-substitute> (subst*, p1);
-      // debug(!"4e6 ");
       p1xs' := <ds-substitute> (subst*, p1xs);
-      // debug(!"4e7 ");
       p2xs' := <ds-substitute> (subst*, p2xs)
-      // debug(!"4e8 ")
       
   merge-premises:
     (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ MergePoint(p1, PremiseBlock(p1xs), PremiseBlock(pr*)) ]
     where
-      // debug(!"4e9 ");
       <not(ds-unify)> [(pl*, pr*)];
-      // debug(!"4e10 ");
       <not(ds-unify)> [(p1, p2)];
-      // debug(!"4e11 ");
       <premises-alternates> (p1, p2)
-      // debug(!"4e12 ")
 
   merge-premises:
     (pl*@[MergePoint(p, PremiseBlock(p1-then), PremiseBlock(p1-else))], pr*@[p2 | p2xs]) -> [ MergePoint(p', PremiseBlock(p1-then''), PremiseBlock(p1-else')) ]
     where
-      // debug(!"4e14 ");
       subst* := <ds-unify> [(p, p2)];
-      // debug(!"4e15 ");
       p' := <ds-substitute> (subst*, p);
-      // debug(!"4e16 ");
       p1-then' := <ds-substitute> (subst*, p1-then);
-      // debug(!"4e17 ");
       p1-else' := <ds-substitute> (subst*, p1-else);
-      // debug(!"4e18 ");
       p2xs' := <ds-substitute> (subst*, p2xs);
-      // debug(!"4e19 ");
       p1-then'' := <merge-premises> (p1-then', p2xs')
-      // debug(!"4e20 ")
 
   merge-premises:
     (pl*@[MergePoint(p, PremiseBlock(p1-then), PremiseBlock(p1-else))], pr*@[p2 | p2xs]) -> [ MergePoint(p, PremiseBlock(p1-then), PremiseBlock(p1-else')) ]
     where
-      // debug(!"4e21 ");
       <not(ds-unify)> [(p, p2)];
-      // debug(!"4e22 ");
       <premises-alternates> (p, p2);
-      // debug(!"4e23 ");
       p1-else' := <merge-premises> (p1-else, pr*)
-      // debug(!"4e24 ")
 
 rules
 	

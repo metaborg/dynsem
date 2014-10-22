@@ -209,4 +209,4 @@ rules
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List([])
   
   is-prime-factor = ?VarRef(_) + ?Wld()
-	
+
