@@ -25,7 +25,6 @@ rules
     	index-setup(|<language>, project-path)
     with
       log-timed(
-	      filename := <guarantee-extension(|"interpreter.aterm")> path;
 	      class*   := <to-java-interpreter> ast;
 	      log-timed(   
 	        <emit-java-classes(overwrite-merge-strategy, id | <gen-package-name>, $[[project-path]/src-gen])> class*
