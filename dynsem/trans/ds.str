@@ -23,8 +23,11 @@ imports
 	mark-references
 	types.generated
 	types.manual
+	generator/interpreter/pre-generation
 	generator/interpreter/gen-interpreter
+	generator/interpreter/unification
 	resolve-includes
+	
 	
 signature
   constructors
@@ -148,11 +151,17 @@ rules // Builders
   //     filename := <guarantee-extension(|"noimports.ds")> path;
   //     result   := <resolve-includes(|path, project-path); pp-debug> ast
 
-  factoplicate-editor:
+   facto-plicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"factorized.ds")> path;
+      filename := <guarantee-extension(|"factoplicated.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; sugar-all; pp-debug> ast
+
+   facto-plico-nify-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"factopliconified.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; escape-variable-names; fuse-sections; unify-module; sugar-all; pp-debug> ast
 
 //   explicate-editor:
 //     (selected, position, ast, path, project-path) -> (filename, result)

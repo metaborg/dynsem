@@ -1,0 +1,196 @@
+module unification
+
+imports
+  include/ds
+  ds
+  pp
+  lib-ds
+  sugar
+  explicate
+  factorize
+
+rules /* merge ovelapping rules */
+
+  unify-module:
+    Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules(merged-rule*)])
+    with
+      cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
+      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
+      rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
+      rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; rename-components); merge-rules-top)>))> rules-by-cons-arrow*
+
+  cons-decl-pair-arity:
+    ConsDecl(cons, args, _) -> (cons, <length> args)
+  
+  cons-decl-pair-arity:
+    InternalConsDecl(cons, args, _) -> (cons, <length> args)
+
+  group-rules-by-cons(|rule*):
+    (cons, arity) -> (cons, arity, rulez)
+    with
+      rulez := <filter(is-rule-matching-cons(|cons, arity))> rule*
+  
+  is-rule-matching-cons(|cons-goal, arity) =
+    where(
+	    ?Rule(_, _, Relation(_, Source(Con(cons-actual, conargs), _), _, _));
+	    <strip-annos; eq> (cons-actual, cons-goal);
+	    <eq> (arity, <length> conargs)
+	  )
+
+  group-rules-by-arrow(|arrow-name*):
+    rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
+
+rules
+  
+  rename-components:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arrow, Target(rhs, tc*))) ->
+      Rule([p1*, p2*, p*, p3*], infer, Relation(Reads(r'*), Source(lhs, sc'*), arrow, Target(rhs, tc'*)))
+    where
+    	(p1*, r'*) := <map(rename-in-component); unzip; (concat, id)> r*;
+    	(p2*, sc'*) := <map(rename-in-component); unzip; (concat, id)> sc*;
+    	(p3*, tc'*) := <map(rename-out-component); unzip; (concat, id)> tc*
+
+  rename-in-component:
+  	LabelComp(ty, v) -> ([Formula(Match(v', v))], LabelComp(ty, v'))
+  	where
+  		v' := VarRef($[[<get-sort-name> ty]_in])
+
+  rename-out-component:
+  	LabelComp(ty, v) -> ([Formula(Match(v, v'))], LabelComp(ty, v'))
+  	where
+  		v' := VarRef($[[<get-sort-name> ty]_out])
+
+rules
+  
+  remove-aliases = repeat(remove-alias); filter-identities
+  
+  remove-alias:
+    r@Rule(p*, _, _) -> <substitute(?VarRef(_))> ([subst], r)
+    where
+      subst := <fetch-elem(mk-substitution)> p*
+  
+  filter-identities:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc), arrow, Target(rhs, tc))) ->
+      Rule(p'*, infer, Relation(Reads(r*), Source(lhs, sc), arrow, Target(rhs, tc)))
+    where
+      p'* := <filter(not(is-identity))> p*
+  
+  mk-substitution:
+    Formula(Match(a@VarRef(_), b@VarRef(_))) -> (a, b)
+    where
+        <not(eq)> (a, b)
+
+  is-identity = ?Formula(Match(a, a))
+  
+  is-identify = ?Formula(TermEq(a, a))
+
+rules
+  
+  merge-rules-top:
+    r* -> <merge-allfail> (r-allfail, r-norm')
+    where
+      r-allfail := <fetch-elem(where(collect-one(?AllFail())))> r*;
+      r-norm* := <filter(not(?r-allfail))> r*;
+      r-norm' := <merge-rules> r-norm*
+
+  merge-rules-top:
+    r* -> <merge-rules> r*
+    where
+      <not(fetch-elem(collect-one(?AllFail())))> r*
+
+  merge-allfail:
+    (r1@Rule(p1*, infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), 
+     [r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))]) ->
+      [Rule([TryOr(PremiseBlock(p1''*), PremiseBlock(p2*))], infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))]
+    where
+      subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
+      p1'* := <filter(not(?AllFail()))> p1*;
+      p1''* := <ds-substitute> (subst*, p1'*)
+  
+  merge-rules:
+    [] -> []
+  
+  merge-rules:
+    [r] -> [r]
+  
+  merge-rules:
+    [r1@Rule(p1*, infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), 
+     r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*))) | xs] ->
+      <merge-rules> [ Rule(p*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*))) | xs]
+  where
+  	head-subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
+  	<ds-substitute> (head-subst*, r1) => Rule(p1'*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*)));
+  	<ds-substitute> (head-subst*, p2*) => p2'*;
+  	(
+  	  p* := <merge-premises> (p1'*, p2'*)
+  	  <+
+  	  r1-str := <sugar-all; pp-dynsem-Rule-string> r1;
+  	  r2-str := <sugar-all; pp-dynsem-Rule-string> r2;
+  	  log(|Critical(), "Cannot unify rules for", <try(?Con(<id>, _))> lhs1)
+  	)
+
+  merge-premises:
+    (p1*, p2*) -> <ds-substitute> (subst*, p1*)
+    where
+      subst* := <ds-unify> [(p1*, p2*)];
+      log(|Warning(), "Premises are identical", (p1*, p2*))
+  
+  merge-premises:
+    (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ p | <merge-premises> (p1xs', p2xs') ]
+    where
+      <not(ds-unify)> [(pl*, pr*)];
+      subst* := <ds-unify> [(p1, p2)];
+      p := <ds-substitute> (subst*, p1);
+      p1xs' := <ds-substitute> (subst*, p1xs);
+      p2xs' := <ds-substitute> (subst*, p2xs)
+      
+  merge-premises:
+    (pl*@[p1 | p1xs], pr*@[p2 | p2xs]) -> [ MergePoint(p1, PremiseBlock(p1xs), PremiseBlock(pr*)) ]
+    where
+      <not(ds-unify)> [(pl*, pr*)];
+      <not(ds-unify)> [(p1, p2)];
+      <premises-alternates> (p1, p2)
+
+  merge-premises:
+    (pl*@[MergePoint(p, PremiseBlock(p1-then), PremiseBlock(p1-else))], pr*@[p2 | p2xs]) -> [ MergePoint(p', PremiseBlock(p1-then''), PremiseBlock(p1-else')) ]
+    where
+      subst* := <ds-unify> [(p, p2)];
+      p' := <ds-substitute> (subst*, p);
+      p1-then' := <ds-substitute> (subst*, p1-then);
+      p1-else' := <ds-substitute> (subst*, p1-else);
+      p2xs' := <ds-substitute> (subst*, p2xs);
+      p1-then'' := <merge-premises> (p1-then', p2xs')
+
+  merge-premises:
+    (pl*@[MergePoint(p, PremiseBlock(p1-then), PremiseBlock(p1-else))], pr*@[p2 | p2xs]) -> [ MergePoint(p, PremiseBlock(p1-then), PremiseBlock(p1-else')) ]
+    where
+      <not(ds-unify)> [(p, p2)];
+      <premises-alternates> (p, p2);
+      p1-else' := <merge-premises> (p1-else, pr*)
+
+rules
+	
+	ds-substitute = substitute(?VarRef(_))
+	ds-unify = unify(?VarRef(_))
+
+rules
+  
+  premises-alternates =
+	    ?(Formula(Match(l, r1)), Formula(Match(l, r2))); <not(eq)> (r1, r2)
+	    + ?(Formula(Match(l, _)), Formula(NMatch(l, _)))
+      + ?(Formula(NMatch(l, _)), Formula(Match(l, _)))
+	    + ?(Formula(TermEq(l, r1)), Formula(TermEq(l, r2))); <not(eq)> (r1, r2)
+	    + ?(Formula(TermEq(l, r)), Formula(TermNeq(l, r)))
+	    + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
+	    + ?(Formula(TermEq(l, _)), Formula(Match(l, _)))
+	    + ?(Formula(Match(l, _)), Formula(TermEq(l, _)))
+	    
+	    + ?(Formula(TermEq(_, _)), Formula(TermEq(_, _)))
+      + ?(Formula(TermEq(_, _)), Formula(TermNeq(_, _)))
+	    + ?(Formula(TermNeq(_, _)), Formula(TermNeq(_, _)))
+      + ?(Formula(TermNeq(_, _)), Formula(TermEq(_, _)))
+
+
+
+

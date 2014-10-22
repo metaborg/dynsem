@@ -45,7 +45,7 @@ rules // components from lhs
   //   map(exp-label-comp-init(|num))
   
   exp-label-comp-init(|num):
-    LabelComp(name, t) -> Formula(Match(Var(<get-sort-name; comp-var(|num)> name), t))
+    LabelComp(name, t) -> Formula(Match(VarRef(<get-sort-name; comp-var(|num)> name), t))
  
 rules // components in rhs
            
@@ -53,11 +53,11 @@ rules // components in rhs
     comp-name -> <fetch-elem(?LabelComp(comp-name,_))> comps
       
   concat-changeables(|num) :
-    comp-name -> LabelComp(comp-name, Con("Concat", [List(<range; map(\i -> Var(<comp-var(|i)>comp-name) \)>(2, <inc>num))]))
+    comp-name -> LabelComp(comp-name, Con("Concat", [List(<range; map(\i -> VarRef(<comp-var(|i)>comp-name) \)>(2, <inc>num))]))
     where <gt> (num, 2)
 
   concat-changeables(|num) :
-    comp-name -> LabelComp(comp-name, Var(<comp-var(|2)>comp-name))
+    comp-name -> LabelComp(comp-name, VarRef(<comp-var(|2)>comp-name))
     where <eq> (num, 2)
 
   concat-changeables(|num) :

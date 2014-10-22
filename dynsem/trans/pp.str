@@ -33,6 +33,12 @@ rules
     ; !V([], <id>)
     ; box2text-string(|80)
 
+  pp-dynsem-Rule-string =
+    parenthesize-ds
+    ; prettyprint-Rule
+    ; !V([], <id>)
+    ; box2text-string(|120)
+
   pp-debug :
     ast -> result
     with

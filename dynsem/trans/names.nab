@@ -55,6 +55,9 @@ binding rules
 
   RuleW(conc, prem*) :
   	scopes Variable
+  
+  // PremiseBlock(_) :
+  //   scopes Variable
 
 binding rules // sorts 
 

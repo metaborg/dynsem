@@ -38,14 +38,6 @@ menus
     action  : "Generate interpreter"   = generate-interpreter
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime) 
-    action  : "Factoplicate"           = factoplicate-editor (openeditor) (realtime) (source)
-    // action  : "Resolve imports"        = includes-editor (openeditor) (realtime) (source)
-    // action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
-    // action  : "Explicate + Factorize"  = explicate-factorize-editor (openeditor) (realtime) (source)
+    action  : "Facto-plico-nify"       = facto-plico-nify-editor (openeditor) (realtime) (source)
+    action  : "Facto-plicate"          = facto-plicate-editor (openeditor) (realtime) (source)
     
-    // action  : "Pregeneration"          = pre-generation-transform-editor (openeditor) (meta)
-    // action  : "Pregeneration AST"      = pre-generation-transform-editor-ast (openeditor) (meta)
-    // action  : "Explicate AST"          = explicate-editor-ast (openeditor) (realtime) (source) (meta)
-    // action  : "Explicate + Factorize AST"  = explicate-factorize-editor-ast (openeditor) (realtime) (source) (meta)    
-     
-                

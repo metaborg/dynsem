@@ -20,13 +20,10 @@ rules // utils for deterministic variable name generation
       NextVarIdx < s + rules(NextVarIdx : _ -> 0); s
     |}
   
-  next-variable(|prefix) =
-    i := <NextVarIdx; inc>;
-    rules(NextVarIdx :- _);
-    rules(NextVarIdx : _ -> i);
-    !$[[prefix]_[i]]
+  next-variable(|prefix) = <newname> prefix
+ 
+  next-variable = next-variable(|"lifted_")
 
-  next-variable = next-variable(|"lifted")
 
 rules // projections for sorts
   
@@ -210,7 +207,7 @@ rules // component operations
     map(mk-label-comp(|num))
    
   mk-label-comp(|num) :
-    name -> LabelComp(name, Var(<get-sort-name; comp-var(|num)> name))
+    name -> LabelComp(name, VarRef(<get-sort-name; comp-var(|num)> name))
 
   mk-label-comp-str(|num) :
     name -> $[[name]([<get-sort-name; comp-var(|num)> name])]

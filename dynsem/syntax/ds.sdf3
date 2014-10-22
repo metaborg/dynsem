@@ -32,22 +32,19 @@ context-free syntax // rules
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail>
 
-  Premise.MergePoint = 
-    [
-      [Premise]
-      < {
-        [{Premise ",\n"}+]
-      } + {
-        [{Premise ",\n"}+]
-      }
-    ]
+  PremisesBlock.PremiseBlock = <{
+    <{Premise ",\n"}*>
+  }>
+
+  Premise.MergePoint = [
+    [Premise]
+    < [PremisesBlock]
+    + [PremisesBlock]
+  ]
   
   Premise.TryOr = [
-  	try {
-      [{Premise ",\n"}+]		
-  	} or {
-  		[{Premise ",\n"}+]
-  	}
+    try [PremisesBlock]
+  	or  [PremisesBlock]
   ]
   
   ID = <rules> {reject}
