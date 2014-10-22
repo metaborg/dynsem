@@ -106,7 +106,7 @@ rules
     where
       subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
       p1'* := <filter(not(?AllFail()))> p1*;
-      p1''* := <ds-substitute> (subst*, p1*)
+      p1''* := <ds-substitute> (subst*, p1'*)
   
   merge-rules:
     [] -> []
