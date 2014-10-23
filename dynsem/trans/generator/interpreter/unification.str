@@ -54,12 +54,12 @@ rules
   rename-in-component:
   	LabelComp(ty, v) -> ([Formula(Match(v', v))], LabelComp(ty, v'))
   	where
-  		v' := VarRef($[[<get-sort-name> ty]_in])
+  		v' := VarRef($[[<get-sort-name; lower-case> ty]_in])
 
   rename-out-component:
   	LabelComp(ty, v) -> ([Formula(Match(v, v'))], LabelComp(ty, v'))
   	where
-  		v' := VarRef($[[<get-sort-name> ty]_out])
+  		v' := VarRef($[[<get-sort-name; lower-case> ty]_out])
 
 rules
   
