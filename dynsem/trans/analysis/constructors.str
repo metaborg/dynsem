@@ -7,3 +7,11 @@ signature
   
   constructors
     Vars: Namespace
+    Sorts: Namespace
+  
+  sorts
+    Property
+  
+  constructors
+    Type: Property
+    ParentSort: Property 

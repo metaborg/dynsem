@@ -9,6 +9,6 @@ rules
 	
 	analyze =
 	  log-timed(rename-all | "Renaming variables");
-	  log-timed(try(store-all)  | "Storing definitions")
+	  log-timed(store-all  | "Storing definitions")
 
 

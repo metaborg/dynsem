@@ -1,7 +1,39 @@
 module analysis/store
 
+imports
+  include/ds
+  analysis/lib-analysis
+  analysis/constructors
+  lib-ds
+
 strategies
   
-  store-all = fail
+  store-all =
+    store-module
 
+rules
+  
+  store-module:
+    m@Module(n, section*) -> m
+    with
+      log-timed(
+        <fetch-elem(?Signatures(<id>)); store-signatures> section* | "Storing signatures"
+      );
+      log-timed(
+        <fetch-elem(?Rules(<id>)); store-rules> section* | "Storing rules"
+      )
+
+  store-signatures =
+    is-list;
+    map(store-sorts <+ store-constructors <+ store-arrows)
+  
+  store-sorts = fail
+  
+  store-constructors = fail
+  
+  store-arrows = fail
+  
+  store-rules = map(store-rule)
+  
+  store-rule = fail
 

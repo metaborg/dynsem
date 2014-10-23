@@ -2,9 +2,9 @@ module analysis/lib-analysis
 
 imports
   include/ds
+  analysis/constructors
 
-
-rules
+rules // renaming
   
   new-scope(s|namespace) = {|
     Renames: s
@@ -22,5 +22,37 @@ rules
     with
       name' := <newname> name;
       rules(Renames:+ (namespace, name) -> name')
+
+rules // storing and looking up
+   
+  store-def(|namespace):
+    name -> name
+    where
+      rules(Declared:+ (namespace, name) -> (namespace, name))
+  
+  lookup-is-defined(|namespace):
+    name -> name
+    where
+      <Declared> (namespace, name)
+   
+  store-prop(|namespace, proptype):
+    (name, propval) -> (name, propval)
+    where
+      rules(Properties:+ (namespace, proptype, name) -> propval)
+   
+  lookup-get-prop(|namespace, proptype):
+    name -> <Properties> (namespace, proptype, name)
+
+  store-type(|namespace):
+    (name, ty) -> <store-prop(|namespace, Type())> (name, ty)
+
+  lookup-get-type(|namespace):
+    name -> <lookup-get-prop(|namespace, Type())> name
+
+
+
+
+
+
 
 
