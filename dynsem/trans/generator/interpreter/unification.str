@@ -18,7 +18,7 @@ rules /* merge ovelapping rules */
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
       rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
-      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; rename-components); merge-rules-top)>))> rules-by-cons-arrow*
+      merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; rename-components; rename-output); merge-rules-top)>))> rules-by-cons-arrow*
 
   cons-decl-pair-arity:
     ConsDecl(cons, args, _) -> (cons, <length> args)
@@ -60,6 +60,10 @@ rules
   	LabelComp(ty, v) -> ([Formula(Match(v, v'))], LabelComp(ty, v'))
   	where
   		v' := VarRef($[[<get-sort-name; lower-case> ty]_out])
+
+  rename-output:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arrow, Target(rhs, tc*))) ->
+      Rule([p*, Formula(Match(rhs, VarRef("result_out")))], infer, Relation(Reads(r*), Source(lhs, sc*), arrow, Target(VarRef("result_out"), tc*)))
 
 rules
   
