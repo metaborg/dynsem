@@ -1,0 +1,26 @@
+module analysis/rename
+
+imports
+  include/ds
+  ds
+  analysis/lib-analysis
+  analysis/constructors
+  
+strategies
+	
+	rename-all = alltd(rename)
+	
+rules
+  
+  
+  rename:
+  	r@Rule(_, _, _) -> <new-scope(alltd(rename-var) | Vars())> r
+
+  rename-var:
+  	VarRef(v) -> VarRef(<rename(|Vars())> v)
+  
+  rename-var:
+  	Var(v) -> Var(<rename(|Vars())> v)
+  	  
+
+

@@ -1,0 +1,7 @@
+module analysis/store
+
+strategies
+  
+  store-all = fail
+
+

@@ -27,6 +27,7 @@ imports
 	generator/interpreter/gen-interpreter
 	generator/interpreter/unification
 	resolve-includes
+	analysis/main
 	
 	
 signature
@@ -145,12 +146,6 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
-  // includes-editor:
-  //   (selected, position, ast, path, project-path) -> (filename, result)
-  //   with
-  //     filename := <guarantee-extension(|"noimports.ds")> path;
-  //     result   := <resolve-includes(|path, project-path); pp-debug> ast
-
    facto-plicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
@@ -163,29 +158,11 @@ rules // Builders
       filename := <guarantee-extension(|"factopliconified.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; escape-variable-names; fuse-sections; unify-module; sugar-all; pp-debug> ast
 
-//   explicate-editor:
-//     (selected, position, ast, path, project-path) -> (filename, result)
-//     with
-//       filename := <guarantee-extension(|"explicated.ds")> path;
-//       result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; sugar-all; pp-debug> selected
-// 
-//   explicate-factorize-editor:
-//     (selected, position, ast, path, project-path) -> (filename, result)
-//     with
-//       filename := <guarantee-extension(|"explicated.factorized.ds")> path;
-//       result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; factorize-module; sugar-all; pp-debug> selected
-// 
-//   explicate-factorize-editor-ast:
-//     (selected, position, ast, path, project-path) -> (filename, result)
-//     with
-//       filename := <guarantee-extension(|"explicated.factorized.aterm")> path;
-//       result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; factorize-module> selected
-
-  // explicate-editor-ast:
-  //   (selected, position, ast, path, project-path) -> (filename, result)
-  //   with
-  //     filename := <guarantee-extension(|"explicated.aterm")> path;
-  //     result   := <resolve-includes(|path, project-path); desugar-all; explicate-module> selected
+  analyze-manual-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"analyzed.manual.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; escape-variable-names; fuse-sections; unify-module; analyze; sugar-all; pp-debug> ast
 
   // format rules
   format-editor:

@@ -1,0 +1,14 @@
+module analysis/main
+
+imports
+	analysis/rename
+	analysis/store
+  lib-ds
+
+rules
+	
+	analyze =
+	  log-timed(rename-all | "Renaming variables");
+	  log-timed(try(store-all)  | "Storing definitions")
+
+

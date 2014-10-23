@@ -1,0 +1,9 @@
+module analysis/constructors
+
+
+signature
+  sorts
+    Namespace
+  
+  constructors
+    Vars: Namespace
