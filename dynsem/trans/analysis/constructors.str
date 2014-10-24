@@ -1,6 +1,5 @@
 module analysis/constructors
 
-
 signature
   sorts
     Namespace
@@ -8,10 +7,32 @@ signature
   constructors
     Vars: Namespace
     Sorts: Namespace
-  
+    Constructors: Namespace
+    NativeOp: Namespace
+    Arrows: Namespace
+    NativeDataType: Namespace
+    NativeDTOp: String -> Namespace 
+      
+signature
   sorts
     Property
-  
+
   constructors
     Type: Property
-    ParentSort: Property 
+    ParentSort: Property
+    SortKind: Property
+    ConsKind: Property
+    NativeDataTypeJString: Property
+
+  sorts
+    SortKind
+    ConsKind
+  
+  constructors
+    LanguageSort: SortKind
+  	InternalSort: SortKind
+  	NativeDTSort: SortKind
+  	LanguageCons: ConsKind
+  	InternalCons: ConsKind
+  	NativeOpCons: ConsKind
+

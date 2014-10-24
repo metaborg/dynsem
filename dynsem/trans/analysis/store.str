@@ -11,29 +11,147 @@ strategies
   store-all =
     store-module
 
-rules
+rules /* store dispatch */
   
   store-module:
     m@Module(n, section*) -> m
     with
       log-timed(
-        <fetch-elem(?Signatures(<id>)); store-signatures> section* | "Storing signatures"
+        <store-signatures> <built-ins-library> | "Storing built-in signatures" 
+      );
+      log-timed(
+        <fetch-elem(?Signatures(_)); store-signatures> section* | "Storing signatures"
       );
       log-timed(
         <fetch-elem(?Rules(<id>)); store-rules> section* | "Storing rules"
       )
 
+rules /* store signatures */
+	
   store-signatures =
-    is-list;
-    map(store-sorts <+ store-constructors <+ store-arrows)
+    Signatures(map(
+      store-sorts
+      <+ store-constructors 
+      <+ store-arrows
+      <+ store-native-datatypes
+      <+ store-native-operators
+      <+ store-semantic-components
+    ))
   
-  store-sorts = fail
+  store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
   
-  store-constructors = fail
+  store-sort:
+    d@InjDecl(s, sup) -> d
+    with
+      <store-def(|Sorts())> s;
+      <store-prop(|Sorts(), s, Type())> SimpleSort(s);
+      <store-prop(|Sorts(), s, ParentSort())> sup;
+      <store-prop(|Sorts(), s, SortKind())> LanguageSort()
+
+  store-sort:
+    d@InternalInjDecl(s, sup) -> d
+    with
+      <store-def(|Sorts())> s;
+      <store-prop(|Sorts(), s, Type())> SimpleSort(s);
+      <store-prop(|Sorts(), s, ParentSort())> sup;
+      <store-prop(|Sorts(), s, SortKind())> InternalSort()
+    
+  store-constructors =
+    Constructors(map(store-constructor))
+    + InternalConstructors(map(store-constructor))
+    + NativeConstructors(map(store-constructor))
+    + Values(map(store-constructor))
   
-  store-arrows = fail
+  store-constructor:
+    d@ConsDecl(c, child*, s) -> d
+    with
+      <store-def(|Constructors())> c;
+      <store-prop(|Constructors(), c, Type())> (child*, s);
+      <store-prop(|Constructors(), c, ConsKind())> LanguageCons()
+
+  store-constructor:
+    d@InternalConsDecl(c, child*, s) -> d
+    with
+      <store-def(|Constructors())> c;
+      <store-prop(|Constructors(), c, Type())> (child*, s);
+      <store-prop(|Constructors(), c, ConsKind())> InternalCons()
+
+  store-constructor:
+    d@NativeConsDecl(c, child*, s) -> d
+    with
+      <store-def(|Constructors())> c;
+      <store-prop(|Constructors(), c, Type())> (child*, s);
+      <store-prop(|Constructors(), c, ConsKind())> NativeOpCons()
+
+  store-constructor:
+    d@ValueDecl(v, child*) -> d
+    with
+      <store-def(|Constructors())> v;
+      <store-prop(|Constructors(), v, Type())> (child*, "Value")
+  
+  store-arrows = ArrowDeclarations(map(store-arrow))
+  
+  store-arrow:
+    d@ArrowDecl(in-srt, arrow, out-srt) -> d
+    with
+      <store-def(|Arrows())> arrow;
+      <store-prop(|Arrows(), arrow, Type())> (in-srt, out-srt)
+
+  store-native-operators = NativeOperators(map(store-native-operator))
+  
+  store-native-operator:
+    d@NativeOpDecl(c, child*, s) -> d
+    with
+      <store-def(|NativeOp())> c;
+      <store-prop(|NativeOp(), c, Type())> (child*, s)
+
+  store-native-datatypes = NativeDataTypes(map(store-native-datatype))
+
+  store-native-datatype:
+    d@NativeBaseTypeDecl(javastring, name, func*) -> d
+    with
+      <store-def(|Sorts())> name;
+      <store-prop(|Sorts(), name, SortKind())> NativeDTSort();
+      <store-prop(|Sorts(), name, NativeDataTypeJString())> javastring;
+      <map(store-native-datatype-op(|name))> func*
+
+  store-native-datatype:
+    d@NativeSubTypeDecl(javastring, name, sup, func*) -> d
+    with
+      <store-def(|Sorts())> name;
+      <store-prop(|Sorts(), name, SortKind())> NativeDTSort();
+      <store-prop(|Sorts(), name, NativeDataTypeJString())> javastring;
+      <map(store-native-datatype-op(|name))> func*
+      
+  store-native-datatype-op(|parent):
+    d@NativeFunctionDecl(name, args*, s) -> d
+    with
+      <store-def(|NativeDTOp(parent))> name;
+      <store-prop(|NativeDTOp(parent), name, Type())> (args*, s)
+
+  store-semantic-components = SemanticComponents(map(store-semantic-component))
+  
+  store-semantic-component:
+    SemanticComponent("VEnv", MapSort(SimpleSort("String"), SimpleSort("VBox"))) -> <fail>
+
+rules /* store variables */
   
   store-rules = map(store-rule)
   
-  store-rule = fail
+  store-rule = id
 
+rules // builtins
+	
+	 built-ins-library = 
+ 	  !Signatures(
+	    [ InternalSorts([
+	        InternalInjDecl("Term", "Term")
+	      , InternalInjDecl("Value", "Term")
+	      , InternalInjDecl("Int", "Term")
+	      , InternalInjDecl("Real", "Term")
+	      , InternalInjDecl("Bool", "Term")
+	      , InternalInjDecl("String", "Term")
+	      , InternalInjDecl("Value", "Term")
+	      ] )
+	    ]
+    )

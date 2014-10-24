@@ -146,13 +146,13 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
-   facto-plicate-editor:
+  facto-plicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factoplicated.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; sugar-all; pp-debug> ast
 
-   facto-plico-nify-editor:
+  facto-plico-nify-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factopliconified.ds")> path;

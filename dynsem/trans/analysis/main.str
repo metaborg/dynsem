@@ -3,12 +3,17 @@ module analysis/main
 imports
 	analysis/rename
 	analysis/store
+	analysis/lib-analysis
   lib-ds
 
 rules
 	
 	analyze =
 	  log-timed(rename-all | "Renaming variables");
-	  log-timed(store-all  | "Storing definitions")
+	  log-timed(store-all  | "Storing all definitions")
 
+  m-in-analysis(s) = new-analysis-scope(
+  	where(analyze);
+  	s
+  )
 

@@ -14,7 +14,7 @@ rules
   
   
   rename:
-  	r@Rule(_, _, _) -> <new-scope(alltd(rename-var) | Vars())> r
+  	r@Rule(_, _, _) -> <new-scope-renames(alltd(rename-var) | Vars())> r
 
   rename-var:
   	VarRef(v) -> VarRef(<rename(|Vars())> v)
