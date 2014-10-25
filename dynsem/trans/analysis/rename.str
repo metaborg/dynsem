@@ -21,3 +21,6 @@ rules
   
   rename-var:
   	Var(v) -> Var(<rename(|Vars())> v)
+
+  rename-var:
+    MatchedVar(v) -> MatchedVar(<rename(|Vars())> v)
