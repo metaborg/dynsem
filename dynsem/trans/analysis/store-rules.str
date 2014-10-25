@@ -1,0 +1,7 @@
+module analysis/store-rules
+
+rules /* store variables */
+  
+  store-rules = map(store-rule)
+  
+  store-rule = id

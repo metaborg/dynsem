@@ -1,0 +1,143 @@
+module analysis/store-signatures
+
+imports
+  include/ds
+  analysis/lib-analysis
+  analysis/constructors
+
+rules /* store signatures */
+  
+  store-signatures =
+    Signatures(map(
+      store-sorts
+      <+ store-constructors 
+      <+ store-arrows
+      <+ store-native-datatypes
+      <+ store-native-operators
+      <+ store-semantic-components
+    ))
+  
+  store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
+  
+  store-sort:
+    d@InjDecl(s, sup) -> d
+    with
+      <store-def(|Sorts())> s;
+      <store-prop(|Sorts(), s, ParentSort())> sup;
+      <store-prop(|Sorts(), s, SortKind())> LanguageSort()
+
+  store-sort:
+    d@InternalInjDecl(s, sup) -> d
+    with
+      <store-def(|Sorts())> s;
+      <store-prop(|Sorts(), s, ParentSort())> sup;
+      <store-prop(|Sorts(), s, SortKind())> InternalSort()
+  
+  store-constructors =
+    Constructors(map(store-constructor))
+    + InternalConstructors(map(store-constructor))
+    + NativeConstructors(map(store-constructor))
+    + Values(map(store-constructor))
+  
+  store-constructor:
+    d@ConsDecl(c, child*, s) -> d
+    with
+      <store-def(|Constructors())> c;
+      <store-prop(|Constructors(), c, Type())> CType(<rw-type> child*, <rw-type> s);
+      <store-prop(|Constructors(), c, ConsKind())> LanguageCons()
+
+  store-constructor:
+    d@InternalConsDecl(c, child*, s) -> d
+    with
+      <store-def(|Constructors())> c;
+      <store-prop(|Constructors(), c, Type())> CType(<rw-type> child*, <rw-type> s);
+      <store-prop(|Constructors(), c, ConsKind())> InternalCons()
+
+  store-constructor:
+    d@NativeConsDecl(c, child*, s) -> d
+    with
+      <store-def(|Constructors())> c;
+      <store-prop(|Constructors(), c, Type())> CType(<rw-type> child*, <rw-type> s);
+      <store-prop(|Constructors(), c, ConsKind())> NativeOpCons()
+
+  store-constructor:
+    d@ValueDecl(v, child*) -> d
+    with
+      <store-def(|Constructors())> v;
+      <store-prop(|Constructors(), v, Type())> CType(<rw-type> child*, SType("Value"))
+  
+  store-arrows = ArrowDeclarations(map(store-arrow))
+  
+  store-arrow:
+    d@ArrowDecl(in-srt, arrow, out-srt) -> d
+    with
+      <store-def(|Arrows())> arrow;
+      <store-prop(|Arrows(), arrow, Type())> (<rw-type> in-srt, <rw-type> out-srt)
+
+  store-native-operators = NativeOperators(map(store-native-operator))
+  
+  store-native-operator:
+    d@NativeOpDecl(c, child*, s) -> d
+    with
+      <store-def(|NativeOp())> c;
+      <store-prop(|NativeOp(), c, Type())> FType(<rw-type> child*, <rw-type> s)
+
+  store-native-datatypes = NativeDataTypes(map(store-native-datatype))
+
+  store-native-datatype:
+    d@NativeBaseTypeDecl(javastring, name, func*) -> d
+    with
+      <store-def(|NativeDT())> name;
+      <store-prop(|NativeDT(), name, NativeDTJString())> javastring;
+      <map(store-native-datatype-op(|name))> func*
+
+  store-native-datatype:
+    d@NativeSubTypeDecl(javastring, name, sup, func*) -> d
+    with
+      <store-def(|NativeDT())> name;
+      <store-prop(|NativeDT(), name, NativeDTJString())> javastring;
+      <store-prop(|NativeDT(), name, ParentSort())> sup;
+      <map(store-native-datatype-op(|name))> func*
+      
+  store-native-datatype-op(|parent):
+    d@NativeFunctionDecl(name, args*, s) -> d
+    with
+      <store-def(|NativeDTOP(parent))> name;
+      <store-prop(|NativeDTOP(parent), name, Type())> FType(<rw-type> args*, <rw-type> s)
+
+  store-semantic-components = SemanticComponents(map(store-semantic-component))
+  
+  store-semantic-component:
+    d@SemanticComponent(name, MapSort(key-ty, val-ty)) -> d
+    with
+      <store-def(|Maps())> name;
+      <store-prop(|Maps(), name, Type())> MType(<rw-type> key-ty, <rw-type> val-ty)
+
+rules // type rewriting
+  
+  rw-type:
+    SimpleSort(s) -> SType(s)
+  
+  rw-type:
+    ListSort(s) -> LType(<rw-type> s)
+  
+  rw-type:
+    MapSort(key-sort, val-sort) -> MType(<rw-type> key-sort, <rw-type> val-sort)
+  
+  rw-type = is-list; map(rw-type)
+
+rules // builtins
+  
+   built-ins-library = 
+    !Signatures(
+      [ InternalSorts([
+          InternalInjDecl("Term", "Term")
+        , InternalInjDecl("Value", "Term")
+        , InternalInjDecl("Int", "Term")
+        , InternalInjDecl("Real", "Term")
+        , InternalInjDecl("Bool", "Term")
+        , InternalInjDecl("String", "Term")
+        , InternalInjDecl("Value", "Term")
+        ])
+      ]
+    )

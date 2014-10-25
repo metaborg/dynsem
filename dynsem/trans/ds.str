@@ -176,7 +176,6 @@ rules // Builders
         all-declared-keys => declaration*;
         all-property-keys => property*
       )> ast'
-      // <syntactic-transformations(|path, project-path); analyze; sugar-all; pp-debug> ast
 
   // format rules
   format-editor:
