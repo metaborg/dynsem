@@ -8,10 +8,11 @@ signature
     Vars: Namespace
     Sorts: Namespace
     Constructors: Namespace
-    NativeOp: Namespace
     Arrows: Namespace
-    NativeDataType: Namespace
-    NativeDTOp: String -> Namespace 
+    Maps: Namespace
+    NativeOp: Namespace
+    NativeDT: Namespace
+    NativeDTOP: String -> Namespace
       
 signature
   sorts
@@ -22,7 +23,17 @@ signature
     ParentSort: Property
     SortKind: Property
     ConsKind: Property
-    NativeDataTypeJString: Property
+    NativeDTJString: Property
+
+  sorts
+    Type
+  
+  constructors
+    SType: String -> Type // simple type
+    CType: List(Type) * Type -> Type // constructor type
+    LType: Type -> Type // list type
+    MType: Type * Type -> Type // map type
+    FType: List(Type) * Type -> Type // function type
 
   sorts
     SortKind
@@ -31,7 +42,8 @@ signature
   constructors
     LanguageSort: SortKind
   	InternalSort: SortKind
-  	NativeDTSort: SortKind
+  	// NativeDTSort: SortKind
+  	// MapSort: SortKind
   	LanguageCons: ConsKind
   	InternalCons: ConsKind
   	NativeOpCons: ConsKind
