@@ -42,8 +42,6 @@ signature
   constructors
     LanguageSort: SortKind
   	InternalSort: SortKind
-  	// NativeDTSort: SortKind
-  	// MapSort: SortKind
   	LanguageCons: ConsKind
   	InternalCons: ConsKind
   	NativeOpCons: ConsKind
