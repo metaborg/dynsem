@@ -72,7 +72,7 @@ rules /* store signatures */
     d@ArrowDecl(in-srt, arrow, out-srt) -> d
     with
       <store-def(|Arrows())> arrow;
-      <store-prop(|Arrows(), arrow, Type())> (<rw-type> in-srt, <rw-type> out-srt)
+      <store-prop(|Arrows(), arrow, Type())> AType(<rw-type> in-srt, <rw-type> out-srt)
 
   store-native-operators = NativeOperators(map(store-native-operator))
   

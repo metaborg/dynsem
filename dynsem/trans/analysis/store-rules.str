@@ -1,7 +1,95 @@
 module analysis/store-rules
 
+imports
+  include/ds
+  analysis/lib-analysis
+  analysis/constructors
+  ds
+
 rules /* store variables */
   
   store-rules = map(store-rule)
   
-  store-rule = id
+  store-rule:
+    r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
+    with
+    	AType(ma-ty, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+    	<pushdown-type> (ma-ty, lhs);
+    	<map(\ LabelComp(l, r) -> (l, r) \; pushdown-type)> [r*, sc*];
+    	<map(store-premise)> p*
+
+  pushdown-type:
+    (ty, into) -> ty
+    with
+      fail
+
+  pushdown-type:
+    (ty, Var(v)) -> ty
+    with
+      <store-def(|Vars())> v;
+      <store-prop(|Vars(), v, Type())> ty
+  
+  pushdown-type:
+    (ty, Con(c, achild*)) -> ty
+    with
+      CType(fchild*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      <zip(pushdown-type)> (fchild*, achild*)
+
+  pushdown-type:
+    (ty@LType(s), List([])) -> ty
+  
+  pushdown-type:
+    (ty@LType(s), ListTail([hd], tl)) -> ty
+    with
+      <pushdown-type> (s, hd);
+      <pushdown-type> (ty, tl)
+
+  
+
+
+
+  store-premise = fail
+
+  mkList(|elem):
+    0 -> []
+  
+  mkList(|elem):
+    len -> [elem | <dec; mkList(|elem)> len]
+    where
+      <gt> (len, 0)
+       
+    	// <store-vars-in-match> lhs;
+    	// <map(store-vars-in-match)> r*;
+    	// <map(store-vars-in-match)> sc*;
+    	// <map(store-vars-in-premise)> p*
+
+//   store-vars-in-match:
+//   	LabelComp(SimpleSort(s), Var(v)) -> ty
+//   	with
+//   		ty := <lookup-def-nss(|[Sorts(), Maps(), NativeDT()]); lookup-prop(|Type())> s;
+//   		<declare-var> (Var(v), ty)
+// 
+//   store-vars-in-match:
+//   	Con(con, achild*) -> ty
+//   	with
+//   		(fchild*, ty) := <lookup-def(|Constructors())> con;
+//   		<zip(declare-var)> (achild*, fchild*)
+// 
+//   declare-var:
+//   	(Var(v), ty) -> ty
+//   	with
+//   		<store-def(|Vars())> v;
+//   		<store-prop(|Vars(), v, Type())> ty
+// 
+//   store-vars-in-premise:
+//   	f@Formula(Match(lhs, rhs)) -> f
+//   	with
+//       lhs-ty := <type-of-build> lhs;
+//       <store-vars-in-match> <fail>
+/*
+
+algorithm to assign types to all variable definitions and variable references
+
+- every match assigns a type to a variable
+
+*/

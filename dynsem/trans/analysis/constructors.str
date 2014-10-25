@@ -33,7 +33,10 @@ signature
     CType: List(Type) * Type -> Type // constructor type
     LType: Type -> Type // list type
     MType: Type * Type -> Type // map type
+    NType: String -> Type // native data type
     FType: List(Type) * Type -> Type // function type
+    AType: Type * Type -> Type // arrow type
+    
 
   sorts
     SortKind
