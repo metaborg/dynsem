@@ -17,3 +17,6 @@ rules
   	s
   )
 
+
+  all-declared-keys = all-keys-Declared
+  all-property-keys = all-keys-Properties

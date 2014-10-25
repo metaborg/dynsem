@@ -5,7 +5,6 @@ signature
     Namespace
   
   constructors
-    Vars: Namespace
     Sorts: Namespace
     Constructors: Namespace
     Arrows: Namespace
@@ -13,6 +12,7 @@ signature
     NativeOp: Namespace
     NativeDT: Namespace
     NativeDTOP: String -> Namespace
+    Vars: Namespace
       
 signature
   sorts

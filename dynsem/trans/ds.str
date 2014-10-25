@@ -158,11 +158,25 @@ rules // Builders
       filename := <guarantee-extension(|"factopliconified.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; escape-variable-names; fuse-sections; unify-module; sugar-all; pp-debug> ast
 
+  syntactic-transformations(|path, project-path) = 
+    resolve-includes(|path, project-path);
+    desugar-top;
+    explicate-module;
+    factorize-module;
+    escape-variable-names;
+    fuse-sections;
+    unify-module
+
   analyze-manual-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
+    (selected, position, ast, path, project-path) -> (filename, [declaration*, property*])
     with
       filename := <guarantee-extension(|"analyzed.manual.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; escape-variable-names; fuse-sections; unify-module; analyze; sugar-all; pp-debug> ast
+      ast' := <syntactic-transformations(|path, project-path)> ast;
+      <m-in-analysis(
+        all-declared-keys => declaration*;
+        all-property-keys => property*
+      )> ast'
+      // <syntactic-transformations(|path, project-path); analyze; sugar-all; pp-debug> ast
 
   // format rules
   format-editor:
