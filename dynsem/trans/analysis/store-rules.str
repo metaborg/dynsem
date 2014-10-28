@@ -4,92 +4,84 @@ imports
   include/ds
   analysis/lib-analysis
   analysis/constructors
+  analysis/coercion
   ds
 
 rules /* store variables */
   
-  store-rules = map(store-rule)
+  store-rules = id
+  
+  // store-rules = map(store-rule)
   
   store-rule:
     r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
     with
+    	debug(!1);
     	AType(ma-ty, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
-    	<pushdown-type> (ma-ty, lhs);
-    	<map(\ LabelComp(l, r) -> (l, r) \; pushdown-type)> [r*, sc*];
+    	debug(!2);
+    	<store-variables> (ma-ty, lhs);
+    	debug(!3);
+    	<map(\ LabelComp(l, r) -> (l, r) \; store-variables)> [r*, sc*];
+    	debug(!4);
     	<map(store-premise)> p*
+    	;debug(!5)
 
-  pushdown-type:
-    (ty, into) -> ty
-    with
-      fail
-
-  pushdown-type:
+  store-variables:
     (ty, Var(v)) -> ty
     with
       <store-def(|Vars())> v;
       <store-prop(|Vars(), v, Type())> ty
-  
-  pushdown-type:
+
+  store-variables:
+    (ty, MatchedVar(v)) -> ty
+    with
+      <store-def(|Vars())> v;
+      <store-prop(|Vars(), v, Type())> ty
+
+  store-variables:
     (ty, Con(c, achild*)) -> ty
     with
-      CType(fchild*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <zip(pushdown-type)> (fchild*, achild*)
-
-  pushdown-type:
-    (ty@LType(s), List([])) -> ty
+      CType(fchild*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+    	<zip; map(store-variables)> (fchild*, achild*)
   
-  pushdown-type:
-    (ty@LType(s), ListTail([hd], tl)) -> ty
+  store-variables:
+    (ty@LType(_), List([])) -> ty
+  
+  store-variables:
+    (ty@LType(ety), ListTail([hd], tl)) -> ty
     with
-      <pushdown-type> (s, hd);
-      <pushdown-type> (ty, tl)
+      <store-variables> (ety, hd);
+      <store-variables> (ty, tl)
 
+  store-premise:
+    f@Formula(Match(lhs, rhs)) -> f
+    with
+      lhs-ty := <type-of> lhs;
+      <store-variables> (lhs-ty, rhs)
+
+  store-premise:
+    f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
+    with
+      <map(store-premise)> l*;
+      <map(store-premise)> r*
   
+  store-premise:
+    f@MergePoint(cond, PremiseBlock(l*), PremiseBlock(r*)) -> f
+    with
+      <map(store-premise)> l*;
+      <map(store-premise)> r*
 
-
-
-  store-premise = fail
-
-  mkList(|elem):
-    0 -> []
+  type-of:
+    VarRef(v) -> <lookup-def(|Vars()); lookup-prop(|Type())> v
   
-  mkList(|elem):
-    len -> [elem | <dec; mkList(|elem)> len]
-    where
-      <gt> (len, 0)
-       
-    	// <store-vars-in-match> lhs;
-    	// <map(store-vars-in-match)> r*;
-    	// <map(store-vars-in-match)> sc*;
-    	// <map(store-vars-in-premise)> p*
+  type-of:
+    Con(c, _) -> <lookup-def(|Constructors()); lookup-prop(|Type())> c
 
-//   store-vars-in-match:
-//   	LabelComp(SimpleSort(s), Var(v)) -> ty
-//   	with
-//   		ty := <lookup-def-nss(|[Sorts(), Maps(), NativeDT()]); lookup-prop(|Type())> s;
-//   		<declare-var> (Var(v), ty)
-// 
-//   store-vars-in-match:
-//   	Con(con, achild*) -> ty
-//   	with
-//   		(fchild*, ty) := <lookup-def(|Constructors())> con;
-//   		<zip(declare-var)> (achild*, fchild*)
-// 
-//   declare-var:
-//   	(Var(v), ty) -> ty
-//   	with
-//   		<store-def(|Vars())> v;
-//   		<store-prop(|Vars(), v, Type())> ty
-// 
-//   store-vars-in-premise:
-//   	f@Formula(Match(lhs, rhs)) -> f
-//   	with
-//       lhs-ty := <type-of-build> lhs;
-//       <store-vars-in-match> <fail>
-/*
+  type-of:
+  	List([]) -> LType("Term")
 
-algorithm to assign types to all variable definitions and variable references
+  type-of:
+  	ListTail([h], tl) -> LType(<type-of> h)
 
-- every match assigns a type to a variable
 
-*/
+

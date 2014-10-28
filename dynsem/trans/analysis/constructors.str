@@ -29,7 +29,11 @@ signature
     Type
   
   constructors
-    SType: String -> Type // simple type
+    IntType: Type // int
+    RealType: Type // real
+    BoolType: Type // bool
+    StringType: Type // string
+    SType: String -> Type // simple node type
     CType: List(Type) * Type -> Type // constructor type
     LType: Type -> Type // list type
     MType: Type * Type -> Type // map type
@@ -49,3 +53,13 @@ signature
   	InternalCons: ConsKind
   	NativeOpCons: ConsKind
 
+signature
+  sorts
+    Message
+    MessageLevel
+  
+  constructors
+    Note: MessageLevel
+    Warning: MessageLevel
+    Error: MessageLevel
+    Message: MessageLevel * String -> Message

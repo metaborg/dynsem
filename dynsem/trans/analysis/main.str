@@ -4,11 +4,13 @@ imports
 	analysis/rename
 	analysis/store
 	analysis/lib-analysis
+	mark-references
   lib-ds
 
 rules
 	
 	analyze =
+		log-timed(mark-vars  | "Marking variable definition sites");
 	  log-timed(rename-all | "Renaming variables");
 	  log-timed(store-all  | "Storing all definitions")
 
@@ -18,5 +20,5 @@ rules
   )
 
 
-  all-declared-keys = all-keys-Declared
-  all-property-keys = all-keys-Properties
+  all-declared-keys = all-keys-Declared; map(\ x -> (x, <bagof-Declared> x) \)
+  all-property-keys = all-keys-Properties; map(\ x -> (x, <bagof-Properties> x) \)

@@ -131,7 +131,7 @@ rules // builtins
    built-ins-library = 
     !Signatures(
       [ InternalSorts([
-          InternalInjDecl("Term", "Term")
+        InternalInjDecl("Term", "Term")
         , InternalInjDecl("Value", "Term")
         , InternalInjDecl("Int", "Term")
         , InternalInjDecl("Real", "Term")

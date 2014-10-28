@@ -6,7 +6,7 @@ imports
 
 rules
 	
-	new-analysis-scope(s) = {| Renames, Declared, Properties: s |}
+	new-analysis-scope(s) = {| Renames, Declared, Properties, Messages: s |}
 
 rules // renaming
   
@@ -36,9 +36,7 @@ rules // storing and looking up
       end
   
   lookup-def(|namespace):
-    name -> name
-    where
-      <Declared> (namespace, name)
+    name -> <Declared> (namespace, name)
    
   store-prop(|namespace, name, proptype):
     propval -> propval
@@ -50,4 +48,10 @@ rules // storing and looking up
 
   lookup-def-nss(|xxx) = ![()]
   
+rules
+  
+  add-msg(|level, message):
+    term -> term
+    with
+      rules(Messages:+ term -> Message(level, message))
 
