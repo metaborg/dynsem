@@ -20,20 +20,26 @@ rules
   	RuleW(conc, prem*) -> RuleW(conc', prem'*)
   	where conc' := <mark-var-defs-in-conclusion> conc
         ; prem'* := <map(mark-vardefs-in-premise)> prem*
-		
+
+  mark-var-defs-in-rule :
+    Rule(prem*, infer, conc) -> Rule(prem'*, infer, conc')
+    where
+      conc' := <mark-var-defs-in-conclusion> conc;
+      prem'* := <map(mark-vardefs-in-premise)> prem*
+
   mark-var-defs-in-conclusion =
   	Relation(make-vars, make-vars, id, id)
-  
+
   mark-vardefs-in-premise =
   	alltd(mark-vardefs-in-relation)
-  	
+
   mark-vardefs-in-relation =
   	Relation(id, id, make-vars, make-vars)
   	<+ TermEq(id, id)
   	<+ TermNeq(id, id)
   	<+ Match(id, make-vars)
   	<+ NMatch(id, make-vars)
-  
+
   make-vars =
   	alltd( \ VarRef(x) -> Var(x) \)
 
@@ -47,3 +53,5 @@ rules
     
   mark-match-var:
     NMatch(lhs, Var(v)) -> NMatch(lhs, MatchedVar(v))
+
+
