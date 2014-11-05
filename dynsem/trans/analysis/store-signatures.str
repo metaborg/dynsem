@@ -155,7 +155,7 @@ rules /* store signatures */
     with
       <store-def(|Types())> name => name-def;
       <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
-      
+
 rules // type rewriting
   
   rw-type:

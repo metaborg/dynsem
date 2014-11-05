@@ -9,10 +9,46 @@ imports
 
 rules /* store variables */
   
-  store-rules = id
+  store-rules = map(store-rule)
   
-  // store-rules = map(store-rule)
+  store-rule:
+    r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
+    where
+      debug(!1);
+      ArrowType(ma-ty, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+      <type-of-top> (ma-ty, lhs);
+      
+      fail
   
+  type-of-top = 
+    ?(ty, t); 
+    ( 
+      <type-of> t
+      <+ 
+      <add-msg(|Error(), "Type check failed")> t
+    )
+  
+  type-of:
+    (ty, dec) -> ty
+    where
+      <?Var(v) + ?MatchedVar(v)> dec
+    where
+      <store-def(|Vars())> v => v-def;
+      <store-prop(|Type(), v-def)> ty
+  
+  type-of:
+    (ty, VarRef(v)) -> ty
+    where
+      <lookup-def(|Vars()); lookup-prop(|Type())> v => v-ty;
+      <type-coerce> (v-ty, ty) // TODO continue here
+      
+  
+  type-of:
+    (ty, Con(c, child*)) -> ty-con
+    where
+      ConstructorType(child-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      <zip; map(type-of)> (child-ty*, child*)
+
 //   store-rule:
 //     r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
 //     with
@@ -26,24 +62,6 @@ rules /* store variables */
 //     	<map(store-premise)> p*
 //     	;debug(!5)
 // 
-//   store-variables:
-//     (ty, Var(v)) -> ty
-//     with
-//       <store-def(|Vars())> v;
-//       <store-prop(|Vars(), v, Type())> ty
-// 
-//   store-variables:
-//     (ty, MatchedVar(v)) -> ty
-//     with
-//       <store-def(|Vars())> v;
-//       <store-prop(|Vars(), v, Type())> ty
-// 
-//   store-variables:
-//     (ty, Con(c, achild*)) -> ty
-//     with
-//       CType(fchild*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-//     	<zip; map(store-variables)> (fchild*, achild*)
-//   
 //   store-variables:
 //     (ty@LType(_), List([])) -> ty
 //   
@@ -83,5 +101,12 @@ rules /* store variables */
 //   type-of:
 //   	ListTail([h], tl) -> LType(<type-of> h)
 
+
+rules
+  
+  // type-coerce-or-err = type-coerce <+ ?(ty1, ty2)
+  
+  type-coerce:
+    (ty-from, ty-to) -> <fail>
 
 
