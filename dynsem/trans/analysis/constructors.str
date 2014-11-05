@@ -5,42 +5,42 @@ signature
     Namespace
   
   constructors
-    Sorts: Namespace
+    Types: Namespace
+    Vars: Namespace
     Constructors: Namespace
     Arrows: Namespace
-    Maps: Namespace
-    NativeOp: Namespace
-    NativeDT: Namespace
-    NativeDTOP: String -> Namespace
-    Vars: Namespace
-      
+    NativeType: Namespace
+    NativeDTFun: String -> Namespace
+
 signature
   sorts
     Property
 
   constructors
+    SuperType: Property
     Type: Property
-    ParentSort: Property
-    SortKind: Property
     ConsKind: Property
-    NativeDTJString: Property
-
+    NativeTypeJString: Property
+    
+signature
   sorts
-    Type
+    DynSemType
   
   constructors
-    IntType: Type // int
-    RealType: Type // real
-    BoolType: Type // bool
-    StringType: Type // string
-    SType: String -> Type // simple node type
-    CType: List(Type) * Type -> Type // constructor type
-    LType: Type -> Type // list type
-    MType: Type * Type -> Type // map type
-    NType: String -> Type // native data type
-    FType: List(Type) * Type -> Type // function type
-    AType: Type * Type -> Type // arrow type
-    
+    AnyType: DynSemType
+    TermType: DynSemType
+    IntType: DynSemType
+    RealType: DynSemType
+    BoolType: DynSemType
+    StringType: DynSemType
+    NodeType: DynSemType
+    ValueType: DynSemType
+    ListType: DynSemType * DynSemType -> DynSemType
+    MapType: DynSemType * DynSemType -> DynSemType
+    ListType: DynSemType -> DynSemType
+    ConstructorType: List(DynSemType) * DynSemType -> DynSemType
+    ArrowType: DynSemType * DynSemType -> DynSemType
+    FunctionType: List(DynSemType) * DynSemType -> DynSemType
 
   sorts
     SortKind

@@ -10,29 +10,71 @@ rules /* store signatures */
   store-signatures =
     Signatures(map(
       store-sorts
-      <+ store-constructors 
+      <+ store-constructors
+      <+ store-native-operators
       <+ store-arrows
       <+ store-native-datatypes
-      <+ store-native-operators
       <+ store-semantic-components
     ))
   
-  store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
+  store-built-ins =
+    <store-def(|Types())> AnyType()
+    ; <store-def(|Types())> TermType() => def-term; <store-prop(|SuperType(), def-term)> AnyType()
+    ; <store-def(|Types())> IntType() => def-int; <store-prop(|SuperType(), def-int)> TermType()
+    ; <store-def(|Types())> RealType() => def-real; <store-prop(|SuperType(), def-real)> TermType()
+    ; <store-def(|Types())> BoolType() => def-bool; <store-prop(|SuperType(), def-bool)> TermType()
+    ; <store-def(|Types())> StringType() => def-str; <store-prop(|SuperType(), def-str)> TermType()
+    ; <store-def(|Types())> NodeType() => def-node; <store-prop(|SuperType(), def-node)> TermType()
+    ; <store-def(|Types())> ValueType() => def-value; <store-prop(|SuperType(), def-value)> NodeType()
+
+  id-to-type = id-to-builtin-type <+ is-string
+
+  id-to-builtin-type:
+    "Term" -> TermType()
+
+  id-to-builtin-type:
+    "Any" -> AnyType()
+
+  id-to-builtin-type:
+    "Int" -> IntType()
+    
+  id-to-builtin-type:
+    "Real" -> RealType()
+
+  id-to-builtin-type:
+    "Bool" -> BoolType()
+    
+  id-to-builtin-type:
+    "String" -> StringType()
   
-  store-sort:
-    d@InjDecl(s, sup) -> d
-    with
-      <store-def(|Sorts())> s;
-      <store-prop(|Sorts(), s, ParentSort())> sup;
-      <store-prop(|Sorts(), s, SortKind())> LanguageSort()
+  store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
 
   store-sort:
-    d@InternalInjDecl(s, sup) -> d
-    with
-      <store-def(|Sorts())> s;
-      <store-prop(|Sorts(), s, ParentSort())> sup;
-      <store-prop(|Sorts(), s, SortKind())> InternalSort()
-  
+    decl@SortDecl(ty) -> decl
+    where
+      <store-def(|Types())> ty => ty-def;
+      <store-prop(|SuperType(), ty-def)> NodeType()
+
+  store-sort:
+    decl@InjDecl(ty, sty-name) -> decl
+    where
+      <id-to-type> sty-name => sty;
+      <store-def(|Types())> ty => ty-def;
+      <store-prop(|SuperType(), ty-def)> sty
+
+  store-sort:
+    decl@InternalSortDecl(ty) -> decl
+    where
+      <store-def(|Types())> ty => ty-def;
+      <store-prop(|SuperType(), ty-def)> NodeType()
+
+  store-sort:
+    decl@InternalInjDecl(ty, sty-name) -> decl
+    where
+      <id-to-type> sty-name => sty;
+      <store-def(|Types())> ty => ty-def;
+      <store-prop(|SuperType(), ty-def)> sty
+
   store-constructors =
     Constructors(map(store-constructor))
     + InternalConstructors(map(store-constructor))
@@ -42,102 +84,88 @@ rules /* store signatures */
   store-constructor:
     d@ConsDecl(c, child*, s) -> d
     with
-      <store-def(|Constructors())> c;
-      <store-prop(|Constructors(), c, Type())> CType(<rw-type> child*, <rw-type> s);
-      <store-prop(|Constructors(), c, ConsKind())> LanguageCons()
+      <store-def(|Constructors())> c => c-def;
+      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
+      <store-prop(|ConsKind(), c-def)> LanguageCons()
 
   store-constructor:
     d@InternalConsDecl(c, child*, s) -> d
     with
-      <store-def(|Constructors())> c;
-      <store-prop(|Constructors(), c, Type())> CType(<rw-type> child*, <rw-type> s);
-      <store-prop(|Constructors(), c, ConsKind())> InternalCons()
+      <store-def(|Constructors())> c => c-def;
+      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
+      <store-prop(|ConsKind(), c-def)> InternalCons()
 
   store-constructor:
     d@NativeConsDecl(c, child*, s) -> d
     with
-      <store-def(|Constructors())> c;
-      <store-prop(|Constructors(), c, Type())> CType(<rw-type> child*, <rw-type> s);
-      <store-prop(|Constructors(), c, ConsKind())> NativeOpCons()
+      <store-def(|Constructors())> c => c-def;
+      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
+      <store-prop(|ConsKind(), c-def)> NativeOpCons()
 
   store-constructor:
     d@ValueDecl(v, child*) -> d
     with
-      <store-def(|Constructors())> v;
-      <store-prop(|Constructors(), v, Type())> CType(<rw-type> child*, SType("Value"))
+      <store-def(|Constructors())> v => v-def;
+      <store-prop(|Type(), v-def)> ConstructorType(<rw-type> child*, ValueType())
   
   store-arrows = ArrowDeclarations(map(store-arrow))
   
   store-arrow:
     d@ArrowDecl(in-srt, arrow, out-srt) -> d
     with
-      <store-def(|Arrows())> arrow;
-      <store-prop(|Arrows(), arrow, Type())> AType(<rw-type> in-srt, <rw-type> out-srt)
+      <store-def(|Arrows())> arrow => arrow-def;
+      <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt)
 
   store-native-operators = NativeOperators(map(store-native-operator))
   
   store-native-operator:
     d@NativeOpDecl(c, child*, s) -> d
     with
-      <store-def(|NativeOp())> c;
-      <store-prop(|NativeOp(), c, Type())> FType(<rw-type> child*, <rw-type> s)
+      <store-def(|Constructors())> c => c-def;
+      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
+      <store-prop(|ConsKind(), c-def)> NativeOpCons()
 
   store-native-datatypes = NativeDataTypes(map(store-native-datatype))
 
   store-native-datatype:
-    d@NativeBaseTypeDecl(javastring, name, func*) -> d
+    d@NativeBaseTypeDecl(jstring, name, func*) -> d
     with
-      <store-def(|NativeDT())> name;
-      <store-prop(|NativeDT(), name, NativeDTJString())> javastring;
-      <map(store-native-datatype-op(|name))> func*
+      <store-def(|NativeType())> name => name-def;
+      <store-prop(|NativeTypeJString(), name-def)> jstring;
+      <map(store-native-datatype-op(|name-def))> func*
 
   store-native-datatype:
     d@NativeSubTypeDecl(javastring, name, sup, func*) -> d
     with
-      <store-def(|NativeDT())> name;
-      <store-prop(|NativeDT(), name, NativeDTJString())> javastring;
-      <store-prop(|NativeDT(), name, ParentSort())> sup;
-      <map(store-native-datatype-op(|name))> func*
+      <store-def(|NativeType())> name => name-def;
+      <store-prop(|NativeTypeJString(), name-def)> javastring;
+      <store-prop(|SuperType(), name-def)> sup;
+      <map(store-native-datatype-op(|name-def))> func*
       
-  store-native-datatype-op(|parent):
+  store-native-datatype-op(|par-def):
     d@NativeFunctionDecl(name, args*, s) -> d
     with
-      <store-def(|NativeDTOP(parent))> name;
-      <store-prop(|NativeDTOP(parent), name, Type())> FType(<rw-type> args*, <rw-type> s)
+      <store-def(|NativeDTFun(par-def))> name => name-def;
+      <store-prop(|Type(), name-def)> FunctionType(<rw-type> args*, <rw-type> s)
 
   store-semantic-components = SemanticComponents(map(store-semantic-component))
   
   store-semantic-component:
     d@SemanticComponent(name, MapSort(key-ty, val-ty)) -> d
     with
-      <store-def(|Maps())> name;
-      <store-prop(|Maps(), name, Type())> MType(<rw-type> key-ty, <rw-type> val-ty)
-
+      <store-def(|Types())> name => name-def;
+      <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
+      
 rules // type rewriting
   
   rw-type:
-    SimpleSort(s) -> SType(s)
+    SimpleSort(s) -> <id-to-type> s
   
   rw-type:
-    ListSort(s) -> LType(<rw-type> s)
+    ListSort(s) -> ListType(<rw-type> s)
   
   rw-type:
-    MapSort(key-sort, val-sort) -> MType(<rw-type> key-sort, <rw-type> val-sort)
+    MapSort(key-sort, val-sort) -> MapType(<rw-type> key-sort, <rw-type> val-sort)
   
   rw-type = is-list; map(rw-type)
 
-rules // builtins
-  
-   built-ins-library = 
-    !Signatures(
-      [ InternalSorts([
-        InternalInjDecl("Term", "Term")
-        , InternalInjDecl("Value", "Term")
-        , InternalInjDecl("Int", "Term")
-        , InternalInjDecl("Real", "Term")
-        , InternalInjDecl("Bool", "Term")
-        , InternalInjDecl("String", "Term")
-        , InternalInjDecl("Value", "Term")
-        ])
-      ]
-    )

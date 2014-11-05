@@ -13,75 +13,75 @@ rules /* store variables */
   
   // store-rules = map(store-rule)
   
-  store-rule:
-    r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
-    with
-    	debug(!1);
-    	AType(ma-ty, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
-    	debug(!2);
-    	<store-variables> (ma-ty, lhs);
-    	debug(!3);
-    	<map(\ LabelComp(l, r) -> (l, r) \; store-variables)> [r*, sc*];
-    	debug(!4);
-    	<map(store-premise)> p*
-    	;debug(!5)
-
-  store-variables:
-    (ty, Var(v)) -> ty
-    with
-      <store-def(|Vars())> v;
-      <store-prop(|Vars(), v, Type())> ty
-
-  store-variables:
-    (ty, MatchedVar(v)) -> ty
-    with
-      <store-def(|Vars())> v;
-      <store-prop(|Vars(), v, Type())> ty
-
-  store-variables:
-    (ty, Con(c, achild*)) -> ty
-    with
-      CType(fchild*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-    	<zip; map(store-variables)> (fchild*, achild*)
-  
-  store-variables:
-    (ty@LType(_), List([])) -> ty
-  
-  store-variables:
-    (ty@LType(ety), ListTail([hd], tl)) -> ty
-    with
-      <store-variables> (ety, hd);
-      <store-variables> (ty, tl)
-
-  store-premise:
-    f@Formula(Match(lhs, rhs)) -> f
-    with
-      lhs-ty := <type-of> lhs;
-      <store-variables> (lhs-ty, rhs)
-
-  store-premise:
-    f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
-    with
-      <map(store-premise)> l*;
-      <map(store-premise)> r*
-  
-  store-premise:
-    f@MergePoint(cond, PremiseBlock(l*), PremiseBlock(r*)) -> f
-    with
-      <map(store-premise)> l*;
-      <map(store-premise)> r*
-
-  type-of:
-    VarRef(v) -> <lookup-def(|Vars()); lookup-prop(|Type())> v
-  
-  type-of:
-    Con(c, _) -> <lookup-def(|Constructors()); lookup-prop(|Type())> c
-
-  type-of:
-  	List([]) -> LType("Term")
-
-  type-of:
-  	ListTail([h], tl) -> LType(<type-of> h)
+//   store-rule:
+//     r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
+//     with
+//     	debug(!1);
+//     	AType(ma-ty, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+//     	debug(!2);
+//     	<store-variables> (ma-ty, lhs);
+//     	debug(!3);
+//     	<map(\ LabelComp(l, r) -> (l, r) \; store-variables)> [r*, sc*];
+//     	debug(!4);
+//     	<map(store-premise)> p*
+//     	;debug(!5)
+// 
+//   store-variables:
+//     (ty, Var(v)) -> ty
+//     with
+//       <store-def(|Vars())> v;
+//       <store-prop(|Vars(), v, Type())> ty
+// 
+//   store-variables:
+//     (ty, MatchedVar(v)) -> ty
+//     with
+//       <store-def(|Vars())> v;
+//       <store-prop(|Vars(), v, Type())> ty
+// 
+//   store-variables:
+//     (ty, Con(c, achild*)) -> ty
+//     with
+//       CType(fchild*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+//     	<zip; map(store-variables)> (fchild*, achild*)
+//   
+//   store-variables:
+//     (ty@LType(_), List([])) -> ty
+//   
+//   store-variables:
+//     (ty@LType(ety), ListTail([hd], tl)) -> ty
+//     with
+//       <store-variables> (ety, hd);
+//       <store-variables> (ty, tl)
+// 
+//   store-premise:
+//     f@Formula(Match(lhs, rhs)) -> f
+//     with
+//       lhs-ty := <type-of> lhs;
+//       <store-variables> (lhs-ty, rhs)
+// 
+//   store-premise:
+//     f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
+//     with
+//       <map(store-premise)> l*;
+//       <map(store-premise)> r*
+//   
+//   store-premise:
+//     f@MergePoint(cond, PremiseBlock(l*), PremiseBlock(r*)) -> f
+//     with
+//       <map(store-premise)> l*;
+//       <map(store-premise)> r*
+// 
+//   type-of:
+//     VarRef(v) -> <lookup-def(|Vars()); lookup-prop(|Type())> v
+//   
+//   type-of:
+//     Con(c, _) -> <lookup-def(|Constructors()); lookup-prop(|Type())> c
+// 
+//   type-of:
+//   	List([]) -> LType("Term")
+// 
+//   type-of:
+//   	ListTail([h], tl) -> LType(<type-of> h)
 
 
 

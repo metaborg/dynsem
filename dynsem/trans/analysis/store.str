@@ -19,7 +19,7 @@ rules /* store dispatch */
     m@Module(n, section*) -> m
     with
       log-timed(
-        <store-signatures> <built-ins-library> | "Storing built-in signatures" 
+        store-built-ins | "Storing built-in signatures" 
       );
       log-timed(
         <fetch-elem(?Signatures(_)); store-signatures> section* | "Storing signatures"

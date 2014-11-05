@@ -28,7 +28,7 @@ rules // renaming
 rules // storing and looking up
   
   store-def(|namespace):
-    name -> name
+    name -> (namespace, name)
     where
       if <not(Declared)> (namespace, name)
       then
@@ -38,15 +38,15 @@ rules // storing and looking up
   lookup-def(|namespace):
     name -> <Declared> (namespace, name)
    
-  store-prop(|namespace, name, proptype):
+  store-prop(|definition, proptype):
     propval -> propval
     where
-      rules(Properties:+ (namespace, proptype, name) -> propval)
+      rules(Properties:+ (proptype, definition) -> propval)
    
   lookup-prop(|proptype):
-    (namespace, name) -> <Properties> (namespace, proptype, name)
+    definition -> <Properties> (proptype, definition)
 
-  lookup-def-nss(|xxx) = ![()]
+  // lookup-def-nss(|xxx) = ![()]
   
 rules
   
