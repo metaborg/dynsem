@@ -123,10 +123,10 @@ rules /* store signatures */
       <map(store-native-datatype-op(|name-def))> func*
       
   store-native-datatype-op(|par-def):
-    d@NativeFunctionDecl(name, args*, s) -> d
+    d@NativeFunctionDecl(name, arg*, s) -> d
     with
       <store-def(|NativeDTFun(par-def))> name => name-def;
-      <store-prop(|Type(), name-def)> FunctionType(<rw-type> args*, <rw-type> s)
+      <store-prop(|Type(), name-def)> FunctionType(<rw-type> arg*, <rw-type> s)
 
   store-semantic-components = SemanticComponents(map(store-semantic-component))
   

@@ -61,4 +61,4 @@ signature
     Note: MessageLevel
     Warning: MessageLevel
     Error: MessageLevel
-    Message: MessageLevel * String -> Message
+    Message: MessageLevel * Term * String -> Message

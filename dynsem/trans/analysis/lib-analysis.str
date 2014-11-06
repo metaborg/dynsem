@@ -46,14 +46,19 @@ rules // storing and looking up
   lookup-prop(|proptype):
     definition -> <Properties> (proptype, definition)
 
-  // lookup-def-nss(|xxx) = ![()]
-  
 rules
   
-  add-msg(|level, message):
-    term -> term
-    with
-      rules(Messages:+ term -> Message(level, message))
+  add-msg(|level, t, message) =
+    rules(Messages:+ t -> Message(level, t, message))
+
+  get-msgs(postprocess|level) =
+  	all-keys-Messages; mapconcat(bagof-Messages); filter(msg-has-level(|level); postprocess)
+  
+  msg-has-level(|level) = ?Message(level, _, _)
+  
+  get-errors(postprocess) = get-msgs(postprocess|Error())
+  get-warnings(postprocess) = get-msgs(postprocess|Warning())
+  get-notes(postprocess) = get-msgs(postprocess|Note())
 
 rules // type rewriting
   
@@ -84,7 +89,40 @@ rules // type rewriting
 
   id-to-builtin-type:
     "Bool" -> BoolType()
+  
+  id-to-builtin-type:
+  	"Node" -> NodeType()
     
   id-to-builtin-type:
     "String" -> StringType()
+ 
+  pp-type = pp-type-builtin <+ is-string
+ 
+  pp-type-builtin:
+  	AnyType() -> "Any"
   
+  pp-type-builtin:
+    TermType() -> "Term"
+  
+  pp-type-builtin:
+  	NodeType() -> "Node"
+  
+  pp-type-builtin:
+  	IntType() -> "Int"
+  
+  pp-type-builtin:
+  	RealType() -> "Real"
+  
+  pp-type-builtin:
+  	BoolType() -> "Bool"
+  
+  pp-type-builtin:
+  	StringType() -> "String"
+
+
+  	
+  	
+  	
+  	
+  	
+  	
