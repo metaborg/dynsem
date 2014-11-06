@@ -27,26 +27,6 @@ rules /* store signatures */
     ; <store-def(|Types())> NodeType() => def-node; <store-prop(|SuperType(), def-node)> TermType()
     ; <store-def(|Types())> ValueType() => def-value; <store-prop(|SuperType(), def-value)> NodeType()
 
-  id-to-type = id-to-builtin-type <+ is-string
-
-  id-to-builtin-type:
-    "Term" -> TermType()
-
-  id-to-builtin-type:
-    "Any" -> AnyType()
-
-  id-to-builtin-type:
-    "Int" -> IntType()
-    
-  id-to-builtin-type:
-    "Real" -> RealType()
-
-  id-to-builtin-type:
-    "Bool" -> BoolType()
-    
-  id-to-builtin-type:
-    "String" -> StringType()
-  
   store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
 
   store-sort:
@@ -155,17 +135,4 @@ rules /* store signatures */
     with
       <store-def(|Types())> name => name-def;
       <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
-
-rules // type rewriting
-  
-  rw-type:
-    SimpleSort(s) -> <id-to-type> s
-  
-  rw-type:
-    ListSort(s) -> ListType(<rw-type> s)
-  
-  rw-type:
-    MapSort(key-sort, val-sort) -> MapType(<rw-type> key-sort, <rw-type> val-sort)
-  
-  rw-type = is-list; map(rw-type)
 

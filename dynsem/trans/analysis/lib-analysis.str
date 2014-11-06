@@ -38,7 +38,7 @@ rules // storing and looking up
   lookup-def(|namespace):
     name -> <Declared> (namespace, name)
    
-  store-prop(|definition, proptype):
+  store-prop(|proptype, definition):
     propval -> propval
     where
       rules(Properties:+ (proptype, definition) -> propval)
@@ -55,3 +55,36 @@ rules
     with
       rules(Messages:+ term -> Message(level, message))
 
+rules // type rewriting
+  
+  rw-type:
+    SimpleSort(s) -> <id-to-type> s
+  
+  rw-type:
+    ListSort(s) -> ListType(<rw-type> s)
+  
+  rw-type:
+    MapSort(key-sort, val-sort) -> MapType(<rw-type> key-sort, <rw-type> val-sort)
+  
+  rw-type = is-list; map(rw-type)
+  
+  id-to-type = id-to-builtin-type <+ is-string
+
+  id-to-builtin-type:
+    "Term" -> TermType()
+
+  id-to-builtin-type:
+    "Any" -> AnyType()
+
+  id-to-builtin-type:
+    "Int" -> IntType()
+    
+  id-to-builtin-type:
+    "Real" -> RealType()
+
+  id-to-builtin-type:
+    "Bool" -> BoolType()
+    
+  id-to-builtin-type:
+    "String" -> StringType()
+  

@@ -4,7 +4,6 @@ imports
   include/ds
   analysis/lib-analysis
   analysis/constructors
-  analysis/coercion
   ds
 
 rules /* store variables */
@@ -15,17 +14,26 @@ rules /* store variables */
     r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
     where
       debug(!1);
-      ArrowType(ma-ty, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+      ArrowType(ma-ty, bu-ty) := <lookup-def(|Arrows()); debug(!"1a "); lookup-prop(|Type()); debug(!"1b ")> arrow-name;
+      debug(!2);
       <type-of-top> (ma-ty, lhs);
-      
-      fail
+      debug(!3);
+      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> [r*, sc*];
+      debug(!4);
+      <map(\ p -> (AnyType(), p) \; type-check-premise-top)> p*;
+      debug(!5);
+      <type-of-top> (bu-ty, rhs);
+      debug(!6);
+      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> tc*;
+      debug(!7)
   
   type-of-top = 
     ?(ty, t); 
     ( 
       <type-of> t
       <+ 
-      <add-msg(|Error(), "Type check failed")> t
+      <add-msg(|Error(), "Type check failed")> t;
+      <debug(!"Type check failed: ")> t
     )
   
   type-of:
@@ -37,76 +45,90 @@ rules /* store variables */
       <store-prop(|Type(), v-def)> ty
   
   type-of:
-    (ty, VarRef(v)) -> ty
+    (ty, VarRef(v)) -> ty'
     where
       <lookup-def(|Vars()); lookup-prop(|Type())> v => v-ty;
-      <type-coerce> (v-ty, ty) // TODO continue here
-      
+      <type-coerce> (v-ty, ty) => ty' 
   
   type-of:
     (ty, Con(c, child*)) -> ty-con
     where
       ConstructorType(child-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <zip; map(type-of)> (child-ty*, child*)
+      <zip; map(type-of-top)> (child-ty*, child*)
 
-//   store-rule:
-//     r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
-//     with
-//     	debug(!1);
-//     	AType(ma-ty, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
-//     	debug(!2);
-//     	<store-variables> (ma-ty, lhs);
-//     	debug(!3);
-//     	<map(\ LabelComp(l, r) -> (l, r) \; store-variables)> [r*, sc*];
-//     	debug(!4);
-//     	<map(store-premise)> p*
-//     	;debug(!5)
-// 
-//   store-variables:
-//     (ty@LType(_), List([])) -> ty
-//   
-//   store-variables:
-//     (ty@LType(ety), ListTail([hd], tl)) -> ty
-//     with
-//       <store-variables> (ety, hd);
-//       <store-variables> (ty, tl)
-// 
-//   store-premise:
-//     f@Formula(Match(lhs, rhs)) -> f
-//     with
-//       lhs-ty := <type-of> lhs;
-//       <store-variables> (lhs-ty, rhs)
-// 
-//   store-premise:
-//     f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
-//     with
-//       <map(store-premise)> l*;
-//       <map(store-premise)> r*
-//   
-//   store-premise:
-//     f@MergePoint(cond, PremiseBlock(l*), PremiseBlock(r*)) -> f
-//     with
-//       <map(store-premise)> l*;
-//       <map(store-premise)> r*
-// 
-//   type-of:
-//     VarRef(v) -> <lookup-def(|Vars()); lookup-prop(|Type())> v
-//   
-//   type-of:
-//     Con(c, _) -> <lookup-def(|Constructors()); lookup-prop(|Type())> c
-// 
-//   type-of:
-//   	List([]) -> LType("Term")
-// 
-//   type-of:
-//   	ListTail([h], tl) -> LType(<type-of> h)
+  type-of:
+  	(ty, List([])) -> ty'
+  	where
+  		<type-coerce> (ListType(AnyType()), ty) => ty'
+  
+  type-of:
+    (ty, ListTail([h], t)) -> ty'
+    where
+      <type-of-top> (ty, t) => l-ty@ListType(elem-ty);
+      <type-of-top> (elem-ty, h) => head-ty;
+      <type-coerce> (ty, ListType(head-ty)) => ty'
 
+  type-check-premise-top = type-check-premise <+ add-msg(|Error(), "Premise type check failed"); debug(!"Premise type check failed ")
+
+  type-check-premise:
+  	f@Formula(TermEq(lhs, rhs)) -> f
+  	where
+  		<type-of-top> (AnyType(), lhs);
+  		<type-of-top> (AnyType(), rhs)
+  
+  type-check-premise:
+    f@Formula(TermNeq(lhs, rhs)) -> f
+    where
+      <type-of-top> (AnyType(), lhs);
+      <type-of-top> (AnyType(), rhs)
+
+  type-check-premise:
+    f@Formula(Match(lhs, rhs)) -> f
+    where
+      <type-of-top> (AnyType(), lhs) => lhs-ty;
+      <type-of-top> (lhs-ty, rhs) => rhs-ty
+  
+  type-check-premise:
+  	f@Formula(NMatch(lhs, rhs)) -> f
+  	where
+  		<type-of-top> (AnyType(), lhs);
+  		<type-of-top> (AnyType(), rhs)
+
+  type-check-premise:
+  	f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
+    with
+      <map(type-check-premise-top)> l*;
+      <map(type-check-premise-top)> r*
+
+  type-check-premise:
+    f@MergePoint(cond, PremiseBlock(l*), PremiseBlock(r*)) -> f
+    with
+    	<type-of-top> (BoolType(), cond);
+      <map(type-check-premise-top)> l*;
+      <map(type-check-premise-top)> r*
 
 rules
   
   // type-coerce-or-err = type-coerce <+ ?(ty1, ty2)
-  
+  /**
+  * We have a type ty-from that needs to conform to 
+  * ty-to
+  */
   type-coerce:
     (ty-from, ty-to) -> <fail>
 
+  type-coerce = eq
+    
+  type-coerce:
+  	(ty-from, AnyType()) -> ty-from
+  
+  type-coerce:
+    (ListType(ty-from), ListType(ty-to)) -> <type-coerce> (ty-from, ty-to)
+  
+  type-coerce:
+    (ty-from, ty-to) -> <type-coerce> (sup-ty, ty-to)
+    where
+      <not(eq)> (ty-from, ty-to);
+      <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
 
+  
