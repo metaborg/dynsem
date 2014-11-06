@@ -28,7 +28,8 @@ imports
 	generator/interpreter/unification
 	resolve-includes
 	analysis/main
-	
+	analysis/lib-analysis
+	analysis/constructors
 	
 signature
   constructors
@@ -38,16 +39,20 @@ signature
 
 rules // Analysis
 	
-	editor-analyze = analysis-default-editor
+  editor-analyze:
+    (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
+		with
+			<syntactic-transformations(|path, project-path)> ast => ast'; 
+			<m-in-analysis(
+				let
+				  mkmsg: Message(_, t, s) -> (t, s)
+				in
+		  		get-msgs(mkmsg|Error()) => error*;
+		  		get-msgs(mkmsg|Warning()) => warning*;
+		  		get-msgs(mkmsg|Note()) => note*
+		    end
+			)> ast' => analyzed-ast
 	
-	analysis-single-default-interface = 
-		analysis-single-default(mark-vars; desugar-top, id, id|<language>)
-	analysis-multiple-default-interface = 
-		analysis-multiple-default(parse-file <+ !(), mark-vars; desugar-top, id, id|<language>, <project-path>)
-	
-	// editor-save = 
-	//   where(generate-stratego; write-string-to-file); analysis-save-default(|<language>)
-
 rules
   
   // When given a tuple (path, string) this writes string into path.
@@ -159,24 +164,17 @@ rules // Builders
       result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; escape-variable-names; fuse-sections; unify-module; sugar-all; pp-debug> ast
 
   syntactic-transformations(|path, project-path) = 
-    resolve-includes(|path, project-path);
-    desugar-top;
-    explicate-module;
-    factorize-module;
-    escape-variable-names;
-    fuse-sections;
-    unify-module
-
-  analyze-manual-editor:
-    (selected, position, ast, path, project-path) -> (filename, [declaration*, property*])
-    with
-      filename := <guarantee-extension(|"analyzed.manual.ds")> path;
-      ast' := <syntactic-transformations(|path, project-path)> ast;
-      <m-in-analysis(
-        all-declared-keys => declaration*;
-        all-property-keys => property*
-      )> ast'
-
+    resolve-includes(|path, project-path)
+    ; desugar-top
+    // ; origin-track-forced(
+		  // explicate-module
+		  // ; factorize-module
+		  // ; escape-variable-names
+		  // ; fuse-sections
+		  // ; unify-module
+		  // ; id
+    // )
+    
   // format rules
   format-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
