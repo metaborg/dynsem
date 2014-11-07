@@ -152,6 +152,15 @@ rules /* store variables */
   		<type-of-top> (NONETYPE(), rhs)
 
   type-check-premise:
+    f@TypeCast(VarRef(v-name), ty-term) -> f
+    where
+      <rw-type> ty-term => ty;
+      <lookup-def(|Vars())> v-name => v-def;
+      <lookup-prop(|Type())> v-def => v-ty;
+      <type-coerce> (ty, v-ty);
+      <store-prop(|Type(), v-def)> ty // TODO continue here
+
+  type-check-premise:
   	f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
     with
       <map(type-check-premise-top)> l*;
