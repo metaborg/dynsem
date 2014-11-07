@@ -95,6 +95,9 @@ rules // type rewriting
     
   id-to-builtin-type:
     "String" -> StringType()
+  
+  id-to-builtin-type:
+    "Value" -> ValueType()
  
   pp-type = pp-type-builtin <+ is-string
  
@@ -118,6 +121,9 @@ rules // type rewriting
   
   pp-type-builtin:
   	StringType() -> "String"
+  
+  pp-type-builtin:
+    ValueType() -> "Value"
 
 
   	
