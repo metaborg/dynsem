@@ -22,9 +22,9 @@ rules /* store dispatch */
         store-built-ins | "Storing built-in signatures" 
       );
       log-timed(
-        <fetch-elem(?Signatures(_)); store-signatures> section* | "Storing signatures"
+        <map(try(store-signatures))> section* | "Storing signatures"
       );
       log-timed(
-        <fetch-elem(?Rules(<id>)); store-rules> section* | "Storing rules"
+        <map(try(store-rules))> section* | "Storing rules"
       )
 
