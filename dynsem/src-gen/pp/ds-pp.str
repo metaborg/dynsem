@@ -141,6 +141,18 @@ strategies
     ?RuleW(_, _)
 
   prettyprint-Premise :
+    TypeCast(t1__, t2__) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [t1__', S(" : "), t2__']
+                              )
+                            ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-Premise =
+    ?TypeCast(_, _)
+
+  prettyprint-Premise :
     Formula(t1__) -> [ H(
                          [SOpt(HS(), "0")]
                        , [t1__']
@@ -529,24 +541,15 @@ strategies
 
 strategies
   prettyprint-example =
+    prettyprint-Var
+
+  prettyprint-example =
     prettyprint-Entry
 
   prettyprint-example =
     prettyprint-Term
 
-  prettyprint-Term :
-    As(t1__, t2__) -> [ H(
-                          [SOpt(HS(), "0")]
-                        , [t1__', S("@"), t2__']
-                        )
-                      ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
-
-  is-Term =
-    ?As(_, _)
-
-  prettyprint-Term :
+  prettyprint-Var :
     VarRef(t1__) -> [ H(
                         [SOpt(HS(), "0")]
                       , [t1__']
@@ -554,19 +557,29 @@ strategies
                     ]
     with t1__' := <pp-one-Z(prettyprint-ID)> t1__
 
-  is-Term =
+  is-Var =
     ?VarRef(_)
 
   prettyprint-Term :
-    Var(t1__) -> [ H(
-                     [SOpt(HS(), "0")]
-                   , [t1__']
-                   )
-                 ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Term)
+    where t1__' := <pp-one-Z(prettyprint-Var)> t1__
+
+  prettyprint-Term :
+    As(t1__, t2__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [t1__', S("@"), t2__']
+                        )
+                      ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Term =
-    ?Var(_)
+    ?As(_, _)
 
   prettyprint-Term :
     Wld() -> [ H(
@@ -795,6 +808,9 @@ strategies
 
   is-Term =
     ?SortFunCall(_, _, _)
+
+  is-Var =
+    fail
 
   is-Entry =
     fail

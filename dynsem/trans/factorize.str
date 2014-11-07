@@ -140,7 +140,7 @@ rules
       end
   
   factorize-as-in-match:
-    As(v, t) -> ([Formula(Match(VarRef(v), t))], VarRef(v))
+    As(vref, t) -> ([Formula(Match(vref, t))], vref)
   
   lift-match-on-cond(c, succ):
     t -> ([], t)
