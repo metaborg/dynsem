@@ -82,7 +82,7 @@ rules /* store variables */
     where
       <type-of-top> (ty, t) => l-ty@ListType(elem-ty);
       <type-of-top> (elem-ty, h) => head-ty;
-      <type-coerce> (ty, ListType(head-ty)) => ty'
+      <type-coerce> (ListType(head-ty), ty) => ty'
 
   type-of:
     (ty, SortFunCall(fun-name, par, arg*)) -> ty'
