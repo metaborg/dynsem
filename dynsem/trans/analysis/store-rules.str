@@ -26,9 +26,9 @@ rules /* store variables */
     <+
     where(
     	?(ty, t);
-    	ty-str := <pp-type> ty;
+    	ty-str := <ensure(pp-type)> ty;
       <add-msg(|Error(), t, $[Type check failed: term is incompatible with type [ty-str]])> t;
-      <debug(!"Type check failed: ")> t
+      <debug(!"Type check failed, msg created: ")> t
     )
 
   type-of:
@@ -108,7 +108,7 @@ rules /* store variables */
     <+
   	where(
   		?p;
-  		p-str := <pp-dynsem-Premise-string> p;
+  		p-str := <ensure(pp-dynsem-Premise-string)> p;
     	add-msg(|Error(), p, $[Premise type check failed: [p-str]]);
     	<debug(!"Premise check failed: ")> p
   	)

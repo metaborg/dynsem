@@ -62,6 +62,8 @@ rules
 
 rules // type rewriting
   
+  ensure(s) = with(s; ?t); !t 
+  
   rw-type:
     SimpleSort(s) -> <id-to-type> s
   
@@ -124,5 +126,8 @@ rules // type rewriting
   
   pp-type-builtin:
     ValueType() -> "Value"
+  
+  pp-type-builtin:
+    ListType(ety) -> $[List([<pp-type> ety])]
 
   	
