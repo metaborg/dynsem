@@ -73,6 +73,12 @@ rules /* store variables */
       <type-coerce> (ty-con, ty) => ty'
 
   type-of:
+  	(ty, As(v, pat)) -> ty'
+  	where
+  		<type-of-top> (ty, pat) => ty';
+  		<type-of-top> (ty', v)
+
+  type-of:
   	(ty, List([])) -> ty'
   	where
   		<type-coerce> (ListType(ALPHATYPE()), ty) => ty'
