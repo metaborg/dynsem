@@ -25,6 +25,9 @@ rules /* store dispatch */
         <map(try(store-signatures))> section* | "Storing signatures"
       );
       log-timed(
+        <check-signatures> section* | "Checking signatures" 
+      );
+      log-timed(
         <map(try(store-rules))> section* | "Storing rules"
       )
 

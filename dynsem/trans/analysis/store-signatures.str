@@ -17,6 +17,8 @@ rules /* store signatures */
       <+ store-semantic-components
     ))
   
+  check-signatures = alltd(check-signature)
+  
   store-built-ins =
     <store-def(|Types())> AnyType()
     ; <store-def(|Types())> TermType() => def-term; <store-prop(|SuperType(), def-term)> AnyType()
@@ -135,4 +137,11 @@ rules /* store signatures */
     with
       <store-def(|Types())> name => name-def;
       <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
+
+rules
+  
+  check-signature = 
+    ( ?SimpleSort(s) + ?InjDecl(_, s) + ?InternalInjDecl(_, s));
+    <not(lookup-def(|Types()) + lookup-def(|NativeType()))> <id-to-type> s;
+    <add-msg(|Error(), s, $[Sort [s] is not declared])> s
 
