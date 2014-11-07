@@ -53,6 +53,12 @@ rules /* store variables */
       <?True() + ?False()> bool;
       <type-coerce> (BoolType(), ty)
   
+  
+  type-of:
+    (ty, String(_)) -> StringType()
+    where
+      <type-coerce> (StringType(), ty)
+
   type-of:
     (ty, VarRef(v)) -> ty'
     where
@@ -164,6 +170,9 @@ rules
     
   type-coerce:
   	(ty-from, AnyType()) -> ty-from
+  
+  type-coerce:
+  	(IntType(), RealType()) -> RealType()
   
   type-coerce:
     (ListType(AnyType()), to-ty@ListType(_)) -> to-ty
