@@ -27,19 +27,18 @@ signature
     DynSemType
   
   constructors
-    AnyType: DynSemType
-    TermType: DynSemType
     IntType: DynSemType
     RealType: DynSemType
     BoolType: DynSemType
     StringType: DynSemType
-    NodeType: DynSemType
     ValueType: DynSemType
     MapType: DynSemType * DynSemType -> DynSemType
     ListType: DynSemType -> DynSemType
     ConstructorType: List(DynSemType) * DynSemType -> DynSemType
     ArrowType: DynSemType * DynSemType -> DynSemType
     FunctionType: List(DynSemType) * DynSemType -> DynSemType
+    ALPHATYPE: DynSemType
+    NONETYPE: DynSemType
 
   sorts
     SortKind

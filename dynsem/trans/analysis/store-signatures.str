@@ -20,22 +20,18 @@ rules /* store signatures */
   check-signatures = alltd(check-signature)
   
   store-built-ins =
-    <store-def(|Types())> AnyType()
-    ; <store-def(|Types())> TermType() => def-term; <store-prop(|SuperType(), def-term)> AnyType()
-    ; <store-def(|Types())> IntType() => def-int; <store-prop(|SuperType(), def-int)> TermType()
-    ; <store-def(|Types())> RealType() => def-real; <store-prop(|SuperType(), def-real)> TermType()
-    ; <store-def(|Types())> BoolType() => def-bool; <store-prop(|SuperType(), def-bool)> TermType()
-    ; <store-def(|Types())> StringType() => def-str; <store-prop(|SuperType(), def-str)> TermType()
-    ; <store-def(|Types())> NodeType() => def-node; <store-prop(|SuperType(), def-node)> TermType()
-    ; <store-def(|Types())> ValueType() => def-value; <store-prop(|SuperType(), def-value)> NodeType()
+    <store-def(|Types())> IntType() => def-int
+    ; <store-def(|Types())> RealType() => def-real
+    ; <store-def(|Types())> BoolType() => def-bool
+    ; <store-def(|Types())> StringType() => def-st
+    ; <store-def(|Types())> ValueType() => def-value
 
   store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
 
   store-sort:
     decl@SortDecl(ty) -> decl
     where
-      <store-def(|Types())> ty => ty-def;
-      <store-prop(|SuperType(), ty-def)> NodeType()
+      <store-def(|Types())> ty => ty-def
 
   store-sort:
     decl@InjDecl(ty, sty-name) -> decl
@@ -47,8 +43,7 @@ rules /* store signatures */
   store-sort:
     decl@InternalSortDecl(ty) -> decl
     where
-      <store-def(|Types())> ty => ty-def;
-      <store-prop(|SuperType(), ty-def)> NodeType()
+      <store-def(|Types())> ty => ty-def
 
   store-sort:
     decl@InternalInjDecl(ty, sty-name) -> decl

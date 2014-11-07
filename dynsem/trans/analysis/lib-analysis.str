@@ -62,7 +62,9 @@ rules
 
 rules // type rewriting
   
-  ensure(s) = with(s; ?t); !t 
+  with-debug(s) = s <+ debug(!"Ensure failed: "); with(fail)
+  
+  ensure(s) = with-debug(s; ?t); !t 
   
   rw-type:
     SimpleSort(s) -> <id-to-type> s
@@ -78,12 +80,6 @@ rules // type rewriting
   id-to-type = id-to-builtin-type <+ is-string
 
   id-to-builtin-type:
-    "Term" -> TermType()
-
-  id-to-builtin-type:
-    "Any" -> AnyType()
-
-  id-to-builtin-type:
     "Int" -> IntType()
     
   id-to-builtin-type:
@@ -93,9 +89,6 @@ rules // type rewriting
     "Bool" -> BoolType()
   
   id-to-builtin-type:
-  	"Node" -> NodeType()
-    
-  id-to-builtin-type:
     "String" -> StringType()
   
   id-to-builtin-type:
@@ -104,14 +97,8 @@ rules // type rewriting
   pp-type = pp-type-builtin <+ is-string
  
   pp-type-builtin:
-  	AnyType() -> "Any"
-  
-  pp-type-builtin:
-    TermType() -> "Term"
-  
-  pp-type-builtin:
-  	NodeType() -> "Node"
-  
+    NONETYPE() -> "NO-TYPE"
+ 
   pp-type-builtin:
   	IntType() -> "Int"
   

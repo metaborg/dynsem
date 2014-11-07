@@ -75,7 +75,7 @@ rules /* store variables */
   type-of:
   	(ty, List([])) -> ty'
   	where
-  		<type-coerce> (ListType(AnyType()), ty) => ty'
+  		<type-coerce> (ListType(ALPHATYPE()), ty) => ty'
   
   type-of:
     (ty, ListTail([h], t)) -> ty'
@@ -87,7 +87,7 @@ rules /* store variables */
   type-of:
     (ty, SortFunCall(fun-name, par, arg*)) -> ty'
     where
-      <type-of> (AnyType(), par) => parent-ty;
+      <type-of-top> (NONETYPE(), par) => parent-ty;
       <lookup-def(|NativeType())> parent-ty => parent-def;
       <lookup-native-fun-def(|fun-name)> parent-def => fun-def;
       <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
@@ -116,19 +116,19 @@ rules /* store variables */
   type-check-premise:
   	f@Formula(TermEq(lhs, rhs)) -> f
   	where
-  		<type-of-top> (AnyType(), lhs);
-  		<type-of-top> (AnyType(), rhs)
+  		<type-of-top> (NONETYPE(), lhs);
+  		<type-of-top> (NONETYPE(), rhs)
   
   type-check-premise:
     f@Formula(TermNeq(lhs, rhs)) -> f
     where
-      <type-of-top> (AnyType(), lhs);
-      <type-of-top> (AnyType(), rhs)
+      <type-of-top> (NONETYPE(), lhs);
+      <type-of-top> (NONETYPE(), rhs)
 
   type-check-premise:
     f@Formula(Match(lhs, rhs)) -> f
     where
-      <type-of-top> (AnyType(), lhs) => lhs-ty;
+      <type-of-top> (NONETYPE(), lhs) => lhs-ty;
       <type-of-top> (lhs-ty, rhs) => rhs-ty
   
   type-check-premise:
@@ -142,8 +142,8 @@ rules /* store variables */
   type-check-premise:
   	f@Formula(NMatch(lhs, rhs)) -> f
   	where
-  		<type-of-top> (AnyType(), lhs);
-  		<type-of-top> (AnyType(), rhs)
+  		<type-of-top> (NONETYPE(), lhs);
+  		<type-of-top> (NONETYPE(), rhs)
 
   type-check-premise:
   	f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
@@ -167,16 +167,13 @@ rules
   * We have a type ty-from that needs to conform to 
   * ty-to
   */
-  type-coerce = eq; Fst
+  type-coerce = (eq <+ ?(_, NONETYPE())); Fst
     
-  type-coerce:
-  	(ty-from, AnyType()) -> ty-from
-  
   type-coerce:
   	(IntType(), RealType()) -> RealType()
   
   type-coerce:
-    (ListType(AnyType()), to-ty@ListType(_)) -> to-ty
+    (ListType(ALPHATYPE()), to-ty@ListType(_)) -> to-ty
   
   type-coerce:
     (ListType(ty-from), ListType(ty-to)) -> <type-coerce> (ty-from, ty-to)

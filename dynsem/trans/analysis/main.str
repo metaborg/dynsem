@@ -10,7 +10,7 @@ imports
 rules
 	
 	analyze =
-		log-timed(mark-vars  | "Marking variable definition sites");
+		log-timed(mark-vars  | "Marking variable def sites");
 	  log-timed(rename-all | "Renaming variables");
 	  log-timed(store-all  | "Storing all definitions")
 
