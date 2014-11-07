@@ -66,10 +66,11 @@ rules /* store variables */
       <type-coerce> (v-ty, ty) => ty'
   
   type-of:
-    (ty, Con(c, child*)) -> ty-con
+    (ty, Con(c, child*)) -> ty'
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <zip; map(type-of-top)> (fchild-ty*, child*)
+      <zip; map(type-of-top)> (fchild-ty*, child*);
+      <type-coerce> (ty-con, ty) => ty'
 
   type-of:
   	(ty, List([])) -> ty'
