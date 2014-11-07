@@ -9,7 +9,7 @@ imports
 
 rules /* store variables */
   
-  store-rules = map(store-rule)
+  store-rules = Rules(map(store-rule))
   
   store-rule:
     r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
@@ -30,6 +30,9 @@ rules /* store variables */
       <add-msg(|Error(), t, $[Type check failed: term is incompatible with type [ty-str]])> t;
       <debug(!"Type check failed: ")> t
     )
+
+  type-of:
+    (ty, Wld()) -> ty
   
   type-of:
     (ty, dec) -> ty
@@ -48,7 +51,7 @@ rules /* store variables */
     (ty, bool) -> BoolType()
     where
       <?True() + ?False()> bool;
-      <type-coerce> (IntType(), ty)
+      <type-coerce> (BoolType(), ty)
   
   type-of:
     (ty, VarRef(v)) -> ty'
@@ -59,8 +62,8 @@ rules /* store variables */
   type-of:
     (ty, Con(c, child*)) -> ty-con
     where
-      ConstructorType(child-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <zip; map(type-of-top)> (child-ty*, child*)
+      ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      <zip; map(type-of-top)> (fchild-ty*, child*)
 
   type-of:
   	(ty, List([])) -> ty'
@@ -74,7 +77,6 @@ rules /* store variables */
       <type-of-top> (elem-ty, h) => head-ty;
       <type-coerce> (ty, ListType(head-ty)) => ty'
 
-  // SortFunCall("makeList",VarRef("tf249"),[VarRef("ts171")])
   type-of:
     (ty, SortFunCall(fun-name, par, arg*)) -> ty'
     where
@@ -148,6 +150,8 @@ rules /* store variables */
     	<type-check-premise-top> cond;
       <map(type-check-premise-top)> l*;
       <map(type-check-premise-top)> r*
+  
+  type-check-premise = ?AllFail()
 
 rules
   
@@ -156,10 +160,13 @@ rules
   * We have a type ty-from that needs to conform to 
   * ty-to
   */
-  type-coerce = eq
+  type-coerce = eq; Fst
     
   type-coerce:
   	(ty-from, AnyType()) -> ty-from
+  
+  type-coerce:
+    (ListType(AnyType()), to-ty@ListType(_)) -> to-ty
   
   type-coerce:
     (ListType(ty-from), ListType(ty-to)) -> <type-coerce> (ty-from, ty-to)
@@ -167,13 +174,11 @@ rules
   type-coerce:
     (ty-from, ty-to) -> <type-coerce> (sup-ty, ty-to)
     where
-      <not(eq)> (ty-from, ty-to);
       <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
 
   type-coerce:
     (ty-from, ty-to) -> <type-coerce> (sup-ty, ty-to)
     where
-      <not(eq)> (ty-from, ty-to);
       <lookup-def(|NativeType()); lookup-prop(|SuperType())> ty-from => sup-ty
 
   
