@@ -44,14 +44,12 @@ rules // Analysis
 		with
 			<syntactic-transformations(|path, project-path)> ast => ast'; 
 			<m-in-analysis(
-				let
-				  mkmsg: Message(_, t, s) -> (t, s)
-				in
 		  		get-msgs(mkmsg|Error()) => error*;
 		  		get-msgs(mkmsg|Warning()) => warning*;
 		  		get-msgs(mkmsg|Note()) => note*
-		    end
 			)> ast' => analyzed-ast
+	
+	mkmsg: Message(_, t, s) -> (t, s)
 	
 rules
   
