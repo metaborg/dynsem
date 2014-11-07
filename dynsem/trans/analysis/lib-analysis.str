@@ -52,7 +52,7 @@ rules
     rules(Messages:+ t -> Message(level, t, message))
 
   get-msgs(postprocess|level) =
-  	all-keys-Messages; mapconcat(bagof-Messages); filter(msg-has-level(|level); postprocess)
+  	all-keys-Messages; mapconcat(bagof-Messages); filter(msg-has-level(|level)); map(postprocess)
   
   msg-has-level(|level) = ?Message(level, _, _)
   
