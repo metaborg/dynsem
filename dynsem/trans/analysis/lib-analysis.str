@@ -98,6 +98,12 @@ rules // type rewriting
  
   pp-type-builtin:
     NONETYPE() -> "NO-TYPE"
+  
+  pp-type-builtin:
+    ALPHATYPE() -> "ALPHA"
+  
+  pp-type-builtin:
+    BETATYPE() -> "BETA"
  
   pp-type-builtin:
   	IntType() -> "Int"

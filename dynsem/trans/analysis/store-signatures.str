@@ -135,13 +135,14 @@ rules /* store signatures */
 
 rules
   
-  check-signature = 
+  check-signature =
     ( ?SimpleSort(s) + ?InjDecl(_, s) + ?InternalInjDecl(_, s));
     <not(lookup-def(|Types()) + lookup-def(|NativeType()))> <id-to-type> s;
-    <add-msg(|Error(), s, $[Sort [s] is not declared])> s
+    add-msg(|Error(), s, $[Sort [s] is not declared])
 
   check-signature =
     ?Con(cname, _);
     <not(lookup-def(|Constructors()))> cname;
-    <add-msg(|Error(), cname, $[Constructor [cname] is not declared])> cname
+    add-msg(|Error(), cname, $[Constructor [cname] is not declared])
+
 

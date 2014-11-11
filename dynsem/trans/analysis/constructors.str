@@ -38,6 +38,7 @@ signature
     ArrowType: DynSemType * DynSemType -> DynSemType
     FunctionType: List(DynSemType) * DynSemType -> DynSemType
     ALPHATYPE: DynSemType
+    BETATYPE: DynSemType
     NONETYPE: DynSemType
 
   sorts

@@ -21,14 +21,21 @@ rules /* store variables */
       <type-of-top> (bu-ty, rhs);
       <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> tc*
   
+  store-rule:
+    r@Rule(_, _, Relation(_, _, nde@NamedDynamicEmitted(_, arrow-name), _)) -> r
+    where
+      <not(lookup-def(|Arrows()))> arrow-name;
+      add-msg(|Error(), nde, $[Arrow [arrow-name] is not declared])
+  
   type-of-top = 
   	type-of
     <+
     where(
     	?(ty, t);
     	ty-str := <ensure(pp-type)> ty;
-      <add-msg(|Error(), t, $[Type check failed: term is incompatible with type [ty-str]])> t;
-      <debug(!"Type check failed, msg created: ")> t
+      add-msg(|Error(), t, $[Type check failed: term is incompatible with type [ty-str]]);
+      <debug(!"Type check failed, msg created: ")> t;
+      !ty
     )
 
   type-of:
@@ -86,7 +93,15 @@ rules /* store variables */
   type-of:
     (ty, ListTail([h], t)) -> ty'
     where
+      <type-of-top> (ty, t) => l-ty@ListType(ALPHATYPE());
+      <type-of-top> (NONETYPE(), h) => head-ty;
+      <type-coerce> (ListType(head-ty), ty) => ty'
+      
+  type-of:
+    (ty, ListTail([h], t)) -> ty'
+    where
       <type-of-top> (ty, t) => l-ty@ListType(elem-ty);
+      <not(?ALPHATYPE())> elem-ty;
       <type-of-top> (elem-ty, h) => head-ty;
       <type-coerce> (ListType(head-ty), ty) => ty'
 
