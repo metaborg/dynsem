@@ -7,7 +7,7 @@ imports
 rules
   
   resolve-includes(|f-path, p-path):
-    Module(name, section*) -> Module(name, [Imports([Import("base")]), section'* ])
+    Module(name, section*) -> Module(name, section'*)
     where
       parent-dir := <string-tokenize(|['/']); reverse; Tl; reverse; concat-strings> f-path;
       include-dir := <concat-strings> [p-path, "/", parent-dir];
@@ -21,16 +21,15 @@ rules
     ([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [i, imported*])> (ixs*, section*)
     where
       <fetch-elem(?i)> imported*
-      <+
-      <?"base"> i
 
   include-imports(|include-dir, imported*):
   	([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [i, imported*])> ([ixs*, new-import*], section'*)
   	where
-  	  <not(fetch-elem(?i))> imported*;
-  	  <not(?"base")> i
+  	  <not(fetch-elem(?i))> imported*
     with
-  		Module(_, imported-section*) := <concat-strings; parse-ds-file> [include-dir, "/", i, ".ds"];
+  		Module(_, imported-section*) := <concat-strings; parse-ds-file-or-critical-log> [include-dir, "/", i, ".ds"];
   		(new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*;
       section'* := [section* | imported-section-noimports*]
+
+  parse-ds-file-or-critical-log = parse-ds-file <+ fatal-err(|"File not found: ")
 
