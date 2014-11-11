@@ -50,7 +50,11 @@ context-free syntax // rules
   
   ID = <rules> {reject}
   ID = <fresh> {reject}
-  
+  ID = <where> {reject}
+  ID = <true> {reject}
+  ID = <false> {reject}
+  ID = <fresh> {reject}
+
 context-free syntax // formulas
   Formula.Match    = [[Term] => [Term]]
   Formula.NMatch   = [[Term] =!=> [Term]] 
@@ -114,5 +118,3 @@ context-free priorities
 
   Term.MapSelect > Term.MapExtend
   
-
-

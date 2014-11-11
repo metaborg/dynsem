@@ -20,6 +20,10 @@ exports
     "try" PremisesBlock "or" PremisesBlock      -> Premise       {cons("TryOr")}
     "rules"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}
+    "where"                                     -> ID            {reject}
+    "true"                                      -> ID            {reject}
+    "false"                                     -> ID            {reject}
+    "fresh"                                     -> ID            {reject}
 
   context-free syntax
     CONTENTCOMPLETE -> ModuleSection {cons("COMPLETION-ModuleSection")}
