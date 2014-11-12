@@ -30,13 +30,13 @@ rules // storing and looking up
   store-def(|namespace):
     name -> (namespace, name)
     where
-      if <not(Declared)> (namespace, name)
-      then
-        rules(Declared:+ (namespace, name) -> (namespace, name))
-      end
+      rules(Declared:+ (namespace, name) -> (namespace, name))
   
   lookup-def(|namespace):
     name -> <Declared> (namespace, name)
+  
+  lookup-defs(|namespace):
+    name -> <bagof-Declared> (namespace, name)
    
   store-prop(|proptype, definition):
     propval -> propval
