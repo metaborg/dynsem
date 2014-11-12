@@ -77,14 +77,14 @@ rules /* store variables */
     (ty, ref@VarRef(v)) -> ty
     where
       <not(lookup-def(|Vars()))> v => v-ty;
-      add-msg(|Error(), ref, $[Variable [v] is not declared])
+      add-msg(|Error(), ref, $[Variable reference cannot be resolved])
   
   type-of:
     (ty, Con(c, child*)) -> ty'
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <zip; map(type-of-top)> (fchild-ty*, child*);
-      <type-coerce> (ty-con, ty) => ty'
+      <type-coerce> (ty-con, ty) => ty';
+      <zip; map(type-of-top)> (fchild-ty*, child*)
 
   type-of:
   	(ty, As(v, pat)) -> ty'
@@ -179,8 +179,12 @@ rules /* store variables */
       <rw-type> ty-term => ty;
       <lookup-def(|Vars())> v-name => v-def;
       <lookup-prop(|Type())> v-def => v-ty;
-      <type-coerce> (ty, v-ty);
-      <store-prop(|Type(), v-def)> ty // TODO continue here
+      if <type-coerce> (ty, v-ty)
+      then
+        <store-prop(|Type(), v-def)> ty
+      else
+        add-msg(|Error(), f, $[Type [<pp-type> ty] cannot be coerced to [<pp-type> v-ty]])
+      end
 
   type-check-premise:
   	f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
@@ -199,13 +203,15 @@ rules /* store variables */
 
 rules
   
-  // type-coerce-or-err = type-coerce <+ ?(ty1, ty2)
   /**
   * We have a type ty-from that needs to conform to 
   * ty-to
   */
+  type-coerce:
+    (ty-from, ty-to) -> <fail>
+  
   type-coerce = (eq <+ ?(_, NONETYPE())); Fst
-    
+  
   type-coerce:
   	(IntType(), RealType()) -> RealType()
   

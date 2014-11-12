@@ -4,6 +4,7 @@ imports
   include/ds
   analysis/lib-analysis
   analysis/constructors
+  analysis/store-rules
 
 rules /* store signatures */
   
@@ -136,7 +137,7 @@ rules /* store signatures */
 rules
   
   check-signature =
-    ( ?SimpleSort(s) + ?InjDecl(_, s) + ?InternalInjDecl(_, s));
+    ( ?SimpleSort(s) + ?InjDecl(_, s) + ?InternalInjDecl(_, s) );
     <not(lookup-def(|Types()) + lookup-def(|NativeType()))> <id-to-type> s;
     add-msg(|Error(), s, $[Sort [s] is not declared])
 
