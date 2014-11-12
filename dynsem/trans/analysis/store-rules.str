@@ -231,4 +231,5 @@ rules
     where
       <lookup-def(|NativeType()); lookup-prop(|SuperType())> ty-from => sup-ty
 
-  
+  type-coerce-sym = type-coerce <+ !(<Snd>, <Fst>); type-coerce
+

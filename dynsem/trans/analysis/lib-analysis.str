@@ -46,6 +46,9 @@ rules // storing and looking up
   lookup-prop(|proptype):
     definition -> <Properties> (proptype, definition)
 
+  lookup-props(|proptype):
+    definition -> <bagof-Properties> (proptype, definition)
+
 rules
   
   add-msg(|level, t, message) =

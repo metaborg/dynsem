@@ -157,3 +157,12 @@ rules
     <lookup-defs(|Constructors())> c => [_, _ | _];
     add-msg(|Error(), c, $[Duplicate constructor [c]])
 
+  check-signature =
+    ?decl@ArrowDecl(in-srt, name, out-srt);
+    in-ty := <rw-type> in-srt;
+    out-ty := <rw-type> out-srt;
+    arrow-def := <lookup-def(|Arrows())> name;
+    arrow-ty* := <lookup-props(|Type()); filter(not(?ArrowType(in-ty, out-ty))); make-set> arrow-def;
+    <fetch-elem(?ArrowType(<id>, _); !(<id>, in-ty); type-coerce-sym)> arrow-ty*;
+    add-msg(|Error(), decl, $[Arrow LHS overlaps with another arrow with the same name])
+    
