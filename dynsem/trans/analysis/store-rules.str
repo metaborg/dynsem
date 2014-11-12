@@ -30,13 +30,14 @@ rules /* store variables */
   type-of-top = 
   	type-of
     <+
-    where(
-    	?(ty, t);
-    	ty-str := <ensure(pp-type)> ty;
+    where(type-of-failure)
+
+  type-of-failure:
+    (ty, t) -> ty
+    where
+      ty-str := <ensure(pp-type)> ty;
       add-msg(|Error(), t, $[Type check failed: term is incompatible with type [ty-str]]);
-      <debug(!"Type check failed, msg created: ")> t;
-      !ty
-    )
+      <debug(!"Type check failed, msg created: ")> t
 
   type-of:
     (ty, Wld()) -> ty
