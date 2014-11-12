@@ -73,6 +73,12 @@ rules /* store variables */
       <type-coerce> (v-ty, ty) => ty'
   
   type-of:
+    (ty, ref@VarRef(v)) -> ty
+    where
+      <not(lookup-def(|Vars()))> v => v-ty;
+      add-msg(|Error(), ref, $[Variable [v] is not declared])
+  
+  type-of:
     (ty, Con(c, child*)) -> ty'
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
