@@ -94,7 +94,7 @@ rules // type rewriting
   id-to-builtin-type:
     "Value" -> ValueType()
  
-  pp-type = pp-type-builtin <+ is-string
+  pp-type = pp-type-builtin <+ is-string <+ is-list; map(pp-type); separate-by(|", "); concat-strings
  
   pp-type-builtin:
     NONETYPE() -> "NO-TYPE"
