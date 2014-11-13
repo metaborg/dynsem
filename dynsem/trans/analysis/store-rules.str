@@ -10,7 +10,7 @@ imports
 rules /* store variables */
   
   store-rules = Rules(map(store-rule))
-  
+
   store-rule:
     r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
     where
@@ -183,7 +183,7 @@ rules /* store variables */
       then
         <store-prop(|Type(), v-def)> ty
       else
-        add-msg(|Error(), f, $[Type [<pp-type> ty] cannot be coerced to [<pp-type> v-ty]])
+        add-msg(|Error(), f, $[Type [<pp-type> v-ty] cannot be coerced to [<pp-type> ty]])
       end
 
   type-check-premise:

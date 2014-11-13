@@ -56,8 +56,9 @@ context-free syntax // rules
   ID = <fresh> {reject}
 
 context-free syntax // formulas
+
   Formula.Match    = [[Term] => [Term]]
-  Formula.NMatch   = [[Term] =!=> [Term]] 
+  Formula.NMatch   = [[Term] =!=> [Term]]
   Formula.TermEq   = [[Term] == [Term]]
   Formula.TermNeq  = [[Term] != [Term]]
   
