@@ -9,7 +9,7 @@ rules
   resolve-includes(|f-path, p-path):
     Module(name, section*) -> Module(name, section'*)
     where
-      parent-dir := <string-tokenize(|['/']); reverse; Tl; reverse; concat-strings> f-path;
+      parent-dir := <string-tokenize(|['/']); init; intersperse(|"/"); concat-strings> f-path;
       include-dir := <concat-strings> [p-path, "/", parent-dir];
       (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
       section'* := <include-imports(|include-dir, [])> (import*, section-noimports*)
@@ -33,3 +33,4 @@ rules
 
   parse-ds-file-or-critical-log = parse-ds-file <+ fatal-err(|"File not found: ")
 
+  intersperse(|elem) = foldr(![], \ (x, x*) -> [x, elem, x*] \ )
