@@ -2,10 +2,13 @@ module analysis/main
 
 imports
 	analysis/rename
-	analysis/store
 	analysis/lib-analysis
+	analysis/store-signatures
+	analysis/store-rules
+	include/ds
 	mark-references
   lib-ds
+  
 
 rules
 	
@@ -22,3 +25,20 @@ rules
 
   all-declared-keys = all-keys-Declared; map(\ x -> (x, <bagof-Declared> x) \)
   all-property-keys = all-keys-Properties; map(\ x -> (x, <bagof-Properties> x) \)
+
+
+  store-all:
+    m@Module(n, section*) -> m
+    with
+      log-timed(
+        store-built-ins | "Storing built-in signatures" 
+      );
+      log-timed(
+        <map(try(store-signatures))> section* | "Storing signatures"
+      );
+      log-timed(
+        <check-signatures> section* | "Checking signatures" 
+      );
+      log-timed(
+        <map(try(store-rules))> section* | "Storing rules"
+      )
