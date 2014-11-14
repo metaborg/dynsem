@@ -24,12 +24,20 @@ rules /* store variables */
   store-rule:
     r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
     where
-      ArrowType(ma-ty, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+      ArrowType(ma-ty, bu-ty) := <select-arrow> (<lookup-def(|Arrows()); lookup-props(|Type())> arrow-name, lhs);
       <type-of-top> (ma-ty, lhs);
       <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> [r*, sc*];
       <map(type-check-premise-top)> p*;
       <type-of-top> (bu-ty, rhs);
       <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> tc*
+  
+  select-arrow:
+    ([arrow-type], _) -> arrow-type
+  
+  select-arrow:
+    (arrow-type*@[_, _|_], Con(c, _)) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
+    where
+      <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, con-ty)
   
   store-rule:
     r@Rule(_, _, Relation(_, _, nde@NamedDynamicEmitted(_, arrow-name), _)) -> r
