@@ -15,7 +15,7 @@ rules /* syntactic checks */
     r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> r
     where
       <not(?Con(_, _))> lhs;
-      add-msg(|Warning(), lhs, $[Left hand side of reduction rules must be a constructor pattern])
+      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern])
 
 rules /* store variables */
   
@@ -45,7 +45,7 @@ rules /* store variables */
       <not(lookup-def(|Arrows()))> arrow-name;
       add-msg(|Error(), nde, $[Arrow [arrow-name] is not declared])
   
-  type-of-top = 
+  type-of-top =
   	type-of
     <+
     where(type-of-failure)
