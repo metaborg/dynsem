@@ -31,6 +31,9 @@ rules
     m@Module(n, section*) -> m
     with
       log-timed(
+        <syntactic-checks> m | "Syntactic checks"
+      );
+      log-timed(
         store-built-ins | "Storing built-in signatures" 
       );
       log-timed(
