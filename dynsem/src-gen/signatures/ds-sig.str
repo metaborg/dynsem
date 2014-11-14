@@ -14,6 +14,7 @@ signature
     Axiom        : Formula -> Rule
     Rule         : List(Premise) * INFER * Formula -> Rule
     RuleW        : Formula * List(Premise) -> Rule
+    TypeCast     : Var * Type -> Premise
     Formula      : Formula -> Premise
     AllFail      : Premise
     PremiseBlock : List(Premise) -> PremisesBlock
@@ -42,9 +43,9 @@ signature
     LabelComp                     : Type * Term -> LabelComp
 
   constructors
-    As          : ID * Term -> Term
-    VarRef      : ID -> Term
-    Var         : ID -> Term
+    VarRef      : ID -> Var
+                : Var -> Term
+    As          : Var * Term -> Term
     Wld         : Term
     String      : STRING -> Term
     Int         : INT -> Term

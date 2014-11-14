@@ -104,7 +104,7 @@ rules // lift constructor sub-terms in match
   factorize-termeq-in-premise = fail
   
   factorize-relation-in-premise:
-  	Formula(Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) ->
+  	Formula(Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs, tc*))) ->
     [p1*, p2*, p3*, Formula(Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*))), p4*, p5*]
     where
       (p1*, read'*) := <try-factor(factorize-target-components, ?succ)> read*;
@@ -140,7 +140,7 @@ rules
       end
   
   factorize-as-in-match:
-    As(v, t) -> ([Formula(Match(VarRef(v), t))], VarRef(v))
+    As(vref, t) -> ([Formula(Match(vref, t))], vref)
   
   lift-match-on-cond(c, succ):
     t -> ([], t)

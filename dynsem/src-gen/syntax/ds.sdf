@@ -12,12 +12,17 @@ exports
     Formula                                     -> Rule          {cons("Axiom")}
     {Premise ","}+ INFER Formula                -> Rule          {cons("Rule")}
     Formula "where" {Premise ","}+              -> Rule          {cons("RuleW")}
+    Var ":" Type                                -> Premise       {cons("TypeCast")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
     "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
     Premise "<" PremisesBlock "+" PremisesBlock -> Premise       {cons("MergePoint")}
     "try" PremisesBlock "or" PremisesBlock      -> Premise       {cons("TryOr")}
     "rules"                                     -> ID            {reject}
+    "fresh"                                     -> ID            {reject}
+    "where"                                     -> ID            {reject}
+    "true"                                      -> ID            {reject}
+    "false"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}
 
   context-free syntax
@@ -57,9 +62,9 @@ exports
     CONTENTCOMPLETE -> LabelComp {cons("COMPLETION-LabelComp")}
 
   context-free syntax
-    ID "@" Term                         -> Term  {cons("As")}
-    ID                                  -> Term  {cons("VarRef"), avoid}
-    ID                                  -> Term  {cons("Var")}
+    ID                                  -> Var   {cons("VarRef")}
+    Var                                 -> Term  
+    Var "@" Term                        -> Term  {cons("As")}
     "_"                                 -> Term  {cons("Wld")}
     STRING                              -> Term  {cons("String")}
     INT                                 -> Term  {cons("Int")}
@@ -80,6 +85,7 @@ exports
     ID "[" Term "]" "(" {Term ","}* ")" -> Term  {cons("SortFunCall")}
 
   context-free syntax
+    CONTENTCOMPLETE -> Var   {cons("COMPLETION-Var")}
     CONTENTCOMPLETE -> Entry {cons("COMPLETION-Entry")}
     CONTENTCOMPLETE -> Term  {cons("COMPLETION-Term")}
 

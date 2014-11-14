@@ -35,9 +35,9 @@ menus
   menu: "Semantics"
 
     action  : "Generate Coq"           = generate-coq (openeditor) (meta)
-    action  : "Generate interpreter"   = generate-interpreter
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime) 
     action  : "Facto-plico-nify"       = facto-plico-nify-editor (openeditor) (realtime) (source)
     action  : "Facto-plicate"          = facto-plicate-editor (openeditor) (realtime) (source)
-    
+    action  : "Manual analysis"        = analyze-manual-editor (openeditor) (realtime) (source)
+    action  : "Generate interpreter"   = generate-interpreter

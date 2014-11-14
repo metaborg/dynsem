@@ -11,7 +11,7 @@ context-free syntax // rules
     
       [ {Rule "\n\n"}* ]
   ] 
-  
+    
   Rule.Strict = [strict [ID] [{INT ","}+]/[INT]]
   Rule.Seqstrict = [seqstrict [ID] [{INT ","}+]/[INT]]
     
@@ -29,6 +29,7 @@ context-free syntax // rules
       [{Premise ",\n"}+]
   ]
   
+  Premise.TypeCast = [[Var] : [Type]]
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail>
 
@@ -49,11 +50,15 @@ context-free syntax // rules
   
   ID = <rules> {reject}
   ID = <fresh> {reject}
-  
+  ID = <where> {reject}
+  ID = <true> {reject}
+  ID = <false> {reject}
+  ID = <fresh> {reject}
+
 context-free syntax // formulas
 
   Formula.Match    = [[Term] => [Term]]
-  Formula.NMatch   = [[Term] =!=> [Term]] 
+  Formula.NMatch   = [[Term] =!=> [Term]]
   Formula.TermEq   = [[Term] == [Term]]
   Formula.TermNeq  = [[Term] != [Term]]
   
@@ -81,13 +86,11 @@ context-free syntax // formulas
   
 context-free syntax // terms
 
-  Term.As       = [[ID]@[Term]]
-
-  Term.VarRef   = [[ID]] {avoid}
-  // Term.VarRef   = [[LID]] {avoid}
-
-  Term.Var      = [[ID]]
-  // Term.Var      = [[LID]]
+  Var.VarRef    = [[ID]]
+  
+  Term = Var
+  Term.As       = [[Var]@[Term]]
+  
   Term.Wld      = <_>
   
   Term.String   = [[STRING]]
@@ -116,6 +119,3 @@ context-free priorities
 
   Term.MapSelect > Term.MapExtend
   
-  
-  
-	

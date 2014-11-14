@@ -2,6 +2,7 @@ module generator/interpreter/gen-interpreter
 
 imports
 	include/ds
+	lib-ds
 	lib/editor-common.generated
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/index/-
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
@@ -59,19 +60,3 @@ rules
         cons-class* := <constructors-to-java-interpreter> mod'
       |"Constructor node generation")
     
-rules // util
-  
-  log-timed(s|msg) =
-      where(times => starttime)
-    ; s
-    ; where(
-        <diff-times>(<times>,starttime)
-      ; <concat-strings>[ <align-left>(' ', msg, 27)
-                        , " : [user/system] = ["
-                        , <self-children-user-time; ticks-to-seconds ; real-to-string(|2)>
-                        , "s/"
-                        , <self-children-sys-time; ticks-to-seconds ; real-to-string(|2)>
-                        , "s]"
-                        ]
-      ; log(|Info(),<id>)
-      )

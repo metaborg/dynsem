@@ -14,11 +14,11 @@ rules // desugaring
 	
   desugar-top = innermost(desugar); alltd(rules-concat)
   
-  desugar :
-    SortDecl(ty) -> InjDecl(ty, "Term")
+  // desugar :
+  //   SortDecl(ty) -> InjDecl(ty, "Term")
   
-  desugar :
-    InternalSortDecl(ty) -> InternalInjDecl(ty, "Term")
+  // desugar :
+  //   InternalSortDecl(ty) -> InternalInjDecl(ty, "Term")
     
   desugar :
     NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)

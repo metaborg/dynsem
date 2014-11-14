@@ -1,0 +1,64 @@
+module analysis/constructors
+
+signature
+  sorts
+    Namespace
+  
+  constructors
+    Types: Namespace
+    Vars: Namespace
+    Constructors: Namespace
+    Arrows: Namespace
+    NativeType: Namespace
+    NativeDTFun: String -> Namespace
+
+signature
+  sorts
+    Property
+
+  constructors
+    SuperType: Property
+    Type: Property
+    ConsKind: Property
+    NativeTypeJString: Property
+    
+signature
+  sorts
+    DynSemType
+  
+  constructors
+    IntType: DynSemType
+    RealType: DynSemType
+    BoolType: DynSemType
+    StringType: DynSemType
+    ValueType: DynSemType
+    MapType: DynSemType * DynSemType -> DynSemType
+    ListType: DynSemType -> DynSemType
+    ConstructorType: List(DynSemType) * DynSemType -> DynSemType
+    ArrowType: DynSemType * DynSemType -> DynSemType
+    FunctionType: List(DynSemType) * DynSemType -> DynSemType
+    ALPHATYPE: DynSemType
+    BETATYPE: DynSemType
+    NONETYPE: DynSemType
+
+  sorts
+    SortKind
+    ConsKind
+  
+  constructors
+    LanguageSort: SortKind
+  	InternalSort: SortKind
+  	LanguageCons: ConsKind
+  	InternalCons: ConsKind
+  	NativeOpCons: ConsKind
+
+signature
+  sorts
+    Message
+    MessageLevel
+  
+  constructors
+    Note: MessageLevel
+    Warning: MessageLevel
+    Error: MessageLevel
+    Message: MessageLevel * Term * String -> Message

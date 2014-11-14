@@ -26,6 +26,12 @@ rules
                      )
                    ]
     where a814 := <pp-one-Z(prettyprint-LID)> a
+
+  pp-dynsem-Premise-string =
+    parenthesize-ds
+    ; prettyprint-Premise
+    ; !V([], <id>)
+    ; box2text-string(|120)
   
   pp-dynsem-string =
     parenthesize-ds

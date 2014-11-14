@@ -18,7 +18,7 @@ language General properties
   provider      : include/ds.jar
   provider      : include/ds-java.jar                                                                  
                                                                                                   
-  observer      : editor-analyze           (multifile) 
+  observer      : editor-analyze
   // on save       : editor-save
   
   

@@ -16,6 +16,8 @@ completions
     <Premise:Premise> "\n" <INFER:INFER> "\n" <Formula:Formula> (blank)  
   completion template Rule : "Formula where Premise" =
     <Formula:Formula> "\nwhere\n\t" <Premise:Premise> (blank)  
+  completion template Premise : "Var : Type" =
+    <Var:Var> " : " <Type:Type>                           
   completion template Premise : "all-fail" =
     "all-fail"                                              
   completion template PremisesBlock : "{ }" =
@@ -60,8 +62,8 @@ completions
     <Type:Type> " " <Term:Term>  
 
 completions
-  completion template Term : "ID@Term" =
-    <ID:ID> "@" <Term:Term>  
+  completion template Term : "Var@Term" =
+    <Var:Var> "@" <Term:Term>  
   completion template Term : "_" =
     "_"    
   completion template Term : "ID()" =
