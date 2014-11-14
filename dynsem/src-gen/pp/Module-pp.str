@@ -17,9 +17,9 @@ strategies
     prettyprint-ImportModule
 
   prettyprint-Module :
-    Module(t0__, t1__) -> [ H(
+    Module(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [S("module "), t0__']
+                            , [S("module "), t1__']
                             )
                           , H(
                               []
@@ -27,44 +27,44 @@ strategies
                             )
                           , H(
                               [SOpt(HS(), "0")]
-                            , [t1__']
+                            , [t2__']
                             )
                           ]
-    with t0__' := <pp-one-Z(prettyprint-ModuleID)> t0__
-    with t1__' := <pp-V-list(prettyprint-ModuleSection|"")> t1__
+    with t1__' := <pp-one-Z(prettyprint-ModuleID)> t1__
+    with t2__' := <pp-V-list(prettyprint-ModuleSection|"1")> t2__
 
   is-Module =
     ?Module(_, _)
 
   prettyprint-ModuleSection :
-    Imports(t0__) -> [ H(
+    Imports(t1__) -> [ H(
                          [SOpt(HS(), "0")]
-                       , [S("imports "), t0__']
+                       , [S("imports "), t1__']
                        )
                      ]
-    with t0__' := <pp-H-list(prettyprint-ImportModule)> t0__
+    with t1__' := <pp-H-list(prettyprint-ImportModule)> t1__
 
   is-ModuleSection =
     ?Imports(_)
 
   prettyprint-ImportModule :
-    ImportWildcard(t0__) -> [ H(
+    ImportWildcard(t1__) -> [ H(
                                 [SOpt(HS(), "0")]
-                              , [t0__', S("/-")]
+                              , [t1__', S("/-")]
                               )
                             ]
-    with t0__' := <pp-one-Z(prettyprint-ModuleID)> t0__
+    with t1__' := <pp-one-Z(prettyprint-ModuleID)> t1__
 
   is-ImportModule =
     ?ImportWildcard(_)
 
   prettyprint-ImportModule :
-    Import(t0__) -> [ H(
+    Import(t1__) -> [ H(
                         [SOpt(HS(), "0")]
-                      , [t0__']
+                      , [t1__']
                       )
                     ]
-    with t0__' := <pp-one-Z(prettyprint-ModuleID)> t0__
+    with t1__' := <pp-one-Z(prettyprint-ModuleID)> t1__
 
   is-ImportModule =
     ?Import(_)

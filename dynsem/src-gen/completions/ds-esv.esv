@@ -7,21 +7,25 @@ imports
 
 completions
   completion template ModuleSection : "rules " =
-    "rules\n\n\t" (cursor) (blank)                
+    "rules\n\n\t" (cursor) (blank)                      
   completion template Rule : "strict ID INT/INT" =
-    "strict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
+    "strict " <ID:ID> " " <INT:INT> "/" <INT:INT>     
   completion template Rule : "seqstrict ID INT/INT" =
     "seqstrict " <ID:ID> " " <INT:INT> "/" <INT:INT>  
   completion template Rule : "Premise INFER Formula" =
     <Premise:Premise> "\n" <INFER:INFER> "\n" <Formula:Formula> (blank)  
   completion template Rule : "Formula where Premise" =
     <Formula:Formula> "\nwhere\n\t" <Premise:Premise> (blank)  
+  completion template Premise : "Var : Type" =
+    <Var:Var> " : " <Type:Type>                           
   completion template Premise : "all-fail" =
-    "all-fail"                                        
-  completion template Premise : "Premise < { Premise } + { Premise }" =
-    <Premise:Premise> "\n< {\n\t" <Premise:Premise> "\n} + {\n\t" <Premise:Premise> "\n}" (blank)  
-  completion template Premise : "try { Premise } or { Premise }" =
-    "try {\n\t" <Premise:Premise> "\n} or {\n\t" <Premise:Premise> "\n}" (blank)  
+    "all-fail"                                              
+  completion template PremisesBlock : "{ }" =
+    "{\n\t\t" (cursor) "\n\t}" (blank)                     
+  completion template Premise : "Premise < PremisesBlock + PremisesBlock" =
+    <Premise:Premise> "\n< " <PremisesBlock:PremisesBlock> "\n+ " <PremisesBlock:PremisesBlock> (blank)  
+  completion template Premise : "try PremisesBlock or PremisesBlock" =
+    "try " <PremisesBlock:PremisesBlock> "\nor  " <PremisesBlock:PremisesBlock> (blank)  
 
 completions
   completion template Formula : "Term => Term" =
@@ -58,8 +62,8 @@ completions
     <Type:Type> " " <Term:Term>  
 
 completions
-  completion template Term : "ID@Term" =
-    <ID:ID> "@" <Term:Term>  
+  completion template Term : "Var@Term" =
+    <Var:Var> "@" <Term:Term>  
   completion template Term : "_" =
     "_"    
   completion template Term : "ID()" =

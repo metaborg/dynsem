@@ -26,12 +26,24 @@ rules
                      )
                    ]
     where a814 := <pp-one-Z(prettyprint-LID)> a
+
+  pp-dynsem-Premise-string =
+    parenthesize-ds
+    ; prettyprint-Premise
+    ; !V([], <id>)
+    ; box2text-string(|120)
   
   pp-dynsem-string =
     parenthesize-ds
     ; prettyprint-Module
     ; !V([], <id>)
     ; box2text-string(|80)
+
+  pp-dynsem-Rule-string =
+    parenthesize-ds
+    ; prettyprint-Rule
+    ; !V([], <id>)
+    ; box2text-string(|120)
 
   pp-debug :
     ast -> result

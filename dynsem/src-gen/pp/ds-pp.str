@@ -26,10 +26,13 @@ strategies
     prettyprint-Rule
 
   prettyprint-example =
+    prettyprint-PremisesBlock
+
+  prettyprint-example =
     prettyprint-Premise
 
   prettyprint-ModuleSection :
-    Rules(t0__) -> [ H(
+    Rules(t1__) -> [ H(
                        [SOpt(HS(), "0")]
                      , [S("rules")]
                      )
@@ -37,68 +40,64 @@ strategies
                        []
                      , [S("")]
                      )
-                   , t0__'
+                   , t1__'
                    ]
-    with t0__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-Rule|"")> t0__]
+    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-Rule|"1")> t1__]
 
   is-ModuleSection =
     ?Rules(_)
 
   prettyprint-Rule :
-    Strict(t0__, t1__, t2__) -> [ H(
+    Strict(t1__, t2__, t3__) -> [ H(
                                     [SOpt(HS(), "0")]
                                   , [ S("strict ")
-                                    , t0__'
-                                    , S(" ")
                                     , t1__'
-                                    , S("/")
+                                    , S(" ")
                                     , t2__'
+                                    , S("/")
+                                    , t3__'
                                     ]
                                   )
                                 ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
-    with t1__' := <pp-H-list(prettyprint-INT|",")> t1__
-    with t2__' := <pp-one-Z(prettyprint-INT)> t2__
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-H-list(prettyprint-INT|",")> t2__
+    with t3__' := <pp-one-Z(prettyprint-INT)> t3__
 
   is-Rule =
     ?Strict(_, _, _)
 
   prettyprint-Rule :
-    Seqstrict(t0__, t1__, t2__) -> [ H(
+    Seqstrict(t1__, t2__, t3__) -> [ H(
                                        [SOpt(HS(), "0")]
                                      , [ S("seqstrict ")
-                                       , t0__'
-                                       , S(" ")
                                        , t1__'
-                                       , S("/")
+                                       , S(" ")
                                        , t2__'
+                                       , S("/")
+                                       , t3__'
                                        ]
                                      )
                                    ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
-    with t1__' := <pp-H-list(prettyprint-INT|",")> t1__
-    with t2__' := <pp-one-Z(prettyprint-INT)> t2__
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-H-list(prettyprint-INT|",")> t2__
+    with t3__' := <pp-one-Z(prettyprint-INT)> t3__
 
   is-Rule =
     ?Seqstrict(_, _, _)
 
   prettyprint-Rule :
-    Axiom(t0__) -> [ H(
+    Axiom(t1__) -> [ H(
                        [SOpt(HS(), "0")]
-                     , [t0__']
+                     , [t1__']
                      )
                    ]
-    with t0__' := <pp-one-Z(prettyprint-Formula)> t0__
+    with t1__' := <pp-one-Z(prettyprint-Formula)> t1__
 
   is-Rule =
     ?Axiom(_)
 
   prettyprint-Rule :
-    Rule(t0__, t1__, t2__) -> [ H(
-                                  [SOpt(HS(), "0")]
-                                , [t0__']
-                                )
-                              , H(
+    Rule(t1__, t2__, t3__) -> [ H(
                                   [SOpt(HS(), "0")]
                                 , [t1__']
                                 )
@@ -106,39 +105,55 @@ strategies
                                   [SOpt(HS(), "0")]
                                 , [t2__']
                                 )
+                              , H(
+                                  [SOpt(HS(), "0")]
+                                , [t3__']
+                                )
                               ]
-    with t0__' := <pp-V-list(prettyprint-Premise|"0", ",")> t0__
-    with t1__' := <pp-one-Z(prettyprint-INFER)> t1__
-    with t2__' := <pp-one-Z(prettyprint-Formula)> t2__
+    with t1__' := <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+    with t2__' := <pp-one-Z(prettyprint-INFER)> t2__
+    with t3__' := <pp-one-Z(prettyprint-Formula)> t3__
 
   is-Rule =
     ?Rule(_, _, _)
 
   prettyprint-Rule :
-    RuleW(t0__, t1__) -> [ H(
+    RuleW(t1__, t2__) -> [ H(
                              [SOpt(HS(), "0")]
-                           , [t0__']
+                           , [t1__']
                            )
                          , H(
                              [SOpt(HS(), "0")]
                            , [S("where")]
                            )
-                         , t1__'
+                         , t2__'
                          ]
-    with t0__' := <pp-one-Z(prettyprint-Formula)> t0__
-    with t1__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+    with t1__' := <pp-one-Z(prettyprint-Formula)> t1__
+    with t2__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t2__
                                     ]
 
   is-Rule =
     ?RuleW(_, _)
 
   prettyprint-Premise :
-    Formula(t0__) -> [ H(
+    TypeCast(t1__, t2__) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [t1__', S(" : "), t2__']
+                              )
+                            ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-Premise =
+    ?TypeCast(_, _)
+
+  prettyprint-Premise :
+    Formula(t1__) -> [ H(
                          [SOpt(HS(), "0")]
-                       , [t0__']
+                       , [t1__']
                        )
                      ]
-    with t0__' := <pp-one-Z(prettyprint-Formula)> t0__
+    with t1__' := <pp-one-Z(prettyprint-Formula)> t1__
 
   is-Premise =
     ?Formula(_)
@@ -153,55 +168,54 @@ strategies
   is-Premise =
     ?AllFail()
 
+  prettyprint-PremisesBlock :
+    PremiseBlock(t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("{")]
+                            )
+                          , t1__'
+                          , t2__'
+                          ]
+    with t1__' := <pp-indent(|"4")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+                                    ]
+    with t2__' := <pp-indent(|"2")> [S("}")]
+
+  is-PremisesBlock =
+    ?PremiseBlock(_)
+
   prettyprint-Premise :
-    MergePoint(t0__, t1__, t2__) -> [ H(
+    MergePoint(t1__, t2__, t3__) -> [ H(
                                         [SOpt(HS(), "0")]
-                                      , [t0__']
+                                      , [t1__']
                                       )
                                     , H(
                                         [SOpt(HS(), "0")]
-                                      , [S("< {")]
+                                      , [S("< "), t2__']
                                       )
-                                    , t1__'
                                     , H(
                                         [SOpt(HS(), "0")]
-                                      , [S("} + {")]
-                                      )
-                                    , t2__'
-                                    , H(
-                                        [SOpt(HS(), "0")]
-                                      , [S("}")]
+                                      , [S("+ "), t3__']
                                       )
                                     ]
-    with t0__' := <pp-one-Z(prettyprint-Premise)> t0__
-    with t1__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
-                                    ]
-    with t2__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t2__
-                                    ]
+    with t1__' := <pp-one-Z(prettyprint-Premise)> t1__
+    with t2__' := <pp-one-Z(prettyprint-PremisesBlock)> t2__
+    with t3__' := <pp-one-Z(prettyprint-PremisesBlock)> t3__
 
   is-Premise =
     ?MergePoint(_, _, _)
 
   prettyprint-Premise :
-    TryOr(t0__, t1__) -> [ H(
+    TryOr(t1__, t2__) -> [ H(
                              [SOpt(HS(), "0")]
-                           , [S("try {")]
+                           , [S("try "), t1__']
                            )
-                         , t0__'
                          , H(
                              [SOpt(HS(), "0")]
-                           , [S("} or {")]
-                           )
-                         , t1__'
-                         , H(
-                             [SOpt(HS(), "0")]
-                           , [S("}")]
+                           , [S("or  "), t2__']
                            )
                          ]
-    with t0__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t0__
-                                    ]
-    with t1__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
-                                    ]
+    with t1__' := <pp-one-Z(prettyprint-PremisesBlock)> t1__
+    with t2__' := <pp-one-Z(prettyprint-PremisesBlock)> t2__
 
   is-Premise =
     ?TryOr(_, _)
@@ -210,6 +224,9 @@ strategies
     fail
 
   is-Rule =
+    fail
+
+  is-PremisesBlock =
     fail
 
   is-Premise =
@@ -236,83 +253,83 @@ strategies
     prettyprint-LabelComp
 
   prettyprint-Formula :
-    Match(t0__, t1__) -> [ H(
+    Match(t1__, t2__) -> [ H(
                              [SOpt(HS(), "0")]
-                           , [t0__', S(" => "), t1__']
+                           , [t1__', S(" => "), t2__']
                            )
                          ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Formula =
     ?Match(_, _)
 
   prettyprint-Formula :
-    NMatch(t0__, t1__) -> [ H(
+    NMatch(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [t0__', S(" =!=> "), t1__']
+                            , [t1__', S(" =!=> "), t2__']
                             )
                           ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Formula =
     ?NMatch(_, _)
 
   prettyprint-Formula :
-    TermEq(t0__, t1__) -> [ H(
+    TermEq(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [t0__', S(" == "), t1__']
+                            , [t1__', S(" == "), t2__']
                             )
                           ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Formula =
     ?TermEq(_, _)
 
   prettyprint-Formula :
-    TermNeq(t0__, t1__) -> [ H(
+    TermNeq(t1__, t2__) -> [ H(
                                [SOpt(HS(), "0")]
-                             , [t0__', S(" != "), t1__']
+                             , [t1__', S(" != "), t2__']
                              )
                            ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Formula =
     ?TermNeq(_, _)
 
   prettyprint-Formula :
-    Relation(t0__, t1__, t2__, t3__) -> [ H(
+    Relation(t1__, t2__, t3__, t4__) -> [ H(
                                             [SOpt(HS(), "0")]
-                                          , [ t0__'
-                                            , t1__'
-                                            , S(" ")
+                                          , [ t1__'
                                             , t2__'
                                             , S(" ")
                                             , t3__'
+                                            , S(" ")
+                                            , t4__'
                                             ]
                                           )
                                         ]
-    with t0__' := <pp-one-Z(prettyprint-Reads)> t0__
-    with t1__' := <pp-one-Z(prettyprint-Source)> t1__
-    with t2__' := <pp-one-Z(prettyprint-Rel)> t2__
-    with t3__' := <pp-one-Z(prettyprint-Target)> t3__
+    with t1__' := <pp-one-Z(prettyprint-Reads)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Source)> t2__
+    with t3__' := <pp-one-Z(prettyprint-Rel)> t3__
+    with t4__' := <pp-one-Z(prettyprint-Target)> t4__
 
   is-Formula =
     ?Relation(_, _, _, _)
 
   prettyprint-Formula :
-    IsValue(t0__) -> [ H(
+    IsValue(t1__) -> [ H(
                          [SOpt(HS(), "0")]
                        , [ S("value(")
-                         , t0__'
+                         , t1__'
                          , S(")")
                          ]
                        )
                      ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
 
   is-Formula =
     ?IsValue(_)
@@ -328,68 +345,68 @@ strategies
     ?NoReads()
 
   prettyprint-Reads :
-    Reads(t0__) -> [ H(
+    Reads(t1__) -> [ H(
                        [SOpt(HS(), "0")]
-                     , [t0__', S(" |- ")]
+                     , [t1__', S(" |- ")]
                      )
                    ]
-    with t0__' := <pp-H-list(prettyprint-LabelComp|", ")> t0__
+    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
 
   is-Reads =
     ?Reads(_)
 
   prettyprint-Source :
-    Source(t0__) -> [ H(
+    Source(t1__) -> [ H(
                         [SOpt(HS(), "0")]
-                      , [t0__']
+                      , [t1__']
                       )
                     ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
 
   is-Source =
     ?Source(_)
 
   prettyprint-Source :
-    Source(t0__, t1__) -> [ H(
+    Source(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
                             , [ S("(")
-                              , t0__'
-                              , S(", ")
                               , t1__'
+                              , S(", ")
+                              , t2__'
                               , S(")")
                               ]
                             )
                           ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
-    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
 
   is-Source =
     ?Source(_, _)
 
   prettyprint-Target :
-    Target(t0__) -> [ H(
+    Target(t1__) -> [ H(
                         [SOpt(HS(), "0")]
-                      , [t0__']
+                      , [t1__']
                       )
                     ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
 
   is-Target =
     ?Target(_)
 
   prettyprint-Target :
-    Target(t0__, t1__) -> [ H(
+    Target(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
                             , [ S("(")
-                              , t0__'
-                              , S(", ")
                               , t1__'
+                              , S(", ")
+                              , t2__'
                               , S(")")
                               ]
                             )
                           ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
-    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
 
   is-Target =
     ?Target(_, _)
@@ -405,95 +422,95 @@ strategies
     ?Dynamic()
 
   prettyprint-Rel :
-    NamedDynamic(t0__) -> [ H(
+    NamedDynamic(t1__) -> [ H(
                               [SOpt(HS(), "0")]
                             , [ S("-")
-                              , t0__'
+                              , t1__'
                               , S("->")
                               ]
                             )
                           ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
 
   is-Rel =
     ?NamedDynamic(_)
 
   prettyprint-Rel :
-    NamedDynamicParametric(t0__, t1__) -> [ H(
+    NamedDynamicParametric(t1__, t2__) -> [ H(
                                               [SOpt(HS(), "0")]
                                             , [ S("-")
-                                              , t0__'
-                                              , S("(")
                                               , t1__'
+                                              , S("(")
+                                              , t2__'
                                               , S(")->")
                                               ]
                                             )
                                           ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
     with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
 
   is-Rel =
     ?NamedDynamicParametric(_, _)
 
   prettyprint-Rel :
-    DynamicEmitted(t0__) -> [ H(
+    DynamicEmitted(t1__) -> [ H(
                                 [SOpt(HS(), "0")]
                               , [ S("-")
-                                , t0__'
+                                , t1__'
                                 , S("->")
                                 ]
                               )
                             ]
-    with t0__' := <pp-H-list(prettyprint-LabelComp|", ")> t0__
+    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
 
   is-Rel =
     ?DynamicEmitted(_)
 
   prettyprint-Rel :
-    NamedDynamicEmitted(t0__, t1__) -> [ H(
+    NamedDynamicEmitted(t1__, t2__) -> [ H(
                                            [SOpt(HS(), "0")]
                                          , [ S("-")
-                                           , t0__'
-                                           , S("-")
                                            , t1__'
+                                           , S("-")
+                                           , t2__'
                                            , S("->")
                                            ]
                                          )
                                        ]
-    with t0__' := <pp-H-list(prettyprint-LabelComp|", ")> t0__
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
+    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
 
   is-Rel =
     ?NamedDynamicEmitted(_, _)
 
   prettyprint-Rel :
-    NamedDynamicEmittedParametric(t0__, t1__, t2__) -> [ H(
+    NamedDynamicEmittedParametric(t1__, t2__, t3__) -> [ H(
                                                            [SOpt(HS(), "0")]
                                                          , [ S("-")
-                                                           , t0__'
-                                                           , S("-")
                                                            , t1__'
-                                                           , S("(")
+                                                           , S("-")
                                                            , t2__'
+                                                           , S("(")
+                                                           , t3__'
                                                            , S(")->")
                                                            ]
                                                          )
                                                        ]
-    with t0__' := <pp-H-list(prettyprint-LabelComp|", ")> t0__
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
     with t2__' := <pp-one-Z(prettyprint-ID)> t2__
+    with t3__' := <pp-one-Z(prettyprint-ID)> t3__
 
   is-Rel =
     ?NamedDynamicEmittedParametric(_, _, _)
 
   prettyprint-LabelComp :
-    LabelComp(t0__, t1__) -> [ H(
+    LabelComp(t1__, t2__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [t0__', S(" "), t1__']
+                               , [t1__', S(" "), t2__']
                                )
                              ]
-    with t0__' := <pp-one-Z(prettyprint-Type)> t0__
-    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t1__' := <pp-one-Z(prettyprint-Type)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-LabelComp =
     ?LabelComp(_, _)
@@ -519,44 +536,45 @@ strategies
 
 strategies
   prettyprint-example =
+    prettyprint-Var
+
+  prettyprint-example =
     prettyprint-Entry
 
   prettyprint-example =
     prettyprint-Term
 
-  prettyprint-Term :
-    As(t0__, t1__) -> [ H(
-                          [SOpt(HS(), "0")]
-                        , [t0__', S("@"), t1__']
-                        )
-                      ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
-    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-
-  is-Term =
-    ?As(_, _)
-
-  prettyprint-Term :
-    VarRef(t0__) -> [ H(
+  prettyprint-Var :
+    VarRef(t1__) -> [ H(
                         [SOpt(HS(), "0")]
-                      , [t0__']
+                      , [t1__']
                       )
                     ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
 
-  is-Term =
+  is-Var =
     ?VarRef(_)
 
   prettyprint-Term :
-    Var(t0__) -> [ H(
-                     [SOpt(HS(), "0")]
-                   , [t0__']
-                   )
-                 ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Term)
+    where t1__' := <pp-one-Z(prettyprint-Var)> t1__
+
+  prettyprint-Term :
+    As(t1__, t2__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [t1__', S("@"), t2__']
+                        )
+                      ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Term =
-    ?Var(_)
+    ?As(_, _)
 
   prettyprint-Term :
     Wld() -> [ H(
@@ -569,81 +587,81 @@ strategies
     ?Wld()
 
   prettyprint-Term :
-    String(t0__) -> [ H(
+    String(t1__) -> [ H(
                         [SOpt(HS(), "0")]
-                      , [t0__']
+                      , [t1__']
                       )
                     ]
-    with t0__' := <pp-one-Z(prettyprint-STRING)> t0__
+    with t1__' := <pp-one-Z(prettyprint-STRING)> t1__
 
   is-Term =
     ?String(_)
 
   prettyprint-Term :
-    Int(t0__) -> [ H(
+    Int(t1__) -> [ H(
                      [SOpt(HS(), "0")]
-                   , [t0__']
+                   , [t1__']
                    )
                  ]
-    with t0__' := <pp-one-Z(prettyprint-INT)> t0__
+    with t1__' := <pp-one-Z(prettyprint-INT)> t1__
 
   is-Term =
     ?Int(_)
 
   prettyprint-Term :
-    Real(t0__) -> [ H(
+    Real(t1__) -> [ H(
                       [SOpt(HS(), "0")]
-                    , [t0__']
+                    , [t1__']
                     )
                   ]
-    with t0__' := <pp-one-Z(prettyprint-REAL)> t0__
+    with t1__' := <pp-one-Z(prettyprint-REAL)> t1__
 
   is-Term =
     ?Real(_)
 
   prettyprint-Term :
-    Con(t0__, t1__) -> [ H(
+    Con(t1__, t2__) -> [ H(
                            [SOpt(HS(), "0")]
-                         , [ t0__'
+                         , [ t1__'
                            , S("(")
-                           , t1__'
+                           , t2__'
                            , S(")")
                            ]
                          )
                        ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
-    with t1__' := <pp-H-list(prettyprint-Term|", ")> t1__
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-H-list(prettyprint-Term|", ")> t2__
 
   is-Term =
     ?Con(_, _)
 
   prettyprint-Term :
-    List(t0__) -> [ H(
+    List(t1__) -> [ H(
                       [SOpt(HS(), "0")]
                     , [ S("[ ")
-                      , t0__'
+                      , t1__'
                       , S(" ]")
                       ]
                     )
                   ]
-    with t0__' := <pp-H-list(prettyprint-Term|", ")> t0__
+    with t1__' := <pp-H-list(prettyprint-Term|", ")> t1__
 
   is-Term =
     ?List(_)
 
   prettyprint-Term :
-    ListTail(t0__, t1__) -> [ H(
+    ListTail(t1__, t2__) -> [ H(
                                 [SOpt(HS(), "0")]
                               , [ S("[ ")
-                                , t0__'
-                                , S(" | ")
                                 , t1__'
+                                , S(" | ")
+                                , t2__'
                                 , S(" ]")
                                 ]
                               )
                             ]
-    with t0__' := <pp-H-list(prettyprint-Term|", ")> t0__
-    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t1__' := <pp-H-list(prettyprint-Term|", ")> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Term =
     ?ListTail(_, _)
@@ -679,112 +697,115 @@ strategies
     ?False()
 
   prettyprint-Term :
-    Map(t0__) -> [ H(
+    Map(t1__) -> [ H(
                      [SOpt(HS(), "0")]
                    , [ S("{")
-                     , t0__'
+                     , t1__'
                      , S("}")
                      ]
                    )
                  ]
-    with t0__' := <pp-H-list(prettyprint-Entry|", ")> t0__
+    with t1__' := <pp-H-list(prettyprint-Entry|", ")> t1__
 
   is-Term =
     ?Map(_)
 
   prettyprint-Entry :
-    Bind(t0__, t1__) -> [ H(
+    Bind(t1__, t2__) -> [ H(
                             [SOpt(HS(), "0")]
-                          , [t0__', S(" |--> "), t1__']
+                          , [t1__', S(" |--> "), t2__']
                           )
                         ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Entry =
     ?Bind(_, _)
 
   prettyprint-Entry :
-    Binds(t0__, t1__) -> [ H(
+    Binds(t1__, t2__) -> [ H(
                              [SOpt(HS(), "0")]
-                           , [t0__', S(" |*-> "), t1__']
+                           , [t1__', S(" |*-> "), t2__']
                            )
                          ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Entry =
     ?Binds(_, _)
 
   prettyprint-Entry :
-    MapEntry(t0__) -> [ H(
+    MapEntry(t1__) -> [ H(
                           [SOpt(HS(), "0")]
-                        , [t0__']
+                        , [t1__']
                         )
                       ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
 
   is-Entry =
     ?MapEntry(_)
 
   prettyprint-Term :
-    MapSelect(t0__, t1__) -> [ H(
+    MapSelect(t1__, t2__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [ t0__'
+                               , [ t1__'
                                  , S("[")
-                                 , t1__'
+                                 , t2__'
                                  , S("]")
                                  ]
                                )
                              ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Term =
     ?MapSelect(_, _)
 
   prettyprint-Term :
-    MapExtend(t0__, t1__) -> [ H(
+    MapExtend(t1__, t2__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [t0__', S(" + "), t1__']
+                               , [t1__', S(" + "), t2__']
                                )
                              ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Term =
     ?MapExtend(_, _)
 
   prettyprint-Term :
-    MapUnbind(t0__, t1__) -> [ H(
+    MapUnbind(t1__, t2__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [t0__', S(" \\ "), t1__']
+                               , [t1__', S(" \\ "), t2__']
                                )
                              ]
-    with t0__' := <pp-one-Z(prettyprint-Term)> t0__
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
   is-Term =
     ?MapUnbind(_, _)
 
   prettyprint-Term :
-    SortFunCall(t0__, t1__, t2__) -> [ H(
+    SortFunCall(t1__, t2__, t3__) -> [ H(
                                          [SOpt(HS(), "0")]
-                                       , [ t0__'
+                                       , [ t1__'
                                          , S("[")
-                                         , t1__'
-                                         , S("](")
                                          , t2__'
+                                         , S("](")
+                                         , t3__'
                                          , S(")")
                                          ]
                                        )
                                      ]
-    with t0__' := <pp-one-Z(prettyprint-ID)> t0__
-    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-Term|", ")> t2__
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
+    with t3__' := <pp-H-list(prettyprint-Term|", ")> t3__
 
   is-Term =
     ?SortFunCall(_, _, _)
+
+  is-Var =
+    fail
 
   is-Entry =
     fail

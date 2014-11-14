@@ -9,16 +9,10 @@ imports
   explicate
   factorize
   mark-references
-  generator/interpreter/tmp-pregeneration-extra
+  generator/interpreter/unification
   
 rules
   
-  pre-generation-transform =
-    alltd(escape-variable-names);
-    fuse-sections;
-    strip-annos;
-    merge-overlapping-rules
-
 rules /* rename variables */
 
   escape-variable-names:
@@ -42,11 +36,8 @@ rules
       natops-decl  := <collect-all(?NativeOperators(<id>)); concat; !NativeOperators(<id>)> body*;
       values-decl  := <collect-all(?Values(<id>)); concat; !Values(<id>)> body*;
       arrow-decl   := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
-      signatures    := [ sort-decl, natty-decl, cons-decl, semcomp-decl, intsort-decl, intcons-decl, natcons-decl, values-decl, arrow-decl ];
+      signatures    := [ sort-decl, intsort-decl, cons-decl, semcomp-decl, intcons-decl, natcons-decl, natops-decl, values-decl, arrow-decl, natty-decl ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
-
-
-
 
 signature
   constructors

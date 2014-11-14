@@ -1,0 +1,129 @@
+module analysis/lib-analysis
+
+imports
+  include/ds
+  analysis/constructors
+
+rules
+	
+	new-analysis-scope(s) = {| Renames, Declared, Properties, Messages: s |}
+
+rules // renaming
+  
+  new-scope-renames(s|namespace) = {| Renames: s |}
+  
+  rename(|namespace):
+    name -> name'
+    where
+      <Renames> (namespace, name) => name'
+  
+  rename(|namespace):
+    name -> name'
+    where
+      <not(Renames)> (namespace, name)
+    with
+      name' := <newname> name;
+      rules(Renames:+ (namespace, name) -> name')
+
+rules // storing and looking up
+  
+  store-def(|namespace):
+    name -> (namespace, name)
+    where
+      rules(Declared:+ (namespace, name) -> (namespace, name))
+  
+  lookup-def(|namespace):
+    name -> <Declared> (namespace, name)
+  
+  lookup-defs(|namespace):
+    name -> <bagof-Declared> (namespace, name)
+   
+  store-prop(|proptype, definition):
+    propval -> propval
+    where
+      rules(Properties:+ (proptype, definition) -> propval)
+   
+  lookup-prop(|proptype):
+    definition -> <Properties> (proptype, definition)
+
+  lookup-props(|proptype):
+    definition -> <bagof-Properties> (proptype, definition)
+
+rules
+  
+  add-msg(|level, t, message) =
+    rules(Messages:+ t -> Message(level, t, message))
+
+  get-msgs(postprocess|level) =
+  	all-keys-Messages; mapconcat(bagof-Messages); filter(msg-has-level(|level)); map(postprocess)
+  
+  msg-has-level(|level) = ?Message(level, _, _)
+  
+  get-errors(postprocess) = get-msgs(postprocess|Error())
+  get-warnings(postprocess) = get-msgs(postprocess|Warning())
+  get-notes(postprocess) = get-msgs(postprocess|Note())
+
+rules // type rewriting
+  
+  with-debug(s) = s <+ debug(!"Ensure failed: "); with(fail)
+  
+  ensure(s) = with-debug(s; ?t); !t 
+  
+  rw-type:
+    SimpleSort(s) -> <id-to-type> s
+  
+  rw-type:
+    ListSort(s) -> ListType(<rw-type> s)
+  
+  rw-type:
+    MapSort(key-sort, val-sort) -> MapType(<rw-type> key-sort, <rw-type> val-sort)
+  
+  rw-type = is-list; map(rw-type)
+  
+  id-to-type = id-to-builtin-type <+ is-string
+
+  id-to-builtin-type:
+    "Int" -> IntType()
+    
+  id-to-builtin-type:
+    "Real" -> RealType()
+
+  id-to-builtin-type:
+    "Bool" -> BoolType()
+  
+  id-to-builtin-type:
+    "String" -> StringType()
+  
+  id-to-builtin-type:
+    "Value" -> ValueType()
+ 
+  pp-type = pp-type-builtin <+ is-string <+ is-list; map(pp-type); separate-by(|", "); concat-strings
+ 
+  pp-type-builtin:
+    NONETYPE() -> "NO-TYPE"
+  
+  pp-type-builtin:
+    ALPHATYPE() -> "ALPHA"
+  
+  pp-type-builtin:
+    BETATYPE() -> "BETA"
+ 
+  pp-type-builtin:
+  	IntType() -> "Int"
+  
+  pp-type-builtin:
+  	RealType() -> "Real"
+  
+  pp-type-builtin:
+  	BoolType() -> "Bool"
+  
+  pp-type-builtin:
+  	StringType() -> "String"
+  
+  pp-type-builtin:
+    ValueType() -> "Value"
+  
+  pp-type-builtin:
+    ListType(ety) -> $[List([<pp-type> ety])]
+
+  	
