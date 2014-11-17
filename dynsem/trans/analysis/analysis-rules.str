@@ -23,7 +23,7 @@ rules /* syntactic checks */
       <?Var(v) + ?MatchedVar(v)> dec
     where
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
-      add-msg(|Warning(), dec, $[Variable [v] is never read])
+      add-msg(|Warning(), dec, $[Variable is never read])
 
 rules /* store variables */
   
