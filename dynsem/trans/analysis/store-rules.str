@@ -22,29 +22,41 @@ rules /* store variables */
   store-rules = Rules(map(store-rule))
 
   store-rule:
-    r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> r
+    r@Rule(_, _, Relation(_, _, nde@NamedDynamicEmitted(_, arrow-name), _)) -> r
     where
-      ArrowType(ma-ty, bu-ty) := <select-arrow> (<lookup-def(|Arrows()); lookup-props(|Type())> arrow-name, lhs);
+      <not(lookup-def(|Arrows()))> arrow-name;
+      add-msg(|Error(), nde, $[Arrow [arrow-name] is not declared])
+
+  store-rule:
+    r@Rule(_, _, Relation(_, Source(con@Con(c, _), _), NamedDynamicEmitted(_, arrow-name), _)) -> r
+    where
+      con-def := <lookup-def(|Constructors())> c;
+      ConstructorType(_, con-ty) := <lookup-prop(|Type())> con-def;
+      arrow-def := <lookup-def(|Arrows())> arrow-name;
+      arrow-ty* := <lookup-props(|Type())> arrow-def;
+      if <select-arrow> (arrow-ty*, con-ty) => arrow-ty
+      then
+        <store-rule> (arrow-ty, r)
+      else
+        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
+        add-msg(|Error(), con, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> con-ty]])
+      end
+
+  store-rule:
+    (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
+    where
       <type-of-top> (ma-ty, lhs);
       <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> [r*, sc*];
       <map(type-check-premise-top)> p*;
       <type-of-top> (bu-ty, rhs);
       <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> tc*
-  
+
   select-arrow:
     ([arrow-type], _) -> arrow-type
   
   select-arrow:
-    (arrow-type*@[_, _|_], Con(c, _)) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
-    where
-      <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, con-ty)
-  
-  store-rule:
-    r@Rule(_, _, Relation(_, _, nde@NamedDynamicEmitted(_, arrow-name), _)) -> r
-    where
-      <not(lookup-def(|Arrows()))> arrow-name;
-      add-msg(|Error(), nde, $[Arrow [arrow-name] is not declared])
-  
+    (arrow-type*@[_, _|_], con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
+
   type-of-top =
   	type-of
     <+
@@ -180,10 +192,18 @@ rules /* store variables */
   type-check-premise:
   	f@Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> f
     where
-    	ArrowType(bu-ty, ma-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
-    	<type-of-top> (bu-ty, lhs);
-    	<type-of-top> (ma-ty, rhs);
-    	<map(\ LabelComp(l, r) -> (<rw-type> l, r) \; type-of-top)> [r*, sc*, tc*]
+    	<type-of-top> (NONETYPE(), lhs) => lhs-ty;
+    	arrow-def := <lookup-def(|Arrows())> arrow-name;
+      arrow-ty* := <lookup-props(|Type())> arrow-def;
+      if <select-arrow> (arrow-ty*, lhs-ty) => ArrowType(bu-ty, ma-ty)
+      then
+        <type-of-top> (bu-ty, lhs);
+        <type-of-top> (ma-ty, rhs);
+        <map(\ LabelComp(l, r) -> (<rw-type> l, r) \; type-of-top)> [r*, sc*, tc*]
+      else
+        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
+        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
+      end
       
   type-check-premise:
   	f@Formula(NMatch(lhs, rhs)) -> f
