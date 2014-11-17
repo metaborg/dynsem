@@ -228,11 +228,10 @@ rules /* store variables */
       <lookup-def(|Vars())> v-name => v-def;
       <store-prop(|Use(), v-def)> r; 
       <lookup-prop(|Type())> v-def => v-ty;
-      if <type-coerce> (ty, v-ty)
+      <store-prop(|Type(), v-def)> ty;
+      if <not(type-coerce)> (ty, v-ty)
       then
-        <store-prop(|Type(), v-def)> ty
-      else
-        add-msg(|Error(), f, $[Type [<pp-type> v-ty] cannot be coerced to [<pp-type> ty]])
+        add-msg(|Warning(), f, $[Term might be uncoerceable to [<pp-type> ty]])
       end
 
   type-check-premise:
