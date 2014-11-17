@@ -1,10 +1,10 @@
-module analysis/store-signatures
+module analysis/analysis-signatures
 
 imports
   include/ds
   analysis/lib-analysis
   analysis/constructors
-  analysis/store-rules
+  analysis/analysis-rules
 
 rules /* store signatures */
   

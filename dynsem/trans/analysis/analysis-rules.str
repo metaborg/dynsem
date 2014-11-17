@@ -1,4 +1,4 @@
-module analysis/store-rules
+module analysis/analysis-rules
 
 imports
   include/ds

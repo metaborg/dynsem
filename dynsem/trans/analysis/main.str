@@ -3,8 +3,8 @@ module analysis/main
 imports
 	analysis/rename
 	analysis/lib-analysis
-	analysis/store-signatures
-	analysis/store-rules
+	analysis/analysis-signatures
+	analysis/analysis-rules
 	include/ds
 	mark-references
   lib-ds
@@ -21,11 +21,6 @@ rules
   	where(analyze);
   	s
   )
-
-
-  all-declared-keys = all-keys-Declared; map(\ x -> (x, <bagof-Declared> x) \)
-  all-property-keys = all-keys-Properties; map(\ x -> (x, <bagof-Properties> x) \)
-
 
   store-all:
     m@Module(n, section*) -> m
