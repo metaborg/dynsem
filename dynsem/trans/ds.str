@@ -153,19 +153,19 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factorized.ds")> path;
-      result := <resolve-includes(|path, project-path); desugar-top; factorize-module; sugar-all; pp-debug> ast
+      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
 
   explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; sugar-all; pp-debug> ast
+      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; explicate-module; sugar-all; pp-debug> ast
 
   merge-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"merged.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; escape-variable-names; fuse-sections; unify-module; sugar-all; pp-debug> ast
+      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; escape-variable-names; unify-module; sugar-all; pp-debug> ast
 
   // format rules
   format-editor:
