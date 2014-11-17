@@ -21,6 +21,7 @@ signature
     Type: Property
     ConsKind: Property
     NativeTypeJString: Property
+    Use: Property
     
 signature
   sorts

@@ -18,8 +18,6 @@ rules /* store signatures */
       <+ store-semantic-components
     ))
   
-  check-signatures = alltd(check-signature)
-  
   store-built-ins =
     <store-def(|Types())> IntType() => def-int
     ; <store-def(|Types())> RealType() => def-real
@@ -135,6 +133,8 @@ rules /* store signatures */
       <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
 
 rules
+  
+  check-signatures = alltd(check-signature)
   
   check-signature =
     ( ?SimpleSort(s) + ?InjDecl(_, s) + ?InternalInjDecl(_, s) );

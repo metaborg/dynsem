@@ -9,13 +9,21 @@ imports
 
 rules /* syntactic checks */
 
-  syntactic-checks = alltd(syntactic-check)
+  post-analysis-checks = alltd(post-analysis-check)
   
-  syntactic-check:
+  post-analysis-check:
     r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> r
     where
       <not(?Con(_, _))> lhs;
       add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern])
+  
+  post-analysis-check:
+    dec -> dec
+    where
+      <?Var(v) + ?MatchedVar(v)> dec
+    where
+      <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
+      add-msg(|Warning(), dec, $[Variable [v] is never read])
 
 rules /* store variables */
   
@@ -98,9 +106,11 @@ rules /* store variables */
       <type-coerce> (StringType(), ty)
 
   type-of:
-    (ty, VarRef(v)) -> ty'
+    (ty, r@VarRef(v)) -> ty'
     where
-      <lookup-def(|Vars()); lookup-prop(|Type())> v => v-ty;
+      <lookup-def(|Vars())> v => v-def;
+      <store-prop(|Use(), v-def)> r;
+      <lookup-prop(|Type())> v-def => v-ty;
       <type-coerce> (v-ty, ty) => ty'
   
   type-of:
@@ -212,10 +222,11 @@ rules /* store variables */
   		<type-of-top> (NONETYPE(), rhs)
 
   type-check-premise:
-    f@TypeCast(VarRef(v-name), ty-term) -> f
+    f@TypeCast(r@VarRef(v-name), ty-term) -> f
     where
       <rw-type> ty-term => ty;
       <lookup-def(|Vars())> v-name => v-def;
+      <store-prop(|Use(), v-def)> r; 
       <lookup-prop(|Type())> v-def => v-ty;
       if <type-coerce> (ty, v-ty)
       then
