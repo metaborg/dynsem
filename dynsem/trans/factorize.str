@@ -37,16 +37,6 @@ rules
 	      prem7* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*, prem5*, prem6*]
 	    )
 
-  // factorize-rule :
-  //   Rule(prem1*, infer, TermEq(lhs, rhs)) -> Rule(prem4*, infer, TermEq(lhs', rhs'))
-  //   with
-  //   	while-counting(
-	 //    	(prem2*, lhs') := <factorize-lhs> lhs;
-	 //      (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-	 //      // prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*]
-	 //      prem4* := [prem2*, prem1*, prem3*]
-	 //    )
-
 rules // lift constructor sub-terms in match
   
   try-factor(f) = try-factor(f, id)
