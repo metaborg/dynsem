@@ -36,7 +36,8 @@ menus
 
     action  : "Generate Coq"           = generate-coq (openeditor) (meta)
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
-    action  : "Refocus"                = refocus-editor (openeditor) (realtime) 
-    action  : "Facto-plico-nify"       = facto-plico-nify-editor (openeditor) (realtime) (source)
-    action  : "Facto-plicate"          = facto-plicate-editor (openeditor) (realtime) (source)
+    action  : "Refocus"                = refocus-editor (openeditor) (realtime)
+    action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
+    action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
+    action  : "Merge"                  = merge-editor (openeditor) (realtime) (source)
     action  : "Generate interpreter"   = generate-interpreter

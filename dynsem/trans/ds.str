@@ -149,17 +149,23 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
-  facto-plicate-editor:
+  factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"factoplicated.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; sugar-all; pp-debug> ast
+      filename := <guarantee-extension(|"factorized.ds")> path;
+      result := <resolve-includes(|path, project-path); desugar-top; factorize-module; sugar-all; pp-debug> ast
 
-  facto-plico-nify-editor:
+  explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"factopliconified.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; escape-variable-names; fuse-sections; unify-module; sugar-all; pp-debug> ast
+      filename := <guarantee-extension(|"explicated.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; sugar-all; pp-debug> ast
+
+  merge-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"merged.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; escape-variable-names; fuse-sections; unify-module; sugar-all; pp-debug> ast
 
   // format rules
   format-editor:
