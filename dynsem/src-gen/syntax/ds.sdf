@@ -24,6 +24,7 @@ exports
     "true"                                      -> ID            {reject}
     "false"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}
+    "fail"                                      -> ID            {reject}
 
   context-free syntax
     CONTENTCOMPLETE -> ModuleSection {cons("COMPLETION-ModuleSection")}
