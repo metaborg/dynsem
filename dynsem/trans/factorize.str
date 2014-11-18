@@ -121,12 +121,13 @@ rules
       end
   
   factorize-listtail-in-match:
-    ListTail([x], xs) -> (prem*, ListTail([x], xs'))
+    ListTail([x], xs) -> ([prem1*, prem2*], ListTail([x'], xs'))
     where
     	let cond = not(is-prime-factor)
     	in
-        (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
-        !success
+    	  (prem1*, x') := <lift-match-on-cond(cond, ?success1)> x;
+        (prem2*, xs') := <lift-match-on-cond(cond, ?success2)> xs;
+        (!success1 <+ !success2)
       end
   
   factorize-as-in-match:
@@ -178,12 +179,13 @@ rules
       end
   
   factorize-listtail-in-build:
-    ListTail([x], xs) -> (prem*, ListTail([x], xs'))
+    ListTail([x], xs) -> ([prem1*, prem2*], ListTail([x'], xs'))
     where
       let cond = not(?VarRef(_))
       in
-        (prem*, xs') := <lift-build-on-cond(cond, ?success)> xs;
-        !success
+        (prem1*, x') := <lift-build-on-cond(cond, ?success1)> x;
+        (prem2*, xs') := <lift-build-on-cond(cond, ?success2)> xs;
+        (!success1 <+ !success2)
       end
   
   factorize-mapselect-in-build:
