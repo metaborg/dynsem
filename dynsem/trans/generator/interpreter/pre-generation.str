@@ -37,7 +37,12 @@ rules
       values-decl  := <collect-all(?Values(<id>)); concat; !Values(<id>)> body*;
       arrow-decl   := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
       signatures    := [ sort-decl, intsort-decl, cons-decl, semcomp-decl, intcons-decl, natcons-decl, natops-decl, values-decl, arrow-decl, natty-decl ];
-      rule-decl*    := <collect-all(?Rules(<id>)); concat> body*
+      rule-decl*    := <collect-all(?Rules(<id>)); concat; sort-rules> body*
+  
+  sort-rules = qsort((rule-con-name, rule-con-name); string-gt)
+  
+  rule-con-name =
+  	?Rule(_, _, Relation(_, Source(Con(<id>, _), _), _, _)) <+ !""
 
 signature
   constructors
