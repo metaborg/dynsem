@@ -54,6 +54,7 @@ context-free syntax // rules
   ID = <true> {reject}
   ID = <false> {reject}
   ID = <fresh> {reject}
+  ID = <fail> {reject}
 
 context-free syntax // formulas
 

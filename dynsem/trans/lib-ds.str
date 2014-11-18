@@ -15,11 +15,6 @@ imports
 
 rules // utils for deterministic variable name generation
   
-  while-counting(s) =
-    {| NextVarIdx:
-      NextVarIdx < s + rules(NextVarIdx : _ -> 0); s
-    |}
-  
   next-variable(|prefix) = <newname> prefix
  
   next-variable = next-variable(|"lifted_")
