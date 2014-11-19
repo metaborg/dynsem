@@ -46,7 +46,7 @@ rules // storing and looking up
   lookup-defs(|namespace):
     name -> <bagof-Declared> (namespace, name)
     
-  lookup-def-all(|namespace) = all-keys-Declared; debug(!"XXX "); filter(?(namespace, _)); mapconcat(bagof-Declared)
+  lookup-def-all(|namespace) = all-keys-Declared; filter(?(namespace, _)); mapconcat(bagof-Declared)
    
   store-prop(|proptype, declaration):
     propval -> propval

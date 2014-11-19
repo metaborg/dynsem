@@ -51,7 +51,7 @@ rules
   ds2java-interfaces:
     Module(_, section*) -> iface*
     where
-    	type* := <lookup-def-all(|Type())>
+    	type* := <lookup-def-all(|Types())>
     	;debug(!"TYPES: ")
     where
       iface* := []
