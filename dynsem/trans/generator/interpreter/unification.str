@@ -5,9 +5,7 @@ imports
   ds
   pp
   lib-ds
-  sugar
-  explicate
-  factorize
+  ds2ds/sugar
 
 rules /* merge ovelapping rules */
 

@@ -1,16 +1,9 @@
 module lib-ds
 
 imports
-  libstratego-lib
-  libstratego-gpp
-  libstratego-aterm
   include/ds
-  lib/editor-common.generated
-  refocus
-  sugar
-  strict
   ds
-
+  
 // utilities for DynSem analysis
 
 rules // utils for deterministic variable name generation

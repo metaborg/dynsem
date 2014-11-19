@@ -5,10 +5,6 @@ imports
   ds
   pp
   lib-ds
-  sugar
-  explicate
-  factorize
-  mark-references
   generator/interpreter/unification
   
 rules

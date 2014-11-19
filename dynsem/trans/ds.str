@@ -1,10 +1,9 @@
 module ds
 
 imports
-	libstratego-lib
-	libstratego-gpp
-	libstratego-aterm
 	include/ds
+
+imports
 	lib/editor-common.generated
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/analysis/-
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
@@ -12,24 +11,21 @@ imports
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/index/-
 	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/editor/properties
 	pp
-	names
-	check
-	refocus
-	factorize
-	explicate
 	outline
-	strict
-	sugar
-	mark-references
-	types.generated
-	types.manual
-	generator/interpreter/pre-generation
-	generator/interpreter/gen-interpreter
-	generator/interpreter/unification
-	resolve-includes
+	ds2ds/refocus
+	ds2ds/strict
+
+imports
+	ds2ds/sugar
+	ds2ds/factorize
+	ds2ds/explicate
+	ds2ds/resolve-includes
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
+	generator/interpreter/pre-generation
+	generator/interpreter/gen-interpreter
+	generator/interpreter/unification
 	
 signature
   constructors

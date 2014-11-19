@@ -1,4 +1,4 @@
-module strict
+module ds2ds/strict
 
 imports
   libstratego-lib
@@ -6,7 +6,7 @@ imports
   libstratego-aterm
   include/ds
   lib/editor-common.generated
-  sugar
+  ds2ds/sugar
   ds
   
 rules

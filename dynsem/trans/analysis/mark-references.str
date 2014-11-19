@@ -1,4 +1,4 @@
-module mark-references
+module analysis/mark-references
 
 imports
   include/ds

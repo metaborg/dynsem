@@ -1,14 +1,8 @@
-module explicate
+module ds2ds/explicate
 
 imports
-  libstratego-lib
-  libstratego-gpp
-  libstratego-aterm
   include/ds
-  lib/editor-common.generated
-  sugar
   lib-ds
-  ds
   
 strategies
   

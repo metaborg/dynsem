@@ -1,15 +1,8 @@
-module factorize
+module ds2ds/factorize
 
 imports
-  libstratego-lib
-  libstratego-gpp
-  libstratego-aterm
   include/ds
-  ds
   lib-ds
-  lib/editor-common.generated
-  sugar
-  mark-references
   
 strategies
     

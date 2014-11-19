@@ -5,8 +5,8 @@ imports
 	analysis/lib-analysis
 	analysis/analysis-signatures
 	analysis/analysis-rules
+	analysis/mark-references
 	include/ds
-	mark-references
   lib-ds
 
 rules
