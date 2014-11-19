@@ -17,6 +17,7 @@ signature
     Property
 
   constructors
+    SystemType: Property // these are built-in types
     SuperType: Property
     Type: Property
     ConsKind: Property

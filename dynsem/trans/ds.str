@@ -25,6 +25,7 @@ imports
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
+	backend/java-backend/main
 	
 signature
   constructors

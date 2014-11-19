@@ -4,13 +4,6 @@ imports
   include/ds
   ds
   
-rules /* rename variables */
-
-  escape-variable-names:
-    t -> <alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))> t
-  
-  escape-identifier = string-replace(|"'", "_")
-
 signature
   constructors
     OptMap: List(Term) -> Term

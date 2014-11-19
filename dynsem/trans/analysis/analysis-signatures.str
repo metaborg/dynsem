@@ -19,11 +19,11 @@ rules /* store signatures */
     ))
   
   store-built-ins =
-    <store-def(|Types())> IntType() => def-int
-    ; <store-def(|Types())> RealType() => def-real
-    ; <store-def(|Types())> BoolType() => def-bool
-    ; <store-def(|Types())> StringType() => def-st
-    ; <store-def(|Types())> ValueType() => def-value
+    <store-def(|Types())> IntType() => def-int; store-prop(|SystemType(), def-int)
+    ; <store-def(|Types())> RealType() => def-real; store-prop(|SystemType(), def-real)
+    ; <store-def(|Types())> BoolType() => def-bool; store-prop(|SystemType(), def-bool)
+    ; <store-def(|Types())> StringType() => def-str; store-prop(|SystemType(), def-str)
+    ; <store-def(|Types())> ValueType() => def-value; store-prop(|SystemType(), def-value)
 
   store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
 

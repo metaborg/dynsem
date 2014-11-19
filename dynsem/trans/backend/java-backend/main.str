@@ -1,0 +1,77 @@
+module backend/java-backend/main
+
+imports
+  include/ds
+  lib/editor-common.generated
+  lib-ds
+  ds
+
+imports
+  ds2ds/sugar
+  analysis/main
+  analysis/lib-analysis
+  analysis/constructors
+
+imports
+  backend/java-backend/utils/java-utils
+  
+rules
+  
+  ds2java-editor:
+    (_, position, ast, path, project-path) -> None()
+    with
+      init-options(|path, project-path);
+      log-timed(
+        class* := <ds2java> ast | "Generating interpreter"
+      )
+
+  ds2java = 
+    log-timed(
+      desugar-top | "Desugaring"
+    );
+    m-in-analysis(
+      
+      // escape variables
+      log-timed(
+        escape-variable-names
+        | "Escaping variable names");
+      
+      ?mod@Module(_, _);
+      
+      // generate interfaces
+      <log-timed(
+        ds2java-interfaces;
+        write-classes
+        | "Generating interfaces")> mod;
+      id
+    )
+
+rules
+  
+  ds2java-interfaces:
+    Module(_, section*) -> iface*
+    where
+    	type* := <lookup-def-all(|Type())>
+    	;debug(!"TYPES: ")
+    where
+      iface* := []
+  
+rules /* rename variables */
+
+  escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
+  
+  escape-identifier = string-replace(|"'", "_")
+
+rules
+  
+  init-options(|path, project-path) =
+    rules(
+      AutoPackageName: _ -> $[[<language>].generated.interpreter]
+      ManuPackageName: _ -> $[[<language>].manual.interpreter]
+      CurrentFilePath: _ -> path
+      ProjectPath: _ -> project-path
+      GenDir: _ -> $[[project-path]/src-gen]
+    )
+
+  write-classes = emit-java-classes(overwrite-merge-strategy, id| <AutoPackageName>, <GenDir>)
+  
