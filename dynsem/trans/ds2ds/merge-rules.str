@@ -1,4 +1,4 @@
-module unification
+module ds2ds/merge-rules
 
 imports
   include/ds
@@ -9,7 +9,7 @@ imports
 
 rules /* merge ovelapping rules */
 
-  unify-module:
+  merge-rules-in-module:
     Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules(merged-rule*)])
     with
       cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;

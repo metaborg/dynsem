@@ -20,12 +20,12 @@ imports
 	ds2ds/factorize
 	ds2ds/explicate
 	ds2ds/resolve-includes
+	ds2ds/merge-rules
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
 	generator/interpreter/pre-generation
 	generator/interpreter/gen-interpreter
-	generator/interpreter/unification
 	
 signature
   constructors
@@ -156,7 +156,7 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"merged.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; escape-variable-names; unify-module; sugar-all; pp-debug> ast
+      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; merge-rules-in-module; sugar-all; pp-debug> ast
 
   // format rules
   format-editor:
