@@ -49,7 +49,7 @@ rules // Analysis
 		  		get-msgs(mkmsg|Note()) => note*
 			)> ast' => analyzed-ast
 	
-	mkmsg: Message(_, t, s) -> (t, s)
+  mkmsg: Message(_, t, s) -> (t, s)
 	
 rules
   
@@ -138,11 +138,6 @@ rules // Debugging
 
 rules // Builders
   
-  prettyprint-ID = ![S(<id>)]
-  prettyprint-INFER = ![S(<id>)]
-  prettyprint-STRING = ![S(<id>)]
-  prettyprint-INT = ![S(<id>)]
-   
   refocus-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with

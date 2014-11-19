@@ -11,6 +11,11 @@ imports
   
 rules
   
+  prettyprint-ID = ![S(<id>)]
+  prettyprint-INFER = ![S(<id>)]
+  prettyprint-STRING = ![S(<id>)]
+  prettyprint-INT = ![S(<id>)]
+  
   prettyprint-Term :
     MatchedVar(a) -> [ H(
                        [SOpt(HS(), "0")]
