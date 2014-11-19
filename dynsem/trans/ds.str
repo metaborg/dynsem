@@ -21,11 +21,10 @@ imports
 	ds2ds/explicate
 	ds2ds/resolve-includes
 	ds2ds/merge-rules
+	ds2ds/fuse-sections
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
-	generator/interpreter/pre-generation
-	generator/interpreter/gen-interpreter
 	
 signature
   constructors

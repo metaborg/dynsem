@@ -40,4 +40,4 @@ menus
     action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
     action  : "Merge"                  = merge-editor (openeditor) (realtime) (source)
-    action  : "Generate interpreter"   = generate-interpreter
+    // action  : "Generate interpreter"   = generate-interpreter
