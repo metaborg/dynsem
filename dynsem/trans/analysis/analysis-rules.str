@@ -4,6 +4,7 @@ imports
   include/ds
   analysis/lib-analysis
   analysis/constructors
+  analysis/rename
 	pp
   ds
 
@@ -23,7 +24,7 @@ rules /* syntactic checks */
       <?Var(v) + ?MatchedVar(v)> dec
     where
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
-      add-msg(|Warning(), dec, $[Variable is never read])
+      add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
 
 rules /* store variables */
   
@@ -117,7 +118,7 @@ rules /* store variables */
     (ty, ref@VarRef(v)) -> ty
     where
       <not(lookup-def(|Vars()))> v => v-ty;
-      add-msg(|Error(), ref, $[Variable reference cannot be resolved])
+      add-msg(|Error(), ref, $[Variable [<unrename-var> v] cannot be resolved])
   
   type-of:
     (ty, Con(c, child*)) -> ty'
