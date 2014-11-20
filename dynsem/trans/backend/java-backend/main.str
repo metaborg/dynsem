@@ -13,9 +13,9 @@ imports
   analysis/constructors
 
 imports
-  backend/java-backend/utils/java-utils
-  backend/java-backend/lib-ds2java
 	backend/java-backend/analysis-extra
+	backend/java-backend/utils
+	backend/java-backend/emit-types
   
 rules
   
@@ -49,75 +49,9 @@ rules
       )
     )
 
-rules
-  
-  ds2java-interfaces:
-    Module(_, section*) -> iface*
-    where
-    	all-type-def*  := <lookup-def-all(|Types())>;
-    	type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
-    	iface* := <map(ds2java-interface)> type-def*
-  
-  ds2java-interface:
-    type-def ->
-      compilation-unit |[
-        package x_pkgname;
-        
-        import org.metaborg.meta.interpreter.framework.*;
-        
-        public interface x_facename extends x_supername {
-          public void specializeChildren(int depth);
-          
-          ~exec*
-        }
-      ]|
-    where
-      x_pkgname := <AutoPackageName>;
-      x_facename := <ds2java-classname> type-def;
-      let
-        super-classname =
-					lookup-prop(|SuperType());
-					lookup-def(|Types());
-					ds2java-classname
-      in
-      	x_supername := <(super-classname <+ !"IMatchableNode")> type-def
-      end;
-    	exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> type-def
-  
-  ds2java-arrow-methodface:
-    arrow-def ->
-	    class-body-dec |[
-	      public x_returnclass x_execname(param*);
-	    ]|
-	  where
-	    x_execname := <ds2java-methodname> arrow-def;
-	    x_returnclass := <ds2java-returnclassname> arrow-def;
-	    input-ty* := <lookup-arrow-inputs> arrow-def;
-	    param* := <map-with-index((id, lookup-def(|Types())); ds2java-paramdecl)> input-ty*
-  
-  ds2java-paramdecl:
-    (idx, ty-def) -> param |[ ~type:iface x_idx ]|
-    with
-      x_idx := $[_[idx]];
-      x_type := <ds2java-classname> ty-def;
-      iface := type |[ x_type]|
-  
 rules /* rename variables */
 
   escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
   
   escape-identifier = string-replace(|"'", "_")
-
-rules
-  
-  init-options(|path, project-path) =
-    rules(
-      AutoPackageName: _ -> $[[<language>].generated.interpreter]
-      ManuPackageName: _ -> $[[<language>].manual.interpreter]
-      CurrentFilePath: _ -> path
-      ProjectPath: _ -> project-path
-      GenDir: _ -> $[[project-path]/src-gen]
-    )
-
-  write-classes = emit-java-classes(overwrite-merge-strategy, id | <AutoPackageName>, <GenDir>)
   

@@ -39,4 +39,8 @@ rules
     <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowChangeables(), arrow-def)> sc*
 
 
+  lookup-applicable-arrow-def:
+    type-def -> <lookup-def-all(|Arrows()); filter(where(lookup-prop(|Type()); ?ArrowType(type-name, _)))>
+    where
+      type-name := <def-get-name> type-def
 

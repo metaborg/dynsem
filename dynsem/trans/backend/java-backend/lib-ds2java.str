@@ -4,14 +4,6 @@ imports
   include/ds
   analysis/constructors
   analysis/lib-analysis
-  
-rules
-  
-  lookup-applicable-arrow-def:
-    type-def -> <lookup-def-all(|Arrows()); filter(where(lookup-prop(|Type()); ?ArrowType(type-name, _)))>
-    where
-      type-name := <def-get-name> type-def
-
 
 rules /* name generation */
 
@@ -51,13 +43,9 @@ rules /* name generation */
   ds2java-mapsort-classname:
   	ty-def@(Types(), name) -> $[com.github.krukow.clj_ds.PersistentMap<[key-ty-str], [val-ty-str]>]
   	where
-  		debug(!1);
   		MapType(key-ty, val-ty) := <lookup-prop(|SuperType())> ty-def;
-  		debug(!2);
   		key-ty-str := <lookup-def(|Types()); ds2java-classname> key-ty;
-  		debug(!3);
   		val-ty-str := <lookup-def(|Types()); ds2java-classname> val-ty
-  		;debug(!4)
 
   ds2java-methodname:
     (Arrows(), name) -> $[exec_[name]]
