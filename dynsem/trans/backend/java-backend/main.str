@@ -57,7 +57,6 @@ rules
     	all-type-def*  := <lookup-def-all(|Types())>;
     	type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
     	iface* := <map(ds2java-interface)> type-def*
-      ;debug(!"->")
   
   ds2java-interface:
     type-def ->
@@ -83,7 +82,7 @@ rules
       in
       	x_supername := <(super-classname <+ !"IMatchableNode")> type-def
       end;
-    	exec* := <debug(!"A "); lookup-applicable-arrow-def; debug(!"B "); map(ds2java-arrow-methodface); debug(!"C ")> type-def
+    	exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> type-def
   
   ds2java-arrow-methodface:
     arrow-def ->
