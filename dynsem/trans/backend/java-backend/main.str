@@ -16,6 +16,7 @@ imports
 	backend/java-backend/analysis-extra
 	backend/java-backend/utils
 	backend/java-backend/emit-types
+	backend/java-backend/emit-arrows
   
 rules
   
@@ -38,14 +39,15 @@ rules
 	        escape-variable-names
 	        | "Escaping variable names");
 	      
-	      ?mod@Module(_, _);
-	      
-	      // generate interfaces
-	      <log-timed(
+	      w-log-timed(
 	        ds2java-interfaces;
 	        write-classes
-	        | "Generating interfaces")> mod;
-	      id
+	        | "Interfaces for sorts");
+	      
+	      w-log-timed(
+	        ds2java-arrowresults;
+	        write-classes
+	        | "Classes for arrow results")
       )
     )
 

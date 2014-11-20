@@ -11,8 +11,9 @@ imports
   backend/java-backend/lib-ds2java
   backend/java-backend/utils
   backend/java-backend/analysis-extra
+  backend/java-backend/emit-arrows
 
-rules
+rules /* generate interfaces for sort declarations */
   
   ds2java-interfaces:
     Module(_, section*) -> iface*
@@ -47,20 +48,3 @@ rules
       end;
       exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> type-def
   
-  ds2java-arrow-methodface:
-    arrow-def ->
-      class-body-dec |[
-        public x_returnclass x_execname(param*);
-      ]|
-    where
-      x_execname := <ds2java-methodname> arrow-def;
-      x_returnclass := <ds2java-returnclassname> arrow-def;
-      input-ty* := <lookup-arrow-inputs> arrow-def;
-      param* := <map-with-index((id, lookup-def(|Types())); ds2java-method-paramdecl)> input-ty*
-  
-  ds2java-method-paramdecl:
-    (idx, ty-def) -> param |[ ~type:iface x_idx ]|
-    with
-      x_idx := $[_[idx]];
-      x_type := <ds2java-classname> ty-def;
-      iface := type |[ x_type ]|

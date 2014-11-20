@@ -1,0 +1,47 @@
+module backend/java-backend/emit-arrows
+
+imports
+  include/ds
+
+imports
+  analysis/constructors
+  analysis/lib-analysis
+
+imports
+  backend/java-backend/lib-ds2java
+  backend/java-backend/analysis-extra
+
+rules
+  
+  // generate arrow interface methods
+  ds2java-arrow-methodface:
+    arrow-def ->
+      class-body-dec |[
+        public x_returnclass x_execname(param*);
+      ]|
+    where
+      x_execname := <ds2java-methodname> arrow-def;
+      x_returnclass := <ds2java-returnclassname> arrow-def;
+      input-ty* := <lookup-arrow-inputs> arrow-def;
+      param* := <map-with-index((id, lookup-def(|Types())); ds2java-method-paramdecl)> input-ty*
+  
+  // generate indexed method parameter declaration
+  ds2java-method-paramdecl:
+    (idx, ty-def) -> param |[ ~type:iface x_idx ]|
+    with
+      x_idx := $[_[idx]];
+      x_type := <ds2java-classname> ty-def;
+      iface := type |[ x_type ]|
+  
+  // generate result class from arrows
+  ds2java-arrowresults:
+    Module(_, section*) -> class*
+    where
+      class* := <fail>
+      // ;
+      // all-type-def*  := <lookup-def-all(|Types())>;
+      // type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
+      // iface* := <map(ds2java-interface)> type-def*
+
+
+

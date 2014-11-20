@@ -311,6 +311,8 @@ rules
 
 rules // utils
 	
+	w-log-timed(s|msg) = where(log-timed(s|msg))
+	
 	log-timed(s|msg) =
       where(times => starttime)
     ; s
