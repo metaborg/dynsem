@@ -157,7 +157,8 @@ rules /* store variables */
     (ty, SortFunCall(fun-name, par, arg*)) -> ty'
     where
       <type-of-top> (NONETYPE(), par) => parent-ty;
-      <lookup-def(|NativeType())> parent-ty => parent-def;
+      <lookup-def(|Types())> parent-ty => parent-def;
+      <lookup-prop(|SortKind())> parent-def => NativeSort();
       <lookup-native-fun-def(|fun-name)> parent-def => fun-def;
       <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
       <zip; map(type-of-top)> (farg*, arg*)
@@ -170,7 +171,8 @@ rules /* store variables */
     where
       <not(lookup-def(|NativeDTFun(parent-def)))> fun-name
     where
-      <lookup-prop(|SuperType()); lookup-def(|NativeType())> parent-def => sup-def
+      <lookup-prop(|SuperType()); lookup-def(|Types())> parent-def => sup-def;
+      <lookup-prop(|SortKind())> sup-def => NativeSort()
     
   type-check-premise-top =
   	type-check-premise
@@ -274,11 +276,6 @@ rules
     (ty-from, ty-to) -> <type-coerce> (sup-ty, ty-to)
     where
       <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
-
-  type-coerce:
-    (ty-from, ty-to) -> <type-coerce> (sup-ty, ty-to)
-    where
-      <lookup-def(|NativeType()); lookup-prop(|SuperType())> ty-from => sup-ty
 
   type-coerce-sym = type-coerce <+ !(<Snd>, <Fst>); type-coerce
 

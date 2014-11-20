@@ -35,6 +35,10 @@ rules // renaming
 
 rules // storing and looking up
   
+  def-get-name = Snd
+  
+  def-get-namespace = Fst
+  
   store-def(|namespace):
     name -> (namespace, name)
     where

@@ -9,7 +9,6 @@ signature
     Vars: Namespace
     Constructors: Namespace
     Arrows: Namespace
-    NativeType: Namespace
     NativeDTFun: String -> Namespace
 
 signature
@@ -17,10 +16,8 @@ signature
     Property
 
   constructors
-    SystemType: Property // these are built-in types
     SuperType: Property
     Type: Property
-    ConsKind: Property
     NativeTypeJString: Property
     Use: Property
     
@@ -48,8 +45,14 @@ signature
     ConsKind
   
   constructors
+    SortKind: Property
     LanguageSort: SortKind
   	InternalSort: SortKind
+  	SemanticCompSort: SortKind
+  	NativeSort: SortKind
+  	SystemSort: SortKind
+  	
+  	ConsKind: Property
   	LanguageCons: ConsKind
   	InternalCons: ConsKind
   	NativeOpCons: ConsKind

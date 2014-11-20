@@ -19,36 +19,40 @@ rules /* store signatures */
     ))
   
   store-built-ins =
-    <store-def(|Types())> IntType() => def-int; store-prop(|SystemType(), def-int)
-    ; <store-def(|Types())> RealType() => def-real; store-prop(|SystemType(), def-real)
-    ; <store-def(|Types())> BoolType() => def-bool; store-prop(|SystemType(), def-bool)
-    ; <store-def(|Types())> StringType() => def-str; store-prop(|SystemType(), def-str)
-    ; <store-def(|Types())> ValueType() => def-value; store-prop(|SystemType(), def-value)
+    <store-def(|Types())> IntType() => def-int; <store-prop(|SortKind(), def-int)> SystemSort()
+    ; <store-def(|Types())> RealType() => def-real; <store-prop(|SortKind(), def-real)> SystemSort()
+    ; <store-def(|Types())> BoolType() => def-bool; <store-prop(|SortKind(), def-bool)> SystemSort()
+    ; <store-def(|Types())> StringType() => def-str; <store-prop(|SortKind(), def-str)> SystemSort()
+    ; <store-def(|Types())> ValueType() => def-value; <store-prop(|SortKind(), def-value)> SystemSort()
 
   store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
 
   store-sort:
     decl@SortDecl(ty) -> decl
     where
-      <store-def(|Types())> ty => ty-def
+      <store-def(|Types())> ty => ty-def;
+      <store-prop(|SortKind(), ty-def)> LanguageSort()
 
   store-sort:
     decl@InjDecl(ty, sty-name) -> decl
     where
       <id-to-type> sty-name => sty;
       <store-def(|Types())> ty => ty-def;
+      <store-prop(|SortKind(), ty-def)> LanguageSort();
       <store-prop(|SuperType(), ty-def)> sty
 
   store-sort:
     decl@InternalSortDecl(ty) -> decl
     where
-      <store-def(|Types())> ty => ty-def
+      <store-def(|Types())> ty => ty-def;
+      <store-prop(|SortKind(), ty-def)> InternalSort()
 
   store-sort:
     decl@InternalInjDecl(ty, sty-name) -> decl
     where
       <id-to-type> sty-name => sty;
       <store-def(|Types())> ty => ty-def;
+      <store-prop(|SortKind(), ty-def)> InternalSort();
       <store-prop(|SuperType(), ty-def)> sty
 
   store-constructors =
@@ -106,14 +110,16 @@ rules /* store signatures */
   store-native-datatype:
     d@NativeBaseTypeDecl(jstring, name, func*) -> d
     with
-      <store-def(|NativeType())> name => name-def;
+      <store-def(|Types())> name => name-def;
+      <store-prop(|SortKind(), name-def)> NativeSort();
       <store-prop(|NativeTypeJString(), name-def)> jstring;
       <map(store-native-datatype-op(|name-def))> func*
 
   store-native-datatype:
     d@NativeSubTypeDecl(javastring, name, sup, func*) -> d
     with
-      <store-def(|NativeType())> name => name-def;
+      <store-def(|Types())> name => name-def;
+      <store-prop(|SortKind(), name-def)> NativeSort();
       <store-prop(|NativeTypeJString(), name-def)> javastring;
       <store-prop(|SuperType(), name-def)> sup;
       <map(store-native-datatype-op(|name-def))> func*
@@ -130,6 +136,7 @@ rules /* store signatures */
     d@SemanticComponent(name, MapSort(key-ty, val-ty)) -> d
     with
       <store-def(|Types())> name => name-def;
+      <store-prop(|SortKind(), name-def)> SemanticCompSort();
       <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
 
 rules
@@ -138,7 +145,7 @@ rules
   
   check-signature =
     ( ?SimpleSort(s) + ?InjDecl(_, s) + ?InternalInjDecl(_, s) );
-    <not(lookup-def(|Types()) + lookup-def(|NativeType()))> <id-to-type> s;
+    <id-to-type; not(lookup-def(|Types()))> s;
     add-msg(|Error(), s, $[Sort [s] is not declared])
 
   check-signature =
