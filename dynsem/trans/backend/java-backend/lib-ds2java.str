@@ -1,0 +1,66 @@
+module backend/java-backend/lib-ds2java
+
+imports
+  include/ds
+  analysis/constructors
+  analysis/lib-analysis
+  
+rules
+  
+  lookup-applicable-arrow-def:
+    type-def -> <lookup-def-all(|Arrows()); filter(where(lookup-prop(|Type()); ?ArrowType(type-name, _)))>
+    where
+      type-name := <def-get-name> type-def
+
+
+rules /* name generation */
+
+  ds2java-classname:
+    ty-def@(Types(), name) -> javaname
+    where
+    	javaname := 
+    		<switch <lookup-prop(|SortKind())> ty-def
+          case SystemSort():
+          	<ds2java-systemsort-classname> ty-def
+          	
+          case SemanticCompSort():
+          	<ds2java-mapsort-classname> ty-def
+          	
+          case NativeSort():
+          	<lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
+          	
+          otherwise:
+          	!$[I_[name]]
+        end>
+
+  ds2java-systemsort-classname:
+  	(Types(), IntType()) -> "int"
+  
+  ds2java-systemsort-classname:
+  	(Types(), RealType()) -> "double"
+
+  ds2java-systemsort-classname:
+  	(Types(), BoolType()) -> "boolean"
+
+  ds2java-systemsort-classname:
+  	(Types(), StringType()) -> "String"
+
+  ds2java-systemsort-classname:
+    (Types(), ValueType()) -> "IValue"
+
+  ds2java-mapsort-classname:
+  	ty-def@(Types(), name) -> $[com.github.krukow.clj_ds.PersistentMap<[key-ty-str], [val-ty-str]>]
+  	where
+  		debug(!1);
+  		MapType(key-ty, val-ty) := <lookup-prop(|SuperType())> ty-def;
+  		debug(!2);
+  		key-ty-str := <lookup-def(|Types()); ds2java-classname> key-ty;
+  		debug(!3);
+  		val-ty-str := <lookup-def(|Types()); ds2java-classname> val-ty
+  		;debug(!4)
+
+  ds2java-methodname:
+    (Arrows(), name) -> $[exec_[name]]
+  
+  ds2java-returnclassname:
+    (Arrows(), name) -> $[R_[name]]
