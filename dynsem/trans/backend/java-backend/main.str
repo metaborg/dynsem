@@ -44,10 +44,10 @@ rules
 	        write-classes
 	        | "Gen interfaces for sorts")
 	      
-	      ;w-log-timed(
-	        ds2java-arrowresults;
-	        write-classes
-	        | "Gen result classes")
+	      // ;w-log-timed(
+	      //   ds2java-arrowresults;
+	      //   write-classes
+	      //   | "Gen result classes")
       )
     )
 

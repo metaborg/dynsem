@@ -17,7 +17,7 @@ rules
   ds2java-arrow-methodface:
     (arrow-def, ArrowType(ma-ty, bu-ty)) ->
       class-body-dec |[
-        public x_returnclass x_execname(param*);
+        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:<ds2java-methodname> (arrow-def, bu-ty) (param*);
       ]|
     where
       x_execname := <ds2java-methodname> (arrow-def, bu-ty);
@@ -27,24 +27,37 @@ rules
   
   // generate indexed method parameter declaration
   ds2java-method-paramdecl:
-    (idx, ty-def) -> param |[ ~type:iface x_idx ]|
-    with
-      x_idx := $[_[idx]];
-      x_type := <ds2java-classname> ty-def;
-      iface := type |[ x_type ]|
+    (idx, ty-def) -> param |[ ~x:<ds2java-classname> ty-def ~x:$[_[idx]] ]|
   
-  // generate result class from arrows
-  ds2java-arrowresults:
-    Module(_, section*) -> class*
-    where
-      class* := <fail>
-
-      // get all arrows
-      
-      // ;
-      // all-type-def*  := <lookup-def-all(|Types())>;
-      // type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
-      // iface* := <map(ds2java-interface)> type-def*
-
-
+  // generate result classes from arrows
+  ds2java-arrowresults =
+    lookup-def-all(|Arrows());
+    mapconcat(\ a-def -> <lookup-props(|Type()); map(\ ty -> (a-def, ty) \)> a-def \);
+    map(ds2java-arrowresult)
+  
+  ds2java-arrowresult = fail
+  
+  // generate result class from arrow
+  // ds2java-arrowresult:
+  //   (a-def, ArrowType(_, bu-ty)) -> 
+		// 	compilation-unit |[
+		// 	  package x_pkgname;
+		// 	  
+		// 	  import org.metaborg.meta.interpreter.framework.*;
+		// 	  
+		// 	  public class x_resultclass {
+		// 	    public final x_valuesort value;
+		// 	     
+		// 	    ~fdec*
+		// 	    
+		// 	    public x_resultclass(x_valuesort value, param*) {
+		// 	      this.value = value;
+		// 	      bstm*
+		// 	    }
+		// 	    
+		// 	    ~fget*
+		// 	    
+		// 	  }
+		// 	]|
+    
 

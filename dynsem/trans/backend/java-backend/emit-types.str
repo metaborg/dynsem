@@ -25,19 +25,17 @@ rules /* generate interfaces for sort declarations */
   ds2java-interface:
     type-def ->
       compilation-unit |[
-        package x_pkgname;
+        package ~x:<AutoPackageName>;
         
         import org.metaborg.meta.interpreter.framework.*;
         
-        public interface x_facename extends x_supername {
+        public interface ~x:<ds2java-classname> type-def extends x_supername {
           public void specializeChildren(int depth);
           
           ~exec*
         }
       ]|
     where
-      x_pkgname := <AutoPackageName>;
-      x_facename := <ds2java-classname> type-def;
       let
         super-classname =
           lookup-prop(|SuperType());
