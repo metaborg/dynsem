@@ -48,3 +48,6 @@ rules /* generate interfaces for sort declarations */
       end;
       exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> type-def
 
+
+
+

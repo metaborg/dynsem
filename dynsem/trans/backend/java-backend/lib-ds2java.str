@@ -48,16 +48,16 @@ rules /* name generation */
   		val-ty-str := <lookup-def(|Types()); ds2java-classname> val-ty
 
   ds2java-methodname:
-    (a-def, match-type) -> $[exec_[name]_[match-type-str]]
+    (a-def, bu-type) -> $[exec_[name]]
     where
       Arrows() := <def-get-namespace> a-def;
       name := <def-get-name> a-def;
-      match-type-str := <pp-type> match-type
+      bu-type-str := <pp-type> bu-type
   
   ds2java-returnclassname:
-    (a-def, match-type) -> $[R_[name]_[match-type-str]]
+    (a-def, bu-type) -> $[R_[name]_[bu-type-str]]
     where
       Arrows() := <def-get-namespace> a-def;
       name := <def-get-name> a-def;
-      match-type-str := <pp-type> match-type
+      bu-type-str := <pp-type> bu-type
 

@@ -20,8 +20,8 @@ rules
         public x_returnclass x_execname(param*);
       ]|
     where
-      x_execname := <ds2java-methodname> (arrow-def, ma-ty);
-      x_returnclass := <ds2java-returnclassname> (arrow-def, ma-ty);
+      x_execname := <ds2java-methodname> (arrow-def, bu-ty);
+      x_returnclass := <ds2java-returnclassname> (arrow-def, bu-ty);
       input-ty* := <lookup-arrow-inputs> arrow-def;
       param* := <map-with-index((id, lookup-def(|Types())); ds2java-method-paramdecl)> input-ty*
   
@@ -38,6 +38,7 @@ rules
     Module(_, section*) -> class*
     where
       class* := <fail>
+
       // get all arrows
       
       // ;
