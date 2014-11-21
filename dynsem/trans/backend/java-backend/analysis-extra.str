@@ -40,7 +40,7 @@ rules
 
 
   lookup-applicable-arrow-def:
-    type-def -> <lookup-def-all(|Arrows()); filter(where(lookup-prop(|Type()); ?ArrowType(type-name, _)))>
+    type-def -> <lookup-def-all(|Arrows()); filter(where(debug(!"A "); lookup-props(|Type()); debug(!"B "); fetch-elem(?ArrowType(type-name, _)))); make-set>
     where
       type-name := <def-get-name> type-def
 

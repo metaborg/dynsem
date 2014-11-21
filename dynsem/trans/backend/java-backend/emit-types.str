@@ -20,6 +20,7 @@ rules /* generate interfaces for sort declarations */
     where
       all-type-def*  := <lookup-def-all(|Types())>;
       type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
+      debug(!"FOR TYPES ");
       iface* := <map(ds2java-interface)> type-def*
   
   ds2java-interface:
@@ -36,6 +37,7 @@ rules /* generate interfaces for sort declarations */
         }
       ]|
     where
+      debug(!">>: ");
       x_pkgname := <AutoPackageName>;
       x_facename := <ds2java-classname> type-def;
       let
@@ -46,5 +48,5 @@ rules /* generate interfaces for sort declarations */
       in
         x_supername := <(super-classname <+ !"IMatchableNode")> type-def
       end;
-      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> type-def
-  
+      exec* := <lookup-applicable-arrow-def; debug(!"# arrows: "); map(ds2java-arrow-methodface)> type-def
+

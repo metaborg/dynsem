@@ -37,17 +37,17 @@ rules
 	      // escape variables
 	      log-timed(
 	        escape-variable-names
-	        | "Escaping variable names");
+	        | "Escaping variable names")
 	      
-	      w-log-timed(
+	      ;w-log-timed(
 	        ds2java-interfaces;
 	        write-classes
-	        | "Interfaces for sorts");
+	        | "Interfaces for sorts")
 	      
-	      w-log-timed(
-	        ds2java-arrowresults;
-	        write-classes
-	        | "Classes for arrow results")
+	      // ;w-log-timed(
+	      //   ds2java-arrowresults;
+	      //   write-classes
+	      //   | "Classes for arrow results")
       )
     )
 
