@@ -34,7 +34,7 @@ rules
     );
     m-in-analysis(
       m-in-backend-extra-analysis(
-	      // escape variables
+
 	      log-timed(
 	        escape-variable-names
 	        | "Escaping variable names")
@@ -42,12 +42,12 @@ rules
 	      ;w-log-timed(
 	        ds2java-interfaces;
 	        write-classes
-	        | "Interfaces for sorts")
+	        | "Gen interfaces for sorts")
 	      
 	      // ;w-log-timed(
 	      //   ds2java-arrowresults;
 	      //   write-classes
-	      //   | "Classes for arrow results")
+	      //   | "Gen result classes")
       )
     )
 

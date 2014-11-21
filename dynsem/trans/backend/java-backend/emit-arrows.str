@@ -15,13 +15,13 @@ rules
   
   // generate arrow interface methods
   ds2java-arrow-methodface:
-    arrow-def ->
+    (arrow-def, ArrowType(ma-ty, bu-ty)) ->
       class-body-dec |[
         public x_returnclass x_execname(param*);
       ]|
     where
-      x_execname := <ds2java-methodname> arrow-def;
-      x_returnclass := <ds2java-returnclassname> arrow-def;
+      x_execname := <ds2java-methodname> (arrow-def, ma-ty);
+      x_returnclass := <ds2java-returnclassname> (arrow-def, ma-ty);
       input-ty* := <lookup-arrow-inputs> arrow-def;
       param* := <map-with-index((id, lookup-def(|Types())); ds2java-method-paramdecl)> input-ty*
   
@@ -38,6 +38,8 @@ rules
     Module(_, section*) -> class*
     where
       class* := <fail>
+      // get all arrows
+      
       // ;
       // all-type-def*  := <lookup-def-all(|Types())>;
       // type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
