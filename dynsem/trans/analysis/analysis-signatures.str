@@ -149,6 +149,18 @@ rules
     add-msg(|Error(), s, $[Sort [s] is not declared])
 
   check-signature =
+    (
+      ?SortDecl(s)
+      + ?InjDecl(s, _)
+      + ?InternalSortDecl(s)
+      + ?InternalInjDecl(_, s)
+      + ?NativeBaseTypeDecl(_, s, _)
+      + ?NativeSubTypeDecl(_, s, _, _)
+    );
+    <lookup-defs(|Types())> s => [_, _ | _];
+    add-msg(|Error(), s, $[Duplicate sort [s]])
+    
+  check-signature =
     ?Con(cname, _);
     <not(lookup-def(|Constructors()))> cname;
     add-msg(|Error(), cname, $[Constructor [cname] is not declared])
