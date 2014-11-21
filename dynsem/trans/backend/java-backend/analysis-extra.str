@@ -38,9 +38,10 @@ rules
     <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowReadables(), arrow-def)> r*;
     <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowChangeables(), arrow-def)> sc*
 
-
   lookup-applicable-arrow-def:
     type-def -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(?ArrowType(type-name, _))> a-def) \); make-set>
     where
       type-name := <def-get-name> type-def
+
+  type-is-adoptable = where(lookup-def(|Types()); lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort()))
 

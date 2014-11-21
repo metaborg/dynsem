@@ -20,16 +20,16 @@ rules /* generate interfaces for sort declarations */
     where
       all-type-def*  := <lookup-def-all(|Types())>;
       type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
-      iface* := <map(ds2java-interface)> type-def*
+      iface* := <map(?(_, <id>); ds2java-interface)> type-def*
   
   ds2java-interface:
-    type-def ->
+    type ->
       compilation-unit |[
         package ~x:<AutoPackageName>;
         
         import org.metaborg.meta.interpreter.framework.*;
         
-        public interface ~x:<ds2java-classname> type-def extends x_supername {
+        public interface ~x:<ds2java-sort-classname> type extends x_supername {
           public void specializeChildren(int depth);
           
           ~exec*
@@ -39,12 +39,11 @@ rules /* generate interfaces for sort declarations */
       let
         super-classname =
           lookup-prop(|SuperType());
-          lookup-def(|Types());
-          ds2java-classname
+          ds2java-sort-classname
       in
-        x_supername := <(super-classname <+ !"IMatchableNode")> type-def
+        x_supername := <(super-classname <+ !"IMatchableNode")> type
       end;
-      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> type-def
+      exec* := <lookup-def(|Types()); lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> type
 
 
 
