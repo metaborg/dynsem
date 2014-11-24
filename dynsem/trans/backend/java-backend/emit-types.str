@@ -23,27 +23,22 @@ rules /* generate interfaces for sort declarations */
       iface* := <map(?(_, <id>); ds2java-interface)> type-def*
   
   ds2java-interface:
-    type ->
+    ty ->
       compilation-unit |[
         package ~x:<AutoPackageName>;
         
         import org.metaborg.meta.interpreter.framework.*;
         
-        public interface ~x:<ds2java-sort-classname> type extends x_supername {
+        public interface ~x:<ds2java-sort-classname> ty extends ~x:supername {
           public void specializeChildren(int depth);
           
           ~exec*
         }
       ]|
     where
-      let
-        super-classname =
-          lookup-prop(|SuperType());
-          ds2java-sort-classname
-      in
-        x_supername := <(super-classname <+ !"IMatchableNode")> type
-      end;
-      exec* := <lookup-def(|Types()); lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> type
+      ty-def := <lookup-def(|Types())> ty;
+      supername := <lookup-prop(|SuperType()); ds2java-sort-classname <+ !"IMatchableNode"> ty-def;
+      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> ty-def
 
 
 
