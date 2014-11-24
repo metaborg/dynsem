@@ -18,7 +18,7 @@ rules
     s
   
   backend-extra-analyze =
-    log-timed( store-arrows-components | "Java back-end extra analysis")
+    log-timed( store-arrows-components | "Java backend extra analysis")
  
   lookup-arrow-readables = lookup-prop(|ArrowReadables())
   lookup-arrow-changeables = lookup-prop(|ArrowChangeables())

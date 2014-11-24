@@ -55,7 +55,8 @@ rules
               final String name = term.getName();
               final ImploderNodeSource source = term.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
                         term.getAttachment(ImploderAttachment.TYPE)) : null;
-              bstm1*
+              // bstm1*
+              ~bstm*:<mapconcat(ds2java-consdecl-specializer)> c-def*
             }
             IGenericNode replacement = null;
             
@@ -72,7 +73,8 @@ rules
     where
       sortname := <ds2java-sort-classname> ty;
       gennodename := $[Generic_[sortname]];
-      bstm1* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons())); mapconcat(ds2java-consdecl-specializer)> 
+      c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons()))>
+      // bstm1* := <mapconcat(ds2java-consdecl-specializer)> c-def*
 
   ds2java-consdecl-specializer:
   	c-def ->
