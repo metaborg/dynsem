@@ -17,6 +17,7 @@ imports
 	backend/java-backend/utils
 	backend/java-backend/emit-types
 	backend/java-backend/emit-arrows
+	backend/java-backend/emit-execs
   
 rules
   
@@ -48,6 +49,11 @@ rules
 	        ds2java-arrowresults;
 	        write-classes
 	        | "Gen result classes")
+	      
+	      ;w-log-timed(
+	       	ds2java-execs;
+	       	write-classes
+	        | "Gen constructor classes")
       )
     )
 

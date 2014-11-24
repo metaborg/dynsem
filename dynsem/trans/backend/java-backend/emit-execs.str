@@ -1,0 +1,61 @@
+module backend/java-backend/emit-execs
+
+imports
+  include/ds
+
+imports
+  analysis/constructors
+  analysis/lib-analysis
+
+imports
+  backend/java-backend/utils
+  backend/java-backend/lib-ds2java
+  backend/java-backend/emit-arrows
+
+rules
+  
+  // generate classes for constructors
+  ds2java-execs:
+    Module(_, section*) -> <map(def-get-name; ds2java-exec(|rule*))> constr-def*
+    where
+      rule* := <fetch-elem(?Rules(<id>))> section*;
+      constr-def* := <lookup-def-all(|Constructors()); filter(not(lookup-prop(|ConsKind()) => NativeOpCons()))>
+  
+  // generate class for constructor
+  ds2java-exec(|rule*):
+    c ->
+	    compilation-unit |[
+	      package ~x:<AutoPackageName>;
+	      
+	      import org.metaborg.meta.interpreter.framework.*;
+	
+	      public class x_consname extends AbstractNode implements ~x:<ds2java-sort-classname> c-ty {
+	        
+	        private boolean hasSpecialized;
+
+	        ~fdec*
+	        
+	        public x_consname(INodeSource source, param0*) {
+            this.setSourceInfo(source);
+            bstm0*
+          }
+	        
+	//         ~body2
+	// 
+	//         ~exec-method*
+	//         
+	//         ~fget*
+	//         
+	//         ~equalsmethod
+	        
+	      }
+	    ]|
+    where
+    	x_consname := <ds2java-constr-classname> c;
+      c-def := <lookup-def(|Constructors())> c;
+      ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def
+    where
+      fdec* := <map-with-index(ds2java-fielddecl)> c-c-ty*;
+    	param0* := <map-with-index(ds2java-method-paramdecl)> c-c-ty*;
+    	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*
+
