@@ -55,12 +55,12 @@ rules
               final String name = term.getName();
               final ImploderNodeSource source = term.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
                         term.getAttachment(ImploderAttachment.TYPE)) : null;
-              // bstm1*
+
               ~bstm*:<mapconcat(ds2java-consdecl-specializer)> c-def*
             }
             IGenericNode replacement = null;
             
-            // bstm2*
+            ~bstm*:<foldr(![], ds2java-sortinj-specializer)> ty-def*
             
             throw new RewritingException();
             
@@ -73,8 +73,8 @@ rules
     where
       sortname := <ds2java-sort-classname> ty;
       gennodename := $[Generic_[sortname]];
-      c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons()))>
-      // bstm1* := <mapconcat(ds2java-consdecl-specializer)> c-def*
+      c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons()))>;
+      ty-def* := <lookup-def-all(|Types()); filter(where(lookup-prop(|SuperType()) => ty); where(lookup-prop(|SortKind()) => LanguageSort()))>
 
   ds2java-consdecl-specializer:
   	c-def ->
@@ -124,7 +124,22 @@ rules
   ds2java-gennode-instantiation:
     (idx, RealType()) -> e |[ Tools.asJavaDouble(term.getSubterm(~i:<int-to-string> idx)) ]|
 
-
+  ds2java-sortinj-specializer:
+  	(ty-def, bstm*) ->
+			bstm* |[
+				try {
+					if(replacement != null) {
+						replacement.replace(this);
+					}
+					replacement = new ~x:gennodename(getSourceInfo(), aterm);
+					return (~x:sortname) replace(replacement).specialize(1);
+				} catch(RewritingException ~x:<newname>) {
+					bstm*
+				}
+			]|
+		where
+			sortname := <def-get-name; ds2java-sort-classname> ty-def;
+			gennodename := $[Generic_[sortname]]
 
 
 
