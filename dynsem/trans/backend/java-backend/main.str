@@ -18,6 +18,7 @@ imports
 	backend/java-backend/emit-types
 	backend/java-backend/emit-arrows
 	backend/java-backend/emit-execs
+	backend/java-backend/emit-genericnodes
   
 rules
   
@@ -54,6 +55,11 @@ rules
 	       	ds2java-execs;
 	       	write-classes
 	        | "Gen constructor classes")
+	      
+	      ;w-log-timed(
+	         ds2java-genericnodes;
+	         write-classes
+	         | "Gen specializer classes")
       )
     )
 

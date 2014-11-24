@@ -1,0 +1,136 @@
+module backend/java-backend/emit-genericnodes
+
+imports
+  include/ds
+  libjava-front
+  
+imports
+  analysis/constructors
+  analysis/lib-analysis
+
+imports
+  backend/java-backend/utils
+  backend/java-backend/lib-ds2java
+
+rules
+  
+  ds2java-genericnodes:
+    Module(_, _) -> <map(def-get-name; ds2java-genericnode)> def-ty* 
+    where
+      def-ty* := <lookup-def-all(|Types()); filter(where(lookup-prop(|SortKind()) => LanguageSort()))>
+
+  ds2java-genericnode:
+    ty -> 
+      compilation-unit |[ 
+        package ~x:<AutoPackageName>;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        import org.spoofax.interpreter.terms.*;
+        import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+        import org.spoofax.interpreter.core.Tools;
+        
+        public class ~x:gennodename extends AbstractNode implements ~x:sortname, IGenericNode {
+          
+          public IStrategoTerm aterm;
+          
+          public ~x:gennodename(INodeSource source, IStrategoTerm term) {
+            this.setSourceInfo(source);
+            this.aterm = term;
+          }
+          
+          @Override
+          public <T> T match(Class<T> clazz) {
+            return specialize(1).match(clazz);
+          }
+          
+          @Override
+          public void specializeChildren(int depth){
+            throw new InterpreterException("Operation not supported");
+          }
+          
+          @Override
+          public ~x:sortname specialize(int depth) {
+            if (aterm instanceof IStrategoAppl) {
+              final IStrategoAppl term = (IStrategoAppl) aterm;
+              final String name = term.getName();
+              final ImploderNodeSource source = term.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
+                        term.getAttachment(ImploderAttachment.TYPE)) : null;
+              bstm1*
+            }
+            IGenericNode replacement = null;
+            
+            // bstm2*
+            
+            throw new RewritingException();
+            
+          }
+          
+          // ~exec_method*
+          
+        }
+      ]|
+    where
+    	debug(!1);
+      sortname := <ds2java-sort-classname> ty;
+    	debug(!2);
+      gennodename := $[Generic_[sortname]];
+    	debug(!3);
+      bstm1* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty))); mapconcat(debug(!"3a "); ds2java-consdecl-specializer; debug(!"3b "))>
+    	;debug(!4)
+
+  ds2java-consdecl-specializer:
+  	c-def ->
+			bstm* |[
+			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<length; int-to-string> c-c-ty*) {
+			    ~x:sortname replacement = replace(new ~x:consname(source, e*));
+			    if (depth > 0) {
+			      replacement.specializeChildren(depth - 1);
+			    }
+			    return replacement;
+		    } else {
+		      // bstm2*
+		    }
+			]|
+    where
+      c-name := <def-get-name> c-def;
+      ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def;
+      sortname := <ds2java-sort-classname> c-ty;
+      consname := <ds2java-constr-classname> c-name;
+      e* := <map-with-index((dec, id); ds2java-gennode-instantiation)> c-c-ty*;
+      bstm2* := [] // <fail>
+      
+  ds2java-gennode-instantiation:
+    (idx, ty) -> e |[ new ~x:gennodename(source, term.getSubterm(~i:<int-to-string> idx)) ]|
+    where
+      not(!ty => ListType(_));
+      ty-def := <lookup-def(|Types())> ty;
+      <not(lookup-prop(|SortKind()) => SystemSort())> ty-def;
+      gennodename := $[Generic_[<ds2java-sort-classname> ty]]
+
+  ds2java-gennode-instantiation:
+    (idx, ty) -> e |[ (INodeList) NodeUtils.makeList(term.getSubterm(i).getSubtermCount(), term.getSubterm(i), ~x:gennodename.class) ]|
+    where
+      !ty => ListType(e-ty);
+      i := <int-to-string> idx;
+      e-ty-def := <lookup-def(|Types())> e-ty;
+      if <lookup-prop(|SortKind())> e-ty-def => SystemSort()
+      then
+        gennodename := <ds2java-sort-classname; ds2java-box-java-type> e-ty
+      else
+        gennodename := $[Generic_[<ds2java-sort-classname> e-ty]]
+      end 
+  
+  ds2java-gennode-instantiation:
+    (idx, StringType()) -> e |[ Tools.asJavaString(term.getSubterm(~i:<int-to-string> idx)) ]|
+
+  ds2java-gennode-instantiation:
+    (idx, IntType()) -> e |[ Tools.asJavaInt(term.getSubterm(~i:<int-to-string> idx)) ]|
+
+  ds2java-gennode-instantiation:
+    (idx, RealType()) -> e |[ Tools.asJavaDouble(term.getSubterm(~i:<int-to-string> idx)) ]|
+
+
+
+
+
+

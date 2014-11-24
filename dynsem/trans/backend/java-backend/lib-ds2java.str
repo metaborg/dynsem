@@ -57,6 +57,17 @@ rules /* name generation */
   ds2java-systemsort-classname:
     (Types(), ValueType()) -> "IValue"
 
+  ds2java-box-java-type = try(ds2java-box-primitive-java-type)
+  
+  ds2java-box-primitive-java-type:
+    "int" -> "Integer"
+
+  ds2java-box-primitive-java-type:
+    "double" -> "Double"
+  
+  ds2java-box-primitive-java-type:
+    "boolean" -> "Boolean"
+
   pp-type-java =
     ?ListType(e); !$[List_[<pp-type-java> e]_]
     <+
