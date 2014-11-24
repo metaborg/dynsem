@@ -85,4 +85,13 @@ rules /* name generation */
       <lookup-prop(|Type())> c-def => ConstructorType(child-ty*, ty);
       <length> child-ty* => arity
 
-  
+  ds2java-type-is-primitive =
+  	?IntType()
+  	+ ?RealType()
+  	+ ?BoolType()
+  		
+  		
+ 
+ 
+ 
+ 

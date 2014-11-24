@@ -40,11 +40,30 @@ rules
             bstm0*
           }
 	        
+	        @Override
+	        public boolean equals(Object obj) {
+	          if (this == obj) {
+	            return true;
+	          }
+	          if (obj == null) {
+	            return false;
+	          }
+	          if (getClass() != obj.getClass()) {
+	            return false;
+	          }
+	          
+	          final x_consname other = (x_consname) obj;
+	          
+	          bstm1*
+	        
+	          return true;
+	        }
+	        
+	        ~fget*
+	        
 	//         ~body2
 	// 
 	//         ~exec-method*
-	//         
-	//         ~fget*
 	//         
 	//         ~equalsmethod
 	        
@@ -57,5 +76,33 @@ rules
     where
       fdec* := <map-with-index(ds2java-fielddecl)> c-c-ty*;
     	param0* := <map-with-index(ds2java-method-paramdecl)> c-c-ty*;
-    	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*
+    	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*;
+    	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
+    	bstm1* := <map-with-index(debug(!1); ds2java-field-eq-check; debug(!2))> c-c-ty*
+  
+  // generate equality check for a field that is of native type
+  ds2java-field-eq-check:
+    (idx, ty) -> 
+      bstm* |[
+        if (x_idx != other.x_idx) {
+          return false;
+        }
+      ]|
+    where
+      <ds2java-type-is-primitive> ty;
+      x_idx := $[_[idx]]
 
+  ds2java-field-eq-check:
+      (idx, ty) -> 
+      bstm* |[
+        if (x_idx == null) {
+          if (other.x_idx != null) {
+            return false;
+          }
+        } else if (!x_idx.equals(other.x_idx)) {
+          return false;
+        }
+      ]|
+    where
+      <not(ds2java-type-is-primitive)> ty;
+      x_idx := $[_[idx]]

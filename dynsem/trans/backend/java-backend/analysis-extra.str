@@ -46,3 +46,4 @@ rules
   type-is-adoptable = where(lookup-def(|Types()); lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort()))
 
   type-is-adoptable-list = where(?ListType(<id>); type-is-adoptable)
+
