@@ -89,9 +89,12 @@ rules /* name generation */
   	?IntType()
   	+ ?RealType()
   	+ ?BoolType()
-  		
-  		
- 
- 
- 
+  
+  mkidx:
+  	idx -> $[_[idx]]
+
+
+
+
+
  
