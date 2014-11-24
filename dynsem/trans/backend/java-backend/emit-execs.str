@@ -60,6 +60,7 @@ rules
 	          return true;
 	        }
 	        
+	        @Override
 	        public void specializeChildren(int depth) {
             if (!hasSpecialized) {
               bstm2*
@@ -70,7 +71,6 @@ rules
 	//         ~exec-method*
 
 	        ~fget*
-	        
 	        
 	      }
 	    ]|
