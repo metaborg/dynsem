@@ -70,13 +70,9 @@ rules
         }
       ]|
     where
-    	debug(!1);
       sortname := <ds2java-sort-classname> ty;
-    	debug(!2);
       gennodename := $[Generic_[sortname]];
-    	debug(!3);
       bstm1* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons())); mapconcat(ds2java-consdecl-specializer)> 
-    	;debug(!5)
 
   ds2java-consdecl-specializer:
   	c-def ->
