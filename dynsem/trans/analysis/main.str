@@ -17,7 +17,7 @@ rules
 	  log-timed(store-all  | "Storing all definitions")
 
   m-in-analysis(s) = new-analysis-scope(
-  	where(analyze);
+  	analyze;
   	s
   )
 
