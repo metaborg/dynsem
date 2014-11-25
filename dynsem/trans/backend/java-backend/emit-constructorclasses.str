@@ -1,4 +1,4 @@
-module backend/java-backend/emit-execs
+module backend/java-backend/emit-constructorclasses
 
 imports
   include/ds
@@ -12,18 +12,19 @@ imports
   backend/java-backend/lib-ds2java
   backend/java-backend/emit-arrows
   backend/java-backend/analysis-extra
+  backend/java-backend/emit-execmethods
 
 rules
   
   // generate classes for constructors
-  ds2java-execs:
-    Module(_, section*) -> <map(def-get-name; ds2java-exec(|rule*))> constr-def*
+  ds2java-constructorclasses:
+    Module(_, section*) -> <map(def-get-name; ds2java-constructorclass(|rule*))> constr-def*
     where
       rule* := <fetch-elem(?Rules(<id>))> section*;
       constr-def* := <lookup-def-all(|Constructors()); filter(not(lookup-prop(|ConsKind()) => NativeOpCons()))>
   
   // generate class for constructor
-  ds2java-exec(|rule*):
+  ds2java-constructorclass(|rule*):
     c ->
 	    compilation-unit |[
 	      package ~x:<AutoPackageName>;
@@ -68,7 +69,7 @@ rules
             }
           }
 
-	//         ~exec-method*
+	        ~exec*
 
 	        ~fget*
 	        
@@ -84,7 +85,8 @@ rules
     	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*;
     	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
-    	bstm2* := <map-with-index(ds2java-field-specializer)> c-c-ty*
+    	bstm2* := <map-with-index(ds2java-field-specializer)> c-c-ty*;
+    	exec* := <ds2java-execmethods> c
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:

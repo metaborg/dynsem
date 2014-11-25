@@ -1,0 +1,14 @@
+module backend/java-backend/emit-execmethods
+
+imports
+  include/ds
+
+rules
+  
+  ds2java-execmethods:
+    c -> []
+  
+  foo = fail
+
+
+
