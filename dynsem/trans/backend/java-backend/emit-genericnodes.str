@@ -10,7 +10,9 @@ imports
 
 imports
   backend/java-backend/utils
+  backend/java-backend/analysis-extra
   backend/java-backend/lib-ds2java
+  backend/java-backend/emit-arrows
 
 rules
   
@@ -66,7 +68,7 @@ rules
             
           }
           
-          // ~exec_method*
+          ~exec*
           
         }
       ]|
@@ -74,7 +76,8 @@ rules
       sortname := <ds2java-sort-classname> ty;
       gennodename := $[Generic_[sortname]];
       c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons()))>;
-      ty-def* := <lookup-def-all(|Types()); filter(where(lookup-prop(|SuperType()) => ty); where(lookup-prop(|SortKind()) => LanguageSort()))>
+      ty-def* := <lookup-def-all(|Types()); filter(where(lookup-prop(|SuperType()) => ty); where(lookup-prop(|SortKind()) => LanguageSort()))>;
+      exec* := <lookup-def(|Types()); lookup-applicable-arrow-def; map(ds2java-arrow-specializedispatch)> ty
 
   ds2java-consdecl-specializer:
   	c-def ->
@@ -141,6 +144,16 @@ rules
 			sortname := <def-get-name; ds2java-sort-classname> ty-def;
 			gennodename := $[Generic_[sortname]]
 
-
+  ds2java-arrow-specializedispatch:
+    (arrow-def, ArrowType(_, bu-ty)) ->
+      class-body-dec |[
+        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
+        	return specialize(1).~x:execname(e*);
+        }
+      ]|
+    where
+      execname := <ds2java-methodname> (arrow-def, bu-ty);
+      param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def
 
 
