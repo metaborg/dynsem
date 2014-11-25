@@ -1,8 +1,7 @@
-module sugar
+module ds2ds/sugar
 
 imports
 	include/ds
-	mark-references
 	ds
 	
 signature
@@ -14,12 +13,6 @@ rules // desugaring
 	
   desugar-top = innermost(desugar); alltd(rules-concat)
   
-  // desugar :
-  //   SortDecl(ty) -> InjDecl(ty, "Term")
-  
-  // desugar :
-  //   InternalSortDecl(ty) -> InternalInjDecl(ty, "Term")
-    
   desugar :
     NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
   

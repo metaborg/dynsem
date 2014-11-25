@@ -18,12 +18,17 @@ exports
     "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
     Premise "<" PremisesBlock "+" PremisesBlock -> Premise       {cons("MergePoint")}
     "try" PremisesBlock "or" PremisesBlock      -> Premise       {cons("TryOr")}
+    "signature"                                 -> ID            {reject}
+    "constructors"                              -> ID            {reject}
+    "sorts"                                     -> ID            {reject}
+    "arrows"                                    -> ID            {reject}
     "rules"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}
     "where"                                     -> ID            {reject}
     "true"                                      -> ID            {reject}
     "false"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}
+    "fail"                                      -> ID            {reject}
 
   context-free syntax
     CONTENTCOMPLETE -> ModuleSection {cons("COMPLETION-ModuleSection")}

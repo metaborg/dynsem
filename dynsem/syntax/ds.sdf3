@@ -48,12 +48,17 @@ context-free syntax // rules
   	or  [PremisesBlock]
   ]
   
+  ID = <signature> {reject}
+  ID = <constructors> {reject}
+  ID = <sorts> {reject}
+  ID = <arrows> {reject}
   ID = <rules> {reject}
   ID = <fresh> {reject}
   ID = <where> {reject}
   ID = <true> {reject}
   ID = <false> {reject}
   ID = <fresh> {reject}
+  ID = <fail> {reject}
 
 context-free syntax // formulas
 

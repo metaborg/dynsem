@@ -1,0 +1,111 @@
+module backend/java-backend/lib-ds2java
+
+imports
+  include/ds
+  analysis/constructors
+  analysis/lib-analysis
+
+rules /* name generation */
+
+  ds2java-sort-classname:
+  	ListType(ety) -> $[INodeList<[ety-str]>]
+  	where
+  		ety-str := <ds2java-sort-classname> ety
+  
+  ds2java-sort-classname:
+  	MapType(kty, vty) -> $[com.github.krukow.clj_ds.PersistentMap<[kty-str], [vty-str]>]
+  	where
+  		kty-str := <ds2java-sort-classname> kty;
+  		vty-str := <ds2java-sort-classname> vty
+  
+  ds2java-sort-classname:
+    ty -> <ds2java-sort-classname> ty'
+    where
+      ty-def := <lookup-def(|Types())> ty;
+      SemanticCompSort() := <lookup-prop(|SortKind())> ty-def;
+      ty' := <lookup-prop(|SuperType())> ty-def
+  
+  ds2java-sort-classname:
+  	ty -> <ds2java-systemsort-classname> ty-def
+  	where
+  		ty-def := <lookup-def(|Types())> ty;
+  		SystemSort() := <lookup-prop(|SortKind())> ty-def
+
+  ds2java-sort-classname:
+  	ty -> <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
+  	where
+  		ty-def := <lookup-def(|Types())> ty;
+  		NativeSort() := <lookup-prop(|SortKind())> ty-def
+  
+  ds2java-sort-classname:
+  	ty -> $[I_[<def-get-name> ty-def]]
+  	where
+  		ty-def := <lookup-def(|Types())> ty
+
+  ds2java-systemsort-classname:
+  	(Types(), IntType()) -> "int"
+  
+  ds2java-systemsort-classname:
+  	(Types(), RealType()) -> "double"
+
+  ds2java-systemsort-classname:
+  	(Types(), BoolType()) -> "boolean"
+
+  ds2java-systemsort-classname:
+  	(Types(), StringType()) -> "String"
+
+  ds2java-systemsort-classname:
+    (Types(), ValueType()) -> "IValue"
+
+  ds2java-box-java-type = try(ds2java-box-primitive-java-type)
+  
+  ds2java-box-primitive-java-type:
+    "int" -> "Integer"
+
+  ds2java-box-primitive-java-type:
+    "double" -> "Double"
+  
+  ds2java-box-primitive-java-type:
+    "boolean" -> "Boolean"
+
+  pp-type-java =
+    ?ListType(e); !$[List_[<pp-type-java> e]_]
+    <+
+    ?MapType(k, v); !$[Map_[<pp-type-java> k]_[<pp-type-java> v]_]
+    <+
+    pp-type
+
+  ds2java-methodname:
+    (a-def, bu-type) -> $[exec_[name]]
+    where
+      Arrows() := <def-get-namespace> a-def;
+      name := <def-get-name> a-def
+
+  ds2java-returnclassname:
+    (a-def, bu-type) -> $[R_[name]_[bu-type-str]]
+    where
+      Arrows() := <def-get-namespace> a-def;
+      name := <def-get-name> a-def;
+      bu-type-str := <pp-type-java> bu-type
+
+  ds2java-constr-classname:
+    constr -> $[[name]_[arity]]
+    where
+      <lookup-def(|Constructors())> constr => c-def;
+      <def-get-name> c-def => name;
+      <lookup-prop(|Type())> c-def => ConstructorType(child-ty*, ty);
+      <length> child-ty* => arity
+
+  ds2java-type-is-primitive =
+  	?IntType()
+  	+ ?RealType()
+  	+ ?BoolType()
+  
+  mkidx:
+  	idx -> $[_[idx]]
+
+
+
+
+
+ 

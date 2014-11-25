@@ -4,7 +4,7 @@ imports
   libstratego-lib
   libjava-front
   libstratego-sglr
-  generator/interpreter/utils
+  backend/java-backend/utils/mkdir
 
 rules
   

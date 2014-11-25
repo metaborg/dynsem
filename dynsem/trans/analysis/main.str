@@ -3,36 +3,27 @@ module analysis/main
 imports
 	analysis/rename
 	analysis/lib-analysis
-	analysis/store-signatures
-	analysis/store-rules
+	analysis/analysis-signatures
+	analysis/analysis-rules
+	analysis/mark-references
 	include/ds
-	mark-references
   lib-ds
-  
 
 rules
 	
 	analyze =
-		log-timed(mark-vars  | "Marking variable def sites");
+		log-timed(mark-vars | "Marking variable def sites");
 	  log-timed(rename-all | "Renaming variables");
 	  log-timed(store-all  | "Storing all definitions")
 
   m-in-analysis(s) = new-analysis-scope(
-  	where(analyze);
+  	analyze;
   	s
   )
-
-
-  all-declared-keys = all-keys-Declared; map(\ x -> (x, <bagof-Declared> x) \)
-  all-property-keys = all-keys-Properties; map(\ x -> (x, <bagof-Properties> x) \)
-
 
   store-all:
     m@Module(n, section*) -> m
     with
-      log-timed(
-        <syntactic-checks> m | "Syntactic checks"
-      );
       log-timed(
         store-built-ins | "Storing built-in signatures" 
       );
@@ -44,4 +35,7 @@ rules
       );
       log-timed(
         <map(try(store-rules))> section* | "Storing rules"
+      );
+      log-timed(
+        <post-analysis-checks> m | "Post analysis checks"
       )

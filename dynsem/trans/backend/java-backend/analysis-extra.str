@@ -1,0 +1,49 @@
+module backend/java-backend/analysis-extra
+
+imports
+  include/ds
+  lib-ds
+  analysis/constructors
+  analysis/lib-analysis
+  
+signature
+  constructors
+    ArrowReadables: Property
+    ArrowChangeables: Property
+
+rules
+  
+  m-in-backend-extra-analysis(s) =
+    where(backend-extra-analyze);
+    s
+  
+  backend-extra-analyze =
+    log-timed( store-arrows-components | "Java backend extra analysis")
+ 
+  lookup-arrow-readables = lookup-prop(|ArrowReadables())
+  lookup-arrow-changeables = lookup-prop(|ArrowChangeables())
+  lookup-arrow-inputs = ?a-def; <conc> (<lookup-arrow-readables> a-def, <lookup-arrow-changeables> a-def)
+ 
+  store-arrows-components =
+    ?m@Module(_, _);
+    
+    lookup-def-all(|Arrows());
+    map(store-arrow-components(|m))
+  
+  store-arrow-components(|m) =
+  	?arrow-def;
+    arrow-name := <def-get-name> arrow-def;
+    <collect-one(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> m;
+    ?Rule(_, _, Relation(Reads(r*), Source(_, sc*), _, _));
+    <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowReadables(), arrow-def)> r*;
+    <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowChangeables(), arrow-def)> sc*
+
+  lookup-applicable-arrow-def:
+    type-def -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(?ArrowType(type-name, _))> a-def) \); make-set>
+    where
+      type-name := <def-get-name> type-def
+
+  type-is-adoptable = where(lookup-def(|Types()); lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort()))
+
+  type-is-adoptable-list = where(?ListType(<id>); type-is-adoptable)
+

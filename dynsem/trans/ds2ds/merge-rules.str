@@ -1,17 +1,15 @@
-module unification
+module ds2ds/merge-rules
 
 imports
   include/ds
   ds
   pp
   lib-ds
-  sugar
-  explicate
-  factorize
+  ds2ds/sugar
 
 rules /* merge ovelapping rules */
 
-  unify-module:
+  merge-rules-in-module:
     Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules(merged-rule*)])
     with
       cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
@@ -106,7 +104,7 @@ rules
   merge-allfail:
     (r1@Rule(p1*, infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), 
      [r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))]) ->
-      [Rule([TryOr(PremiseBlock(p1''*), PremiseBlock(p2*))], infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))]
+      [Rule([TryOr(PremiseBlock(p2*), PremiseBlock(p1''*))], infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*)))]
     where
       subst* := <ds-unify> [(r1*, r2*), (lhs1, lhs2), (sc1*, sc2*), (rhs1, rhs2), (tc1*, tc2*)];
       p1'* := <filter(not(?AllFail()))> p1*;
@@ -181,20 +179,21 @@ rules
 rules
   
   premises-alternates =
-	    ?(Formula(Match(l, r1)), Formula(Match(l, r2))); <not(eq)> (r1, r2)
-	    + ?(Formula(Match(l, _)), Formula(NMatch(l, _)))
-      + ?(Formula(NMatch(l, _)), Formula(Match(l, _)))
-	    + ?(Formula(TermEq(l, r1)), Formula(TermEq(l, r2))); <not(eq)> (r1, r2)
-	    + ?(Formula(TermEq(l, r)), Formula(TermNeq(l, r)))
-	    + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
-	    + ?(Formula(TermEq(l, _)), Formula(Match(l, _)))
-	    + ?(Formula(Match(l, _)), Formula(TermEq(l, _)))
-	    
-	    + ?(Formula(TermEq(_, _)), Formula(TermEq(_, _)))
-      + ?(Formula(TermEq(_, _)), Formula(TermNeq(_, _)))
-	    + ?(Formula(TermNeq(_, _)), Formula(TermNeq(_, _)))
-      + ?(Formula(TermNeq(_, _)), Formula(TermEq(_, _)))
-
+  	?(Formula(Match(l, r1)), Formula(Match(l, r2))); <not(eq)> (r1, r2)
+    + ?(Formula(Match(l, _)), Formula(NMatch(l, _)))
+    + ?(Formula(NMatch(l, _)), Formula(Match(l, _)))
+    + ?(Formula(TermEq(l, r1)), Formula(TermEq(l, r2))); <not(eq)> (r1, r2)
+    + ?(Formula(TermEq(l, r)), Formula(TermNeq(l, r)))
+    + ?(Formula(TermNeq(l, r)), Formula(TermEq(l, r)))
+    + ?(Formula(TermEq(l, _)), Formula(Match(l, _)))
+    + ?(Formula(Match(l, _)), Formula(TermEq(l, _)))
+    
+    + ?(Formula(TermEq(_, _)), Formula(TermEq(_, _)))
+    + ?(Formula(TermEq(_, _)), Formula(TermNeq(_, _)))
+    + ?(Formula(TermNeq(_, _)), Formula(TermNeq(_, _)))
+    + ?(Formula(TermNeq(_, _)), Formula(TermEq(_, _)))
+    
+    + ?(TypeCast(l, r1), TypeCast(l, r2)); <not(eq)> (r1, r2)
 
 
 

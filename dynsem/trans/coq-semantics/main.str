@@ -8,11 +8,11 @@ imports
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/properties/-
   lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
   names
-  mark-references
+  analysis/mark-references
   lib/editor-common.generated
   include/ds
   ds
-  sugar
+  ds2ds/sugar
   lib/Coq/signatures/-
   lib/Coq/Coq-parenthesize
   lib/Coq/pp/-

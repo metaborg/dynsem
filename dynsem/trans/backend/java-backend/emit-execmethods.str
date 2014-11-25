@@ -1,0 +1,62 @@
+module backend/java-backend/emit-execmethods
+
+imports
+  include/ds
+  ds
+
+imports
+  analysis/lib-analysis
+  analysis/constructors
+
+imports
+  backend/java-backend/analysis-extra
+  backend/java-backend/lib-ds2java
+  backend/java-backend/emit-arrows
+
+rules
+  
+  ds2java-execmethods(|rule*):
+    c -> <map(ds2java-execmethod(|rule*))> applicable-arrow*
+    where
+      ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      applicable-arrow* := <lookup-def(|Types()); lookup-applicable-arrow-def> c-ty
+      
+  ds2java-execmethod(|rule*):
+    (arrow-def, ArrowType(_, bu-ty)) ->
+      class-body-dec |[
+        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
+          this.specializeChildren(0);
+          
+          bstm*
+        }
+      ]|
+    where
+      execname := <ds2java-methodname> (arrow-def, bu-ty);
+      param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      arrow-name := <def-get-name> arrow-def;
+      rule := <fetch-elem(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> rule*;
+      bstm* := <ds2java-rulestatements> rule
+  
+  ds2java-rulestatements:
+    Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*]
+    where
+    	// bind reads and incoming changeables
+    	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
+    	// bind pattern bound variables
+    	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*
+  
+  ds2java-componentbind:
+  	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
+  	where
+  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+
+  ds2java-patternboundbind:
+  	(idx, Var(v)) -> bstm |[ final ~x:typename ~x:v = this.~x:$[_[idx]]; ]|
+  	where
+  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+
+
+
+
+
+

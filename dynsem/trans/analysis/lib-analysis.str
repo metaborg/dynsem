@@ -6,7 +6,7 @@ imports
 
 rules
 	
-	new-analysis-scope(s) = {| Renames, Declared, Properties, Messages: s |}
+	new-analysis-scope(s) = {| Renames, InvRenames, Declared, Properties, Messages: s |}
 
 rules // renaming
   
@@ -23,9 +23,21 @@ rules // renaming
       <not(Renames)> (namespace, name)
     with
       name' := <newname> name;
-      rules(Renames:+ (namespace, name) -> name')
+      rules(
+        Renames:+ (namespace, name) -> name'
+        InvRenames:+ name' -> (namespace, name)
+      )
+   
+  invrename(|namespace):
+    name' -> name
+    where
+      <InvRenames> name' => (_, name)
 
 rules // storing and looking up
+  
+  def-get-name = Snd
+  
+  def-get-namespace = Fst
   
   store-def(|namespace):
     name -> (namespace, name)
@@ -37,17 +49,24 @@ rules // storing and looking up
   
   lookup-defs(|namespace):
     name -> <bagof-Declared> (namespace, name)
+    
+  lookup-def-all(|namespace) = all-keys-Declared; filter(?(namespace, _)); mapconcat(bagof-Declared)
    
-  store-prop(|proptype, definition):
+  store-prop(|proptype, declaration):
     propval -> propval
     where
-      rules(Properties:+ (proptype, definition) -> propval)
+      rules(Properties:+ (proptype, declaration) -> propval)
    
   lookup-prop(|proptype):
-    definition -> <Properties> (proptype, definition)
+    declaration -> <Properties> (proptype, declaration)
 
   lookup-props(|proptype):
-    definition -> <bagof-Properties> (proptype, definition)
+    declaration -> <bagof-Properties> (proptype, declaration)
+  
+  has-prop(|proptype):
+    declaration -> declaration
+    where
+      <lookup-prop(|proptype)> declaration
 
 rules
   

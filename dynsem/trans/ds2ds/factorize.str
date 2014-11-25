@@ -1,15 +1,8 @@
-module factorize
+module ds2ds/factorize
 
 imports
-  libstratego-lib
-  libstratego-gpp
-  libstratego-aterm
   include/ds
-  ds
   lib-ds
-  lib/editor-common.generated
-  sugar
-  mark-references
   
 strategies
     
@@ -18,7 +11,7 @@ strategies
     where
       section'* := <map(try(factorize-rules))> section*
         
-  factorize-rules = alltd(factorize-rule)
+  factorize-rules = alltd(\ Wld() -> VarRef(<next-variable>) \); alltd(factorize-rule)
   
 rules
   
@@ -28,24 +21,12 @@ rules
     Rule(prem7*, infer, 
           Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
     with
-    	while-counting(
-    	  (prem2*, read'*) := <try-factor(factorize-source-components)> read*;
-	      (prem3*, lhs') := <try-factor(factorize-lhs)> lhs;
-	      (prem4*, sc'*) := <try-factor(factorize-source-components)> sc*;
-	      (prem5*, rhs') := <try-factor(factorize-rhs)> rhs;
-	      (prem6*, tc'*) := <try-factor(factorize-target-components)> tc*;
-	      prem7* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*, prem5*, prem6*]
-	    )
-
-  // factorize-rule :
-  //   Rule(prem1*, infer, TermEq(lhs, rhs)) -> Rule(prem4*, infer, TermEq(lhs', rhs'))
-  //   with
-  //   	while-counting(
-	 //    	(prem2*, lhs') := <factorize-lhs> lhs;
-	 //      (prem3*, rhs') := <lift-constructors-from-rhs> rhs;
-	 //      // prem4* := <lift-constructors-from-premises> [prem2*, prem1*, prem3*]
-	 //      prem4* := [prem2*, prem1*, prem3*]
-	 //    )
+  	  (prem2*, read'*) := <try-factor(factorize-source-components)> read*;
+      (prem3*, lhs') := <try-factor(factorize-lhs)> lhs;
+      (prem4*, sc'*) := <try-factor(factorize-source-components)> sc*;
+      (prem5*, rhs') := <try-factor(factorize-rhs)> rhs;
+      (prem6*, tc'*) := <try-factor(factorize-target-components)> tc*;
+      prem7* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*, prem5*, prem6*]
 
 rules // lift constructor sub-terms in match
   
@@ -59,7 +40,7 @@ rules // lift constructor sub-terms in match
   		(p*, t2*) := <map(lift-match-on-cond(not(is-prime-factor), ?succ)); unzip; (concat, id)> t1*;
   		!succ
   
-  factorize-rhs = lift-build-on-cond(not(?VarRef(_)), ?succ); where(!succ)
+  factorize-rhs = lift-build-on-cond(not(is-prime-factor), ?succ); where(!succ)
   
   factorize-source-components =
     map(try-factor(factorize-source-components, ?succ)); where(!succ); unzip; (concat, id)
@@ -67,7 +48,7 @@ rules // lift constructor sub-terms in match
   factorize-source-components:
     LabelComp(ty, t) -> ([Formula(Match(VarRef(v), t))], LabelComp(ty, VarRef(v)))
     where
-      <not(?VarRef(_))> t;
+      <not(is-prime-factor)> t;
       v := <next-variable>
   
   factorize-target-components =
@@ -76,7 +57,7 @@ rules // lift constructor sub-terms in match
   factorize-target-components:
     LabelComp(ty, t) -> ([Formula(Match(t, VarRef(v)))], LabelComp(ty, VarRef(v)))
     where
-      <not(?VarRef(_))> t;
+      <not(is-prime-factor)> t;
       v := <next-variable>
   
   factorize-premises = repeat(some(factorize-premise); flatten-list)
@@ -110,7 +91,7 @@ rules // lift constructor sub-terms in match
       (p1*, read'*) := <try-factor(factorize-target-components, ?succ)> read*;
       (p2*, lhs') := <try-factor(factorize-rhs, ?succ)> lhs;
       (p3*, sc'*) := <try-factor(factorize-target-components, ?succ)> sc*;
-      (p4*, rhs') := <lift-match-on-cond(not(?VarRef(_)), ?succ)> rhs;
+      (p4*, rhs') := <lift-match-on-cond(not(is-prime-factor), ?succ)> rhs;
       (p5*, tc'*) := <try-factor(factorize-source-components, ?succ)> tc*;
       !succ
 
@@ -131,12 +112,13 @@ rules
       end
   
   factorize-listtail-in-match:
-    ListTail([x], xs) -> (prem*, ListTail([x], xs'))
+    ListTail([x], xs) -> ([prem1*, prem2*], ListTail([x'], xs'))
     where
     	let cond = not(is-prime-factor)
     	in
-        (prem*, xs') := <lift-match-on-cond(cond, ?success)> xs;
-        !success
+    	  (prem1*, x') := <lift-match-on-cond(cond, ?success1)> x;
+        (prem2*, xs') := <lift-match-on-cond(cond, ?success2)> xs;
+        (!success1 <+ !success2)
       end
   
   factorize-as-in-match:
@@ -171,7 +153,7 @@ rules
   factorize-constructors-in-build:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      let cond = not(?VarRef(_))
+      let cond = not(is-prime-factor)
       in
         (prem*, t2*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
         !success
@@ -180,7 +162,7 @@ rules
   factorize-sortfuncall-in-build:
     SortFunCall(name, on, t*) -> ([p1*, p2*], SortFunCall(name, on', t'*))
     where
-      let cond = not(?VarRef(_))
+      let cond = not(is-prime-factor)
       in
         (p1*, on') := <lift-build-on-cond(cond, ?success)> on;
         (p2*, t'*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t*;
@@ -188,18 +170,19 @@ rules
       end
   
   factorize-listtail-in-build:
-    ListTail([x], xs) -> (prem*, ListTail([x], xs'))
+    ListTail([x], xs) -> ([prem1*, prem2*], ListTail([x'], xs'))
     where
-      let cond = not(?VarRef(_))
+      let cond = not(is-prime-factor)
       in
-        (prem*, xs') := <lift-build-on-cond(cond, ?success)> xs;
-        !success
+        (prem1*, x') := <lift-build-on-cond(cond, ?success1)> x;
+        (prem2*, xs') := <lift-build-on-cond(cond, ?success2)> xs;
+        (!success1 <+ !success2)
       end
   
   factorize-mapselect-in-build:
     MapExtend(l, r) -> (prem*, MapExtend(l, r'))
     where
-      let cond = not(?VarRef(_))
+      let cond = not(is-prime-factor)
       in
         (prem*, r') := <lift-build-on-cond(cond, ?success)> r;
         !success
@@ -207,5 +190,5 @@ rules
     
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List([])
   
-  is-prime-factor = ?VarRef(_) + ?Wld()
+  is-prime-factor = ?VarRef(_)
 

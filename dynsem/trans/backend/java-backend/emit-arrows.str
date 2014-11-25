@@ -1,0 +1,124 @@
+module backend/java-backend/emit-arrows
+
+imports
+  include/ds
+
+imports
+  analysis/constructors
+  analysis/lib-analysis
+
+imports
+  backend/java-backend/lib-ds2java
+  backend/java-backend/analysis-extra
+  backend/java-backend/utils
+
+rules
+  
+  // generate arrow interface methods
+  ds2java-arrow-methodface:
+    (arrow-def, ArrowType(ma-ty, bu-ty)) ->
+      class-body-dec |[
+        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:<ds2java-methodname> (arrow-def, bu-ty) (param*);
+      ]|
+    where
+      param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def
+  
+  // generate indexed method parameter declaration
+  ds2java-method-paramdecl:
+    (idx, ty) -> param |[ ~x:<ds2java-sort-classname> ty ~x:$[_[idx]] ]|
+  
+  // generate indexed field declaration
+  ds2java-fielddecl:
+    (idx, ty) -> class-body-dec |[ public ~x:<ds2java-sort-classname> ty ~x:$[_[idx]]; ]|
+    where
+      <not(type-is-adoptable + type-is-adoptable-list)> ty
+
+  // generate indexed field declaration
+  ds2java-fielddecl:
+    (idx, ty) -> class-body-dec |[ @Child public ~x:<ds2java-sort-classname> ty ~x:$[_[idx]]; ]|
+    where
+      <type-is-adoptable> ty;
+      <not(type-is-adoptable-list)> ty
+
+  // generate indexed field declaration
+  ds2java-fielddecl:
+    (idx, ty) -> class-body-dec |[ @Children public ~x:<ds2java-sort-classname> ty ~x:$[_[idx]]; ]|
+    where
+      <type-is-adoptable-list> ty
+  
+  // generate setter for indexed child adoption
+  ds2java-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
+    where
+      <type-is-adoptable> ty;
+      x_idx := $[_[idx]]
+
+  // generate setter for indexed child adoption
+  ds2java-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
+    where
+      <type-is-adoptable> ty;
+      <not(type-is-adoptable-list)> ty;
+      x_idx := $[_[idx]]
+
+  // generate setter for indexed child adoption
+  ds2java-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = adoptChildren(x_idx); ]|
+    where
+      <type-is-adoptable-list> ty;
+      x_idx := $[_[idx]]
+
+  // generate setter for indexed non-adoptable child
+  ds2java-fieldinit:
+    (idx, ty) -> stm |[ this.x_idx = x_idx; ]|
+    where
+      <not(type-is-adoptable + type-is-adoptable-list)> ty;
+      x_idx := $[_[idx]]
+  
+  // generate setter for indexed field
+  ds2java-getter:
+    (idx, ty) ->
+      class-body-dec |[
+        public ~x:<ds2java-sort-classname> ty ~x:$[get_[idx]]() {
+          return this.~x:$[_[idx]];
+        }
+      ]|
+  
+  // generate result classes from arrows
+  ds2java-arrowresults =
+    lookup-def-all(|Arrows());
+    mapconcat(\ a-def -> <lookup-props(|Type()); map(\ ty -> (a-def, ty) \)> a-def \);
+    map(ds2java-arrowresult)
+  
+  // generate result class from arrow
+  ds2java-arrowresult:
+    (arrow-def, ArrowType(_, bu-ty)) -> 
+			compilation-unit |[
+			  package ~x:<AutoPackageName>;
+			  
+			  import org.metaborg.meta.interpreter.framework.*;
+			  
+			  public class x_classname {
+			    public final x_valueclass value;
+
+			    ~fdec*
+
+			    public x_classname(x_valueclass value, param*) {
+			      this.value = value;
+			      bstm*
+			    }
+
+			    ~fget*
+
+			  }
+			]|
+		where
+			x_classname := <ds2java-returnclassname> (arrow-def, bu-ty);
+			x_valueclass := <ds2java-sort-classname> bu-ty;
+			changeable* := <lookup-arrow-changeables> arrow-def;
+			param* := <map-with-index(ds2java-method-paramdecl)> changeable*;
+			fdec* := <map-with-index(ds2java-fielddecl)> changeable*;
+			bstm* := <map-with-index(ds2java-fieldinit)> changeable*;
+			fget* := <map-with-index(ds2java-getter)> changeable*
+  
+

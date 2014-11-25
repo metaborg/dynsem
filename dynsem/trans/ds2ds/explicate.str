@@ -1,14 +1,8 @@
-module explicate
+module ds2ds/explicate
 
 imports
-  libstratego-lib
-  libstratego-gpp
-  libstratego-aterm
   include/ds
-  lib/editor-common.generated
-  sugar
   lib-ds
-  ds
   
 strategies
   
@@ -79,16 +73,19 @@ rules // premisses
     f@AllFail() -> [f]
   
   explicate-premise:
-    form@Formula(Match(lhs, rhs)) -> [form]
+    form@Formula(Match(_, _)) -> [form]
 
   explicate-premise:
-    form@Formula(NMatch(lhs, rhs)) -> [form]
+    form@Formula(NMatch(_, _)) -> [form]
   
   explicate-premise:
-    form@Formula(TermEq(lhs, rhs)) -> [form]
+    form@Formula(TermEq(_, _)) -> [form]
   
   explicate-premise:
-    form@Formula(TermNeq(lhs, rhs)) -> [form]
+    form@Formula(TermNeq(_, _)) -> [form]
+
+  explicate-premise:
+    form@TypeCast(_, _) -> [form]
     
   explicate-premise :
     Formula(Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(e1*, arrow), Target(rhs, tc1*))) -> 

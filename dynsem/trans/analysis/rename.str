@@ -5,6 +5,7 @@ imports
   ds
   analysis/lib-analysis
   analysis/constructors
+  lib/editor-common.generated
   
 strategies
 	
@@ -12,9 +13,8 @@ strategies
 	
 rules
   
-  
   rename:
-  	r@Rule(_, _, _) -> <new-scope-renames(alltd(rename-var) | Vars())> r
+  	r@Rule(_, _, _) -> <new-scope-renames(alltd(origin-track-forced(rename-var)) | Vars())> r
 
   rename-var:
   	VarRef(v) -> VarRef(<rename(|Vars())> v)
@@ -25,4 +25,18 @@ rules
   rename-var:
     MatchedVar(v) -> MatchedVar(<rename(|Vars())> v)
 
+  unrename-var:
+  	v -> <invrename(|Vars())> v
+  	where
+  		is-string
 
+  unrename-var:
+    VarRef(v) -> VarRef(<unrename-var> v)
+
+  unrename-var:
+    Var(v) -> Var(<unrename-var> v)
+
+  unrename-var:
+    MatchedVar(v) -> MatchedVar(<unrename-var> v)
+  
+    
