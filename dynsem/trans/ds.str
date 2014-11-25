@@ -22,6 +22,7 @@ imports
 	ds2ds/resolve-includes
 	ds2ds/merge-rules
 	ds2ds/fuse-sections
+	ds2ds/copy-propagation
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
@@ -157,6 +158,12 @@ rules // Builders
     with
       filename := <guarantee-extension(|"merged.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; merge-rules-in-module; sugar-all; pp-debug> ast
+
+  copy-propagation-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"copyprop.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; copy-propagation-module; sugar-all; pp-debug> ast
 
   // format rules
   format-editor:
