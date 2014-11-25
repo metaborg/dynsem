@@ -29,31 +29,29 @@ rules
         }
       ]|
     where
-    	debug(!1);
       execname := <ds2java-methodname> (arrow-def, bu-ty);
-    	debug(!2);
       param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
-    	debug(!3);
       arrow-name := <def-get-name> arrow-def;
-    	debug(!4);
       rule := <fetch-elem(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> rule*;
-    	debug(!5);
       bstm* := <ds2java-rulestatements> rule
-    	; debug(!6)
   
   ds2java-rulestatements:
-    Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> component*
+    Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*]
     where
     	// bind reads and incoming changeables
-    	debug(!10);
-    	component* := <map-with-index(debug(!11); ds2java-componentbind; debug(!12))> [r*, sc*]
-    	; debug(!13)
+    	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
+    	// bind pattern bound variables
+    	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*
   
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
   	where
-  		type := <lookup-def(|Vars()); lookup-prop(|Type()); lookup-def(|Types()); def-get-name> v;
-  		typename := <ds2java-sort-classname> type
+  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+
+  ds2java-patternboundbind:
+  	(idx, Var(v)) -> bstm |[ final ~x:typename ~x:v = this.~x:$[_[idx]]; ]|
+  	where
+  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
 
 
 
