@@ -2,13 +2,61 @@ module backend/java-backend/emit-execmethods
 
 imports
   include/ds
+  ds
+
+imports
+  analysis/lib-analysis
+  analysis/constructors
+
+imports
+  backend/java-backend/analysis-extra
+  backend/java-backend/lib-ds2java
+  backend/java-backend/emit-arrows
 
 rules
   
-  ds2java-execmethods:
-    c -> []
+  ds2java-execmethods(|rule*):
+    c -> <map(ds2java-execmethod(|rule*))> applicable-arrow*
+    where
+      ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      applicable-arrow* := <lookup-def(|Types()); lookup-applicable-arrow-def> c-ty
+      
+  ds2java-execmethod(|rule*):
+    (arrow-def, ArrowType(_, bu-ty)) ->
+      class-body-dec |[
+        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
+          bstm*
+        }
+      ]|
+    where
+    	debug(!1);
+      execname := <ds2java-methodname> (arrow-def, bu-ty);
+    	debug(!2);
+      param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+    	debug(!3);
+      arrow-name := <def-get-name> arrow-def;
+    	debug(!4);
+      rule := <fetch-elem(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> rule*;
+    	debug(!5);
+      bstm* := <ds2java-rulestatements> rule
+    	; debug(!6)
   
-  foo = fail
+  ds2java-rulestatements:
+    Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> component*
+    where
+    	// bind reads and incoming changeables
+    	debug(!10);
+    	component* := <map-with-index(debug(!11); ds2java-componentbind; debug(!12))> [r*, sc*]
+    	; debug(!13)
+  
+  ds2java-componentbind:
+  	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
+  	where
+  		type := <lookup-def(|Vars()); lookup-prop(|Type()); lookup-def(|Types()); def-get-name> v;
+  		typename := <ds2java-sort-classname> type
+
+
+
 
 
 
