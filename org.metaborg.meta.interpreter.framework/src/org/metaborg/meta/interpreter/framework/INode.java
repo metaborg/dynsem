@@ -10,6 +10,8 @@ package org.metaborg.meta.interpreter.framework;
  */
 public interface INode {
 
+	public void specializeChildren(int depth);
+	
 	public void setSourceInfo(INodeSource src);
 
 	public INodeSource getSourceInfo();

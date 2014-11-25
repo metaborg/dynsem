@@ -30,8 +30,6 @@ rules /* generate interfaces for sort declarations */
         import org.metaborg.meta.interpreter.framework.*;
         
         public interface ~x:<ds2java-sort-classname> ty extends ~x:supername {
-          public void specializeChildren(int depth);
-          
           ~exec*
         }
       ]|
