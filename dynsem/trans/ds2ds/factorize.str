@@ -32,7 +32,7 @@ rules
     Rule(prem1*, infer, Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs, tc*))) ->
       Rule(prem1'*, infer, Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs', tc'*)))
     where {| R:
-      prem1'* := <map(debug(!"IN "); factorize-typecast-prem); concat> prem1*;
+      prem1'* := <map(factorize-typecast-prem); concat> prem1*;
       rhs' := <alltd(R)> rhs;
       tc'* := <alltd(R)> tc*
     |}
@@ -41,17 +41,13 @@ rules
     TypeCast(vref@VarRef(v), ty) -> [TypeCheck(vref, ty), Formula(Match(Cast(vref, ty), vref'))]
     where
       vref' := VarRef(<newname> v);
-      rules(R: vref -> vref');
-      !vref;
-      debug(!"Before: ");
-      R;
-      debug(!"After: ")
+      rules(R: vref -> vref')
   
   factorize-typecast-prem:
     f -> [f']
     where
       <not(?TypeCast(_, _))> f;
-      f' := <alltd(?VarRef(_); debug(!"X "); R; debug(!"Y "))> f
+      f' := <alltd(R)> f
 
 rules // lift constructor sub-terms in match
   
