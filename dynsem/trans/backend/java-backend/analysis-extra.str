@@ -44,9 +44,8 @@ rules
       type-name := <def-get-name> type-def
 
   lookup-arrow-def:
-    (Con(c, _), arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
+    (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
     where
-      <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, c-ty);
       <lookup-def(|Types())> c-ty => c-ty-def;
       <lookup-applicable-arrow-def> c-ty-def => arrow*
       

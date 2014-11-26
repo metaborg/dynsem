@@ -51,9 +51,10 @@ rules
       debug(!"B ");
     	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*;
       debug(!"C ");
-      retgt := Target(<lookup-arrow-def> (Con(c, patt-var*), arrow-name), rhs, tc*);
+      <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, c-ty);
+      retgt := Target(<lookup-arrow-def> (c-ty, arrow-name), rhs, tc*);
       debug(!"D ");
-    	prem := <debug(!"Da "); inject-try-or; debug(!"Db "); insert-target(|retgt); debug(!"Dc ")> prem*;
+    	prem := <inject-try-or; insert-target(|retgt)> prem*;
       debug(!"E ");
     	premstms* := <ds2java-premise> (prem, [], [])
     	; debug(!"F ")
@@ -93,11 +94,8 @@ rules
   insert-target(|tgt):
     TryOr(PremiseBlock(p1*), PremiseBlock(p2*)) -> TryOr(PremiseBlock(p1'*), PremiseBlock(p2'*))
     where
-      debug(!1);
       p1'* := <insert-target(|tgt)> p1*;
-      debug(!2);
       p2'* := <insert-target(|tgt)> p2*
-      ;debug(!3)
 
   ds2java-premise = ?[]
 
@@ -118,6 +116,40 @@ rules
     (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
 
   ds2java-premise:
+    (Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(Var(vout), tc*))), on-succ*, _) ->
+      bstm* |[
+        final ~x:resultclass x_tmp = e_lhs.~x:exec(e*);
+        final ~x:vout-ty ~x:vout = x_result_tmp.value;
+        bstm*
+      ]|
+    where
+      debug(!1);
+      (arrow-def, ArrowType(ma-ty, bu-ty)) := <lookup-arrow-def> (<type-of> lhs, arrow-name);
+      debug(!2);
+      resultclass := <ds2java-returnclassname> (arrow-def, bu-ty);
+      debug(!3);
+      x_tmp := <newname> "$tmp";
+      debug(!4);
+      e_lhs := <ds2java-term-build> lhs;
+      debug(!5);
+      exec := <ds2java-methodname> (arrow-def, bu-ty);
+      debug(!6);
+      e* := <map(?LabelComp(_, <id>); ds2java-term-build)> [r*, sc*];
+      debug(!7);
+      vout-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> vout;
+      debug(!8);
+      bstm1* := <map(?LabelComp(_, <id>)); map-with-index(debug(!"8a"); ds2java-bind-out-var(|x_tmp); debug(!"8b"))> tc*;
+      debug(!9);
+      bstm* := <ds2java-premise> on-succ*
+      
+
+  ds2java-bind-out-var(|x_result):
+    (idx, Var(v)) -> bstm |[ final ~x:v-ty ~x:v = x_result.~x:$[get_[idx]](); ]|
+    where
+      v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+      
+
+  ds2java-premise:
     (MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)), _, _) -> <ds2java-premise> (p, p1*, p2*)
 
   ds2java-premise:
@@ -127,11 +159,8 @@ rules
         { bstm2* }
       ]|
     where
-      debug(!"A ");
       bstm1* := <ds2java-premise> (p1x, p1xs, []);
-      debug(!"B ");
       bstm2* := <ds2java-premise> (p2x, p2xs, [])
-      ;debug(!"C ")
   
   ds2java-premise:
     (Formula(NMatch(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(Match(t1, t2)), on-fail*, on-succ*)
