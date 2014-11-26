@@ -13,6 +13,7 @@ exports
     {Premise ","}+ INFER Formula                -> Rule          {cons("Rule")}
     Formula "where" {Premise ","}+              -> Rule          {cons("RuleW")}
     Var ":" Type                                -> Premise       {cons("TypeCast")}
+    Var "?" Type                                -> Premise       {cons("TypeCheck")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
     "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
@@ -69,6 +70,8 @@ exports
   context-free syntax
     ID                                  -> Var   {cons("VarRef")}
     Var                                 -> Term  
+    Var "!" Type                        -> Cast  {cons("Cast")}
+    Cast                                -> Term  
     Var "@" Term                        -> Term  {cons("As")}
     "_"                                 -> Term  {cons("Wld")}
     STRING                              -> Term  {cons("String")}
@@ -91,6 +94,7 @@ exports
 
   context-free syntax
     CONTENTCOMPLETE -> Var   {cons("COMPLETION-Var")}
+    CONTENTCOMPLETE -> Cast  {cons("COMPLETION-Cast")}
     CONTENTCOMPLETE -> Entry {cons("COMPLETION-Entry")}
     CONTENTCOMPLETE -> Term  {cons("COMPLETION-Term")}
 

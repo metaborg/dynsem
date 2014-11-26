@@ -30,6 +30,7 @@ context-free syntax // rules
   ]
   
   Premise.TypeCast = [[Var] : [Type]]
+  Premise.TypeCheck = [[Var] ? [Type]]
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail>
 
@@ -92,8 +93,11 @@ context-free syntax // formulas
 context-free syntax // terms
 
   Var.VarRef    = [[ID]]
-  
   Term = Var
+  
+  Cast.Cast = [[Var] ! [Type]]
+  Term = Cast
+  
   Term.As       = [[Var]@[Term]]
   
   Term.Wld      = <_>

@@ -153,6 +153,18 @@ strategies
     ?TypeCast(_, _)
 
   prettyprint-Premise :
+    TypeCheck(t1__, t2__) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [t1__', S(" ? "), t2__']
+                               )
+                             ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-Premise =
+    ?TypeCheck(_, _)
+
+  prettyprint-Premise :
     Formula(t1__) -> [ H(
                          [SOpt(HS(), "0")]
                        , [t1__']
@@ -544,6 +556,9 @@ strategies
     prettyprint-Var
 
   prettyprint-example =
+    prettyprint-Cast
+
+  prettyprint-example =
     prettyprint-Entry
 
   prettyprint-example =
@@ -568,6 +583,27 @@ strategies
             ]
     where not(is-Term)
     where t1__' := <pp-one-Z(prettyprint-Var)> t1__
+
+  prettyprint-Cast :
+    Cast(t1__, t2__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [t1__', S(" ! "), t2__']
+                          )
+                        ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-Cast =
+    ?Cast(_, _)
+
+  prettyprint-Term :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Term)
+    where t1__' := <pp-one-Z(prettyprint-Cast)> t1__
 
   prettyprint-Term :
     As(t1__, t2__) -> [ H(
@@ -810,6 +846,9 @@ strategies
     ?SortFunCall(_, _, _)
 
   is-Var =
+    fail
+
+  is-Cast =
     fail
 
   is-Entry =

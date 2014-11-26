@@ -128,6 +128,13 @@ rules /* store variables */
       <zip; map(type-of-top)> (fchild-ty*, child*)
 
   type-of:
+    (ty, Cast(ref, ty-trm)) -> ty'
+    where
+      <rw-type> ty-trm => ty-cast;
+      <type-of-top> (ty-cast, ref);
+      <type-coerce> (ty, ty-cast) => ty'
+
+  type-of:
   	(ty, As(v, pat)) -> ty'
   	where
   		<type-of-top> (ty, pat) => ty';
@@ -232,6 +239,18 @@ rules /* store variables */
       <store-prop(|Use(), v-def)> r; 
       <lookup-prop(|Type())> v-def => v-ty;
       <store-prop(|Type(), v-def)> ty;
+      if <not(type-coerce)> (ty, v-ty)
+      then
+        add-msg(|Warning(), f, $[Term might be uncoerceable to [<pp-type> ty]])
+      end
+
+  type-check-premise:
+    f@TypeCheck(r@VarRef(v-name), ty-term) -> f
+    where
+      <rw-type> ty-term => ty;
+      <lookup-def(|Vars())> v-name => v-def;
+      <store-prop(|Use(), v-def)> r; 
+      <lookup-prop(|Type())> v-def => v-ty;
       if <not(type-coerce)> (ty, v-ty)
       then
         add-msg(|Warning(), f, $[Term might be uncoerceable to [<pp-type> ty]])

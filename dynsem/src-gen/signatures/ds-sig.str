@@ -15,6 +15,7 @@ signature
     Rule         : List(Premise) * INFER * Formula -> Rule
     RuleW        : Formula * List(Premise) -> Rule
     TypeCast     : Var * Type -> Premise
+    TypeCheck    : Var * Type -> Premise
     Formula      : Formula -> Premise
     AllFail      : Premise
     PremiseBlock : List(Premise) -> PremisesBlock
@@ -45,6 +46,8 @@ signature
   constructors
     VarRef      : ID -> Var
                 : Var -> Term
+    Cast        : Var * Type -> Cast
+                : Cast -> Term
     As          : Var * Term -> Term
     Wld         : Term
     String      : STRING -> Term

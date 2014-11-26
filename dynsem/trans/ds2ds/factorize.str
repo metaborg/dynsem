@@ -11,15 +11,13 @@ strategies
     where
       section'* := <map(try(factorize-rules))> section*
         
-  factorize-rules = alltd(\ Wld() -> VarRef(<next-variable>) \); alltd(factorize-rule)
+  factorize-rules = alltd(\ Wld() -> VarRef(<next-variable>) \); alltd(factorize-typecast); alltd(factorize-rule)
   
 rules
   
   factorize-rule :
-    Rule(prem1*, infer, 
-          Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) -> 
-    Rule(prem7*, infer, 
-          Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
+    Rule(prem1*, infer,  Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs,tc*))) -> 
+      Rule(prem7*, infer, Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*)))
     with
   	  (prem2*, read'*) := <try-factor(factorize-source-components)> read*;
       (prem3*, lhs') := <try-factor(factorize-lhs)> lhs;
@@ -27,6 +25,33 @@ rules
       (prem5*, rhs') := <try-factor(factorize-rhs)> rhs;
       (prem6*, tc'*) := <try-factor(factorize-target-components)> tc*;
       prem7* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*, prem5*, prem6*]
+
+rules
+
+  factorize-typecast:
+    Rule(prem1*, infer, Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs, tc*))) ->
+      Rule(prem1'*, infer, Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs', tc'*)))
+    where {| R:
+      prem1'* := <map(debug(!"IN "); factorize-typecast-prem); concat> prem1*;
+      rhs' := <alltd(R)> rhs;
+      tc'* := <alltd(R)> tc*
+    |}
+
+  factorize-typecast-prem:
+    TypeCast(vref@VarRef(v), ty) -> [TypeCheck(vref, ty), Formula(Match(Cast(vref, ty), vref'))]
+    where
+      vref' := VarRef(<newname> v);
+      rules(R: vref -> vref');
+      !vref;
+      debug(!"Before: ");
+      R;
+      debug(!"After: ")
+  
+  factorize-typecast-prem:
+    f -> [f']
+    where
+      <not(?TypeCast(_, _))> f;
+      f' := <alltd(?VarRef(_); debug(!"X "); R; debug(!"Y "))> f
 
 rules // lift constructor sub-terms in match
   
