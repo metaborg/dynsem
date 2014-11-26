@@ -131,8 +131,8 @@ rules /* store variables */
     (ty, Cast(ref, ty-trm)) -> ty'
     where
       <rw-type> ty-trm => ty-cast;
-      <type-of-top> (ty-cast, ref);
-      <type-coerce> (ty, ty-cast) => ty'
+      <type-of-top> (NONETYPE(), ref);
+      <type-coerce> (ty-cast, ty) => ty'
 
   type-of:
   	(ty, As(v, pat)) -> ty'
