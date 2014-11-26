@@ -6,6 +6,7 @@ imports
 
 imports
   analysis/lib-analysis
+  analysis/query
   analysis/constructors
 
 imports
@@ -15,7 +16,8 @@ imports
 
 signature
   constructors
-  	NoOpPremise: Premise
+    RuleFail: Premise
+    Target: ArrowSomething * Term * LabelComp -> Premise
 
 rules
   
@@ -42,14 +44,20 @@ rules
       bstm* := <ds2java-rulestatements> rule
   
   ds2java-rulestatements:
-    Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), tgt)) -> [component*, patternbound*, premstms*]
+    Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
     where
     	// bind reads and incoming changeables
     	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
     	// bind pattern bound variables
     	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*;
+      // build informationfull tgt
+      retgt := Target(<lookup-arrow-def> (Con(c, patt-var*), arrow-name), rhs, tc*);
+    	// push tgt down as a premise on all branches
+    	prem'* := <pushdown-target(|retgt)> prem*;
+    	// add throw InterpreterException on rules that do not have a try-or
+    	p := <inject-try-or> prem'*;
     	// compile the premises
-    	premstms* := <foldr(![], ds2java-premise(|tgt))> prem*
+    	premstms* := <ds2java-premise> (p, [], [])
   
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
@@ -61,71 +69,119 @@ rules
   	where
   		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
 
-  ds2java-premise(|tgt):
-    (TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), []) ->
-      bstm* |[
-      	{
-      		// bstm1*
-      	}
-      	{
-      		// bstm2*
-      	}
-      ]|
-    where with(fail|"Not implemented")
-
-  ds2java-premise(|tgt):
-    (MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)), []) ->
-      bstm* |[
-      	
-      ]|
-    where with(fail|"Not implemented")
+  inject-try-or:
+    [p@TryOr(_, _)] -> p 
   
-//   // ds2java-premise(|tgt):
-//   //   ()
-//   
-//   // BUILD => PATTERN  
-//   ds2java-premiseop:
-//     (Formula(Match(VarRef(v), r)), on-success*, on-failure*) -> <fail>
-// 
-//   // BUILD => VARDEF
-//   ds2java-premiseop:
-//     (Formula(Match(b, MatchedVar(v))), on-success*, on-failure*) -> <fail>
-//   
-//   // STHING =!=> STHING
-//   ds2java-premiseop:
-//     (Formula(NMatch(l, r)), on-success*, on-failure*) -> <ds2java-premiseop> (Formula(Match(l, r)), on-failure*, on-success*)
-//   
-//   // variable : TYPE
-//   ds2java-premiseop:
-//     (Formula(TypeCheck(VarRef(v), ty-trm)), on-success*, on-failure*) ->
-//       bstm* |[
-//         if(~x:v instanceof ~x:tyname) {
-//           bstm1*
-//         }else{
-//           bstm2*
-//         }
-//       ]|
-//     where
-//       ty := <rw-type> ty-trm;
-//       tyname := <ds2java-sort-classname> ty;
-//       v-new := <newname>;
-//       // <store-def
-//       // store definition
-//       // update type
-//       // on-success'* := <alltd(?VarRef(v); !VarRef(v-new))> on-success*
-//       bstm1* := <fail>
-//       
-//   
-//   // BUILD == BUILD
-//   ds2java-premiseop:
-//     (Formula(TermEq(l, r)), on-success*, on-falure*) -> <fail>
-//   
-//   // BUILD != BUILD
-//   ds2java-premiseop:
-//     (Formula(TermNeq(l, r)), on-success*, on-failure*) -> <ds2java-premiseop> (Formula(TermEq(l, r)), on-failure*, on-success*)
-// 
-// 
-// 
-// 
-//       
-// 
+  inject-try-or:
+    l@[p1 | _] -> TryOr(PremiseBlock(l), PremiseBlock([RuleFail()]))
+    where
+      <not(?TryOr(_, _))> p1
+
+  pushdown-target(|tgt):
+    MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)) -> MergePoint(p, PremiseBlock(p1'*), PremiseBlock(p2'*))
+    where
+      p1'* := <pushdown-target(|tgt)> p1*;
+      p2'* := <pushdown-target(|tgt)> p2*
+
+  pushdown-target(|tgt):
+    TryOr(PremiseBlock(p1*), PremiseBlock(p2*)) -> TryOr(PremiseBlock(p1'*), PremiseBlock(p2'*))
+    where
+      p1'* := <pushdown-target(|tgt)> p1*;
+      p2'* := <pushdown-target(|tgt)> p2*
+
+  pushdown-target(|tgt):
+    prem* -> [prem*, tgt]
+    where
+      is-list
+
+  ds2java-premise:
+    [p | pxs] -> <ds2java-premise> (p, pxs, [])
+
+  ds2java-premise:
+    (Target((arrow-def, ArrowType(_, bu-ty)), t1, tc*), _, _) ->
+      bstm* |[
+        return new x_classname(e*);
+      ]|
+    where
+      x_classname := <ds2java-returnclassname> (arrow-def, bu-ty);
+      t* := [t1 | <map(?LabelComp(_, <id>))> tc*];
+      e* := <map(ds2java-term-build)> t*
+
+  ds2java-premise:
+    (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
+
+  ds2java-premise:
+    (MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)), _, _) -> <ds2java-premise> (p, p1*, p2*)
+
+  ds2java-premise:
+    (TryOr(PremiseBlock([p1x | p1xs]), PremiseBlock([p2x | p2xs])), _, _) ->
+      bstm* |[
+        { bstm1* }
+        { bstm2* }
+      ]|
+    where
+      debug(!"A ");
+      bstm1* := <ds2java-premise> (p1x, p1xs, []);
+      debug(!"B ");
+      bstm2* := <ds2java-premise> (p2x, p2xs, [])
+      ;debug(!"C ")
+  
+  ds2java-premise:
+    (Formula(NMatch(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(Match(t1, t2)), on-fail*, on-succ*)
+  
+  ds2java-premise:
+    (Formula(Match(lhs, MatchedVar(v))), _, _) ->
+      bstm* |[
+        final ~x:v-ty ~x:v = e_lhs;
+      ]|
+    where
+      debug(!1);
+      v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
+      debug(!2);
+      e_lhs := <ds2java-term-build> lhs 
+      ;debug(!3)
+  
+  ds2java-premise:
+    (Formula(TermNeq(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(TermEq(t1, t2)), on-fail*, on-succ*)
+  
+  ds2java-premise:
+    (Formula(TermEq(t1, t2)), on-succ*, on-fail*) ->
+      bstm* |[
+        if(e_t1 == e_t2){
+          bstm1*
+        } else {
+          bstm2*
+        }
+      ]|
+    where
+      <type-of; ds2java-type-is-primitive> t1;
+      <type-of; ds2java-type-is-primitive> t2
+    where
+      e_t1 := <ds2java-term-build> t1;
+      e_t2 := <ds2java-term-build> t2;
+      bstm1* := <ds2java-premise> on-succ*;
+      bstm2* := <ds2java-premise> on-fail*
+  
+  ds2java-premise:
+    (Formula(TermEq(t1, t2)), on-succ*, on-fail*) ->
+      bstm* |[
+        if(e_t1 != null && e_t1 == e_t2){
+          bstm1*
+        } else {
+          bstm2*
+        }
+      ]|
+    where
+      <type-of; not(ds2java-type-is-primitive)> t1;
+      <type-of; not(ds2java-type-is-primitive)> t2
+    where
+      e_t1 := <ds2java-term-build> t1;
+      e_t2 := <ds2java-term-build> t2;
+      bstm1* := <ds2java-premise> on-succ*;
+      bstm2* := <ds2java-premise> on-fail*
+
+  ds2java-premise = Fst; debug(!"Premise failure: "); fail
+
+  ds2java-term-build = ! e |[ 42 ]|
+  ds2java-term-match = ! bstm* |[ System.out.println(42); ]|
+  
