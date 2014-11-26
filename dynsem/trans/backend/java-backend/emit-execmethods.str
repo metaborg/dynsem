@@ -185,11 +185,6 @@ rules
       bstm2* := <ds2java-premise> on-succ*;
       bstm3* := <ds2java-premise> on-fail*
   
-  // ds2java-bind-pattern-var(|x_res):
-  // 	(idx, Var(v)) -> bstm |[ final ~x:v-ty ~x:v = x_res.~x:$[get_[idx]](); ]|
-  //   where
-  //     v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
-  
   ds2java-premise:
     (Formula(TermNeq(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(TermEq(t1, t2)), on-fail*, on-succ*)
   
@@ -225,6 +220,20 @@ rules
     where
       e_t1 := <ds2java-term-build> t1;
       e_t2 := <ds2java-term-build> t2;
+      bstm1* := <ds2java-premise> on-succ*;
+      bstm2* := <ds2java-premise> on-fail*
+
+  ds2java-premise:
+    (Formula(TypeCheck(VarRef(v), ty-trm)), on-succ*, on-fail*) ->
+      bstm* |[
+        if(~x:v instanceof ~x:ty){
+          bstm1*
+        }else{
+          bstm2*
+        }
+      ]|
+    where
+      ty := <rw-type; ds2java-sort-classname> ty-trm;
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
