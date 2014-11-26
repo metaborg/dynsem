@@ -46,18 +46,17 @@ rules
   ds2java-rulestatements:
     Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
     where
-    	// bind reads and incoming changeables
+      debug(!"A ");
     	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
-    	// bind pattern bound variables
+      debug(!"B ");
     	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*;
-      // build informationfull tgt
+      debug(!"C ");
       retgt := Target(<lookup-arrow-def> (Con(c, patt-var*), arrow-name), rhs, tc*);
-    	// push tgt down as a premise on all branches
-    	prem'* := <pushdown-target(|retgt)> prem*;
-    	// add throw InterpreterException on rules that do not have a try-or
-    	p := <inject-try-or> prem'*;
-    	// compile the premises
-    	premstms* := <ds2java-premise> (p, [], [])
+      debug(!"D ");
+    	prem := <debug(!"Da "); inject-try-or; debug(!"Db "); insert-target(|retgt); debug(!"Dc ")> prem*;
+      debug(!"E ");
+    	premstms* := <ds2java-premise> (prem, [], [])
+    	; debug(!"F ")
   
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
@@ -77,22 +76,30 @@ rules
     where
       <not(?TryOr(_, _))> p1
 
-  pushdown-target(|tgt):
+  insert-target(|tgt):
+    [] -> [tgt]
+  
+  insert-target(|tgt):
+    [px | pxs] -> [px' | <insert-target(|tgt)> pxs]
+    where
+      px' := <try(insert-target(|tgt))> px 
+
+  insert-target(|tgt):
     MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)) -> MergePoint(p, PremiseBlock(p1'*), PremiseBlock(p2'*))
     where
-      p1'* := <pushdown-target(|tgt)> p1*;
-      p2'* := <pushdown-target(|tgt)> p2*
+      p1'* := <insert-target(|tgt)> p1*;
+      p2'* := <insert-target(|tgt)> p2*
 
-  pushdown-target(|tgt):
+  insert-target(|tgt):
     TryOr(PremiseBlock(p1*), PremiseBlock(p2*)) -> TryOr(PremiseBlock(p1'*), PremiseBlock(p2'*))
     where
-      p1'* := <pushdown-target(|tgt)> p1*;
-      p2'* := <pushdown-target(|tgt)> p2*
+      debug(!1);
+      p1'* := <insert-target(|tgt)> p1*;
+      debug(!2);
+      p2'* := <insert-target(|tgt)> p2*
+      ;debug(!3)
 
-  pushdown-target(|tgt):
-    prem* -> [prem*, tgt]
-    where
-      is-list
+  ds2java-premise = ?[]
 
   ds2java-premise:
     [p | pxs] -> <ds2java-premise> (p, pxs, [])
@@ -130,16 +137,15 @@ rules
     (Formula(NMatch(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(Match(t1, t2)), on-fail*, on-succ*)
   
   ds2java-premise:
-    (Formula(Match(lhs, MatchedVar(v))), _, _) ->
+    (Formula(Match(lhs, MatchedVar(v))), on-succ*, _) ->
       bstm* |[
         final ~x:v-ty ~x:v = e_lhs;
+        bstm*
       ]|
     where
-      debug(!1);
       v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
-      debug(!2);
-      e_lhs := <ds2java-term-build> lhs 
-      ;debug(!3)
+      e_lhs := <ds2java-term-build> lhs;
+      bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
     (Formula(TermNeq(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(TermEq(t1, t2)), on-fail*, on-succ*)
@@ -155,8 +161,7 @@ rules
       ]|
     where
       <type-of; ds2java-type-is-primitive> t1;
-      <type-of; ds2java-type-is-primitive> t2
-    where
+      <type-of; ds2java-type-is-primitive> t2;
       e_t1 := <ds2java-term-build> t1;
       e_t2 := <ds2java-term-build> t2;
       bstm1* := <ds2java-premise> on-succ*;
@@ -180,7 +185,7 @@ rules
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
-  ds2java-premise = Fst; debug(!"Premise failure: "); fail
+  ds2java-premise = debug(!"Premise failure: "); fail
 
   ds2java-term-build = ! e |[ 42 ]|
   ds2java-term-match = ! bstm* |[ System.out.println(42); ]|
