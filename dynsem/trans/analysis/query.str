@@ -1,0 +1,55 @@
+module analysis/query
+
+imports
+  include/ds
+  ds
+
+imports
+  analysis/constructors
+  analysis/lib-analysis
+  analysis/analysis-rules
+
+rules
+  
+  type-of:
+    Int(_) -> IntType()
+  
+  type-of:
+    Real(_) -> RealType()
+  
+  type-of:
+    String(_) -> StringType()
+  
+  type-of:
+    True() -> BoolType()
+  
+  type-of:
+    False() -> BoolType()
+
+  type-of:
+    Var(v) -> <lookup-def(|Vars()); lookup-prop(|Type())> v
+
+  type-of:
+    VarRef(v) -> <lookup-def(|Vars()); lookup-prop(|Type())> v
+  
+  type-of:
+    Con(c, _) -> ty
+    where
+      <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, ty)
+  
+  type-of:
+    List([]) -> ListType(ALPHATYPE())
+  
+  type-of:
+    ListTail([h], _) -> ListType(<type-of> h)
+  
+  type-of:
+    Cast(_, ty-trm) -> <rw-type> ty-trm
+  
+  type-of:
+    SortFunCall(fun-name, par, _) -> ty
+    where
+    	<type-of> par => par-ty;
+      <lookup-def(|Types())> par-ty => par-def;
+      <lookup-native-fun-def(|fun-name)> par-def => fun-def;
+      <lookup-prop(|Type())> fun-def => FunctionType(_, ty)

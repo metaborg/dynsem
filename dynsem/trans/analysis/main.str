@@ -6,6 +6,7 @@ imports
 	analysis/analysis-signatures
 	analysis/analysis-rules
 	analysis/mark-references
+	analysis/query
 	include/ds
   lib-ds
 
