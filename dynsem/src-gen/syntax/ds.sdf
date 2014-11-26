@@ -12,8 +12,6 @@ exports
     Formula                                     -> Rule          {cons("Axiom")}
     {Premise ","}+ INFER Formula                -> Rule          {cons("Rule")}
     Formula "where" {Premise ","}+              -> Rule          {cons("RuleW")}
-    Var ":" Type                                -> Premise       {cons("TypeCast")}
-    Var "?" Type                                -> Premise       {cons("TypeCheck")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
     "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
@@ -43,6 +41,8 @@ exports
     Term "=!=>" Term                            -> Formula   {cons("NMatch")}
     Term "==" Term                              -> Formula   {cons("TermEq")}
     Term "!=" Term                              -> Formula   {cons("TermNeq")}
+    Var "?" Type                                -> Formula   {cons("TypeCheck")}
+    Var ":" Type                                -> Formula   {cons("TypeCast")}
     Reads Source Rel Target                     -> Formula   {cons("Relation")}
     "value" "(" Term ")"                        -> Formula   {cons("IsValue")}
                                                 -> Reads     {cons("NoReads")}

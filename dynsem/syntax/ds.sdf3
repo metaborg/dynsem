@@ -29,8 +29,6 @@ context-free syntax // rules
       [{Premise ",\n"}+]
   ]
   
-  Premise.TypeCast = [[Var] : [Type]]
-  Premise.TypeCheck = [[Var] ? [Type]]
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail>
 
@@ -67,7 +65,9 @@ context-free syntax // formulas
   Formula.NMatch   = [[Term] =!=> [Term]]
   Formula.TermEq   = [[Term] == [Term]]
   Formula.TermNeq  = [[Term] != [Term]]
-  
+  Formula.TypeCheck = [[Var] ? [Type]]
+  Formula.TypeCast = [[Var] : [Type]]
+      
   Formula.Relation = [[Reads][Source] [Rel] [Target]]
   Formula.IsValue  = [value([Term])]
   

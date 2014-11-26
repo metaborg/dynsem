@@ -141,30 +141,6 @@ strategies
     ?RuleW(_, _)
 
   prettyprint-Premise :
-    TypeCast(t1__, t2__) -> [ H(
-                                [SOpt(HS(), "0")]
-                              , [t1__', S(" : "), t2__']
-                              )
-                            ]
-    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
-    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
-
-  is-Premise =
-    ?TypeCast(_, _)
-
-  prettyprint-Premise :
-    TypeCheck(t1__, t2__) -> [ H(
-                                 [SOpt(HS(), "0")]
-                               , [t1__', S(" ? "), t2__']
-                               )
-                             ]
-    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
-    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
-
-  is-Premise =
-    ?TypeCheck(_, _)
-
-  prettyprint-Premise :
     Formula(t1__) -> [ H(
                          [SOpt(HS(), "0")]
                        , [t1__']
@@ -316,6 +292,30 @@ strategies
 
   is-Formula =
     ?TermNeq(_, _)
+
+  prettyprint-Formula :
+    TypeCheck(t1__, t2__) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [t1__', S(" ? "), t2__']
+                               )
+                             ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-Formula =
+    ?TypeCheck(_, _)
+
+  prettyprint-Formula :
+    TypeCast(t1__, t2__) -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [t1__', S(" : "), t2__']
+                              )
+                            ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-Formula =
+    ?TypeCast(_, _)
 
   prettyprint-Formula :
     Relation(t1__, t2__, t3__, t4__) -> [ H(

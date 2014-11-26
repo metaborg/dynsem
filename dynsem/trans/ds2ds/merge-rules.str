@@ -195,7 +195,7 @@ rules
     + ?(Formula(TermNeq(_, _)), Formula(TermNeq(_, _)))
     + ?(Formula(TermNeq(_, _)), Formula(TermEq(_, _)))
     
-    + ?(TypeCheck(l, r1), TypeCheck(l, r2)); <not(eq)> (r1, r2)
+    + ?(Formula(TypeCheck(l, r1)), Formula(TypeCheck(l, r2))); <not(eq)> (r1, r2)
 
 
 

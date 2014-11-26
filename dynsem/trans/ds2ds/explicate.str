@@ -85,7 +85,10 @@ rules // premisses
     form@Formula(TermNeq(_, _)) -> [form]
 
   explicate-premise:
-    form@TypeCast(_, _) -> [form]
+    form@Formula(TypeCast(_, _)) -> [form]
+
+  explicate-premise:
+    form@Formula(TypeCheck(_, _)) -> [form]
     
   explicate-premise :
     Formula(Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(e1*, arrow), Target(rhs, tc1*))) -> 

@@ -13,6 +13,10 @@ imports
   backend/java-backend/lib-ds2java
   backend/java-backend/emit-arrows
 
+signature
+  constructors
+  	NoOpPremise: Premise
+
 rules
   
   ds2java-execmethods(|rule*):
@@ -45,8 +49,7 @@ rules
     	// bind pattern bound variables
     	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*;
     	// compile the premises
-    	// premstms* := <foldr(![], ds2java-premiseformula(|tgt))> prem*
-    	premstms* := []
+    	premstms* := <foldr(![], ds2java-premise(|tgt))> prem*
   
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
@@ -58,73 +61,71 @@ rules
   	where
   		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
 
-//   ds2java-premiseformula(|tgt):
-//     (TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), []) ->
+  ds2java-premise(|tgt):
+    (TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), []) ->
+      bstm* |[
+      	{
+      		// bstm1*
+      	}
+      	{
+      		// bstm2*
+      	}
+      ]|
+    where with(fail|"Not implemented")
+
+  ds2java-premise(|tgt):
+    (MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)), []) ->
+      bstm* |[
+      	
+      ]|
+    where with(fail|"Not implemented")
+  
+//   // ds2java-premise(|tgt):
+//   //   ()
+//   
+//   // BUILD => PATTERN  
+//   ds2java-premiseop:
+//     (Formula(Match(VarRef(v), r)), on-success*, on-failure*) -> <fail>
+// 
+//   // BUILD => VARDEF
+//   ds2java-premiseop:
+//     (Formula(Match(b, MatchedVar(v))), on-success*, on-failure*) -> <fail>
+//   
+//   // STHING =!=> STHING
+//   ds2java-premiseop:
+//     (Formula(NMatch(l, r)), on-success*, on-failure*) -> <ds2java-premiseop> (Formula(Match(l, r)), on-failure*, on-success*)
+//   
+//   // variable : TYPE
+//   ds2java-premiseop:
+//     (Formula(TypeCheck(VarRef(v), ty-trm)), on-success*, on-failure*) ->
 //       bstm* |[
-//         {
+//         if(~x:v instanceof ~x:tyname) {
 //           bstm1*
-//         }
-//         {
+//         }else{
 //           bstm2*
 //         }
 //       ]|
 //     where
-//       bstm1* := <foldr(![], ds2java-premiseformula(|tgt))> p1*;
-//       bstm2* := <foldr(![], ds2java-premiseformula(|tgt))> p2*
+//       ty := <rw-type> ty-trm;
+//       tyname := <ds2java-sort-classname> ty;
+//       v-new := <newname>;
+//       // <store-def
+//       // store definition
+//       // update type
+//       // on-success'* := <alltd(?VarRef(v); !VarRef(v-new))> on-success*
+//       bstm1* := <fail>
+//       
+//   
+//   // BUILD == BUILD
+//   ds2java-premiseop:
+//     (Formula(TermEq(l, r)), on-success*, on-falure*) -> <fail>
+//   
+//   // BUILD != BUILD
+//   ds2java-premiseop:
+//     (Formula(TermNeq(l, r)), on-success*, on-failure*) -> <ds2java-premiseop> (Formula(TermEq(l, r)), on-failure*, on-success*)
 // 
-//   ds2java-premiseformula(|tgt):
-//     (MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)), []) ->
-//       bstm* |[
-//         
-//       ]|
-//     where
-//       <ds2java-premiseop> (p, p1*, p2*);
-//       fail
-
-  // BUILD => PATTERN  
-  ds2java-premiseop:
-    (Formula(Match(VarRef(v), r)), on-success*, on-failure*) -> <fail>
-
-  // BUILD => VARDEF
-  ds2java-premiseop:
-    (Formula(Match(b, MatchedVar(v))), on-success*, on-failure*) -> <fail>
-  
-  // STHING =!=> STHING
-  ds2java-premiseop:
-    (Formula(NMatch(l, r)), on-success*, on-failure*) -> <ds2java-premiseop> (Formula(Match(l, r)), on-failure*, on-success*)
-  
-  // variable : TYPE
-  ds2java-premiseop:
-    (TypeCast(VarRef(v), ty-trm), on-success*, on-failure*) ->
-      bstm* |[
-        if(~x:v instanceof ~x:tyname) {
-          final ~x:tyname ~x:v-new = (~x:tyname) ~x:v;
-          
-        }else{
-          ~bstm1*
-        }
-      ]|
-    where
-      ty := <rw-type> ty-trm;
-      tyname := <ds2java-sort-classname> ty;
-      v-new := <newname>;
-      // <store-def
-      // store definition
-      // update type
-      // on-success'* := <alltd(?VarRef(v); !VarRef(v-new))> on-success*
-      bstm1* := <fail>
-      
-  
-  // BUILD == BUILD
-  ds2java-premiseop:
-    (Formula(TermEq(l, r)), on-success*, on-falure*) -> <fail>
-  
-  // BUILD != BUILD
-  ds2java-premiseop:
-    (Formula(TermNeq(l, r)), on-success*, on-failure*) -> <ds2java-premiseop> (Formula(TermEq(l, r)), on-failure*, on-success*)
-
-
-
-
-      
-
+// 
+// 
+// 
+//       
+// 

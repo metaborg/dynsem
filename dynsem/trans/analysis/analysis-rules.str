@@ -232,7 +232,7 @@ rules /* store variables */
   		<type-of-top> (NONETYPE(), rhs)
 
   type-check-premise:
-    f@TypeCast(r@VarRef(v-name), ty-term) -> f
+    f@Formula(TypeCast(r@VarRef(v-name), ty-term)) -> f
     where
       <rw-type> ty-term => ty;
       <lookup-def(|Vars())> v-name => v-def;
@@ -245,7 +245,7 @@ rules /* store variables */
       end
 
   type-check-premise:
-    f@TypeCheck(r@VarRef(v-name), ty-term) -> f
+    f@Formula(TypeCheck(r@VarRef(v-name), ty-term)) -> f
     where
       <rw-type> ty-term => ty;
       <lookup-def(|Vars())> v-name => v-def;

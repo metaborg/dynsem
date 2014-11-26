@@ -38,7 +38,7 @@ rules
     |}
 
   factorize-typecast-prem:
-    TypeCast(vref@VarRef(v), ty) -> [TypeCheck(vref, ty), Formula(Match(Cast(vref, ty), vref'))]
+    Formula(TypeCast(vref@VarRef(v), ty)) -> [Formula(TypeCheck(vref, ty)), Formula(Match(Cast(vref, ty), vref'))]
     where
       vref' := VarRef(<newname> v);
       rules(R: vref -> vref')
@@ -46,7 +46,7 @@ rules
   factorize-typecast-prem:
     f -> [f']
     where
-      <not(?TypeCast(_, _))> f;
+      <not(?Formula(TypeCast(_, _)))> f;
       f' := <alltd(R)> f
 
 rules // lift constructor sub-terms in match

@@ -14,8 +14,6 @@ signature
     Axiom        : Formula -> Rule
     Rule         : List(Premise) * INFER * Formula -> Rule
     RuleW        : Formula * List(Premise) -> Rule
-    TypeCast     : Var * Type -> Premise
-    TypeCheck    : Var * Type -> Premise
     Formula      : Formula -> Premise
     AllFail      : Premise
     PremiseBlock : List(Premise) -> PremisesBlock
@@ -27,6 +25,8 @@ signature
     NMatch                        : Term * Term -> Formula
     TermEq                        : Term * Term -> Formula
     TermNeq                       : Term * Term -> Formula
+    TypeCheck                     : Var * Type -> Formula
+    TypeCast                      : Var * Type -> Formula
     Relation                      : Reads * Source * Rel * Target -> Formula
     IsValue                       : Term -> Formula
     NoReads                       : Reads
