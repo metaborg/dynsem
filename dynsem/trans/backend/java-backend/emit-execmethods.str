@@ -107,7 +107,7 @@ rules
     where
       ty := <rw-type> ty-trm;
       tyname := <ds2java-sort-classname> ty;
-      // v-new := <newname>;
+      v-new := <newname>;
       // <store-def
       // store definition
       // update type
