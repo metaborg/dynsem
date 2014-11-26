@@ -123,23 +123,14 @@ rules
         bstm*
       ]|
     where
-      debug(!1);
       (arrow-def, ArrowType(ma-ty, bu-ty)) := <lookup-arrow-def> (<type-of> lhs, arrow-name);
-      debug(!2);
       resultclass := <ds2java-returnclassname> (arrow-def, bu-ty);
-      debug(!3);
       x_tmp := <newname> "$tmp";
-      debug(!4);
       e_lhs := <ds2java-term-build> lhs;
-      debug(!5);
       exec := <ds2java-methodname> (arrow-def, bu-ty);
-      debug(!6);
       e* := <map(?LabelComp(_, <id>); ds2java-term-build)> [r*, sc*];
-      debug(!7);
       vout-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> vout;
-      debug(!8);
-      bstm1* := <map(?LabelComp(_, <id>)); map-with-index(debug(!"8a"); ds2java-bind-out-var(|x_tmp); debug(!"8b"))> tc*;
-      debug(!9);
+      bstm1* := <map(?LabelComp(_, <id>)); map-with-index(ds2java-bind-out-var(|x_tmp))> tc*;
       bstm* := <ds2java-premise> on-succ*
       
 
