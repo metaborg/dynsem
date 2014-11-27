@@ -30,10 +30,11 @@ signature
 rules
   
   ds2java-execmethods(|rule*):
-    c -> <mapconcat(ds2java-execmethod(|rule*))> applicable-arrow*
+    c -> <mapconcat(ds2java-execmethod(|rule-c*))> applicable-arrow*
     where
       ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      applicable-arrow* := <lookup-def(|Types()); lookup-applicable-arrow-def> c-ty
+      applicable-arrow* := <lookup-def(|Types()); lookup-applicable-arrow-def> c-ty;
+      rule-c* := <filter(?Rule(_, _, Relation(_, Source(Con(c, _), _), _, _)))> rule*
       
   ds2java-execmethod(|rule*):
     (arrow-def, ArrowType(_, bu-ty)) ->
@@ -50,11 +51,17 @@ rules
       execname := <ds2java-methodname> (arrow-def, bu-ty);
       param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
       arrow-name := <def-get-name> arrow-def;
-      rule := <fetch-elem(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> rule*;
-      {| LiftedMethods:
-        bstm* := <ds2java-rulestatements> rule;
-        more-method* := <bagof-LiftedMethods>
-      |}
+      if rule := <fetch-elem(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> rule*
+      then
+        {| LiftedMethods:
+          bstm* := <ds2java-rulestatements> rule;
+          more-method* := <bagof-LiftedMethods>
+        |}
+      else
+        bstm* := bstm* |[ throw new InterpreterException("Rule failure"); ]|;
+        more-method* := []
+      end
+
   
   ds2java-rulestatements:
     Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
@@ -333,7 +340,7 @@ rules
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       x_manualpkg := <ManuPackageName>;
       x_consname := $[[c]_[<length> c-c-ty*]];
-      e* := <zip(ds2java-term-build)> (c-c-ty*, child*)
+      e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (c-c-ty*, child*)
 
   ds2java-term-build(|ex_ty):
     SortFunCall(x_fname, par, arg*) -> e |[ e_on.x_fname(e*)]|
