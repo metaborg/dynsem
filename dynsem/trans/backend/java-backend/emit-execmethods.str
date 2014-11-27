@@ -3,6 +3,7 @@ module backend/java-backend/emit-execmethods
 imports
   include/ds
   ds
+  libjava-front
 
 imports
   ds2ds/factorize
@@ -18,7 +19,8 @@ imports
   backend/java-backend/analysis-extra
   backend/java-backend/lib-ds2java
   backend/java-backend/emit-arrows
-
+  backend/java-backend/utils
+  
 signature
   constructors
     RuleFail: Premise
@@ -137,7 +139,7 @@ rules
     (Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(vdec@Var(v-name), tc*))), on-succ*, _) ->
       bstm* |[
         final ~x:resultclass x_tmp = e_lhs.~x:exec(e*);
-        final ~x:vout-ty ~x:v-name = x_result_tmp.value;
+        final ~x:vout-ty ~x:v-name = x_tmp.value;
         bstm*
       ]|
     where
@@ -299,8 +301,61 @@ rules
       bstm2* := <ds2java-premise> on-fail*
 
   ds2java-premise = debug(!"Premise failure: "); fail 
+  
+  ds2java-term-build:
+    VarRef(x_v) -> e |[ x_v ]|
+  
+  ds2java-term-build:
+    Int(i) -> e |[ i ]|
 
-  ds2java-term-build = ! e |[ 42 ]|
-  ds2java-term-match = ! bstm* |[ System.out.println(42); ]|
+  ds2java-term-build:
+    True() -> e |[ true ]|
+  
+  ds2java-term-build:
+    False() -> e |[ false ]|
+  
+  ds2java-term-build:
+    VarRef(x_vref) -> e |[ x_vref ]|
+  
+  ds2java-term-build:
+    Con(c, child*) -> e |[ new x_consclass(null, e*) ]|
+    where
+      c-kind := <lookup-def(|Constructors()); lookup-prop(|ConsKind())> c;
+      <not(?NativeOpCons())> c-kind
+    where
+      x_consclass := <ds2java-constr-classname> c;
+      e* := <map(ds2java-term-build)> child*
+  
+  ds2java-term-build:
+    Con(c, child*) -> e |[ x_manualpkg.Natives.x_consname(e*) ]|
+    where
+    	c-def := <lookup-def(|Constructors())> c;
+      <lookup-prop(|ConsKind())> c-def => NativeOpCons();
+      ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
+      x_manualpkg := <ManuPackageName>;
+      x_consname := $[[c]_[<length> c-c-ty*]];
+      e* := <map(ds2java-term-build)> child*
+  
+  ds2java-term-build:
+    SortFunCall(x_fname, on, arg*) -> e |[ e_on.x_fname(e*)]|
+    where
+    	e_on := <ds2java-term-build> on;
+    	e* := <map(ds2java-term-build)> arg*
+  
+  ds2java-term-build:
+  	List([]) -> e |[ NodeList.NIL(Object.class) ]|
+  
+  ds2java-term-build:
+    Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
+    where
+      e_t := <ds2java-term-build> t;
+      x_ty := <rw-type; ds2java-sort-classname> ty-trm     
+  
+  ds2java-term-build:
+    String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))
+
+  ds2java-term-build = debug(!"Term build failure: "); !e |[ xx ]|
+  
+  // ds2java-term-build = debug(!"Term build failure: "); fail
   
   

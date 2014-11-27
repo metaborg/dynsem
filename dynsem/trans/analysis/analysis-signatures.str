@@ -86,7 +86,8 @@ rules /* store signatures */
     d@ValueDecl(v, child*) -> d
     with
       <store-def(|Constructors())> v => v-def;
-      <store-prop(|Type(), v-def)> ConstructorType(<rw-type> child*, ValueType())
+      <store-prop(|Type(), v-def)> ConstructorType(<rw-type> child*, ValueType());
+      <store-prop(|ConsKind(), v-def)> ValueCons()
   
   store-arrows = ArrowDeclarations(map(store-arrow))
   
