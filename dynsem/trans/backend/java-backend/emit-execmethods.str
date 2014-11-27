@@ -146,9 +146,9 @@ rules
       (arrow-def, ArrowType(ma-ty, bu-ty)) := <lookup-arrow-def> (<type-of> lhs, arrow-name);
       resultclass := <ds2java-returnclassname> (arrow-def, bu-ty);
       x_tmp := <newname> "$tmp";
-      e_lhs := <ds2java-term-build> lhs;
+      e_lhs := <ds2java-term-build(|ALPHATYPE())> lhs;
       exec := <ds2java-methodname> (arrow-def, bu-ty);
-      e* := <map(?LabelComp(_, <id>); ds2java-term-build)> [r*, sc*];
+      e* := <map(?LabelComp(_, <id>); ds2java-term-build(|ALPHATYPE()))> [r*, sc*];
       vout-ty := <type-of; ds2java-sort-classname> vdec;
       bstm1* := <map(?LabelComp(_, <id>)); map-with-index(ds2java-bind-out-var(|x_tmp))> tc*;
       bstm* := <ds2java-premise> on-succ*
@@ -210,7 +210,7 @@ rules
       ]|
     where
       v-ty := <type-of; ds2java-sort-classname> dec;
-      e_lhs := <ds2java-term-build> lhs;
+      e_lhs := <ds2java-term-build(|ALPHATYPE())> lhs;
       bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
@@ -263,8 +263,8 @@ rules
     where
       <type-of; ds2java-type-is-primitive> t1;
       <type-of; ds2java-type-is-primitive> t2;
-      e_t1 := <ds2java-term-build> t1;
-      e_t2 := <ds2java-term-build> t2;
+      e_t1 := <ds2java-term-build(|ALPHATYPE())> t1;
+      e_t2 := <ds2java-term-build(|ALPHATYPE())> t2;
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
   
@@ -281,8 +281,8 @@ rules
       <type-of; not(ds2java-type-is-primitive)> t1;
       <type-of; not(ds2java-type-is-primitive)> t2
     where
-      e_t1 := <ds2java-term-build> t1;
-      e_t2 := <ds2java-term-build> t2;
+      e_t1 := <ds2java-term-build(|ALPHATYPE())> t1;
+      e_t2 := <ds2java-term-build(|ALPHATYPE())> t2;
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
@@ -301,32 +301,31 @@ rules
       bstm2* := <ds2java-premise> on-fail*
 
   ds2java-premise = debug(!"Premise failure: "); fail 
-  
-  ds2java-term-build:
-    VarRef(x_v) -> e |[ x_v ]|
-  
-  ds2java-term-build:
+
+  ds2java-term-build(|ex_ty):
     Int(i) -> e |[ i ]|
 
-  ds2java-term-build:
+  ds2java-term-build(|ex_ty):
     True() -> e |[ true ]|
   
-  ds2java-term-build:
+  ds2java-term-build(|ex_ty):
     False() -> e |[ false ]|
   
-  ds2java-term-build:
+  ds2java-term-build(|ex_ty):
     VarRef(x_vref) -> e |[ x_vref ]|
   
-  ds2java-term-build:
+  ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ new x_consclass(null, e*) ]|
     where
-      c-kind := <lookup-def(|Constructors()); lookup-prop(|ConsKind())> c;
+      c-def := <lookup-def(|Constructors())> c;
+      c-kind := <lookup-prop(|ConsKind())> c-def;
       <not(?NativeOpCons())> c-kind
     where
       x_consclass := <ds2java-constr-classname> c;
-      e* := <map(ds2java-term-build)> child*
+      ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
+      e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (c-c-ty*, child*)
   
-  ds2java-term-build:
+  ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ x_manualpkg.Natives.x_consname(e*) ]|
     where
     	c-def := <lookup-def(|Constructors())> c;
@@ -334,27 +333,33 @@ rules
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       x_manualpkg := <ManuPackageName>;
       x_consname := $[[c]_[<length> c-c-ty*]];
-      e* := <map(ds2java-term-build)> child*
-  
-  ds2java-term-build:
-    SortFunCall(x_fname, on, arg*) -> e |[ e_on.x_fname(e*)]|
+      e* := <zip(ds2java-term-build)> (c-c-ty*, child*)
+
+  ds2java-term-build(|ex_ty):
+    SortFunCall(x_fname, par, arg*) -> e |[ e_on.x_fname(e*)]|
     where
-    	e_on := <ds2java-term-build> on;
-    	e* := <map(ds2java-term-build)> arg*
+    	e_on := <ds2java-term-build(|ALPHATYPE())> par;
+    	par-ty := <type-of> par;
+      par-def := <lookup-def(|Types())> par-ty;
+      fun-def := <lookup-native-fun-def(|x_fname)> par-def;
+      <lookup-prop(|Type())> fun-def => FunctionType(farg*, _);
+    	e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (farg*, arg*)
   
-  ds2java-term-build:
-  	List([]) -> e |[ NodeList.NIL(Object.class) ]|
+  ds2java-term-build(|ex_ty):
+  	List([]) -> e |[ NodeList.NIL(x_exptype.class) ]|
+  	where
+  	  x_exptype := <ds2java-sort-classname> ex_ty
   
-  ds2java-term-build:
+  ds2java-term-build(|ex_ty):
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
     where
-      e_t := <ds2java-term-build> t;
+      e_t := <ds2java-term-build(|ALPHATYPE())> t;
       x_ty := <rw-type; ds2java-sort-classname> ty-trm     
   
-  ds2java-term-build:
+  ds2java-term-build(|ex_ty):
     String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))
 
-  ds2java-term-build = debug(!"Term build failure: "); !e |[ xx ]|
+  ds2java-term-build(|ex_ty) = debug(!"Term build failure: "); !e |[ xx ]|
   
   // ds2java-term-build = debug(!"Term build failure: "); fail
   
