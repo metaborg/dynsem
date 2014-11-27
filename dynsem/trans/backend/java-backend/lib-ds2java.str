@@ -10,7 +10,10 @@ rules /* name generation */
   ds2java-sort-classname:
   	ListType(ety) -> $[INodeList<[ety-str]>]
   	where
-  		ety-str := <ds2java-sort-classname> ety
+  		ety-str := <ds2java-sort-classname; ds2java-box-java-type> ety
+  
+  ds2java-sort-classname:
+    ALPHATYPE() -> $[Object]
   
   ds2java-sort-classname:
   	MapType(kty, vty) -> $[com.github.krukow.clj_ds.PersistentMap<[kty-str], [vty-str]>]
