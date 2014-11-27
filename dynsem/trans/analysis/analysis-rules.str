@@ -19,17 +19,13 @@ rules /* syntactic checks */
       add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern])
   
   post-analysis-check:
-    dec -> dec
-    where
-      <?Var(v) + ?MatchedVar(v)> dec
+    dec@Var(v) -> dec
     where
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
       add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
   
   post-analysis-check:
-    dec -> dec
-    where
-      <?Var(v) + ?MatchedVar(v)> dec
+    dec@Var(v) -> dec
     where
       <not(lookup-def(|Vars()))> v;
       add-msg(|Error(), dec, $[INTERNAL ERROR: missing definition for variable [v] from [<unrename-var> v]])
@@ -91,9 +87,7 @@ rules /* store variables */
     (ty, Wld()) -> ty
   
   type-of:
-    (ty, dec) -> ty
-    where
-      <?Var(v) + ?MatchedVar(v)> dec
+    (ty, Var(v)) -> ty
     where
       <store-def(|Vars())> v => v-def;
       <store-prop(|Type(), v-def)> ty
