@@ -6,7 +6,7 @@ imports
 
 rules
   
-  mark-vars = mark-var-defs-in-rules
+  mark-vars = mark-var-defs-in-rules; mark-match-vars
 
 rules
 	
@@ -42,4 +42,16 @@ rules
 
   make-vars =
   	alltd( \ VarRef(x) -> Var(x) \)
+
+rules
+  
+  mark-match-vars =
+    alltd(mark-match-var)
+  
+  mark-match-var:
+    Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
+    
+  mark-match-var:
+    NMatch(lhs, Var(v)) -> NMatch(lhs, MatchedVar(v))
+
 

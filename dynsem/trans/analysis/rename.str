@@ -22,6 +22,9 @@ rules
   rename-var:
   	Var(v) -> Var(<rename(|Vars())> v)
 
+  rename-var:
+    MatchedVar(v) -> MatchedVar(<rename(|Vars())> v)
+
   unrename-var:
   	v -> <invrename(|Vars())> v
   	where
@@ -33,4 +36,7 @@ rules
   unrename-var:
     Var(v) -> Var(<unrename-var> v)
 
+  unrename-var:
+    MatchedVar(v) -> MatchedVar(<unrename-var> v)
+  
     

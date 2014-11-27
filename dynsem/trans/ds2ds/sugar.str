@@ -104,3 +104,7 @@ rules // sugaring
     
   sugar :
     Rule(prem*, _, form) -> RuleW(form, prem*)
+
+  sugar :
+  	MatchedVar(v) -> Var(v)
+  

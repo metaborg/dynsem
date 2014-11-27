@@ -16,6 +16,22 @@ rules
   prettyprint-STRING = ![S(<id>)]
   prettyprint-INT = ![S(<id>)]
   
+  prettyprint-Term :
+    MatchedVar(a) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [a813]
+                     )
+                   ]
+    where a813 := <pp-one-Z(prettyprint-ID)> a
+
+  prettyprint-Term :
+    MatchedVar(a) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [a814]
+                     )
+                   ]
+    where a814 := <pp-one-Z(prettyprint-LID)> a
+
   pp-dynsem-Premise-string =
     parenthesize-ds
     ; prettyprint-Premise

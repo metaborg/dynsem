@@ -201,7 +201,7 @@ rules
       bstm2* := <ds2java-premise> on-fail*
   
   ds2java-premise:
-    (Formula(Match(lhs, dec@Var(v))), on-succ*, _) ->
+    (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
       bstm* |[
         final ~x:v-ty ~x:v = e_lhs;
         bstm*

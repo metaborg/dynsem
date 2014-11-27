@@ -27,7 +27,9 @@ rules
     False() -> BoolType()
 
   type-of:
-    Var(v) -> <lookup-def(|Vars()); lookup-prop(|Type())> v
+    dec -> <lookup-def(|Vars()); lookup-prop(|Type())> v
+    where
+      <?Var(v) + ?MatchedVar(v) + ?VarRef(v)> dec
 
   type-of:
     Con(c, _) -> ty
