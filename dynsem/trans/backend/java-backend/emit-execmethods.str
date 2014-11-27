@@ -157,20 +157,25 @@ rules
     (Formula(NMatch(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(Match(t1, t2)), on-fail*, on-succ*)
   
   ds2java-premise:
-    (Formula(Match(lhs, MatchedVar(v))), on-succ*, _) ->
+    (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
       bstm* |[
         final ~x:v-ty ~x:v = e_lhs;
         bstm*
       ]|
     where
-      v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
+      debug(!1);
+      // v-ty := <debug(!"1a"); lookup-def(|Vars()); debug(!"1b"); lookup-prop(|Type()); debug(!"1c"); ds2java-sort-classname; debug(!"1d")> v;
+      v-ty := <debug(!"1a"); type-of; debug(!"1b")> dec;
+      debug(!2);
       e_lhs := <ds2java-term-build> lhs;
+      debug(!3);
       bstm* := <ds2java-premise> on-succ*
+      ; debug(!4)
   
   ds2java-premise:
-    (Formula(Match(t, Con(c, patt-var*))), on-succ*, on-fail*) ->
+    (Formula(Match(VarRef(v), Con(c, patt-var*))), on-succ*, on-fail*) ->
       bstm* |[
-        final ~x:consname x_tmp = e_t.match(~x:consname.class);
+        final ~x:consname x_tmp = ~x:v.match(~x:consname.class);
         if(x_tmp != null){
           bstm1* // bind pattern variables
           bstm2* // on-success
@@ -181,7 +186,6 @@ rules
     where
       consname := <ds2java-constr-classname> c;
       x_tmp := <newname> "$tmp";
-      e_t := <ds2java-term-build> t;
       bstm1* := <map-with-index(ds2java-bind-out-var(|x_tmp))> patt-var*;
       bstm2* := <ds2java-premise> on-succ*;
       bstm3* := <ds2java-premise> on-fail*
