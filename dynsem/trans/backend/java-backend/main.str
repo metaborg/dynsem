@@ -34,13 +34,21 @@ rules
     log-timed(
       desugar-top | "Desugaring"
     );
+    
+    log-timed(
+      escape-variable-names | "Escaping variable names"
+    );
+    
     m-in-analysis(
       m-in-backend-extra-analysis(
-
-	      log-timed(
-	        escape-variable-names
-	        | "Escaping variable names")
-	      
+        where(
+          get-msgs(mkmsg|Error()) => error*
+          ;if <?[_|_]> error*
+           then
+             <fatal-err(|"Errors encountered: ")> error*
+           end
+        )
+        
 	      ;w-log-timed(
 	        ds2java-interfaces;
 	        write-classes
@@ -50,7 +58,7 @@ rules
 	        ds2java-arrowresults;
 	        write-classes
 	        | "Gen result classes")
-	      
+         
 	      ;w-log-timed(
 	       	ds2java-constructorclasses;
 	       	write-classes
@@ -60,6 +68,7 @@ rules
 	         ds2java-genericnodes;
 	         write-classes
 	         | "Gen specializer classes")
+	         
       )
     )
 
