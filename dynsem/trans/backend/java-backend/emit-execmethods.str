@@ -186,7 +186,7 @@ rules
       x_inputtmp := <newname> "$tmp";
       vin-ty := <type-of> vin;
       <store-prop(|Type(), <store-def(|Vars())> x_inputtmp)> vin-ty; 
-      prem* := <factorize-premises; map(mark-vardefs-in-premise); map(type-check-premise-top)> [Formula(Match(VarRef(x_inputtmp), pattern))];
+      prem* := <factorize-premises; map(mark-vardefs-in-premise); map(mark-match-vars); map(type-check-premise-top)> [Formula(Match(VarRef(x_inputtmp), pattern))];
       bstm0* := <ds2java-premise> (prem*, [JavaStm(bstm* |[ return false; ]|) ], []);
       rules(
         LiftedMethods:+ _ ->
