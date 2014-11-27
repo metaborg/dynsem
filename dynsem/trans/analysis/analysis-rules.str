@@ -25,6 +25,15 @@ rules /* syntactic checks */
     where
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
       add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
+  
+  post-analysis-check:
+    dec -> dec
+    where
+      <?Var(v) + ?MatchedVar(v)> dec
+    where
+      <not(lookup-def(|Vars()))> v;
+      add-msg(|Error(), dec, $[INTERNAL ERROR: missing definition for variable [v] from [<unrename-var> v]])
+    
 
 rules /* store variables */
   
