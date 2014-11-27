@@ -116,10 +116,10 @@ rules
     (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
 
   ds2java-premise:
-    (Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(Var(vout), tc*))), on-succ*, _) ->
+    (Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(vdec@Var(v-name), tc*))), on-succ*, _) ->
       bstm* |[
         final ~x:resultclass x_tmp = e_lhs.~x:exec(e*);
-        final ~x:vout-ty ~x:vout = x_result_tmp.value;
+        final ~x:vout-ty ~x:v-name = x_result_tmp.value;
         bstm*
       ]|
     where
@@ -129,7 +129,7 @@ rules
       e_lhs := <ds2java-term-build> lhs;
       exec := <ds2java-methodname> (arrow-def, bu-ty);
       e* := <map(?LabelComp(_, <id>); ds2java-term-build)> [r*, sc*];
-      vout-ty := <type-of; ds2java-sort-classname> vout;
+      vout-ty := <type-of; ds2java-sort-classname> vdec;
       bstm1* := <map(?LabelComp(_, <id>)); map-with-index(ds2java-bind-out-var(|x_tmp))> tc*;
       bstm* := <ds2java-premise> on-succ*
       
@@ -138,7 +138,7 @@ rules
     (idx, Var(v)) -> bstm |[ final ~x:v-ty ~x:v = x_result.~x:$[get_[idx]](); ]|
     where
       v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
-
+      
   ds2java-premise:
     (MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)), _, _) -> <ds2java-premise> (p, p1*, p2*)
 
