@@ -168,9 +168,9 @@ rules
       bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
-    (Formula(Match(VarRef(v), Con(c, patt-var*))), on-succ*, on-fail*) ->
+    (Formula(Match(t, Con(c, patt-var*))), on-succ*, on-fail*) ->
       bstm* |[
-        final ~x:consname x_tmp = ~x:v.match(~x:consname.class);
+        final ~x:consname x_tmp = e_t.match(~x:consname.class);
         if(x_tmp != null){
           bstm1* // bind pattern variables
           bstm2* // on-success
@@ -181,6 +181,7 @@ rules
     where
       consname := <ds2java-constr-classname> c;
       x_tmp := <newname> "$tmp";
+      e_t := <ds2java-term-build> t;
       bstm1* := <map-with-index(ds2java-bind-out-var(|x_tmp))> patt-var*;
       bstm2* := <ds2java-premise> on-succ*;
       bstm3* := <ds2java-premise> on-fail*
