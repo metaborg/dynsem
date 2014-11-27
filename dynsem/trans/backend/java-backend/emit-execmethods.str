@@ -5,9 +5,14 @@ imports
   ds
 
 imports
+  ds2ds/factorize
+
+imports
   analysis/lib-analysis
   analysis/query
   analysis/constructors
+  analysis/analysis-rules
+  analysis/mark-references
 
 imports
   backend/java-backend/analysis-extra
@@ -17,31 +22,37 @@ imports
 signature
   constructors
     RuleFail: Premise
+    JavaStm: List(BlockStm) -> Premise
     Target: ArrowSomething * Term * LabelComp -> Premise
-
+    
 rules
   
   ds2java-execmethods(|rule*):
-    c -> <map(ds2java-execmethod(|rule*))> applicable-arrow*
+    c -> <mapconcat(ds2java-execmethod(|rule*))> applicable-arrow*
     where
       ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       applicable-arrow* := <lookup-def(|Types()); lookup-applicable-arrow-def> c-ty
       
   ds2java-execmethod(|rule*):
     (arrow-def, ArrowType(_, bu-ty)) ->
-      class-body-dec |[
+      class-body-dec* |[
         public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
           this.specializeChildren(0);
           
           bstm*
         }
+        
+        ~more-method*
       ]|
     where
       execname := <ds2java-methodname> (arrow-def, bu-ty);
       param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
       arrow-name := <def-get-name> arrow-def;
       rule := <fetch-elem(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> rule*;
-      bstm* := <ds2java-rulestatements> rule
+      {| LiftedMethods:
+        bstm* := <ds2java-rulestatements> rule;
+        more-method* := <bagof-LiftedMethods>
+      |}
   
   ds2java-rulestatements:
     Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
@@ -56,7 +67,7 @@ rules
       // debug(!"D ");
     	prem := <inject-try-or; insert-target(|retgt)> prem*;
       // debug(!"E ");
-    	premstms* := <ds2java-premise> (prem, [], [])
+      premstms* := <ds2java-premise> (prem, [], [])
     	// ; debug(!"F ")
   
   ds2java-componentbind:
@@ -97,10 +108,14 @@ rules
       p1'* := <insert-target(|tgt)> p1*;
       p2'* := <insert-target(|tgt)> p2*
 
-  ds2java-premise = ?[]
+  ds2java-premise:
+    [] -> []
 
   ds2java-premise:
     [p | pxs] -> <ds2java-premise> (p, pxs, [])
+
+  ds2java-premise:
+    ([p | pxs*], on-succ*, on-fail*) -> <ds2java-premise> (p, [pxs*, on-succ*], on-fail*)
 
   ds2java-premise:
     (Target((arrow-def, ArrowType(_, bu-ty)), t1, tc*), _, _) ->
@@ -114,6 +129,9 @@ rules
 
   ds2java-premise:
     (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
+
+  ds2java-premise:
+  	(JavaStm(bstm*), _, _) -> bstm*
 
   ds2java-premise:
     (Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(vdec@Var(v-name), tc*))), on-succ*, _) ->
@@ -153,7 +171,34 @@ rules
       bstm2* := <ds2java-premise> (p2x, p2xs, [])
   
   ds2java-premise:
-    (Formula(NMatch(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(Match(t1, t2)), on-fail*, on-succ*)
+    (Formula(NMatch(vin@VarRef(v), pattern)), on-succ*, on-fail*) ->
+      bstm* |[
+        if(x_antimatch(~x:v)){
+          // match failed
+          bstm1*
+        }else{
+          // match succeeded
+          bstm2*
+        }
+      ]|
+    where
+      x_antimatch := <newname> "$antimatch";
+      x_inputtmp := <newname> "$tmp";
+      vin-ty := <type-of> vin;
+      <store-prop(|Type(), <store-def(|Vars())> x_inputtmp)> vin-ty; 
+      prem* := <factorize-premises; map(mark-vardefs-in-premise); map(type-check-premise-top)> [Formula(Match(VarRef(x_inputtmp), pattern))];
+      bstm0* := <ds2java-premise> (prem*, [JavaStm(bstm* |[ return false; ]|) ], []);
+      rules(
+        LiftedMethods:+ _ ->
+          class-body-dec |[
+            private boolean x_antimatch(~x:<ds2java-sort-classname> vin-ty x_inputtmp) {
+              bstm0*
+              return true;
+            }
+          ]|
+      );
+      bstm1* := <ds2java-premise> on-succ*;
+      bstm2* := <ds2java-premise> on-fail*
   
   ds2java-premise:
     (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
@@ -253,8 +298,9 @@ rules
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
-  ds2java-premise = debug(!"Premise failure: "); fail
+  ds2java-premise = debug(!"Premise failure: "); fail 
 
   ds2java-term-build = ! e |[ 42 ]|
   ds2java-term-match = ! bstm* |[ System.out.println(42); ]|
+  
   
