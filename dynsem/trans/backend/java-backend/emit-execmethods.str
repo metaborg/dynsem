@@ -164,8 +164,7 @@ rules
       ]|
     where
       debug(!1);
-      // v-ty := <debug(!"1a"); lookup-def(|Vars()); debug(!"1b"); lookup-prop(|Type()); debug(!"1c"); ds2java-sort-classname; debug(!"1d")> v;
-      v-ty := <debug(!"1a"); type-of; debug(!"1b")> dec;
+      v-ty := <type-of; ds2java-sort-classname> dec;
       debug(!2);
       e_lhs := <ds2java-term-build> lhs;
       debug(!3);
