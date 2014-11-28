@@ -355,21 +355,22 @@ rules
   ds2java-term-build(|ex_ty):
   	List([]) -> e |[ NodeList.NIL(x_exptype.class) ]|
   	where
-  	  x_exptype := <ds2java-sort-classname> ex_ty
+  	  !ex_ty => ListType(ex_elem_ty);
+  	  x_exptype := <ds2java-sort-classname> ex_elem_ty
   
   ds2java-term-build(|ex_ty):
-    ListTail([h-trm], t-trm) -> e |[ new NodeList<x_type>(e_h, e_t) ]|
+    ListTail([h-trm], t-trm) -> e |[ new x_listtype(e_h, e_t) ]|
     where
-      debug(!1);
-      <debug(!"1a ")> ex_ty;
-      <?ListType(ex_elem_ty)> ex_ty;
-      debug(!2);
-      x_type := <ds2java-sort-classname> ex_elem_ty;
-      debug(!3);
-      e_h := <ds2java-term-build(|ex_elem_ty)> h-trm;
-      debug(!4);
-      e_t := <ds2java-term-build(|ex_ty)> t-trm
-      ;debug(!5)
+      h-ty := <type-of> h-trm;
+      e_h := <ds2java-term-build(|h-ty)> h-trm;
+      if <?ListType(_)> ex_ty
+      then
+        x_listtype := <ds2java-sort-classname> ex_ty;
+        e_t := <ds2java-term-build(|ex_ty)> t-trm
+      else
+        x_listtype := <ds2java-sort-classname> ListType(h-ty);
+        e_t := <ds2java-term-build(|ListType(h-ty))> t-trm
+      end
   
   ds2java-term-build(|ex_ty):
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
