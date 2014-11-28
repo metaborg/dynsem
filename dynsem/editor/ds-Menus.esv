@@ -41,4 +41,5 @@ menus
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
     action  : "Merge"                  = merge-editor (openeditor) (realtime) (source)
     action  : "Copy propagation"       = copy-propagation-editor (openeditor) (realtime) (source)
+    action  : "Constant propagation"   = constant-propagation-editor (openeditor) (realtime) (source)
     action  : "Generate Java"          = ds2java-editor (source)
