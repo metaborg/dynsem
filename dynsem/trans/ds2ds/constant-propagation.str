@@ -22,9 +22,30 @@ rules
       rules(ConstantValue:+ VarRef(v) -> const')
   
   constant-propagation:
+    (TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [prem*, TryOr(PremiseBlock(p1'*), PremiseBlock(p2'*))]
+    where
+      {| ConstantValue:
+        p1'* := <foldl(![], constant-propagation)> p1*
+      |};
+      {| ConstantValue:
+        p2'* := <foldl(![], constant-propagation)> p2*
+      |}
+
+  constant-propagation:
+    (MergePoint(pc, PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [prem*, MergePoint(pc', PremiseBlock(p1'*), PremiseBlock(p2'*))]
+    where
+      pc' := <alltd(ConstantValue)> pc;
+      {| ConstantValue:
+        p1'* := <foldl(![], constant-propagation)> p1*
+      |};
+      {| ConstantValue:
+        p2'* := <foldl(![], constant-propagation)> p2*
+      |}
+  
+  constant-propagation:
     (p, prem*) -> [prem*, <alltd(ConstantValue)> p]
     where
-      <not(?Formula(Match(const, VarRef(_))); <alltd(constant-propagation); is-constant> const)> p
+      <not(?TryOr(_, _) + ?MergePoint(_, _, _) + ?Formula(Match(const, VarRef(_))); <alltd(constant-propagation); is-constant> const)> p
   
   is-constant =
     ?Int(_)
