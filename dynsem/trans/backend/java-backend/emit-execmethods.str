@@ -147,6 +147,7 @@ rules
       bstm* |[
         final ~x:resultclass x_tmp = e_lhs.~x:exec(e*);
         final ~x:vout-ty ~x:v-name = x_tmp.value;
+        bstm1*
         bstm*
       ]|
     where
