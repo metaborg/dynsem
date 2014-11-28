@@ -53,7 +53,3 @@ rules
       <lookup-native-fun-def(|fun-name)> par-def => fun-def;
       <lookup-prop(|Type())> fun-def => FunctionType(_, ty)
 
-rules
-  
-  type-lub:
-    (ty-l, ty-r) -> <fail>

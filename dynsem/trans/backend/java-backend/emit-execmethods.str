@@ -362,29 +362,20 @@ rules
   			x_exptype := <ds2java-sort-classname> ex_ty
   		end
   		
-  ds2java-term-build(|ex_ty):
+  ds2java-term-build(|ex-ty):
     ListTail([h-trm], t-trm) -> e |[ new NodeList<x_type>(e_h, e_t) ]|
     where
-      debug(!1);
       h-ty := <type-of> h-trm;
-      debug(!2);
       e_h := <ds2java-term-build(|h-ty)> h-trm;
-      debug(!3);
-      h_ex_elem_ty := <?ListType(<id>) <+ !h-ty> ex_ty;
-      debug(!4);
-      if <type-of> t-trm => ListType(t-ty)
+      h-ex-elem-ty := <?ListType(<id>) <+ !h-ty> ex-ty;
+      if <type-of> t-trm => ListType(t-elem-ty)
       then
-        debug(!5);
-        actual_ex_elem_ty := <type-lub> (h_ex_elem_ty, t-ty)
+        actual_ex_elem_ty := <type-coerce> (h-ex-elem-ty, t-elem-ty)
       else
-        debug(!6);
-        actual_ex_elem_ty := h_ex_elem_ty
+        actual_ex_elem_ty := h-ex-elem-ty
       end;
-      debug(!7);
       x_type := <ds2java-sort-classname; ds2java-box-java-type> actual_ex_elem_ty;
-      debug(!8);
       e_t := <ds2java-term-build(|ListType(actual_ex_elem_ty))> t-trm
-      ;debug(!9)
   
   ds2java-term-build(|ex_ty):
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
