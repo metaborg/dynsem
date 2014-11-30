@@ -192,6 +192,20 @@ rules /* store variables */
       <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
       <zip; map(type-of-top)> (farg*, arg*)
   
+  type-of:
+    (ty, Map([Bind(key-val, val-val)])) -> ty'
+    where
+      <type-of-top> (NONETYPE(), key-val) => key-ty;
+      <type-of-top> (NONETYPE(), val-val) => val-ty;
+      map-ty := MapType(key-ty, val-ty);
+      <type-coerce> (map-ty, ty) => ty'
+
+  type-of:
+    (ty, MapExtend(map1, map2)) -> map2-ty
+    where
+      <type-of-top> (NONETYPE(), map1) => map1-ty;
+      <type-of-top> (map1-ty, map2) => map2-ty
+
   lookup-native-fun-def(|fun-name):
     parent-def -> <lookup-def(|NativeDTFun(parent-def))> fun-name
   

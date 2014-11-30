@@ -144,4 +144,7 @@ rules // type rewriting
   
   pp-type-builtin:
     ListType(ety) -> $[List([<pp-type> ety])]
+  
+  pp-type-builtin:
+    MapType(key-ty, val-ty) -> $[Map([<pp-type> key-ty], [<pp-type> val-ty])]
 
