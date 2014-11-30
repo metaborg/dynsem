@@ -170,6 +170,19 @@ rules /* store variables */
       <type-coerce> (ListType(head-ty), ty) => ty'
 
   type-of:
+    (ty, MapSelect(map-trm, key-trm)) -> val-ty'
+    where
+      <type-of-top> (NONETYPE(), map-trm) => maybe-map-ty;
+      if <?MapType(key-ty, val-ty)> maybe-map-ty
+      then
+        id
+      else
+        <lookup-def(|Types()); lookup-prop(|SuperType())> maybe-map-ty => MapType(key-ty, val-ty)
+      end;
+      <type-of-top> (key-ty, key-trm) => key-ty;
+      <type-coerce> (val-ty, ty) => val-ty'
+
+  type-of:
     (ty, SortFunCall(fun-name, par, arg*)) -> ty'
     where
       <type-of-top> (NONETYPE(), par) => parent-ty;
