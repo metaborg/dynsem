@@ -66,18 +66,12 @@ rules
   ds2java-rulestatements:
     Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
     where
-      // debug(!"A ");
     	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
-      // debug(!"B ");
     	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*;
-      // debug(!"C ");
       <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, c-ty);
       retgt := Target(<lookup-arrow-def> (c-ty, arrow-name), rhs, tc*);
-      // debug(!"D ");
     	prem := <inject-try-or; insert-target(|retgt)> prem*;
-      // debug(!"E ");
       premstms* := <ds2java-premise> (prem, [], [])
-    	// ; debug(!"F ")
   
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
