@@ -13,7 +13,7 @@ rules /* merge ovelapping rules */
     Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules(merged-rule*)])
     with
       cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
-      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> signatures;
+      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name); make-set> signatures;
       rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; rename-components; rename-output); merge-rules-top)>))> rules-by-cons-arrow*
