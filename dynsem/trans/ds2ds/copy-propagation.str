@@ -15,7 +15,7 @@ rules
     	prem'* := <foldr(![], copy-propagation-prems(|excluded-var*))> prem*
 
   copy-propagation-prems(|excluded-var*):
-  	(TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [TryOr(PremiseBlock(p1'*), PremiseBlock(p1'*)), prem*]
+  	(TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [TryOr(PremiseBlock(p1'*), PremiseBlock(p2'*)), prem*]
   	where
   		p1'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p1*;
   		p2'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p2*
