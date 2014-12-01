@@ -10,7 +10,7 @@ rules
 
 rules // renaming
   
-  new-scope-renames(s|namespace) = {| Renames: s |}
+  new-scope-renames(s) = {| Renames: s |}
   
   rename(|namespace):
     name -> name'

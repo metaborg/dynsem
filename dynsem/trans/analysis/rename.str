@@ -14,16 +14,46 @@ strategies
 rules
   
   rename:
-  	r@Rule(_, _, _) -> <new-scope-renames(alltd(origin-track-forced(rename-var)) | Vars())> r
-
+    Rule(p*, i, r) -> Rule(p'*, i, r')
+    where
+      new-scope-renames(
+        r' := <rename-all-vars> r;
+        p'* := <rename-all-vars> p*
+      )
+  
+  rename-all-vars = alltd(origin-track-forced(rename-var))
+  
+  rename-var:
+  	TryOr(l, r) -> TryOr(l', r')
+  	where
+  	  new-scope-renames(
+        l' := <rename-all-vars> l
+      );
+      new-scope-renames(
+        r' := <rename-all-vars> r
+      )
+  
+  rename-var:
+    MergePoint(p, l, r) -> MergePoint(p', l', r')
+    where
+      new-scope-renames(
+        p' := <rename-all-vars> p;
+        l' := <rename-all-vars> l
+      );
+      new-scope-renames(
+        r' := <rename-all-vars> r
+      )
+  
   rename-var:
   	VarRef(v) -> VarRef(<rename(|Vars())> v)
   
   rename-var:
   	Var(v) -> Var(<rename(|Vars())> v)
-
+  
   rename-var:
-    MatchedVar(v) -> MatchedVar(<rename(|Vars())> v)
+  	MatchedVar(v) -> MatchedVar(<rename(|Vars())> v)
+
+rules
 
   unrename-var:
   	v -> <invrename(|Vars())> v
@@ -38,5 +68,3 @@ rules
 
   unrename-var:
     MatchedVar(v) -> MatchedVar(<unrename-var> v)
-  
-    

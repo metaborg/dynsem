@@ -72,7 +72,7 @@ rules
       )
     )
 
-rules /* rename variables */
+rules /* escape variable names */
 
   escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
   
