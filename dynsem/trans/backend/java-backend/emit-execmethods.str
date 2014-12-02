@@ -223,12 +223,12 @@ rules
   ds2java-premise:
     (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
       bstm* |[
-        final ~x:v-ty ~x:v = e_lhs;
+        final ~x:<ds2java-sort-classname> v-ty ~x:v = e_lhs;
         bstm*
       ]|
     where
-      v-ty := <type-of; ds2java-sort-classname> dec;
-      e_lhs := <ds2java-term-build(|ALPHATYPE())> lhs;
+      v-ty := <type-of> dec;
+      e_lhs := <ds2java-term-build(|v-ty)> lhs;
       bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
