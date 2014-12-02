@@ -87,9 +87,25 @@ rules
     [p@TryOr(_, _)] -> p 
   
   inject-try-or:
+    l@[p1 | _] -> l
+    where
+      <not(?TryOr(_, _))> p1;
+      <not(fetch-elem(premise-can-fail))> l
+      
+  inject-try-or:
     l@[p1 | _] -> TryOr(PremiseBlock(l), PremiseBlock([RuleFail()]))
     where
-      <not(?TryOr(_, _))> p1
+      <not(?TryOr(_, _))> p1;
+      <fetch-elem(premise-can-fail)> l
+
+  premise-can-fail =
+    ?Formula(Match(_, Con(_, _)))
+    + ?Formula(Match(_, List(_)))
+    + ?Formula(Match(_, ListTail(_, _)))
+    + ?Formula(NMatch(_, _))
+    + ?Formula(TermEq(_, _))
+    + ?Formula(TermNeq(_, _))
+    + ?MergePoint(_, PremiseBlock(p1*), PremiseBlock(p2*)); <fetch-elem(premise-can-fail)> p2*
 
   insert-target(|tgt):
     [] -> [tgt]
