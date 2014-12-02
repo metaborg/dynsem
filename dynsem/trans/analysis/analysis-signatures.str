@@ -80,7 +80,7 @@ rules /* store signatures */
     with
       <store-def(|Constructors())> c => c-def;
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
-      <store-prop(|ConsKind(), c-def)> NativeOpCons()
+      <store-prop(|ConsKind(), c-def)> NativeCons()
 
   store-constructor:
     d@ValueDecl(v, child*) -> d

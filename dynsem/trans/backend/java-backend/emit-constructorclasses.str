@@ -21,7 +21,7 @@ rules
     Module(_, section*) -> <map(def-get-name; ds2java-constructorclass(|rule*))> constr-def*
     where
       rule* := <fetch-elem(?Rules(<id>))> section*;
-      constr-def* := <lookup-def-all(|Constructors()); filter(not(lookup-prop(|ConsKind()) => NativeOpCons()))>
+      constr-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|ConsKind()); not(?NativeOpCons() + NativeCons())))>
   
   // generate class for constructor
   ds2java-constructorclass(|rule*):

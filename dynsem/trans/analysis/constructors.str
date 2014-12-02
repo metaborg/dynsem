@@ -55,6 +55,7 @@ signature
   	ConsKind: Property
   	LanguageCons: ConsKind
   	InternalCons: ConsKind
+  	NativeCons: ConsKind
   	NativeOpCons: ConsKind
   	ValueCons: ConsKind
 
