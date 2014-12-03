@@ -91,6 +91,9 @@ public class NodeList<T> implements INodeList<T> {
 		if (this.size() != other.size()) {
 			return false;
 		}
+		if (this.isEmpty() && other.isEmpty()) {
+			return false;
+		}
 		if (head == null) {
 			if (other.head != null)
 				return false;
