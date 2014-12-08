@@ -17,7 +17,7 @@ public class NodeUtils {
 			try {
 				s += f.get(o) + ", ";
 			} catch (IllegalAccessException e) {
-				 s += "<" + f.getName() + " INACCESSIBLE>";
+//				 s += "<" + f.getName() + ">";
 			}
 		}
 		s += ")";
