@@ -116,6 +116,11 @@ rules /* store variables */
       <type-coerce> (StringType(), ty)
 
   type-of:
+    (ty, Fresh()) -> IntType()
+    where
+      <type-coerce> (IntType(), ty)
+
+  type-of:
     (ty, r@VarRef(v)) -> ty'
     where
       <lookup-def(|Vars())> v => v-def;

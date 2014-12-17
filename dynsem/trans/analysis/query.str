@@ -27,6 +27,9 @@ rules
     False() -> BoolType()
 
   type-of:
+    Fresh() -> IntType()
+
+  type-of:
     dec -> <lookup-def(|Vars()); lookup-prop(|Type())> v
     where
       <?Var(v) + ?MatchedVar(v) + ?VarRef(v)> dec
