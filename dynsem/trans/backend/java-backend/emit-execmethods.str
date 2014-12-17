@@ -397,6 +397,11 @@ rules
   ds2java-term-build(|ex_ty):
     String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))
 
+  ds2java-term-build(|ex_ty):
+    Fresh() -> e |[ x_manualpkg.Natives.fresh() ]|
+    where
+      x_manualpkg := <ManuPackageName>
+
   ds2java-term-build(|ex_ty) = debug(!"Term build failure: "); !e |[ xx ]|
   
   // ds2java-term-build = debug(!"Term build failure: "); fail
