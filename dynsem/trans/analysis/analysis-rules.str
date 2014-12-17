@@ -337,5 +337,14 @@ rules
     where
       <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
 
+  type-coerce:
+    (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty
+    where
+      <lookup-def(|Types())> to-ty => to-ty-def;
+      <lookup-prop(|SortKind())> to-ty-def => SemanticCompSort();
+      <lookup-prop(|SuperType())> to-ty-def => MapType(e-k-ty, e-v-ty);
+      <type-coerce> (a-k-ty, e-k-ty);
+      <type-coerce> (a-v-ty, e-v-ty)
+
   type-coerce-sym = type-coerce <+ !(<Snd>, <Fst>); type-coerce
 
