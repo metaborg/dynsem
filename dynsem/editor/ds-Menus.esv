@@ -43,3 +43,4 @@ menus
     action  : "Copy propagation"       = copy-propagation-editor (openeditor) (realtime) (source)
     action  : "Constant propagation"   = constant-propagation-editor (openeditor) (realtime) (source)
     action  : "Generate Java"          = ds2java-editor (source)
+    action  : "All to Java"            = all-to-java-editor (source)

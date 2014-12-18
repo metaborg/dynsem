@@ -16,6 +16,7 @@ imports
 	ds2ds/strict
 
 imports
+  lib-ds
 	ds2ds/sugar
 	ds2ds/factorize
 	ds2ds/explicate
@@ -28,6 +29,7 @@ imports
 	analysis/lib-analysis
 	analysis/constructors
 	backend/java-backend/main
+	backend/java-backend/utils
 	
 signature
   constructors
@@ -142,17 +144,17 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
-  factorize-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"factorized.ds")> path;
-      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
-
   explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; explicate-module; sugar-all; pp-debug> ast
+
+  factorize-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"factorized.ds")> path;
+      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
 
   merge-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
@@ -172,6 +174,37 @@ rules // Builders
       filename := <guarantee-extension(|"constprop.ds")> path;
       result   := <resolve-includes(|path, project-path); desugar-top; constant-propagation-module; sugar-all; pp-debug> ast
 
+  all-to-java-editor:
+    (_, position, ast, path, project-path) -> None()
+    with
+      init-options(|path, project-path);
+      <log-timed(
+        log-timed(
+          resolve-includes(|path, project-path) | "Import resolutions"
+        );
+        log-timed(
+          desugar-top; fuse-sections | "Desugaring"
+        );
+        log-timed(
+          explicate-module | "Explication"
+        );
+        log-timed(
+          factorize-module | "Factorization"
+        );
+        log-timed(
+          merge-rules-in-module | "Rule merging"
+        );
+        log-timed(
+          copy-propagation-module | "Copy propagation"
+        );
+        log-timed(
+          constant-propagation-module | "Constant propagation"
+        );
+        log-timed(
+          ds2java | "Interpreter generation"
+        )
+      | "Total")> ast
+      
   // format rules
   format-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
