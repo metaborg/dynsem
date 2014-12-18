@@ -157,7 +157,7 @@ rules // extract components
       writable* := <make-set> [locl-writable*, glob-writable*];
       changeable* := <make-set> [locl-changeable*, glob-changeable*];
       rules(
-        ReadableComps : arrow -> <sort-comps> readable*
+        ReadableComps : arrow -> <sort-comps; diff(|changeable*)> readable*
         WritableComps : arrow -> <sort-comps> writable*
         ChangeableComps : arrow -> <sort-comps> changeable*
       )
@@ -181,12 +181,15 @@ rules // extract components
       writable* := <make-set> [new-writable*, conc-writable*];
       changeable* := <make-set> [new-changeable*, conc-changeable*];
       rules(
-        ReadableComps : conc-arrow -> <sort-comps> readable*
+        ReadableComps : conc-arrow -> <sort-comps; diff(|changeable*)> readable*
         WritableComps : conc-arrow -> <sort-comps> writable*
         ChangeableComps : conc-arrow -> <sort-comps> changeable*
       )
   
   sort-comps = qsort(comp-gt)
+  
+  diff(|l2):
+    l1 -> <diff> (l1, l2)
   
   comp-gt = ?(SimpleSort(l), SimpleSort(r)); <string-gt> (l, r)
   
