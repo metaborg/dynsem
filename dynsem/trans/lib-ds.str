@@ -157,9 +157,9 @@ rules // extract components
       writable* := <make-set> [locl-writable*, glob-writable*];
       changeable* := <make-set> [locl-changeable*, glob-changeable*];
       rules(
-        ReadableComps : arrow -> readable*
-        WritableComps : arrow -> writable*
-        ChangeableComps : arrow -> changeable*
+        ReadableComps : arrow -> <sort-comps> readable*
+        WritableComps : arrow -> <sort-comps> writable*
+        ChangeableComps : arrow -> <sort-comps> changeable*
       )
   
   extract-components-from-premises:
@@ -181,10 +181,21 @@ rules // extract components
       writable* := <make-set> [new-writable*, conc-writable*];
       changeable* := <make-set> [new-changeable*, conc-changeable*];
       rules(
-        ReadableComps : conc-arrow -> readable*
-        WritableComps : conc-arrow -> writable*
-        ChangeableComps : conc-arrow -> changeable*
+        ReadableComps : conc-arrow -> <sort-comps> readable*
+        WritableComps : conc-arrow -> <sort-comps> writable*
+        ChangeableComps : conc-arrow -> <sort-comps> changeable*
       )
+  
+  sort-comps = qsort(comp-gt)
+  
+  comp-gt = ?(SimpleSort(l), SimpleSort(r)); <string-gt> (l, r)
+  
+  comp-gt =
+    ?(ListSort(_), SimpleSort(_))
+  
+  comp-gt =
+    ?(ListSort(l), ListSort(r)); <string-gt> (l, r)
+    
       
 rules // component operations
   
