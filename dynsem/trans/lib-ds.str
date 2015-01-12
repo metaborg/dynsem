@@ -109,7 +109,6 @@ rules // new extracted components (working for inference of components on multip
   		);
   		s
   	}
-
   
   extract-components(|arrow*):
     rule* -> rule*

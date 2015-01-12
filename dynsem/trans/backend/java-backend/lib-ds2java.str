@@ -18,8 +18,8 @@ rules /* name generation */
   ds2java-sort-classname:
   	MapType(kty, vty) -> $[com.github.krukow.clj_ds.PersistentMap<[kty-str], [vty-str]>]
   	where
-  		kty-str := <ds2java-sort-classname> kty;
-  		vty-str := <ds2java-sort-classname> vty
+  		kty-str := <ds2java-sort-classname; try(ds2java-box-primitive-java-type)> kty;
+  		vty-str := <ds2java-sort-classname; try(ds2java-box-primitive-java-type)> vty
   
   ds2java-sort-classname:
     ty -> <ds2java-sort-classname> ty'

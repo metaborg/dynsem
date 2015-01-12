@@ -408,6 +408,19 @@ rules
       e_map := <ds2java-term-build(|ALPHATYPE())> map-expr;
       e_key := <ds2java-term-build(|ALPHATYPE())> key-expr
 
+  ds2java-term-build(|ex_ty):
+    MapExtend(lmap, rmap) -> e |[ MapUtils.plus(e_rmap, e_lmap) ]|
+    where
+      e_rmap := <ds2java-term-build(|ALPHATYPE())> rmap;
+      e_lmap := <ds2java-term-build(|ALPHATYPE())> lmap
+
+  ds2java-term-build(|ex_ty):
+    Map([Bind(key, val)]) -> e |[ new com.github.krukow.clj_lang.PersistentTreeMap<x_keyty, x_valty>().plus(e_key, e_val) ]|
+    where
+      x_keyty := <type-of; ds2java-sort-classname; ds2java-box-java-type> key;
+      x_valty := <type-of; ds2java-sort-classname; ds2java-box-java-type> val;
+      e_key := <ds2java-term-build(|ALPHATYPE())> key;
+      e_val := <ds2java-term-build(|ALPHATYPE())> val
+      
   ds2java-term-build(|ex_ty) = debug(!"Term build failure: "); !e |[ xx ]|
   
-  // ds2java-term-build = debug(!"Term build failure: "); fail
