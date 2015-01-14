@@ -13,6 +13,7 @@ imports
   backend/java-backend/emit-arrows
   backend/java-backend/analysis-extra
   backend/java-backend/emit-execmethods
+  backend/java-backend/emit-atermconversion
 
 rules
   
@@ -30,7 +31,8 @@ rules
 	      package ~x:<AutoPackageName>;
 	      
 	      import org.metaborg.meta.interpreter.framework.*;
-	
+	      import org.spoofax.interpreter.terms.*;
+
 	      public class x_consname extends AbstractNode implements ~x:<ds2java-sort-classname> c-ty {
 	        
 	        private boolean hasSpecialized;
@@ -72,6 +74,8 @@ rules
 	        ~exec*
 
 	        ~fget*
+
+          ~atermconvert
 	        
 	      }
 	    ]|
@@ -86,7 +90,8 @@ rules
     	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
     	bstm2* := <map-with-index(ds2java-field-specializer)> c-c-ty*;
-    	exec* := <ds2java-execmethods(|rule*)> c
+    	exec* := <ds2java-execmethods(|rule*)> c;
+    	atermconvert := <ds2java-atermconversion> c
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:

@@ -68,8 +68,13 @@ rules
             
           }
           
+          @Override
+          public IStrategoTerm toStrategoTerm(ITermFactory factory) {
+            return aterm;
+          }
+
           ~exec*
-          
+
         }
       ]|
     where
