@@ -44,11 +44,19 @@ rules // Analysis
 		with
 		  ast' := <resolve-includes(|path, project-path); desugar-top> ast;
 			<m-in-analysis(
+				where(
 		  		get-msgs(mkmsg|Error()) => error*;
 		  		get-msgs(mkmsg|Warning()) => warning*;
 		  		get-msgs(mkmsg|Note()) => note*
+		  	)
 			)> ast' => analyzed-ast
 	
+	editor-show-analyzed:
+		(selected, position, ast, path, project-path) -> (filename, analyzed-ast)
+		with
+			filename := <guarantee-extension(|"analyzed.aterm")> path;
+			(analyzed-ast, _, _, _) := <editor-analyze> (ast, path, project-path)
+			
   mkmsg: Message(_, t, s) -> (t, s)
 	
 rules
@@ -100,12 +108,6 @@ rules // Debugging
 			filename := <guarantee-extension(|"aterm")> path;
 			result	 := selected
 			
-	// Prints the analyzed annotated abstract syntax ATerm of a selection.
-	debug-show-analyzed:
-		(selected, position, ast, path, project-path) -> (filename, ast)
-		with
-			filename := <guarantee-extension(|"analyzed.aterm")> path
-  
   debug-show-desugared:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
