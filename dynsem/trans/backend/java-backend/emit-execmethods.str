@@ -4,6 +4,7 @@ imports
   include/ds
   ds
   libjava-front
+  lib-ds/lib-match
 
 imports
   ds2ds/factorize
@@ -34,7 +35,7 @@ rules
     where
       ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       applicable-arrow* := <lookup-def(|Types()); lookup-applicable-arrow-def> c-ty;
-      rule-c* := <filter(?Rule(_, _, Relation(_, Source(Con(c, _), _), _, _)))> rule*
+      rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
       
   ds2java-execmethod(|rule*):
     (arrow-def, ArrowType(_, bu-ty)) ->
@@ -51,7 +52,7 @@ rules
       execname := <ds2java-methodname> (arrow-def, bu-ty);
       param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
       arrow-name := <def-get-name> arrow-def;
-      if rule := <fetch-elem(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> rule*
+      if rule := <fetch-elem(is-rule-matching-arrow(|arrow-name))> rule*
       then
         {| LiftedMethods:
           bstm* := <ds2java-rulestatements> rule;
@@ -64,8 +65,15 @@ rules
 
   
   ds2java-rulestatements:
-    Rule(prem*, _, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
+    Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, asbound*, patternbound*, premstms*]
     where
+    	if <?As(v, Con(c, patt-var*))> lhs then
+    		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
+    		asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
+    	else
+    		Con(c, patt-var*) := lhs;
+    		asbound* := []
+    	end;
     	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
     	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*;
       <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, c-ty);

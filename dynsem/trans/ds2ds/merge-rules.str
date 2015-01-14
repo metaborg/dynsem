@@ -6,6 +6,7 @@ imports
   pp
   lib-ds
   ds2ds/sugar
+  lib-ds/lib-match
 
 rules /* merge ovelapping rules */
 
@@ -29,13 +30,6 @@ rules /* merge ovelapping rules */
     with
       rulez := <filter(is-rule-matching-cons(|cons, arity))> rule*
   
-  is-rule-matching-cons(|cons-goal, arity) =
-    where(
-	    ?Rule(_, _, Relation(_, Source(Con(cons-actual, conargs), _), _, _));
-	    <strip-annos; eq> (cons-actual, cons-goal);
-	    <eq> (arity, <length> conargs)
-	  )
-
   group-rules-by-arrow(|arrow-name*):
     rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
 
