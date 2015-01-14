@@ -33,8 +33,8 @@
                     --library
                     -I &quot;${trans}&quot;
                     -I &quot;${basedir}&quot;
-		                -I &quot;${basedir}/lib/runtime-libraries/org.spoofax.meta.runtime.libraries&quot;
                     -la stratego-lib -la stratego-sglr -la stratego-gpp -la stratego-xtc -la stratego-aterm -la stratego-parallel" />
+
 	<!-- Optional: external .def and .jar locations
     <property name="externaldef" location="syntax/${sdfmodule}.def"/>
     <property name="externaljar" value="../lib.jar"/>
@@ -60,7 +60,7 @@
 
 	<!-- Main target -->
 	<target depends="spoofaximp.default.ctree" name="all" />
-	<target depends="generate-sources-java" name="generate-sources"/>
-	<target depends="package-java" name="package"/>
-	
+	<target depends="generate-sources-java" name="generate-sources" />
+	<target depends="package-java" name="package" />
+
 </project>
