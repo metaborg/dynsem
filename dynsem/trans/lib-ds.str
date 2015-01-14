@@ -319,8 +319,8 @@ rules // pretty-printing terms
     
 rules
   
-  pp-aterm :
-    c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
+  // pp-aterm :
+  //   c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
 
 rules // utils
 	
