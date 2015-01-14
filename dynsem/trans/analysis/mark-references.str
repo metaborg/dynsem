@@ -39,6 +39,7 @@ rules
   	<+ TermNeq(id, id)
   	<+ Match(id, make-vars)
   	<+ NMatch(id, make-vars)
+  	<+ As(make-vars, make-vars)
 
   make-vars =
   	alltd( \ VarRef(x) -> Var(x) \)
