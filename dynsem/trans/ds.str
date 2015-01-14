@@ -74,7 +74,13 @@ rules
     end
     
 rules // Editor services
-	
+	editor-resolve:
+	  (node, position, ast, path, project-path) -> <fail>
+  
+  editor-hover:
+    (target, position, ast, path, project-path) -> <fail>
+
+
 	// Resolves a reference when the user control-clicks or presses F3 in the editor.
 	// editor-resolve:
 	// 	(node, position, ast, path, project-path) -> definition
