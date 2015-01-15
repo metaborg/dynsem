@@ -10,6 +10,7 @@ imports
 
 imports
   backend/java-backend/lib-ds2java
+  backend/java-backend/emit-maputils
 
 rules
 
@@ -33,40 +34,35 @@ rules
       e_child* := <map-with-index(ds2java-atermconversion-field)> c-c-ty*
 
   ds2java-atermconversion-field:
-  	(idx, f-ty) -> e |[ x_idx.toStrategoTerm(factory) ]|
+    (idx, f-ty) -> <ds2java-atermconversion-name(| e |[ ~x:<mkidx> idx ]|)> f-ty
+
+  ds2java-atermconversion-name(|e):
+  	f-ty -> e |[ e.toStrategoTerm(factory) ]|
   	where
   		f-ty-def := <lookup-def(|Types())> f-ty;
   		f-ty-knd := <lookup-prop(|SortKind())> f-ty-def;
   		<not(?SystemSort())> f-ty-knd;
   		<not(?SemanticCompSort())> f-ty-knd
-    where
-    	x_idx := <mkidx> idx
 
-  ds2java-atermconversion-field:
-  	(idx, f-ty) -> e |[ factory.makeString(x_idx.toString()) ]|
+  ds2java-atermconversion-name(|e):
+  	f-ty -> e |[ AutoMapUtils.x_map2aterm(e, factory) ]|
   	where
-      <lookup-def(|Types()); lookup-prop(|SortKind())> f-ty => SemanticCompSort()
-  	where
-  		x_idx := <mkidx> idx
+  		f-ty-def := <lookup-def(|Types())> f-ty;
+      <lookup-prop(|SortKind())> f-ty-def => SemanticCompSort();
+      x_map2aterm := <def-get-name; ds2java-map2aterm-name> f-ty-def
   
-  ds2java-atermconversion-field:
-  	(idx, IntType()) -> e |[ factory.makeInt(x_idx) ]|
-    where
-    	x_idx := <mkidx> idx
+  ds2java-atermconversion-name(|e):
+  	IntType() -> e |[ factory.makeInt(e) ]|
 
-  ds2java-atermconversion-field:
-  	(idx, RealType()) -> e |[ factory.makeReal(x_idx) ]|
-    where
-    	x_idx := <mkidx> idx
+  ds2java-atermconversion-name(|e):
+  	RealType() -> e |[ factory.makeReal(e) ]|
 
-  ds2java-atermconversion-field:
-  	(idx, BoolType()) -> e |[ factory.makeAppl(factory.makeConstructor(x_idx ? "True" : "False", 0)) ]|
-    where
-    	x_idx := <mkidx> idx
+  ds2java-atermconversion-name(|e):
+  	BoolType() -> e |[ factory.makeAppl(factory.makeConstructor(e ? "True" : "False", 0)) ]|
   
-  ds2java-atermconversion-field:
-  	(idx, StringType()) -> e |[ factory.makeString(x_idx) ]|
-  	where
-  		x_idx := <mkidx> idx
+  ds2java-atermconversion-name(|e):
+  	StringType() -> e |[ factory.makeString(e) ]|
+
+
 
 

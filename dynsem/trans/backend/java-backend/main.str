@@ -19,6 +19,7 @@ imports
 	backend/java-backend/emit-arrows
 	backend/java-backend/emit-constructorclasses
 	backend/java-backend/emit-genericnodes
+	backend/java-backend/emit-maputils
   
 rules
   
@@ -68,7 +69,12 @@ rules
 	         ds2java-genericnodes;
 	         write-classes
 	         | "Gen specializer classes")
-	         
+	      
+	      ;w-log-timed(
+	         ds2java-maputils;
+	         write-classes
+	         | "Gen map utilities"
+	       )
       )
     )
 

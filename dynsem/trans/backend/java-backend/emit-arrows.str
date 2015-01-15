@@ -115,7 +115,6 @@ rules
 
 	        @Override
 	        public IStrategoTerm toStrategoTerm(ITermFactory factory) {
-	          final x_valueclass _0 = value;
 	          return factory.makeAppl(
 	                   factory.makeConstructor(~e:Lit(String([Chars(<escape> x_classname)])), ~i:<length; inc; int-to-string> changeable*),
 	                   e_val,
@@ -135,7 +134,7 @@ rules
      bstm* := <map-with-index(ds2java-fieldinit)> changeable*;
      fget* := <map-with-index(ds2java-getter)> changeable*
 	 where
-	   e_val := <ds2java-atermconversion-field> (0, bu-ty);
+	   e_val := <ds2java-atermconversion-name(| e |[ value ]|)> bu-ty;
 	   e_child* := <map-with-index(ds2java-atermconversion-field)> changeable*
 
 
