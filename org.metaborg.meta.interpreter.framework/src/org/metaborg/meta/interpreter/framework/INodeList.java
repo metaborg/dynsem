@@ -1,6 +1,7 @@
 package org.metaborg.meta.interpreter.framework;
 
-public interface INodeList<T> extends Iterable<T> {
+
+public interface INodeList<T> extends Iterable<T>, IConvertibleToStrategoTerm {
 
 	public T head();
 

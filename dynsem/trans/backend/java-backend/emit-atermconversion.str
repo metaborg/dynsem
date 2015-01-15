@@ -13,7 +13,7 @@ imports
 
 rules
 
-  ds2java-atermconversion:
+  ds2java-atermconversion-constructor:
     c ->
 	    class-body-dec |[
 	      @Override

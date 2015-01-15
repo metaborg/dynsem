@@ -91,7 +91,7 @@ rules
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
     	bstm2* := <map-with-index(ds2java-field-specializer)> c-c-ty*;
     	exec* := <ds2java-execmethods(|rule*)> c;
-    	atermconvert := <ds2java-atermconversion> c
+    	atermconvert := <ds2java-atermconversion-constructor> c
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:

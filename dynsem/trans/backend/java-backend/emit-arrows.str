@@ -2,7 +2,8 @@ module backend/java-backend/emit-arrows
 
 imports
   include/ds
-
+  libjava-front
+  
 imports
   analysis/constructors
   analysis/lib-analysis
@@ -11,7 +12,8 @@ imports
   backend/java-backend/lib-ds2java
   backend/java-backend/analysis-extra
   backend/java-backend/utils
-
+  backend/java-backend/emit-atermconversion
+  
 rules
   
   // generate arrow interface methods
@@ -97,8 +99,11 @@ rules
 			  package ~x:<AutoPackageName>;
 			  
 			  import org.metaborg.meta.interpreter.framework.*;
+			  import org.metaborg.meta.interpreter.framework.IConvertibleToStrategoTerm;
+			  import org.spoofax.interpreter.terms.IStrategoTerm;
+			  import org.spoofax.interpreter.terms.ITermFactory;
 			  
-			  public class x_classname {
+			  public class x_classname implements IConvertibleToStrategoTerm {
 			    public final x_valueclass value;
 
 			    ~fdec*
@@ -108,17 +113,29 @@ rules
 			      bstm*
 			    }
 
-			    ~fget*
+	        @Override
+	        public IStrategoTerm toStrategoTerm(ITermFactory factory) {
+	          final x_valueclass _0 = value;
+	          return factory.makeAppl(
+	                   factory.makeConstructor(~e:Lit(String([Chars(<escape> x_classname)])), ~i:<length; inc; int-to-string> changeable*),
+	                   e_val,
+	                   e_child*
+	                 );
+	        }
 
+			    ~fget*
 			  }
 			]|
-		where
-			x_classname := <ds2java-returnclassname> (arrow-def, bu-ty);
-			x_valueclass := <ds2java-sort-classname> bu-ty;
-			changeable* := <lookup-arrow-changeables> arrow-def;
-			param* := <map-with-index(ds2java-method-paramdecl)> changeable*;
-			fdec* := <map-with-index(ds2java-fielddecl)> changeable*;
-			bstm* := <map-with-index(ds2java-fieldinit)> changeable*;
-			fget* := <map-with-index(ds2java-getter)> changeable*
-  
+   where
+     x_classname := <ds2java-returnclassname> (arrow-def, bu-ty);
+     x_valueclass := <ds2java-sort-classname> bu-ty;
+     changeable* := <lookup-arrow-changeables> arrow-def;
+     param* := <map-with-index(ds2java-method-paramdecl)> changeable*;
+     fdec* := <map-with-index(ds2java-fielddecl)> changeable*;
+     bstm* := <map-with-index(ds2java-fieldinit)> changeable*;
+     fget* := <map-with-index(ds2java-getter)> changeable*
+	 where
+	   e_val := <ds2java-atermconversion-field> (0, bu-ty);
+	   e_child* := <map-with-index(ds2java-atermconversion-field)> changeable*
+
 

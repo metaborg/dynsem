@@ -11,7 +11,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
  * @author vladvergu
  * 
  */
-public interface INode {
+public interface INode extends IConvertibleToStrategoTerm {
 
 	public void specializeChildren(int depth);
 	

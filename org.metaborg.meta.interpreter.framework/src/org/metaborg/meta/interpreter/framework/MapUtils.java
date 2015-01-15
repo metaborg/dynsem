@@ -1,5 +1,8 @@
 package org.metaborg.meta.interpreter.framework;
 
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+
 import com.github.krukow.clj_ds.PersistentMap;
 
 public class MapUtils {
@@ -12,4 +15,5 @@ public class MapUtils {
 		}
 		return nmap;
 	}
+	
 }
