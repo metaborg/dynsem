@@ -28,6 +28,7 @@ rules
         
         import java.util.Map.Entry;
         import org.spoofax.interpreter.terms.*;
+        import org.metaborg.meta.interpreter.framework.*;
         import com.github.krukow.clj_ds.PersistentMap;
         
         public class AutoMapUtils {

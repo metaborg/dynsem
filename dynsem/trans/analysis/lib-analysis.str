@@ -113,9 +113,6 @@ rules // type rewriting
   id-to-builtin-type:
     "String" -> StringType()
   
-  id-to-builtin-type:
-    "Value" -> ValueType()
- 
   pp-type = pp-type-builtin <+ is-string <+ is-list; map(pp-type); separate-by(|", "); concat-strings
  
   pp-type-builtin:
@@ -138,9 +135,6 @@ rules // type rewriting
   
   pp-type-builtin:
   	StringType() -> "String"
-  
-  pp-type-builtin:
-    ValueType() -> "Value"
   
   pp-type-builtin:
     ListType(ety) -> $[List([<pp-type> ety])]

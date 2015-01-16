@@ -23,7 +23,6 @@ rules /* store signatures */
     ; <store-def(|Types())> RealType() => def-real; <store-prop(|SortKind(), def-real)> SystemSort()
     ; <store-def(|Types())> BoolType() => def-bool; <store-prop(|SortKind(), def-bool)> SystemSort()
     ; <store-def(|Types())> StringType() => def-str; <store-prop(|SortKind(), def-str)> SystemSort()
-    ; <store-def(|Types())> ValueType() => def-value; <store-prop(|SortKind(), def-value)> SystemSort()
 
   store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
 
@@ -59,7 +58,6 @@ rules /* store signatures */
     Constructors(map(store-constructor))
     + InternalConstructors(map(store-constructor))
     + NativeConstructors(map(store-constructor))
-    + Values(map(store-constructor))
   
   store-constructor:
     d@ConsDecl(c, child*, s) -> d
@@ -82,13 +80,6 @@ rules /* store signatures */
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
       <store-prop(|ConsKind(), c-def)> NativeCons()
 
-  store-constructor:
-    d@ValueDecl(v, child*) -> d
-    with
-      <store-def(|Constructors())> v => v-def;
-      <store-prop(|Type(), v-def)> ConstructorType(<rw-type> child*, ValueType());
-      <store-prop(|ConsKind(), v-def)> ValueCons()
-  
   store-arrows = ArrowDeclarations(map(store-arrow))
   
   store-arrow:
@@ -172,7 +163,6 @@ rules
       + ?ConsDecl(c, _, _)
       + ?InternalConsDecl(c, _, _)
       + ?NativeConsDecl(c, _, _)
-      + ?ValueDecl(c, _)
     );
     <lookup-defs(|Constructors())> c => [_, _ | _];
     add-msg(|Error(), c, $[Duplicate constructor [c]])

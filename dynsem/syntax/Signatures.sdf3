@@ -79,14 +79,6 @@ context-free syntax // native operator declarations
   
   NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}*] -> [Type]]
 
-context-free syntax // value term declarations
-
-  SignatureSection.Values = <
-    values
-      <{ValueDecl "\n"}*>>
-
-  ValueDecl.ValueDecl = [[ID] : [{Type " * "}*]]
-
 context-free syntax // internal constructor declarations
 
   SignatureSection.InternalConstructors = <

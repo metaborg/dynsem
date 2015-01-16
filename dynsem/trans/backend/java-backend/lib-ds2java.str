@@ -57,9 +57,6 @@ rules /* name generation */
   ds2java-systemsort-classname:
   	(Types(), StringType()) -> "String"
 
-  ds2java-systemsort-classname:
-    (Types(), ValueType()) -> "IValue"
-
   ds2java-box-java-type = try(ds2java-box-primitive-java-type)
   
   ds2java-box-primitive-java-type:

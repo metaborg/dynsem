@@ -22,24 +22,24 @@ rules // relations
   relation-is-transitive = ?"<:"
   
   relation-match-custom(|ctx) : 
-    ("<:", Var(x), VarRef(y)) -> <task-create-id(|ctx, [eq8])> VarRef(y)
+    ("<:", Var(x), VarRef(y)) -> <task-create-id(|ctx, [eq16])> VarRef(y)
     where 
-      eq8 := <type-match(|ctx, y)> x
+      eq16 := <type-match(|ctx, y)> x
   
   relation-match-custom(|ctx) : 
-    ("<compat:", s-ty, l-ty) -> <task-create-id(|ctx, [or14])> l-ty
+    ("<compat:", s-ty, l-ty) -> <task-create-id(|ctx, [or26])> l-ty
     where 
-      eq9 := <type-match(|ctx, l-ty)> s-ty;
-      relmatch34 := <relation-create-match(|ctx)> ("<:", s-ty, l-ty);
-      or14 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq9, relmatch34]
+      eq17 := <type-match(|ctx, l-ty)> s-ty;
+      relmatch62 := <relation-create-match(|ctx)> ("<:", s-ty, l-ty);
+      or26 := <type-is(|ctx)> <task-create-choice(|ctx)> [eq17, relmatch62]
   
 
 rules // rules
   
   create-type-task(|ctx) :
-    Fresh() -> <task-create-id(|ctx,[x96])> x96
+    Fresh() -> <task-create-id(|ctx,[x628])> x628
     where 
-      x96 := <type-is(|ctx)> SimpleSort("Int")
+      x628 := <type-is(|ctx)> SimpleSort("Int")
   
   create-type-task(|ctx) :
     Var(x) -> <task-create-id(|ctx,[ty])> ty
@@ -62,61 +62,61 @@ rules // rules
       ty := <type-lookup(|ctx)> x
   
   create-type-task(|ctx) :
-    Con(c, t_) -> <task-create-id(|ctx,[relmatch28])> ty
+    Con(c, t_) -> <task-create-id(|ctx,[relmatch56])> ty
     where 
-      x97 := <type-lookup(|ctx)> c;
-      ty_ := <new-task(|ctx)> Rewrite("proj48", x97); task-create-id(|ctx, [x97]);
-      ty := <new-task(|ctx)> Rewrite("proj49", x97); task-create-id(|ctx, [ty_]);
+      x629 := <type-lookup(|ctx)> c;
+      ty_ := <new-task(|ctx)> Rewrite("proj88", x629); task-create-id(|ctx, [x629]);
+      ty := <new-task(|ctx)> Rewrite("proj89", x629); task-create-id(|ctx, [ty_]);
       ty_t_ := <type-task(|ctx); task-create-id(|ctx, [ty])> t_;
-      relmatch28 := <relation-create-match(|ctx); task-create-id(|ctx, [ty_t_])> ("<compat:", ty_t_, ty_);
-      <task-create-error-on-failure(|ctx, relmatch28, "types of sub-terms do not match constructor definition")> c
+      relmatch56 := <relation-create-match(|ctx); task-create-id(|ctx, [ty_t_])> ("<compat:", ty_t_, ty_);
+      <task-create-error-on-failure(|ctx, relmatch56, "types of sub-terms do not match constructor definition")> c
   
   create-type-task(|ctx) :
     l@List([]) -> <task-create-id(|ctx,[l-ty])> l-ty
     where 
-      l-ty0 := <expected-type-task(|ctx)> l;
-      l-ty1 := <type-is(|ctx)> ListSort(SimpleSort("Term"));
-      or12 := <type-is(|ctx)> <task-create-choice(|ctx)> [l-ty0, l-ty1];
-      l-ty := <type-is(|ctx); task-create-id(|ctx, [or12])> <task-create-choice(|ctx)> [l-ty0, l-ty1]
+      l-ty4 := <expected-type-task(|ctx)> l;
+      l-ty5 := <type-is(|ctx)> ListSort(SimpleSort("Term"));
+      or24 := <type-is(|ctx)> <task-create-choice(|ctx)> [l-ty4, l-ty5];
+      l-ty := <type-is(|ctx); task-create-id(|ctx, [or24])> <task-create-choice(|ctx)> [l-ty4, l-ty5]
   
   create-type-task(|ctx) :
     lt@ListTail([x], _) -> <task-create-id(|ctx,[lt-ty])> lt-ty
     where 
-      lt-ty0 := <expected-type-task(|ctx)> lt;
+      lt-ty4 := <expected-type-task(|ctx)> lt;
       x-ty := <type-task(|ctx)> x;
-      lt-ty1 := <type-is(|ctx); task-create-id(|ctx, [x-ty])> ListSort(x-ty);
-      or13 := <type-is(|ctx)> <task-create-choice(|ctx)> [lt-ty0, lt-ty1];
-      lt-ty := <type-is(|ctx); task-create-id(|ctx, [or13])> <task-create-choice(|ctx)> [lt-ty0, lt-ty1]
+      lt-ty5 := <type-is(|ctx); task-create-id(|ctx, [x-ty])> ListSort(x-ty);
+      or25 := <type-is(|ctx)> <task-create-choice(|ctx)> [lt-ty4, lt-ty5];
+      lt-ty := <type-is(|ctx); task-create-id(|ctx, [or25])> <task-create-choice(|ctx)> [lt-ty4, lt-ty5]
   
   nabl-constraint(|ctx) :
     LabelComp(lc, e) -> <fail>
     where 
       lc-ty := <type-lookup(|ctx)> lc;
       e-ty := <type-task(|ctx); task-create-id(|ctx, [lc-ty])> e;
-      relmatch29 := <relation-create-match(|ctx); task-create-id(|ctx, [e-ty])> ("<compat:", e-ty, lc-ty);
-      <task-create-error-on-failure(|ctx, relmatch29, "expression type is incompatible with component type")> e
+      relmatch57 := <relation-create-match(|ctx); task-create-id(|ctx, [e-ty])> ("<compat:", e-ty, lc-ty);
+      <task-create-error-on-failure(|ctx, relmatch57, "expression type is incompatible with component type")> e
   
   create-type-task(|ctx) :
-    SortFunCall(f, parent-ref, aparam_) -> <task-create-id(|ctx,[relmatch30])> ty
+    SortFunCall(f, parent-ref, aparam_) -> <task-create-id(|ctx,[relmatch58])> ty
     where 
-      x98 := <type-lookup(|ctx)> f;
-      fparam_ty_ := <new-task(|ctx)> Rewrite("proj46", x98); task-create-id(|ctx, [x98]);
-      ty := <new-task(|ctx)> Rewrite("proj47", x98); task-create-id(|ctx, [fparam_ty_]);
+      x630 := <type-lookup(|ctx)> f;
+      fparam_ty_ := <new-task(|ctx)> Rewrite("proj86", x630); task-create-id(|ctx, [x630]);
+      ty := <new-task(|ctx)> Rewrite("proj87", x630); task-create-id(|ctx, [fparam_ty_]);
       aparam_ty_ := <type-task(|ctx); task-create-id(|ctx, [ty])> aparam_;
-      relmatch30 := <relation-create-match(|ctx); task-create-id(|ctx, [aparam_ty_])> ("<compat:", aparam_ty_, fparam_ty_);
-      <task-create-error-on-failure(|ctx, relmatch30, "actual parameter types are incompatible with formal parameter types")> f
+      relmatch58 := <relation-create-match(|ctx); task-create-id(|ctx, [aparam_ty_])> ("<compat:", aparam_ty_, fparam_ty_);
+      <task-create-error-on-failure(|ctx, relmatch58, "actual parameter types are incompatible with formal parameter types")> f
   
   nabl-constraint(|ctx) :
     rel@Relation(_, Source(s, _), NamedDynamicEmitted(_, arrow), Target(t, _)) -> <fail>
     where 
-      x99 := <type-lookup(|ctx)> arrow;
-      l-ty := <new-task(|ctx)> Rewrite("proj44", x99); task-create-id(|ctx, [x99]);
-      r-ty := <new-task(|ctx)> Rewrite("proj45", x99); task-create-id(|ctx, [l-ty]);
+      x631 := <type-lookup(|ctx)> arrow;
+      l-ty := <new-task(|ctx)> Rewrite("proj84", x631); task-create-id(|ctx, [x631]);
+      r-ty := <new-task(|ctx)> Rewrite("proj85", x631); task-create-id(|ctx, [l-ty]);
       s-ty := <type-task(|ctx); task-create-id(|ctx, [r-ty])> s;
       t-ty := <type-task(|ctx); task-create-id(|ctx, [s-ty])> t;
-      relmatch31 := <relation-create-match(|ctx); task-create-id(|ctx, [t-ty])> ("<compat:", s-ty, l-ty);
-      relmatch32 := <relation-create-match(|ctx); task-create-id(|ctx, [relmatch31])> ("<compat:", t-ty, r-ty);
-      <task-create-error-on-failure(|ctx, relmatch32, "source and target types are incompatible with arrow definition types")> rel
+      relmatch59 := <relation-create-match(|ctx); task-create-id(|ctx, [t-ty])> ("<compat:", s-ty, l-ty);
+      relmatch60 := <relation-create-match(|ctx); task-create-id(|ctx, [relmatch59])> ("<compat:", t-ty, r-ty);
+      <task-create-error-on-failure(|ctx, relmatch60, "source and target types are incompatible with arrow definition types")> rel
   
   create-type-task(|ctx) :
     w@Wld() -> <task-create-id(|ctx,[ty])> ty
@@ -124,25 +124,25 @@ rules // rules
       ty := <expected-type-task(|ctx)> w
   
   create-type-task(|ctx) :
-    Map([]) -> <task-create-id(|ctx,[x100])> x100
+    Map([]) -> <task-create-id(|ctx,[x632])> x632
     where 
-      x100 := <type-is(|ctx)> MapSort(SimpleSort("Term"), SimpleSort("Term"))
+      x632 := <type-is(|ctx)> MapSort(SimpleSort("Term"), SimpleSort("Term"))
   
   create-type-task(|ctx) :
-    Map([Bind(key, val)]) -> <task-create-id(|ctx,[x101])> x101
+    Map([Bind(key, val)]) -> <task-create-id(|ctx,[x633])> x633
     where 
       key-ty := <type-task(|ctx)> key;
       val-ty := <type-task(|ctx); task-create-id(|ctx, [key-ty])> val;
-      x101 := <type-is(|ctx); task-create-id(|ctx, [val-ty])> MapSort(key-ty, val-ty)
+      x633 := <type-is(|ctx); task-create-id(|ctx, [val-ty])> MapSort(key-ty, val-ty)
   
   create-type-task(|ctx) :
-    Map([Binds(key, val)]) -> <task-create-id(|ctx,[x102])> x102
+    Map([Binds(key, val)]) -> <task-create-id(|ctx,[x634])> x634
     where 
       keys-ty := <type-task(|ctx)> key;
       vals-ty := <type-task(|ctx); task-create-id(|ctx, [keys-ty])> val;
-      key-ty := <new-task(|ctx)> Rewrite("proj42", keys-ty); task-create-id(|ctx, [vals-ty]);
-      val-ty := <new-task(|ctx)> Rewrite("proj43", vals-ty); task-create-id(|ctx, [key-ty]);
-      x102 := <type-is(|ctx); task-create-id(|ctx, [val-ty])> MapSort(key-ty, val-ty)
+      key-ty := <new-task(|ctx)> Rewrite("proj82", keys-ty); task-create-id(|ctx, [vals-ty]);
+      val-ty := <new-task(|ctx)> Rewrite("proj83", vals-ty); task-create-id(|ctx, [key-ty]);
+      x634 := <type-is(|ctx); task-create-id(|ctx, [val-ty])> MapSort(key-ty, val-ty)
   
   create-type-task(|ctx) :
     MapUnbind(map1, map2) -> <task-create-id(|ctx,[map2-ty])> map2-ty
@@ -157,81 +157,81 @@ rules // rules
       map2-ty := <type-task(|ctx); task-create-id(|ctx, [map1-ty])> map2
   
   create-type-task(|ctx) :
-    ms@MapSelect(map, key) -> <task-create-id(|ctx,[relmatch33])> def-val-ty
+    ms@MapSelect(map, key) -> <task-create-id(|ctx,[relmatch61])> def-val-ty
     where 
       map-ty := <type-lookup(|ctx)> map;
       key-val-tys := <stored-tys-lookup(|ctx); task-create-id(|ctx, [map-ty])> map-ty;
-      def-key-ty := <new-task(|ctx)> Rewrite("proj40", key-val-tys); task-create-id(|ctx, [key-val-tys]);
-      def-val-ty := <new-task(|ctx)> Rewrite("proj41", key-val-tys); task-create-id(|ctx, [def-key-ty]);
+      def-key-ty := <new-task(|ctx)> Rewrite("proj80", key-val-tys); task-create-id(|ctx, [key-val-tys]);
+      def-val-ty := <new-task(|ctx)> Rewrite("proj81", key-val-tys); task-create-id(|ctx, [def-key-ty]);
       use-key-ty := <type-task(|ctx); task-create-id(|ctx, [def-val-ty])> key;
-      relmatch33 := <relation-create-match(|ctx); task-create-id(|ctx, [use-key-ty])> ("<compat:", use-key-ty, def-key-ty);
-      <task-create-error-on-failure(|ctx, relmatch33, "incompatible map access")> ms
+      relmatch61 := <relation-create-match(|ctx); task-create-id(|ctx, [use-key-ty])> ("<compat:", use-key-ty, def-key-ty);
+      <task-create-error-on-failure(|ctx, relmatch61, "incompatible map access")> ms
   
   nabl-constraint(|ctx) :
     InjDecl(ty, p-ty) -> <fail>
     where 
-      relstore8 := <new-rel-tuple(|ctx, "<:", p-ty)> ty
+      relstore16 := <new-rel-tuple(|ctx, "<:", p-ty)> ty
   
   nabl-constraint(|ctx) :
     NativeSubTypeDecl(_, ty, sup-ty, _) -> <fail>
     where 
-      relstore9 := <new-rel-tuple(|ctx, "<:", sup-ty)> ty
+      relstore17 := <new-rel-tuple(|ctx, "<:", sup-ty)> ty
   
   create-type-task(|ctx) :
-    Int(i) -> <task-create-id(|ctx,[x103])> x103
+    Int(i) -> <task-create-id(|ctx,[x635])> x635
     where 
-      x103 := <type-is(|ctx)> SimpleSort("Int")
+      x635 := <type-is(|ctx)> SimpleSort("Int")
   
   create-type-task(|ctx) :
-    Real(r) -> <task-create-id(|ctx,[x104])> x104
+    Real(r) -> <task-create-id(|ctx,[x636])> x636
     where 
-      x104 := <type-is(|ctx)> SimpleSort("Real")
+      x636 := <type-is(|ctx)> SimpleSort("Real")
   
   create-type-task(|ctx) :
-    String(s) -> <task-create-id(|ctx,[x105])> x105
+    String(s) -> <task-create-id(|ctx,[x637])> x637
     where 
-      x105 := <type-is(|ctx)> SimpleSort("String")
+      x637 := <type-is(|ctx)> SimpleSort("String")
   
   create-type-task(|ctx) :
-    True() -> <task-create-id(|ctx,[x106])> x106
+    True() -> <task-create-id(|ctx,[x638])> x638
     where 
-      x106 := <type-is(|ctx)> SimpleSort("Bool")
+      x638 := <type-is(|ctx)> SimpleSort("Bool")
   
   create-type-task(|ctx) :
-    False() -> <task-create-id(|ctx,[x107])> x107
+    False() -> <task-create-id(|ctx,[x639])> x639
     where 
-      x107 := <type-is(|ctx)> SimpleSort("Bool")
+      x639 := <type-is(|ctx)> SimpleSort("Bool")
   
 
 rules // projections
   
   task-rewrite :
-    ("proj49", (_, ty)) -> ty
+    ("proj89", (_, ty)) -> ty
   
   task-rewrite :
-    ("proj48", (ty_, _)) -> ty_
+    ("proj88", (ty_, _)) -> ty_
   
   task-rewrite :
-    ("proj47", (_, ty)) -> ty
+    ("proj87", (_, ty)) -> ty
   
   task-rewrite :
-    ("proj46", (fparam_ty_, _)) -> fparam_ty_
+    ("proj86", (fparam_ty_, _)) -> fparam_ty_
   
   task-rewrite :
-    ("proj45", (_, r-ty)) -> r-ty
+    ("proj85", (_, r-ty)) -> r-ty
   
   task-rewrite :
-    ("proj44", (l-ty, _)) -> l-ty
+    ("proj84", (l-ty, _)) -> l-ty
   
   task-rewrite :
-    ("proj43", ListSort(val-ty)) -> val-ty
+    ("proj83", ListSort(val-ty)) -> val-ty
   
   task-rewrite :
-    ("proj42", ListSort(key-ty)) -> key-ty
+    ("proj82", ListSort(key-ty)) -> key-ty
   
   task-rewrite :
-    ("proj41", (_, def-val-ty)) -> def-val-ty
+    ("proj81", (_, def-val-ty)) -> def-val-ty
   
   task-rewrite :
-    ("proj40", (def-key-ty, _)) -> def-key-ty
+    ("proj80", (def-key-ty, _)) -> def-key-ty
   

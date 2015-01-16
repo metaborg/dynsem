@@ -30,7 +30,6 @@ signature
     RealType: DynSemType
     BoolType: DynSemType
     StringType: DynSemType
-    ValueType: DynSemType
     MapType: DynSemType * DynSemType -> DynSemType
     ListType: DynSemType -> DynSemType
     ConstructorType: List(DynSemType) * DynSemType -> DynSemType
@@ -57,7 +56,6 @@ signature
   	InternalCons: ConsKind
   	NativeCons: ConsKind
   	NativeOpCons: ConsKind
-  	ValueCons: ConsKind
 
 signature
   sorts

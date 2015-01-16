@@ -42,7 +42,19 @@ rules
   		f-ty-def := <lookup-def(|Types())> f-ty;
   		f-ty-knd := <lookup-prop(|SortKind())> f-ty-def;
   		<not(?SystemSort())> f-ty-knd;
-  		<not(?SemanticCompSort())> f-ty-knd
+  		<not(?SemanticCompSort())> f-ty-knd;
+  		<not(?NativeSort())> f-ty-knd
+
+  ds2java-atermconversion-name(|e):
+    f-ty -> e |[
+    	 (e instanceof IConvertibleToStrategoTerm) ? 
+    	   ((IConvertibleToStrategoTerm) e).toStrategoTerm(factory) 
+    	 : factory.makeString(e.toString())
+    ]|
+    where
+      f-ty-def := <lookup-def(|Types())> f-ty;
+      f-ty-knd := <lookup-prop(|SortKind())> f-ty-def;
+      <?NativeSort()> f-ty-knd
 
   ds2java-atermconversion-name(|e):
   	f-ty -> e |[ AutoMapUtils.x_map2aterm(e, factory) ]|
@@ -50,6 +62,9 @@ rules
   		f-ty-def := <lookup-def(|Types())> f-ty;
       <lookup-prop(|SortKind())> f-ty-def => SemanticCompSort();
       x_map2aterm := <def-get-name; ds2java-map2aterm-name> f-ty-def
+  
+  ds2java-atermconversion-name(|e):
+    ListType(_) -> e |[ e.toStrategoTerm(factory) ]|
   
   ds2java-atermconversion-name(|e):
   	IntType() -> e |[ factory.makeInt(e) ]|
