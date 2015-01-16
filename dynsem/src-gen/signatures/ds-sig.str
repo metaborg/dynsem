@@ -12,8 +12,8 @@ signature
     Strict       : ID * List(INT) * INT -> Rule
     Seqstrict    : ID * List(INT) * INT -> Rule
     Axiom        : Formula -> Rule
-    Rule         : List(Premise) * INFER * Formula -> Rule
-    RuleW        : Formula * List(Premise) -> Rule
+    Rule         : List(Premise) * INFER * Relation -> Rule
+    RuleW        : Relation * List(Premise) -> Rule
     Formula      : Formula -> Premise
     AllFail      : Premise
     PremiseBlock : List(Premise) -> PremisesBlock
@@ -27,7 +27,8 @@ signature
     TermNeq                       : Term * Term -> Formula
     TypeCheck                     : Var * Type -> Formula
     TypeCast                      : Var * Type -> Formula
-    Relation                      : Reads * Source * Rel * Target -> Formula
+                                  : Relation -> Formula
+    Relation                      : Reads * Source * Rel * Target -> Relation
     IsValue                       : Term -> Formula
     NoReads                       : Reads
     Reads                         : List(LabelComp) -> Reads

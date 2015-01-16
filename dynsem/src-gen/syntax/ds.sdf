@@ -10,8 +10,8 @@ exports
     "strict" ID {INT ","}+ "/" INT              -> Rule          {cons("Strict")}
     "seqstrict" ID {INT ","}+ "/" INT           -> Rule          {cons("Seqstrict")}
     Formula                                     -> Rule          {cons("Axiom")}
-    {Premise ","}+ INFER Formula                -> Rule          {cons("Rule")}
-    Formula "where" {Premise ","}+              -> Rule          {cons("RuleW")}
+    {Premise ","}+ INFER Relation               -> Rule          {cons("Rule")}
+    Relation "where" {Premise ","}+             -> Rule          {cons("RuleW")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
     "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
@@ -43,7 +43,8 @@ exports
     Term "!=" Term                              -> Formula   {cons("TermNeq")}
     Var "?" Type                                -> Formula   {cons("TypeCheck")}
     Var ":" Type                                -> Formula   {cons("TypeCast")}
-    Reads Source Rel Target                     -> Formula   {cons("Relation")}
+    Relation                                    -> Formula   
+    Reads Source Rel Target                     -> Relation  {cons("Relation")}
     "value" "(" Term ")"                        -> Formula   {cons("IsValue")}
                                                 -> Reads     {cons("NoReads")}
     {LabelComp ","}+ "|-"                       -> Reads     {cons("Reads")}
@@ -60,6 +61,7 @@ exports
     Type Term                                   -> LabelComp {cons("LabelComp")}
 
   context-free syntax
+    CONTENTCOMPLETE -> Relation  {cons("COMPLETION-Relation")}
     CONTENTCOMPLETE -> Formula   {cons("COMPLETION-Formula")}
     CONTENTCOMPLETE -> Reads     {cons("COMPLETION-Reads")}
     CONTENTCOMPLETE -> Source    {cons("COMPLETION-Source")}

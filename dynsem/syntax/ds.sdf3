@@ -20,11 +20,11 @@ context-free syntax // rules
   Rule.Rule = [
     [{Premise ",\n"}+]
     [INFER]
-    [Formula]
+    [Relation]
   ]
   
   Rule.RuleW = [
-    [Formula]
+    [Relation]
     where
       [{Premise ",\n"}+]
   ]
@@ -67,8 +67,10 @@ context-free syntax // formulas
   Formula.TermNeq  = [[Term] != [Term]]
   Formula.TypeCheck = [[Var] ? [Type]]
   Formula.TypeCast = [[Var] : [Type]]
-      
-  Formula.Relation = [[Reads][Source] [Rel] [Target]]
+  
+  Formula = [[Relation]]
+  Relation.Relation = [[Reads][Source] [Rel] [Target]]
+  
   Formula.IsValue  = [value([Term])]
   
   Reads.NoReads = []
