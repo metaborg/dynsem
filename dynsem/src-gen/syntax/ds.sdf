@@ -41,8 +41,8 @@ exports
     Term "=!=>" Term                            -> Formula   {cons("NMatch")}
     Term "==" Term                              -> Formula   {cons("TermEq")}
     Term "!=" Term                              -> Formula   {cons("TermNeq")}
-    Var "?" Type                                -> Formula   {cons("TypeCheck")}
-    Var ":" Type                                -> Formula   {cons("TypeCast")}
+    Var "<?" Type                               -> Formula   {cons("TypeCheck")}
+    Var "<:" Type                               -> Formula   {cons("TypeCast")}
     Relation                                    -> Formula   
     Reads Source Rel Target                     -> Relation  {cons("Relation")}
     "value" "(" Term ")"                        -> Formula   {cons("IsValue")}

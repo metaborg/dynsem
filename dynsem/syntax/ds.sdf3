@@ -65,8 +65,8 @@ context-free syntax // formulas
   Formula.NMatch   = [[Term] =!=> [Term]]
   Formula.TermEq   = [[Term] == [Term]]
   Formula.TermNeq  = [[Term] != [Term]]
-  Formula.TypeCheck = [[Var] ? [Type]]
-  Formula.TypeCast = [[Var] : [Type]]
+  Formula.TypeCheck = [[Var] <? [Type]]
+  Formula.TypeCast = [[Var] <: [Type]]
   
   Formula = [[Relation]]
   Relation.Relation = [[Reads][Source] [Rel] [Target]]

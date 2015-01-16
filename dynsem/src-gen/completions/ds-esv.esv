@@ -34,10 +34,10 @@ completions
     <Term:Term> " == " <Term:Term>  
   completion template Formula : "Term != Term" =
     <Term:Term> " != " <Term:Term>  
-  completion template Formula : "Var ? Type" =
-    <Var:Var> " ? " <Type:Type>  
-  completion template Formula : "Var : Type" =
-    <Var:Var> " : " <Type:Type>  
+  completion template Formula : "Var <? Type" =
+    <Var:Var> " <? " <Type:Type>  
+  completion template Formula : "Var <: Type" =
+    <Var:Var> " <: " <Type:Type>  
   completion template Relation : "ReadsSource Rel Target" =
     <Reads:Reads> <Source:Source> " " <Rel:Rel> " " <Target:Target>  
   completion template Formula : "value(Term)" =
