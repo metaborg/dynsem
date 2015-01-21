@@ -44,10 +44,10 @@ completions
     "value(" <Term:Term> ")"  
   completion template Reads : "LabelComp |- " =
     <LabelComp:LabelComp> " |- "  
-  completion template Source : "(Term, LabelComp)" =
-    "(" <Term:Term> ", " <LabelComp:LabelComp> ")"  
-  completion template Target : "(Term, LabelComp)" =
-    "(" <Term:Term> ", " <LabelComp:LabelComp> ")"  
+  completion template Source : "Term :: LabelComp" =
+    <Term:Term> " :: " <LabelComp:LabelComp>  
+  completion template Target : "Term :: LabelComp" =
+    <Term:Term> " :: " <LabelComp:LabelComp>  
   completion template Rel : "-->" =
     "-->"                        
   completion template Rel : "-ID->" =
