@@ -379,7 +379,7 @@ strategies
                      , [t1__', S(" |- ")]
                      )
                    ]
-    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
+    with t1__' := <pp-H-list(prettyprint-LabelComp|" ")> t1__
 
   is-Reads =
     ?Reads(_)
@@ -402,7 +402,7 @@ strategies
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|" ")> t2__
 
   is-Source =
     ?Source(_, _)
@@ -425,7 +425,7 @@ strategies
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|" ")> t2__
 
   is-Target =
     ?Target(_, _)
