@@ -74,7 +74,11 @@ We set-up the project to achieve this as follows:
     @Override
     public IStrategoTerm invoke(Context context, IStrategoTerm program) {
 
-      return new Generic_I_Expr(null, program).exec_default(new PersistentTreeMap<String, Integer>(), new PersistentTreeMap<Integer, I_V>()).toStrategoTerm(context.getFactory());
+      return new Generic_I_Expr(null, program).
+        exec_default(
+          new PersistentTreeMap<String, Integer>(),
+          new PersistentTreeMap<Integer, I_V>()
+        ).toStrategoTerm(context.getFactory());
     }
 
   }
@@ -86,4 +90,4 @@ Note the following replacements in the above fragment:
   * The arguments of the method correspond to the semantic components of the arrow, first the read-only and then the read-write semantic components.
 4. Register the `dsevaluate_0_0` class in the `InteropRegisterer`
 
-Once the language is built, an open program can be evaluated by invoking the ***Interpreter*** > ***Evaluate*** action. In the example above the evaluation will result in a term *R_Result_V(res, sto)* where *res* has sort *V* and *sto* is an ATerm representation of the *Sto* semantic component
+Once the project is built, an open program can be evaluated by invoking the ***Interpreter*** > ***Evaluate*** action. In the example above the evaluation will result in a term *R_Result_V(res, sto)* where *res* has sort *V* and *sto* is an ATerm representation of the *Sto* semantic component
