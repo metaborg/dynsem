@@ -1,3 +1,4 @@
+
 # How to use DynSem in Spoofax
 
 To use DynSem in Spoofax you'll first need a Spoofax language project. Once you have that you can create a **.ds** file anywhere you want.
@@ -47,7 +48,7 @@ The goal is to interpret a program in the language by:
 
 We set-up the project to achieve this as follows:
 
-1. Add a builder that invokes the interpreter (*LANG.str*):
+	1. Add a builder that invokes the interpreter (*LANG.str*):
 ```
   external dsevaluate(|)
 
@@ -57,13 +58,13 @@ We set-up the project to achieve this as follows:
       filename := <guarantee-extension(|"evaluated.aterm")> path;
       result := <dsevaluate> ast
 ```
-2. Add an action for it in the language menus (*LANG-Menus.esv*):
+	2. Add an action for it in the language menus (*LANG-Menus.esv*):
 ```
   menu: "Interpreter"
 
     action: "Evaluate" = editor-evaluate (openeditor) (realtime) (source)
 ```
-3. Implement the native strategy `dsevaluate(|)` in the *LANG.strategies* package:
+	3. Implement the native strategy `dsevaluate(|)` in the *LANG.strategies* package and register it in the `InteropRegisterer`:
 ```
   package LANG.strategies;
 
@@ -83,11 +84,12 @@ We set-up the project to achieve this as follows:
 
   }
 ```
+
 Note the following replacements in the above fragment:
-  * *LANG* should be replaced by your language name
-  * `Expr` in `Generic_I_Expr` and in `I_Expr` correspond to the sort `Expr` of your language. For a sort `Foo` they would be `Generic_I_Foo` and `I_Foo`
-  * `default` in `exec_default` corresponds to the name of the arrow (the `-->` arrow is the same as `-default->`). For an arrow named `doit` the method would called `exec_doit`.
-  * The arguments of the method correspond to the semantic components of the arrow, first the read-only and then the read-write semantic components.
-4. Register the `dsevaluate_0_0` class in the `InteropRegisterer`
+	
+* *LANG* should be replaced by your language name
+* `Expr` in `Generic_I_Expr` and in `I_Expr` correspond to the sort `Expr` of your language. For a sort `Foo` they would be `Generic_I_Foo` and `I_Foo`
+* `default` in `exec_default` corresponds to the name of the arrow (the `-->` arrow is the same as `-default->`). For an arrow named `doit` the method would called `exec_doit`.
+* The arguments of the method correspond to the semantic components of the arrow, first the read-only and then the read-write semantic components.
 
 Once the project is built, an open program can be evaluated by invoking the ***Interpreter*** > ***Evaluate*** action. In the example above the evaluation will result in a term *R_Result_V(res, sto)* where *res* has sort *V* and *sto* is an ATerm representation of the *Sto* semantic component
