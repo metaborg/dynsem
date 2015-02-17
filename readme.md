@@ -48,42 +48,41 @@ The goal is to interpret a program in the language by:
 
 We set-up the project to achieve this as follows:
 
-	1. Add a builder that invokes the interpreter (*LANG.str*):
-```
-  external dsevaluate(|)
+1. Add a builder that invokes the interpreter (*LANG.str*):
+		 
+		 external dsevaluate(|)
+		
+		 editor-evaluate:
+		   (_, _, ast, path, _) -> (filename, result)
+		   where
+		     filename := <guarantee-extension(|"evaluated.aterm")> path;
+		     result := <dsevaluate> ast
+		     
+2. Add an action for it in the language menus (*LANG-Menus.esv*):
 
-  editor-evaluate:
-    (_, _, ast, path, _) -> (filename, result)
-    where
-      filename := <guarantee-extension(|"evaluated.aterm")> path;
-      result := <dsevaluate> ast
-```
-	2. Add an action for it in the language menus (*LANG-Menus.esv*):
-```
-  menu: "Interpreter"
+		menu: "Interpreter"
+		
+			action: "Evaluate" = editor-evaluate (openeditor) (realtime) (source)
+			
+3. Implement the native strategy `dsevaluate(|)` in the *LANG.strategies* package and register it in the `InteropRegisterer`:
 
-    action: "Evaluate" = editor-evaluate (openeditor) (realtime) (source)
-```
-	3. Implement the native strategy `dsevaluate(|)` in the *LANG.strategies* package and register it in the `InteropRegisterer`:
-```
-  package LANG.strategies;
+		package LANG.strategies;
+		
+		public class dsevaluate_0_0 extends Strategy {
+		
+			public static dsevaluate_0_0 instance = new dsevaluate_0_0();
+		
+			@Override
+			public IStrategoTerm invoke(Context context, IStrategoTerm program) {
+		
+				return new Generic_I_Expr(null, program).
+					exec_default(
+						new PersistentTreeMap<String, Integer>(),
+						new PersistentTreeMap<Integer, I_V>()
+					).toStrategoTerm(context.getFactory());
+			}
+		}
 
-  public class dsevaluate_0_0 extends Strategy {
-
-    public static dsevaluate_0_0 instance = new dsevaluate_0_0();
-
-    @Override
-    public IStrategoTerm invoke(Context context, IStrategoTerm program) {
-
-      return new Generic_I_Expr(null, program).
-        exec_default(
-          new PersistentTreeMap<String, Integer>(),
-          new PersistentTreeMap<Integer, I_V>()
-        ).toStrategoTerm(context.getFactory());
-    }
-
-  }
-```
 
 Note the following replacements in the above fragment:
 	
