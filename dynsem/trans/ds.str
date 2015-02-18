@@ -42,6 +42,7 @@ rules // Analysis
   editor-analyze:
     (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
 		with
+		  editor-init;
 		  ast' := <resolve-includes(|path, project-path); desugar-top> ast;
 			<m-in-analysis(
 				where(
