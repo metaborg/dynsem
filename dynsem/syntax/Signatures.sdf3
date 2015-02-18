@@ -34,6 +34,10 @@ context-free syntax // constructor declarations
   
   MapType.MapSort = [Map<[Type],[Type]>]
   
+template options
+
+  tokenize: "<("
+  
 context-free syntax // semantic component declarations
 
   SignatureSection.SemanticComponents = <
