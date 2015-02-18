@@ -7,6 +7,7 @@ imports
   analysis/rename
 	pp
   ds
+  lib-ds
 
 rules /* syntactic checks */
 
@@ -71,7 +72,7 @@ rules /* store variables */
   type-of-top =
   	type-of
     <+
-    where(type-of-failure)
+    type-of-failure
 
   type-of-failure:
     (ty, t) -> ty
@@ -345,5 +346,5 @@ rules
       <type-coerce> (a-k-ty, e-k-ty);
       <type-coerce> (a-v-ty, e-v-ty)
 
-  type-coerce-sym = type-coerce <+ !(<Snd>, <Fst>); type-coerce
+  type-coerce-sym = type-coerce <+ swap; type-coerce
 
