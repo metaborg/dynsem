@@ -34,10 +34,14 @@ rules
   store-arrow-components(|m) =
   	?arrow-def;
     arrow-name := <def-get-name> arrow-def;
-    <collect-one(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> m;
-    ?Rule(_, _, Relation(Reads(r*), Source(_, sc*), _, _));
-    <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowReadables(), arrow-def)> r*;
-    <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowChangeables(), arrow-def)> sc*
+    if <collect-one(?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _)))> m => Rule(_, _, Relation(Reads(r*), Source(_, sc*), _, _))
+    then
+	    <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowReadables(), arrow-def)> r*;
+	    <map(?LabelComp(<rw-type>, _)); store-prop(|ArrowChangeables(), arrow-def)> sc*
+	  else
+	    <store-prop(|ArrowReadables(), arrow-def)> [];
+	    <store-prop(|ArrowChangeables(), arrow-def)> []
+	  end
 
   lookup-applicable-arrow-def:
     type-def -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type-name)))> a-def) \); make-set>
