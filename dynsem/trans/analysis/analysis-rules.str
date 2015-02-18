@@ -200,10 +200,17 @@ rules /* store variables */
       <type-coerce> (map-ty, ty) => ty'
 
   type-of:
-    (ty, MapExtend(map1, map2)) -> map2-ty
+    (ty, mx@MapExtend(map1, map2)) -> maps-ty
     where
       <type-of-top> (NONETYPE(), map1) => map1-ty;
-      <type-of-top> (map1-ty, map2) => map2-ty
+      <type-of-top> (NONETYPE(), map2) => map2-ty;
+      (
+        <type-coerce-sym> (map1-ty, map2-ty) => maps-ty
+        <+
+        add-msg(|Error(), mx, $[Type [<ensure(pp-type)> map1-ty] is not coercible to type [<ensure(pp-type)> map2-ty]])
+      );
+      <type-coerce> (maps-ty, ty)
+
 
   lookup-native-fun-def(|fun-name):
     parent-def -> <lookup-def(|NativeDTFun(parent-def))> fun-name
@@ -344,5 +351,7 @@ rules
       <type-coerce> (a-k-ty, e-k-ty);
       <type-coerce> (a-v-ty, e-v-ty)
 
-  type-coerce-sym = type-coerce <+ swap; type-coerce
+  type-coerce-sym =
+    type-coerce
+    <+ swap; type-coerce
 
