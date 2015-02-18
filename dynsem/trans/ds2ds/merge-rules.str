@@ -111,6 +111,22 @@ rules
     [r] -> [r]
   
   merge-rules:
+  	[r1, r2 | xs] -> <merge-rules> [r1, <rule-inject-as-match> r2 | xs]
+  	where
+  		<rule-has-as-match> r1;
+  		<not(rule-has-as-match)> r2
+  
+  merge-rules:
+    [r1, r2 | xs] -> <merge-rules> [<rule-inject-as-match> r1, r2 | xs]
+    where
+      <not(rule-has-as-match)> r1;
+      <rule-has-as-match> r2  
+  
+  rule-has-as-match = ?Rule(_, _, Relation(_, Source(As(_, Con(_, _)), _), _, _))
+  
+  rule-inject-as-match = Rule(id, id, Relation(id, Source(\ lhs -> As(VarRef(<next-variable>), lhs) \, id), id, id)) 
+  
+  merge-rules:
     [r1@Rule(p1*, infer1, Relation(Reads(r1*), Source(lhs1, sc1*), arrow1, Target(rhs1, tc1*))), 
      r2@Rule(p2*, infer2, Relation(Reads(r2*), Source(lhs2, sc2*), arrow2, Target(rhs2, tc2*))) | xs] ->
       <merge-rules> [ Rule(p*, infer1', Relation(Reads(r1'*), Source(lhs1', sc1'*), arrow1', Target(rhs1', tc1'*))) | xs]
