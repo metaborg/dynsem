@@ -67,7 +67,7 @@ rules
   ds2java-rulestatements:
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, asbound*, patternbound*, premstms*]
     where
-    	if <?As(v, Con(c, patt-var*))> lhs then
+    	if <?As(Var(v), Con(c, patt-var*))> lhs then
     		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
     		asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
     	else
