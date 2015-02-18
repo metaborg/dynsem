@@ -129,10 +129,10 @@ rules /* store variables */
       add-msg(|Error(), ref, $[Variable [<unrename-var> v] cannot be resolved])
   
   type-of:
-    (ty, Con(c, child*)) -> ty'
+    (ty, Con(c, child*)) -> ty-con
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <type-coerce> (ty-con, ty) => ty';
+      <type-coerce> (ty-con, ty);
       <zip; map(type-of-top)> (fchild-ty*, child*)
 
   type-of:
@@ -145,8 +145,6 @@ rules /* store variables */
   type-of:
   	(ty, As(v, pat)) -> ty'
   	where
-  	  <store-def(|Vars())> v => v-def;
-  	  <store-prop(|Type(), v-def)> ty;
   	  <type-of-top> (ty, pat) => ty';
   	  <type-of-top> (ty', v)
 
