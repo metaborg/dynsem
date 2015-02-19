@@ -91,7 +91,7 @@ rules /* store variables */
     where
       <store-def(|Vars())> v => v-def;
       <store-prop(|Type(), v-def)> ty
-  
+
   type-of:
     (ty, Int(_)) -> IntType()
     where
@@ -169,6 +169,21 @@ rules /* store variables */
       <type-coerce> (ListType(head-ty), ty) => ty'
 
   type-of:
+    (ty, SortFunCall(fun-name, par, arg*)) -> ty'
+    where
+      <type-of-top> (NONETYPE(), par) => parent-ty;
+      <lookup-def(|Types())> parent-ty => parent-def;
+      <lookup-prop(|SortKind())> parent-def => NativeSort();
+      <lookup-native-fun-def(|fun-name)> parent-def => fun-def;
+      <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
+      <zip; map(type-of-top)> (farg*, arg*)
+
+  type-of:
+    (ty, Map([])) -> ty'
+    where
+      <type-coerce> (MapType(ALPHATYPE(), ALPHATYPE()), ty) => ty'
+
+  type-of:
     (ty, MapSelect(map-trm, key-trm)) -> val-ty'
     where
       <type-of-top> (NONETYPE(), map-trm) => maybe-map-ty;
@@ -180,16 +195,6 @@ rules /* store variables */
       end;
       <type-of-top> (key-ty, key-trm) => key-ty;
       <type-coerce> (val-ty, ty) => val-ty'
-
-  type-of:
-    (ty, SortFunCall(fun-name, par, arg*)) -> ty'
-    where
-      <type-of-top> (NONETYPE(), par) => parent-ty;
-      <lookup-def(|Types())> parent-ty => parent-def;
-      <lookup-prop(|SortKind())> parent-def => NativeSort();
-      <lookup-native-fun-def(|fun-name)> parent-def => fun-def;
-      <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
-      <zip; map(type-of-top)> (farg*, arg*)
   
   type-of:
     (ty, Map([Bind(key-val, val-val)])) -> ty'
@@ -210,7 +215,6 @@ rules /* store variables */
         add-msg(|Error(), mx, $[Type [<ensure(pp-type)> map1-ty] is not coercible to type [<ensure(pp-type)> map2-ty]])
       );
       <type-coerce> (maps-ty, ty)
-
 
   lookup-native-fun-def(|fun-name):
     parent-def -> <lookup-def(|NativeDTFun(parent-def))> fun-name
@@ -330,10 +334,10 @@ rules
   
   type-coerce:
   	(IntType(), RealType()) -> RealType()
-  
+
   type-coerce:
     (ListType(ALPHATYPE()), to-ty@ListType(_)) -> to-ty
-  
+
   type-coerce:
     (ListType(ty-from), ListType(ty-to)) -> <type-coerce> (ty-from, ty-to)
   
@@ -341,6 +345,9 @@ rules
     (ty-from, ty-to) -> <type-coerce> (sup-ty, ty-to)
     where
       <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
+
+  type-coerce:
+    (ALPHATYPE(), ty) -> ty
 
   type-coerce:
     (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty

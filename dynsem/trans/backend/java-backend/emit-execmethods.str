@@ -172,9 +172,9 @@ rules
       (arrow-def, ArrowType(ma-ty, bu-ty)) := <lookup-arrow-def> (<type-of> lhs, arrow-name);
       resultclass := <ds2java-returnclassname> (arrow-def, bu-ty);
       x_tmp := <newname> "$tmp";
-      e_lhs := <ds2java-term-build(|ALPHATYPE())> lhs;
+      e_lhs := <ds2java-term-build(|ma-ty)> lhs;
       exec := <ds2java-methodname> (arrow-def, bu-ty);
-      e* := <map(?LabelComp(_, <id>); ds2java-term-build(|ALPHATYPE()))> [r*, sc*];
+      e* := <map(\ LabelComp(ty, c) -> <ds2java-term-build-optcast(|ty)> c \)> [r*, sc*];
       vout-ty := <type-of; ds2java-sort-classname> vdec;
       bstm1* := <map(?LabelComp(_, <id>)); map-with-index(ds2java-bind-out-var(|x_tmp))> tc*;
       bstm* := <ds2java-premise> on-succ*
@@ -328,6 +328,17 @@ rules
 
   ds2java-premise = debug(!"Premise failure: "); fail 
 
+  ds2java-term-build-optcast(|ex_ty):
+    trm -> <ds2java-term-build(|ex_ty)> trm
+    where not(
+      <type-of> trm => MapType(ALPHATYPE(), ALPHATYPE())
+    )
+  
+  ds2java-term-build-optcast(|ex_ty):
+    trm -> <ds2java-term-build(|ex_ty)> Cast(trm, ex_ty)
+    where
+      <type-of> trm => MapType(ALPHATYPE(), ALPHATYPE())
+
   ds2java-term-build(|ex_ty):
     Int(i) -> e |[ i ]|
 
@@ -360,7 +371,7 @@ rules
       x_manualpkg := <ManuPackageName>;
       x_consname := $[[c]_[<length> c-c-ty*]];
       e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (c-c-ty*, child*)
-
+  
   ds2java-term-build(|ex_ty):
     SortFunCall(x_fname, par, arg*) -> e |[ e_on.x_fname(e*)]|
     where
@@ -399,8 +410,8 @@ rules
   ds2java-term-build(|ex_ty):
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
     where
-      e_t := <ds2java-term-build(|ALPHATYPE())> t;
-      x_ty := <rw-type; ds2java-sort-classname> ty-trm     
+      e_t := <ds2java-term-build(|ty-trm)> t;
+      x_ty := <rw-type; ds2java-sort-classname> ty-trm
   
   ds2java-term-build(|ex_ty):
     String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))
@@ -429,6 +440,9 @@ rules
       x_valty := <type-of; ds2java-sort-classname; ds2java-box-java-type> val;
       e_key := <ds2java-term-build(|ALPHATYPE())> key;
       e_val := <ds2java-term-build(|ALPHATYPE())> val
+
+  ds2java-term-build(|ex_ty):
+    Map([]) -> e |[ PersistentTreeMap.EMPTY ]|
       
   ds2java-term-build(|ex_ty) = debug(!"Term build failure: "); !e |[ xx ]|
   

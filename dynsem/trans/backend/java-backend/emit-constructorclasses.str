@@ -32,6 +32,7 @@ rules
 	      
 	      import org.metaborg.meta.interpreter.framework.*;
 	      import org.spoofax.interpreter.terms.*;
+	      import com.github.krukow.clj_lang.PersistentTreeMap;
 
 	      public class x_consname extends AbstractNode implements ~x:<ds2java-sort-classname> c-ty {
 	        
