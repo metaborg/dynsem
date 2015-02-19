@@ -51,7 +51,7 @@ exports
     Term                                        -> Source    {cons("Source")}
     Term "::" LabelComp+                        -> Source    {cons("Source")}
     Term                                        -> Target    {cons("Target")}
-    Term "::" LabelComp+                        -> Target    {cons("Target")}
+    Term "::" LabelComp+ "."                    -> Target    {cons("Target")}
     "-->"                                       -> Rel       {cons("Dynamic")}
     "-" ID "->"                                 -> Rel       {cons("NamedDynamic")}
     "-" ID "(" ID ")" "->"                      -> Rel       {cons("NamedDynamicParametric")}

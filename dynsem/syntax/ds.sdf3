@@ -11,7 +11,7 @@ context-free syntax // rules
     
       [ {Rule "\n\n"}* ]
   ] 
-    
+  
   Rule.Strict = [strict [ID] [{INT ","}+]/[INT]]
   Rule.Seqstrict = [seqstrict [ID] [{INT ","}+]/[INT]]
     
@@ -80,7 +80,7 @@ context-free syntax // formulas
   Source.Source = [[Term] :: [{LabelComp " "}+]]
 
   Target.Target = [[Term]]
-  Target.Target = [[Term] :: [{LabelComp " "}+]]
+  Target.Target = [[Term] :: [{LabelComp " "}+].]
   
   Rel.Dynamic = [-->]
   Rel.NamedDynamic = [-[ID]->]

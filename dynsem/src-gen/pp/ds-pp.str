@@ -421,7 +421,11 @@ strategies
   prettyprint-Target :
     Target(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [t1__', S(" :: "), t2__']
+                            , [ t1__'
+                              , S(" :: ")
+                              , t2__'
+                              , S(".")
+                              ]
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
