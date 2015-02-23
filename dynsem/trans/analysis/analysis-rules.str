@@ -104,7 +104,8 @@ rules /* store variables */
       <lookup-def(|Vars())> v => v-def;
       <lookup-prop(|Type())> v-def => v-ty;
       <not(type-coerce)> (v-ty, ty);
-      <type-reduce> (v-ty, ty) => ty'
+      arrow-def := <InArrow>;
+      <type-reduce(|arrow-def)> (v-ty, ty) => ty'
 
   type-of:
     (ty, Int(_)) -> IntType()
@@ -145,7 +146,8 @@ rules /* store variables */
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       <not(type-coerce)> (ty-con, ty);
-      <type-reduce <+ swap; type-reduce> (ty, ty-con);
+      arrow-def := <InArrow>;
+      <type-reduce(|arrow-def) <+ swap; type-reduce(|arrow-def)> (ty, ty-con);
       <zip; map(type-of-top)> (fchild-ty*, child*)
 
   type-of:
@@ -367,14 +369,15 @@ rules
       <type-coerce> (a-k-ty, e-k-ty);
       <type-coerce> (a-v-ty, e-v-ty)
 
-  type-reduce:
+  type-reduce(|arrow-def):
     (ty-reduce-from, ty-reduce-to) -> ty-to'
     where
-      arrow-ty* := <lookup-props(|Type())> <InArrow>;
+      arrow-ty* := <lookup-props(|Type())> arrow-def;
       ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
       ty-to' := <type-coerce> (bu-ty, ty-reduce-to)
 
   type-coerce-sym =
     type-coerce
     <+ swap; type-coerce
+
 
