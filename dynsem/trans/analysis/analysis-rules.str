@@ -142,7 +142,7 @@ rules /* store variables */
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       <not(type-coerce)> (ty-con, ty);
-      <type-coerce-rel> (ty-con, ty);
+      <type-coerce-rel-sym> (ty-con, ty);
       <zip; map(type-of-top)> (fchild-ty*, child*)
 
   type-of:
@@ -371,6 +371,8 @@ rules
       arrow-ty* := <lookup-props(|Type())> <InArrow>;
       ArrowType(_, bu-ty) := <select-arrow> (arrow-ty*, ty-coerce-to);
       ty-to' := <type-coerce> (bu-ty, ty-coerce-from)
+
+  type-coerce-rel-sym = type-coerce-rel <+ swap; type-coerce-rel
 
   type-coerce-sym =
     type-coerce
