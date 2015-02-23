@@ -39,12 +39,20 @@ rules
 	    <not(type-coerce)> (v-left-ty, t-right-ty);
 	  	<type-reduce(|arrow-def)> (v-left-ty, t-right-ty)
   
-  expand-reduction-target(|arrow-def, arrow-ty):
+  expand-reduction-premise(|arrow-def):
+    Formula(Match(Con(c, child*), t-right)) -> [p*, Formula(Match(Con(c, child'*), t-right))]
+    where
+      ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      (child'*, p*) := <zip(expand-reduction-target(|arrow-def)); unzip; (id, concat)> (child*, fchild-ty*)
+  
+  expand-reduction-target(|arrow-def):
+    (t, exp-ty) -> <expand-reduction-target(|arrow-def, exp-ty)> t
+  
+  expand-reduction-target(|arrow-def, exp-ty):
     v@VarRef(_) -> (v, [])
     where
       v-ty := <type-of> v;
-      ArrowType(_, bu-ty) := arrow-ty;
-      <type-coerce> (v-ty, bu-ty)
+      <type-coerce> (v-ty, exp-ty)
 
   expand-reduction-target(|arrow-def, exp-ty):
     v@VarRef(_) -> (VarRef(v'), [Formula(Relation(Reads([]), Source(v, []), NamedDynamicEmitted([], <def-get-name> arrow-def), Target(Var(v'), [])))])
@@ -53,17 +61,6 @@ rules
       <not(type-coerce)> (v-ty, exp-ty);
       <type-reduce(|arrow-def)> (v-ty, exp-ty);
       v' := <next-variable>
-   
-  
-  // // ??does this exact case ever happen??
-  // expand-reduction-premise:
-  //   Formula(Match(t-left, t-right@MatchedVar(v-right))) ->
-  //     Formula(Relation(Reads([]), Source(t-left, []), NamedDynamicEmitted([], <InArrow; def-get-name>), Target(Var(v-right), [])))
-  //   where
-  //     t-left-ty := <type-of> t-left;
-  //     t-right-ty := <type-of> t-right;
-  //     <not(type-coerce)> (t-left-ty, t-right-ty);
-  //     <type-reduce> (t-left-ty, t-right-ty)
 
 
 

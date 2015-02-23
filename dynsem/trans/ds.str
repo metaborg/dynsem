@@ -173,10 +173,13 @@ rules // Builders
           desugar-top; fuse-sections | "Desugaring"
         );
         log-timed(
-          factorize-module | "Factorization"
+          factorize-module | "Factorization 1/2"
         );
         log-timed(
           expand-reductions-module | "Reduction expansion"
+        );
+        log-timed(
+          factorize-module | "Factorization 2/2"
         );
         log-timed(
           explicate-module | "Explication"
