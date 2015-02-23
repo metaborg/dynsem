@@ -37,6 +37,7 @@ menus
     action  : "All to Java"            = all-to-java-editor (source)
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)
+    action  : "Expand reductions"      = expand-reds-editor (openeditor) (realtime) (source)
     action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
     action  : "Merge"                  = merge-editor (openeditor) (realtime) (source)

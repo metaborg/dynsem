@@ -5,6 +5,7 @@ imports
   analysis/lib-analysis
   analysis/constructors
   analysis/rename
+  analysis/query
 	pp
   ds
   lib-ds
@@ -43,7 +44,7 @@ rules /* store variables */
       if arrow-def := <lookup-def(|Arrows())> arrow-name
       then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <select-arrow> (arrow-ty*, con-ty) => arrow-ty
+	      if <type-of-applicable-arrow> (arrow-ty*, con-ty) => arrow-ty
 	      then
 	        {| InArrow:
 	          rules(InArrow: _ -> arrow-def);
@@ -65,9 +66,6 @@ rules /* store variables */
       <map(type-check-premise-top)> p*;
       <type-of-top> (bu-ty, rhs);
       <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> tc*
-
-  select-arrow:
-    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
 
   type-of-top =
   	type-of
@@ -277,7 +275,7 @@ rules /* store variables */
     	if arrow-def := <lookup-def(|Arrows())> arrow-name
     	then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <select-arrow> (arrow-ty*, lhs-ty) => ArrowType(bu-ty, ma-ty)
+	      if <type-of-applicable-arrow> (arrow-ty*, lhs-ty) => ArrowType(bu-ty, ma-ty)
 	      then
 	        <type-of-top> (bu-ty, lhs);
 	        <type-of-top> (ma-ty, rhs);
@@ -373,7 +371,7 @@ rules
     (ty-reduce-from, ty-reduce-to) -> ty-to'
     where
       arrow-ty* := <lookup-props(|Type())> <InArrow>;
-      ArrowType(_, bu-ty) := <select-arrow> (arrow-ty*, ty-reduce-from);
+      ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
       ty-to' := <type-coerce> (bu-ty, ty-reduce-to)
 
   type-coerce-sym =

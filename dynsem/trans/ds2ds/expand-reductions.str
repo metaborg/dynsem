@@ -1,0 +1,39 @@
+module expand-reductions
+
+imports
+  include/ds
+  ds
+  analysis/main
+  analysis/mark-references
+  analysis/lib-analysis
+  analysis/constructors
+  analysis/query
+  analysis/analysis-rules
+  
+rules
+	
+	expand-reductions-module:
+	  mod@Module(_, _) -> Module($[[name]_expreds], section*)
+	  where
+	    <m-in-analysis(expand-reductions); unmark-vars> mod => Module(name, section*)
+	
+	expand-reductions = alltd(expand-reductions-rule)
+
+  expand-reductions-rule:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
+      Rule(p'*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs, tc*)))
+    where {| InArrow:
+      arrow-def := <lookup-def(|Arrows())> arrow-name;
+      rules(InArrow: _ -> arrow-def);
+      p'* := <map(try(expand-reduction-premise))> p*
+    |}
+
+	expand-reduction-premise:
+	  Formula(Match(t-left@VarRef(v-left), t-right@Con(c, child*))) ->
+	    Formula(Relation(Reads([]), Source(t-left, []), NamedDynamicEmitted([], <InArrow; def-get-name>), Target(t-right, [])))
+	  where
+	    v-left-ty := <type-of> t-left;
+	    t-right-ty := <type-of> t-right;
+	    <not(type-coerce)> (v-left-ty, t-right-ty);
+	    <type-reduce> (v-left-ty, t-right-ty)
+  
