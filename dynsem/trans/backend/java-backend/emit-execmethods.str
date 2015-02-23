@@ -236,7 +236,7 @@ rules
       ]|
     where
       v-ty := <type-of> dec;
-      e_lhs := <ds2java-term-build(|v-ty)> lhs;
+      e_lhs := <ds2java-term-build-optcast(|v-ty)> lhs;
       bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
@@ -328,6 +328,7 @@ rules
 
   ds2java-premise = debug(!"Premise failure: "); fail 
 
+
   ds2java-term-build-optcast(|ex_ty):
     trm -> <ds2java-term-build(|ex_ty)> trm
     where not(
@@ -335,9 +336,18 @@ rules
     )
   
   ds2java-term-build-optcast(|ex_ty):
-    trm -> <ds2java-term-build(|ex_ty)> Cast(trm, ex_ty)
+    trm -> <ds2java-term-build(|ex_ty)> Cast(trm, ex_ty')
     where
       <type-of> trm => MapType(ALPHATYPE(), ALPHATYPE())
+    where
+    	if !ex_ty => MapType(_, _)
+    	then
+    		ex_ty' := ex_ty
+    	else
+    		ex_ty_def := <lookup-def(|Types())> ex_ty;
+    		<lookup-prop(|SortKind())> ex_ty_def => SemanticCompSort();
+    		ex_ty' := <lookup-prop(|SuperType())> ex_ty_def
+      end
 
   ds2java-term-build(|ex_ty):
     Int(i) -> e |[ i ]|
@@ -411,7 +421,7 @@ rules
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
     where
       e_t := <ds2java-term-build(|ty-trm)> t;
-      x_ty := <rw-type; ds2java-sort-classname> ty-trm
+      x_ty := <ds2java-sort-classname> ty-trm
   
   ds2java-term-build(|ex_ty):
     String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))
