@@ -45,7 +45,10 @@ rules /* store variables */
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
 	      if <select-arrow> (arrow-ty*, con-ty) => arrow-ty
 	      then
-	        <store-rule> (arrow-ty, r)
+	        {| InArrow:
+	          rules(InArrow: _ -> arrow-def);
+	          <store-rule> (arrow-ty, r)
+	        |}
 	      else
 	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
 	        add-msg(|Error(), con, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> con-ty]])
@@ -102,8 +105,7 @@ rules /* store variables */
     where
       <?True() + ?False()> bool;
       <type-coerce> (BoolType(), ty)
-  
-  
+
   type-of:
     (ty, String(_)) -> StringType()
     where
@@ -133,6 +135,14 @@ rules /* store variables */
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       <type-coerce> (ty-con, ty);
+      <zip; map(type-of-top)> (fchild-ty*, child*)
+  
+  type-of:
+    (ty, Con(c, child*)) -> ty-con
+    where
+      ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      <not(type-coerce)> (ty-con, ty);
+      <type-coerce-rel> (ty-con, ty);
       <zip; map(type-of-top)> (fchild-ty*, child*)
 
   type-of:
@@ -323,10 +333,6 @@ rules /* store variables */
 
 rules
   
-  /**
-  * We have a type ty-from that needs to conform to 
-  * ty-to
-  */
   type-coerce:
     (ty-from, ty-to) -> <fail>
   
@@ -357,6 +363,14 @@ rules
       <lookup-prop(|SuperType())> to-ty-def => MapType(e-k-ty, e-v-ty);
       <type-coerce> (a-k-ty, e-k-ty);
       <type-coerce> (a-v-ty, e-v-ty)
+
+  // (V, Expr) then we look for an arrow Expr -arr-> Value
+  type-coerce-rel:
+    (ty-coerce-from, ty-coerce-to) -> ty-to'
+    where
+      arrow-ty* := <lookup-props(|Type())> <InArrow>;
+      ArrowType(_, bu-ty) := <select-arrow> (arrow-ty*, ty-coerce-to);
+      ty-to' := <type-coerce> (bu-ty, ty-coerce-from)
 
   type-coerce-sym =
     type-coerce
