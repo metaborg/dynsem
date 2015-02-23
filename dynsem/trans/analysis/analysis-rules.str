@@ -32,7 +32,7 @@ rules /* store variables */
   store-rules = Rules(map(store-rule))
 
   store-rule:
-    r@Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), _)) -> r
+    r@Rule(_, _, Relation(_, Source(lhs, _), arr@NamedDynamicEmitted(_, arrow-name), _)) -> r
     where
       As(_, con@Con(c, _)) := lhs
       <+
@@ -54,7 +54,7 @@ rules /* store variables */
 	        add-msg(|Error(), con, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> con-ty]])
 	      end
 	    else
-        add-msg(|Error(), arrow-name, $[Arrow [arrow-name] is not declared])
+        add-msg(|Error(), arr, $[Arrow [arrow-name] is not declared])
       end
 
   store-rule:
