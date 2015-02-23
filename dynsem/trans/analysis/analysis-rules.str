@@ -67,10 +67,7 @@ rules /* store variables */
       <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> tc*
 
   select-arrow:
-    ([arrow-type], _) -> arrow-type
-  
-  select-arrow:
-    (arrow-type*@[_, _|_], con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
+    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
 
   type-of-top =
   	type-of
@@ -96,6 +93,22 @@ rules /* store variables */
       <store-prop(|Type(), v-def)> ty
 
   type-of:
+    (ty, r@VarRef(v)) -> ty'
+    where
+      <lookup-def(|Vars())> v => v-def;
+      <store-prop(|Use(), v-def)> r;
+      <lookup-prop(|Type())> v-def => v-ty;
+      <type-coerce> (v-ty, ty) => ty'
+
+  type-of:
+    (ty, r@VarRef(v)) -> ty'
+    where
+      <lookup-def(|Vars())> v => v-def;
+      <lookup-prop(|Type())> v-def => v-ty;
+      <not(type-coerce)> (v-ty, ty);
+      <type-reduce> (v-ty, ty) => ty'
+
+  type-of:
     (ty, Int(_)) -> IntType()
     where
       <type-coerce> (IntType(), ty)
@@ -115,14 +128,6 @@ rules /* store variables */
     (ty, Fresh()) -> IntType()
     where
       <type-coerce> (IntType(), ty)
-
-  type-of:
-    (ty, r@VarRef(v)) -> ty'
-    where
-      <lookup-def(|Vars())> v => v-def;
-      <store-prop(|Use(), v-def)> r;
-      <lookup-prop(|Type())> v-def => v-ty;
-      <type-coerce> (v-ty, ty) => ty'
   
   type-of:
     (ty, ref@VarRef(v)) -> ty
@@ -142,7 +147,7 @@ rules /* store variables */
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       <not(type-coerce)> (ty-con, ty);
-      <type-coerce-rel-sym> (ty-con, ty);
+      <type-reduce <+ swap; type-reduce> (ty, ty-con);
       <zip; map(type-of-top)> (fchild-ty*, child*)
 
   type-of:
@@ -364,15 +369,12 @@ rules
       <type-coerce> (a-k-ty, e-k-ty);
       <type-coerce> (a-v-ty, e-v-ty)
 
-  // (V, Expr) then we look for an arrow Expr -arr-> Value
-  type-coerce-rel:
-    (ty-coerce-from, ty-coerce-to) -> ty-to'
+  type-reduce:
+    (ty-reduce-from, ty-reduce-to) -> ty-to'
     where
       arrow-ty* := <lookup-props(|Type())> <InArrow>;
-      ArrowType(_, bu-ty) := <select-arrow> (arrow-ty*, ty-coerce-to);
-      ty-to' := <type-coerce> (bu-ty, ty-coerce-from)
-
-  type-coerce-rel-sym = type-coerce-rel <+ swap; type-coerce-rel
+      ArrowType(_, bu-ty) := <select-arrow> (arrow-ty*, ty-reduce-from);
+      ty-to' := <type-coerce> (bu-ty, ty-reduce-to)
 
   type-coerce-sym =
     type-coerce
