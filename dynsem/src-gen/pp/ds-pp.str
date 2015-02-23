@@ -596,7 +596,7 @@ strategies
   prettyprint-Cast :
     Cast(t1__, t2__) -> [ H(
                             [SOpt(HS(), "0")]
-                          , [t1__', S(" ! "), t2__']
+                          , [t1__', S(" : "), t2__']
                           )
                         ]
     with t1__' := <pp-one-Z(prettyprint-Var)> t1__

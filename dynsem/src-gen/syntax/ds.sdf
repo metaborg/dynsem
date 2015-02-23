@@ -72,7 +72,7 @@ exports
   context-free syntax
     ID                                  -> Var   {cons("VarRef")}
     Var                                 -> Term  
-    Var "!" Type                        -> Cast  {cons("Cast")}
+    Var ":" Type                        -> Cast  {cons("Cast")}
     Cast                                -> Term  
     Var "@" Term                        -> Term  {cons("As")}
     "_"                                 -> Term  {cons("Wld")}

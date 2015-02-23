@@ -97,7 +97,7 @@ context-free syntax // terms
   Var.VarRef    = [[ID]]
   Term = Var
   
-  Cast.Cast = [[Var] ! [Type]]
+  Cast.Cast = [[Var] : [Type]]
   Term = Cast
   
   Term.As       = [[Var]@[Term]]

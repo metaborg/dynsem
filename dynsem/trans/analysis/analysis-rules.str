@@ -156,6 +156,15 @@ rules /* store variables */
       <rw-type> ty-trm => ty-cast;
       <type-of-top> (NONETYPE(), ref);
       <type-coerce> (ty-cast, ty) => ty'
+  
+  type-of:
+  	(ty, Cast(v@Var(_), ty-trm)) -> ty'
+  	where
+  		<rw-type> ty-trm => ty-cast;
+  		<not(type-coerce)> (ty-cast, ty);
+  		arrow-def := <InArrow>;
+  		<type-reduce(|arrow-def)> (ty, ty-cast) => ty';
+  		<type-of-top> (ty', v)
 
   type-of:
   	(ty, As(v, pat)) -> ty'
