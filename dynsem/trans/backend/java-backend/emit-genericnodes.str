@@ -64,7 +64,7 @@ rules
             
             ~bstm*:<foldr(![], ds2java-sortinj-specializer)> ty-def*
             
-            throw new RewritingException();
+            throw new RewritingException(aterm.toString());
             
           }
           
