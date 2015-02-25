@@ -70,7 +70,7 @@ rules
             
             bstm2*
             
-            throw new RewritingException();
+            throw new RewritingException(aterm.toString());
             
           }
           
