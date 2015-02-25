@@ -410,7 +410,7 @@ rules
       h-ex-elem-ty := <?ListType(<id>) <+ !h-ty> ex-ty;
       if <type-of> t-trm => ListType(t-elem-ty)
       then
-        actual_ex_elem_ty := <type-coerce> (h-ex-elem-ty, t-elem-ty)
+        actual_ex_elem_ty := <type-coerce-sym> (h-ex-elem-ty, t-elem-ty)
       else
         actual_ex_elem_ty := h-ex-elem-ty
       end;
