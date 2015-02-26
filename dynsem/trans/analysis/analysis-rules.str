@@ -383,7 +383,7 @@ rules
     where
       arrow-ty* := <lookup-props(|Type())> arrow-def;
       ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
-      ty-to' := <type-coerce> (ty-reduce-to, bu-ty)
+      ty-to' := <type-coerce-sym> (ty-reduce-to, bu-ty)
 
   type-coerce-sym =
     type-coerce
