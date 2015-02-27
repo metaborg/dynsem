@@ -56,6 +56,14 @@ rules
       <lookup-native-fun-def(|fun-name)> par-def => fun-def;
       <lookup-prop(|Type())> fun-def => FunctionType(_, ty)
 
+  type-of:
+    MapSelect(map, key) -> vty
+    where
+      <type-of> map => map-ty;
+      <lookup-def(|Types())> map-ty => map-ty-def;
+      <lookup-prop(|SortKind())> map-ty-def => SemanticCompSort();
+      <lookup-prop(|SuperType())> map-ty-def => MapType(_, vty)
+
   type-of-applicable-arrow:
     (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
 
