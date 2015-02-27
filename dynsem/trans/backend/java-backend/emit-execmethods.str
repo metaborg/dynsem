@@ -92,20 +92,18 @@ rules
   		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
 
   inject-try-or:
-    [p@TryOr(_, _)] -> p 
+    [] -> TryOr(PremiseBlock([]), PremiseBlock([RuleFail()]))
+
+  inject-try-or:
+    p*@[_|_] -> p*
+    where
+      <not(fetch-elem(premise-can-fail))> p*
   
   inject-try-or:
-    l@[p1 | _] -> l
+    p* -> TryOr(PremiseBlock(p*), PremiseBlock([RuleFail()]))
     where
-      <not(?TryOr(_, _))> p1;
-      <not(fetch-elem(premise-can-fail))> l
-      
-  inject-try-or:
-    l@[p1 | _] -> TryOr(PremiseBlock(l), PremiseBlock([RuleFail()]))
-    where
-      <not(?TryOr(_, _))> p1;
-      <fetch-elem(premise-can-fail)> l
-
+      <fetch-elem(premise-can-fail)> p*
+  
   premise-can-fail =
     ?Formula(Match(_, Con(_, _)))
     + ?Formula(Match(_, List(_)))
@@ -114,6 +112,7 @@ rules
     + ?Formula(TermEq(_, _))
     + ?Formula(TermNeq(_, _))
     + ?MergePoint(_, PremiseBlock(p1*), PremiseBlock(p2*)); <fetch-elem(premise-can-fail)> p2*
+    + ?TryOr(_, PremiseBlock(p2*)); <fetch-elem(premise-can-fail)> p2*
 
   insert-target(|tgt):
     [] -> [tgt]
