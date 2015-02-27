@@ -45,7 +45,7 @@ rules
           IStrategoConstructor bindCons = factory.makeConstructor("Bind", 2);
 
           IStrategoTerm[] kids = new IStrategoTerm[map.size() + 1];
-          kids[0] = factory.makeString("Store");
+          kids[0] = factory.makeString(~e:Lit(String([Chars(semcomp-name)])));
 
           int idx = 1;
           for (Entry<x_kty, x_vty> entry : map.entrySet()) {
@@ -58,7 +58,8 @@ rules
         }
       ]|
     where
-      x_methodname := <def-get-name; ds2java-map2aterm-name> semcomp-def;
+      semcomp-name := <def-get-name> semcomp-def;
+      x_methodname := <ds2java-map2aterm-name> semcomp-name;
       MapType(k-ty, v-ty) := <lookup-prop(|SuperType())> semcomp-def;
       x_kty := <ds2java-sort-classname; ds2java-box-java-type> k-ty;
       x_vty := <ds2java-sort-classname; ds2java-box-java-type> v-ty;
