@@ -150,6 +150,12 @@ public class NodeList<T> implements INodeList<T> {
 		if (head instanceof IConvertibleToStrategoTerm) {
 			headTerm = ((IConvertibleToStrategoTerm) head)
 					.toStrategoTerm(factory);
+		} else if (head instanceof String) {
+			headTerm = factory.makeString((String) head);
+		} else if (head instanceof Integer) {
+			headTerm = factory.makeInt((int) head);
+		} else if (head instanceof Double) {
+			headTerm = factory.makeReal((double) head);
 		} else {
 			throw new RuntimeException("Unsupported list element: " + head);
 		}
