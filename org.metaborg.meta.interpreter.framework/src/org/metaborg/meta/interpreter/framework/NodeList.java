@@ -153,9 +153,9 @@ public class NodeList<T> implements INodeList<T> {
 		} else if (head instanceof String) {
 			headTerm = factory.makeString((String) head);
 		} else if (head instanceof Integer) {
-			headTerm = factory.makeInt((int) head);
+			headTerm = factory.makeInt((Integer) head);
 		} else if (head instanceof Double) {
-			headTerm = factory.makeReal((double) head);
+			headTerm = factory.makeReal((Double) head);
 		} else {
 			throw new RuntimeException("Unsupported list element: " + head);
 		}
