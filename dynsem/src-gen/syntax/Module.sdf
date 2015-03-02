@@ -20,7 +20,7 @@ exports
     "namespaces" -> ModuleID {reject}
     "properties" -> ModuleID {reject}
     "imports"    -> ModuleID {reject}
-    "signatures" -> ModuleID {reject}
+    "signature"  -> ModuleID {reject}
     "rule"       -> ID       {reject}
 
   lexical restrictions
