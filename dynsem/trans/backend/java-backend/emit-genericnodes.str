@@ -52,6 +52,9 @@ rules
           
           @Override
           public ~x:sortname specialize(int depth) {
+            if(replaced()) {
+              return (~x:sortname) replacement();
+            }
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
