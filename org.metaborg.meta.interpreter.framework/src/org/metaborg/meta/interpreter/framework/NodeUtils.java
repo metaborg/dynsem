@@ -46,6 +46,7 @@ public class NodeUtils {
 						if (list.head() == oldChild) {
 							// do the replacement
 							// ask the parent to adopt the child
+							oldChild.setReplacedBy(newChild);
 							list.replaceHead(newChild);
 							parent.adoptChild(newChild);
 							return newChild;
