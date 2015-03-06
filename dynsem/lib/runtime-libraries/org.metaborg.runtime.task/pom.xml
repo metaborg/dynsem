@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>org.metaborg.runtime.task</artifactId>
+	<packaging>jar</packaging>
+	<description>Task engine for incremental execution of program analysis tasks</description>
+	<url>https://github.com/metaborg/runtime-libraries</url>
+
+	<parent>
+		<groupId>org.metaborg</groupId>
+		<artifactId>org.metaborg.maven.parent.java</artifactId>
+		<version>1.4.0</version>
+		<relativePath>../../spoofax-deploy/org.metaborg.maven.parent.java</relativePath>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.spoofax.terms</artifactId>
+			<version>${metaborg-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.spoofax.interpreter.core</artifactId>
+			<version>${metaborg-version}</version>
+		</dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.util</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.spoofax.jsglr</artifactId>
+			<version>${metaborg-version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.functionaljava</groupId>
+			<artifactId>functionaljava</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<developers>
+		<developer>
+			<name>Gabriël Konat</name>
+			<email>g.d.p.konat@tudelft.nl</email>
+			<organization>Delft University of Technology</organization>
+			<organizationUrl>http://www.ewi.tudelft.nl/en</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git@github.com:metaborg/runtime-libraries.git</connection>
+		<developerConnection>scm:git:git@github.com:metaborg/runtime-libraries.git</developerConnection>
+		<url>https://github.com/metaborg/runtime-libraries</url>
+	</scm>
+</project>
