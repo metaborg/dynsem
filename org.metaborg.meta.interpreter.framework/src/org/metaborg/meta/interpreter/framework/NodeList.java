@@ -6,6 +6,10 @@ package org.metaborg.meta.interpreter.framework;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+
 /**
  * @author vladvergu
  *
@@ -91,6 +95,9 @@ public class NodeList<T> implements INodeList<T> {
 		if (this.size() != other.size()) {
 			return false;
 		}
+		if (this.isEmpty() && other.isEmpty()) {
+			return false;
+		}
 		if (head == null) {
 			if (other.head != null)
 				return false;
@@ -132,6 +139,29 @@ public class NodeList<T> implements INodeList<T> {
 				throw new UnsupportedOperationException();
 			}
 		};
+	}
+
+	@Override
+	public IStrategoList toStrategoTerm(ITermFactory factory) {
+		if (this.isEmpty()) {
+			return factory.makeList();
+		}
+		IStrategoTerm headTerm = null;
+		if (head instanceof IConvertibleToStrategoTerm) {
+			headTerm = ((IConvertibleToStrategoTerm) head)
+					.toStrategoTerm(factory);
+		} else if (head instanceof String) {
+			headTerm = factory.makeString((String) head);
+		} else if (head instanceof Integer) {
+			headTerm = factory.makeInt((Integer) head);
+		} else if (head instanceof Double) {
+			headTerm = factory.makeReal((Double) head);
+		} else {
+			throw new RuntimeException("Unsupported list element: " + head);
+		}
+
+		return factory.makeListCons(headTerm,
+				(IStrategoList) tail.toStrategoTerm(factory));
 	}
 
 	@Override

@@ -1,0 +1,43 @@
+module backend/java-backend/emit-types
+
+imports
+  include/ds
+
+imports
+  analysis/lib-analysis
+  analysis/constructors
+
+imports
+  backend/java-backend/lib-ds2java
+  backend/java-backend/utils
+  backend/java-backend/analysis-extra
+  backend/java-backend/emit-arrows
+
+rules /* generate interfaces for sort declarations */
+  
+  ds2java-interfaces:
+    Module(_, section*) -> iface*
+    where
+      all-type-def*  := <lookup-def-all(|Types())>;
+      type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
+      iface* := <map(?(_, <id>); ds2java-interface)> type-def*
+  
+  ds2java-interface:
+    ty ->
+      compilation-unit |[
+        package ~x:<AutoPackageName>;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        
+        public interface ~x:<ds2java-sort-classname> ty extends ~x:supername {
+          ~exec*
+        }
+      ]|
+    where
+      ty-def := <lookup-def(|Types())> ty;
+      supername := <lookup-prop(|SuperType()); ds2java-sort-classname <+ !"IMatchableNode"> ty-def;
+      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> ty-def
+
+
+
+

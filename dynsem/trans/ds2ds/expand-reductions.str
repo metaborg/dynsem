@@ -1,0 +1,79 @@
+module expand-reductions
+
+imports
+  include/ds
+  ds
+  analysis/main
+  analysis/mark-references
+  analysis/lib-analysis
+  analysis/constructors
+  analysis/query
+  analysis/analysis-rules
+  lib-ds
+  
+rules
+	
+	expand-reductions-module:
+	  mod@Module(_, _) -> Module($[[name]_expreds], section*)
+	  where
+	    <m-in-analysis(expand-reductions); unmark-vars> mod => Module(name, section*)
+	
+	expand-reductions = alltd(expand-reductions-rule)
+
+  expand-reductions-rule:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
+      Rule([p'*, p-extra*], infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs', tc*)))
+    where
+      arrow-def := <lookup-def(|Arrows())> arrow-name;
+      arrow-ty* := <lookup-props(|Type())> arrow-def;
+      ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, <type-of> lhs);
+      p'* := <map(expand-reduction-premise(|arrow-def) <+ MkSingleton); flatten-list> p*;
+      (rhs', p-extra*) := <expand-reduction-target(|arrow-def, bu-ty)> rhs
+
+	expand-reduction-premise(|arrow-def):
+	  Formula(Match(t-left@VarRef(v-left), t-right@Con(c, child*))) ->
+	    [Formula(Relation(Reads([]), Source(t-left, []), NamedDynamicEmitted([], <def-get-name> arrow-def), Target(t-right, [])))]
+	  where
+	    v-left-ty := <type-of> t-left;
+	    t-right-ty := <type-of> t-right;
+	    <not(type-coerce)> (v-left-ty, t-right-ty);
+	  	<type-reduce(|arrow-def)> (v-left-ty, t-right-ty)
+  
+  expand-reduction-premise(|arrow-def):
+    Formula(Match(t-left@VarRef(v-left), Cast(Var(v-right), cast-ty))) ->
+      [Formula(Match(t-left, MatchedVar(v'))),
+        Formula(Relation(Reads([]), Source(VarRef(v'), []), NamedDynamicEmitted([], <def-get-name> arrow-def), Target(Var(v-right), [])))]
+    where
+      t-left-ty := <type-of> t-left;
+      t-right-ty := <rw-type> cast-ty;
+      <not(type-coerce)> (t-left-ty, t-right-ty);
+      <type-reduce(|arrow-def)> (t-left-ty, t-right-ty);
+      v' := <next-variable>
+  
+  expand-reduction-premise(|arrow-def):
+    Formula(Match(Con(c, child*), t-right)) -> [p*, Formula(Match(Con(c, child'*), t-right))]
+    where
+      ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      (child'*, p*) := <zip(expand-reduction-target(|arrow-def)); unzip; (id, concat)> (child*, fchild-ty*)
+  
+  expand-reduction-target(|arrow-def):
+    (t, exp-ty) -> <expand-reduction-target(|arrow-def, exp-ty)> t
+  
+  expand-reduction-target(|arrow-def, exp-ty):
+    v@VarRef(_) -> (v, [])
+    where
+      v-ty := <type-of> v;
+      <type-coerce> (v-ty, exp-ty)
+
+  expand-reduction-target(|arrow-def, exp-ty):
+    v@VarRef(_) -> (VarRef(v'), [Formula(Relation(Reads([]), Source(v, []), NamedDynamicEmitted([], <def-get-name> arrow-def), Target(Var(v'), [])))])
+    where
+      v-ty := <type-of> v;
+      <not(type-coerce)> (v-ty, exp-ty);
+      <type-reduce(|arrow-def)> (v-ty, exp-ty);
+      v' := <next-variable>
+
+
+
+
+

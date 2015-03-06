@@ -44,10 +44,6 @@ signature
     NativeOpDecl    : ID * List(Type) * Type -> NativeOpDecl
 
   constructors
-    Values    : List(ValueDecl) -> SignatureSection
-    ValueDecl : ID * List(Type) -> ValueDecl
-
-  constructors
     InternalConstructors : List(InternalConsDecl) -> SignatureSection
     InternalConsDecl     : ID * List(Type) * Type -> InternalConsDecl
 

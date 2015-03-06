@@ -3,13 +3,18 @@ module pp
 imports
   libstratego-lib
   libstratego-gpp
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/tmpl/pp
+  lib/runtime/tmpl/pp
   src-gen/signatures/-
   src-gen/pp/-
   include/ds-parenthesize
   ds
   
 rules
+  
+  prettyprint-ID = ![S(<id>)]
+  prettyprint-INFER = ![S(<id>)]
+  prettyprint-STRING = ![S(<id>)]
+  prettyprint-INT = ![S(<id>)]
   
   prettyprint-Term :
     MatchedVar(a) -> [ H(
@@ -26,6 +31,12 @@ rules
                      )
                    ]
     where a814 := <pp-one-Z(prettyprint-LID)> a
+
+  pp-dynsem-Premise-string =
+    parenthesize-ds
+    ; prettyprint-Premise
+    ; !V([], <id>)
+    ; box2text-string(|120)
   
   pp-dynsem-string =
     parenthesize-ds

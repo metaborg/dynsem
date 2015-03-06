@@ -20,11 +20,11 @@ context-free syntax // rules
   Rule.Rule = [
     [{Premise ",\n"}+]
     [INFER]
-    [Formula]
+    [Relation]
   ]
   
   Rule.RuleW = [
-    [Formula]
+    [Relation]
     where
       [{Premise ",\n"}+]
   ]
@@ -47,27 +47,41 @@ context-free syntax // rules
   	or  [PremisesBlock]
   ]
   
+  ID = <imports> {reject}
+  ID = <signature> {reject}
+  ID = <constructors> {reject}
+  ID = <sorts> {reject}
+  ID = <arrows> {reject}
   ID = <rules> {reject}
   ID = <fresh> {reject}
-  
+  ID = <where> {reject}
+  ID = <true> {reject}
+  ID = <false> {reject}
+  ID = <fresh> {reject}
+  ID = <fail> {reject}
+
 context-free syntax // formulas
 
   Formula.Match    = [[Term] => [Term]]
-  Formula.NMatch   = [[Term] =!=> [Term]] 
+  Formula.NMatch   = [[Term] =!=> [Term]]
   Formula.TermEq   = [[Term] == [Term]]
   Formula.TermNeq  = [[Term] != [Term]]
+  Formula.TypeCheck = [[Var] <? [Type]]
+  Formula.TypeCast = [[Var] <: [Type]]
   
-  Formula.Relation = [[Reads][Source] [Rel] [Target]]
+  Formula = [[Relation]]
+  Relation.Relation = [[Reads][Source] [Rel] [Target]]
+  
   Formula.IsValue  = [value([Term])]
   
   Reads.NoReads = []
-  Reads.Reads   = [[{LabelComp ", "}+] |- ]
+  Reads.Reads   = [[{LabelComp " "}+] |- ]
   
   Source.Source = [[Term]]
-  Source.Source = [([Term], [{LabelComp ", "}+])]
+  Source.Source = [[Term] :: [{LabelComp " "}+]]
 
   Target.Target = [[Term]]
-  Target.Target = [([Term], [{LabelComp ", "}+])]
+  Target.Target = [[Term] :: [{LabelComp " "}+].]
   
   Rel.Dynamic = [-->]
   Rel.NamedDynamic = [-[ID]->]
@@ -81,13 +95,14 @@ context-free syntax // formulas
   
 context-free syntax // terms
 
-  Term.As       = [[ID]@[Term]]
-
-  Term.VarRef   = [[ID]] {avoid}
-  // Term.VarRef   = [[LID]] {avoid}
-
-  Term.Var      = [[ID]]
-  // Term.Var      = [[LID]]
+  Var.VarRef    = [[ID]]
+  Term = Var
+  
+  Cast.Cast = [[Var] : [Type]]
+  Term = Cast
+  
+  Term.As       = [[Var]@[Term]]
+  
   Term.Wld      = <_>
   
   Term.String   = [[STRING]]
@@ -116,6 +131,3 @@ context-free priorities
 
   Term.MapSelect > Term.MapExtend
   
-  
-  
-	

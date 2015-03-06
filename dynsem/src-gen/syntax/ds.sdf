@@ -10,15 +10,25 @@ exports
     "strict" ID {INT ","}+ "/" INT              -> Rule          {cons("Strict")}
     "seqstrict" ID {INT ","}+ "/" INT           -> Rule          {cons("Seqstrict")}
     Formula                                     -> Rule          {cons("Axiom")}
-    {Premise ","}+ INFER Formula                -> Rule          {cons("Rule")}
-    Formula "where" {Premise ","}+              -> Rule          {cons("RuleW")}
+    {Premise ","}+ INFER Relation               -> Rule          {cons("Rule")}
+    Relation "where" {Premise ","}+             -> Rule          {cons("RuleW")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
     "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
     Premise "<" PremisesBlock "+" PremisesBlock -> Premise       {cons("MergePoint")}
     "try" PremisesBlock "or" PremisesBlock      -> Premise       {cons("TryOr")}
+    "imports"                                   -> ID            {reject}
+    "signature"                                 -> ID            {reject}
+    "constructors"                              -> ID            {reject}
+    "sorts"                                     -> ID            {reject}
+    "arrows"                                    -> ID            {reject}
     "rules"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}
+    "where"                                     -> ID            {reject}
+    "true"                                      -> ID            {reject}
+    "false"                                     -> ID            {reject}
+    "fresh"                                     -> ID            {reject}
+    "fail"                                      -> ID            {reject}
 
   context-free syntax
     CONTENTCOMPLETE -> ModuleSection {cons("COMPLETION-ModuleSection")}
@@ -32,14 +42,17 @@ exports
     Term "=!=>" Term                            -> Formula   {cons("NMatch")}
     Term "==" Term                              -> Formula   {cons("TermEq")}
     Term "!=" Term                              -> Formula   {cons("TermNeq")}
-    Reads Source Rel Target                     -> Formula   {cons("Relation")}
+    Var "<?" Type                               -> Formula   {cons("TypeCheck")}
+    Var "<:" Type                               -> Formula   {cons("TypeCast")}
+    Relation                                    -> Formula   
+    Reads Source Rel Target                     -> Relation  {cons("Relation")}
     "value" "(" Term ")"                        -> Formula   {cons("IsValue")}
                                                 -> Reads     {cons("NoReads")}
-    {LabelComp ","}+ "|-"                       -> Reads     {cons("Reads")}
+    LabelComp+ "|-"                             -> Reads     {cons("Reads")}
     Term                                        -> Source    {cons("Source")}
-    "(" Term "," {LabelComp ","}+ ")"           -> Source    {cons("Source")}
+    Term "::" LabelComp+                        -> Source    {cons("Source")}
     Term                                        -> Target    {cons("Target")}
-    "(" Term "," {LabelComp ","}+ ")"           -> Target    {cons("Target")}
+    Term "::" LabelComp+ "."                    -> Target    {cons("Target")}
     "-->"                                       -> Rel       {cons("Dynamic")}
     "-" ID "->"                                 -> Rel       {cons("NamedDynamic")}
     "-" ID "(" ID ")" "->"                      -> Rel       {cons("NamedDynamicParametric")}
@@ -49,6 +62,7 @@ exports
     Type Term                                   -> LabelComp {cons("LabelComp")}
 
   context-free syntax
+    CONTENTCOMPLETE -> Relation  {cons("COMPLETION-Relation")}
     CONTENTCOMPLETE -> Formula   {cons("COMPLETION-Formula")}
     CONTENTCOMPLETE -> Reads     {cons("COMPLETION-Reads")}
     CONTENTCOMPLETE -> Source    {cons("COMPLETION-Source")}
@@ -57,9 +71,11 @@ exports
     CONTENTCOMPLETE -> LabelComp {cons("COMPLETION-LabelComp")}
 
   context-free syntax
-    ID "@" Term                         -> Term  {cons("As")}
-    ID                                  -> Term  {cons("VarRef"), avoid}
-    ID                                  -> Term  {cons("Var")}
+    ID                                  -> Var   {cons("VarRef")}
+    Var                                 -> Term  
+    Var ":" Type                        -> Cast  {cons("Cast")}
+    Cast                                -> Term  
+    Var "@" Term                        -> Term  {cons("As")}
     "_"                                 -> Term  {cons("Wld")}
     STRING                              -> Term  {cons("String")}
     INT                                 -> Term  {cons("Int")}
@@ -80,6 +96,8 @@ exports
     ID "[" Term "]" "(" {Term ","}* ")" -> Term  {cons("SortFunCall")}
 
   context-free syntax
+    CONTENTCOMPLETE -> Var   {cons("COMPLETION-Var")}
+    CONTENTCOMPLETE -> Cast  {cons("COMPLETION-Cast")}
     CONTENTCOMPLETE -> Entry {cons("COMPLETION-Entry")}
     CONTENTCOMPLETE -> Term  {cons("COMPLETION-Term")}
 

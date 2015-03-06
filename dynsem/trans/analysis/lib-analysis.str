@@ -1,0 +1,144 @@
+module analysis/lib-analysis
+
+imports
+  include/ds
+  analysis/constructors
+
+rules
+	
+	new-analysis-scope(s) = {| Renames, InvRenames, Declared, Properties, Messages: s |}
+
+rules // renaming
+  
+  new-scope-renames(s) = {| Renames: s |}
+  
+  rename(|namespace):
+    name -> name'
+    where
+      <Renames> (namespace, name) => name'
+  
+  rename(|namespace):
+    name -> name'
+    where
+      <not(Renames)> (namespace, name)
+    with
+      name' := <newname> name;
+      rules(
+        Renames:+ (namespace, name) -> name'
+        InvRenames:+ name' -> (namespace, name)
+      )
+   
+  invrename(|namespace):
+    name' -> name
+    where
+      <InvRenames> name' => (_, name)
+
+rules // storing and looking up
+  
+  def-get-name = Snd
+  
+  def-get-namespace = Fst
+  
+  store-def(|namespace):
+    name -> (namespace, name)
+    where
+      rules(Declared:+ (namespace, name) -> (namespace, name))
+  
+  lookup-def(|namespace):
+    name -> <Declared> (namespace, name)
+  
+  lookup-defs(|namespace):
+    name -> <bagof-Declared> (namespace, name)
+    
+  lookup-def-all(|namespace) = all-keys-Declared; filter(?(namespace, _)); mapconcat(bagof-Declared)
+   
+  store-prop(|proptype, declaration):
+    propval -> propval
+    where
+      rules(Properties:+ (proptype, declaration) -> propval)
+   
+  lookup-prop(|proptype):
+    declaration -> <Properties> (proptype, declaration)
+
+  lookup-props(|proptype):
+    declaration -> <bagof-Properties> (proptype, declaration)
+  
+  has-prop(|proptype):
+    declaration -> declaration
+    where
+      <lookup-prop(|proptype)> declaration
+
+rules
+  
+  add-msg(|level, t, message) =
+    rules(Messages:+ t -> Message(level, t, message))
+
+  get-msgs(postprocess|level) =
+  	all-keys-Messages; mapconcat(bagof-Messages); filter(msg-has-level(|level)); map(postprocess)
+  
+  msg-has-level(|level) = ?Message(level, _, _)
+  
+  get-errors(postprocess) = get-msgs(postprocess|Error())
+  get-warnings(postprocess) = get-msgs(postprocess|Warning())
+  get-notes(postprocess) = get-msgs(postprocess|Note())
+
+rules // type rewriting
+  
+  with-debug(s) = s <+ debug(!"Ensure failed: "); with(fail)
+  
+  ensure(s) = with-debug(s; ?t); !t 
+  
+  rw-type:
+    SimpleSort(s) -> <id-to-type> s
+  
+  rw-type:
+    ListSort(s) -> ListType(<rw-type> s)
+  
+  rw-type:
+    MapSort(key-sort, val-sort) -> MapType(<rw-type> key-sort, <rw-type> val-sort)
+  
+  rw-type = is-list; map(rw-type)
+  
+  id-to-type = id-to-builtin-type <+ is-string
+
+  id-to-builtin-type:
+    "Int" -> IntType()
+    
+  id-to-builtin-type:
+    "Real" -> RealType()
+
+  id-to-builtin-type:
+    "Bool" -> BoolType()
+  
+  id-to-builtin-type:
+    "String" -> StringType()
+  
+  pp-type = pp-type-builtin <+ is-string <+ is-list; map(pp-type); separate-by(|", "); concat-strings
+ 
+  pp-type-builtin:
+    NONETYPE() -> "NO-TYPE"
+  
+  pp-type-builtin:
+    ALPHATYPE() -> "ALPHA"
+  
+  pp-type-builtin:
+    BETATYPE() -> "BETA"
+ 
+  pp-type-builtin:
+  	IntType() -> "Int"
+  
+  pp-type-builtin:
+  	RealType() -> "Real"
+  
+  pp-type-builtin:
+  	BoolType() -> "Bool"
+  
+  pp-type-builtin:
+  	StringType() -> "String"
+  
+  pp-type-builtin:
+    ListType(ety) -> $[List([<pp-type> ety])]
+  
+  pp-type-builtin:
+    MapType(key-ty, val-ty) -> $[Map([<pp-type> key-ty], [<pp-type> val-ty])]
+

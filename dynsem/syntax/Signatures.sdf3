@@ -34,6 +34,10 @@ context-free syntax // constructor declarations
   
   MapType.MapSort = [Map<[Type],[Type]>]
   
+template options
+
+  tokenize: "<("
+  
 context-free syntax // semantic component declarations
 
   SignatureSection.SemanticComponents = <
@@ -78,14 +82,6 @@ context-free syntax // native operator declarations
       <{NativeOpDecl "\n"}*>>
   
   NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}*] -> [Type]]
-
-context-free syntax // value term declarations
-
-  SignatureSection.Values = <
-    values
-      <{ValueDecl "\n"}*>>
-
-  ValueDecl.ValueDecl = [[ID] : [{Type " * "}*]]
 
 context-free syntax // internal constructor declarations
 

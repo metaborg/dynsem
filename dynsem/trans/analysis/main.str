@@ -1,0 +1,42 @@
+module analysis/main
+
+imports
+	analysis/rename
+	analysis/lib-analysis
+	analysis/analysis-signatures
+	analysis/analysis-rules
+	analysis/mark-references
+	analysis/query
+	include/ds
+  lib-ds
+
+rules
+	
+	analyze =
+		log-timed(mark-vars | "Marking variable def sites");
+	  log-timed(rename-all | "Renaming variables");
+	  log-timed(store-all  | "Storing all definitions")
+
+  m-in-analysis(s) = new-analysis-scope(
+  	analyze;
+  	s
+  )
+
+  store-all:
+    m@Module(n, section*) -> m
+    with
+      log-timed(
+        store-built-ins | "Storing built-in signatures" 
+      );
+      log-timed(
+        <map(try(store-signatures))> section* | "Storing signatures"
+      );
+      log-timed(
+        <check-signatures> section* | "Checking signatures" 
+      );
+      log-timed(
+        <map(try(store-rules))> section* | "Storing rules"
+      );
+      log-timed(
+        <post-analysis-checks> m | "Post analysis checks"
+      )

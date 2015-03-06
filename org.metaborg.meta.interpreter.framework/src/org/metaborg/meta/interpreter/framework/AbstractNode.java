@@ -7,7 +7,7 @@ import java.util.Objects;
  * @author vladvergu
  * 
  */
-public abstract class AbstractNode implements INode, IMatchable {
+public abstract class AbstractNode implements IMatchableNode {
 
 	private INode parent;
 	private INode replacedBy;

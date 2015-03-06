@@ -1,0 +1,70 @@
+module analysis/rename
+
+imports
+  include/ds
+  ds
+  analysis/lib-analysis
+  analysis/constructors
+  lib/editor-common.generated
+  
+strategies
+	
+	rename-all = alltd(rename)
+	
+rules
+  
+  rename:
+    Rule(p*, i, r) -> Rule(p'*, i, r')
+    where
+      new-scope-renames(
+        r' := <rename-all-vars> r;
+        p'* := <rename-all-vars> p*
+      )
+  
+  rename-all-vars = alltd(origin-track-forced(rename-var))
+  
+  rename-var:
+  	TryOr(l, r) -> TryOr(l', r')
+  	where
+  	  new-scope-renames(
+        l' := <rename-all-vars> l
+      );
+      new-scope-renames(
+        r' := <rename-all-vars> r
+      )
+  
+  rename-var:
+    MergePoint(p, l, r) -> MergePoint(p', l', r')
+    where
+      new-scope-renames(
+        p' := <rename-all-vars> p;
+        l' := <rename-all-vars> l
+      );
+      new-scope-renames(
+        r' := <rename-all-vars> r
+      )
+  
+  rename-var:
+  	VarRef(v) -> VarRef(<rename(|Vars())> v)
+  
+  rename-var:
+  	Var(v) -> Var(<rename(|Vars())> v)
+  
+  rename-var:
+  	MatchedVar(v) -> MatchedVar(<rename(|Vars())> v)
+
+rules
+
+  unrename-var:
+  	v -> <invrename(|Vars())> v
+  	where
+  		is-string
+
+  unrename-var:
+    VarRef(v) -> VarRef(<unrename-var> v)
+
+  unrename-var:
+    Var(v) -> Var(<unrename-var> v)
+
+  unrename-var:
+    MatchedVar(v) -> MatchedVar(<unrename-var> v)

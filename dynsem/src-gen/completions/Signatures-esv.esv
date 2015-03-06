@@ -56,12 +56,6 @@ completions
     <ID:ID> " : " <:Type> " -> " <Type:Type>  
 
 completions
-  completion template SignatureSection : "values " =
-    "values\n\t" (cursor) (blank)  
-  completion template ValueDecl : "ID : " =
-    <ID:ID> " : " <:Type>  
-
-completions
   completion template SignatureSection : "internal-constructors " =
     "internal-constructors\n\t" (cursor) (blank)  
   completion template InternalConsDecl : "ID : -> Type" =

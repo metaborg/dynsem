@@ -1,0 +1,70 @@
+module backend/java-backend/emit-maputils
+
+imports
+  include/ds
+  libjava-front
+
+imports
+  analysis/constructors
+  analysis/lib-analysis
+
+imports
+	backend/java-backend/utils
+	backend/java-backend/lib-ds2java
+	backend/java-backend/emit-atermconversion
+	
+rules
+  
+  ds2java-maputils =
+    lookup-def-all(|Types());
+    filter(where(lookup-prop(|SortKind()) => SemanticCompSort()));
+    ds2java-maputils-semcomps;
+    MkSingleton
+    
+  ds2java-maputils-semcomps:
+    semcomp-def* ->
+      compilation-unit |[
+        package ~x:<AutoPackageName>;
+        
+        import java.util.Map.Entry;
+        import org.spoofax.interpreter.terms.*;
+        import org.metaborg.meta.interpreter.framework.*;
+        import com.github.krukow.clj_ds.PersistentMap;
+        
+        public class AutoMapUtils {
+          ~conv*
+        }
+      ]|
+    where
+      conv* := <map(ds2java-maputils-semcomp)> semcomp-def*
+  
+  ds2java-maputils-semcomp:
+    semcomp-def ->
+      class-body-dec |[
+        public static IStrategoTerm x_methodname(PersistentMap<x_kty, x_vty> map, ITermFactory factory) {
+          IStrategoConstructor bindCons = factory.makeConstructor("Bind", 2);
+
+          IStrategoTerm[] kids = new IStrategoTerm[map.size() + 1];
+          kids[0] = factory.makeString(~e:Lit(String([Chars(semcomp-name)])));
+
+          int idx = 1;
+          for (Entry<x_kty, x_vty> entry : map.entrySet()) {
+            kids[idx] = factory.makeAppl(bindCons,
+                        e_keytrm, e_valtrm);
+            idx++;
+          }
+          
+          return factory.makeAppl(factory.makeConstructor("Map", 2), kids);
+        }
+      ]|
+    where
+      semcomp-name := <def-get-name> semcomp-def;
+      x_methodname := <ds2java-map2aterm-name> semcomp-name;
+      MapType(k-ty, v-ty) := <lookup-prop(|SuperType())> semcomp-def;
+      x_kty := <ds2java-sort-classname; ds2java-box-java-type> k-ty;
+      x_vty := <ds2java-sort-classname; ds2java-box-java-type> v-ty;
+      e_keytrm := <ds2java-atermconversion-name(| e |[ entry.getKey() ]|)> k-ty;
+      e_valtrm := <ds2java-atermconversion-name(| e |[ entry.getValue() ]|)> v-ty
+
+  ds2java-map2aterm-name:
+  	semcomp-name -> $[toStrategoTerm_[semcomp-name]]

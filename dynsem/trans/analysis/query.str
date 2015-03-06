@@ -1,0 +1,71 @@
+module analysis/query
+
+imports
+  include/ds
+  ds
+
+imports
+  analysis/constructors
+  analysis/lib-analysis
+  analysis/analysis-rules
+
+rules
+  
+  type-of:
+    Int(_) -> IntType()
+  
+  type-of:
+    Real(_) -> RealType()
+  
+  type-of:
+    String(_) -> StringType()
+  
+  type-of:
+    True() -> BoolType()
+  
+  type-of:
+    False() -> BoolType()
+
+  type-of:
+    Fresh() -> IntType()
+
+  type-of:
+    dec -> <lookup-def(|Vars()); lookup-prop(|Type())> v
+    where
+      <?Var(v) + ?MatchedVar(v) + ?VarRef(v)> dec
+
+  type-of:
+    Con(c, _) -> ty
+    where
+      <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, ty)
+  
+  type-of:
+    List([]) -> ListType(ALPHATYPE())
+  
+  type-of:
+    ListTail([h], _) -> ListType(<type-of> h)
+  
+  type-of:
+    Cast(_, ty-trm) -> <rw-type> ty-trm
+  
+  type-of:
+    SortFunCall(fun-name, par, _) -> ty
+    where
+    	<type-of> par => par-ty;
+      <lookup-def(|Types())> par-ty => par-def;
+      <lookup-native-fun-def(|fun-name)> par-def => fun-def;
+      <lookup-prop(|Type())> fun-def => FunctionType(_, ty)
+
+  type-of:
+    MapSelect(map, key) -> vty
+    where
+      <type-of> map => map-ty;
+      <lookup-def(|Types())> map-ty => map-ty-def;
+      <lookup-prop(|SortKind())> map-ty-def => SemanticCompSort();
+      <lookup-prop(|SuperType())> map-ty-def => MapType(_, vty)
+
+  type-of-applicable-arrow:
+    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
+
+
+

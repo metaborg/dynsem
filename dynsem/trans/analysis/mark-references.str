@@ -1,0 +1,60 @@
+module analysis/mark-references
+
+imports
+  include/ds
+  ds
+
+rules
+  
+  mark-vars = mark-var-defs-in-rules; mark-match-vars
+  
+  unmark-vars = alltd(\ Var(x) -> VarRef(x) \ + \ MatchedVar(x) -> VarRef(x) \)
+
+rules
+	
+	mark-var-defs-in-rules =
+		alltd(mark-var-defs-in-rule)
+		
+  mark-var-defs-in-rule =
+  	Axiom(mark-var-defs-in-conclusion)
+		
+  mark-var-defs-in-rule :
+  	RuleW(conc, prem*) -> RuleW(conc', prem'*)
+  	where conc' := <mark-var-defs-in-conclusion> conc
+        ; prem'* := <map(mark-vardefs-in-premise)> prem*
+
+  mark-var-defs-in-rule :
+    Rule(prem*, infer, conc) -> Rule(prem'*, infer, conc')
+    where
+      conc' := <mark-var-defs-in-conclusion> conc;
+      prem'* := <map(mark-vardefs-in-premise)> prem*
+
+  mark-var-defs-in-conclusion =
+  	Relation(make-vars, make-vars, id, id)
+
+  mark-vardefs-in-premise =
+  	alltd(mark-vardefs-in-relation)
+
+  mark-vardefs-in-relation =
+  	Relation(id, id, make-vars, make-vars)
+  	<+ TermEq(id, id)
+  	<+ TermNeq(id, id)
+  	<+ Match(id, make-vars)
+  	<+ NMatch(id, make-vars)
+  	<+ As(make-vars, make-vars)
+
+  make-vars =
+  	alltd( \ VarRef(x) -> Var(x) \)
+
+rules
+  
+  mark-match-vars =
+    alltd(mark-match-var)
+  
+  mark-match-var:
+    Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
+    
+  mark-match-var:
+    NMatch(lhs, Var(v)) -> NMatch(lhs, MatchedVar(v))
+
+

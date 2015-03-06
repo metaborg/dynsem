@@ -1,0 +1,83 @@
+module backend/java-backend/emit-atermconversion
+
+imports
+  include/ds
+  libjava-front
+  
+imports
+  analysis/constructors
+  analysis/lib-analysis
+
+imports
+  backend/java-backend/lib-ds2java
+  backend/java-backend/emit-maputils
+
+rules
+
+  ds2java-atermconversion-constructor:
+    c ->
+	    class-body-dec |[
+	      @Override
+	      public IStrategoTerm toStrategoTerm(ITermFactory factory) {
+	      	return factory.makeAppl(
+	      		       factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<length; int-to-string> c-c-ty*), 
+	      		       e_child*
+	      		     );
+	      }
+	    ]|
+    where
+      x_consname := <ds2java-constr-classname> c;
+      c-def := <lookup-def(|Constructors())> c;
+      ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def
+    where
+      c-name := <def-get-name> c-def;
+      e_child* := <map-with-index(ds2java-atermconversion-field)> c-c-ty*
+
+  ds2java-atermconversion-field:
+    (idx, f-ty) -> <ds2java-atermconversion-name(| e |[ ~x:<mkidx> idx ]|)> f-ty
+
+  ds2java-atermconversion-name(|e):
+  	f-ty -> e |[ e.toStrategoTerm(factory) ]|
+  	where
+  		f-ty-def := <lookup-def(|Types())> f-ty;
+  		f-ty-knd := <lookup-prop(|SortKind())> f-ty-def;
+  		<not(?SystemSort())> f-ty-knd;
+  		<not(?SemanticCompSort())> f-ty-knd;
+  		<not(?NativeSort())> f-ty-knd
+
+  ds2java-atermconversion-name(|e):
+    f-ty -> e |[
+    	 (e instanceof IConvertibleToStrategoTerm) ? 
+    	   ((IConvertibleToStrategoTerm) e).toStrategoTerm(factory) 
+    	 : factory.makeString(e.toString())
+    ]|
+    where
+      f-ty-def := <lookup-def(|Types())> f-ty;
+      f-ty-knd := <lookup-prop(|SortKind())> f-ty-def;
+      <?NativeSort()> f-ty-knd
+
+  ds2java-atermconversion-name(|e):
+  	f-ty -> e |[ AutoMapUtils.x_map2aterm(e, factory) ]|
+  	where
+  		f-ty-def := <lookup-def(|Types())> f-ty;
+      <lookup-prop(|SortKind())> f-ty-def => SemanticCompSort();
+      x_map2aterm := <def-get-name; ds2java-map2aterm-name> f-ty-def
+  
+  ds2java-atermconversion-name(|e):
+    ListType(_) -> e |[ e.toStrategoTerm(factory) ]|
+  
+  ds2java-atermconversion-name(|e):
+  	IntType() -> e |[ factory.makeInt(e) ]|
+
+  ds2java-atermconversion-name(|e):
+  	RealType() -> e |[ factory.makeReal(e) ]|
+
+  ds2java-atermconversion-name(|e):
+  	BoolType() -> e |[ factory.makeAppl(factory.makeConstructor(e ? "True" : "False", 0)) ]|
+  
+  ds2java-atermconversion-name(|e):
+  	StringType() -> e |[ factory.makeString(e) ]|
+
+
+
+

@@ -1,33 +1,31 @@
 module ds
 
 imports
-	libstratego-lib
-	libstratego-gpp
-	libstratego-aterm
 	include/ds
+
+imports
 	lib/editor-common.generated
-	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/analysis/-
-	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
-	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
-	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/index/-
-	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/editor/properties
 	pp
-	names
-	check
-	refocus
-	factorize
-	explicate
 	outline
-	strict
-	sugar
-	mark-references
-	types.generated
-	types.manual
-	generator/interpreter/pre-generation
-	generator/interpreter/gen-interpreter
-	generator/interpreter/unification
-	resolve-includes
-	
+	ds2ds/refocus
+	ds2ds/strict
+
+imports
+  lib-ds
+	ds2ds/sugar
+	ds2ds/factorize
+	ds2ds/explicate
+	ds2ds/resolve-includes
+	ds2ds/merge-rules
+	ds2ds/fuse-sections
+	ds2ds/copy-propagation
+	ds2ds/constant-propagation
+	ds2ds/expand-reductions
+	analysis/main
+	analysis/lib-analysis
+	analysis/constructors
+	backend/java-backend/main
+	backend/java-backend/utils
 	
 signature
   constructors
@@ -37,16 +35,27 @@ signature
 
 rules // Analysis
 	
-	editor-analyze = analysis-default-editor
+  editor-analyze:
+    (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
+		with
+		  editor-init;
+		  ast' := <resolve-includes(|path, project-path); desugar-top> ast;
+			<m-in-analysis(
+				where(
+		  		get-msgs(mkmsg|Error()) => error*;
+		  		get-msgs(mkmsg|Warning()) => warning*;
+		  		get-msgs(mkmsg|Note()) => note*
+		  	)
+			)> ast' => analyzed-ast
 	
-	analysis-single-default-interface = 
-		analysis-single-default(mark-vars; desugar-top, id, id|<language>)
-	analysis-multiple-default-interface = 
-		analysis-multiple-default(parse-file <+ !(), mark-vars; desugar-top, id, id|<language>, <project-path>)
+	editor-show-analyzed:
+		(selected, position, ast, path, project-path) -> (filename, analyzed-ast)
+		with
+			filename := <guarantee-extension(|"analyzed.aterm")> path;
+			(analyzed-ast, _, _, _) := <editor-analyze> (ast, path, project-path)
+			
+  mkmsg: Message(_, t, s) -> (t, s)
 	
-	// editor-save = 
-	//   where(generate-stratego; write-string-to-file); analysis-save-default(|<language>)
-
 rules
   
   // When given a tuple (path, string) this writes string into path.
@@ -62,18 +71,24 @@ rules
     end
     
 rules // Editor services
-	
-	// Resolves a reference when the user control-clicks or presses F3 in the editor.
 	editor-resolve:
-		(node, position, ast, path, project-path) -> definition
-		where
-			definition := <analysis-resolve(|<language>, project-path)> node
+	  (node, position, ast, path, project-path) -> <fail>
+  
+  editor-hover:
+    (target, position, ast, path, project-path) -> <fail>
+
+
+	// Resolves a reference when the user control-clicks or presses F3 in the editor.
+	// editor-resolve:
+	// 	(node, position, ast, path, project-path) -> definition
+	// 	where
+	// 		definition := <analysis-resolve(|<language>, project-path)> node
 
 	 // Returns "hover help" information for a particular node in the editor.
   // For references, this rule is invoked using the resolved term.
-  editor-hover:
-    (target, position, ast, path, project-path) ->
-      <get-editor-properties(pp-ds-string |<language>, project-path);properties-to-html>target
+  // editor-hover:
+  //   (target, position, ast, path, project-path) ->
+  //     <get-editor-properties(pp-ds-string |<language>, project-path);properties-to-html> target
 
   // Gathers the properties for the properties view.
   // editor-properties:
@@ -82,10 +97,10 @@ rules // Editor services
 
 	// Completes an identifier when the user presses control-space
 	// (the completion identifier in the AST provides additional context information)
-	editor-complete:
-		(node, position, ast, path, project-path) -> proposals
-		where
-			proposals := <analysis-propose-completions(|<language>, project-path)> ast
+	// editor-complete:
+	// 	(node, position, ast, path, project-path) -> proposals
+	// 	where
+	// 		proposals := <analysis-propose-completions(|<language>, project-path)> ast
 
 rules // Debugging
 	
@@ -96,97 +111,93 @@ rules // Debugging
 			filename := <guarantee-extension(|"aterm")> path;
 			result	 := selected
 			
-	// Prints the analyzed annotated abstract syntax ATerm of a selection.
-	debug-show-analyzed:
-		(selected, position, ast, path, project-path) -> (filename, ast)
-		with
-			filename := <guarantee-extension(|"analyzed.aterm")> path
-  
   debug-show-desugared:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"desugared.aterm")> path;
       result   := <desugar-top> ast
 			
-	debug-show-index-current =
-		analysis-debug-show-current-partition(|<language>)
-		 
-	debug-show-index-all =
-		analysis-debug-show-all-partitions(|<language>)
-
-	debug-show-tasks-selection =
-		analysis-debug-show-tasks-selection(|<language>)
-		
-	debug-reanalyze = 
-		analysis-debug-reanalyze(|<language>)
-
-  debug-reanalyze = analysis-debug-reanalyze(|<language>)
-  
-  debug-project = analysis-debug-project(|<language>)
-  debug-partition = analysis-debug-partition(|<language>)
-  
-  debug-index-project = analysis-debug-index-project(|<language>)
-  debug-index-partition = analysis-debug-index-partition(|<language>)
-  
-  debug-task-project = analysis-debug-task-project(|<language>)
-  debug-task-partition = analysis-debug-task-partition(|<language>)
-  debug-task-selection = analysis-debug-task-selection(|<language>)
-
 rules // Builders
   
-  prettyprint-ID = ![S(<id>)]
-  prettyprint-INFER = ![S(<id>)]
-  prettyprint-STRING = ![S(<id>)]
-  prettyprint-INT = ![S(<id>)]
-   
   refocus-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
-  // includes-editor:
-  //   (selected, position, ast, path, project-path) -> (filename, result)
-  //   with
-  //     filename := <guarantee-extension(|"noimports.ds")> path;
-  //     result   := <resolve-includes(|path, project-path); pp-debug> ast
-
-   facto-plicate-editor:
+  expand-reds-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"factoplicated.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; sugar-all; pp-debug> ast
+      filename := <guarantee-extension(|"expreds.ds")> path;
+      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; expand-reductions-module; sugar-all; pp-debug> ast
 
-   facto-plico-nify-editor:
+  explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"factopliconified.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; explicate-module; factorize-module; escape-variable-names; fuse-sections; unify-module; sugar-all; pp-debug> ast
+      filename := <guarantee-extension(|"explicated.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; explicate-module; sugar-all; pp-debug> ast
 
-//   explicate-editor:
-//     (selected, position, ast, path, project-path) -> (filename, result)
-//     with
-//       filename := <guarantee-extension(|"explicated.ds")> path;
-//       result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; sugar-all; pp-debug> selected
-// 
-//   explicate-factorize-editor:
-//     (selected, position, ast, path, project-path) -> (filename, result)
-//     with
-//       filename := <guarantee-extension(|"explicated.factorized.ds")> path;
-//       result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; factorize-module; sugar-all; pp-debug> selected
-// 
-//   explicate-factorize-editor-ast:
-//     (selected, position, ast, path, project-path) -> (filename, result)
-//     with
-//       filename := <guarantee-extension(|"explicated.factorized.aterm")> path;
-//       result   := <resolve-includes(|path, project-path); desugar-all; explicate-module; factorize-module> selected
+  factorize-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"factorized.ds")> path;
+      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
 
-  // explicate-editor-ast:
-  //   (selected, position, ast, path, project-path) -> (filename, result)
-  //   with
-  //     filename := <guarantee-extension(|"explicated.aterm")> path;
-  //     result   := <resolve-includes(|path, project-path); desugar-all; explicate-module> selected
+  merge-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"merged.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; merge-rules-in-module; sugar-all; pp-debug> ast
 
+  copy-propagation-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"copyprop.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; copy-propagation-module; sugar-all; pp-debug> ast
+
+  constant-propagation-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"constprop.ds")> path;
+      result   := <resolve-includes(|path, project-path); desugar-top; constant-propagation-module; sugar-all; pp-debug> ast
+
+  all-to-java-editor:
+    (_, position, ast, path, project-path) -> None()
+    with
+      init-options(|path, project-path);
+      <log-timed(
+        log-timed(
+          resolve-includes(|path, project-path) | "Import resolutions"
+        );
+        log-timed(
+          desugar-top; fuse-sections | "Desugaring"
+        );
+        log-timed(
+          factorize-module | "Factorization 1/2"
+        );
+        log-timed(
+          expand-reductions-module | "Reduction expansion"
+        );
+        log-timed(
+          factorize-module | "Factorization 2/2"
+        );
+        log-timed(
+          explicate-module | "Explication"
+        );
+        log-timed(
+          merge-rules-in-module | "Rule merging"
+        );
+        log-timed(
+          copy-propagation-module | "Copy propagation"
+        );
+        log-timed(
+          constant-propagation-module | "Constant propagation"
+        );
+        log-timed(
+          ds2java | "Interpreter generation"
+        )
+      | "Total")> ast
+      
   // format rules
   format-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
@@ -199,26 +210,3 @@ rules // Builders
     with
       filename := <guarantee-extension(|"unstrict.ds")> path;
       result   := <unstrict-rules; pp-debug> selected
-
-rules // Builtins
-	
-	analysis-builtin-partitions = 
-		![
-			("base.ds", Module(
-			  "base"
-			, [ Signatures(
-			      [ InternalSorts([InternalSortDecl("Term")])
-			      , Sorts(
-			          [ InjDecl("Int", "Term")
-			          , InjDecl("Real", "Term")
-			          , InjDecl("Bool", "Term")
-			          , InjDecl("String", "Term")
-			          , InjDecl("Value", "Term")
-			          ]
-			        )
-			      ]
-			    )
-			  ]
-			)
-		)
-	]

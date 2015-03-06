@@ -3,13 +3,18 @@
  */
 package org.metaborg.meta.interpreter.framework;
 
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+
 
 /**
  * @author vladvergu
  * 
  */
-public interface INode {
+public interface INode extends IConvertibleToStrategoTerm {
 
+	public void specializeChildren(int depth);
+	
 	public void setSourceInfo(INodeSource src);
 
 	public INodeSource getSourceInfo();
@@ -34,4 +39,6 @@ public interface INode {
 
 	public INode getParent();
 
+	public IStrategoTerm toStrategoTerm(ITermFactory factory);
+	
 }

@@ -29,7 +29,7 @@ context-free syntax
   ModuleID = "namespaces" {reject}
   ModuleID = "properties" {reject}
   ModuleID = "imports"    {reject}
-  ModuleID = "signatures" {reject}
+  ModuleID = "signature" {reject}
   
   ID = "rule" {reject}
 

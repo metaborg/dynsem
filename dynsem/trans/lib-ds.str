@@ -1,24 +1,12 @@
 module lib-ds
 
 imports
-  libstratego-lib
-  libstratego-gpp
-  libstratego-aterm
   include/ds
-  lib/editor-common.generated
-  refocus
-  sugar
-  strict
   ds
-
+  
 // utilities for DynSem analysis
 
 rules // utils for deterministic variable name generation
-  
-  while-counting(s) =
-    {| NextVarIdx:
-      NextVarIdx < s + rules(NextVarIdx : _ -> 0); s
-    |}
   
   next-variable(|prefix) = <newname> prefix
  
@@ -121,7 +109,6 @@ rules // new extracted components (working for inference of components on multip
   		);
   		s
   	}
-
   
   extract-components(|arrow*):
     rule* -> rule*
@@ -169,9 +156,9 @@ rules // extract components
       writable* := <make-set> [locl-writable*, glob-writable*];
       changeable* := <make-set> [locl-changeable*, glob-changeable*];
       rules(
-        ReadableComps : arrow -> readable*
-        WritableComps : arrow -> writable*
-        ChangeableComps : arrow -> changeable*
+        ReadableComps : arrow -> <sort-comps; diff(|changeable*)> readable*
+        WritableComps : arrow -> <sort-comps> writable*
+        ChangeableComps : arrow -> <sort-comps> changeable*
       )
   
   extract-components-from-premises:
@@ -193,10 +180,24 @@ rules // extract components
       writable* := <make-set> [new-writable*, conc-writable*];
       changeable* := <make-set> [new-changeable*, conc-changeable*];
       rules(
-        ReadableComps : conc-arrow -> readable*
-        WritableComps : conc-arrow -> writable*
-        ChangeableComps : conc-arrow -> changeable*
+        ReadableComps : conc-arrow -> <sort-comps; diff(|changeable*)> readable*
+        WritableComps : conc-arrow -> <sort-comps> writable*
+        ChangeableComps : conc-arrow -> <sort-comps> changeable*
       )
+  
+  sort-comps = qsort(comp-gt)
+  
+  diff(|l2):
+    l1 -> <diff> (l1, l2)
+  
+  comp-gt = ?(SimpleSort(l), SimpleSort(r)); <string-gt> (l, r)
+  
+  comp-gt =
+    ?(ListSort(_), SimpleSort(_))
+  
+  comp-gt =
+    ?(ListSort(l), ListSort(r)); <string-gt> (l, r)
+    
       
 rules // component operations
   
@@ -318,6 +319,28 @@ rules // pretty-printing terms
     
 rules
   
-  pp-aterm :
-    c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
-    
+  // pp-aterm :
+  //   c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
+
+rules // utils
+	
+	w-log-timed(s|msg) = where(log-timed(s|msg))
+	
+	log-timed(s|msg) =
+      where(times => starttime)
+    ; s
+    ; where(
+        <diff-times>(<times>,starttime)
+      ; <concat-strings>[ <align-left>(' ', msg, 27)
+                        , " : [user/system] = ["
+                        , <self-children-user-time; ticks-to-seconds ; real-to-string(|2)>
+                        , "s/"
+                        , <self-children-sys-time; ticks-to-seconds ; real-to-string(|2)>
+                        , "s]"
+                        ]
+      ; log(|Info(),<id>)
+      )
+  
+  foldl(s1, s2) = <foldl(s2)> (<id>, <s1>)
+
+  swap = !(<Snd>, <Fst>)

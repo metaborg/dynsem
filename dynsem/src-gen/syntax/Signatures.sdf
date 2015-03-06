@@ -24,7 +24,7 @@ exports
     ID                           -> Type             {cons("SimpleSort")}
     "List" "(" Type ")"          -> Type             {cons("ListSort")}
     MapType                      -> Type             
-    "Map<" Type "," Type ">"     -> MapType          {cons("MapSort")}
+    "Map" "<" Type "," Type ">"  -> MapType          {cons("MapSort")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
@@ -72,14 +72,6 @@ exports
     CONTENTCOMPLETE -> NativeOpDecl     {cons("COMPLETION-NativeOpDecl")}
 
   context-free syntax
-    "values" ValueDecl* -> SignatureSection {cons("Values")}
-    ID ":" {Type "*"}*  -> ValueDecl        {cons("ValueDecl")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> ValueDecl        {cons("COMPLETION-ValueDecl")}
-
-  context-free syntax
     "internal-constructors" InternalConsDecl* -> SignatureSection {cons("InternalConstructors")}
     ID ":" {Type "*"}* "->" Type              -> InternalConsDecl {cons("InternalConsDecl")}
 
@@ -96,12 +88,12 @@ exports
     CONTENTCOMPLETE -> NativeConsDecl   {cons("COMPLETION-NativeConsDecl")}
 
   context-free syntax
-    "arrows" DeclaredArrow*                                   -> SignatureSection         {cons("ArrowDeclarations")}
-    ArrowDeclaration                                          -> DeclaredArrow            
-    ArrowTemplateDeclaration                                  -> DeclaredArrow            
-    Type "-" ID "->" Type                                     -> ArrowDeclaration         {cons("ArrowDecl")}
-    Type "-->" Type                                           -> ArrowDeclaration         {cons("DefaultArrowDecl")}
-    "forall" ID+ "," Type "-" ID "(" ID "->" ID ")" "->" Type -> ArrowTemplateDeclaration {cons("ArrowTemplDecl")}
+    "arrows" DeclaredArrow*                                -> SignatureSection         {cons("ArrowDeclarations")}
+    ArrowDeclaration                                       -> DeclaredArrow            
+    ArrowTemplateDeclaration                               -> DeclaredArrow            
+    Type "-" ID "->" Type                                  -> ArrowDeclaration         {cons("ArrowDecl")}
+    Type "-->" Type                                        -> ArrowDeclaration         {cons("DefaultArrowDecl")}
+    "forall" ID+ "," Type "-" ID "(" ID "->" ID ")->" Type -> ArrowTemplateDeclaration {cons("ArrowTemplDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection         {cons("COMPLETION-SignatureSection")}

@@ -1,0 +1,86 @@
+module backend/java-backend/main
+
+imports
+  include/ds
+  lib/editor-common.generated
+  lib-ds
+  ds
+
+imports
+  ds2ds/sugar
+  analysis/main
+  analysis/lib-analysis
+  analysis/constructors
+
+imports
+	backend/java-backend/analysis-extra
+	backend/java-backend/utils
+	backend/java-backend/emit-types
+	backend/java-backend/emit-arrows
+	backend/java-backend/emit-constructorclasses
+	backend/java-backend/emit-genericnodes
+	backend/java-backend/emit-maputils
+  
+rules
+  
+  ds2java-editor:
+    (_, position, ast, path, project-path) -> None()
+    with
+      init-options(|path, project-path);
+      log-timed(
+        class* := <ds2java> ast | "Generating interpreter"
+      )
+
+  ds2java = 
+    log-timed(
+      desugar-top | "Desugaring"
+    );
+    
+    log-timed(
+      escape-variable-names | "Escaping variable names"
+    );
+    
+    m-in-analysis(
+      m-in-backend-extra-analysis(
+        where(
+          get-msgs(mkmsg|Error()) => error*
+          ;if <?[_|_]> error*
+           then
+             <fatal-err(|"Errors encountered: ")> error*
+           end
+        )
+        
+	      ;w-log-timed(
+	        ds2java-interfaces;
+	        write-classes
+	        | "Gen interfaces for sorts")
+	      
+	      ;w-log-timed(
+	        ds2java-arrowresults;
+	        write-classes
+	        | "Gen result classes")
+         
+	      ;w-log-timed(
+	       	ds2java-constructorclasses;
+	       	write-classes
+	        | "Gen constructor classes")
+	      
+	      ;w-log-timed(
+	         ds2java-genericnodes;
+	         write-classes
+	         | "Gen specializer classes")
+	      
+	      ;w-log-timed(
+	         ds2java-maputils;
+	         write-classes
+	         | "Gen map utilities"
+	       )
+      )
+    )
+
+rules /* escape variable names */
+
+  escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
+  
+  escape-identifier = string-replace(|"'", "_")
+  

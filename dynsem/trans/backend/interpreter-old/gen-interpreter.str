@@ -1,0 +1,62 @@
+module generator/interpreter/gen-interpreter
+
+imports
+	include/ds
+	lib-ds
+	lib/editor-common.generated
+	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/index/-
+	lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
+  generator/interpreter/sorts-to-java
+  generator/interpreter/pre-generation
+  generator/interpreter/java-utils
+  generator/interpreter/constructors-to-java
+  generator/interpreter/sorts-to-specializing-nodes
+  generator/interpreter/gen-noop-node
+  
+rules
+  
+  gen-package-name = !$[[<language>].generated.interpreter]
+  
+  man-package-name = !$[[<language>].manual.interpreter]
+  
+  generate-interpreter:
+    (selected, position, ast, path, project-path) -> None()
+    with
+    	task-setup(|project-path);
+    	index-setup(|<language>, project-path)
+    with
+      log-timed(
+	      class*   := <to-java-interpreter> ast;
+	      log-timed(   
+	        <emit-java-classes(overwrite-merge-strategy, id | <gen-package-name>, $[[project-path]/src-gen])> class*
+	      |"Writing files")
+	    |"All")
+
+rules
+  
+  to-java-interpreter:
+    mod@Module(_, _) -> [inode-iface, noop-node, sort-iface*, sort-node*, result-class*, cons-class*]
+    with
+      log-timed(   
+        // mod' := <pre-generation-transform> mod
+        mod' := mod
+      |"Pre-generation");
+      log-timed(   
+        inode-iface := <module-to-inode-interface> mod'
+      |"Base INode generation");
+      log-timed(
+        noop-node := <module-2-noop-node> mod'
+      |"Noop node generation");
+      log-timed(   
+        sort-iface* := <sorts-to-java-interpreter> mod'
+      |"Sort INode generation");
+      log-timed(   
+        sort-node* := <sorts-to-specializing-nodes> mod'
+      |"Generic sort nodes generation");
+      log-timed(   
+        result-class* := <reductions-to-java-result-classes> mod'
+      |"Arrow-specific result class generation");
+      log-timed(
+        cons-class* := <constructors-to-java-interpreter> mod'
+      |"Constructor node generation")
+    

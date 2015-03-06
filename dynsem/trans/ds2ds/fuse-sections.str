@@ -1,0 +1,28 @@
+module ds2ds/fuse-sections
+
+imports
+  include/ds
+
+rules
+  
+  fuse-sections:
+    Module(mod, body*) -> Module(mod, [import, Signatures(signatures), Rules(rule-decl*)]) 
+    with
+      import       := <collect-all(?Imports(<id>)); concat; !Imports(<id>)> body*;
+      sort-decl    := <collect-all(?Sorts(<id>)); concat; !Sorts(<id>)> body*;
+      semcomp-decl := <collect-all(?SemanticComponents(<id>)); concat; !SemanticComponents(<id>)> body*;
+      intsort-decl := <collect-all(?InternalSorts(<id>)); concat; !InternalSorts(<id>)> body*;
+      natty-decl   := <collect-all(?NativeDataTypes(<id>)); concat; !NativeDataTypes(<id>)> body*;
+      cons-decl    := <collect-all(?Constructors(<id>)); concat; !Constructors(<id>)> body*;
+      intcons-decl := <collect-all(?InternalConstructors(<id>)); concat; !InternalConstructors(<id>)> body*;
+      natcons-decl := <collect-all(?NativeConstructors(<id>)); concat; !NativeConstructors(<id>)> body*;
+      natops-decl  := <collect-all(?NativeOperators(<id>)); concat; !NativeOperators(<id>)> body*;
+      arrow-decl   := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
+      signatures    := [ sort-decl, intsort-decl, cons-decl, semcomp-decl, intcons-decl, natcons-decl, natops-decl, arrow-decl, natty-decl ];
+      rule-decl*    := <collect-all(?Rules(<id>)); concat; sort-rules> body*
+  
+  sort-rules = qsort((rule-con-name, rule-con-name); string-gt)
+  
+  rule-con-name =
+    ?Rule(_, _, Relation(_, Source(Con(<id>, _), _), _, _)) <+ !""
+
