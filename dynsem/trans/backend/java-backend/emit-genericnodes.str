@@ -58,8 +58,7 @@ rules
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
-              final ImploderNodeSource source = term.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
-                        term.getAttachment(ImploderAttachment.TYPE)) : null;
+              final NodeSource source = new NodeSource(term);
 
               ~bstm*:<mapconcat(ds2java-consdecl-specializer)> c-def*
             }

@@ -19,10 +19,14 @@ rules
 	    class-body-dec |[
 	      @Override
 	      public IStrategoTerm toStrategoTerm(ITermFactory factory) {
-	      	return factory.makeAppl(
-	      		       factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<length; int-to-string> c-c-ty*), 
-	      		       e_child*
-	      		     );
+	        IStrategoAppl term = factory.makeAppl(
+	            factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<length; int-to-string> c-c-ty*), 
+	            e_child*
+	        );
+	        if ( getSourceInfo() != null ) {
+	          getSourceInfo().apply(term);
+	        }
+	        return term;
 	      }
 	    ]|
     where

@@ -7,6 +7,7 @@ import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.terms.attachments.OriginAttachment;
 
 public class NodeUtils {
 
@@ -77,10 +78,7 @@ public class NodeUtils {
 				try {
 					c = clazz.getConstructor(INodeSource.class,
 							IStrategoTerm.class);
-					final ImploderNodeSource source = parentTerm.getSubterm(i)
-							.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
-							parentTerm.getSubterm(i).getAttachment(
-									ImploderAttachment.TYPE)) : null;
+					final NodeSource source = new NodeSource(parentTerm.getSubterm(i));
 					list = new NodeList<T>(c.newInstance(source,
 							parentTerm.getSubterm(i)), list);
 				} catch (Exception ex) {
