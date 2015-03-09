@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-SymbolicName: dynsem;singleton:=true
 Bundle-Name: Ds Plug-in
-Bundle-Version: 1.4.0.qualifier
+Bundle-Version: 1.5.0.qualifier
 Require-Bundle: org.strategoxt.strj,
  org.spoofax.interpreter.core,
  org.spoofax.terms,

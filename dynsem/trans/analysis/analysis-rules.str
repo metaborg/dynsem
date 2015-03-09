@@ -76,7 +76,8 @@ rules /* store variables */
     (ty, t) -> ty
     where
       ty-str := <ensure(pp-type)> ty;
-      add-msg(|Error(), t, $[Type check failed: term is incompatible with type [ty-str]]);
+      t-ty-str := <type-of; pp-type <+ !"(unknown)"> t;
+      add-msg(|Error(), t, $[Type check failed: term of type [t-ty-str] is incompatible with type [ty-str]]);
       <debug(!"Type check failed, msg created: ")> t
 
   type-of:
