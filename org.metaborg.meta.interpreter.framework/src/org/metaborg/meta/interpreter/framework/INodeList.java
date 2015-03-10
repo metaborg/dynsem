@@ -1,16 +1,15 @@
 package org.metaborg.meta.interpreter.framework;
 
+public interface INodeList extends IConvertibleToStrategoTerm {
 
-public interface INodeList<T> extends Iterable<T>, IConvertibleToStrategoTerm {
+	public Object head();
 
-	public T head();
+	public void replaceHead(Object newHead);
 
-	public void replaceHead(T newHead);
-	
-	public INodeList<T> tail();
+	public INodeList tail();
 
 	public int size();
 
 	public boolean isEmpty();
-	
+
 }

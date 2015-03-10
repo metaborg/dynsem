@@ -145,14 +145,21 @@ rules
 	ds2java-field-specializer:
 		(idx, ty) ->
 		  stm |[
-		    for (x_ty x_idxelem : x_idx) {
-		      if (x_idxelem instanceof IGenericNode) {
-		        ((IGenericNode) x_idxelem).specialize(depth);
-		      }
+		    {
+			    x_listty x_idxlist = x_idx;
+			    while(!x_idxlist.isEmpty()) {
+			      x_ty x_idxelem = x_idxlist.head();
+			      if (x_idxelem instanceof IGenericNode) {
+	            ((IGenericNode) x_idxelem).specialize(depth);
+	          }
+	          x_idxlist = x_idxlist.tail();
+			    }
 		    }
 		  ]|
 		where
 		  <type-is-adoptable-list> ty;
 		  x_ty := <?ListType(<id>); ds2java-sort-classname> ty;
 		  x_idx := <mkidx> idx;
-		  x_idxelem := $[[x_idx]_elem]
+		  x_idxelem := $[[x_idx]_elem];
+		  x_idxlist := $[[x_idx]_list];
+		  x_listty := <ds2java-sort-classname> ty
