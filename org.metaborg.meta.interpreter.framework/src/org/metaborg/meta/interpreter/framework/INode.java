@@ -6,7 +6,6 @@ package org.metaborg.meta.interpreter.framework;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-
 /**
  * @author vladvergu
  * 
@@ -14,7 +13,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 public interface INode extends IConvertibleToStrategoTerm {
 
 	public void specializeChildren(int depth);
-	
+
 	public void setSourceInfo(INodeSource src);
 
 	public INodeSource getSourceInfo();
@@ -22,9 +21,9 @@ public interface INode extends IConvertibleToStrategoTerm {
 	public <T extends INode> INode setParent(T parent);
 
 	public <T extends INode> T adoptChild(T child);
-	
-	public <K extends INode> INodeList<K> adoptChildren(INodeList<K> children);
-	
+
+	public <L extends INodeList> L adoptChildren(L children);
+
 	public <T extends INode> T replace(T newNode);
 
 	public <T extends INode> T replaceChild(INode oldChild, T newChild);
@@ -40,5 +39,5 @@ public interface INode extends IConvertibleToStrategoTerm {
 	public INode getParent();
 
 	public IStrategoTerm toStrategoTerm(ITermFactory factory);
-	
+
 }

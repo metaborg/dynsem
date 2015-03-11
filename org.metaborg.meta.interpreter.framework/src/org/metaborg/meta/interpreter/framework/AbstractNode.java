@@ -37,10 +37,12 @@ public abstract class AbstractNode implements IMatchableNode {
 	}
 
 	@Override
-	public <K extends INode> INodeList<K> adoptChildren(INodeList<K> children) {
-		INodeList<K> list = children;
+	public <L extends INodeList> L adoptChildren(L children) {
+		INodeList list = children;
 		while (list.size() > 0) {
-			adoptChild(list.head());
+			if (list.head() instanceof INode) {
+				adoptChild((INode) list.head());
+			}
 			list = list.tail();
 		}
 		return children;

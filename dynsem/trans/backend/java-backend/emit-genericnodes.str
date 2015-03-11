@@ -114,18 +114,11 @@ rules
       gennodename := $[Generic_[<ds2java-sort-classname> ty]]
 
   ds2java-gennode-instantiation:
-    (idx, ty) -> e |[ (INodeList) NodeUtils.makeList(term.getSubterm(i).getSubtermCount(), term.getSubterm(i), ~x:gennodename.class) ]|
+    (idx, lty@ListType(e-ty)) -> e |[ new x_listname().fromStrategoTerm(term.getSubterm(i)) ]|
     where
-      !ty => ListType(e-ty);
       i := <int-to-string> idx;
-      e-ty-def := <lookup-def(|Types())> e-ty;
-      if <lookup-prop(|SortKind())> e-ty-def => SystemSort()
-      then
-        gennodename := <ds2java-sort-classname; ds2java-box-java-type> e-ty
-      else
-        gennodename := $[Generic_[<ds2java-sort-classname> e-ty]]
-      end 
-  
+      x_listname := <ds2java-sort-classname> lty
+
   ds2java-gennode-instantiation:
     (idx, StringType()) -> e |[ Tools.asJavaString(term.getSubterm(~i:<int-to-string> idx)) ]|
 
