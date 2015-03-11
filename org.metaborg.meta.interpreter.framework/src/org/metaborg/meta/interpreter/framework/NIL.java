@@ -37,4 +37,9 @@ public class NIL implements INodeList {
 		return true;
 	}
 
+	@Override
+	public NIL fromStrategoTerm(IStrategoTerm list) {
+		throw new UnsupportedOperationException();
+	}
+
 }
