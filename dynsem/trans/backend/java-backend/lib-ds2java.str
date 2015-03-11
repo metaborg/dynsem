@@ -8,9 +8,17 @@ imports
 rules /* name generation */
 
   ds2java-sort-classname:
-  	ListType(ety) -> $[INodeList<[ety-str]>]
-  	where
-  		ety-str := <ds2java-sort-classname; ds2java-box-java-type> ety
+    ListType(ety) -> $[L_[ety-str]]
+    where
+      ety-str := <ds2java-listsort-elemname; ds2java-box-java-type> ety
+  
+  ds2java-listsort-elemname:
+    ty -> $[I_[<def-get-name> ty-def]]
+    where
+      ty-def := <lookup-def(|Types())> ty;
+      SemanticCompSort() := <lookup-prop(|SortKind())> ty-def
+  
+  ds2java-listsort-elemname = ds2java-sort-classname
   
   ds2java-sort-classname:
     ALPHATYPE() -> $[Object]
