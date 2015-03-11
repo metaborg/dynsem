@@ -392,17 +392,18 @@ rules
     	e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (farg*, arg*)
   
   ds2java-term-build(|ex_ty):
-  	List([]) -> e |[ NodeList.NIL(x_exptype.class) ]|
-  	where
-  		if <?ListType(ex_elem_ty)> ex_ty
-  		then
-  			x_exptype := <ds2java-sort-classname; ds2java-box-java-type> ex_elem_ty
-  		else
-  			x_exptype := <ds2java-sort-classname> ex_ty
-  		end
+    List([]) -> e |[ new x_type() ]|
+    where
+      <?ListType(_)> ex_ty;
+      x_type := <ds2java-sort-classname> ex_ty
+  
+  ds2java-term-build(|ex_ty):
+    List([]) -> e |[ new NIL() ]|
+    where
+      <not(?ListType(_))> ex_ty
   		
   ds2java-term-build(|ex-ty):
-    ListTail([h-trm], t-trm) -> e |[ new NodeList<x_type>(e_h, e_t) ]|
+    ListTail([h-trm], t-trm) -> e |[ new x_type(e_h, e_t) ]|
     where
       h-ty := <type-of> h-trm;
       e_h := <ds2java-term-build(|h-ty)> h-trm;
@@ -413,7 +414,7 @@ rules
       else
         actual_ex_elem_ty := h-ex-elem-ty
       end;
-      x_type := <ds2java-sort-classname; ds2java-box-java-type> actual_ex_elem_ty;
+      x_type := <ds2java-sort-classname> ListType(actual_ex_elem_ty);
       e_t := <ds2java-term-build(|ListType(actual_ex_elem_ty))> t-trm
   
   ds2java-term-build(|ex_ty):
