@@ -42,17 +42,16 @@ public class ListUtils {
 	}
 
 	public static boolean equals(INodeList a, Object b) {
-		if (a == b)
+		if(a == b)
 			return true;
-		if (b == null)
+		if(b == null)
 			return false;
+		if((b instanceof INodeList) && a.isEmpty() && ((INodeList) b).isEmpty())
+			return true;
 		if (a.getClass() != b.getClass())
 			return false;
 		INodeList other = (INodeList) b;
 		if (a.size() != other.size()) {
-			return false;
-		}
-		if (a.isEmpty() && other.isEmpty()) {
 			return false;
 		}
 		if (a.head() == null) {

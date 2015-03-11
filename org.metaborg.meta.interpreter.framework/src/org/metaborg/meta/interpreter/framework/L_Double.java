@@ -21,7 +21,7 @@ public class L_Double extends AbstractPrimitiveList<Double> {
 	@Override
 	public L_Double fromStrategoTerm(IStrategoTerm alist) {
 		L_Double list = new L_Double();
-		for (int i = alist.getSubtermCount(); i >= 0; i--) {
+		for (int i = alist.getSubtermCount() - 1; i >= 0; i--) {
 			double dv = ((IStrategoReal) alist.getSubterm(i)).realValue();
 			list = new L_Double(dv, list);
 		}

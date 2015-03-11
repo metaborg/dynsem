@@ -149,7 +149,7 @@ rules
     	@Override
       public x_classname fromStrategoTerm(IStrategoTerm alist) {
 		    x_classname list = new x_classname();
-		    for (int l = alist.getSubtermCount(); l >= 0; l--) {
+		    for (int l = alist.getSubtermCount() - 1; l >= 0; l--) {
 		      final ImploderNodeSource source =
 		        alist.getSubterm(l).getAttachment(ImploderAttachment.TYPE) != null
 		          ? new ImploderNodeSource(alist.getSubterm(l).getAttachment(ImploderAttachment.TYPE))
