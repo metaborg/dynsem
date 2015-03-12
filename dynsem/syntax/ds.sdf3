@@ -98,7 +98,7 @@ context-free syntax // terms
   Var.VarRef    = [[ID]]
   Term = Var
   
-  Cast.Cast = [[Var] : [Type]]
+  Cast.Cast     = [[Term] : [Type]]
   Term = Cast
   
   Term.As       = [[Var]@[Term]]
@@ -109,9 +109,11 @@ context-free syntax // terms
   Term.Int      = [[INT]]
   Term.Real     = [[REAL]]
   Term.Con      = [[ID]([{Term ", "}*])]
-  Term.List     = <[ <{Term ", "}*> ]>
-  Term.ListTail = <[ <{Term ", "}*> | <Term> ]>
   
+  List.List     = <[ <{Term ", "}*> ]>
+  List.ListTail = <[ <{Term ", "}*> | <Term> ]>
+  Term = List
+
   Term.Fresh  = [fresh]
   Term.True   = [true]
   Term.False  = [false]

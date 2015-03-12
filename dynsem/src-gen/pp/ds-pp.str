@@ -568,6 +568,9 @@ strategies
     prettyprint-Cast
 
   prettyprint-example =
+    prettyprint-List
+
+  prettyprint-example =
     prettyprint-Entry
 
   prettyprint-example =
@@ -599,7 +602,7 @@ strategies
                           , [t1__', S(" : "), t2__']
                           )
                         ]
-    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
     with t2__' := <pp-one-Z(prettyprint-Type)> t2__
 
   is-Cast =
@@ -685,7 +688,7 @@ strategies
   is-Term =
     ?Con(_, _)
 
-  prettyprint-Term :
+  prettyprint-List :
     List(t1__) -> [ H(
                       [SOpt(HS(), "0")]
                     , [ S("[ ")
@@ -696,10 +699,10 @@ strategies
                   ]
     with t1__' := <pp-H-list(prettyprint-Term|", ")> t1__
 
-  is-Term =
+  is-List =
     ?List(_)
 
-  prettyprint-Term :
+  prettyprint-List :
     ListTail(t1__, t2__) -> [ H(
                                 [SOpt(HS(), "0")]
                               , [ S("[ ")
@@ -713,8 +716,17 @@ strategies
     with t1__' := <pp-H-list(prettyprint-Term|", ")> t1__
     with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
-  is-Term =
+  is-List =
     ?ListTail(_, _)
+
+  prettyprint-Term :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Term)
+    where t1__' := <pp-one-Z(prettyprint-List)> t1__
 
   prettyprint-Term :
     Fresh() -> [ H(
@@ -858,6 +870,9 @@ strategies
     fail
 
   is-Cast =
+    fail
+
+  is-List =
     fail
 
   is-Entry =
