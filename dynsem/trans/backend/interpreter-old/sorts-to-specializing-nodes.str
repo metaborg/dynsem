@@ -61,7 +61,7 @@ rules
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
-              final NodeSource source = new NodeSource(term);
+              final INodeSource source = NodeSource.fromStrategoTerm(term);
               bstm1*
             }
             IGenericNode replacement = null;
