@@ -61,6 +61,12 @@ rules // lift constructor sub-terms in match
   		(p*, t2*) := <map(lift-match-on-cond(not(is-prime-factor), ?succ)); unzip; (concat, id)> t1*;
   		!succ
   
+  factorize-lhs:
+    Cast(t1, ty) -> (p*, Cast(t2, ty))
+    where
+      (p*, t2) := <lift-match-on-cond(not(is-prime-factor), ?succ)> t1;
+      !succ
+  
   factorize-rhs = lift-build-on-cond(not(is-prime-factor), ?succ); where(!succ)
   
   factorize-source-components =
@@ -170,6 +176,7 @@ rules
     <+ factorize-sortfuncall-in-build
     <+ factorize-listtail-in-build
     <+ factorize-mapselect-in-build
+    <+ factorize-cast-in-build
 
   factorize-constructors-in-build:
     Con(c, t1*) -> (prem*, Con(c, t2*))
@@ -208,7 +215,13 @@ rules
         (prem*, r') := <lift-build-on-cond(cond, ?success)> r;
         !success
       end
-    
+  
+  factorize-cast-in-build:
+    Cast(t1, ty) -> (prem*, Cast(t2, ty))
+    where
+      (prem*, t2) := <lift-build-on-cond(not(is-prime-factor), ?success)> t1;
+      !success
+  
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List([])
   
   is-prime-factor = ?VarRef(_)
