@@ -17,8 +17,8 @@ rules /* syntactic checks */
   post-analysis-check:
     r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> r
     where
-      <not(?Con(_, _) + ?As(_, Con(_, _)))> lhs;
-      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern])
+      <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)))> lhs;
+      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern or a list cast pattern])
   
   post-analysis-check:
     dec -> dec
@@ -30,21 +30,19 @@ rules /* syntactic checks */
 
 rules /* store variables */
   
-  store-rules = Rules(map(store-rule))
+  store-rules = Rules(map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
 
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr@NamedDynamicEmitted(_, arrow-name), _)) -> r
     where
-      As(_, con@Con(c, _)) := lhs
+      lhs-ty := <try(?As(_, <id>)); ?Con(<id>, _); lookup-def(|Constructors()); lookup-prop(|Type()); ?ConstructorType(_, <id>)> lhs
       <+
-      con@Con(c, _) := lhs
+      lhs-ty := <?Cast(_, <id>); rw-type> lhs
     where
-      con-def := <lookup-def(|Constructors())> c;
-      ConstructorType(_, con-ty) := <lookup-prop(|Type())> con-def;
       if arrow-def := <lookup-def(|Arrows())> arrow-name
       then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <type-of-applicable-arrow> (arrow-ty*, con-ty) => arrow-ty
+	      if <type-of-applicable-arrow> (arrow-ty*, lhs-ty) => arrow-ty
 	      then
 	        {| InArrow:
 	          rules(InArrow: _ -> arrow-def);
@@ -52,7 +50,7 @@ rules /* store variables */
 	        |}
 	      else
 	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
-	        add-msg(|Error(), con, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> con-ty]])
+	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
 	      end
 	    else
         add-msg(|Error(), arr, $[Arrow [arrow-name] is not declared])
@@ -61,14 +59,14 @@ rules /* store variables */
   store-rule:
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
     where
-      <type-of-top> (ma-ty, lhs);
-      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> [r*, sc*];
+      <infer-type-of-top> (ma-ty, lhs);
+      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; infer-type-of-top)> [r*, sc*];
       <map(type-check-premise-top)> p*;
-      <type-of-top> (bu-ty, rhs);
-      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; type-of-top)> tc*
+      <infer-type-of-top> (bu-ty, rhs);
+      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; infer-type-of-top)> tc*
 
-  type-of-top =
-  	type-of
+  infer-type-of-top =
+  	infer-type-of
     <+
     type-of-failure
 
@@ -80,10 +78,10 @@ rules /* store variables */
       add-msg(|Error(), t, $[Type check failed: term of type [t-ty-str] is incompatible with type [ty-str]]);
       <debug(!"Type check failed, msg created: ")> t
 
-  type-of:
+  infer-type-of:
     (ty, Wld()) -> ty
   
-  type-of:
+  infer-type-of:
     (ty, dec) -> ty
     where
       <?Var(v) + ?MatchedVar(v)> dec
@@ -91,7 +89,7 @@ rules /* store variables */
       <store-def(|Vars())> v => v-def;
       <store-prop(|Type(), v-def)> ty
 
-  type-of:
+  infer-type-of:
     (ty, r@VarRef(v)) -> ty'
     where
       <lookup-def(|Vars())> v => v-def;
@@ -99,7 +97,7 @@ rules /* store variables */
       <lookup-prop(|Type())> v-def => v-ty;
       <type-coerce> (v-ty, ty) => ty'
 
-  type-of:
+  infer-type-of:
     (ty, r@VarRef(v)) -> ty'
     where
       <lookup-def(|Vars())> v => v-def;
@@ -108,132 +106,138 @@ rules /* store variables */
       arrow-def := <InArrow>;
       <type-reduce(|arrow-def)> (v-ty, ty) => ty'
 
-  type-of:
+  infer-type-of:
     (ty, Int(_)) -> IntType()
     where
       <type-coerce> (IntType(), ty)
 
-  type-of:
+  infer-type-of:
     (ty, bool) -> BoolType()
     where
       <?True() + ?False()> bool;
       <type-coerce> (BoolType(), ty)
 
-  type-of:
+  infer-type-of:
     (ty, String(_)) -> StringType()
     where
       <type-coerce> (StringType(), ty)
 
-  type-of:
+  infer-type-of:
     (ty, Fresh()) -> IntType()
     where
       <type-coerce> (IntType(), ty)
   
-  type-of:
+  infer-type-of:
     (ty, ref@VarRef(v)) -> ty
     where
       <not(lookup-def(|Vars()))> v => v-ty;
       add-msg(|Error(), ref, $[Variable [<unrename-var> v] cannot be resolved])
   
-  type-of:
+  infer-type-of:
     (ty, Con(c, child*)) -> ty-con
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       <type-coerce> (ty-con, ty);
-      <zip; map(type-of-top)> (fchild-ty*, child*)
+      <zip; map(infer-type-of-top)> (fchild-ty*, child*)
   
-  type-of:
+  infer-type-of:
     (ty, Con(c, child*)) -> ty-con
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       <not(type-coerce)> (ty-con, ty);
       arrow-def := <InArrow>;
       <type-reduce(|arrow-def) <+ swap; type-reduce(|arrow-def)> (ty, ty-con);
-      <zip; map(type-of-top)> (fchild-ty*, child*)
+      <zip; map(infer-type-of-top)> (fchild-ty*, child*)
 
-  type-of:
-    (ty, Cast(ref, ty-trm)) -> ty'
+  infer-type-of:
+    (NONETYPE(), Cast(t, ty-trm)) -> t-ty'
     where
       <rw-type> ty-trm => ty-cast;
-      <type-of-top> (NONETYPE(), ref);
-      <type-coerce> (ty-cast, ty) => ty'
+      <infer-type-of-top> (ty-cast, t) => t-ty'
   
-  type-of:
-  	(ty, Cast(v@Var(_), ty-trm)) -> ty'
+  infer-type-of:
+  	(ty, Cast(t, ty-trm)) -> t-ty'
+  	where
+  		<rw-type> ty-trm => ty-cast;
+  		<type-coerce> (ty, ty-cast) => ty-cast';
+  		<infer-type-of-top> (ty-cast', t) => t-ty'
+  
+  infer-type-of:
+  	(ty, Cast(t, ty-trm)) -> ty'
   	where
   		<rw-type> ty-trm => ty-cast;
   		<not(type-coerce)> (ty-cast, ty);
   		arrow-def := <InArrow>;
   		<type-reduce(|arrow-def)> (ty, ty-cast) => ty';
-  		<type-of-top> (ty', v)
+  		<infer-type-of-top> (ty', t)
 
-  type-of:
+  infer-type-of:
   	(ty, As(v, pat)) -> ty'
   	where
-  	  <type-of-top> (ty, pat) => ty';
-  	  <type-of-top> (ty', v)
+  	  <infer-type-of-top> (ty, pat) => ty';
+  	  <infer-type-of-top> (ty', v)
 
-  type-of:
+  infer-type-of:
   	(ty, List([])) -> ty'
   	where
   		<type-coerce> (ListType(ALPHATYPE()), ty) => ty'
   
-  type-of:
+  infer-type-of:
     (ty, ListTail([h], t)) -> ty'
     where
-      <type-of-top> (ty, t) => l-ty@ListType(ALPHATYPE());
-      <type-of-top> (NONETYPE(), h) => head-ty;
+      <infer-type-of-top> (ty, t) => l-ty@ListType(ALPHATYPE());
+      <infer-type-of-top> (NONETYPE(), h) => head-ty;
       <type-coerce> (ListType(head-ty), ty) => ty'
       
-  type-of:
+  infer-type-of:
     (ty, ListTail([h], t)) -> ty'
     where
-      <type-of-top> (ty, t) => l-ty@ListType(elem-ty);
+      <infer-type-of-top> (ty, t) => l-ty@ListType(elem-ty);
       <not(?ALPHATYPE())> elem-ty;
-      <type-of-top> (elem-ty, h) => head-ty;
+      <infer-type-of-top> (elem-ty, h) => head-ty;
       <type-coerce> (ListType(head-ty), ty) => ty'
 
-  type-of:
+  infer-type-of:
     (ty, SortFunCall(fun-name, par, arg*)) -> ty'
     where
-      <type-of-top> (NONETYPE(), par) => parent-ty;
+      <infer-type-of-top> (NONETYPE(), par) => parent-ty;
       <lookup-def(|Types())> parent-ty => parent-def;
       <lookup-prop(|SortKind())> parent-def => NativeSort();
       <lookup-native-fun-def(|fun-name)> parent-def => fun-def;
       <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
-      <zip; map(type-of-top)> (farg*, arg*)
+      <zip; map(infer-type-of-top)> (farg*, arg*)
 
-  type-of:
+  infer-type-of:
     (ty, Map([])) -> ty'
     where
       <type-coerce> (MapType(ALPHATYPE(), ALPHATYPE()), ty) => ty'
 
-  type-of:
+  infer-type-of:
     (ty, MapSelect(map-trm, key-trm)) -> val-ty'
     where
-      <type-of-top> (NONETYPE(), map-trm) => maybe-map-ty;
+      <infer-type-of-top> (NONETYPE(), map-trm) => maybe-map-ty;
       if <?MapType(key-ty, val-ty)> maybe-map-ty
       then
         id
       else
         <lookup-def(|Types()); lookup-prop(|SuperType())> maybe-map-ty => MapType(key-ty, val-ty)
       end;
-      <type-of-top> (key-ty, key-trm) => key-ty;
+      <infer-type-of-top> (key-ty, key-trm) => key-ty;
       <type-coerce> (val-ty, ty) => val-ty'
   
-  type-of:
+  infer-type-of:
     (ty, Map([Bind(key-val, val-val)])) -> ty'
     where
-      <type-of-top> (NONETYPE(), key-val) => key-ty;
-      <type-of-top> (NONETYPE(), val-val) => val-ty;
+      <infer-type-of-top> (NONETYPE(), key-val) => key-ty;
+      <infer-type-of-top> (NONETYPE(), val-val) => val-ty;
       map-ty := MapType(key-ty, val-ty);
       <type-coerce> (map-ty, ty) => ty'
 
-  type-of:
+  infer-type-of:
     (ty, mx@MapExtend(map1, map2)) -> maps-ty
     where
-      <type-of-top> (NONETYPE(), map1) => map1-ty;
-      <type-of-top> (NONETYPE(), map2) => map2-ty;
+      <infer-type-of-top> (NONETYPE(), map1) => map1-ty;
+      <infer-type-of-top> (NONETYPE(), map2) => map2-ty;
       (
         <type-coerce-sym> (map1-ty, map2-ty) => maps-ty
         <+
@@ -265,33 +269,33 @@ rules /* store variables */
   type-check-premise:
   	f@Formula(TermEq(lhs, rhs)) -> f
   	where
-  		<type-of-top> (NONETYPE(), lhs);
-  		<type-of-top> (NONETYPE(), rhs)
+  		<infer-type-of-top> (NONETYPE(), lhs);
+  		<infer-type-of-top> (NONETYPE(), rhs)
   
   type-check-premise:
     f@Formula(TermNeq(lhs, rhs)) -> f
     where
-      <type-of-top> (NONETYPE(), lhs);
-      <type-of-top> (NONETYPE(), rhs)
+      <infer-type-of-top> (NONETYPE(), lhs);
+      <infer-type-of-top> (NONETYPE(), rhs)
 
   type-check-premise:
     f@Formula(Match(lhs, rhs)) -> f
     where
-      <type-of-top> (NONETYPE(), lhs) => lhs-ty;
-      <type-of-top> (lhs-ty, rhs) => rhs-ty
+      <infer-type-of-top> (NONETYPE(), lhs) => lhs-ty;
+      <infer-type-of-top> (lhs-ty, rhs) => rhs-ty
   
   type-check-premise:
   	f@Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> f
     where
-    	<type-of-top> (NONETYPE(), lhs) => lhs-ty;
+    	<infer-type-of-top> (NONETYPE(), lhs) => lhs-ty;
     	if arrow-def := <lookup-def(|Arrows())> arrow-name
     	then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
 	      if <type-of-applicable-arrow> (arrow-ty*, lhs-ty) => ArrowType(bu-ty, ma-ty)
 	      then
-	        <type-of-top> (bu-ty, lhs);
-	        <type-of-top> (ma-ty, rhs);
-	        <map(\ LabelComp(l, r) -> (<rw-type> l, r) \; type-of-top)> [r*, sc*, tc*]
+	        <infer-type-of-top> (bu-ty, lhs);
+	        <infer-type-of-top> (ma-ty, rhs);
+	        <map(\ LabelComp(l, r) -> (<rw-type> l, r) \; infer-type-of-top)> [r*, sc*, tc*]
 	      else
 	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
 	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
@@ -303,8 +307,8 @@ rules /* store variables */
   type-check-premise:
   	f@Formula(NMatch(lhs, rhs)) -> f
   	where
-  		<type-of-top> (NONETYPE(), lhs);
-  		<type-of-top> (NONETYPE(), rhs)
+  		<infer-type-of-top> (NONETYPE(), lhs);
+  		<infer-type-of-top> (NONETYPE(), rhs)
 
   type-check-premise:
     f@Formula(TypeCast(r@VarRef(v-name), ty-term)) -> f
