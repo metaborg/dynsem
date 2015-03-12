@@ -150,7 +150,7 @@ rules
       public x_classname fromStrategoTerm(IStrategoTerm alist) {
 		    x_classname list = new x_classname();
 		    for (int l = alist.getSubtermCount() - 1; l >= 0; l--) {
-		      final NodeSource source = new NodeSource(alist.getSubterm(l));
+		      final INodeSource source = NodeSource.fromStrategoTerm(alist.getSubterm(l));
 		      list = new x_classname(new x_genelem(source, alist.getSubterm(l)), list);
 		    }
 		    return list;
