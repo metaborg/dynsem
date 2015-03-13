@@ -40,50 +40,23 @@ rules /* merge ovelapping rules */
   merge-listrules-in-module:
   	Module(name, [imports, signatures, Rules(rule*)]) -> Module(name, [imports, signatures, Rules([nonlist-rule*, merged-list-rule*])])
   	where
-  		debug(!1);
-  		list-rule* := <filter(is-rule-matching-list)> rule*;
-  		debug(!2);
-  		nonlist-rule* := <diff> (rule*, list-rule*);
-  		debug(!3);
+  		list-rule* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, ListSort(_))))> rule*;
+  		nonlist-rule* := <diff> (list-rule*, rule*);
   		merged-list-rule* := <merge-list-rules> rule*
-  		;debug(!4)
 
   merge-list-rules:
-    list-rule* -> list-rule*
+    rule* -> rule''*
     where
-      debug(!5);
-      list-rule-type* := <map(rule-to-source-type-pair)> list-rule*
-      ;debug(!6)
-
-  is-rule-matching-list =
-    ?Rule(_, _, Relation(_, Source(List(_), _), _, _))
-    + ?Rule(_, _, Relation(_, Source(ListTail(_, _), _), _, _))
-
-  rule-to-source-type-pair:
-    rule -> (rule, ty)
-    where
-      debug(!7);
-      relation := <get-rule-relation> rule;
-      debug(!8);
-      source := <get-relation-source> relation;
-      debug(!9);
-      arrow := <get-relation-arrow-name> relation;
-      debug(!10);
-      ty := <type-of-rule-listsource> (source, arrow)
-      ;debug(!11)
-  
-  type-of-rule-listsource:
-    (l@ListTail(_, _), _) -> <debug(!"X "); type-of; debug(!"Y ")> l
-  
-  type-of-rule-listsource:
-    (l@List(_), arrow) -> <type-of-applicable-arrow; get-arrow-source-type> (arrow-ty*, lty)
-    where
-    	debug(!12);
-      arrow-ty* := <lookup-defs(|Arrows()); map(lookup-prop(|Type()))> arrow;
-    	debug(!13);
-      lty := <type-of> l
-    	;debug(!14)
-
+      src-type* := <map(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type)> rule*;
+      rules-by-type* := <map(group-rules-by-type(|rule*))> src-type*;
+      arrow-name* := <lookup-def-all(|Arrows()); map(def-get-name)>;
+      rules-by-type-by-arrow* := <mapconcat(group-rules-by-arrow(|arrow-name*))> rules-by-type*;
+      debug(!1);
+      rule'* := <filter(not(?[])); map(unmark-vars; map(remove-aliases; rename-components; rename-output))> rules-by-type-by-arrow*;
+      debug(!2);
+      rule''* := <mapconcat(merge-rules-top)> rule'*      
+      ;debug(!3)
+      
     /*
         el : List(Expr) -xxx-> vl
 			  where
@@ -108,7 +81,10 @@ rules /* merge ovelapping rules */
     (cons, arity) -> (cons, arity, rulez)
     with
       rulez := <filter(is-rule-matching-cons(|cons, arity))> rule*
-  
+
+  group-rules-by-type(|rule*):
+    ty -> <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <rw-type>); ?ty))> rule*
+    
   group-rules-by-arrow(|arrow-name*):
     rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
 

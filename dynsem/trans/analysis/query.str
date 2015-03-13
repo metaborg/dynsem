@@ -30,7 +30,7 @@ rules
     Fresh() -> IntType()
 
   type-of:
-    dec -> <debug(!"T1 "); lookup-def(|Vars()); debug(!"T2 "); lookup-prop(|Type()); debug(!"T3 ")> v
+    dec -> <lookup-def(|Vars()); lookup-prop(|Type())> v
     where
       <?Var(v) + ?MatchedVar(v) + ?VarRef(v)> dec
 
