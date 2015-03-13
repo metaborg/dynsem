@@ -131,5 +131,5 @@ context-free syntax // terms
 
 context-free priorities
 
-  Term.MapSelect > Term.MapExtend
+  Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
   

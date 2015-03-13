@@ -188,9 +188,9 @@ rules /* store variables */
       <infer-type-of-top> (ty, t) => l-ty@ListType(ALPHATYPE());
       <infer-type-of-top> (NONETYPE(), h) => head-ty;
       <type-coerce> (ListType(head-ty), ty) => ty'
-      
+
   infer-type-of:
-    (ty, ListTail([h], t)) -> ty'
+    (ty, ListTail([h], t)) -> ty
     where
       <infer-type-of-top> (ty, t) => l-ty@ListType(elem-ty);
       <not(?ALPHATYPE())> elem-ty;
