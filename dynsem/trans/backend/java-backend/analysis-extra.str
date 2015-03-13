@@ -44,9 +44,7 @@ rules
 	  end
 
   lookup-applicable-arrow-def:
-    type-def -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type-name)))> a-def) \); make-set>
-    where
-      type-name := <def-get-name> type-def
+    type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
 
   is-applicable-arrow-def(|type-name) =
     ?ArrowType(type-name, _)
@@ -57,8 +55,7 @@ rules
   lookup-arrow-def:
     (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
     where
-      <lookup-def(|Types())> c-ty => c-ty-def;
-      <lookup-applicable-arrow-def> c-ty-def => arrow*
+      <lookup-applicable-arrow-def> c-ty => arrow*
       
 
   type-is-adoptable = where(lookup-def(|Types()); lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort()))

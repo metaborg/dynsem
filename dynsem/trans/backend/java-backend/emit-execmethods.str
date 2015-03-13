@@ -34,7 +34,7 @@ rules
     c -> <mapconcat(ds2java-execmethod(|rule-c*))> applicable-arrow*
     where
       ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      applicable-arrow* := <lookup-def(|Types()); lookup-applicable-arrow-def> c-ty;
+      applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
       rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
       
   ds2java-execmethod(|rule*):
