@@ -40,9 +40,8 @@ rules /* merge ovelapping rules */
   merge-listrules-in-module:
   	Module(name, [imports, signatures, Rules(rule*)]) -> Module(name, [imports, signatures, Rules([nonlist-rule*, merged-list-rule*])])
   	where
-  		list-rule* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, ListSort(_))))> rule*;
-  		nonlist-rule* := <diff> (list-rule*, rule*);
-  		merged-list-rule* := <merge-list-rules> rule*
+  		(list-rule*, nonlist-rule*) := <partition(where(get-rule-relation; get-relation-source; ?Cast(_, ListSort(_))))> rule*;
+  		merged-list-rule* := <merge-list-rules> list-rule*
 
   merge-list-rules:
     rule* -> rule''*
@@ -51,26 +50,9 @@ rules /* merge ovelapping rules */
       rules-by-type* := <map(group-rules-by-type(|rule*))> src-type*;
       arrow-name* := <lookup-def-all(|Arrows()); map(def-get-name)>;
       rules-by-type-by-arrow* := <mapconcat(group-rules-by-arrow(|arrow-name*))> rules-by-type*;
-      debug(!1);
       rule'* := <filter(not(?[])); map(unmark-vars; map(remove-aliases; rename-components; rename-output))> rules-by-type-by-arrow*;
-      debug(!2);
       rule''* := <mapconcat(merge-rules-top)> rule'*      
-      ;debug(!3)
       
-    /*
-        el : List(Expr) -xxx-> vl
-			  where
-			    el => []
-			    < {
-			      [] => vl
-			    } + {
-			      el => [e | es],
-			      e --> v,
-			      es --> vs,
-			      [v | vs] => vl
-			    }
-    */
-
   cons-decl-pair-arity:
     ConsDecl(cons, args, _) -> (cons, <length> args)
   
