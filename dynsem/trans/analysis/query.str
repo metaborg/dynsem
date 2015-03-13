@@ -30,7 +30,7 @@ rules
     Fresh() -> IntType()
 
   type-of:
-    dec -> <lookup-def(|Vars()); lookup-prop(|Type())> v
+    dec -> <debug(!"T1 "); lookup-def(|Vars()); debug(!"T2 "); lookup-prop(|Type()); debug(!"T3 ")> v
     where
       <?Var(v) + ?MatchedVar(v) + ?VarRef(v)> dec
 
@@ -67,5 +67,10 @@ rules
   type-of-applicable-arrow:
     (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
 
+  get-arrow-source-type:
+    ArrowType(src-ty, _) -> src-ty
+  
+  get-arrow-target-type:
+    ArrowType(_, tgt-ty) -> tgt-ty
 
 

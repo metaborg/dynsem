@@ -76,7 +76,13 @@ rules
 
   get-relation-changeables:
     Relation(_, Source(_, sc*), _, Target(_, tc*)) -> [sc*, tc*]
-    
+  
+  get-relation-source:
+    Relation(_, Source(src, _), _, _) -> src
+  
+  get-relation-target:
+    Relation(_, _, _, Target(tgt, _)) -> tgt
+  
   get-relation-arrow-name:
     Relation(_, _, arrow, _) -> <get-arrow-name> arrow
   

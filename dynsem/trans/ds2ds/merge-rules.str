@@ -5,19 +5,98 @@ imports
   ds
   pp
   lib-ds
+
+imports
+  analysis/main
+  analysis/lib-analysis
+  analysis/mark-references
+  analysis/query
+  analysis/constructors
+
+imports
   ds2ds/sugar
   lib-ds/lib-match
 
 rules /* merge ovelapping rules */
 
+  merge-rules-in-module-top =
+    log-timed(
+      merge-rules-in-module | "Cons merging"
+    );
+    log-timed(
+      m-in-analysis(merge-listrules-in-module) |	"List merging"
+    )
+
   merge-rules-in-module:
-    Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules(merged-rule*)])
+    Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules([merged-rule*, rule'*])])
     with
       cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name); make-set> signatures;
       rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
+      rule'* := <diff> (rule*, <mapconcat(?(_, _, <id>))> rules-by-cons*); // rules not covered by cons-merging
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; rename-components; rename-output); merge-rules-top)>))> rules-by-cons-arrow*
+
+  merge-listrules-in-module:
+  	Module(name, [imports, signatures, Rules(rule*)]) -> Module(name, [imports, signatures, Rules([nonlist-rule*, merged-list-rule*])])
+  	where
+  		debug(!1);
+  		list-rule* := <filter(is-rule-matching-list)> rule*;
+  		debug(!2);
+  		nonlist-rule* := <diff> (rule*, list-rule*);
+  		debug(!3);
+  		merged-list-rule* := <merge-list-rules> rule*
+  		;debug(!4)
+
+  merge-list-rules:
+    list-rule* -> list-rule*
+    where
+      debug(!5);
+      list-rule-type* := <map(rule-to-source-type-pair)> list-rule*
+      ;debug(!6)
+
+  is-rule-matching-list =
+    ?Rule(_, _, Relation(_, Source(List(_), _), _, _))
+    + ?Rule(_, _, Relation(_, Source(ListTail(_, _), _), _, _))
+
+  rule-to-source-type-pair:
+    rule -> (rule, ty)
+    where
+      debug(!7);
+      relation := <get-rule-relation> rule;
+      debug(!8);
+      source := <get-relation-source> relation;
+      debug(!9);
+      arrow := <get-relation-arrow-name> relation;
+      debug(!10);
+      ty := <type-of-rule-listsource> (source, arrow)
+      ;debug(!11)
+  
+  type-of-rule-listsource:
+    (l@ListTail(_, _), _) -> <debug(!"X "); type-of; debug(!"Y ")> l
+  
+  type-of-rule-listsource:
+    (l@List(_), arrow) -> <type-of-applicable-arrow; get-arrow-source-type> (arrow-ty*, lty)
+    where
+    	debug(!12);
+      arrow-ty* := <lookup-defs(|Arrows()); map(lookup-prop(|Type()))> arrow;
+    	debug(!13);
+      lty := <type-of> l
+    	;debug(!14)
+
+    /*
+        el : List(Expr) -xxx-> vl
+			  where
+			    el => []
+			    < {
+			      [] => vl
+			    } + {
+			      el => [e | es],
+			      e --> v,
+			      es --> vs,
+			      [v | vs] => vl
+			    }
+    */
 
   cons-decl-pair-arity:
     ConsDecl(cons, args, _) -> (cons, <length> args)
