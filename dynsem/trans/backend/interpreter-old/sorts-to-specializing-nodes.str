@@ -37,7 +37,6 @@ rules
         
         import org.metaborg.meta.interpreter.framework.*;
         import org.spoofax.interpreter.terms.*;
-        import org.spoofax.jsglr.client.imploder.ImploderAttachment;
         import org.spoofax.interpreter.core.Tools;
         
         public class x_gennodename extends AbstractNode implements x_sortname, IGenericNode {
@@ -62,8 +61,7 @@ rules
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
-              final ImploderNodeSource source = term.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
-                        term.getAttachment(ImploderAttachment.TYPE)) : null;
+              final INodeSource source = NodeSource.fromStrategoTerm(term);
               bstm1*
             }
             IGenericNode replacement = null;

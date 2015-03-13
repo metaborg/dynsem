@@ -1,5 +1,7 @@
 package org.metaborg.meta.interpreter.framework;
 
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
 public interface INodeSource {
 
 	public int getLine();
@@ -9,4 +11,7 @@ public interface INodeSource {
 	public String getCodeFragment();
 
 	public String getFilename();
+	
+	public void apply(IStrategoTerm term);
+
 }
