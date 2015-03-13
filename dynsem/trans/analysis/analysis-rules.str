@@ -364,7 +364,7 @@ rules
     (ListType(ALPHATYPE()), to-ty@ListType(_)) -> to-ty
 
   type-coerce:
-    (ListType(ty-from), ListType(ty-to)) -> <type-coerce> (ty-from, ty-to)
+    (ListType(ty-from), ListType(ty-to)) -> ListType(<type-coerce> (ty-from, ty-to))
   
   type-coerce:
     (ty-from, ty-to) -> <type-coerce> (sup-ty, ty-to)
