@@ -64,7 +64,7 @@ public class NodeSource implements INodeSource {
 			OriginAttachment originAttachment = aterm.getAttachment(OriginAttachment.TYPE);
 			imploderAttachment = originAttachment.getOrigin().getAttachment(ImploderAttachment.TYPE);
 			attachment = originAttachment;
-		} else if ( aterm.getAttachment(OriginAttachment.TYPE) != null ) {
+		} else if ( aterm.getAttachment(ImploderAttachment.TYPE) != null ) {
 			imploderAttachment = aterm.getAttachment(ImploderAttachment.TYPE);
 			attachment = imploderAttachment;
 		}
