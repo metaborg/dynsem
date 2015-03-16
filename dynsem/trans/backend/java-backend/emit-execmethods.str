@@ -361,7 +361,7 @@ rules
     VarRef(x_vref) -> e |[ x_vref ]|
   
   ds2java-term-build(|ex_ty):
-    Con(c, child*) -> e |[ new x_consclass(null, e*) ]|
+    Con(c, child*) -> e |[ new x_consclass(this.getSourceInfo(), e*) ]|
     where
       c-def := <lookup-def(|Constructors())> c;
       c-kind := <lookup-prop(|ConsKind())> c-def;
