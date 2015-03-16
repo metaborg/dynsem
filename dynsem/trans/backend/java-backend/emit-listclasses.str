@@ -9,24 +9,26 @@ imports
   analysis/lib-analysis
 
 imports
+  backend/java-backend/emit-execmethods
   backend/java-backend/lib-ds2java
   backend/java-backend/utils
 
 rules
   
   ds2java-listclasses:
-    Module(_, section*) -> <make-set; map(ds2java-listclass)> [ltys1*]
+    Module(_, section*) -> <make-set; map(ds2java-listclass(|rule*))> ltys*
     where
       rule* := <fetch-elem(?Rules(<id>))> section*;
-      ltys1* := <lookup-def-all(|Types()); filter(not(lookup-prop(|SortKind()) => SystemSort())); map(\ (_, ty) -> ListType(ty) \)>
+      ltys* := <lookup-def-all(|Types()); filter(not(lookup-prop(|SortKind()) => SystemSort())); map(\ (_, ty) -> ListType(ty) \)>
   
-  ds2java-listclass:
+  ds2java-listclass(|rule*):
   	lty@ListType(ety) -> class
     where
       x_classname := <ds2java-sort-classname> lty;
       x_elemname := <ds2java-sort-classname; ds2java-box-java-type> ety;
       specializer* := <mklist-specializer(|x_classname, ety) <+ ![]>;
-      exec* := []; // TODO here generate the code for the reduction rules
+      // exec* := <ds2java-execmethods(|rule*)> lty;
+      exec* := [];
   		ety-def := <lookup-def(|Types())> ety;
   		if sup-ty := <lookup-prop(|SuperType())> ety-def; <not(lookup-prop(|SortKind()); ?SemanticCompSort())> ety-def
   		then

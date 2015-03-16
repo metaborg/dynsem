@@ -8,9 +8,19 @@ imports
 rules /* name generation */
 
   ds2java-sort-classname:
+    ListType(ALPHATYPE()) -> "NIL"
+  
+  ds2java-sort-classname:
     ListType(ety) -> $[L_[ety-str]]
     where
+      <not(?ALPHATYPE())> ety
+    where
       ety-str := <ds2java-listsort-elemname; ds2java-box-java-type> ety
+      
+  // ds2java-sort-classname:
+  //   ListType(ety) -> $[L_[ety-str]]
+  //   where
+  //     ety-str := <ds2java-listsort-elemname; ds2java-box-java-type> ety
   
   ds2java-listsort-elemname:
     ty -> $[I_[<def-get-name> ty-def]]

@@ -36,7 +36,7 @@ rules
       ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
       rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
-      
+  
   ds2java-execmethod(|rule*):
     (arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
@@ -394,14 +394,8 @@ rules
   ds2java-term-build(|ex_ty):
     List([]) -> e |[ new x_type() ]|
     where
-      <?ListType(_)> ex_ty;
       x_type := <ds2java-sort-classname> ex_ty
   
-  ds2java-term-build(|ex_ty):
-    List([]) -> e |[ new NIL() ]|
-    where
-      <not(?ListType(_))> ex_ty
-  		
   ds2java-term-build(|ex-ty):
     ListTail([h-trm], t-trm) -> e |[ new x_type(e_h, e_t) ]|
     where
