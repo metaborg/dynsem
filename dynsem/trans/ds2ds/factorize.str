@@ -181,48 +181,38 @@ rules
   factorize-constructors-in-build:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      let cond = not(is-prime-factor)
-      in
-        (prem*, t2*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
-        !success
-      end
+      (prem*, t2*) := <map(lift-build-on-cond(is-build-nonprime-factor, ?success)); unzip; (concat, id)> t1*;
+      !success
   
   factorize-sortfuncall-in-build:
     SortFunCall(name, on, t*) -> ([p1*, p2*], SortFunCall(name, on', t'*))
     where
-      let cond = not(is-prime-factor)
-      in
-        (p1*, on') := <lift-build-on-cond(cond, ?success)> on;
-        (p2*, t'*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t*;
-        !success
-      end
+      (p1*, on') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> on;
+      (p2*, t'*) := <map(lift-build-on-cond(is-build-nonprime-factor, ?success)); unzip; (concat, id)> t*;
+      !success
   
   factorize-listtail-in-build:
     ListTail([x], xs) -> ([prem1*, prem2*], ListTail([x'], xs'))
     where
-      let cond = not(is-prime-factor)
-      in
-        (prem1*, x') := <lift-build-on-cond(cond, ?success1)> x;
-        (prem2*, xs') := <lift-build-on-cond(cond, ?success2)> xs;
-        (!success1 <+ !success2)
-      end
+      (prem1*, x') := <lift-build-on-cond(is-build-nonprime-factor, ?success1)> x;
+      (prem2*, xs') := <lift-build-on-cond(is-build-nonprime-factor, ?success2)> xs;
+      (!success1 <+ !success2)
   
   factorize-mapselect-in-build:
     MapExtend(l, r) -> (prem*, MapExtend(l, r'))
     where
-      let cond = not(is-prime-factor)
-      in
-        (prem*, r') := <lift-build-on-cond(cond, ?success)> r;
-        !success
-      end
+      (prem*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
+      !success
   
   factorize-cast-in-build:
     Cast(t1, ty) -> (prem*, Cast(t2, ty))
     where
-      (prem*, t2) := <lift-build-on-cond(not(is-prime-factor), ?success)> t1;
+      (prem*, t2) := <lift-build-on-cond(is-build-nonprime-factor, ?success)> t1;
       !success
+  
+  is-build-nonprime-factor = not(is-prime-factor <+ ?List([])) 
   
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List([])
   
-  is-prime-factor = ?VarRef(_) + ?List([])
+  is-prime-factor = ?VarRef(_)
 
