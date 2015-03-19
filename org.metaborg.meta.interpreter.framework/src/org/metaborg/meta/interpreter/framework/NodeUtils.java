@@ -11,14 +11,13 @@ public class NodeUtils {
 			try {
 				s += f.get(o) + ", ";
 			} catch (IllegalAccessException e) {
-//				 s += "<" + f.getName() + ">";
+				// s += "<" + f.getName() + ">";
 			}
 		}
 		s += ")";
 		return s;
 	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
 	public static <T extends INode> T replaceChild(INode parent,
 			INode oldChild, T newChild) {
 		// locate the field of the oldChild

@@ -17,11 +17,6 @@ rules /* name generation */
     where
       ety-str := <ds2java-listsort-elemname; ds2java-box-java-type> ety
       
-  // ds2java-sort-classname:
-  //   ListType(ety) -> $[L_[ety-str]]
-  //   where
-  //     ety-str := <ds2java-listsort-elemname; ds2java-box-java-type> ety
-  
   ds2java-listsort-elemname:
     ty -> $[I_[<def-get-name> ty-def]]
     where
@@ -29,9 +24,6 @@ rules /* name generation */
       SemanticCompSort() := <lookup-prop(|SortKind())> ty-def
   
   ds2java-listsort-elemname = ds2java-sort-classname
-  
-  ds2java-sort-classname:
-    ALPHATYPE() -> $[Object]
   
   ds2java-sort-classname:
     MapType(ALPHATYPE(), ALPHATYPE()) -> $[com.github.krukow.clj_ds.PersistentMap<?, ?>]

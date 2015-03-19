@@ -4,6 +4,7 @@ imports
   include/ds
   ds
   libjava-front
+  lib-ds
   lib-ds/lib-match
 
 imports
@@ -37,6 +38,12 @@ rules
       applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
       rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
   
+  ds2java-execmethods(|rule*):
+    ty -> <mapconcat(ds2java-execmethod(|rule-l*))> applicable-arrow*
+    where
+      applicable-arrow* := <lookup-applicable-arrow-def> ty;
+      rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
+  
   ds2java-execmethod(|rule*):
     (arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
@@ -62,25 +69,33 @@ rules
         bstm* := bstm* |[ throw new InterpreterException("Rule failure"); ]|;
         more-method* := []
       end
-
   
   ds2java-rulestatements:
-    Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, asbound*, patternbound*, premstms*]
+    Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
     where
-    	if <?As(Var(v), Con(c, patt-var*))> lhs then
-    		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
-    		asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
-    	else
-    		Con(c, patt-var*) := lhs;
-    		asbound* := []
-    	end;
+    	patternbound* := <ds2java-patternbinds> lhs;
     	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
-    	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*;
-      <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, c-ty);
-      retgt := Target(<lookup-arrow-def> (c-ty, arrow-name), rhs, tc*);
-    	prem := <inject-try-or; insert-target(|retgt)> prem*;
+      lhs-ty := <type-of> lhs;
+      retgt := Target(<lookup-arrow-def> (lhs-ty, arrow-name), rhs, tc*);
+      prem := <inject-try-or; insert-target(|retgt)> prem*;
       premstms* := <ds2java-premise> (prem, [], [])
   
+  ds2java-patternbinds:
+  	Con(c, patt-var*) -> <map-with-index(ds2java-patternboundbind)> patt-var*
+  
+  ds2java-patternbinds:
+    As(Var(v), con) -> [asbound*, con-bind*]
+    where
+    	con-bind* := <ds2java-patternbinds> con;
+    	typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
+      asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
+  
+  ds2java-patternbinds:
+  	Cast(Var(v), _) -> asbound*
+  	where
+      typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
+      asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
+      
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
   	where
@@ -392,9 +407,14 @@ rules
     	e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (farg*, arg*)
   
   ds2java-term-build(|ex_ty):
-    List([]) -> e |[ new x_type() ]|
-    where
-      x_type := <ds2java-sort-classname> ex_ty
+  	List([]) -> e |[ new x_type() ]|
+  	where
+  		if <?ListType(_)> ex_ty
+  		then
+  			x_type := <ds2java-sort-classname> ex_ty
+  		else
+  			x_type := <ds2java-sort-classname> ListType(ex_ty)
+  		end 
   
   ds2java-term-build(|ex-ty):
     ListTail([h-trm], t-trm) -> e |[ new x_type(e_h, e_t) ]|
