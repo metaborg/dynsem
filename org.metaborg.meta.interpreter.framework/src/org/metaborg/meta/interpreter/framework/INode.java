@@ -10,13 +10,9 @@ import org.spoofax.interpreter.terms.ITermFactory;
  * @author vladvergu
  * 
  */
-public interface INode extends IConvertibleToStrategoTerm {
+public interface INode extends IConvertibleToStrategoTerm, OriginTracked {
 
 	public void specializeChildren(int depth);
-
-	public void setSourceInfo(INodeSource src);
-
-	public INodeSource getSourceInfo();
 
 	public <T extends INode> INode setParent(T parent);
 

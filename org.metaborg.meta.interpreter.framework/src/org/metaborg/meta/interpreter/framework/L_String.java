@@ -5,12 +5,13 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public class L_String extends AbstractPrimitiveList<String> {
 
-	public L_String() {
-		super();
+	public L_String(INodeSource source) {
+		super(source);
 	}
 
-	public L_String(String head, AbstractPrimitiveList<String> tail) {
-		super(head, tail);
+	public L_String(INodeSource source, String head,
+			AbstractPrimitiveList<String> tail) {
+		super(source, head, tail);
 	}
 
 	@Override
@@ -20,10 +21,10 @@ public class L_String extends AbstractPrimitiveList<String> {
 
 	@Override
 	public L_String fromStrategoTerm(IStrategoTerm alist) {
-		L_String list = new L_String();
+		L_String list = new L_String(NodeSource.fromStrategoTerm(alist));
 		for (int i = alist.getSubtermCount() - 1; i >= 0; i--) {
 			String s = ((IStrategoString) alist.getSubterm(i)).stringValue();
-			list = new L_String(s, list);
+			list = new L_String(NodeSource.fromStrategoTerm(alist), s, list);
 		}
 		return list;
 	}
