@@ -48,6 +48,7 @@ rules
         import org.metaborg.meta.interpreter.framework.*;
         import org.spoofax.interpreter.terms.*;
         import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+        import com.github.krukow.clj_lang.PersistentTreeMap;
         
         public class x_classname extends x_supername implements INodeList {
         	~body*
@@ -62,6 +63,7 @@ rules
         import org.metaborg.meta.interpreter.framework.*;
         import org.spoofax.interpreter.terms.*;
         import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+        import com.github.krukow.clj_lang.PersistentTreeMap;
         
         public class x_classname implements INodeList {
           ~body*
