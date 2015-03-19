@@ -47,7 +47,7 @@ signature
   constructors
     VarRef      : ID -> Var
                 : Var -> Term
-    Cast        : Var * Type -> Cast
+    Cast        : Term * Type -> Cast
                 : Cast -> Term
     As          : Var * Term -> Term
     Wld         : Term
@@ -55,8 +55,9 @@ signature
     Int         : INT -> Term
     Real        : REAL -> Term
     Con         : ID * List(Term) -> Term
-    List        : List(Term) -> Term
-    ListTail    : List(Term) * Term -> Term
+    List        : List(Term) -> List
+    ListTail    : List(Term) * Term -> List
+                : List -> Term
     Fresh       : Term
     True        : Term
     False       : Term

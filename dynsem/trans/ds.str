@@ -147,7 +147,7 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"merged.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; merge-rules-in-module; sugar-all; pp-debug> ast
+      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; merge-rules-in-module-top; sugar-all; pp-debug> ast
 
   copy-propagation-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
@@ -185,7 +185,7 @@ rules // Builders
           explicate-module | "Explication"
         );
         log-timed(
-          merge-rules-in-module | "Rule merging"
+          merge-rules-in-module-top  | "Rule merging"
         );
         log-timed(
           copy-propagation-module | "Copy propagation"

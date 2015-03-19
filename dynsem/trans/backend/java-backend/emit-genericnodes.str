@@ -84,7 +84,7 @@ rules
       gennodename := $[Generic_[sortname]];
       c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons()))>;
       ty-def* := <lookup-def-all(|Types()); filter(where(lookup-prop(|SuperType()) => ty); where(lookup-prop(|SortKind()) => LanguageSort()))>;
-      exec* := <lookup-def(|Types()); lookup-applicable-arrow-def; map(ds2java-arrow-specializedispatch)> ty
+      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-specializedispatch)> ty
 
   ds2java-consdecl-specializer:
   	c-def ->
