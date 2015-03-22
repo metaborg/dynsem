@@ -40,6 +40,9 @@ rules
       <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, ty)
   
   type-of:
+    As(v, _) -> <type-of> v
+  
+  type-of:
     List([]) -> ListType(ALPHATYPE())
   
   type-of:
