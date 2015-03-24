@@ -67,6 +67,11 @@ rules // lift constructor sub-terms in match
       (p*, t2) := <lift-match-on-cond(not(is-prime-factor), ?succ)> t1;
       !succ
   
+  factorize-lhs:
+    As(v, t1) -> (p*, As(v, t2))
+    where
+      (p*, t2) := <factorize-lhs> t1
+  
   factorize-rhs = lift-build-on-cond(not(is-prime-factor), ?succ); where(!succ)
   
   factorize-source-components =
