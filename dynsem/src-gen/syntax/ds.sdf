@@ -70,6 +70,9 @@ exports
     CONTENTCOMPLETE -> Rel       {cons("COMPLETION-Rel")}
     CONTENTCOMPLETE -> LabelComp {cons("COMPLETION-LabelComp")}
 
+  lexical syntax
+    ID -> TermCon 
+
   context-free syntax
     ID                                  -> Var   {cons("VarRef")}
     Var                                 -> Term  
@@ -80,7 +83,7 @@ exports
     STRING                              -> Term  {cons("String")}
     INT                                 -> Term  {cons("Int")}
     REAL                                -> Term  {cons("Real")}
-    ID "(" {Term ","}* ")"              -> Term  {cons("Con")}
+    TermCon "(" {Term ","}* ")"         -> Term  {cons("Con")}
     "[" {Term ","}* "]"                 -> List  {cons("List")}
     "[" {Term ","}* "|" Term "]"        -> List  {cons("ListTail")}
     List                                -> Term  

@@ -561,6 +561,14 @@ strategies
 
 
 strategies
+  prettyprint-TermCon =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-TermCon
+
+
+strategies
   prettyprint-example =
     prettyprint-Var
 
@@ -682,7 +690,7 @@ strategies
                            ]
                          )
                        ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t1__' := <pp-one-Z(prettyprint-TermCon)> t1__
     with t2__' := <pp-H-list(prettyprint-Term|", ")> t2__
 
   is-Term =

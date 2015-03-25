@@ -70,8 +70,8 @@ completions
     <Var:Var> "@" <Term:Term>  
   completion template Term : "_" =
     "_"    
-  completion template Term : "ID()" =
-    <ID:ID> "(" <:Term> ")"  
+  completion template Term : "TermCon()" =
+    <TermCon:TermCon> "(" <:Term> ")"  
   completion template List : "[ ]" =
     "[ " <:Term> " ]"  
   completion template List : "[ | Term ]" =

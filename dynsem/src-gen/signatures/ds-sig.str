@@ -45,6 +45,9 @@ signature
     LabelComp                     : Type * Term -> LabelComp
 
   constructors
+     : String -> TermCon
+
+  constructors
     VarRef      : ID -> Var
                 : Var -> Term
     Cast        : Term * Type -> Cast
@@ -54,7 +57,7 @@ signature
     String      : STRING -> Term
     Int         : INT -> Term
     Real        : REAL -> Term
-    Con         : ID * List(Term) -> Term
+    Con         : TermCon * List(Term) -> Term
     List        : List(Term) -> List
     ListTail    : List(Term) * Term -> List
                 : List -> Term
