@@ -435,7 +435,7 @@ rules
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
     where
       e_t := <ds2java-term-build(|ty-trm)> t;
-      x_ty := <ds2java-sort-classname> ty-trm
+      x_ty := <rw-type; ds2java-sort-classname> ty-trm
   
   ds2java-term-build(|ex_ty):
     String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))

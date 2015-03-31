@@ -150,10 +150,11 @@ rules /* store variables */
       <zip; map(infer-type-of-top)> (fchild-ty*, child*)
 
   infer-type-of:
-    (NONETYPE(), Cast(t, ty-trm)) -> t-ty'
+    (NONETYPE(), Cast(t, ty-trm)) -> ty-cast
     where
-      <rw-type> ty-trm => ty-cast;
-      <infer-type-of-top> (ty-cast, t) => t-ty'
+      ty-cast := <rw-type> ty-trm;
+      ty-t := <infer-type-of-top> (NONETYPE(), t)
+      
   
   infer-type-of:
   	(ty, Cast(t, ty-trm)) -> t-ty'
