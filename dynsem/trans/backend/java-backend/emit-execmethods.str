@@ -434,7 +434,7 @@ rules
   ds2java-term-build(|ex_ty):
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
     where
-      e_t := <ds2java-term-build(|ty-trm)> t;
+      e_t := <ds2java-term-build(|<rw-type> ty-trm)> t;
       x_ty := <rw-type; ds2java-sort-classname> ty-trm
   
   ds2java-term-build(|ex_ty):
