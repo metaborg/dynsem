@@ -40,6 +40,9 @@ rules
       <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, ty)
   
   type-of:
+    As(v, _) -> <type-of> v
+  
+  type-of:
     List([]) -> ListType(ALPHATYPE())
   
   type-of:
@@ -67,5 +70,10 @@ rules
   type-of-applicable-arrow:
     (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
 
+  get-arrow-source-type:
+    ArrowType(src-ty, _) -> src-ty
+  
+  get-arrow-target-type:
+    ArrowType(_, tgt-ty) -> tgt-ty
 
 

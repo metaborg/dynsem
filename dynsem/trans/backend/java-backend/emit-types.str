@@ -36,7 +36,7 @@ rules /* generate interfaces for sort declarations */
     where
       ty-def := <lookup-def(|Types())> ty;
       supername := <lookup-prop(|SuperType()); ds2java-sort-classname <+ !"IMatchableNode"> ty-def;
-      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> ty-def
+      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> ty
 
 
 

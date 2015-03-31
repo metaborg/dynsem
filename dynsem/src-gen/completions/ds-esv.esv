@@ -64,17 +64,17 @@ completions
     <Type:Type> " " <Term:Term>  
 
 completions
-  completion template Cast : "Var : Type" =
-    <Var:Var> " : " <Type:Type>  
+  completion template Cast : "Term : Type" =
+    <Term:Term> " : " <Type:Type>  
   completion template Term : "Var@Term" =
     <Var:Var> "@" <Term:Term>  
   completion template Term : "_" =
     "_"    
-  completion template Term : "ID()" =
-    <ID:ID> "(" <:Term> ")"  
-  completion template Term : "[ ]" =
+  completion template Term : "TermCon()" =
+    <TermCon:TermCon> "(" <:Term> ")"  
+  completion template List : "[ ]" =
     "[ " <:Term> " ]"  
-  completion template Term : "[ | Term ]" =
+  completion template List : "[ | Term ]" =
     "[ " <:Term> " | " <Term:Term> " ]"  
   completion template Term : "fresh" =
     "fresh"  

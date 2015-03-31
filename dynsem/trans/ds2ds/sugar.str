@@ -33,7 +33,7 @@ rules // desugaring
   
   desugar :
     List(x*) -> ListTail(x*, List([]))
-    where <not(?[])> x* 
+    where <not(?[])> x*
 
   desugar :
     ListTail([x | xs*], xxs) -> ListTail([x], ListTail(xs*, xxs))

@@ -1,0 +1,213 @@
+module backend/java-backend/emit-listclasses
+
+imports
+  include/ds
+  ds
+
+imports
+  analysis/constructors
+  analysis/lib-analysis
+
+imports
+  backend/java-backend/emit-execmethods
+  backend/java-backend/lib-ds2java
+  backend/java-backend/utils
+  backend/java-backend/emit-specializercode
+
+rules
+  
+  ds2java-listclasses:
+    Module(_, section*) -> <make-set; map(ds2java-listclass(|rule*))> ltys*
+    where
+      rule* := <fetch-elem(?Rules(<id>))> section*;
+      ltys* := <lookup-def-all(|Types()); filter(not(lookup-prop(|SortKind()) => SystemSort())); map(\ (_, ty) -> ListType(ty) \)>
+  
+  ds2java-listclass(|rule*):
+  	lty@ListType(ety) -> class
+    where
+      x_classname := <ds2java-sort-classname> lty;
+      specializer* := <mklist-specializer(|x_classname, ety) <+ ![]>;
+      exec* := <ds2java-execmethods(|rule*)> lty;
+  		ety-def := <lookup-def(|Types())> ety;
+  		if sup-ty := <lookup-prop(|SuperType())> ety-def; <not(lookup-prop(|SortKind()); ?SemanticCompSort())> ety-def
+  		then
+  			x_supername := <lookup-def(|Types()); def-get-name; !ListSort(SimpleSort(<id>)); rw-type; ds2java-sort-classname> sup-ty;
+  			class := <mklist-class(|x_classname, x_supername, ety, [specializer*, exec*])>
+			else
+				class := <mklist-class(|x_classname, ety, [specializer*, exec*])>
+			end
+  
+  
+rules
+	
+  mklist-class(|x_classname, x_supername, elemtype, exec*) =
+  	body* := <mklist-class-body(|x_classname, elemtype, exec*)>;
+  	x_elemname := <ds2java-sort-classname; ds2java-box-java-type> elemtype;
+  	!compilation-unit |[
+  		package ~x:<AutoPackageName>;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        import org.spoofax.interpreter.terms.*;
+        import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+        import com.github.krukow.clj_lang.PersistentTreeMap;
+        
+        public class x_classname extends x_supername implements INodeList {
+          public INodeSource source;
+          
+          public x_classname(INodeSource source) {
+            this(source, null, null);
+          }
+          
+          public x_classname(INodeSource source, x_elemname head, x_classname tail) {
+            super(source, head, tail);
+            this.source = source;
+            this.head = head;
+            this.tail = tail;
+            this.size = (head == null ? 0 : 1) + (tail == null ? 0 : tail.size());
+          }
+          
+        	~body*
+        }
+  	]|
+ 
+  mklist-class(|x_classname, elemty, exec*) =
+    body* := <mklist-class-body(|x_classname, elemty, exec*)>;
+    x_elemname := <ds2java-sort-classname; ds2java-box-java-type> elemty;
+    !compilation-unit |[
+      package ~x:<AutoPackageName>;
+        
+        import org.metaborg.meta.interpreter.framework.*;
+        import org.spoofax.interpreter.terms.*;
+        import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+        import com.github.krukow.clj_lang.PersistentTreeMap;
+        
+        public class x_classname implements INodeList {
+          public INodeSource source;
+          
+          public x_classname(INodeSource source) {
+            this(source, null, null);
+          }
+          
+          public x_classname(INodeSource source, x_elemname head, x_classname tail) {
+            this.source = source;
+            this.head = head;
+            this.tail = tail;
+            this.size = (head == null ? 0 : 1) + (tail == null ? 0 : tail.size());
+          }
+          
+          ~body*
+        }
+    ]|
+
+  mklist-class-body(|x_classname, elemty, exec*) =
+  	x_elemname := <ds2java-sort-classname; ds2java-box-java-type> elemty;
+  	!class-body-dec* |[
+  		    @Child
+          public x_elemname head;
+          
+          @Children
+          public x_classname tail;
+          
+          public final int size;
+          
+          @Override
+				  public void setSourceInfo(INodeSource source) {
+				    this.source = source;
+				  }
+
+				  @Override
+				  public INodeSource getSourceInfo() {
+				    return source;
+				  }
+  
+          @Override
+          public x_elemname head() {
+            if (head == null) {
+              throw new InterpreterException("No such element exception");
+            }
+            return head;
+          }
+          
+          @Override
+          public void replaceHead(Object newHead) {
+            this.head = (x_elemname) newHead;
+          }
+          
+          @Override
+          public x_classname tail() {
+            if (tail == null) {
+              throw new InterpreterException("No such element exception");
+            }
+            return tail;
+          }
+          
+          @Override
+          public int size() {
+            return size;
+          }
+          
+          @Override
+          public boolean isEmpty() {
+            return head == null;
+          }
+          
+          @Override
+          public int hashCode() {
+            return ListUtils.hashCode(this);
+          }
+        
+          @Override
+          public IStrategoTerm toStrategoTerm(ITermFactory factory) {
+            return ListUtils.toStrategoTerm(this, factory);
+          }
+        
+          @Override
+          public boolean equals(Object obj) {
+            return ListUtils.equals(this, obj);
+          }
+        
+          @Override
+          public String toString() {
+            return ListUtils.toString(this);
+          }
+          
+          private boolean hasSpecialized;
+            
+	        public void specializeChildren(int depth) {
+	          if (!hasSpecialized) {
+	            if(head instanceof IGenericNode){
+	            	((IGenericNode) head).specialize(depth);
+	            }
+	            hasSpecialized = true;
+	          }
+	        }
+          
+          ~exec*
+      ]|
+	
+  mklist-specializer(|x_classname, e-ty) =
+    e-ty-def := <lookup-def(|Types())> e-ty;
+    where(<lookup-prop(|SortKind())> e-ty-def => LanguageSort());
+    x_genelem := $[Generic_[<ds2java-sort-classname> e-ty]];
+    !class-body-dec* |[
+    	@Override
+      public x_classname fromStrategoTerm(IStrategoTerm alist) {
+		    x_classname list = new x_classname(NodeSource.fromStrategoTerm(alist));
+		    for (int l = alist.getSubtermCount() - 1; l >= 0; l--) {
+		      final INodeSource source = NodeSource.fromStrategoTerm(alist.getSubterm(l));
+		      list = new x_classname(NodeSource.fromStrategoTerm(alist), new x_genelem(source, alist.getSubterm(l)), list);
+		    }
+		    return list;
+		  }
+    ]|
+
+  mklist-specializer(|x_classname, e-ty) =
+    e-ty-def := <lookup-def(|Types())> e-ty;
+    not(<lookup-prop(|SortKind())> e-ty-def => LanguageSort());
+    !class-body-dec* |[
+    	@Override
+      public x_classname fromStrategoTerm(IStrategoTerm alist) {
+        throw new UnsupportedOperationException();
+		  }
+    ]|
+

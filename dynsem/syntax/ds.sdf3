@@ -93,12 +93,16 @@ context-free syntax // formulas
   
   LabelComp.LabelComp = [[Type] [Term]]
   
+lexical syntax 
+
+  TermCon = ID 
+  
 context-free syntax // terms
 
   Var.VarRef    = [[ID]]
   Term = Var
   
-  Cast.Cast = [[Var] : [Type]]
+  Cast.Cast     = [[Term] : [Type]]
   Term = Cast
   
   Term.As       = [[Var]@[Term]]
@@ -108,10 +112,12 @@ context-free syntax // terms
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
   Term.Real     = [[REAL]]
-  Term.Con      = [[ID]([{Term ", "}*])]
-  Term.List     = <[ <{Term ", "}*> ]>
-  Term.ListTail = <[ <{Term ", "}*> | <Term> ]>
+  Term.Con      = [[TermCon]([{Term ", "}*])]
   
+  List.List     = <[ <{Term ", "}*> ]>
+  List.ListTail = <[ <{Term ", "}*> | <Term> ]>
+  Term = List
+
   Term.Fresh  = [fresh]
   Term.True   = [true]
   Term.False  = [false]
@@ -129,5 +135,5 @@ context-free syntax // terms
 
 context-free priorities
 
-  Term.MapSelect > Term.MapExtend
+  Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
   

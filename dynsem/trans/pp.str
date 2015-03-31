@@ -11,11 +11,6 @@ imports
   
 rules
   
-  prettyprint-ID = ![S(<id>)]
-  prettyprint-INFER = ![S(<id>)]
-  prettyprint-STRING = ![S(<id>)]
-  prettyprint-INT = ![S(<id>)]
-  
   prettyprint-Term :
     MatchedVar(a) -> [ H(
                        [SOpt(HS(), "0")]
@@ -24,13 +19,16 @@ rules
                    ]
     where a813 := <pp-one-Z(prettyprint-ID)> a
 
-  prettyprint-Term :
-    MatchedVar(a) -> [ H(
-                       [SOpt(HS(), "0")]
-                     , [a814]
-                     )
-                   ]
-    where a814 := <pp-one-Z(prettyprint-LID)> a
+  prettyprint-Var :
+    Var(t1__) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [t1__']
+                      )
+                    ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+
+  is-Var =
+    ?Var(_)
 
   pp-dynsem-Premise-string =
     parenthesize-ds

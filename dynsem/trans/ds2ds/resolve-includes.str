@@ -9,10 +9,8 @@ rules
   resolve-includes(|f-path, p-path):
     Module(name, section*) -> Module(name, section'*)
     where
-      parent-dir := <string-tokenize(|['/']); init; separate-by(|"/"); concat-strings> f-path;
-      include-dir := <concat-strings> [p-path, "/", parent-dir];
       (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
-      section'* := <include-imports(|include-dir, [])> (import*, section-noimports*)
+      section'* := <include-imports(|p-path, [])> (import*, section-noimports*)
   
   include-imports(|include-dir, imported*):
     ([], section*) -> section*

@@ -70,19 +70,23 @@ exports
     CONTENTCOMPLETE -> Rel       {cons("COMPLETION-Rel")}
     CONTENTCOMPLETE -> LabelComp {cons("COMPLETION-LabelComp")}
 
+  lexical syntax
+    ID -> TermCon 
+
   context-free syntax
     ID                                  -> Var   {cons("VarRef")}
     Var                                 -> Term  
-    Var ":" Type                        -> Cast  {cons("Cast")}
+    Term ":" Type                       -> Cast  {cons("Cast")}
     Cast                                -> Term  
     Var "@" Term                        -> Term  {cons("As")}
     "_"                                 -> Term  {cons("Wld")}
     STRING                              -> Term  {cons("String")}
     INT                                 -> Term  {cons("Int")}
     REAL                                -> Term  {cons("Real")}
-    ID "(" {Term ","}* ")"              -> Term  {cons("Con")}
-    "[" {Term ","}* "]"                 -> Term  {cons("List")}
-    "[" {Term ","}* "|" Term "]"        -> Term  {cons("ListTail")}
+    TermCon "(" {Term ","}* ")"         -> Term  {cons("Con")}
+    "[" {Term ","}* "]"                 -> List  {cons("List")}
+    "[" {Term ","}* "|" Term "]"        -> List  {cons("ListTail")}
+    List                                -> Term  
     "fresh"                             -> Term  {cons("Fresh")}
     "true"                              -> Term  {cons("True")}
     "false"                             -> Term  {cons("False")}
@@ -98,9 +102,13 @@ exports
   context-free syntax
     CONTENTCOMPLETE -> Var   {cons("COMPLETION-Var")}
     CONTENTCOMPLETE -> Cast  {cons("COMPLETION-Cast")}
+    CONTENTCOMPLETE -> List  {cons("COMPLETION-List")}
     CONTENTCOMPLETE -> Entry {cons("COMPLETION-Entry")}
     CONTENTCOMPLETE -> Term  {cons("COMPLETION-Term")}
 
   context-free priorities
     Term "[" Term "]" -> Term >
     Term "+" Term -> Term
+    ,
+    Var "@" Term -> Term >
+    Term ":" Type -> Cast
