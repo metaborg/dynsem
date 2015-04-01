@@ -51,6 +51,7 @@ rules
           }
           
           @Override
+          @SuppressWarnings("unused")
           public ~x:sortname specialize(int depth) {
             if(replaced()) {
               return (~x:sortname) replacement();
