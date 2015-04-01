@@ -199,14 +199,15 @@ rules /* store variables */
       <type-coerce> (ListType(head-ty), ty) => ty'
 
   infer-type-of:
-    (ty, SortFunCall(fun-name, par, arg*)) -> ty'
+    (ty, SortFunCall(fun-name, par, arg*)) -> ty''
     where
       <infer-type-of-top> (NONETYPE(), par) => parent-ty;
       <lookup-def(|Types())> parent-ty => parent-def;
       <lookup-prop(|SortKind())> parent-def => NativeSort();
       <lookup-native-fun-def(|fun-name)> parent-def => fun-def;
       <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
-      <zip; map(infer-type-of-top)> (farg*, arg*)
+      <zip; map(infer-type-of-top)> (farg*, arg*);
+      <type-coerce> (ty', ty) => ty''
 
   infer-type-of:
     (ty, Map([])) -> ty'
