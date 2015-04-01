@@ -31,6 +31,7 @@ rules
         import org.spoofax.jsglr.client.imploder.ImploderAttachment;
         import org.spoofax.interpreter.core.Tools;
         
+        @SuppressWarnings("unused")
         public class ~x:gennodename extends AbstractNode implements ~x:sortname, IGenericNode {
           
           public IStrategoTerm aterm;
@@ -51,7 +52,6 @@ rules
           }
           
           @Override
-          @SuppressWarnings("unused")
           public ~x:sortname specialize(int depth) {
             if(replaced()) {
               return (~x:sortname) replacement();
