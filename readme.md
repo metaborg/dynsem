@@ -19,6 +19,7 @@ Let's assume that the following is a fragment of the specification after explana
 
     constructors
       Plus: Expr * Expr -> Expr
+      NumV: Int -> V
 
     arrows
       Expr -default-> V
