@@ -60,7 +60,7 @@
 
 	<!-- Main target -->
 	<target depends="spoofaximp.default.ctree" name="all" />
-	<target depends="generate-sources-java" name="generate-sources" />
-	<target depends="package-java" name="package" />
+	<target depends="generate-sources-ctree" name="generate-sources" />
+	<target depends="package-ctree" name="package" />
 
 </project>
