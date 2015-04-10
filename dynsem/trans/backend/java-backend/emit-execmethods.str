@@ -244,6 +244,20 @@ rules
       bstm2* := <ds2java-premise> on-fail*
   
   ds2java-premise:
+    (Formula(Match(lhs@Con(c, _), dec@MatchedVar(v))), on-succ*, _) ->
+      bstm* |[
+        final ~x:<ds2java-constr-classname> c ~x:v = e_lhs;
+        bstm*
+      ]|
+    where
+    	c-kind := <lookup-def(|Constructors()); lookup-prop(|ConsKind())> c;
+    	<not(?NativeOpCons())> c-kind
+    where
+      v-ty := <type-of> dec;
+      e_lhs := <ds2java-term-build-optcast(|v-ty)> lhs;
+      bstm* := <ds2java-premise> on-succ*
+  
+  ds2java-premise:
     (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
       bstm* |[
         final ~x:<ds2java-sort-classname> v-ty ~x:v = e_lhs;
