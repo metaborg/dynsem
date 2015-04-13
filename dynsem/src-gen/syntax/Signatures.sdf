@@ -1,4 +1,3 @@
-
 module Signatures
 imports Common ds
 
@@ -42,15 +41,6 @@ exports
     CONTENTCOMPLETE -> SemanticCompDecl {cons("COMPLETION-SemanticCompDecl")}
 
   context-free syntax
-    "internal-sorts" InternalSortDecl* -> SignatureSection {cons("InternalSorts")}
-    ID                                 -> InternalSortDecl {cons("InternalSortDecl")}
-    ID "->" ID                         -> InternalSortDecl {cons("InternalInjDecl")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> InternalSortDecl {cons("COMPLETION-InternalSortDecl")}
-
-  context-free syntax
     "native-datatypes" NativeTypeDecl*                   -> SignatureSection   {cons("NativeDataTypes")}
     STRING                                               -> JSNIPPET           
     JSNIPPET "as" ID "{" NativeFunctionDecl* "}"         -> NativeTypeDecl     {cons("NativeBaseTypeDecl")}
@@ -74,15 +64,6 @@ exports
     CONTENTCOMPLETE -> NativeOpDecl     {cons("COMPLETION-NativeOpDecl")}
 
   context-free syntax
-    "internal-constructors" InternalConsDecl* -> SignatureSection {cons("InternalConstructors")}
-    ID ":" {Type "*"}+ "->" Type              -> InternalConsDecl {cons("InternalConsDecl")}
-    ID ":" Type                               -> InternalConsDecl {cons("NullaryInternalConsDecl")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> InternalConsDecl {cons("COMPLETION-InternalConsDecl")}
-
-  context-free syntax
     "native-constructors" NativeConsDecl* -> SignatureSection {cons("NativeConstructors")}
     ID ":" {Type "*"}+ "->" Type          -> NativeConsDecl   {cons("NativeConsDecl")}
     ID ":" Type                           -> NativeConsDecl   {cons("NullaryNativeConsDecl")}
@@ -92,14 +73,11 @@ exports
     CONTENTCOMPLETE -> NativeConsDecl   {cons("COMPLETION-NativeConsDecl")}
 
   context-free syntax
-    "arrows" DeclaredArrow*                                -> SignatureSection         {cons("ArrowDeclarations")}
-    ArrowDeclaration                                       -> DeclaredArrow            
-    ArrowTemplateDeclaration                               -> DeclaredArrow            
-    Type "-" ID "->" Type                                  -> ArrowDeclaration         {cons("ArrowDecl")}
-    Type "-->" Type                                        -> ArrowDeclaration         {cons("DefaultArrowDecl")}
-    "forall" ID+ "," Type "-" ID "(" ID "->" ID ")->" Type -> ArrowTemplateDeclaration {cons("ArrowTemplDecl")}
+    "arrows" DeclaredArrow* -> SignatureSection {cons("ArrowDeclarations")}
+    ArrowDeclaration        -> DeclaredArrow    
+    Type "-" ID "->" Type   -> ArrowDeclaration {cons("ArrowDecl")}
+    Type "-->" Type         -> ArrowDeclaration {cons("DefaultArrowDecl")}
 
   context-free syntax
-    CONTENTCOMPLETE -> SignatureSection         {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> ArrowDeclaration         {cons("COMPLETION-ArrowDeclaration")}
-    CONTENTCOMPLETE -> ArrowTemplateDeclaration {cons("COMPLETION-ArrowTemplateDeclaration")}
+    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
+    CONTENTCOMPLETE -> ArrowDeclaration {cons("COMPLETION-ArrowDeclaration")}

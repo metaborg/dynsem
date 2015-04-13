@@ -20,9 +20,6 @@ rules // desugaring
     NullaryConsDecl(c, s) -> ConsDecl(c, [], s)
   
   desugar :
-    NullaryInternalConsDecl(c, s) -> InternalConsDecl(c, [], s)
-
-  desugar :
     NullaryNativeConsDecl(c, s) -> NativeConsDecl(c, [], s)
 
   desugar :
@@ -99,9 +96,6 @@ rules // sugaring
   sugar :
     ConsDecl(c, [], s) -> NullaryConsDecl(c, s)
   
-  sugar :
-    InternalConsDecl(c, [], s) -> NullaryInternalConsDecl(c, s)
-
   sugar :
     NativeConsDecl(c, [], s) -> NullaryNativeConsDecl(c, s)
 

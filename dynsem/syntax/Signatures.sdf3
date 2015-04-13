@@ -47,15 +47,6 @@ context-free syntax // semantic component declarations
   
   SemanticCompDecl.SemanticComponent = [[ID] -> [MapType]]
 
-context-free syntax // internal sort declarations
-  
-  SignatureSection.InternalSorts = <
-    internal-sorts
-      <{InternalSortDecl "\n"}*>>
-  
-  InternalSortDecl.InternalSortDecl = <<ID>>
-  InternalSortDecl.InternalInjDecl = [[ID] -> [ID]]
-
 context-free syntax // native data types
 
   SignatureSection.NativeDataTypes = <
@@ -87,15 +78,6 @@ context-free syntax // native operator declarations
 
 context-free syntax // internal constructor declarations
 
-  SignatureSection.InternalConstructors = <
-    internal-constructors
-      <{InternalConsDecl "\n"}*>>
-
-  InternalConsDecl.InternalConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
-  InternalConsDecl.NullaryInternalConsDecl = [[ID] : [Type]]
-
-context-free syntax // internal constructor declarations
-
   SignatureSection.NativeConstructors = <
     native-constructors
       <{NativeConsDecl "\n"}*>>
@@ -110,9 +92,6 @@ context-free syntax
       <{DeclaredArrow "\n"}*>>
   
   DeclaredArrow = ArrowDeclaration
-  DeclaredArrow = ArrowTemplateDeclaration
   
   ArrowDeclaration.ArrowDecl = [[Type] -[ID]-> [Type]]
   ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]
-
-  ArrowTemplateDeclaration.ArrowTemplDecl = [forall [{ID " "}+], [Type] -[ID]([ID] -> [ID])-> [Type]]

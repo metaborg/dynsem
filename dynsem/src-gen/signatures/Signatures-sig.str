@@ -28,11 +28,6 @@ signature
     SemanticComponent  : ID * MapType -> SemanticCompDecl
 
   constructors
-    InternalSorts    : List(InternalSortDecl) -> SignatureSection
-    InternalSortDecl : ID -> InternalSortDecl
-    InternalInjDecl  : ID * ID -> InternalSortDecl
-
-  constructors
     NativeDataTypes         : List(NativeTypeDecl) -> SignatureSection
                             : STRING -> JSNIPPET
     NativeBaseTypeDecl      : JSNIPPET * ID * List(NativeFunctionDecl) -> NativeTypeDecl
@@ -46,11 +41,6 @@ signature
     NullaryNativeOpDecl : ID * Type -> NativeOpDecl
 
   constructors
-    InternalConstructors    : List(InternalConsDecl) -> SignatureSection
-    InternalConsDecl        : ID * List(Type) * Type -> InternalConsDecl
-    NullaryInternalConsDecl : ID * Type -> InternalConsDecl
-
-  constructors
     NativeConstructors    : List(NativeConsDecl) -> SignatureSection
     NativeConsDecl        : ID * List(Type) * Type -> NativeConsDecl
     NullaryNativeConsDecl : ID * Type -> NativeConsDecl
@@ -58,7 +48,5 @@ signature
   constructors
     ArrowDeclarations : List(DeclaredArrow) -> SignatureSection
                       : ArrowDeclaration -> DeclaredArrow
-                      : ArrowTemplateDeclaration -> DeclaredArrow
     ArrowDecl         : Type * ID * Type -> ArrowDeclaration
     DefaultArrowDecl  : Type * Type -> ArrowDeclaration
-    ArrowTemplDecl    : List(ID) * Type * ID * ID * ID * Type -> ArrowTemplateDeclaration
