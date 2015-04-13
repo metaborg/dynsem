@@ -18,8 +18,10 @@ completions
 completions
   completion template SignatureSection : "constructors " =
     "constructors\n\t" (cursor) (blank)  
-  completion template ConsDecl : "ID : -> Type" =
-    <ID:ID> " : " <:Type> " -> " <Type:Type>  
+  completion template ConsDecl : "ID : Type -> Type" =
+    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
+  completion template ConsDecl : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
   completion template Type : "List(Type)" =
     "List(" <Type:Type> ")"  
   completion template MapType : "Map<Type,Type>" =
@@ -52,20 +54,26 @@ completions
 completions
   completion template SignatureSection : "native-operators " =
     "native-operators\n\t" (cursor) (blank)  
-  completion template NativeOpDecl : "ID : -> Type" =
-    <ID:ID> " : " <:Type> " -> " <Type:Type>  
+  completion template NativeOpDecl : "ID : Type -> Type" =
+    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
+  completion template NativeOpDecl : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
 
 completions
   completion template SignatureSection : "internal-constructors " =
     "internal-constructors\n\t" (cursor) (blank)  
-  completion template InternalConsDecl : "ID : -> Type" =
-    <ID:ID> " : " <:Type> " -> " <Type:Type>  
+  completion template InternalConsDecl : "ID : Type -> Type" =
+    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
+  completion template InternalConsDecl : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
 
 completions
   completion template SignatureSection : "native-constructors " =
     "native-constructors\n\t" (cursor) (blank)  
-  completion template NativeConsDecl : "ID : -> Type" =
-    <ID:ID> " : " <:Type> " -> " <Type:Type>  
+  completion template NativeConsDecl : "ID : Type -> Type" =
+    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
+  completion template NativeConsDecl : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
 
 completions
   completion template SignatureSection : "arrows " =

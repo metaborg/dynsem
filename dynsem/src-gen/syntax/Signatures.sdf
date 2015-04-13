@@ -20,7 +20,8 @@ exports
 
   context-free syntax
     "constructors" ConsDecl*     -> SignatureSection {cons("Constructors")}
-    ID ":" {Type "*"}* "->" Type -> ConsDecl         {cons("ConsDecl")}
+    ID ":" {Type "*"}+ "->" Type -> ConsDecl         {cons("ConsDecl")}
+    ID ":" Type                  -> ConsDecl         {cons("NullaryConsDecl")}
     ID                           -> Type             {cons("SimpleSort")}
     "List" "(" Type ")"          -> Type             {cons("ListSort")}
     MapType                      -> Type             
@@ -65,7 +66,8 @@ exports
 
   context-free syntax
     "native-operators" NativeOpDecl* -> SignatureSection {cons("NativeOperators")}
-    ID ":" {Type "*"}* "->" Type     -> NativeOpDecl     {cons("NativeOpDecl")}
+    ID ":" {Type "*"}+ "->" Type     -> NativeOpDecl     {cons("NativeOpDecl")}
+    ID ":" Type                      -> NativeOpDecl     {cons("NullaryNativeOpDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
@@ -73,7 +75,8 @@ exports
 
   context-free syntax
     "internal-constructors" InternalConsDecl* -> SignatureSection {cons("InternalConstructors")}
-    ID ":" {Type "*"}* "->" Type              -> InternalConsDecl {cons("InternalConsDecl")}
+    ID ":" {Type "*"}+ "->" Type              -> InternalConsDecl {cons("InternalConsDecl")}
+    ID ":" Type                               -> InternalConsDecl {cons("NullaryInternalConsDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
@@ -81,7 +84,8 @@ exports
 
   context-free syntax
     "native-constructors" NativeConsDecl* -> SignatureSection {cons("NativeConstructors")}
-    ID ":" {Type "*"}* "->" Type          -> NativeConsDecl   {cons("NativeConsDecl")}
+    ID ":" {Type "*"}+ "->" Type          -> NativeConsDecl   {cons("NativeConsDecl")}
+    ID ":" Type                           -> NativeConsDecl   {cons("NullaryNativeConsDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}

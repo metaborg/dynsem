@@ -128,6 +128,18 @@ strategies
   is-ConsDecl =
     ?ConsDecl(_, _, _)
 
+  prettyprint-ConsDecl :
+    NullaryConsDecl(t1__, t2__) -> [ H(
+                                       [SOpt(HS(), "0")]
+                                     , [t1__', S(" : "), t2__']
+                                     )
+                                   ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-ConsDecl =
+    ?NullaryConsDecl(_, _)
+
   prettyprint-Type :
     SimpleSort(t1__) -> [ H(
                             [SOpt(HS(), "0")]
@@ -434,6 +446,18 @@ strategies
   is-NativeOpDecl =
     ?NativeOpDecl(_, _, _)
 
+  prettyprint-NativeOpDecl :
+    NullaryNativeOpDecl(t1__, t2__) -> [ H(
+                                           [SOpt(HS(), "0")]
+                                         , [t1__', S(" : "), t2__']
+                                         )
+                                       ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-NativeOpDecl =
+    ?NullaryNativeOpDecl(_, _)
+
   is-SignatureSection =
     fail
 
@@ -478,6 +502,18 @@ strategies
   is-InternalConsDecl =
     ?InternalConsDecl(_, _, _)
 
+  prettyprint-InternalConsDecl :
+    NullaryInternalConsDecl(t1__, t2__) -> [ H(
+                                               [SOpt(HS(), "0")]
+                                             , [t1__', S(" : "), t2__']
+                                             )
+                                           ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-InternalConsDecl =
+    ?NullaryInternalConsDecl(_, _)
+
   is-SignatureSection =
     fail
 
@@ -521,6 +557,18 @@ strategies
 
   is-NativeConsDecl =
     ?NativeConsDecl(_, _, _)
+
+  prettyprint-NativeConsDecl :
+    NullaryNativeConsDecl(t1__, t2__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [t1__', S(" : "), t2__']
+                                           )
+                                         ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-NativeConsDecl =
+    ?NullaryNativeConsDecl(_, _)
 
   is-SignatureSection =
     fail

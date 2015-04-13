@@ -17,6 +17,18 @@ rules // desugaring
     NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
   
   desugar :
+    NullaryConsDecl(c, s) -> ConsDecl(c, [], s)
+  
+  desugar :
+    NullaryInternalConsDecl(c, s) -> InternalConsDecl(c, [], s)
+
+  desugar :
+    NullaryNativeConsDecl(c, s) -> NativeConsDecl(c, [], s)
+
+  desugar :
+    NullaryNativeOpDecl(c, s) -> NativeOpDecl(c, [], s)
+  
+  desugar :
     RuleW(form, prem*) -> Rule(prem*, "---", form)
   
   desugar :
@@ -83,6 +95,18 @@ rules // sugaring
   
   sugar :
     NativeFunctionDecl(name, [], type) -> NativeNoArgFunctionDecl(name, type)
+  
+  sugar :
+    ConsDecl(c, [], s) -> NullaryConsDecl(c, s)
+  
+  sugar :
+    InternalConsDecl(c, [], s) -> NullaryInternalConsDecl(c, s)
+
+  sugar :
+    NativeConsDecl(c, [], s) -> NullaryNativeConsDecl(c, s)
+
+  sugar :
+    NativeOpDecl(c, [], s) -> NullaryNativeOpDecl(c, s)
   
   sugar :
   	Rule([],infer,conc) -> Axiom(conc)

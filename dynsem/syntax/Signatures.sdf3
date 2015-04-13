@@ -26,7 +26,8 @@ context-free syntax // constructor declarations
     constructors
       <{ConsDecl "\n"}*>>
 
-  ConsDecl.ConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
+  ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  ConsDecl.NullaryConsDecl = [[ID] : [Type]]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
@@ -81,7 +82,8 @@ context-free syntax // native operator declarations
     native-operators
       <{NativeOpDecl "\n"}*>>
   
-  NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}*] -> [Type]]
+  NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  NativeOpDecl.NullaryNativeOpDecl = [[ID] : [Type]]
 
 context-free syntax // internal constructor declarations
 
@@ -89,7 +91,8 @@ context-free syntax // internal constructor declarations
     internal-constructors
       <{InternalConsDecl "\n"}*>>
 
-  InternalConsDecl.InternalConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
+  InternalConsDecl.InternalConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  InternalConsDecl.NullaryInternalConsDecl = [[ID] : [Type]]
 
 context-free syntax // internal constructor declarations
 
@@ -97,7 +100,8 @@ context-free syntax // internal constructor declarations
     native-constructors
       <{NativeConsDecl "\n"}*>>
 
-  NativeConsDecl.NativeConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
+  NativeConsDecl.NativeConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  NativeConsDecl.NullaryNativeConsDecl = [[ID] : [Type]]
 
 context-free syntax
   
