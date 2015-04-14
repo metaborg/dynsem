@@ -18,7 +18,7 @@ imports
 rules
   
   ds2java-genericnodes:
-    Module(_, _) -> <map(debug(!"A "); def-get-name; debug(!"B "); ds2java-genericnode; debug(!"C "))> def-ty* 
+    Module(_, _) -> <map(def-get-name; ds2java-genericnode)> def-ty* 
     where
       def-ty* := <lookup-def-all(|Types()); filter(where(lookup-prop(|SortKind()) => LanguageSort()))>
 
@@ -100,17 +100,11 @@ rules
 		    }
 			]|
     where
-      debug(!11);
       c-name := <def-get-name> c-def;
-      debug(!12);
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def;
-      debug(!13);
       sortname := <ds2java-sort-classname> c-ty;
-      debug(!14);
       consname := <ds2java-constr-classname> c-name;
-      debug(!15);
       e* := <map-with-index((\ idx -> e |[ term.getSubterm(~i:<int-to-string> idx)]| \, id); ds2java-gennode-instantiation)> c-c-ty*
-      ;debug(!16)
   
   subterm-at-index:
     idx -> e |[ term.getSubterm(~i:<int-to-string> idx) ]|
