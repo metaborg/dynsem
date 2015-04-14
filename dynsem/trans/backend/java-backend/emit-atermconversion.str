@@ -77,7 +77,7 @@ rules
   	RealType() -> e |[ factory.makeReal(e) ]|
 
   ds2java-atermconversion-name(|e):
-  	BoolType() -> e |[ factory.makeAppl(factory.makeConstructor(e ? "True" : "False", 0)) ]|
+    BoolType() -> e |[ TermUtils.termFromBool(e, factory) ]|
   
   ds2java-atermconversion-name(|e):
   	StringType() -> e |[ factory.makeString(e) ]|

@@ -62,11 +62,11 @@ rules
               final String name = term.getName();
               final INodeSource source = NodeSource.fromStrategoTerm(term);
 
-              ~bstm*:<mapconcat(debug(!1); ds2java-consdecl-specializer; debug(!2))> c-def*
+              ~bstm*:<mapconcat(ds2java-consdecl-specializer)> c-def*
             }
             IGenericNode replacement = null;
             
-            ~bstm*:<foldr(![], debug(!3); ds2java-sortinj-specializer; debug(!4))> ty-def*
+            ~bstm*:<foldr(![], ds2java-sortinj-specializer)> ty-def*
             
             throw new RewritingException(aterm.toString());
             
@@ -140,9 +140,8 @@ rules
   ds2java-gennode-instantiation:
     (e_trm, RealType()) -> e |[ Tools.asJavaDouble(e_trm) ]|
   
-  // TODO
   ds2java-gennode-instantiation:
-    (e_trm, BoolType()) -> e |[ 55 ]| // TODO: maybe there is some actual conversion convention we could use
+    (e_trm, BoolType()) -> e |[ TermUtils.boolFromTerm(e_trm) ]|
 
   ds2java-sortinj-specializer:
   	(ty-def, bstm*) ->
