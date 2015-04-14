@@ -13,6 +13,7 @@ imports
   backend/java-backend/analysis-extra
   backend/java-backend/lib-ds2java
   backend/java-backend/emit-arrows
+  backend/java-backend/emit-maputils
 
 rules
   
@@ -108,11 +109,14 @@ rules
       debug(!14);
       consname := <ds2java-constr-classname> c-name;
       debug(!15);
-      e* := <map-with-index((dec, id); ds2java-gennode-instantiation)> c-c-ty*
+      e* := <map-with-index((\ idx -> e |[ term.getSubterm(~i:<int-to-string> idx)]| \, id); ds2java-gennode-instantiation)> c-c-ty*
       ;debug(!16)
-      
+  
+  subterm-at-index:
+    idx -> e |[ term.getSubterm(~i:<int-to-string> idx) ]|
+
   ds2java-gennode-instantiation:
-    (idx, ty) -> e |[ new ~x:gennodename(source, term.getSubterm(~i:<int-to-string> idx)) ]|
+    (e_trm, ty) -> e |[ new ~x:gennodename(NodeSource.fromStrategoTerm(e_trm), e_trm) ]|
     where
       not(!ty => ListType(_));
       ty-def := <lookup-def(|Types())> ty;
@@ -121,32 +125,30 @@ rules
       gennodename := $[Generic_[<ds2java-sort-classname> ty]]
 
   ds2java-gennode-instantiation:
-    (idx, lty@ListType(e-ty)) -> e |[ new x_listname(NodeSource.fromStrategoTerm(term.getSubterm(i))).fromStrategoTerm(term.getSubterm(i)) ]|
+    (e_trm, lty@ListType(e-ty)) -> e |[ new x_listname(NodeSource.fromStrategoTerm(e_trm)).fromStrategoTerm(e_trm) ]|
     where
-      i := <int-to-string> idx;
       x_listname := <ds2java-sort-classname> lty
+  
+  ds2java-gennode-instantiation:
+    (e_trm, ty) -> e |[ AutoMapUtils.x_tosemcomp(e_trm) ]|
+    where
+      ty-def := <lookup-def(|Types())> ty;
+      <lookup-prop(|SortKind())> ty-def => SemanticCompSort();
+      ty-name := <def-get-name> ty-def;
+      x_tosemcomp := <ds2java-aterm2map-name> ty-name
  
   ds2java-gennode-instantiation:
-    (idx, ty) -> e |[ new x_listname(NodeSource.fromStrategoTerm(term.getSubterm(i))).fromStrategoTerm(term.getSubterm(i)) ]|
-    where
-      i := <int-to-string> idx;
-      ty-def := <lookup-def(|Types())> ty;
-      <not(lookup-prop(|SortKind()) => SemanticCompSort())> ty-def
+    (e_trm, StringType()) -> e |[ Tools.asJavaString(e_trm) ]|
 
   ds2java-gennode-instantiation:
-    (idx, StringType()) -> e |[ Tools.asJavaString(term.getSubterm(~i:<int-to-string> idx)) ]|
+    (e_trm, IntType()) -> e |[ Tools.asJavaInt(e_trm) ]|
 
   ds2java-gennode-instantiation:
-    (idx, IntType()) -> e |[ Tools.asJavaInt(term.getSubterm(~i:<int-to-string> idx)) ]|
-
+    (e_trm, RealType()) -> e |[ Tools.asJavaDouble(e_trm) ]|
+  
+  // TODO
   ds2java-gennode-instantiation:
-    (idx, RealType()) -> e |[ Tools.asJavaDouble(term.getSubterm(~i:<int-to-string> idx)) ]|
-
-  ds2java-gennode-instantiation:
-    (idx, BoolType()) -> e |[ false ]| // TODO: maybe there is some actual conversion convention we could use
-
-  // ds2java-gennode-instantiation:
-  // 
+    (e_trm, BoolType()) -> e |[ 55 ]| // TODO: maybe there is some actual conversion convention we could use
 
   ds2java-sortinj-specializer:
   	(ty-def, bstm*) ->
