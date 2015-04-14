@@ -116,6 +116,7 @@ rules
       ty-def := <lookup-def(|Types())> ty;
       <not(lookup-prop(|SortKind()) => SystemSort())> ty-def;
       <not(lookup-prop(|SortKind()) => SemanticCompSort())> ty-def;
+      <not(lookup-prop(|SortKind()) => NativeSort())> ty-def;
       gennodename := $[Generic_[<ds2java-sort-classname> ty]]
 
   ds2java-gennode-instantiation:
@@ -130,6 +131,12 @@ rules
       <lookup-prop(|SortKind())> ty-def => SemanticCompSort();
       ty-name := <def-get-name> ty-def;
       x_tosemcomp := <ds2java-aterm2map-name> ty-name
+ 
+  ds2java-gennode-instantiation:
+  	(e_trm, ty) -> e |[ null ]|
+  	where
+  		ty-def := <lookup-def(|Types())> ty;
+  		<lookup-prop(|SortKind())> ty-def => NativeSort()
  
   ds2java-gennode-instantiation:
     (e_trm, StringType()) -> e |[ Tools.asJavaString(e_trm) ]|
