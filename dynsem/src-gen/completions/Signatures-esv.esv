@@ -1,4 +1,3 @@
-
 module src-gen/completions/Signatures-esv
 
 imports
@@ -18,8 +17,10 @@ completions
 completions
   completion template SignatureSection : "constructors " =
     "constructors\n\t" (cursor) (blank)  
-  completion template ConsDecl : "ID : -> Type" =
-    <ID:ID> " : " <:Type> " -> " <Type:Type>  
+  completion template ConsDecl : "ID : Type -> Type" =
+    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
+  completion template ConsDecl : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
   completion template Type : "List(Type)" =
     "List(" <Type:Type> ")"  
   completion template MapType : "Map<Type,Type>" =
@@ -30,12 +31,6 @@ completions
     "semantic-components\n\t" (cursor) (blank)  
   completion template SemanticCompDecl : "ID -> MapType" =
     <ID:ID> " -> " <MapType:MapType>  
-
-completions
-  completion template SignatureSection : "internal-sorts " =
-    "internal-sorts\n\t" (cursor) (blank)  
-  completion template InternalSortDecl : "ID -> ID" =
-    <ID:ID> " -> " <ID:ID>  
 
 completions
   completion template SignatureSection : "native-datatypes " =
@@ -52,27 +47,23 @@ completions
 completions
   completion template SignatureSection : "native-operators " =
     "native-operators\n\t" (cursor) (blank)  
-  completion template NativeOpDecl : "ID : -> Type" =
-    <ID:ID> " : " <:Type> " -> " <Type:Type>  
-
-completions
-  completion template SignatureSection : "internal-constructors " =
-    "internal-constructors\n\t" (cursor) (blank)  
-  completion template InternalConsDecl : "ID : -> Type" =
-    <ID:ID> " : " <:Type> " -> " <Type:Type>  
+  completion template NativeOpDecl : "ID : Type -> Type" =
+    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
+  completion template NativeOpDecl : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
 
 completions
   completion template SignatureSection : "native-constructors " =
     "native-constructors\n\t" (cursor) (blank)  
-  completion template NativeConsDecl : "ID : -> Type" =
-    <ID:ID> " : " <:Type> " -> " <Type:Type>  
+  completion template NativeConsDecl : "ID : Type -> Type" =
+    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
+  completion template NativeConsDecl : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
 
 completions
   completion template SignatureSection : "arrows " =
-    "arrows\n\t" (cursor) (blank)             
+    "arrows\n\t" (cursor) (blank)  
   completion template ArrowDeclaration : "Type -ID-> Type" =
     <Type:Type> " -" <ID:ID> "-> " <Type:Type>  
   completion template ArrowDeclaration : "Type --> Type" =
-    <Type:Type> " --> " <Type:Type>     
-  completion template ArrowTemplateDeclaration : "forall ID, Type -ID(ID -> ID)-> Type" =
-    "forall " <ID:ID> ", " <Type:Type> " -" <ID:ID> "(" <ID:ID> " -> " <ID:ID> ")-> " <Type:Type>  
+    <Type:Type> " --> " <Type:Type>  

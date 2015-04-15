@@ -19,7 +19,7 @@ rules /* generate interfaces for sort declarations */
     Module(_, section*) -> iface*
     where
       all-type-def*  := <lookup-def-all(|Types())>;
-      type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
+      type-def* := <filter(where(lookup-prop(|SortKind()) => LanguageSort()))> all-type-def*;
       iface* := <map(?(_, <id>); ds2java-interface)> type-def*
   
   ds2java-interface:
