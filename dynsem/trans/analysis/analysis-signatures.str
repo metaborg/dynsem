@@ -16,6 +16,7 @@ rules /* store signatures */
       <+ store-arrows
       <+ store-native-datatypes
       <+ store-semantic-components
+      <+ store-variable-schemes
     ))
   
   store-built-ins =
@@ -108,6 +109,14 @@ rules /* store signatures */
       <store-def(|Types())> name => name-def;
       <store-prop(|SortKind(), name-def)> SemanticCompSort();
       <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
+
+  store-variable-schemes = VariableSchemes(map(store-variable-scheme))
+  
+  store-variable-scheme:
+    d@VariableScheme(prefix, ty) -> d
+    with
+      <store-def(|VarSchemes())> prefix => scheme-def;
+      <store-prop(|Type(), scheme-def)> <rw-type> ty
 
 rules
   
