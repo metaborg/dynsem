@@ -92,8 +92,26 @@ rules /* store variables */
     where
       <?Var(v) + ?MatchedVar(v)> dec
     where
+      <not(get-unique-matching-varscheme)> v;
       <store-def(|Vars())> v => v-def;
       <store-prop(|Type(), v-def)> ty
+
+  infer-type-of:
+    (ty, dec) -> ty
+    where
+      <?Var(v) + ?MatchedVar(v)> dec
+    where
+      debug(!1);
+      scheme-def := <get-unique-matching-varscheme> v;
+      debug(!2);
+      scheme-ty := <lookup-prop(|Type())> scheme-def;
+      debug(!3);
+      ty' := <debug(!"A "); type-coerce; debug(!"B ")> (ty, scheme-ty);
+      debug(!4);
+      <store-def(|Vars())> v => v-def;
+      debug(!5);
+      <store-prop(|Type(), v-def)> ty'
+      ;debug(!6)
 
   infer-type-of:
     (ty, r@VarRef(v)) -> ty'
