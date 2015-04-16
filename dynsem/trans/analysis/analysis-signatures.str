@@ -5,6 +5,7 @@ imports
   analysis/lib-analysis
   analysis/constructors
   analysis/analysis-rules
+  analysis/query
 
 rules /* store signatures */
   
@@ -136,7 +137,12 @@ rules
     );
     <lookup-defs(|Types())> s => [_, _ | _];
     add-msg(|Error(), s, $[Duplicate sort [s]])
-    
+  
+  check-signature =
+    ?vs@VariableScheme(prefix, _);
+    <get-matching-varschemes> prefix => [_, _ | _];
+    add-msg(|Error(), vs, $[Duplicate or overlapping variable prefix [prefix]])
+  
   check-signature =
     ?Con(cname, _);
     <not(lookup-def(|Constructors()))> cname;
