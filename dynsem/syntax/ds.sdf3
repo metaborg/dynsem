@@ -92,17 +92,15 @@ context-free syntax // formulas
   
   Rel.Dynamic = [-->]
   Rel.NamedDynamic = [-[ID]->]
-  Rel.NamedDynamicParametric = [-[ID]([ID])->]
   
-  Rel.DynamicEmitted = [-[{LabelComp ", "}+]->]
+  Rel.DynamicEmitted = [-[{LabelComp ", "}+]-->]
   Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[ID]->]
-  Rel.NamedDynamicEmittedParametric = [-[{LabelComp ", "}+]-[ID]([ID])->]
   
   LabelComp.LabelComp = [[Type] [Term]]
-  LabelComp.VarLabelComp = [[Var]]
+  LabelComp.VarLabelComp = [`[Var]]
 
   LabelComp = [([LabelComp])] {bracket}
-  
+
 lexical syntax 
 
   TermCon = ID 

@@ -45,30 +45,28 @@ exports
     CONTENTCOMPLETE -> ID            {cons("COMPLETION-ID")}
 
   context-free syntax
-    Term "=>" Term                              -> Formula   {cons("Match")}
-    Term "=!=>" Term                            -> Formula   {cons("NMatch")}
-    Term "==" Term                              -> Formula   {cons("TermEq")}
-    Term "!=" Term                              -> Formula   {cons("TermNeq")}
-    Var "<?" Type                               -> Formula   {cons("TypeCheck")}
-    Var "<:" Type                               -> Formula   {cons("TypeCast")}
-    Relation                                    -> Formula   
-    Reads Source Rel Target                     -> Relation  {cons("Relation")}
-    "value" "(" Term ")"                        -> Formula   {cons("IsValue")}
-                                                -> Reads     {cons("NoReads")}
-    LabelComp+ "|-"                             -> Reads     {cons("Reads")}
-    Term                                        -> Source    {cons("Source")}
-    Term "::" LabelComp+                        -> Source    {cons("Source")}
-    Term                                        -> Target    {cons("Target")}
-    Term "::" LabelComp+ "."                    -> Target    {cons("Target")}
-    "-->"                                       -> Rel       {cons("Dynamic")}
-    "-" ID "->"                                 -> Rel       {cons("NamedDynamic")}
-    "-" ID "(" ID ")" "->"                      -> Rel       {cons("NamedDynamicParametric")}
-    "-" {LabelComp ","}+ "->"                   -> Rel       {cons("DynamicEmitted")}
-    "-" {LabelComp ","}+ "-" ID "->"            -> Rel       {cons("NamedDynamicEmitted")}
-    "-" {LabelComp ","}+ "-" ID "(" ID ")" "->" -> Rel       {cons("NamedDynamicEmittedParametric")}
-    Type Term                                   -> LabelComp {cons("LabelComp")}
-    Var                                         -> LabelComp {cons("VarLabelComp")}
-    "(" LabelComp ")"                           -> LabelComp {bracket}
+    Term "=>" Term                   -> Formula   {cons("Match")}
+    Term "=!=>" Term                 -> Formula   {cons("NMatch")}
+    Term "==" Term                   -> Formula   {cons("TermEq")}
+    Term "!=" Term                   -> Formula   {cons("TermNeq")}
+    Var "<?" Type                    -> Formula   {cons("TypeCheck")}
+    Var "<:" Type                    -> Formula   {cons("TypeCast")}
+    Relation                         -> Formula   
+    Reads Source Rel Target          -> Relation  {cons("Relation")}
+    "value" "(" Term ")"             -> Formula   {cons("IsValue")}
+                                     -> Reads     {cons("NoReads")}
+    LabelComp+ "|-"                  -> Reads     {cons("Reads")}
+    Term                             -> Source    {cons("Source")}
+    Term "::" LabelComp+             -> Source    {cons("Source")}
+    Term                             -> Target    {cons("Target")}
+    Term "::" LabelComp+ "."         -> Target    {cons("Target")}
+    "-->"                            -> Rel       {cons("Dynamic")}
+    "-" ID "->"                      -> Rel       {cons("NamedDynamic")}
+    "-" {LabelComp ","}+ "-->"       -> Rel       {cons("DynamicEmitted")}
+    "-" {LabelComp ","}+ "-" ID "->" -> Rel       {cons("NamedDynamicEmitted")}
+    Type Term                        -> LabelComp {cons("LabelComp")}
+    "`" Var                          -> LabelComp {cons("VarLabelComp")}
+    "(" LabelComp ")"                -> LabelComp {bracket}
 
   context-free syntax
     CONTENTCOMPLETE -> Relation  {cons("COMPLETION-Relation")}
