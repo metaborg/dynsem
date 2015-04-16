@@ -15,6 +15,10 @@ signature
     InjDecl  : ID * ID -> SortDecl
 
   constructors
+    VariableSchemes : List(VariableScheme) -> SignatureSection
+    VariableScheme  : ID * Type -> VariableScheme
+
+  constructors
     Constructors    : List(ConsDecl) -> SignatureSection
     ConsDecl        : ID * List(Type) * Type -> ConsDecl
     NullaryConsDecl : ID * Type -> ConsDecl

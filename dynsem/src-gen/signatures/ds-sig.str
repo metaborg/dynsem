@@ -43,6 +43,7 @@ signature
     NamedDynamicEmitted           : List(LabelComp) * ID -> Rel
     NamedDynamicEmittedParametric : List(LabelComp) * ID * ID -> Rel
     LabelComp                     : Type * Term -> LabelComp
+    VarLabelComp                  : Var -> LabelComp
 
   constructors
      : String -> TermCon

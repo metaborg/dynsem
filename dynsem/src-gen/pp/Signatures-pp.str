@@ -90,6 +90,44 @@ strategies
     prettyprint-SignatureSection
 
   prettyprint-example =
+    prettyprint-VariableScheme
+
+  prettyprint-SignatureSection :
+    VariableSchemes(t1__) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("variables")]
+                               )
+                             , t1__'
+                             ]
+    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-VariableScheme)> t1__]
+
+  is-SignatureSection =
+    ?VariableSchemes(_)
+
+  prettyprint-VariableScheme :
+    VariableScheme(t1__, t2__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [t1__', S(" : "), t2__']
+                                    )
+                                  ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-VariableScheme =
+    ?VariableScheme(_, _)
+
+  is-SignatureSection =
+    fail
+
+  is-VariableScheme =
+    fail
+
+
+strategies
+  prettyprint-example =
+    prettyprint-SignatureSection
+
+  prettyprint-example =
     prettyprint-ConsDecl
 
   prettyprint-example =

@@ -15,6 +15,12 @@ completions
     <ID:ID> " -> " <ID:ID>  
 
 completions
+  completion template SignatureSection : "variables " =
+    "variables\n\t" (cursor) (blank)  
+  completion template VariableScheme : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
+
+completions
   completion template SignatureSection : "constructors " =
     "constructors\n\t" (cursor) (blank)  
   completion template ConsDecl : "ID : Type -> Type" =

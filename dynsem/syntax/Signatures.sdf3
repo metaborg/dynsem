@@ -20,6 +20,14 @@ context-free syntax // sort declarations
   SortDecl.InjDecl = [[ID] -> [ID]]
   
 
+context-free syntax // variable schemes
+  
+  SignatureSection.VariableSchemes = <
+    variables
+      <{VariableScheme "\n"}*>>
+  
+  VariableScheme.VariableScheme = [[ID] : [Type]]
+
 context-free syntax // constructor declarations
 
   SignatureSection.Constructors = <

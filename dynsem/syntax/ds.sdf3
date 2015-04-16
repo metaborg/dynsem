@@ -84,10 +84,10 @@ context-free syntax // formulas
   Reads.NoReads = []
   Reads.Reads   = [[{LabelComp " "}+] |- ]
   
-  Source.Source = [[Term]]
+  Source.Source = Term
   Source.Source = [[Term] :: [{LabelComp " "}+]]
 
-  Target.Target = [[Term]]
+  Target.Target = Term
   Target.Target = [[Term] :: [{LabelComp " "}+].]
   
   Rel.Dynamic = [-->]
@@ -99,6 +99,9 @@ context-free syntax // formulas
   Rel.NamedDynamicEmittedParametric = [-[{LabelComp ", "}+]-[ID]([ID])->]
   
   LabelComp.LabelComp = [[Type] [Term]]
+  LabelComp.VarLabelComp = [[Var]]
+
+  LabelComp = [([LabelComp])] {bracket}
   
 lexical syntax 
 

@@ -18,6 +18,14 @@ exports
     CONTENTCOMPLETE -> SortDecl         {cons("COMPLETION-SortDecl")}
 
   context-free syntax
+    "variables" VariableScheme* -> SignatureSection {cons("VariableSchemes")}
+    ID ":" Type                 -> VariableScheme   {cons("VariableScheme")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
+    CONTENTCOMPLETE -> VariableScheme   {cons("COMPLETION-VariableScheme")}
+
+  context-free syntax
     "constructors" ConsDecl*     -> SignatureSection {cons("Constructors")}
     ID ":" {Type "*"}+ "->" Type -> ConsDecl         {cons("ConsDecl")}
     ID ":" Type                  -> ConsDecl         {cons("NullaryConsDecl")}

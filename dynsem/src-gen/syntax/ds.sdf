@@ -67,6 +67,8 @@ exports
     "-" {LabelComp ","}+ "-" ID "->"            -> Rel       {cons("NamedDynamicEmitted")}
     "-" {LabelComp ","}+ "-" ID "(" ID ")" "->" -> Rel       {cons("NamedDynamicEmittedParametric")}
     Type Term                                   -> LabelComp {cons("LabelComp")}
+    Var                                         -> LabelComp {cons("VarLabelComp")}
+    "(" LabelComp ")"                           -> LabelComp {bracket}
 
   context-free syntax
     CONTENTCOMPLETE -> Relation  {cons("COMPLETION-Relation")}
