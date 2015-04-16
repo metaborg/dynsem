@@ -104,7 +104,7 @@ rules
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def;
       sortname := <ds2java-sort-classname> c-ty;
       consname := <ds2java-constr-classname> c-name;
-      e* := <map-with-index((\ idx -> e |[ term.getSubterm(~i:<int-to-string> idx)]| \, id); ds2java-gennode-instantiation)> c-c-ty*
+      e* := <map-with-index((\ idx -> e |[ term.getSubterm(~i:<dec; int-to-string> idx)]| \, id); ds2java-gennode-instantiation)> c-c-ty*
   
   subterm-at-index:
     idx -> e |[ term.getSubterm(~i:<int-to-string> idx) ]|
