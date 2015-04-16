@@ -27,14 +27,14 @@ completions
     "Map<" <Type:Type> "," <Type:Type> ">"  
 
 completions
-  completion template SignatureSection : "semantic-components " =
-    "semantic-components\n\t" (cursor) (blank)  
+  completion template SignatureSection : "semantic components " =
+    "semantic components\n\t" (cursor) (blank)  
   completion template SemanticCompDecl : "ID -> MapType" =
     <ID:ID> " -> " <MapType:MapType>  
 
 completions
-  completion template SignatureSection : "native-datatypes " =
-    "native-datatypes\n\t" (cursor) (blank)  
+  completion template SignatureSection : "native datatypes " =
+    "native datatypes\n\t" (cursor) (blank)  
   completion template NativeTypeDecl : "JSNIPPET as ID { } " =
     <JSNIPPET:JSNIPPET> " as " <ID:ID> " { " <:NativeFunctionDecl> " } "  
   completion template NativeTypeDecl : "JSNIPPET as ID -> ID { } " =
@@ -45,16 +45,16 @@ completions
     <ID:ID> " : " <Type:Type>   
 
 completions
-  completion template SignatureSection : "native-operators " =
-    "native-operators\n\t" (cursor) (blank)  
+  completion template SignatureSection : "native operators " =
+    "native operators\n\t" (cursor) (blank)  
   completion template NativeOpDecl : "ID : Type -> Type" =
     <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
   completion template NativeOpDecl : "ID : Type" =
     <ID:ID> " : " <Type:Type>  
 
 completions
-  completion template SignatureSection : "native-constructors " =
-    "native-constructors\n\t" (cursor) (blank)  
+  completion template SignatureSection : "native constructors " =
+    "native constructors\n\t" (cursor) (blank)  
   completion template NativeConsDecl : "ID : Type -> Type" =
     <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
   completion template NativeConsDecl : "ID : Type" =

@@ -21,6 +21,13 @@ exports
     "signature"                                 -> ID            {reject}
     "constructors"                              -> ID            {reject}
     "sorts"                                     -> ID            {reject}
+    "native"                                    -> ID            {reject}
+    "operators"                                 -> ID            {reject}
+    "datatypes"                                 -> ID            {reject}
+    "semantic"                                  -> ID            {reject}
+    "components"                                -> ID            {reject}
+    "List"                                      -> ID            {reject}
+    "Map"                                       -> ID            {reject}
     "arrows"                                    -> ID            {reject}
     "rules"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}

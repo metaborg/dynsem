@@ -42,7 +42,7 @@ template options
 context-free syntax // semantic component declarations
 
   SignatureSection.SemanticComponents = <
-    semantic-components
+    semantic components
       <{SemanticCompDecl "\n"}*>>
   
   SemanticCompDecl.SemanticComponent = [[ID] -> [MapType]]
@@ -50,7 +50,7 @@ context-free syntax // semantic component declarations
 context-free syntax // native data types
 
   SignatureSection.NativeDataTypes = <
-    native-datatypes
+    native datatypes
       <{NativeTypeDecl "\n"}*>>
   
   JSNIPPET = <<STRING>>
@@ -70,7 +70,7 @@ context-free syntax // native data types
 context-free syntax // native operator declarations
 
   SignatureSection.NativeOperators = <
-    native-operators
+    native operators
       <{NativeOpDecl "\n"}*>>
   
   NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}+] -> [Type]]
@@ -79,7 +79,7 @@ context-free syntax // native operator declarations
 context-free syntax // internal constructor declarations
 
   SignatureSection.NativeConstructors = <
-    native-constructors
+    native constructors
       <{NativeConsDecl "\n"}*>>
 
   NativeConsDecl.NativeConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
@@ -95,3 +95,4 @@ context-free syntax
   
   ArrowDeclaration.ArrowDecl = [[Type] -[ID]-> [Type]]
   ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]
+

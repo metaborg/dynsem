@@ -51,6 +51,13 @@ context-free syntax // rules
   ID = <signature> {reject}
   ID = <constructors> {reject}
   ID = <sorts> {reject}
+  ID = <native> {reject}
+  ID = <operators> {reject}
+  ID = <datatypes> {reject}
+  ID = <semantic> {reject}
+  ID = <components> {reject}
+  ID = <List> {reject}
+  ID = <Map> {reject}
   ID = <arrows> {reject}
   ID = <rules> {reject}
   ID = <fresh> {reject}

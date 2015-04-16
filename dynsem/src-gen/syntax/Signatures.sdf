@@ -33,15 +33,15 @@ exports
     CONTENTCOMPLETE -> MapType          {cons("COMPLETION-MapType")}
 
   context-free syntax
-    "semantic-components" SemanticCompDecl* -> SignatureSection {cons("SemanticComponents")}
-    ID "->" MapType                         -> SemanticCompDecl {cons("SemanticComponent")}
+    "semantic" "components" SemanticCompDecl* -> SignatureSection {cons("SemanticComponents")}
+    ID "->" MapType                           -> SemanticCompDecl {cons("SemanticComponent")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
     CONTENTCOMPLETE -> SemanticCompDecl {cons("COMPLETION-SemanticCompDecl")}
 
   context-free syntax
-    "native-datatypes" NativeTypeDecl*                   -> SignatureSection   {cons("NativeDataTypes")}
+    "native" "datatypes" NativeTypeDecl*                 -> SignatureSection   {cons("NativeDataTypes")}
     STRING                                               -> JSNIPPET           
     JSNIPPET "as" ID "{" NativeFunctionDecl* "}"         -> NativeTypeDecl     {cons("NativeBaseTypeDecl")}
     JSNIPPET "as" ID "->" ID "{" NativeFunctionDecl* "}" -> NativeTypeDecl     {cons("NativeSubTypeDecl")}
@@ -55,18 +55,18 @@ exports
     CONTENTCOMPLETE -> NativeFunctionDecl {cons("COMPLETION-NativeFunctionDecl")}
 
   context-free syntax
-    "native-operators" NativeOpDecl* -> SignatureSection {cons("NativeOperators")}
-    ID ":" {Type "*"}+ "->" Type     -> NativeOpDecl     {cons("NativeOpDecl")}
-    ID ":" Type                      -> NativeOpDecl     {cons("NullaryNativeOpDecl")}
+    "native" "operators" NativeOpDecl* -> SignatureSection {cons("NativeOperators")}
+    ID ":" {Type "*"}+ "->" Type       -> NativeOpDecl     {cons("NativeOpDecl")}
+    ID ":" Type                        -> NativeOpDecl     {cons("NullaryNativeOpDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
     CONTENTCOMPLETE -> NativeOpDecl     {cons("COMPLETION-NativeOpDecl")}
 
   context-free syntax
-    "native-constructors" NativeConsDecl* -> SignatureSection {cons("NativeConstructors")}
-    ID ":" {Type "*"}+ "->" Type          -> NativeConsDecl   {cons("NativeConsDecl")}
-    ID ":" Type                           -> NativeConsDecl   {cons("NullaryNativeConsDecl")}
+    "native" "constructors" NativeConsDecl* -> SignatureSection {cons("NativeConstructors")}
+    ID ":" {Type "*"}+ "->" Type            -> NativeConsDecl   {cons("NativeConsDecl")}
+    ID ":" Type                             -> NativeConsDecl   {cons("NullaryNativeConsDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}

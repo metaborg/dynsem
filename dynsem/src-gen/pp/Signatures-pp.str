@@ -214,7 +214,7 @@ strategies
   prettyprint-SignatureSection :
     SemanticComponents(t1__) -> [ H(
                                     [SOpt(HS(), "0")]
-                                  , [S("semantic-components")]
+                                  , [S("semantic components")]
                                   )
                                 , t1__'
                                 ]
@@ -258,7 +258,7 @@ strategies
   prettyprint-SignatureSection :
     NativeDataTypes(t1__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [S("native-datatypes")]
+                               , [S("native datatypes")]
                                )
                              , t1__'
                              ]
@@ -370,7 +370,7 @@ strategies
   prettyprint-SignatureSection :
     NativeOperators(t1__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [S("native-operators")]
+                               , [S("native operators")]
                                )
                              , t1__'
                              ]
@@ -426,7 +426,7 @@ strategies
   prettyprint-SignatureSection :
     NativeConstructors(t1__) -> [ H(
                                     [SOpt(HS(), "0")]
-                                  , [S("native-constructors")]
+                                  , [S("native constructors")]
                                   )
                                 , t1__'
                                 ]
