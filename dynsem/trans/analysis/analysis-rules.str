@@ -60,10 +60,16 @@ rules /* store variables */
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
     where
       <infer-type-of-top> (ma-ty, lhs);
-      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; infer-type-of-top)> [r*, sc*];
+      <map(labelcomp-to-type-term-pair; infer-type-of-top)> [r*, sc*];
       <map(type-check-premise-top)> p*;
       <infer-type-of-top> (bu-ty, rhs);
-      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; infer-type-of-top)> tc*
+      <map(labelcomp-to-type-term-pair; infer-type-of-top)> tc*
+
+  labelcomp-to-type-term-pair:
+    LabelComp(ty, v) -> (<rw-type> ty, v)
+  
+  labelcomp-to-type-term-pair:
+  	VarLabelComp(v@Var(prefix)) -> (<get-unique-matching-varscheme> prefix, v)
 
   infer-type-of-top =
   	infer-type-of

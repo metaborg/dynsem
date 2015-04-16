@@ -78,6 +78,10 @@ rules
 
 rules /* variable scheme queries */
 
+  get-unique-matching-varscheme =
+    get-matching-varschemes;
+    ?[<id>]
+
   get-matching-varschemes:
     used-word -> <lookup-def-all(|VarSchemes()); filter(is-name-matches-varscheme(|used-word))>
   
