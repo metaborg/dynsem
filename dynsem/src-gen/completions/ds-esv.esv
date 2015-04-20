@@ -58,8 +58,6 @@ completions
     "-" <LabelComp:LabelComp> "-" <ID:ID> "->"  
   completion template LabelComp : "Type Term" =
     <Type:Type> " " <Term:Term>  
-  completion template LabelComp : "(LabelComp)" =
-    "(" <LabelComp:LabelComp> ")"  
 
 completions
   completion template Cast : "Term : Type" =

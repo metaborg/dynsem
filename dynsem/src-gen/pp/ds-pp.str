@@ -508,17 +508,6 @@ strategies
   is-LabelComp =
     ?VarLabelComp(_)
 
-  prettyprint-LabelComp :
-    Parenthetical(t1__) -> [ H(
-                               [SOpt(HS(), "0")]
-                             , [ S("(")
-                               , t1__'
-                               , S(")")
-                               ]
-                             )
-                           ]
-    with t1__' := <pp-one-Z(prettyprint-LabelComp)> t1__
-
   is-Relation =
     fail
 

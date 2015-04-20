@@ -99,8 +99,6 @@ context-free syntax // formulas
   LabelComp.LabelComp = [[Type] [Term]]
   LabelComp.VarLabelComp = [[Var]]
 
-  LabelComp = [([LabelComp])] {bracket}
-
 lexical syntax 
 
   TermCon = ID 
