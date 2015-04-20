@@ -51,6 +51,13 @@ context-free syntax // rules
   ID = <signature> {reject}
   ID = <constructors> {reject}
   ID = <sorts> {reject}
+  ID = <native> {reject}
+  ID = <operators> {reject}
+  ID = <datatypes> {reject}
+  ID = <semantic> {reject}
+  ID = <components> {reject}
+  ID = <List> {reject}
+  ID = <Map> {reject}
   ID = <arrows> {reject}
   ID = <rules> {reject}
   ID = <fresh> {reject}
@@ -75,24 +82,23 @@ context-free syntax // formulas
   Formula.IsValue  = [value([Term])]
   
   Reads.NoReads = []
-  Reads.Reads   = [[{LabelComp " "}+] |- ]
+  Reads.Reads   = [[{LabelComp ", "}+] |- ]
   
-  Source.Source = [[Term]]
-  Source.Source = [[Term] :: [{LabelComp " "}+]]
+  Source.Source = Term
+  Source.Source = [[Term] :: [{LabelComp ", "}+]]
 
-  Target.Target = [[Term]]
-  Target.Target = [[Term] :: [{LabelComp " "}+].]
+  Target.Target = Term
+  Target.Target = [[Term] :: [{LabelComp ", "}+]]
   
   Rel.Dynamic = [-->]
   Rel.NamedDynamic = [-[ID]->]
-  Rel.NamedDynamicParametric = [-[ID]([ID])->]
   
-  Rel.DynamicEmitted = [-[{LabelComp ", "}+]->]
+  Rel.DynamicEmitted = [-[{LabelComp ", "}+]-->]
   Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[ID]->]
-  Rel.NamedDynamicEmittedParametric = [-[{LabelComp ", "}+]-[ID]([ID])->]
   
   LabelComp.LabelComp = [[Type] [Term]]
-  
+  LabelComp.VarLabelComp = [[Var]]
+
 lexical syntax 
 
   TermCon = ID 

@@ -76,4 +76,45 @@ rules
   get-arrow-target-type:
     ArrowType(_, tgt-ty) -> tgt-ty
 
+rules /* variable scheme queries */
+
+  get-unique-matching-varscheme =
+    get-matching-varschemes;
+    ?[<id>]
+
+  get-matching-varschemes =
+    not(is-string);
+    (?Var(<id>) + ?VarRef(<id>));
+    get-matching-varschemes
+
+  get-matching-varschemes:
+    used-word -> <lookup-def-all(|VarSchemes()); filter(is-name-matches-varscheme(|used-word))>
+    where is-string
+  
+  is-name-matches-varscheme(|used-word):
+    scheme-def -> scheme-def
+    where
+      scheme-name := <def-get-name> scheme-def
+    where
+      used-word-chars := <explode-string> used-word;
+      scheme-word-chars := <explode-string> scheme-name;
+      used-word-suffix-chars := <left-match> (used-word-chars, scheme-word-chars);
+      if not(!used-word-suffix-chars => [])
+      then
+	      if not(<Hd> used-word-suffix-chars => '_')
+	      then
+	        <filter(not(?'\''); not(MkSingleton; dec-chars-to-int))> used-word-suffix-chars => []
+	      end
+	    end
+
+
+
+
+
+
+
+
+
+
+
 

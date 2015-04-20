@@ -38,6 +38,7 @@ menus
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
+    action  : "Desugar varschemes"     = desugar-varschemes-editor (openeditor) (realtime) (source)
     action  : "Expand reductions"      = expand-reds-editor (openeditor) (realtime) (source)
     action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
     action  : "Merge"                  = merge-editor (openeditor) (realtime) (source)

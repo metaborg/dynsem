@@ -11,7 +11,7 @@ colorer
   Reads.Reads : 127 0 85 bold
   Rel.Dynamic : 127 0 85 bold
   Rel.NamedDynamic : 127 0 85 bold
-  Rel.NamedDynamicParametric : 127 0 85 bold
+  // Rel.NamedDynamicParametric : 127 0 85 bold
                                                                       
   // This file can be used for custom colorer rules.                  
   //                                                                  

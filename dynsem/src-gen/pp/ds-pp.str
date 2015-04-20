@@ -379,7 +379,7 @@ strategies
                      , [t1__', S(" |- ")]
                      )
                    ]
-    with t1__' := <pp-H-list(prettyprint-LabelComp|" ")> t1__
+    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
 
   is-Reads =
     ?Reads(_)
@@ -402,7 +402,7 @@ strategies
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-LabelComp|" ")> t2__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
 
   is-Source =
     ?Source(_, _)
@@ -421,15 +421,11 @@ strategies
   prettyprint-Target :
     Target(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [ t1__'
-                              , S(" :: ")
-                              , t2__'
-                              , S(".")
-                              ]
+                            , [t1__', S(" :: "), t2__']
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-LabelComp|" ")> t2__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
 
   is-Target =
     ?Target(_, _)
@@ -459,28 +455,11 @@ strategies
     ?NamedDynamic(_)
 
   prettyprint-Rel :
-    NamedDynamicParametric(t1__, t2__) -> [ H(
-                                              [SOpt(HS(), "0")]
-                                            , [ S("-")
-                                              , t1__'
-                                              , S("(")
-                                              , t2__'
-                                              , S(")->")
-                                              ]
-                                            )
-                                          ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
-
-  is-Rel =
-    ?NamedDynamicParametric(_, _)
-
-  prettyprint-Rel :
     DynamicEmitted(t1__) -> [ H(
                                 [SOpt(HS(), "0")]
                               , [ S("-")
                                 , t1__'
-                                , S("->")
+                                , S("-->")
                                 ]
                               )
                             ]
@@ -506,26 +485,6 @@ strategies
   is-Rel =
     ?NamedDynamicEmitted(_, _)
 
-  prettyprint-Rel :
-    NamedDynamicEmittedParametric(t1__, t2__, t3__) -> [ H(
-                                                           [SOpt(HS(), "0")]
-                                                         , [ S("-")
-                                                           , t1__'
-                                                           , S("-")
-                                                           , t2__'
-                                                           , S("(")
-                                                           , t3__'
-                                                           , S(")->")
-                                                           ]
-                                                         )
-                                                       ]
-    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
-    with t3__' := <pp-one-Z(prettyprint-ID)> t3__
-
-  is-Rel =
-    ?NamedDynamicEmittedParametric(_, _, _)
-
   prettyprint-LabelComp :
     LabelComp(t1__, t2__) -> [ H(
                                  [SOpt(HS(), "0")]
@@ -537,6 +496,17 @@ strategies
 
   is-LabelComp =
     ?LabelComp(_, _)
+
+  prettyprint-LabelComp :
+    VarLabelComp(t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [t1__']
+                            )
+                          ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+
+  is-LabelComp =
+    ?VarLabelComp(_)
 
   is-Relation =
     fail

@@ -5,6 +5,7 @@ imports
   analysis/lib-analysis
   analysis/constructors
   analysis/analysis-rules
+  analysis/query
 
 rules /* store signatures */
   
@@ -16,6 +17,7 @@ rules /* store signatures */
       <+ store-arrows
       <+ store-native-datatypes
       <+ store-semantic-components
+      <+ store-variable-schemes
     ))
   
   store-built-ins =
@@ -109,6 +111,14 @@ rules /* store signatures */
       <store-prop(|SortKind(), name-def)> SemanticCompSort();
       <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
 
+  store-variable-schemes = VariableSchemes(map(store-variable-scheme))
+  
+  store-variable-scheme:
+    d@VariableScheme(prefix, ty) -> d
+    with
+      <store-def(|VarSchemes())> prefix => scheme-def;
+      <store-prop(|Type(), scheme-def)> <rw-type> ty
+
 rules
   
   check-signatures = alltd(check-signature)
@@ -127,7 +137,12 @@ rules
     );
     <lookup-defs(|Types())> s => [_, _ | _];
     add-msg(|Error(), s, $[Duplicate sort [s]])
-    
+  
+  check-signature =
+    ?vs@VariableScheme(prefix, _);
+    <get-matching-varschemes> prefix => [_, _ | _];
+    add-msg(|Error(), vs, $[Duplicate or overlapping variable prefix [prefix]])
+  
   check-signature =
     ?Con(cname, _);
     <not(lookup-def(|Constructors()))> cname;

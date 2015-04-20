@@ -21,6 +21,7 @@ imports
 	ds2ds/copy-propagation
 	ds2ds/constant-propagation
 	ds2ds/expand-reductions
+	ds2ds/desugar-varschemes
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
@@ -131,6 +132,12 @@ rules // Builders
       filename := <guarantee-extension(|"expreds.ds")> path;
       result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; expand-reductions-module; sugar-all; pp-debug> ast
 
+  desugar-varschemes-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"varschemes.ds")> path;
+      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; desugar-varschemes-module; sugar-all; pp-debug> ast
+
   explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
@@ -171,6 +178,9 @@ rules // Builders
         );
         log-timed(
           desugar-top; fuse-sections | "Desugaring"
+        );
+        log-timed(
+          desugar-varschemes-module | "Desugaring variable schemes"
         );
         log-timed(
           factorize-module | "Factorization 1/2"

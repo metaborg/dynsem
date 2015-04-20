@@ -60,10 +60,19 @@ rules /* store variables */
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
     where
       <infer-type-of-top> (ma-ty, lhs);
-      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; infer-type-of-top)> [r*, sc*];
+      <map(labelcomp-to-type-term-pair; infer-type-of-top)> [r*, sc*];
       <map(type-check-premise-top)> p*;
       <infer-type-of-top> (bu-ty, rhs);
-      <map(\ LabelComp(ty, v) -> (<rw-type> ty, v) \; infer-type-of-top)> tc*
+      <map(labelcomp-to-type-term-pair; infer-type-of-top)> tc*
+
+  labelcomp-to-type-term-pair:
+    LabelComp(ty, v) -> (<rw-type> ty, v)
+  
+  labelcomp-to-type-term-pair:
+  	VarLabelComp(v) -> (scheme-ty, v)
+  	where
+  	  scheme-def := <get-unique-matching-varscheme> v;
+  	  scheme-ty := <lookup-prop(|Type())> scheme-def
 
   infer-type-of-top =
   	infer-type-of
@@ -86,8 +95,20 @@ rules /* store variables */
     where
       <?Var(v) + ?MatchedVar(v)> dec
     where
+      <not(get-unique-matching-varscheme)> v;
       <store-def(|Vars())> v => v-def;
       <store-prop(|Type(), v-def)> ty
+
+  infer-type-of:
+    (ty, dec) -> ty
+    where
+      <?Var(v) + ?MatchedVar(v)> dec
+    where
+      scheme-def := <get-unique-matching-varscheme> v;
+      scheme-ty := <lookup-prop(|Type())> scheme-def;
+      ty' := <type-coerce> (ty, scheme-ty);
+      <store-def(|Vars())> v => v-def;
+      <store-prop(|Type(), v-def)> ty'
 
   infer-type-of:
     (ty, r@VarRef(v)) -> ty'
@@ -297,7 +318,7 @@ rules /* store variables */
 	      then
 	        <infer-type-of-top> (bu-ty, lhs);
 	        <infer-type-of-top> (ma-ty, rhs);
-	        <map(\ LabelComp(l, r) -> (<rw-type> l, r) \; infer-type-of-top)> [r*, sc*, tc*]
+	        <map(labelcomp-to-type-term-pair; infer-type-of-top)> [r*, sc*, tc*]
 	      else
 	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
 	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])

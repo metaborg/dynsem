@@ -16,7 +16,8 @@ rules
       natcons-decl := <collect-all(?NativeConstructors(<id>)); concat; !NativeConstructors(<id>)> body*;
       natops-decl  := <collect-all(?NativeOperators(<id>)); concat; !NativeOperators(<id>)> body*;
       arrow-decl   := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
-      signatures    := [ sort-decl, cons-decl, semcomp-decl, natcons-decl, natops-decl, arrow-decl, natty-decl ];
+      varschemes-decl := <collect-all(?VariableSchemes(<id>)); concat; !VariableSchemes(<id>)> body*;
+      signatures    := [ sort-decl, cons-decl, semcomp-decl, natcons-decl, natops-decl, arrow-decl, natty-decl, varschemes-decl ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat; sort-rules> body*
   
   sort-rules = qsort((rule-con-name, rule-con-name); string-gt)
