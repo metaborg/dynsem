@@ -69,7 +69,10 @@ rules /* store variables */
     LabelComp(ty, v) -> (<rw-type> ty, v)
   
   labelcomp-to-type-term-pair:
-  	VarLabelComp(v@Var(prefix)) -> (<get-unique-matching-varscheme> prefix, v)
+  	VarLabelComp(v@Var(prefix)) -> (scheme-ty, v)
+  	where
+  	  scheme-def := <get-unique-matching-varscheme> prefix;
+  	  scheme-ty := <lookup-prop(|Type())> scheme-def
 
   infer-type-of-top =
   	infer-type-of
@@ -101,17 +104,11 @@ rules /* store variables */
     where
       <?Var(v) + ?MatchedVar(v)> dec
     where
-      debug(!1);
       scheme-def := <get-unique-matching-varscheme> v;
-      debug(!2);
       scheme-ty := <lookup-prop(|Type())> scheme-def;
-      debug(!3);
-      ty' := <debug(!"A "); type-coerce; debug(!"B ")> (ty, scheme-ty);
-      debug(!4);
+      ty' := <type-coerce> (ty, scheme-ty);
       <store-def(|Vars())> v => v-def;
-      debug(!5);
       <store-prop(|Type(), v-def)> ty'
-      ;debug(!6)
 
   infer-type-of:
     (ty, r@VarRef(v)) -> ty'
