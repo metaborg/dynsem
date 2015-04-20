@@ -71,7 +71,7 @@ rules /* store variables */
   labelcomp-to-type-term-pair:
   	VarLabelComp(v) -> (scheme-ty, v)
   	where
-  	  scheme-def := <(?Var(<id>) + ?VarRef(<id>)); get-unique-matching-varscheme> v;
+  	  scheme-def := <get-unique-matching-varscheme> v;
   	  scheme-ty := <lookup-prop(|Type())> scheme-def
 
   infer-type-of-top =

@@ -98,6 +98,27 @@ rules // type rewriting
     MapSort(key-sort, val-sort) -> MapType(<rw-type> key-sort, <rw-type> val-sort)
   
   rw-type = is-list; map(rw-type)
+
+  derw-type = is-list; map(derw-type)
+  
+  derw-type:
+    ListType(ty) -> ListSort(<derw-type> ty)
+  
+  derw-type:
+    MapType(kty, vty) -> MapSort(<derw-type> kty, <derw-type> vty)
+
+  derw-type:
+    ty -> SimpleSort(ty)
+    where
+      is-string
+  
+  derw-type: IntType() -> <derw-type> "Int"
+  
+  derw-type: RealType() -> <derw-type> "Real"
+  
+  derw-type: BoolType() -> <derw-type> "Bool"
+  
+  derw-type: StringType() -> <derw-type> "String"
   
   id-to-type = id-to-builtin-type <+ is-string
 

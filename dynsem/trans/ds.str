@@ -180,6 +180,9 @@ rules // Builders
           desugar-top; fuse-sections | "Desugaring"
         );
         log-timed(
+          desugar-varschemes-module | "Desugaring variable schemes"
+        );
+        log-timed(
           factorize-module | "Factorization 1/2"
         );
         log-timed(

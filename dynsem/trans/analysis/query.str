@@ -82,8 +82,14 @@ rules /* variable scheme queries */
     get-matching-varschemes;
     ?[<id>]
 
+  get-matching-varschemes =
+    not(is-string);
+    (?Var(<id>) + ?VarRef(<id>));
+    get-matching-varschemes
+
   get-matching-varschemes:
     used-word -> <lookup-def-all(|VarSchemes()); filter(is-name-matches-varscheme(|used-word))>
+    where is-string
   
   is-name-matches-varscheme(|used-word):
     scheme-def -> scheme-def
