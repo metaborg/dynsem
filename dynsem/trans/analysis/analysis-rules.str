@@ -318,7 +318,7 @@ rules /* store variables */
 	      then
 	        <infer-type-of-top> (bu-ty, lhs);
 	        <infer-type-of-top> (ma-ty, rhs);
-	        <map(\ LabelComp(l, r) -> (<rw-type> l, r) \; infer-type-of-top)> [r*, sc*, tc*]
+	        <map(labelcomp-to-type-term-pair; infer-type-of-top)> [r*, sc*, tc*]
 	      else
 	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
 	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])

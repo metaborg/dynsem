@@ -1,0 +1,14 @@
+module ds2ds/desugar-varschemes
+
+imports
+  include/ds
+  lib-ds
+
+rules
+  
+  desugar-varschemes-module :
+    mod@Module(name, section*) -> Module($[[name]_varschemes], section'*)
+    where
+      section'* := section* // TODO
+
+
