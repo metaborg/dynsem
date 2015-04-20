@@ -55,17 +55,17 @@ exports
     Reads Source Rel Target          -> Relation  {cons("Relation")}
     "value" "(" Term ")"             -> Formula   {cons("IsValue")}
                                      -> Reads     {cons("NoReads")}
-    LabelComp+ "|-"                  -> Reads     {cons("Reads")}
+    {LabelComp ","}+ "|-"            -> Reads     {cons("Reads")}
     Term                             -> Source    {cons("Source")}
-    Term "::" LabelComp+             -> Source    {cons("Source")}
+    Term "::" {LabelComp ","}+       -> Source    {cons("Source")}
     Term                             -> Target    {cons("Target")}
-    Term "::" LabelComp+ "."         -> Target    {cons("Target")}
+    Term "::" {LabelComp ","}+       -> Target    {cons("Target")}
     "-->"                            -> Rel       {cons("Dynamic")}
     "-" ID "->"                      -> Rel       {cons("NamedDynamic")}
     "-" {LabelComp ","}+ "-->"       -> Rel       {cons("DynamicEmitted")}
     "-" {LabelComp ","}+ "-" ID "->" -> Rel       {cons("NamedDynamicEmitted")}
     Type Term                        -> LabelComp {cons("LabelComp")}
-    "`" Var                          -> LabelComp {cons("VarLabelComp")}
+    Var                              -> LabelComp {cons("VarLabelComp")}
     "(" LabelComp ")"                -> LabelComp {bracket}
 
   context-free syntax

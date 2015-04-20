@@ -379,7 +379,7 @@ strategies
                      , [t1__', S(" |- ")]
                      )
                    ]
-    with t1__' := <pp-H-list(prettyprint-LabelComp|" ")> t1__
+    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
 
   is-Reads =
     ?Reads(_)
@@ -402,7 +402,7 @@ strategies
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-LabelComp|" ")> t2__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
 
   is-Source =
     ?Source(_, _)
@@ -421,15 +421,11 @@ strategies
   prettyprint-Target :
     Target(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [ t1__'
-                              , S(" :: ")
-                              , t2__'
-                              , S(".")
-                              ]
+                            , [t1__', S(" :: "), t2__']
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-LabelComp|" ")> t2__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
 
   is-Target =
     ?Target(_, _)
@@ -504,7 +500,7 @@ strategies
   prettyprint-LabelComp :
     VarLabelComp(t1__) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [S("`"), t1__']
+                            , [t1__']
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Var)> t1__

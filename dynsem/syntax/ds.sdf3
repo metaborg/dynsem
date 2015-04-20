@@ -82,13 +82,13 @@ context-free syntax // formulas
   Formula.IsValue  = [value([Term])]
   
   Reads.NoReads = []
-  Reads.Reads   = [[{LabelComp " "}+] |- ]
+  Reads.Reads   = [[{LabelComp ", "}+] |- ]
   
   Source.Source = Term
-  Source.Source = [[Term] :: [{LabelComp " "}+]]
+  Source.Source = [[Term] :: [{LabelComp ", "}+]]
 
   Target.Target = Term
-  Target.Target = [[Term] :: [{LabelComp " "}+].]
+  Target.Target = [[Term] :: [{LabelComp ", "}+]]
   
   Rel.Dynamic = [-->]
   Rel.NamedDynamic = [-[ID]->]
@@ -97,7 +97,7 @@ context-free syntax // formulas
   Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[ID]->]
   
   LabelComp.LabelComp = [[Type] [Term]]
-  LabelComp.VarLabelComp = [`[Var]]
+  LabelComp.VarLabelComp = [[Var]]
 
   LabelComp = [([LabelComp])] {bracket}
 

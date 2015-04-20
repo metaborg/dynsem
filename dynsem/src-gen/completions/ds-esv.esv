@@ -46,8 +46,8 @@ completions
     <LabelComp:LabelComp> " |- "  
   completion template Source : "Term :: LabelComp" =
     <Term:Term> " :: " <LabelComp:LabelComp>  
-  completion template Target : "Term :: LabelComp." =
-    <Term:Term> " :: " <LabelComp:LabelComp> "."  
+  completion template Target : "Term :: LabelComp" =
+    <Term:Term> " :: " <LabelComp:LabelComp>  
   completion template Rel : "-->" =
     "-->"                        
   completion template Rel : "-ID->" =
@@ -58,8 +58,6 @@ completions
     "-" <LabelComp:LabelComp> "-" <ID:ID> "->"  
   completion template LabelComp : "Type Term" =
     <Type:Type> " " <Term:Term>  
-  completion template LabelComp : "`Var" =
-    "`" <Var:Var>         
   completion template LabelComp : "(LabelComp)" =
     "(" <LabelComp:LabelComp> ")"  
 
