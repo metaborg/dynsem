@@ -97,9 +97,7 @@ rules /* variable scheme queries */
       then
 	      if not(<Hd> used-word-suffix-chars => '_')
 	      then
-	        <filter(not(?'\''))> used-word-suffix-chars => []
-	        <+
-	        <filter(not(MkSingleton; dec-chars-to-int))> used-word-suffix-chars => []
+	        <filter(not(?'\''); not(MkSingleton; dec-chars-to-int))> used-word-suffix-chars => []
 	      end
 	    end
 
