@@ -23,8 +23,7 @@ signature
     ConsDecl             : ID * List(Type) * Type -> ConsDecl
     NullaryConsDecl      : ID * Type -> ConsDecl
     ImplicitConstructors : List(ImplConsDecl) -> SignatureSection
-    ImplConsDecl         : ID * List(Type) * Type -> ImplConsDecl
-    ImplNullaryConsDecl  : ID * Type -> ImplConsDecl
+    ImplConsDecl         : ID * Type * Type -> ImplConsDecl
     SimpleSort           : ID -> Type
     ListSort             : Type -> Type
                          : MapType -> Type

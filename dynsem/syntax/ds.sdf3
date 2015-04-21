@@ -46,7 +46,7 @@ context-free syntax // rules
     try [PremisesBlock]
   	or  [PremisesBlock]
   ]
-  
+  ID = <_> {reject}
   ID = <imports> {reject}
   ID = <signature> {reject}
   ID = <constructors> {reject}

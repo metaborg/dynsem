@@ -53,6 +53,7 @@ signature
   	
   	ConsKind: Property
   	LanguageCons: ConsKind
+  	ImplicitCons: ConsKind
   	NativeCons: ConsKind
   	NativeOpCons: ConsKind
 

@@ -41,11 +41,7 @@ context-free syntax // constructor declarations
     implicit constructors
       <{ImplConsDecl "\n"}*>>
 
-  ImplConsDecl.ImplConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
-  ImplConsDecl.ImplNullaryConsDecl = [[ID] : [Type]]
-
-
-
+  ImplConsDecl.ImplConsDecl = [[ID] : [Type] -> [Type]]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 

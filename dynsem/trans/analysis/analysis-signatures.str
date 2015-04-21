@@ -44,6 +44,7 @@ rules /* store signatures */
 
   store-constructors =
     Constructors(map(store-constructor))
+    + ImplicitConstructors(map(store-constructor))
     + NativeConstructors(map(store-constructor))
   
   store-constructor:
@@ -52,6 +53,13 @@ rules /* store signatures */
       <store-def(|Constructors())> c => c-def;
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
       <store-prop(|ConsKind(), c-def)> LanguageCons()
+
+  store-constructor:
+    d@ImplConsDecl(c, child, s) -> d
+    with
+      <store-def(|Constructors())> c => c-def;
+      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> [child], <rw-type> s);
+      <store-prop(|ConsKind(), c-def)> ImplicitCons()
 
   store-constructor:
     d@NativeConsDecl(c, child*, s) -> d
