@@ -19,13 +19,16 @@ signature
     VariableScheme  : ID * Type -> VariableScheme
 
   constructors
-    Constructors    : List(ConsDecl) -> SignatureSection
-    ConsDecl        : ID * List(Type) * Type -> ConsDecl
-    NullaryConsDecl : ID * Type -> ConsDecl
-    SimpleSort      : ID -> Type
-    ListSort        : Type -> Type
-                    : MapType -> Type
-    MapSort         : Type * Type -> MapType
+    Constructors         : List(ConsDecl) -> SignatureSection
+    ConsDecl             : ID * List(Type) * Type -> ConsDecl
+    NullaryConsDecl      : ID * Type -> ConsDecl
+    ImplicitConstructors : List(ImplConsDecl) -> SignatureSection
+    ImplConsDecl         : ID * List(Type) * Type -> ImplConsDecl
+    ImplNullaryConsDecl  : ID * Type -> ImplConsDecl
+    SimpleSort           : ID -> Type
+    ListSort             : Type -> Type
+                         : MapType -> Type
+    MapSort              : Type * Type -> MapType
 
   constructors
     SemanticComponents : List(SemanticCompDecl) -> SignatureSection

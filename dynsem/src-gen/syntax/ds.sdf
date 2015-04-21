@@ -26,6 +26,7 @@ exports
     "datatypes"                                 -> ID            {reject}
     "semantic"                                  -> ID            {reject}
     "components"                                -> ID            {reject}
+    "implicit"                                  -> ID            {reject}
     "List"                                      -> ID            {reject}
     "Map"                                       -> ID            {reject}
     "arrows"                                    -> ID            {reject}

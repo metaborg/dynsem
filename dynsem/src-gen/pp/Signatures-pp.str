@@ -125,10 +125,13 @@ strategies
 
 strategies
   prettyprint-example =
+    prettyprint-ConsDecl
+
+  prettyprint-example =
     prettyprint-SignatureSection
 
   prettyprint-example =
-    prettyprint-ConsDecl
+    prettyprint-ImplConsDecl
 
   prettyprint-example =
     prettyprint-Type
@@ -177,6 +180,48 @@ strategies
 
   is-ConsDecl =
     ?NullaryConsDecl(_, _)
+
+  prettyprint-SignatureSection :
+    ImplicitConstructors(t1__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [S("implicit constructors")]
+                                    )
+                                  , t1__'
+                                  ]
+    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-ImplConsDecl)> t1__]
+
+  is-SignatureSection =
+    ?ImplicitConstructors(_)
+
+  prettyprint-ImplConsDecl :
+    ImplConsDecl(t1__, t2__, t3__) -> [ H(
+                                          [SOpt(HS(), "0")]
+                                        , [ t1__'
+                                          , S(" : ")
+                                          , t2__'
+                                          , S(" -> ")
+                                          , t3__'
+                                          ]
+                                        )
+                                      ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-H-list(prettyprint-Type|" * ")> t2__
+    with t3__' := <pp-one-Z(prettyprint-Type)> t3__
+
+  is-ImplConsDecl =
+    ?ImplConsDecl(_, _, _)
+
+  prettyprint-ImplConsDecl :
+    ImplNullaryConsDecl(t1__, t2__) -> [ H(
+                                           [SOpt(HS(), "0")]
+                                         , [t1__', S(" : "), t2__']
+                                         )
+                                       ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-ImplConsDecl =
+    ?ImplNullaryConsDecl(_, _)
 
   prettyprint-Type :
     SimpleSort(t1__) -> [ H(
@@ -229,10 +274,13 @@ strategies
   is-MapType =
     ?MapSort(_, _)
 
+  is-ConsDecl =
+    fail
+
   is-SignatureSection =
     fail
 
-  is-ConsDecl =
+  is-ImplConsDecl =
     fail
 
   is-Type =

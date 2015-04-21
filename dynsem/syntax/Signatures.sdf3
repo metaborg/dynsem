@@ -37,12 +37,22 @@ context-free syntax // constructor declarations
   ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
   ConsDecl.NullaryConsDecl = [[ID] : [Type]]
 
+  SignatureSection.ImplicitConstructors = <
+    implicit constructors
+      <{ImplConsDecl "\n"}*>>
+
+  ImplConsDecl.ImplConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  ImplConsDecl.ImplNullaryConsDecl = [[ID] : [Type]]
+
+
+
+
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
   Type = [[MapType]]
   
   MapType.MapSort = [Map<[Type],[Type]>]
-  
+
 template options
 
   tokenize: "<("
