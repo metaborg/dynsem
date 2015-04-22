@@ -355,9 +355,8 @@ rules
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
-  ds2java-premise = debug(!"Premise failure: "); fail 
-
-
+  ds2java-premise = debug(!"Premise failure: "); fail
+  
   ds2java-term-build-optcast(|ex_ty):
     trm -> <ds2java-term-build(|ex_ty)> trm
     where not(
@@ -400,7 +399,7 @@ rules
       x_consclass := <ds2java-constr-classname> c;
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (c-c-ty*, child*)
-  
+
   ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ x_manualpkg.Natives.x_consname(e*) ]|
     where

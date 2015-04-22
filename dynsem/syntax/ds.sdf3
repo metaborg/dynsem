@@ -15,7 +15,7 @@ context-free syntax // rules
   Rule.Strict = [strict [ID] [{INT ","}+]/[INT]]
   Rule.Seqstrict = [seqstrict [ID] [{INT ","}+]/[INT]]
     
-  Rule.Axiom = [[Formula]]
+  Rule.Axiom = [[Formula].]
   
   Rule.Rule = [
     [{Premise ",\n"}+]
@@ -26,7 +26,7 @@ context-free syntax // rules
   Rule.RuleW = [
     [Relation]
     where
-      [{Premise ",\n"}+]
+      [{Premise ",\n"}+].
   ]
   
   Premise.Formula = [[Formula]]

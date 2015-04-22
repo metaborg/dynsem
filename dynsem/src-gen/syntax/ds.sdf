@@ -9,9 +9,9 @@ exports
     "rules" Rule*                               -> ModuleSection {cons("Rules")}
     "strict" ID {INT ","}+ "/" INT              -> Rule          {cons("Strict")}
     "seqstrict" ID {INT ","}+ "/" INT           -> Rule          {cons("Seqstrict")}
-    Formula                                     -> Rule          {cons("Axiom")}
+    Formula "."                                 -> Rule          {cons("Axiom")}
     {Premise ","}+ INFER Relation               -> Rule          {cons("Rule")}
-    Relation "where" {Premise ","}+             -> Rule          {cons("RuleW")}
+    Relation "where" {Premise ","}+ "."         -> Rule          {cons("RuleW")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
     "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
