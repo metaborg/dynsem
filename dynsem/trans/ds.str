@@ -190,13 +190,19 @@ rules // Builders
           desugar-varschemes-module | "Desugaring variable schemes"
         );
         log-timed(
-          factorize-module | "Factorization 1/2"
+          factorize-module | "Factorization 1/3"
         );
         log-timed(
           expand-reductions-module | "Reduction expansion"
         );
         log-timed(
-          factorize-module | "Factorization 2/2"
+          factorize-module | "Factorization 2/3"
+        );
+        log-timed(
+          expand-constructors-module | "Implicit constructor expansion"
+        );
+        log-timed(
+          factorize-module | "Factorization 3/3"
         );
         log-timed(
           explicate-module | "Explication"
