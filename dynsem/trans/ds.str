@@ -21,6 +21,7 @@ imports
 	ds2ds/copy-propagation
 	ds2ds/constant-propagation
 	ds2ds/expand-reductions
+	ds2ds/expand-constructors
 	ds2ds/desugar-varschemes
 	analysis/main
 	analysis/lib-analysis
@@ -131,6 +132,12 @@ rules // Builders
     with
       filename := <guarantee-extension(|"expreds.ds")> path;
       result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; expand-reductions-module; sugar-all; pp-debug> ast
+
+  expand-constructors-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"expcons.ds")> path;
+      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; expand-constructors-module; sugar-all; pp-debug> ast
 
   desugar-varschemes-editor:
     (selected, position, ast, path, project-path) -> (filename, result)

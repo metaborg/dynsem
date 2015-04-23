@@ -369,12 +369,17 @@ rules
     type-coerce-base
     <+ type-coerce(type-coerce-direct)
     <+ type-coerce-impl-constructor(type-coerce-direct)
+
+  type-coerce-simple =
+  	type-coerce-base
+  	<+ type-coerce(type-coerce-simple)
   
+  type-coerce-base = eq; Fst
+
   type-coerce-sym(coerce-s) =
     coerce-s
     <+ swap; coerce-s
   
-  type-coerce-base = eq; Fst
   
   type-coerce-base:
     (ty, NONETYPE()) -> ty

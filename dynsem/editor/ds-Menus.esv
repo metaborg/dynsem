@@ -40,6 +40,7 @@ menus
     action  : "Desugar varschemes"     = desugar-varschemes-editor (openeditor) (realtime) (source)
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
     action  : "Expand reductions"      = expand-reds-editor (openeditor) (realtime) (source)
+    action  : "Expand constructors"    = expand-constructors-editor (openeditor) (realtime) (source)
     action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
     action  : "Merge"                  = merge-editor (openeditor) (realtime) (source)
     action  : "Copy propagation"       = copy-propagation-editor (openeditor) (realtime) (source)
