@@ -36,8 +36,11 @@ rules
 	  where
 	    v-left-ty := <type-of> t-left;
 	    t-right-ty := <type-of> t-right;
-	    <not(type-coerce)> (v-left-ty, t-right-ty);
-	  	<type-reduce(|arrow-def)> (v-left-ty, t-right-ty)
+	    <not(type-coerce-direct)> (v-left-ty, t-right-ty);
+	    {|InArrow:
+	      rules(InArrow: _ -> arrow-def);
+	      <type-coerce-impl-reduction(type-coerce-direct)> (v-left-ty, t-right-ty)
+	  	|}
   
   expand-reduction-premise(|arrow-def):
     Formula(Match(t-left@VarRef(v-left), Cast(Var(v-right), cast-ty))) ->
@@ -46,8 +49,11 @@ rules
     where
       t-left-ty := <type-of> t-left;
       t-right-ty := <rw-type> cast-ty;
-      <not(type-coerce)> (t-left-ty, t-right-ty);
-      <type-reduce(|arrow-def)> (t-left-ty, t-right-ty);
+      <not(type-coerce-direct)> (t-left-ty, t-right-ty);
+      {|InArrow:
+        rules(InArrow: _ -> arrow-def);
+        <type-coerce-impl-reduction(type-coerce-direct)> (t-left-ty, t-right-ty)
+      |};
       v' := <next-variable>
   
   expand-reduction-premise(|arrow-def):
@@ -63,14 +69,17 @@ rules
     v@VarRef(_) -> (v, [])
     where
       v-ty := <type-of> v;
-      <type-coerce> (v-ty, exp-ty)
+      <type-coerce-direct> (v-ty, exp-ty)
 
   expand-reduction-target(|arrow-def, exp-ty):
     v@VarRef(_) -> (VarRef(v'), [Formula(Relation(Reads([]), Source(v, []), NamedDynamicEmitted([], <def-get-name> arrow-def), Target(Var(v'), [])))])
     where
       v-ty := <type-of> v;
-      <not(type-coerce)> (v-ty, exp-ty);
-      <type-reduce(|arrow-def)> (v-ty, exp-ty);
+      <not(type-coerce-direct)> (v-ty, exp-ty);
+      {|InArrow:
+        rules(InArrow: _ -> arrow-def);
+        <type-coerce-impl-reduction(type-coerce-direct)> (v-ty, exp-ty)
+      |};
       v' := <next-variable>
 
 

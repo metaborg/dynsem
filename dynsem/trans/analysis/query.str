@@ -68,7 +68,7 @@ rules
       <lookup-prop(|SuperType())> map-ty-def => MapType(_, vty)
 
   type-of-applicable-arrow:
-    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce> (con-ty, ma-ty) \))> arrow-type*
+    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce-direct> (con-ty, ma-ty) \))> arrow-type*
 
   get-arrow-source-type:
     ArrowType(src-ty, _) -> src-ty

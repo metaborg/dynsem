@@ -106,7 +106,7 @@ rules /* store variables */
     where
       scheme-def := <get-unique-matching-varscheme> v;
       scheme-ty := <lookup-prop(|Type())> scheme-def;
-      ty' := <type-coerce> (ty, scheme-ty);
+      ty' := <type-coerce-direct> (ty, scheme-ty);
       <store-def(|Vars())> v => v-def;
       <store-prop(|Type(), v-def)> ty'
 
@@ -116,36 +116,28 @@ rules /* store variables */
       <lookup-def(|Vars())> v => v-def;
       <store-prop(|Use(), v-def)> r;
       <lookup-prop(|Type())> v-def => v-ty;
-      <type-coerce> (v-ty, ty) => ty'
-
-  infer-type-of:
-    (ty, r@VarRef(v)) -> ty'
-    where
-      <lookup-def(|Vars())> v => v-def;
-      <lookup-prop(|Type())> v-def => v-ty;
-      <not(type-coerce)> (v-ty, ty);
-      <type-reduce(|<InArrow>)> (v-ty, ty) => ty'
+      <type-coerce-full> (v-ty, ty) => ty'
 
   infer-type-of:
     (ty, Int(_)) -> IntType()
     where
-      <type-coerce> (IntType(), ty)
+      <type-coerce-direct> (IntType(), ty)
 
   infer-type-of:
     (ty, bool) -> BoolType()
     where
       <?True() + ?False()> bool;
-      <type-coerce> (BoolType(), ty)
+      <type-coerce-direct> (BoolType(), ty)
 
   infer-type-of:
     (ty, String(_)) -> StringType()
     where
-      <type-coerce> (StringType(), ty)
+      <type-coerce-direct> (StringType(), ty)
 
   infer-type-of:
     (ty, Fresh()) -> IntType()
     where
-      <type-coerce> (IntType(), ty)
+      <type-coerce-direct> (IntType(), ty)
   
   infer-type-of:
     (ty, ref@VarRef(v)) -> ty
@@ -157,18 +149,13 @@ rules /* store variables */
     (ty, Con(c, child*)) -> ty-con
     where
       ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <type-coerce> (ty-con, ty);
+      (
+        <type-coerce-direct> (ty-con, ty)
+        <+
+        <type-coerce-sym(type-coerce-impl-reduction(type-coerce-direct))> (ty, ty-con)
+      );
       <zip; map(infer-type-of-top)> (fchild-ty*, child*)
   
-  infer-type-of:
-    (ty, Con(c, child*)) -> ty-con
-    where
-      ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <not(type-coerce)> (ty-con, ty);
-      arrow-def := <InArrow>;
-      <type-reduce(|arrow-def) <+ swap; type-reduce(|arrow-def)> (ty, ty-con);
-      <zip; map(infer-type-of-top)> (fchild-ty*, child*)
-
   infer-type-of:
     (NONETYPE(), Cast(t, ty-trm)) -> ty-cast
     where
@@ -179,16 +166,14 @@ rules /* store variables */
   	(ty, Cast(t, ty-trm)) -> t-ty'
   	where
   		<rw-type> ty-trm => ty-cast;
-  		<type-coerce> (ty, ty-cast) => ty-cast';
+  		<type-coerce-direct> (ty, ty-cast) => ty-cast';
   		<infer-type-of-top> (ty-cast', t) => t-ty'
   
   infer-type-of:
   	(ty, Cast(t, ty-trm)) -> ty'
   	where
   		<rw-type> ty-trm => ty-cast;
-  		<not(type-coerce)> (ty-cast, ty);
-  		arrow-def := <InArrow>;
-  		<type-reduce(|arrow-def)> (ty, ty-cast) => ty';
+  		ty' := <type-coerce-direct <+ type-coerce-impl-reduction(type-coerce-direct)> (ty-cast, ty);
   		<infer-type-of-top> (ty', t)
 
   infer-type-of:
@@ -200,14 +185,14 @@ rules /* store variables */
   infer-type-of:
   	(ty, List([])) -> ty'
   	where
-  		<type-coerce> (ListType(ALPHATYPE()), ty) => ty'
+  		<type-coerce-direct> (ListType(ALPHATYPE()), ty) => ty'
   
   infer-type-of:
     (ty, ListTail([h], t)) -> ty'
     where
       <infer-type-of-top> (ty, t) => l-ty@ListType(ALPHATYPE());
       <infer-type-of-top> (NONETYPE(), h) => head-ty;
-      <type-coerce> (ListType(head-ty), ty) => ty'
+      <type-coerce-direct> (ListType(head-ty), ty) => ty'
 
   infer-type-of:
     (ty, ListTail([h], t)) -> ty'
@@ -215,7 +200,7 @@ rules /* store variables */
       <infer-type-of-top> (ty, t) => l-ty@ListType(elem-ty);
       <not(?ALPHATYPE())> elem-ty;
       <infer-type-of-top> (elem-ty, h) => head-ty;
-      <type-coerce> (ListType(head-ty), ty) => ty'
+      <type-coerce-direct> (ListType(head-ty), ty) => ty'
 
   infer-type-of:
     (ty, SortFunCall(fun-name, par, arg*)) -> ty''
@@ -226,12 +211,12 @@ rules /* store variables */
       <lookup-native-fun-def(|fun-name)> parent-def => fun-def;
       <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
       <zip; map(infer-type-of-top)> (farg*, arg*);
-      <type-coerce> (ty', ty) => ty''
+      <type-coerce-direct> (ty', ty) => ty''
 
   infer-type-of:
     (ty, Map([])) -> ty'
     where
-      <type-coerce> (MapType(ALPHATYPE(), ALPHATYPE()), ty) => ty'
+      <type-coerce-direct> (MapType(ALPHATYPE(), ALPHATYPE()), ty) => ty'
 
   infer-type-of:
     (ty, MapSelect(map-trm, key-trm)) -> val-ty'
@@ -244,7 +229,7 @@ rules /* store variables */
         <lookup-def(|Types()); lookup-prop(|SuperType())> maybe-map-ty => MapType(key-ty, val-ty)
       end;
       <infer-type-of-top> (key-ty, key-trm) => key-ty;
-      <type-coerce> (val-ty, ty) => val-ty'
+      <type-coerce-direct> (val-ty, ty) => val-ty'
   
   infer-type-of:
     (ty, Map([Bind(key-val, val-val)])) -> ty'
@@ -252,7 +237,7 @@ rules /* store variables */
       <infer-type-of-top> (NONETYPE(), key-val) => key-ty;
       <infer-type-of-top> (NONETYPE(), val-val) => val-ty;
       map-ty := MapType(key-ty, val-ty);
-      <type-coerce> (map-ty, ty) => ty'
+      <type-coerce-direct> (map-ty, ty) => ty'
 
   infer-type-of:
     (ty, mx@MapExtend(map1, map2)) -> maps-ty
@@ -260,11 +245,11 @@ rules /* store variables */
       <infer-type-of-top> (NONETYPE(), map1) => map1-ty;
       <infer-type-of-top> (NONETYPE(), map2) => map2-ty;
       (
-        <type-coerce-sym> (map1-ty, map2-ty) => maps-ty
+        <type-coerce-sym(type-coerce-direct)> (map1-ty, map2-ty) => maps-ty
         <+
         add-msg(|Error(), mx, $[Type [<ensure(pp-type)> map1-ty] is not coercible to type [<ensure(pp-type)> map2-ty]])
       );
-      <type-coerce> (maps-ty, ty)
+      <type-coerce-direct> (maps-ty, ty)
 
   lookup-native-fun-def(|fun-name):
     parent-def -> <lookup-def(|NativeDTFun(parent-def))> fun-name
@@ -339,7 +324,7 @@ rules /* store variables */
       <store-prop(|Use(), v-def)> r; 
       <lookup-prop(|Type())> v-def => v-ty;
       <store-prop(|Type(), v-def)> ty;
-      if <not(type-coerce)> (ty, v-ty)
+      if <not(type-coerce-direct)> (ty, v-ty)
       then
         add-msg(|Warning(), f, $[Term might be uncoerceable to [<pp-type> ty]])
       end
@@ -351,7 +336,7 @@ rules /* store variables */
       <lookup-def(|Vars())> v-name => v-def;
       <store-prop(|Use(), v-def)> r; 
       <lookup-prop(|Type())> v-def => v-ty;
-      if <not(type-coerce)> (ty, v-ty)
+      if <not(type-coerce-direct)> (ty, v-ty)
       then
         add-msg(|Warning(), f, $[Term might be uncoerceable to [<pp-type> ty]])
       end
@@ -373,78 +358,83 @@ rules /* store variables */
 
 rules
   
-  type-coerce:
-    (ty-from, ty-to) -> <fail>
+  type-coerce-full =
+    type-coerce-base
+    <+ type-coerce(type-coerce-full)
+    <+ type-coerce-impl-constructor(type-coerce-full)
+    <+ type-coerce-impl-reduction(type-coerce-full)
   
-  type-coerce = (eq <+ ?(_, NONETYPE())); Fst
+  type-coerce-direct =
+    type-coerce-base
+    <+ type-coerce(type-coerce-direct)
+    <+ type-coerce-impl-constructor(type-coerce-direct)
   
-  type-coerce:
+  type-coerce-sym(coerce-s) =
+    coerce-s
+    <+ swap; coerce-s
+  
+  type-coerce-base = eq; Fst
+  
+  type-coerce-base:
+    (ty, NONETYPE()) -> ty
+  
+  type-coerce-base:
+    (ALPHATYPE(), ty) -> ty
+  
+  type-coerce(coerce-s):
   	(IntType(), RealType()) -> RealType()
 
-  type-coerce:
+  type-coerce(coerce-s):
     (ListType(ALPHATYPE()), to-ty@ListType(_)) -> to-ty
 
-  type-coerce:
-    (ListType(ty-from), ListType(ty-to)) -> ListType(<type-coerce> (ty-from, ty-to))
+  type-coerce(coerce-s):
+    (ListType(ty-from), ListType(ty-to)) -> ListType(<coerce-s> (ty-from, ty-to))
   
-  type-coerce:
-    (ty-from, ty-to) -> <type-coerce> (sup-ty, ty-to)
+  type-coerce(coerce-s):
+    (ty-from, ty-to) -> <coerce-s> (sup-ty, ty-to)
     where
       <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
 
-  type-coerce:
-    (ALPHATYPE(), ty) -> ty
-
-  type-coerce:
+  type-coerce(coerce-s):
     (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty
     where
       <lookup-def(|Types())> to-ty => to-ty-def;
       <lookup-prop(|SortKind())> to-ty-def => SemanticCompSort();
       <lookup-prop(|SuperType())> to-ty-def => MapType(e-k-ty, e-v-ty);
-      <type-coerce> (a-k-ty, e-k-ty);
-      <type-coerce> (a-v-ty, e-v-ty)
+      <coerce-s> (a-k-ty, e-k-ty);
+      <coerce-s> (a-v-ty, e-v-ty)
 
-  type-coerce:
-    ty-tup@(ty-from, _) -> ty'
+  type-coerce-impl-constructor(coerce-s):
+    (ty-from, ty-to) -> ty-to'
     where
-      all-cons-def* := <matching-implicit-cons> ty-from;
-      candidate-cons-def* := <diff> (all-cons-def*, <AConsDefs <+ ![]>);
-      {| AConsDefs:
-        rules(AConsDefs: _ -> candidate-cons-def*);
-        ty' := <type-box> ty-tup
-      |}
+      cons-def* := <diff> (<get-matching-impl-constructors> ty-from, <AConsDefs <+ ![]>);
+      ty-to' := <fetch-elem({|AConsDefs:
+          \ c-def -> c-def
+            where
+              rem-def* := <filter(not(?c-def))> cons-def*;
+              rules(AConsDefs: _ -> rem-def*)
+          \;
+          lookup-prop(|Type());
+          ?ConstructorType(_, <id>);
+          \ ty -> <coerce-s> (ty, ty-to) \
+        |}
+      )> cons-def*
 
-  matching-implicit-cons:
+  get-matching-impl-constructors:
     ty -> cons-def*
     where
       all-implicit-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|ConsKind()) => ImplicitCons()))>;
       cons-def* := <filter(where(lookup-prop(|Type()) => ConstructorType([ty], _)))> all-implicit-def*
 
-  type-reduce(|arrow-def):
+  type-coerce-impl-reduction(coerce-s) = type-coerce-impl-reduction(coerce-s|<InArrow>)
+
+  type-coerce-impl-reduction(coerce-s|arrow-def):
     (ty-reduce-from, ty-reduce-to) -> ty-to'
     where
       arrow-ty* := <lookup-props(|Type())> arrow-def;
       ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
-      ty-to' := <type-coerce-sym> (ty-reduce-to, bu-ty)
-  
-  type-box:
-    (ty-from, ty-to) -> ty-to'
-    where
-      cons-def* := <AConsDefs>;
-      ty-to' := <fetch-elem(
-        {|AConsDefs:
-          where({c-def:
-            rem-def* := <filter(not(?c-def))> cons-def*;
-            rules(AConsDefs: _ -> rem-def*)
-          });
-	        lookup-prop(|Type());
-	        ?ConstructorType(_, <id>);
-          \ ty -> <type-coerce> (ty, ty-to) \
-        |}
-      )> cons-def*
+      ty-to' := <type-coerce-sym(coerce-s)> (ty-reduce-to, bu-ty)
 
-  type-coerce-sym =
-    type-coerce
-    <+ swap; type-coerce
+
 
 
