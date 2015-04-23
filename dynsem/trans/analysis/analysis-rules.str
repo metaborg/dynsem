@@ -407,8 +407,14 @@ rules
 
   type-coerce-impl-constructor(coerce-s):
     (ty-from, ty-to) -> ty-to'
-    where
-      cons-def* := <diff> (<get-matching-impl-constructors> ty-from, <AConsDefs <+ ![]>);
+    where {|AConsDefs:
+      if not(AConsDefs)
+      then
+        cons-def* := <get-matching-impl-constructors> ty-from;
+        rules(AConsDefs: _ -> cons-def*)
+      else
+        cons-def* := <AConsDefs>
+      end;
       ty-to' := <fetch-elem({|AConsDefs:
           \ c-def -> c-def
             where
@@ -420,6 +426,7 @@ rules
           \ ty -> <coerce-s> (ty, ty-to) \
         |}
       )> cons-def*
+    |}
 
   get-matching-impl-constructors:
     ty -> cons-def*
