@@ -10,9 +10,9 @@ public class TermUtils {
 	public static boolean boolFromTerm(IStrategoTerm term) {
 		if (Tools.isTermAppl(term)) {
 			IStrategoAppl tAppl = (IStrategoAppl) term;
-			if (Tools.hasConstructor(tAppl, "$__DS_False__$", 0)) {
+			if (Tools.hasConstructor(tAppl, "___DS_False___", 0)) {
 				return false;
-			} else if (Tools.hasConstructor(tAppl, "$__DS_True__$", 0)) {
+			} else if (Tools.hasConstructor(tAppl, "___DS_True___", 0)) {
 				return true;
 			}
 		}
@@ -20,7 +20,7 @@ public class TermUtils {
 	}
 
 	public static IStrategoTerm termFromBool(boolean bV, ITermFactory factory) {
-		return factory.makeAppl(factory.makeConstructor(bV ? "$__DS_True__$"
-				: "$__DS_False__$", 0));
+		return factory.makeAppl(factory.makeConstructor(bV ? "___DS_True___"
+				: "___DS_False___", 0));
 	}
 }
