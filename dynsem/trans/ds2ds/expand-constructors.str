@@ -47,33 +47,19 @@ rules
     Con(c, child*) -> Con(c, child'*)
     where
       ConstructorType(c-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      child'* := <zip(debug(!1); expand-constructor; debug(!2) <+ Snd)> (c-ty*, child*)
+      child'* := <zip(expand-constructor <+ Snd)> (c-ty*, child*)
   
   expand-constructor:
     (ex-ty, t) -> Con(impl-con, [t])
     where
-      debug(!3);
       t-ty := <type-of> t;
-      debug(!4);
       (
-	      debug(!5);
         <not(type-coerce-simple)> (ex-ty, t-ty);
         impl-con := <get-first-impl-constructor-def; def-get-name> (t-ty, ex-ty)
         <+
-	      debug(!6);
         <not(type-coerce-simple)> (t-ty, ex-ty);
         impl-con := <get-first-impl-constructor-def; def-get-name> (ex-ty, t-ty)
-      );
-      debug(!7)
-      // if <not(type-coerce-sym(type-coerce-simple))> (ex-ty, t-ty)
-      // then
-      // debug(!8);
-      //   out := <expand-constructor> (ex-ty, pre-term)
-      // else
-      // debug(!9);
-      //   out := pre-term
-      // end
-      // ;debug(!10)
+      )
 
   get-first-impl-constructor-def:
     (ty-from, ty-to) -> con-def
