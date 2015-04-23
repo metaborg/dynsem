@@ -161,19 +161,20 @@ rules /* store variables */
     where
       ty-cast := <rw-type> ty-trm;
       ty-t := <infer-type-of-top> (NONETYPE(), t)
-      
+
   infer-type-of:
-  	(ty, Cast(t, ty-trm)) -> t-ty'
-  	where
-  		<rw-type> ty-trm => ty-cast;
-  		<type-coerce-direct> (ty, ty-cast) => ty-cast';
-  		<infer-type-of-top> (ty-cast', t) => t-ty'
-  
+    (ty, Cast(t, ty-trm)) -> t-ty'
+    where
+      <rw-type> ty-trm => ty-cast;
+      <type-coerce-direct> (ty, ty-cast) => ty-cast';
+      <infer-type-of-top> (ty-cast', t) => t-ty'
+
   infer-type-of:
   	(ty, Cast(t, ty-trm)) -> ty'
   	where
   		<rw-type> ty-trm => ty-cast;
-  		ty' := <type-coerce-direct <+ type-coerce-impl-reduction(type-coerce-direct)> (ty-cast, ty);
+      <not(type-coerce-direct)> (ty-cast, ty);
+      ty' := <type-coerce-impl-reduction(type-coerce-direct)> (ty, ty-cast);
   		<infer-type-of-top> (ty', t)
 
   infer-type-of:
