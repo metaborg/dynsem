@@ -124,8 +124,7 @@ rules /* store variables */
       <lookup-def(|Vars())> v => v-def;
       <lookup-prop(|Type())> v-def => v-ty;
       <not(type-coerce)> (v-ty, ty);
-      arrow-def := <InArrow>;
-      <type-reduce(|arrow-def)> (v-ty, ty) => ty'
+      <type-reduce(|<InArrow>)> (v-ty, ty) => ty'
 
   infer-type-of:
     (ty, Int(_)) -> IntType()
@@ -176,7 +175,6 @@ rules /* store variables */
       ty-cast := <rw-type> ty-trm;
       ty-t := <infer-type-of-top> (NONETYPE(), t)
       
-  
   infer-type-of:
   	(ty, Cast(t, ty-trm)) -> t-ty'
   	where
@@ -406,12 +404,44 @@ rules
       <type-coerce> (a-k-ty, e-k-ty);
       <type-coerce> (a-v-ty, e-v-ty)
 
+  type-coerce:
+    ty-tup@(ty-from, _) -> ty'
+    where
+      all-cons-def* := <matching-implicit-cons> ty-from;
+      candidate-cons-def* := <diff> (all-cons-def*, <AConsDefs <+ ![]>);
+      {| AConsDefs:
+        rules(AConsDefs: _ -> candidate-cons-def*);
+        ty' := <type-box> ty-tup
+      |}
+
+  matching-implicit-cons:
+    ty -> cons-def*
+    where
+      all-implicit-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|ConsKind()) => ImplicitCons()))>;
+      cons-def* := <filter(where(lookup-prop(|Type()) => ConstructorType([ty], _)))> all-implicit-def*
+
   type-reduce(|arrow-def):
     (ty-reduce-from, ty-reduce-to) -> ty-to'
     where
       arrow-ty* := <lookup-props(|Type())> arrow-def;
       ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
       ty-to' := <type-coerce-sym> (ty-reduce-to, bu-ty)
+  
+  type-box:
+    (ty-from, ty-to) -> ty-to'
+    where
+      cons-def* := <AConsDefs>;
+      ty-to' := <fetch-elem(
+        {|AConsDefs:
+          where({c-def:
+            rem-def* := <filter(not(?c-def))> cons-def*;
+            rules(AConsDefs: _ -> rem-def*)
+          });
+	        lookup-prop(|Type());
+	        ?ConstructorType(_, <id>);
+          \ ty -> <type-coerce> (ty, ty-to) \
+        |}
+      )> cons-def*
 
   type-coerce-sym =
     type-coerce
