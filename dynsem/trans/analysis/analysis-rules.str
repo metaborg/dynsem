@@ -417,9 +417,7 @@ rules
       end;
       ty-to' := <fetch-elem({|AConsDefs:
           \ c-def -> c-def
-            where
-              rem-def* := <filter(not(?c-def))> cons-def*;
-              rules(AConsDefs: _ -> rem-def*)
+            where rules(AConsDefs: _ -> <filter(not(?c-def))> cons-def*)
           \;
           lookup-prop(|Type());
           ?ConstructorType(_, <id>);
