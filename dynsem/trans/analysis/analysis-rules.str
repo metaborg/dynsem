@@ -427,10 +427,7 @@ rules
     |}
 
   get-matching-impl-constructors:
-    ty -> cons-def*
-    where
-      all-implicit-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|ConsKind()) => ImplicitCons()))>;
-      cons-def* := <filter(where(lookup-prop(|Type()) => ConstructorType([ty], _)))> all-implicit-def*
+    ty -> <lookup-def-all(|Constructors()); filter(where(lookup-prop(|ConsKind()) => ImplicitCons()); where(lookup-prop(|Type()) => ConstructorType([ty], _)))>
 
   type-coerce-impl-reduction(coerce-s) = type-coerce-impl-reduction(coerce-s|<InArrow>)
 
