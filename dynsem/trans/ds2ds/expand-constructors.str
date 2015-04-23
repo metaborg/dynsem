@@ -13,9 +13,16 @@ imports
 rules
 
   expand-constructors-module:
-    mod@Module(_, _) -> Module($[[name]_expcons], section*)
+    mod@Module(_, _) -> Module($[[name]_expcons], section'*)
     where
-      <m-in-analysis(expand-constructors); unmark-vars> mod => Module(name, section*)
+      Module(name, section*) := <m-in-analysis(expand-constructors); unmark-vars> mod;
+      section'* := <alltd(rw-implicit-consdecls)> section*    
+  
+  rw-implicit-consdecls:
+    ImplicitConstructors(decl*) -> Constructors(<map(rw-implicit-consdecl)> decl*)
+  
+  rw-implicit-consdecl:
+    ImplConsDecl(c, child, s) -> ConsDecl(c, [child], s)
   
   expand-constructors = alltd(?Rule(_, _, _); alltd(expand-constructor))
   
