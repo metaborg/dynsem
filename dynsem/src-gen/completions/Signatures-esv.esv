@@ -27,6 +27,8 @@ completions
     <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
   completion template ConsDecl : "ID : Type" =
     <ID:ID> " : " <Type:Type>  
+  completion template ConsDecl : "ID : --> Type" =
+    <ID:ID> " : " <:Type> " --> " <Type:Type>  
   completion template SignatureSection : "implicit constructors " =
     "implicit constructors\n\t" (cursor) (blank)  
   completion template ImplConsDecl : "ID : Type -> Type" =

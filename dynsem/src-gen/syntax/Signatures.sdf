@@ -29,6 +29,7 @@ exports
     "constructors" ConsDecl*                -> SignatureSection {cons("Constructors")}
     ID ":" {Type "*"}+ "->" Type            -> ConsDecl         {cons("ConsDecl")}
     ID ":" Type                             -> ConsDecl         {cons("NullaryConsDecl")}
+    ID ":" {Type "*"}* "-->" Type           -> ConsDecl         {cons("FunDecl")}
     "implicit" "constructors" ImplConsDecl* -> SignatureSection {cons("ImplicitConstructors")}
     ID ":" Type "->" Type                   -> ImplConsDecl     {cons("ImplConsDecl")}
     ID                                      -> Type             {cons("SimpleSort")}

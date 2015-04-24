@@ -36,6 +36,9 @@ context-free syntax // constructor declarations
 
   ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
   ConsDecl.NullaryConsDecl = [[ID] : [Type]]
+  
+  
+  ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
 
   SignatureSection.ImplicitConstructors = <
     implicit constructors
