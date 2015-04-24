@@ -26,13 +26,14 @@ exports
     CONTENTCOMPLETE -> VariableScheme   {cons("COMPLETION-VariableScheme")}
 
   context-free syntax
-    "constructors" ConsDecl*     -> SignatureSection {cons("Constructors")}
-    ID ":" {Type "*"}+ "->" Type -> ConsDecl         {cons("ConsDecl")}
-    ID ":" Type                  -> ConsDecl         {cons("NullaryConsDecl")}
-    ID                           -> Type             {cons("SimpleSort")}
-    "List" "(" Type ")"          -> Type             {cons("ListSort")}
-    MapType                      -> Type             
-    "Map" "<" Type "," Type ">"  -> MapType          {cons("MapSort")}
+    "constructors" ConsDecl*      -> SignatureSection {cons("Constructors")}
+    ID ":" {Type "*"}+ "->" Type  -> ConsDecl         {cons("ConsDecl")}
+    ID ":" Type                   -> ConsDecl         {cons("NullaryConsDecl")}
+    ID ":" {Type "*"}* "-->" Type -> ConsDecl         {cons("FunDecl")}
+    ID                            -> Type             {cons("SimpleSort")}
+    "List" "(" Type ")"           -> Type             {cons("ListSort")}
+    MapType                       -> Type             
+    "Map" "<" Type "," Type ">"   -> MapType          {cons("MapSort")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}

@@ -22,6 +22,7 @@ signature
     Constructors    : List(ConsDecl) -> SignatureSection
     ConsDecl        : ID * List(Type) * Type -> ConsDecl
     NullaryConsDecl : ID * Type -> ConsDecl
+    FunDecl         : ID * List(Type) * Type -> ConsDecl
     SimpleSort      : ID -> Type
     ListSort        : Type -> Type
                     : MapType -> Type

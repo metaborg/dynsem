@@ -27,6 +27,8 @@ completions
     <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
   completion template ConsDecl : "ID : Type" =
     <ID:ID> " : " <Type:Type>  
+  completion template ConsDecl : "ID : --> Type" =
+    <ID:ID> " : " <:Type> " --> " <Type:Type>  
   completion template Type : "List(Type)" =
     "List(" <Type:Type> ")"  
   completion template MapType : "Map<Type,Type>" =
