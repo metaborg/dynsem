@@ -30,7 +30,11 @@ rules /* syntactic checks */
 
 rules /* store variables */
   
-  store-rules = Rules(map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
+  store-rules = 
+    {| MemoTyPath, MemoTyTrans:
+      where(prime-typaths);
+      Rules(map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
+    |}
 
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr@NamedDynamicEmitted(_, arrow-name), _)) -> r
@@ -411,28 +415,50 @@ rules
       <coerce-s> (a-v-ty, e-v-ty)
 
   type-coerce-impl-constructor(coerce-s):
-    (ty-from, ty-to) -> ty-to'
-    where {|AConsDefs:
-      if not(AConsDefs)
-      then
-        cons-def* := <get-matching-impl-constructors> ty-from;
-        rules(AConsDefs: _ -> cons-def*)
-      else
-        cons-def* := <AConsDefs>
-      end;
-      ty-to' := <fetch-elem({|AConsDefs:
-          \ c-def -> c-def
-            where rules(AConsDefs: _ -> <filter(not(?c-def))> cons-def*)
-          \;
-          lookup-prop(|Type());
-          ?ConstructorType(_, <id>);
-          \ ty -> <coerce-s> (ty, ty-to) \
-        |}
-      )> cons-def*
-    |}
+    ty-tup@(_, _) -> <get-typath(coerce-s); last> ty-tup
+        
 
-  get-matching-impl-constructors:
-    ty -> <lookup-def-all(|Constructors()); filter(where(lookup-prop(|ConsKind()) => ImplicitCons()); where(lookup-prop(|Type()) => ConstructorType([ty], _)))>
+  // initialize the memo table with the implicit constructors and arrows as paths
+  prime-typaths = 
+    lookup-def-all(|Constructors());
+    filter(where(lookup-prop(|ConsKind()) => ImplicitCons()));
+    map({in-ty, out-ty: \
+      c-def -> c-def
+      where
+        <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
+        rules(
+          MemoTyPath: (in-ty, out-ty) -> [c-def]
+          MemoTyTrans:+ in-ty -> out-ty
+        )
+    \})
+
+  get-typath(coerce-strategy):
+    t@(ty-from, ty-to) -> path*
+    where
+    	anti-cycle(
+	      ( <MemoTyPath> t => path* )
+	      <+
+	      (
+	        <bagof-MemoTyTrans> ty-from => ty-inter*;
+	        ty-inter := <fetch-elem(\ ty -> <coerce-strategy> (ty, ty-to) \)> ty-inter*;
+	        path1* := <MemoTyPath> (ty-from, ty-inter);
+	        path2* := <get-typath(coerce-strategy)> (ty-inter, ty-to);
+	        path* := [path1*, path2*];
+	        rules(
+	          MemoTyPath: t -> path*
+	          MemoTyTrans:+ ty-from -> ty-to
+	        )
+	      )
+      )
+  
+  anti-cycle(s):
+  	t -> t'
+  	where {|AntiCycle:
+  		<not(AntiCycle)> t;
+  		rules(AntiCycle:+ t -> t);
+  		<s> t => t'
+    |}
+  		
 
   type-coerce-impl-reduction(coerce-s) = type-coerce-impl-reduction(coerce-s|<InArrow>)
 

@@ -68,28 +68,30 @@ rules
         impl-con := <get-first-impl-constructor-def; def-get-name> (ex-ty, t-ty)
       )
 
-  get-first-impl-constructor-def:
-    (ty-from, ty-to) -> con-def
-    where {|AConsDefs:
-      if not(AConsDefs)
-      then
-        cons-def* := <get-matching-impl-constructors> ty-from;
-        rules(AConsDefs: _ -> cons-def*)
-      else
-        cons-def* := <AConsDefs>
-      end;
-      con-def := <fetch-elem({|AConsDefs:
-          \ c-def -> c-def
-            where rules(AConsDefs: _ -> <filter(not(?c-def))> cons-def*)
-          \;
-          where(
-            lookup-prop(|Type());
-            ?ConstructorType(_, <id>);
-            \ ty -> <type-coerce-direct> (ty, ty-to) \
-          )
-        |}
-      )> cons-def*
-    |}
+  get-first-impl-constructor-def = fail
+// 
+//   get-first-impl-constructor-def:
+//     (ty-from, ty-to) -> con-def
+//     where {|AConsDefs:
+//       if not(AConsDefs)
+//       then
+//         cons-def* := <get-matching-impl-constructors> ty-from;
+//         rules(AConsDefs: _ -> cons-def*)
+//       else
+//         cons-def* := <AConsDefs>
+//       end;
+//       con-def := <fetch-elem({|AConsDefs:
+//           \ c-def -> c-def
+//             where rules(AConsDefs: _ -> <filter(not(?c-def))> cons-def*)
+//           \;
+//           where(
+//             lookup-prop(|Type());
+//             ?ConstructorType(_, <id>);
+//             \ ty -> <type-coerce-direct> (ty, ty-to) \
+//           )
+//         |}
+//       )> cons-def*
+//     |}
   
 
 
