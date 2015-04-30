@@ -169,9 +169,13 @@ rules /* store variables */
   infer-type-of:
     (ty, Cast(t, ty-trm)) -> t-ty'
     where
+      debug(!1);
       <rw-type> ty-trm => ty-cast;
+      debug(!2);
       <type-coerce-direct> (ty, ty-cast) => ty-cast';
+      debug(!3);
       <infer-type-of-top> (ty-cast', t) => t-ty'
+      ;debug(!4)
 
   infer-type-of:
   	(ty, Cast(t, ty-trm)) -> ty'
@@ -266,7 +270,97 @@ rules /* store variables */
     where
       <lookup-prop(|SuperType()); lookup-def(|Types())> parent-def => sup-def;
       <lookup-prop(|SortKind())> sup-def => NativeSort()
-    
+
+rules
+  
+  type-check-build =
+    type-check-build-con
+
+  type-check-build-con:
+    Con(c, aparam*) -> ty
+    where
+      ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      aparam-ty* := <map(type-check-build-con)> aparam*;
+      <zip(type-coerce-full)> (aparam-ty*, fparam-ty*)
+
+rules
+  
+  type-check-match(|in-ty) =
+    type-check-match-num(|in-ty)
+    <+ type-check-match-var(|in-ty)
+    <+ type-check-match-as(|in-ty)
+    <+ type-check-match-con(|in-ty)
+    <+ type-check-match-cast(|in-ty)
+    <+ type-check-match-list(|in-ty)
+
+  type-check-match:
+    (t1, t2) -> <type-check-match(|t1)> t2
+  
+  type-check-match-num(|in-ty):
+    Int(_) -> <type-coerce-full> (IntType(), in-ty)
+  
+  type-check-match-num(|in-ty):
+    Real(_) -> <type-coerce-full> (RealType(), in-ty)
+  
+  type-check-match-num(|in-ty):
+    True() -> <type-coerce-full> (BoolType(), in-ty)
+
+  type-check-match-num(|in-ty):
+    False() -> <type-coerce-full> (BoolType(), in-ty)
+  
+  type-check-match-num(|in-ty):
+    String(_) -> <type-coerce-full> (StringType(), in-ty)
+  
+  type-check-match-var(|in-ty):
+    Wld() -> in-ty
+  
+  type-check-match-var(|in-ty):
+    dec -> ty
+    where
+      ?Var(v) + ?MatchedVar(v)
+    where
+      if scheme-def := <get-unique-matching-varscheme> v
+      then
+        scheme-ty := <lookup-prop(|Type())> scheme-def;
+        ty := <type-coerce-full> (scheme-ty, in-ty)
+      else
+        ty := in-ty
+      end;
+      v-def := <store-def(|Vars())> v;
+      <store-prop(|Type(), v-def)> ty
+  
+  type-check-match-as(|in-ty):
+  	As(v, p) -> ty
+  	where
+  		<type-check-match(|in-ty)> v;
+  		ty := <type-check-match(|in-ty)> p  
+
+  type-check-match-cast(|in-ty):
+  	Cast(t, ty-trm) -> <type-coerce-full> (t-ty, in-ty)
+  	where
+  		cast-ty := <rw-type> ty-trm;
+  		t-ty := <type-check-match(|cast-ty)> t
+  		
+  type-check-match-con(|in-ty):
+    Con(c, aparam*) -> <type-coerce-full> (ty, in-ty)
+    where
+      ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      <zip(type-check-match)> (fparam-ty*, aparam*)
+  
+  type-check-match-list(|in-ty):
+  	List([]) -> <type-coerce-full> (ListType(ALPHATYPE()), in-ty)
+  
+  type-check-match-list(|in-ty):
+  	ListTail([h], t) -> <type-coerce-full> (l-ty, in-ty)
+  	where
+  		<?ListType(in-el-ty)> in-ty
+    where
+    	t-ty@ListType(t-el-ty) := <type-check-match(|in-ty)> t;
+    	h-ty := <type-check-match(|in-el-ty)> h;
+    	l-ty := <type-coerce-full> (ListType(h-ty), t-ty)
+
+rules
+  
   type-check-premise-top =
   	type-check-premise
     <+
@@ -280,8 +374,11 @@ rules /* store variables */
   type-check-premise:
   	f@Formula(TermEq(lhs, rhs)) -> f
   	where
-  		<infer-type-of-top> (NONETYPE(), lhs);
-  		<infer-type-of-top> (NONETYPE(), rhs)
+  	  <type-check-build> lhs;
+  	  <type-check-build> rhs
+
+  		// <infer-type-of-top> (NONETYPE(), lhs);
+  		// <infer-type-of-top> (NONETYPE(), rhs)
   
   type-check-premise:
     f@Formula(TermNeq(lhs, rhs)) -> f
@@ -292,8 +389,11 @@ rules /* store variables */
   type-check-premise:
     f@Formula(Match(lhs, rhs)) -> f
     where
-      <infer-type-of-top> (NONETYPE(), lhs) => lhs-ty;
-      <infer-type-of-top> (lhs-ty, rhs) => rhs-ty
+      lhs-ty := <type-check-build> lhs;
+      rhs-ty := <type-check-match(|lhs-ty)> rhs 
+      
+      // <infer-type-of-top> (NONETYPE(), lhs) => lhs-ty;
+      // <infer-type-of-top> (lhs-ty, rhs) => rhs-ty
   
   type-check-premise:
   	f@Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> f
@@ -400,10 +500,10 @@ rules
   type-coerce(coerce-s):
     (ListType(ty-from), ListType(ty-to)) -> ListType(<coerce-s> (ty-from, ty-to))
   
-  type-coerce(coerce-s):
-    (ty-from, ty-to) -> <coerce-s> (sup-ty, ty-to)
-    where
-      <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
+  // type-coerce(coerce-s):
+  //   (ty-from, ty-to) -> <coerce-s> (sup-ty, ty-to)
+  //   where
+  //     <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
 
   type-coerce(coerce-s):
     (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty
@@ -416,13 +516,12 @@ rules
 
   type-coerce-impl-constructor(coerce-s):
     ty-tup@(_, _) -> <get-typath(coerce-s); last> ty-tup
-        
 
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths = 
     lookup-def-all(|Constructors());
     filter(where(lookup-prop(|ConsKind()) => ImplicitCons()));
-    map({in-ty, out-ty: \
+    map({in-ty, out-ty: \ /* scoping the vars is required due to Stratego bug */
       c-def -> c-def
       where
         <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
