@@ -64,10 +64,10 @@ rules /* store variables */
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
     where
       <type-check-match(|ma-ty)> lhs;
-      <map(labelcomp-to-type-term-pair; type-check-match)> [r*, sc*];
+      <map(labelcomp-to-type-term-pair; type-check-match-wrap)> [r*, sc*];
       <map(type-check-premise-top)> p*;
-      <type-check-build(|bu-ty)> rhs;
-      <map(labelcomp-to-type-term-pair; type-check-build)> tc*
+      <type-check-build-expect(|bu-ty)> rhs;
+      <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> tc*
 
   labelcomp-to-type-term-pair:
     LabelComp(ty, v) -> (<rw-type> ty, v)
@@ -80,7 +80,7 @@ rules /* store variables */
 
 rules
 
-  type-check-build(|ex-ty):
+  type-check-build-expect(|ex-ty):
     t -> t-ty
     where
       if t-ty := <type-check-build> t
@@ -92,6 +92,11 @@ rules
         add-msg(|Error(), t, $[Expected type [ex-ty-str]])
       end
   
+  type-check-build-expect-wrap:
+    (ex-ty, t) -> <type-check-build-expect(|ex-ty)> t
+  
+  
+  
   type-check-expectation(coerce|term, expected-ty):
     actual-ty -> actual-ty
     where
@@ -101,13 +106,14 @@ rules
       ex-ty-str := <pp-type> expected-ty;
       add-msg(|Error(), term, $[Term of type [t-ty-str] found, but expected [ex-ty-str]])
 
-  type-check-build:
-    (ex-ty, t) -> <type-check-build(|ex-ty)> t
-  
+  type-check-expectation-wrap(coerce|t):
+    (expected-ty, actual-ty) -> <type-check-expectation(coerce|t, expected-ty)> actual-ty
+
+
   type-check-build =
   	type-check-build-helper
-  	<+ type-err-build-match-symbols; fail
-    <+ type-err-build; fail
+  	<+ type-err-build-match-symbols
+    <+ type-err-build
   
   type-check-build-helper =
     type-check-build-num
@@ -122,14 +128,14 @@ rules
     <+ type-check-build-nativefuncall
   
   type-err-build-match-symbols:
-    t -> t
+    t -> NONETYPE()
     where 
       ?Wld() + ?MatchedVar(_) + ?Var(_)
     where 
       add-msg(|Error(), t, $[Match symbol in build pattern])
   
   type-err-build:
-    t -> t
+    t -> NONETYPE()
     where
       add-msg(|Error(), t, $[Type error])
   
@@ -168,8 +174,10 @@ rules
     Con(c, aparam*) -> ty
     where
       ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      aparam-ty* := <map(type-check-build-con)> aparam*;
-      <zip(type-coerce-full)> (aparam-ty*, fparam-ty*)
+      // aparam-ty* := <map(type-check-build)> aparam*;
+      <zip(type-check-build-expect-wrap)> (fparam-ty*, aparam*)
+      // <zip(type-check-bu)
+      // <zip(type-check-expectation-wrap(type-coerce-full|<Snd>))> (aparam-ty*, fparam-ty*)
 
   type-check-build-list:
     List([]) -> ListType(ALPHATYPE())
@@ -242,16 +250,15 @@ rules // type rules for match-sides
     <+ type-check-match-con(|in-ty)
     <+ type-check-match-cast(|in-ty)
     <+ type-check-match-list(|in-ty)
-    <+ type-err-match(|in-ty); fail
+    <+ type-err-match(|in-ty)
   
   type-err-match(|in-ty):
-  	t -> t
+  	t -> in-ty
   	where
-  		in-ty-str := <ensure(pp-type)> in-ty;
-  		t-ty-str := <type-of; pp-type <+ !"no-type"> t;
-  		add-msg(|Error(), t, $[Term of type [t-ty-str] found, but expected [in-ty-str]])
+  		in-ty-str := <pp-type> in-ty;
+  		add-msg(|Error(), t, $[Expected [in-ty-str]])
 
-  type-check-match:
+  type-check-match-wrap:
     (in-ty, t) -> <type-check-match(|in-ty)> t
   
   type-check-match-num(|in-ty):
@@ -303,7 +310,7 @@ rules // type rules for match-sides
   		ty := <type-check-match(|in-ty)> p
 
   type-check-match-cast(|in-ty):
-  	Cast(t, ty-trm) -> <type-coerce-full> (t-ty, in-ty)
+  	Cast(t, ty-trm) -> <type-coerce-full> (in-ty, t-ty)
   	where
   		cast-ty := <rw-type> ty-trm;
   		t-ty := <type-check-match(|cast-ty)> t
@@ -312,7 +319,7 @@ rules // type rules for match-sides
     Con(c, aparam*) -> <type-coerce-full> (ty, in-ty)
     where
       ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      <zip(type-check-match)> (fparam-ty*, aparam*)
+      <zip(type-check-match-wrap)> (fparam-ty*, aparam*)
   
   type-check-match-list(|in-ty):
   	List([]) -> <type-coerce-full> (ListType(ALPHATYPE()), in-ty)
@@ -334,8 +341,7 @@ rules
   	where(
   		?p;
   		p-str := <ensure(pp-dynsem-Premise-string)> p;
-    	add-msg(|Error(), p, $[Premise type check failed: [p-str]]);
-    	<debug(!"Premise check failed: ")> p
+    	add-msg(|Error(), p, $[Premise type check failed: [p-str]])
   	)
 
   type-check-premise:
@@ -373,8 +379,8 @@ rules
 	      then
 	        <type-check-expectation(type-coerce-full|lhs, bu-ty)> lhs-ty;
 	        <type-check-match(|ma-ty)> rhs;
-	        <map(labelcomp-to-type-term-pair; type-check-build)> [r*, sc*];
-	        <map(labelcomp-to-type-term-pair; type-check-match)> tc*
+	        <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> [r*, sc*];
+	        <map(labelcomp-to-type-term-pair; type-check-match-wrap)> tc*
 	      else
 	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
 	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
@@ -448,7 +454,6 @@ rules
     coerce-s
     <+ swap; coerce-s
   
-  
   type-coerce-base:
     (ty, NONETYPE()) -> ty
   
@@ -521,7 +526,6 @@ rules
   		rules(AntiCycle:+ t -> t);
   		<s> t => t'
     |}
-  		
 
   type-coerce-impl-reduction(coerce-s) = type-coerce-impl-reduction(coerce-s|<InArrow>)
 
@@ -530,7 +534,8 @@ rules
     where
       arrow-ty* := <lookup-props(|Type())> arrow-def;
       ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
-      ty-to' := <type-coerce-sym(coerce-s)> (ty-reduce-to, bu-ty)
+      ty-to' := <coerce-s> (ty-reduce-to, bu-ty)
+
 
 
 
