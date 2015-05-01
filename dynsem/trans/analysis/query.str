@@ -11,7 +11,11 @@ imports
 
 rules
   
-  type-of = with(fail|"Invocation of type-of")
+  type-of =
+    type-check-build-helper
+  
+  type-of:
+    As(v, _) -> <type-of> v
   
   type-of-applicable-arrow:
     (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce-direct> (con-ty, ma-ty) \))> arrow-type*

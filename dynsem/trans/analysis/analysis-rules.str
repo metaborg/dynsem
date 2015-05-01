@@ -91,190 +91,15 @@ rules /* store variables */
       add-msg(|Error(), t, $[Type check failed: term of type [t-ty-str] is incompatible with type [ty-str]]);
       <debug(!"Type check failed, msg created: ")> t
 
-  infer-type-of:
-    (ty, Wld()) -> ty
-  
-  infer-type-of:
-    (ty, dec) -> ty
-    where
-      <?Var(v) + ?MatchedVar(v)> dec
-    where
-      <not(get-unique-matching-varscheme)> v;
-      <store-def(|Vars())> v => v-def;
-      <store-prop(|Type(), v-def)> ty
-
-  infer-type-of:
-    (ty, dec) -> ty
-    where
-      <?Var(v) + ?MatchedVar(v)> dec
-    where
-      scheme-def := <get-unique-matching-varscheme> v;
-      scheme-ty := <lookup-prop(|Type())> scheme-def;
-      ty' := <type-coerce-direct> (ty, scheme-ty);
-      <store-def(|Vars())> v => v-def;
-      <store-prop(|Type(), v-def)> ty'
-
-  infer-type-of:
-    (ty, r@VarRef(v)) -> ty'
-    where
-      <lookup-def(|Vars())> v => v-def;
-      <store-prop(|Use(), v-def)> r;
-      <lookup-prop(|Type())> v-def => v-ty;
-      <type-coerce-full> (v-ty, ty) => ty'
-
-  infer-type-of:
-    (ty, Int(_)) -> IntType()
-    where
-      <type-coerce-direct> (IntType(), ty)
-
-  infer-type-of:
-    (ty, bool) -> BoolType()
-    where
-      <?True() + ?False()> bool;
-      <type-coerce-direct> (BoolType(), ty)
-
-  infer-type-of:
-    (ty, String(_)) -> StringType()
-    where
-      <type-coerce-direct> (StringType(), ty)
-
-  infer-type-of:
-    (ty, Fresh()) -> IntType()
-    where
-      <type-coerce-direct> (IntType(), ty)
-  
-  infer-type-of:
-    (ty, ref@VarRef(v)) -> ty
-    where
-      <not(lookup-def(|Vars()))> v => v-ty;
-      add-msg(|Error(), ref, $[Variable [<unrename-var> v] cannot be resolved])
-  
-  infer-type-of:
-    (ty, Con(c, child*)) -> ty-con
-    where
-      ConstructorType(fchild-ty*, ty-con) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      (
-        <type-coerce-direct> (ty-con, ty)
-        <+
-        <type-coerce-sym(type-coerce-impl-reduction(type-coerce-direct))> (ty, ty-con)
-      );
-      <zip; map(infer-type-of-top)> (fchild-ty*, child*)
-  
-  infer-type-of:
-    (NONETYPE(), Cast(t, ty-trm)) -> ty-cast
-    where
-      ty-cast := <rw-type> ty-trm;
-      ty-t := <infer-type-of-top> (NONETYPE(), t)
-
-  infer-type-of:
-    (ty, Cast(t, ty-trm)) -> t-ty'
-    where
-      debug(!1);
-      <rw-type> ty-trm => ty-cast;
-      debug(!2);
-      <type-coerce-direct> (ty, ty-cast) => ty-cast';
-      debug(!3);
-      <infer-type-of-top> (ty-cast', t) => t-ty'
-      ;debug(!4)
-
-  infer-type-of:
-  	(ty, Cast(t, ty-trm)) -> ty'
-  	where
-  		<rw-type> ty-trm => ty-cast;
-      <not(type-coerce-direct)> (ty-cast, ty);
-      ty' := <type-coerce-impl-reduction(type-coerce-direct)> (ty, ty-cast);
-  		<infer-type-of-top> (ty', t)
-
-  infer-type-of:
-  	(ty, As(v, pat)) -> ty'
-  	where
-  	  <infer-type-of-top> (ty, pat) => ty';
-  	  <infer-type-of-top> (ty', v)
-
-  infer-type-of:
-  	(ty, List([])) -> ty'
-  	where
-  		<type-coerce-direct> (ListType(ALPHATYPE()), ty) => ty'
-  
-  infer-type-of:
-    (ty, ListTail([h], t)) -> ty'
-    where
-      <infer-type-of-top> (ty, t) => l-ty@ListType(ALPHATYPE());
-      <infer-type-of-top> (NONETYPE(), h) => head-ty;
-      <type-coerce-direct> (ListType(head-ty), ty) => ty'
-
-  infer-type-of:
-    (ty, ListTail([h], t)) -> ty'
-    where
-      <infer-type-of-top> (ty, t) => l-ty@ListType(elem-ty);
-      <not(?ALPHATYPE())> elem-ty;
-      <infer-type-of-top> (elem-ty, h) => head-ty;
-      <type-coerce-direct> (ListType(head-ty), ty) => ty'
-
-  infer-type-of:
-    (ty, SortFunCall(fun-name, par, arg*)) -> ty''
-    where
-      <infer-type-of-top> (NONETYPE(), par) => parent-ty;
-      <lookup-def(|Types())> parent-ty => parent-def;
-      <lookup-prop(|SortKind())> parent-def => NativeSort();
-      <lookup-native-fun-def(|fun-name)> parent-def => fun-def;
-      <lookup-prop(|Type())> fun-def => FunctionType(farg*, ty');
-      <zip; map(infer-type-of-top)> (farg*, arg*);
-      <type-coerce-direct> (ty', ty) => ty''
-
-  infer-type-of:
-    (ty, Map([])) -> ty'
-    where
-      <type-coerce-direct> (MapType(ALPHATYPE(), ALPHATYPE()), ty) => ty'
-
-  infer-type-of:
-    (ty, MapSelect(map-trm, key-trm)) -> val-ty'
-    where
-      <infer-type-of-top> (NONETYPE(), map-trm) => maybe-map-ty;
-      if <?MapType(key-ty, val-ty)> maybe-map-ty
-      then
-        id
-      else
-        <lookup-def(|Types()); lookup-prop(|SuperType())> maybe-map-ty => MapType(key-ty, val-ty)
-      end;
-      <infer-type-of-top> (key-ty, key-trm) => key-ty;
-      <type-coerce-direct> (val-ty, ty) => val-ty'
-  
-  infer-type-of:
-    (ty, Map([Bind(key-val, val-val)])) -> ty'
-    where
-      <infer-type-of-top> (NONETYPE(), key-val) => key-ty;
-      <infer-type-of-top> (NONETYPE(), val-val) => val-ty;
-      map-ty := MapType(key-ty, val-ty);
-      <type-coerce-direct> (map-ty, ty) => ty'
-
-  infer-type-of:
-    (ty, mx@MapExtend(map1, map2)) -> maps-ty
-    where
-      <infer-type-of-top> (NONETYPE(), map1) => map1-ty;
-      <infer-type-of-top> (NONETYPE(), map2) => map2-ty;
-      (
-        <type-coerce-sym(type-coerce-direct)> (map1-ty, map2-ty) => maps-ty
-        <+
-        add-msg(|Error(), mx, $[Type [<ensure(pp-type)> map1-ty] is not coercible to type [<ensure(pp-type)> map2-ty]])
-      );
-      <type-coerce-direct> (maps-ty, ty)
-
-  lookup-native-fun-def(|fun-name):
-    parent-def -> <lookup-def(|NativeDTFun(parent-def))> fun-name
-  
-  lookup-native-fun-def(|fun-name):
-    parent-def -> <lookup-native-fun-def(|fun-name)> sup-def
-    where
-      <not(lookup-def(|NativeDTFun(parent-def)))> fun-name
-    where
-      <lookup-prop(|SuperType()); lookup-def(|Types())> parent-def => sup-def;
-      <lookup-prop(|SortKind())> sup-def => NativeSort()
-
 rules
   
   type-check-build =
-  	type-check-build-num
+  	type-check-build-helper
+  	<+ type-err-build-match-symbols; fail
+    <+ type-err-build; fail
+  
+  type-check-build-helper =
+    type-check-build-num
     <+ type-check-build-str
     <+ type-check-build-bool
     <+ type-check-build-fresh
@@ -284,8 +109,6 @@ rules
     <+ type-check-build-map
     <+ type-check-build-cast
     <+ type-check-build-nativefuncall
-  	<+ type-err-build-match-symbols; fail
-    <+ type-err-build; fail
   
   type-err-build-match-symbols:
     t -> t
