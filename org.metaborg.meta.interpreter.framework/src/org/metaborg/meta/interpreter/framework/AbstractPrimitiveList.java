@@ -10,14 +10,28 @@ public abstract class AbstractPrimitiveList<T> implements INodeList {
 
 	public final int size;
 
-	public AbstractPrimitiveList() {
-		this(null, null);
+	public INodeSource source;
+
+	public AbstractPrimitiveList(INodeSource source) {
+		this(source, null, null);
 	}
 
-	public AbstractPrimitiveList(T head, AbstractPrimitiveList<T> tail) {
+	public AbstractPrimitiveList(INodeSource source, T head,
+			AbstractPrimitiveList<T> tail) {
+		this.source = source;
 		this.head = head;
 		this.tail = tail;
 		this.size = (head == null ? 0 : 1) + (tail == null ? 0 : tail.size());
+	}
+
+	@Override
+	public INodeSource getSourceInfo() {
+		return source;
+	}
+
+	@Override
+	public void setSourceInfo(INodeSource source) {
+		this.source = source;
 	}
 
 	@Override
@@ -29,6 +43,7 @@ public abstract class AbstractPrimitiveList<T> implements INodeList {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void replaceHead(Object newHead) {
 		this.head = (T) newHead;
 
@@ -71,5 +86,5 @@ public abstract class AbstractPrimitiveList<T> implements INodeList {
 	public String toString() {
 		return ListUtils.toString(this);
 	}
-	
+
 }

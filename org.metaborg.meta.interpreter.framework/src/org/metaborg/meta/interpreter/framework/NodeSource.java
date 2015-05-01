@@ -21,7 +21,8 @@ public class NodeSource implements INodeSource {
 	private final String filename;
 	private final AbstractTermAttachment attachment;
 
-	private NodeSource(ImploderAttachment imploderAttachment, AbstractTermAttachment attachment) {
+	private NodeSource(ImploderAttachment imploderAttachment,
+			AbstractTermAttachment attachment) {
 		final IToken leftToken = imploderAttachment.getLeftToken();
 		final IToken rightToken = imploderAttachment.getRightToken();
 		line = leftToken.getLine() + 1;
@@ -50,7 +51,7 @@ public class NodeSource implements INodeSource {
 	public String getFilename() {
 		return filename;
 	}
-	
+
 	@Override
 	public void apply(IStrategoTerm term) {
 		term.putAttachment(attachment);
@@ -59,17 +60,20 @@ public class NodeSource implements INodeSource {
 	public static INodeSource fromStrategoTerm(IStrategoTerm aterm) {
 		AbstractTermAttachment attachment = null;
 		ImploderAttachment imploderAttachment = null;
-	
-		if ( aterm.getAttachment(OriginAttachment.TYPE) != null ) {
-			OriginAttachment originAttachment = aterm.getAttachment(OriginAttachment.TYPE);
-			imploderAttachment = originAttachment.getOrigin().getAttachment(ImploderAttachment.TYPE);
+
+		if (aterm.getAttachment(OriginAttachment.TYPE) != null) {
+			OriginAttachment originAttachment = aterm
+					.getAttachment(OriginAttachment.TYPE);
+			imploderAttachment = originAttachment.getOrigin().getAttachment(
+					ImploderAttachment.TYPE);
 			attachment = originAttachment;
-		} else if ( aterm.getAttachment(OriginAttachment.TYPE) != null ) {
+		} else if (aterm.getAttachment(ImploderAttachment.TYPE) != null) {
 			imploderAttachment = aterm.getAttachment(ImploderAttachment.TYPE);
 			attachment = imploderAttachment;
 		}
-	
-		return imploderAttachment != null ? new NodeSource(imploderAttachment, attachment) : null;
+
+		return imploderAttachment != null ? new NodeSource(imploderAttachment,
+				attachment) : null;
 	}
 
 }

@@ -7,6 +7,12 @@ import org.spoofax.interpreter.terms.ITermFactory;
 
 public class NIL implements INodeList {
 
+	public INodeSource source;
+
+	public NIL(INodeSource source) {
+		this.source = source;
+	}
+
 	@Override
 	public IStrategoTerm toStrategoTerm(ITermFactory factory) {
 		return factory.makeList();
@@ -40,6 +46,16 @@ public class NIL implements INodeList {
 	@Override
 	public NIL fromStrategoTerm(IStrategoTerm list) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setSourceInfo(INodeSource source) {
+		this.source = source;
+	}
+
+	@Override
+	public INodeSource getSourceInfo() {
+		return source;
 	}
 
 }

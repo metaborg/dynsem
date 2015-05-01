@@ -113,7 +113,7 @@ rules
       gennodename := $[Generic_[<ds2java-sort-classname> ty]]
 
   ds2java-gennode-instantiation:
-    (idx, lty@ListType(e-ty)) -> e |[ new x_listname().fromStrategoTerm(term.getSubterm(i)) ]|
+    (idx, lty@ListType(e-ty)) -> e |[ new x_listname(NodeSource.fromStrategoTerm(term.getSubterm(i))).fromStrategoTerm(term.getSubterm(i)) ]|
     where
       i := <int-to-string> idx;
       x_listname := <ds2java-sort-classname> lty
