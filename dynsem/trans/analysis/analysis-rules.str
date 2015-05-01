@@ -495,29 +495,21 @@ rules
   get-typath(coerce-strategy):
     t@(ty-from, ty-to) -> path*
     where
-      debug(!1);
     	anti-cycle(
 	      ( <MemoTyPath> t => path* )
 	      <+
 	      (
-	        debug(!2);
 	        <bagof-MemoTyTrans> ty-from => ty-inter*;
-	        debug(!3);
 	        ty-inter := <fetch-elem(where(\ ty -> <coerce-strategy> (ty, ty-to) \))> ty-inter*;
-	        debug(!4);
-	        path1* := <debug(!"4a "); MemoTyPath; debug(!"4b ")> (ty-from, ty-inter);
-	        debug(!5);
+	        path1* := <MemoTyPath> (ty-from, ty-inter);
 	        path2* := <get-typath(coerce-strategy)> (ty-inter, ty-to);
-	        debug(!6);
 	        path* := [path1*, path2*];
-	        debug(!7);
 	        rules(
 	          MemoTyPath: t -> path*
 	          MemoTyTrans:+ ty-from -> ty-to
 	        )
 	      )
       )
-      ;<debug(!8)> path*
   
   anti-cycle(s):
   	t -> t'
