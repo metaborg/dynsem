@@ -63,11 +63,11 @@ rules /* store variables */
   store-rule:
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
     where
-      <infer-type-of-top> (ma-ty, lhs);
-      <map(labelcomp-to-type-term-pair; infer-type-of-top)> [r*, sc*];
+      <type-check-match(|ma-ty)> lhs;
+      <map(labelcomp-to-type-term-pair; type-check-match)> [r*, sc*];
       <map(type-check-premise-top)> p*;
-      <infer-type-of-top> (bu-ty, rhs);
-      <map(labelcomp-to-type-term-pair; infer-type-of-top)> tc*
+      <type-check-build(|bu-ty)> rhs;
+      <map(labelcomp-to-type-term-pair; type-check-build)> tc*
 
   labelcomp-to-type-term-pair:
     LabelComp(ty, v) -> (<rw-type> ty, v)
@@ -78,20 +78,31 @@ rules /* store variables */
   	  scheme-def := <get-unique-matching-varscheme> v;
   	  scheme-ty := <lookup-prop(|Type())> scheme-def
 
-  infer-type-of-top =
-  	infer-type-of
-    <+
-    type-of-failure
-
-  type-of-failure:
-    (ty, t) -> ty
-    where
-      ty-str := <ensure(pp-type)> ty;
-      t-ty-str := <type-of; pp-type <+ !"(unknown)"> t;
-      add-msg(|Error(), t, $[Type check failed: term of type [t-ty-str] is incompatible with type [ty-str]]);
-      <debug(!"Type check failed, msg created: ")> t
-
 rules
+
+  type-check-build(|ex-ty):
+    t -> t-ty
+    where
+      if t-ty := <type-check-build> t
+      then
+        <type-check-expectation(type-coerce-full|t, ex-ty)> t-ty
+      else
+        t-ty := ex-ty;
+        ex-ty-str := <pp-type> ex-ty;
+        add-msg(|Error(), t, $[Expected type [ex-ty-str]])
+      end
+  
+  type-check-expectation(coerce|term, expected-ty):
+    actual-ty -> actual-ty
+    where
+      <coerce> (actual-ty, expected-ty)
+      <+
+      t-ty-str := <pp-type> actual-ty;
+      ex-ty-str := <pp-type> expected-ty;
+      add-msg(|Error(), term, $[Term of type [t-ty-str] found, but expected [ex-ty-str]])
+
+  type-check-build:
+    (ex-ty, t) -> <type-check-build(|ex-ty)> t
   
   type-check-build =
   	type-check-build-helper
@@ -241,7 +252,7 @@ rules // type rules for match-sides
   		add-msg(|Error(), t, $[Term of type [t-ty-str] found, but expected [in-ty-str]])
 
   type-check-match:
-    (t1, t2) -> <type-check-match(|t1)> t2
+    (in-ty, t) -> <type-check-match(|in-ty)> t
   
   type-check-match-num(|in-ty):
     Int(_) -> <type-coerce-full> (IntType(), in-ty)
@@ -330,39 +341,40 @@ rules
   type-check-premise:
   	f@Formula(TermEq(lhs, rhs)) -> f
   	where
-  	  <type-check-build> lhs;
+  	  <type-check-build> lhs; // TODO opportunity for type check
   	  <type-check-build> rhs
 
-  		// <infer-type-of-top> (NONETYPE(), lhs);
-  		// <infer-type-of-top> (NONETYPE(), rhs)
-  
   type-check-premise:
     f@Formula(TermNeq(lhs, rhs)) -> f
     where
-      <infer-type-of-top> (NONETYPE(), lhs);
-      <infer-type-of-top> (NONETYPE(), rhs)
+      <type-check-build> lhs; // TODO opportunity for type check
+      <type-check-build> rhs
 
   type-check-premise:
     f@Formula(Match(lhs, rhs)) -> f
     where
       lhs-ty := <type-check-build> lhs;
       rhs-ty := <type-check-match(|lhs-ty)> rhs 
-      
-      // <infer-type-of-top> (NONETYPE(), lhs) => lhs-ty;
-      // <infer-type-of-top> (lhs-ty, rhs) => rhs-ty
   
+  type-check-premise:
+  	f@Formula(NMatch(lhs, rhs)) -> f
+  	where
+  	  <type-check-build> lhs;
+  	  <type-check-match(|NONETYPE())> rhs
+
   type-check-premise:
   	f@Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> f
     where
-    	<infer-type-of-top> (NONETYPE(), lhs) => lhs-ty;
+      lhs-ty := <type-check-build> lhs;
     	if arrow-def := <lookup-def(|Arrows())> arrow-name
     	then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
 	      if <type-of-applicable-arrow> (arrow-ty*, lhs-ty) => ArrowType(bu-ty, ma-ty)
 	      then
-	        <infer-type-of-top> (bu-ty, lhs);
-	        <infer-type-of-top> (ma-ty, rhs);
-	        <map(labelcomp-to-type-term-pair; infer-type-of-top)> [r*, sc*, tc*]
+	        <type-check-expectation(type-coerce-full|lhs, bu-ty)> lhs-ty;
+	        <type-check-match(|ma-ty)> rhs;
+	        <map(labelcomp-to-type-term-pair; type-check-build)> [r*, sc*];
+	        <map(labelcomp-to-type-term-pair; type-check-match)> tc*
 	      else
 	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
 	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
@@ -371,12 +383,6 @@ rules
 	      add-msg(|Error(), arrow-name, $[Arrow [arrow-name] is not declared])
 	    end
       
-  type-check-premise:
-  	f@Formula(NMatch(lhs, rhs)) -> f
-  	where
-  		<infer-type-of-top> (NONETYPE(), lhs);
-  		<infer-type-of-top> (NONETYPE(), rhs)
-
   type-check-premise:
     f@Formula(TypeCast(r@VarRef(v-name), ty-term)) -> f
     where
@@ -424,6 +430,8 @@ rules
     <+ type-coerce(type-coerce-full)
     <+ type-coerce-impl-constructor(type-coerce-full)
     <+ type-coerce-impl-reduction(type-coerce-full)
+  
+  // FIXME: eliminate these
   
   type-coerce-direct =
     type-coerce-base
