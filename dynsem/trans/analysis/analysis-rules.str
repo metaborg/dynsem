@@ -274,7 +274,16 @@ rules /* store variables */
 rules
   
   type-check-build =
-  	type-of
+  	type-check-build-num
+    <+ type-check-build-str
+    <+ type-check-build-bool
+    <+ type-check-build-fresh
+    <+ type-check-build-var
+    <+ type-check-build-con
+    <+ type-check-build-list
+    <+ type-check-build-map
+    <+ type-check-build-cast
+    <+ type-check-build-nativefuncall
   	<+ type-err-build-match-symbols; fail
     <+ type-err-build; fail
   
@@ -288,19 +297,7 @@ rules
   type-err-build:
     t -> t
     where
-      t-ty-str := <type-of; pp-type <+ !"no-type"> t;
-      add-msg(|Error(), t, $[Type error in type [t-ty-str]])
-  
-  type-of =
-  	type-check-build-num
-  	<+ type-check-build-str
-  	<+ type-check-build-bool
-  	<+ type-check-build-fresh
-  	<+ type-check-build-var
-  	<+ type-check-build-con
-  	<+ type-check-build-list
-  	<+ type-check-build-map
-  	<+ type-check-build-nativefuncall
+      add-msg(|Error(), t, $[Type error])
   
   type-check-build-num:
   	Int(_) -> IntType()
@@ -370,6 +367,12 @@ rules
       MapType(key-ty, val-ty) := <type-check-build> m-t;
       k-ty := <type-check-build> k-t;
       <type-coerce-full> (k-ty, key-ty)
+
+  type-check-build-cast:
+    Cast(t, ty-t) -> <type-coerce-full> (t-ty, cast-ty)
+    where
+      t-ty := <type-check-build> t;
+      cast-ty := <rw-type> ty-t
 
   type-check-build-nativefuncall:
     SortFunCall(fun-name, parent-t, param-t*) -> fun-ty
