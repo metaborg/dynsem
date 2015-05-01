@@ -174,10 +174,7 @@ rules
     Con(c, aparam*) -> ty
     where
       ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      // aparam-ty* := <map(type-check-build)> aparam*;
       <zip(type-check-build-expect-wrap)> (fparam-ty*, aparam*)
-      // <zip(type-check-bu)
-      // <zip(type-check-expectation-wrap(type-coerce-full|<Snd>))> (aparam-ty*, fparam-ty*)
 
   type-check-build-list:
     List([]) -> ListType(ALPHATYPE())
@@ -469,11 +466,6 @@ rules
   type-coerce(coerce-s):
     (ListType(ty-from), ListType(ty-to)) -> ListType(<coerce-s> (ty-from, ty-to))
   
-  // type-coerce(coerce-s):
-  //   (ty-from, ty-to) -> <coerce-s> (sup-ty, ty-to)
-  //   where
-  //     <lookup-def(|Types()); lookup-prop(|SuperType())> ty-from => sup-ty
-
   type-coerce(coerce-s):
     (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty
     where
@@ -490,7 +482,7 @@ rules
   prime-typaths = 
     lookup-def-all(|Constructors());
     filter(where(lookup-prop(|ConsKind()) => ImplicitCons()));
-    map({in-ty, out-ty: \ /* scoping the vars is required due to Stratego bug */
+    map({in-ty, out-ty: \ /* scoping the vars is required due to Stratego interpreter bug */
       c-def -> c-def
       where
         <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
