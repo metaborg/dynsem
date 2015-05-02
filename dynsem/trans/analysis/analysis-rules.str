@@ -432,7 +432,7 @@ rules
     type-coerce-base
     <+ type-coerce(type-coerce-full)
     <+ type-coerce-impl-constructor(type-coerce-full)
-    <+ type-coerce-impl-reduction(type-coerce-full)
+    // <+ type-coerce-impl-reduction(type-coerce-full)
   
   // FIXME: eliminate these
   
@@ -482,15 +482,29 @@ rules
   prime-typaths = 
     lookup-def-all(|Constructors());
     filter(where(lookup-prop(|ConsKind()) => ImplicitCons()));
-    map({in-ty, out-ty: \ /* scoping the vars is required due to Stratego interpreter bug */
+    map(\
       c-def -> c-def
-      where
+      where {in-ty, out-ty:
         <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
         rules(
           MemoTyPath: (in-ty, out-ty) -> [c-def]
           MemoTyTrans:+ in-ty -> out-ty
         )
-    \})
+      }
+    \);
+    lookup-def-all(|Arrows());
+    map(\
+      a-def -> a-def
+      where
+        a-ty* := <lookup-props(|Type())> a-def;
+        <map({in-ty, out-ty:
+          ?ArrowType(in-ty, out-ty);
+          rules(
+            MemoTyPath: (in-ty, out-ty) -> [a-def]
+            MemoTyTrans:+ in-ty -> out-ty
+          ) 
+        })> a-ty*
+    \)
 
   get-typath(coerce-strategy):
     t@(ty-from, ty-to) -> path*
@@ -519,14 +533,16 @@ rules
   		<s> t => t'
     |}
 
-  type-coerce-impl-reduction(coerce-s) = type-coerce-impl-reduction(coerce-s|<InArrow>)
+  type-coerce-impl-reduction(coerce-s) = with(fail|"Deprecated")
 
-  type-coerce-impl-reduction(coerce-s|arrow-def):
-    (ty-reduce-from, ty-reduce-to) -> ty-to'
-    where
-      arrow-ty* := <lookup-props(|Type())> arrow-def;
-      ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
-      ty-to' := <coerce-s> (ty-reduce-to, bu-ty)
+//   type-coerce-impl-reduction(coerce-s) = type-coerce-impl-reduction(coerce-s|<InArrow>)
+// 
+//   type-coerce-impl-reduction(coerce-s|arrow-def):
+//     (ty-reduce-from, ty-reduce-to) -> ty-to'
+//     where
+//       arrow-ty* := <lookup-props(|Type())> arrow-def;
+//       ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
+//       ty-to' := <coerce-s> (ty-reduce-to, bu-ty)
 
 
 
