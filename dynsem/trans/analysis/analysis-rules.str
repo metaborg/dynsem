@@ -458,9 +458,6 @@ rules
     (ALPHATYPE(), ty) -> ty
   
   type-coerce(coerce-s):
-  	(IntType(), RealType()) -> RealType()
-
-  type-coerce(coerce-s):
     (ListType(ALPHATYPE()), to-ty@ListType(_)) -> to-ty
 
   type-coerce(coerce-s):
