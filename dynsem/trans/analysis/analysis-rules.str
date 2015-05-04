@@ -32,8 +32,7 @@ rules /* store variables */
   
   store-rules = 
     {| MemoTyPath, MemoTyTrans:
-      where(prime-typaths);
-      Rules(map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
+      Rules(where(prime-typaths); (map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked])))))
     |}
 
   store-rule:
@@ -493,14 +492,14 @@ rules
     map(\
       a-def -> a-def
       where
-        a-ty* := <lookup-props(|Type())> a-def;
-        <map({in-ty, out-ty:
+        <lookup-props(|Type())> a-def;
+        map({in-ty, out-ty:
           ?ArrowType(in-ty, out-ty);
           rules(
             MemoTyPath: (in-ty, out-ty) -> [a-def]
             MemoTyTrans:+ in-ty -> out-ty
-          ) 
-        })> a-ty*
+          )
+        })
     \)
 
   get-typath(coerce-strategy):
