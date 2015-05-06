@@ -448,13 +448,10 @@ rules
     <+ swap; coerce-s
   
   type-coerce-base:
-    (ty, NONETYPE()) -> ty
+    (ty, ALPHATYPE()) -> ty
   
   type-coerce-base:
     (ALPHATYPE(), ty) -> ty
-  
-  type-coerce(coerce-s):
-    (ListType(ALPHATYPE()), to-ty@ListType(_)) -> to-ty
 
   type-coerce(coerce-s):
     (ListType(ty-from), ListType(ty-to)) -> ListType(<coerce-s> (ty-from, ty-to))
