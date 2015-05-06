@@ -15,42 +15,47 @@
     <relativePath>../../spoofax-deploy/org.metaborg.maven.parent.language</relativePath>
   </parent>
 
-    <build>
-      <resources>
-        <resource>
-          <directory>lib</directory>
-          <targetPath>lib</targetPath>
-          <includes>
-            <include>*.tbl</include>
-          </includes>
-        </resource>
-      </resources>
-      <plugins>
-        <plugin>
+  <build>
+    <resources>
+      <resource>
+        <directory>lib</directory>
+        <targetPath>lib</targetPath>
+        <includes>
+          <include>*.tbl</include>
+        </includes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.metaborg</groupId>
+        <artifactId>spoofax-maven-plugin</artifactId>
+        <configuration>
+            <pardonedLanguages>
+                <language>NameBindingLanguage</language>
+            </pardonedLanguages>
+        </configuration>
+        <dependencies>
+          <dependency>
             <groupId>org.metaborg</groupId>
-            <artifactId>spoofax-maven-plugin</artifactId>
-            <dependencies>
-              <dependency>
-                <groupId>org.metaborg</groupId>
-                <artifactId>org.metaborg.meta.lang.template</artifactId>
-                <version>${metaborg-version}</version>
-                <type>spoofax-language</type>
-              </dependency>
-              <dependency>
-                <groupId>org.metaborg</groupId>
-                <artifactId>org.metaborg.meta.lang.nabl</artifactId>
-                <version>${metaborg-version}</version>
-                <type>spoofax-language</type>
-              </dependency>
-              <dependency>
-                <groupId>org.metaborg</groupId>
-                <artifactId>org.metaborg.meta.lang.esv</artifactId>
-                <version>${metaborg-version}</version>
-                <type>spoofax-language</type>
-              </dependency>
-            </dependencies>
-          </plugin>
-      </plugins>
+            <artifactId>org.metaborg.meta.lang.template</artifactId>
+            <version>${metaborg-version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.lang.nabl</artifactId>
+            <version>${metaborg-version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.lang.esv</artifactId>
+            <version>${metaborg-version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
   </build>
 
   <developers>
