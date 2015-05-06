@@ -94,8 +94,6 @@ rules
   type-check-build-expect-wrap:
     (ex-ty, t) -> <type-check-build-expect(|ex-ty)> t
   
-  
-  
   type-check-expectation(coerce|term, expected-ty):
     actual-ty -> actual-ty
     where
@@ -258,19 +256,19 @@ rules // type rules for match-sides
     (in-ty, t) -> <type-check-match(|in-ty)> t
   
   type-check-match-num(|in-ty):
-    Int(_) -> <type-coerce-full> (IntType(), in-ty)
+    Int(_) -> <type-coerce-full> (in-ty, IntType())
   
   type-check-match-num(|in-ty):
-    Real(_) -> <type-coerce-full> (RealType(), in-ty)
+    Real(_) -> <type-coerce-full> (in-ty, RealType())
   
   type-check-match-bool(|in-ty):
-    True() -> <type-coerce-full> (BoolType(), in-ty)
+    True() -> <type-coerce-full> (in-ty, BoolType())
 
   type-check-match-bool(|in-ty):
-    False() -> <type-coerce-full> (BoolType(), in-ty)
+    False() -> <type-coerce-full> (in-ty, BoolType())
   
   type-check-match-str(|in-ty):
-    String(_) -> <type-coerce-full> (StringType(), in-ty)
+    String(_) -> <type-coerce-full> (in-ty, StringType())
   
   type-check-match-wld(|in-ty):
     Wld() -> in-ty
@@ -284,7 +282,7 @@ rules // type rules for match-sides
       if scheme-def := <get-unique-matching-varscheme> v
       then
         scheme-ty := <lookup-prop(|Type())> scheme-def;
-        ty := <type-coerce-full> (scheme-ty, in-ty)
+        ty := <type-coerce-full> (in-ty, scheme-ty)
       else
         ty := in-ty
       end;
@@ -312,22 +310,22 @@ rules // type rules for match-sides
   		t-ty := <type-check-match(|cast-ty)> t
   		
   type-check-match-con(|in-ty):
-    Con(c, aparam*) -> <type-coerce-full> (ty, in-ty)
+    Con(c, aparam*) -> <type-coerce-full> (in-ty, ty)
     where
       ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       <zip(type-check-match-wrap)> (fparam-ty*, aparam*)
   
   type-check-match-list(|in-ty):
-  	List([]) -> <type-coerce-full> (ListType(ALPHATYPE()), in-ty)
+  	List([]) -> <type-coerce-full> (in-ty, ListType(ALPHATYPE()))
   
   type-check-match-list(|in-ty):
-  	ListTail([h], t) -> <type-coerce-full> (l-ty, in-ty)
+  	ListTail([h], t) -> <type-coerce-full> (in-ty, l-ty)
   	where
   		<?ListType(in-el-ty)> in-ty
     where
     	t-ty@ListType(t-el-ty) := <type-check-match(|in-ty)> t;
     	h-ty := <type-check-match(|in-el-ty)> h;
-    	l-ty := <type-coerce-full> (ListType(h-ty), t-ty)
+    	l-ty := <type-coerce-full> (t-ty, ListType(h-ty))
 
 rules
   
@@ -430,15 +428,14 @@ rules
   type-coerce-full =
     type-coerce-base
     <+ type-coerce(type-coerce-full)
-    <+ type-coerce-impl-constructor(type-coerce-full)
-    // <+ type-coerce-impl-reduction(type-coerce-full)
+    <+ type-coerce-implicit(type-coerce-full)
   
   // FIXME: eliminate these
   
   type-coerce-direct =
     type-coerce-base
     <+ type-coerce(type-coerce-direct)
-    <+ type-coerce-impl-constructor(type-coerce-direct)
+    <+ type-coerce-implicit(type-coerce-direct)
 
   type-coerce-simple =
   	type-coerce-base
@@ -471,36 +468,38 @@ rules
       <coerce-s> (a-k-ty, e-k-ty);
       <coerce-s> (a-v-ty, e-v-ty)
 
-  type-coerce-impl-constructor(coerce-s):
+  type-coerce-implicit(coerce-s):
     ty-tup@(_, _) -> <get-typath(coerce-s); last> ty-tup
 
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths = 
     lookup-def-all(|Constructors());
     filter(where(lookup-prop(|ConsKind()) => ImplicitCons()));
-    map(\
-      c-def -> c-def
-      where {in-ty, out-ty:
-        <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
+    map(store-prime-conspath);
+    lookup-def-all(|Arrows());
+    map(store-prime-arrowpath)
+  
+  store-prime-conspath:
+    c-def -> c-def
+    where {in-ty, out-ty:
+      <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
+      rules(
+        MemoTyPath: (in-ty, out-ty) -> [c-def]
+        MemoTyTrans:+ in-ty -> out-ty
+      )
+    }
+
+  store-prime-arrowpath:
+    a-def -> a-def
+    where
+      <lookup-props(|Type())> a-def;
+      map({in-ty, out-ty:
+        ?ArrowType(in-ty, out-ty);
         rules(
-          MemoTyPath: (in-ty, out-ty) -> [c-def]
+          MemoTyPath: (in-ty, out-ty) -> [a-def]
           MemoTyTrans:+ in-ty -> out-ty
         )
-      }
-    \);
-    lookup-def-all(|Arrows());
-    map(\
-      a-def -> a-def
-      where
-        <lookup-props(|Type())> a-def;
-        map({in-ty, out-ty:
-          ?ArrowType(in-ty, out-ty);
-          rules(
-            MemoTyPath: (in-ty, out-ty) -> [a-def]
-            MemoTyTrans:+ in-ty -> out-ty
-          )
-        })
-    \)
+      })
 
   get-typath(coerce-strategy):
     t@(ty-from, ty-to) -> path*
@@ -530,17 +529,4 @@ rules
     |}
 
   type-coerce-impl-reduction(coerce-s) = with(fail|"Deprecated")
-
-//   type-coerce-impl-reduction(coerce-s) = type-coerce-impl-reduction(coerce-s|<InArrow>)
-// 
-//   type-coerce-impl-reduction(coerce-s|arrow-def):
-//     (ty-reduce-from, ty-reduce-to) -> ty-to'
-//     where
-//       arrow-ty* := <lookup-props(|Type())> arrow-def;
-//       ArrowType(_, bu-ty) := <type-of-applicable-arrow> (arrow-ty*, ty-reduce-from);
-//       ty-to' := <coerce-s> (ty-reduce-to, bu-ty)
-
-
-
-
 
