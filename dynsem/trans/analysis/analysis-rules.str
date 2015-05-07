@@ -84,7 +84,7 @@ rules
     where
       if t-ty := <type-check-build> t
       then
-        <type-check-expectation(type-coerce-full|t, ex-ty)> t-ty
+        <type-check-expectation(type-coerce-full(fail)|t, ex-ty)> t-ty
       else
         t-ty := ex-ty;
         ex-ty-str := <pp-type> ex-ty;
@@ -177,7 +177,7 @@ rules
     List([]) -> ListType(ALPHATYPE())
 
   type-check-build-list:
-    ListTail([h], t) -> <type-coerce-full> (ListType(h-ty), t-ty)
+    ListTail([h], t) -> <type-coerce-full(fail)> (ListType(h-ty), t-ty)
     where
       t-ty := <type-check-build> t;
       h-ty := <type-check-build> h
@@ -192,7 +192,7 @@ rules
       v-ty := <type-check-build> v-t
   
   type-check-build-map:
-    MapExtend(map1, map2) -> <type-coerce-full> (map1-ty, map2-ty)
+    MapExtend(map1, map2) -> <type-coerce-full(fail)> (map1-ty, map2-ty)
     where
       map1-ty := <type-check-build> map1;
       map2-ty := <type-check-build> map2
@@ -202,10 +202,10 @@ rules
     where
       MapType(key-ty, val-ty) := <type-check-build> m-t;
       k-ty := <type-check-build> k-t;
-      <type-coerce-full> (k-ty, key-ty)
+      <type-coerce-full(fail)> (k-ty, key-ty)
 
   type-check-build-cast:
-    Cast(t, ty-t) -> <type-coerce-full> (t-ty, cast-ty)
+    Cast(t, ty-t) -> <type-coerce-full(fail)> (t-ty, cast-ty)
     where
       t-ty := <type-check-build> t;
       cast-ty := <rw-type> ty-t
@@ -218,8 +218,8 @@ rules
       NativeSort() := <lookup-prop(|SortKind())> parent-def;
       fun-def := <lookup-native-fun-def(|fun-name)> parent-def;
       FunctionType(fparam-ty*, fun-ty) := <lookup-prop(|Type())> fun-def;
-      param-ty* := <map(type-coerce-full)> param-t*;
-      <zip; map(type-coerce-full)> (param-ty*, fparam-ty*)
+      param-ty* := <map(type-coerce-full(fail))> param-t*;
+      <zip; map(type-coerce-full(fail))> (param-ty*, fparam-ty*)
 
   lookup-native-fun-def(|fun-name):
     parent-def -> <lookup-def(|NativeDTFun(parent-def))> fun-name
@@ -257,19 +257,19 @@ rules // type rules for match-sides
     (in-ty, t) -> <type-check-match(|in-ty)> t
   
   type-check-match-num(|in-ty):
-    Int(_) -> <type-coerce-full> (in-ty, IntType())
+    Int(_) -> <type-coerce-full(id)> (in-ty, IntType())
   
   type-check-match-num(|in-ty):
-    Real(_) -> <type-coerce-full> (in-ty, RealType())
+    Real(_) -> <type-coerce-full(id)> (in-ty, RealType())
   
   type-check-match-bool(|in-ty):
-    True() -> <type-coerce-full> (in-ty, BoolType())
+    True() -> <type-coerce-full(id)> (in-ty, BoolType())
 
   type-check-match-bool(|in-ty):
-    False() -> <type-coerce-full> (in-ty, BoolType())
+    False() -> <type-coerce-full(id)> (in-ty, BoolType())
   
   type-check-match-str(|in-ty):
-    String(_) -> <type-coerce-full> (in-ty, StringType())
+    String(_) -> <type-coerce-full(id)> (in-ty, StringType())
   
   type-check-match-wld(|in-ty):
     Wld() -> in-ty
@@ -283,7 +283,7 @@ rules // type rules for match-sides
       if scheme-def := <get-unique-matching-varscheme> v
       then
         scheme-ty := <lookup-prop(|Type())> scheme-def;
-        ty := <type-coerce-full> (in-ty, scheme-ty)
+        ty := <type-coerce-full(id)> (in-ty, scheme-ty)
       else
         ty := in-ty
       end;
@@ -305,28 +305,28 @@ rules // type rules for match-sides
   		ty := <type-check-match(|in-ty)> p
 
   type-check-match-cast(|in-ty):
-  	Cast(t, ty-trm) -> <type-coerce-full> (in-ty, t-ty)
+  	Cast(t, ty-trm) -> <type-coerce-full(id)> (in-ty, t-ty)
   	where
   		cast-ty := <rw-type> ty-trm;
   		t-ty := <type-check-match(|cast-ty)> t
   		
   type-check-match-con(|in-ty):
-    Con(c, aparam*) -> <type-coerce-full> (in-ty, ty)
+    Con(c, aparam*) -> <type-coerce-full(id)> (in-ty, ty)
     where
       ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       <zip(type-check-match-wrap)> (fparam-ty*, aparam*)
   
   type-check-match-list(|in-ty):
-  	List([]) -> <type-coerce-full> (in-ty, ListType(ALPHATYPE()))
+  	List([]) -> <type-coerce-full(id)> (in-ty, ListType(ALPHATYPE()))
   
   type-check-match-list(|in-ty):
-  	ListTail([h], t) -> <type-coerce-full> (in-ty, l-ty)
+  	ListTail([h], t) -> <type-coerce-full(id)> (in-ty, l-ty)
   	where
   		<?ListType(in-el-ty)> in-ty
     where
     	t-ty@ListType(t-el-ty) := <type-check-match(|in-ty)> t;
     	h-ty := <type-check-match(|in-el-ty)> h;
-    	l-ty := <type-coerce-full> (t-ty, ListType(h-ty))
+    	l-ty := <type-coerce-full(id)> (t-ty, ListType(h-ty))
 
 rules
   
@@ -392,7 +392,7 @@ rules
       <store-prop(|Use(), v-def)> r; 
       <lookup-prop(|Type())> v-def => v-ty;
       <store-prop(|Type(), v-def)> ty;
-      if <not(type-coerce-direct)> (ty, v-ty)
+      if <not(type-coerce-full(id))> (ty, v-ty)
       then
         add-msg(|Warning(), f, $[Term might be uncoerceable to [<pp-type> ty]])
       end
@@ -404,7 +404,7 @@ rules
       <lookup-def(|Vars())> v-name => v-def;
       <store-prop(|Use(), v-def)> r; 
       <lookup-prop(|Type())> v-def => v-ty;
-      if <not(type-coerce-direct)> (ty, v-ty)
+      if <not(type-coerce-full(id))> (ty, v-ty)
       then
         add-msg(|Warning(), f, $[Term might be uncoerceable to [<pp-type> ty]])
       end
@@ -424,24 +424,25 @@ rules
   
   type-check-premise = ?AllFail()
 
+signature
+  sorts
+    CoercionMode
+  
+  constructors
+    MatchMode: CoercionMode
+    BuildMode: CoercionMode
+
 rules
   
-  type-coerce-full =
+  type-coerce-full(is-matching) =
     type-coerce-base
-    <+ type-coerce(type-coerce-full)
-    <+ type-coerce-implicit(type-coerce-full)
+    <+ type-coerce(type-coerce-full(is-matching))
+    <+ type-coerce-implicit(is-matching, type-coerce-full(is-matching))
+    
+  type-coerce-direct = with(fail|"Deprecated")
   
-  // FIXME: eliminate these
-  
-  type-coerce-direct =
-    type-coerce-base
-    <+ type-coerce(type-coerce-direct)
-    <+ type-coerce-implicit(type-coerce-direct)
-
-  type-coerce-simple =
-  	type-coerce-base
-  	<+ type-coerce(type-coerce-simple)
-  
+  type-coerce-simple = with(fail|"Deprecated")
+ 
   type-coerce-base = eq; Fst
 
   type-coerce-sym(coerce-s) =
@@ -466,11 +467,13 @@ rules
       <coerce-s> (a-k-ty, e-k-ty);
       <coerce-s> (a-v-ty, e-v-ty)
 
-  type-coerce-implicit(coerce-s):
-    ty-tup@(_, _) -> <get-typath(coerce-s); last> ty-tup
+  type-coerce-implicit(is-matching, coerce-s):
+    (ty-from, ty-to) -> <get-typath(coerce-s); last> (ty-from, ty-to, mode)
+    where
+      is-matching < mode := MatchMode() + mode := BuildMode()
 
   // initialize the memo table with the implicit constructors and arrows as paths
-  prime-typaths = 
+  prime-typaths =
     lookup-def-all(|Constructors());
     filter(where(lookup-prop(|ConsKind()) => ImplicitCons()));
     map(store-prime-conspath);
@@ -482,8 +485,11 @@ rules
     where {in-ty, out-ty:
       <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
       rules(
-        MemoTyPath: (in-ty, out-ty) -> [c-def]
-        MemoTyTrans:+ in-ty -> out-ty
+        MemoTyPath: (in-ty, out-ty, BuildMode()) -> [c-def]
+        MemoTyTrans:+ (in-ty, BuildMode()) -> out-ty
+
+        MemoTyPath: (out-ty, in-ty, MatchMode()) -> [c-def]
+        MemoTyTrans:+ (out-ty, MatchMode()) -> in-ty
       )
     }
 
@@ -494,27 +500,37 @@ rules
       map({in-ty, out-ty:
         ?ArrowType(in-ty, out-ty);
         rules(
-          MemoTyPath: (in-ty, out-ty) -> [a-def]
-          MemoTyTrans:+ in-ty -> out-ty
+          MemoTyPath: (in-ty, out-ty, BuildMode()) -> [a-def]
+          MemoTyPath: (in-ty, out-ty, MatchMode()) -> [a-def]
+          MemoTyTrans:+ (in-ty, BuildMode()) -> out-ty
+          MemoTyTrans:+ (in-ty, MatchMode()) -> out-ty
         )
       })
 
   get-typath(coerce-strategy):
-    t@(ty-from, ty-to) -> path*
+    t@(ty-from, ty-to, mode) -> path*
     where
+      debug(!1);
     	anti-cycle(
 	      ( <MemoTyPath> t => path* )
 	      <+
 	      (
-	        <bagof-MemoTyTrans> ty-from => ty-inter*;
+	        debug(!2);
+	        <bagof-MemoTyTrans> (ty-from, mode) => ty-inter*;
+	        debug(!3);
 	        ty-inter := <fetch-elem(where(\ ty -> <coerce-strategy> (ty, ty-to) \))> ty-inter*;
-	        path1* := <MemoTyPath> (ty-from, ty-inter);
+	        debug(!4);
+	        path1* := <MemoTyPath> (ty-from, ty-inter, mode);
+	        debug(!5);
 	        path2* := <get-typath(coerce-strategy)> (ty-inter, ty-to);
+	        debug(!6);
 	        path* := [path1*, path2*];
+	        debug(!7);
 	        rules(
 	          MemoTyPath: t -> path*
-	          MemoTyTrans:+ ty-from -> ty-to
+	          MemoTyTrans:+ (ty-from, mode) -> ty-to
 	        )
+	        ;debug(!8)
 	      )
       )
   
