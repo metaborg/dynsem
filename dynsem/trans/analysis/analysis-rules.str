@@ -235,7 +235,6 @@ rules
 rules // type rules for match-sides
   
   type-check-match(|in-ty) =
-    debug(!"X "); !in-ty; debug(!"Y "); fail <+
     type-check-match-num(|in-ty)
     <+ type-check-match-bool(|in-ty)
     <+ type-check-match-str(|in-ty)
@@ -510,27 +509,19 @@ rules
   get-typath(coerce-strategy):
     t@(ty-from, ty-to, mode) -> path*
     where
-      debug(!1);
     	anti-cycle(
 	      ( <MemoTyPath> t => path* )
 	      <+
 	      (
-	        debug(!2);
 	        <bagof-MemoTyTrans> (ty-from, mode) => ty-inter*;
-	        debug(!3);
 	        ty-inter := <fetch-elem(where(\ ty -> <coerce-strategy> (ty, ty-to) \))> ty-inter*;
-	        debug(!4);
 	        path1* := <MemoTyPath> (ty-from, ty-inter, mode);
-	        debug(!5);
 	        path2* := <get-typath(coerce-strategy)> (ty-inter, ty-to);
-	        debug(!6);
 	        path* := [path1*, path2*];
-	        debug(!7);
 	        rules(
 	          MemoTyPath: t -> path*
 	          MemoTyTrans:+ (ty-from, mode) -> ty-to
 	        )
-	        ;debug(!8)
 	      )
       )
   
