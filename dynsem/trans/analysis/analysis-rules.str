@@ -235,6 +235,7 @@ rules
 rules // type rules for match-sides
   
   type-check-match(|in-ty) =
+    debug(!"X "); !in-ty; debug(!"Y "); fail <+
     type-check-match-num(|in-ty)
     <+ type-check-match-bool(|in-ty)
     <+ type-check-match-str(|in-ty)
@@ -369,10 +370,10 @@ rules
     	if arrow-def := <lookup-def(|Arrows())> arrow-name
     	then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <type-of-applicable-arrow> (arrow-ty*, lhs-ty) => ArrowType(bu-ty, ma-ty)
+	      if <type-of-applicable-arrow> (arrow-ty*, lhs-ty) => ArrowType(in-ty, out-ty)
 	      then
-	        <type-check-expectation(type-coerce-full|lhs, bu-ty)> lhs-ty;
-	        <type-check-match(|ma-ty)> rhs;
+	        <type-check-expectation(type-coerce-full|lhs, in-ty)> lhs-ty;
+	        <type-check-match(|out-ty)> rhs;
 	        <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> [r*, sc*];
 	        <map(labelcomp-to-type-term-pair; type-check-match-wrap)> tc*
 	      else
@@ -519,7 +520,7 @@ rules
   
   anti-cycle(s):
   	t -> t'
-  	where {|AntiCycle:
+  	where {| AntiCycle:
   		<not(AntiCycle)> t;
   		rules(AntiCycle:+ t -> t);
   		<s> t => t'
