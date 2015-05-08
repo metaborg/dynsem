@@ -371,7 +371,7 @@ rules
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
 	      if <type-of-applicable-arrow> (arrow-ty*, lhs-ty) => ArrowType(in-ty, out-ty)
 	      then
-	        <type-check-expectation(type-coerce-full|lhs, in-ty)> lhs-ty;
+	        <type-check-expectation(type-coerce-full(id)|lhs, in-ty)> lhs-ty;
 	        <type-check-match(|out-ty)> rhs;
 	        <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> [r*, sc*];
 	        <map(labelcomp-to-type-term-pair; type-check-match-wrap)> tc*
@@ -516,7 +516,7 @@ rules
 	        <bagof-MemoTyTrans> (ty-from, mode) => ty-inter*;
 	        ty-inter := <fetch-elem(where(\ ty -> <coerce-strategy> (ty, ty-to) \))> ty-inter*;
 	        path1* := <MemoTyPath> (ty-from, ty-inter, mode);
-	        path2* := <get-typath(coerce-strategy)> (ty-inter, ty-to);
+	        path2* := <get-typath(coerce-strategy)> (ty-inter, ty-to, mode);
 	        path* := [path1*, path2*];
 	        rules(
 	          MemoTyPath: t -> path*
