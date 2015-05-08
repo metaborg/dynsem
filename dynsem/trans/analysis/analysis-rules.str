@@ -197,10 +197,19 @@ rules
       map1-ty := <type-check-build> map1;
       map2-ty := <type-check-build> map2
 
+
+
+
   type-check-build-map:
     MapSelect(m-t, k-t) -> val-ty
     where
-      MapType(key-ty, val-ty) := <type-check-build> m-t;
+      maybe-map-ty := <type-check-build> m-t;
+      if <?MapType(key-ty, val-ty)> maybe-map-ty
+      then
+        id
+      else
+        <lookup-def(|Types()); lookup-prop(|SuperType())> maybe-map-ty => MapType(key-ty, val-ty)
+      end;
       k-ty := <type-check-build> k-t;
       <type-coerce-full(fail)> (k-ty, key-ty)
 
