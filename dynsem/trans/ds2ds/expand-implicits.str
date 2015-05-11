@@ -18,13 +18,14 @@ rules
   
   expand-implicits-rule:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
-      Rule(p'*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs', tc*)))
+      Rule([p''*, p-extra*], infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs', tc*)))
       where
       	arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
       	lhs-ty := <type-of> lhs;
       	ArrowType(_, bu-ty) := <type-of-applicable-arrow(type-coerce-direct(id))> (arrow-ty*, lhs-ty);
       	p'* := <mapconcat(expand-implicits-match <+ MkSingleton)> p*;
-      	rhs' := rhs
+      	p''* := <mapconcat(expand-implicits-build <+ MkSingleton)> p'*;
+      	(rhs', p-extra*) := <expand-implicit-target> (bu-ty, rhs)
   
   expand-implicits-match:
   	f@Formula(Match(lt, rt)) -> <expand-typath-match> (ty-path*, lt, rt)
@@ -41,25 +42,90 @@ rules
   expand-typath-match:
     ([c-def | xs-def], lt, rt) -> [Formula(Match(lt, Con(c-name, [Var(v-new)]))), path*]
     where
-      <def-get-namespace> c-def => Constructors()
+      <def-get-namespace> c-def => Constructors();
+      ConstructorType([c-child-ty], _) := <lookup-prop(|Type())> c-def
     where
       c-name := <def-get-name> c-def;
-      v-new := <next-variable>;
+      v-new := <def-next-variable> c-child-ty;
       path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
   
   expand-typath-match:
     ([a-def | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
     where
-      <def-get-namespace> a-def => Arrows()
+      <def-get-namespace> a-def => Arrows();
+      ArrowType(_, bu-ty) := <lookup-prop(|Type())> a-def
     where
       a-name := <def-get-name> a-def;
-      v-new := <next-variable>;
+      v-new := <def-next-variable> bu-ty;
       path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
-      
-    
+
+  expand-implicits-build:
+    f@Formula(Match(lt, rt)) -> <expand-typath-build> (ty-path*, lt, rt)
+    where
+      lt-ty := <type-of> lt;
+      rt-ty := <type-of> rt;
+      <not(type-coerce-direct(fail))> (lt-ty, rt-ty)
+    where
+      ty-path* := <get-typath(type-coerce-full(fail))> (lt-ty, rt-ty, BuildMode())
+  
+  // TODO: term building the children
+  
+  
+  expand-typath-build:
+    ([], lt, rt) -> [Formula(Match(lt, rt))]
+  
+  expand-typath-build:
+    ([c-def | xs-def], lt, rt) -> [Formula(Match(Con(c-name, [lt]), Var(v-new))), path*]
+    where
+      <def-get-namespace> c-def => Constructors();
+      ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def
+    where
+      c-name := <def-get-name> c-def;
+      v-new := <def-next-variable> c-ty;
+      path* := <expand-typath-build> (xs-def, VarRef(v-new), rt)
+  
+  expand-typath-build:
+    ([a-def | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
+    where
+      <def-get-namespace> a-def => Arrows();
+      ArrowType(_, bu-ty) := <lookup-prop(|Type())> a-def
+    where
+      a-name := <def-get-name> a-def;
+      v-new := <def-next-variable> bu-ty;
+      path* := <expand-typath-build> (xs-def, VarRef(v-new), rt)
+
+  expand-implicit-target:
+    (bu-ty, vref@VarRef(_)) -> (vref, [])
+    where
+      v-ty := <type-of> vref;
+      <type-coerce-direct(fail)> (v-ty, bu-ty)
+  
+  expand-implicit-target:
+    (bu-ty, vref@VarRef(_)) -> (VarRef(v-new), prem*)
+    where
+      v-ty := <type-of> vref;
+      <not(type-coerce-direct(fail))> (v-ty, bu-ty)
+    where
+      ty-path* := <get-typath(type-coerce-full(fail))> (v-ty, bu-ty, BuildMode());
+      v-new := <def-next-variable> bu-ty;
+      prem* := <expand-typath-build> (ty-path*, vref, Var(v-new))
   		
-      	
-      	
+   def-next-variable:
+     ty -> v-name
+     where
+       v-name := <next-variable>;
+       v-def := <store-def(|Vars())> v-name;
+       <store-prop(|v-def, Type())> ty
+
+
+
+
+
+
+
+
+
+
 
 
 
