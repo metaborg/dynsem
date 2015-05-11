@@ -17,6 +17,12 @@ rules
   type-of:
     As(v, _) -> <type-of> v
   
+  type-of:
+    MatchedVar(v) -> <type-of> VarRef(v)
+  
+  type-of:
+    Var(v) -> <type-of> VarRef(v)
+  
   type-of-applicable-arrow(coerce-s):
     (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <coerce-s> (con-ty, ma-ty) \))> arrow-type*
 

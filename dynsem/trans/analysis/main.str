@@ -17,10 +17,10 @@ rules
 	  log-timed(rename-all | "Renaming variables");
 	  log-timed(store-all  | "Storing all definitions")
 
-  m-in-analysis(s) = new-analysis-scope(
+  m-in-analysis(s) = new-analysis-scope(new-type-transitions-scope(
   	analyze;
   	s
-  )
+  ))
 
   store-all:
     m@Module(n, section*) -> m

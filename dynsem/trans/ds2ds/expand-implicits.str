@@ -1,0 +1,77 @@
+module expand-implicits
+
+imports
+  include/ds
+  ds
+  analysis/-
+  lib-ds
+
+rules
+  
+  expand-implicits-module:
+    m@Module(_, _) -> Module($[[name]_explimpl], section*)
+    where
+      <m-in-analysis(expand-implicits); unmark-vars> m => Module(name, section*)
+
+
+  expand-implicits = alltd(expand-implicits-rule)
+  
+  expand-implicits-rule:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
+      Rule(p'*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs', tc*)))
+      where
+      	arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      	lhs-ty := <type-of> lhs;
+      	ArrowType(_, bu-ty) := <type-of-applicable-arrow(type-coerce-direct(id))> (arrow-ty*, lhs-ty);
+      	p'* := <mapconcat(expand-implicits-match <+ MkSingleton)> p*;
+      	rhs' := rhs
+  
+  expand-implicits-match:
+  	f@Formula(Match(lt, rt)) -> <expand-typath-match> (ty-path*, lt, rt)
+  	where
+  	  lt-ty := <type-of> lt;
+  	  rt-ty := <type-of> rt;
+  	  <not(type-coerce-direct(id))> (lt-ty, rt-ty)
+  	where
+  	  ty-path* := <get-typath(type-coerce-full(id))> (lt-ty, rt-ty, MatchMode())
+  
+  expand-typath-match:
+    ([], lt, rt) -> [Formula(Match(lt, rt))]
+  
+  expand-typath-match:
+    ([c-def | xs-def], lt, rt) -> [Formula(Match(lt, Con(c-name, [Var(v-new)]))), path*]
+    where
+      <def-get-namespace> c-def => Constructors()
+    where
+      c-name := <def-get-name> c-def;
+      v-new := <next-variable>;
+      path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
+  
+  expand-typath-match:
+    ([a-def | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
+    where
+      <def-get-namespace> a-def => Arrows()
+    where
+      a-name := <def-get-name> a-def;
+      v-new := <next-variable>;
+      path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
+      
+    
+  		
+      	
+      	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    

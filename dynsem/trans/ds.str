@@ -20,8 +20,7 @@ imports
 	ds2ds/fuse-sections
 	ds2ds/copy-propagation
 	ds2ds/constant-propagation
-	ds2ds/expand-reductions
-	ds2ds/expand-constructors
+	ds2ds/expand-implicits
 	ds2ds/desugar-varschemes
 	analysis/main
 	analysis/lib-analysis
@@ -127,17 +126,11 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
-  expand-reds-editor:
+  expand-implicits-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"expreds.ds")> path;
-      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; expand-reductions-module; sugar-all; pp-debug> ast
-
-  expand-constructors-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"expcons.ds")> path;
-      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; expand-constructors-module; sugar-all; pp-debug> ast
+      filename := <guarantee-extension(|"explimpls.ds")> path;
+      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; expand-implicits-module; sugar-all; pp-debug> ast
 
   desugar-varschemes-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
@@ -193,13 +186,10 @@ rules // Builders
           factorize-module | "Factorization 1/3"
         );
         log-timed(
-          expand-reductions-module | "Reduction expansion"
+          expand-implicits-module | "Implicits expansion"
         );
         log-timed(
           factorize-module | "Factorization 2/3"
-        );
-        log-timed(
-          expand-constructors-module | "Implicit constructor expansion"
         );
         log-timed(
           factorize-module | "Factorization 3/3"

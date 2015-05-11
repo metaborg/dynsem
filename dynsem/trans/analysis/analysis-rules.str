@@ -11,7 +11,8 @@ imports
   lib-ds
 
 rules /* syntactic checks */
-
+  new-type-transitions-scope(s) = {| MemoTyPath, MemoTyTrans: s |}
+  
   post-analysis-checks = alltd(post-analysis-check)
   
   post-analysis-check:
@@ -31,9 +32,7 @@ rules /* syntactic checks */
 rules /* store variables */
   
   store-rules = 
-    {| MemoTyPath, MemoTyTrans:
       Rules(where(prime-typaths); (map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked])))))
-    |}
 
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr@NamedDynamicEmitted(_, arrow-name), _)) -> r
@@ -196,9 +195,6 @@ rules
     where
       map1-ty := <type-check-build> map1;
       map2-ty := <type-check-build> map2
-
-
-
 
   type-check-build-map:
     MapSelect(m-t, k-t) -> val-ty
