@@ -17,8 +17,8 @@ rules
   type-of:
     As(v, _) -> <type-of> v
   
-  type-of-applicable-arrow:
-    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <type-coerce-full(id)> (con-ty, ma-ty) \))> arrow-type*
+  type-of-applicable-arrow(coerce-s):
+    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <coerce-s> (con-ty, ma-ty) \))> arrow-type*
 
   get-arrow-source-type:
     ArrowType(src-ty, _) -> src-ty
