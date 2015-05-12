@@ -26,21 +26,23 @@ exports
     CONTENTCOMPLETE -> VariableScheme   {cons("COMPLETION-VariableScheme")}
 
   context-free syntax
-    "constructors" ConsDecl*                -> SignatureSection {cons("Constructors")}
-    ID ":" {Type "*"}+ "->" Type            -> ConsDecl         {cons("ConsDecl")}
-    ID ":" Type                             -> ConsDecl         {cons("NullaryConsDecl")}
-    ID ":" {Type "*"}* "-->" Type           -> ConsDecl         {cons("FunDecl")}
-    "implicit" "constructors" ImplConsDecl* -> SignatureSection {cons("ImplicitConstructors")}
-    ID ":" Type "->" Type                   -> ImplConsDecl     {cons("ImplConsDecl")}
-    ID                                      -> Type             {cons("SimpleSort")}
-    "List" "(" Type ")"                     -> Type             {cons("ListSort")}
-    MapType                                 -> Type             
-    "Map" "<" Type "," Type ">"             -> MapType          {cons("MapSort")}
+    "constructors" ConsDecl*               -> SignatureSection {cons("Constructors")}
+    ID ":" Type ConsAnnos                  -> ConsDecl         {cons("NullaryConsDecl")}
+    ID ":" {Type "*"}+ "->" Type ConsAnnos -> ConsDecl         {cons("ConsDecl")}
+                                           -> ConsAnnos        {cons("NoAnnos")}
+    "{" {ConsAnno ","}* "}"                -> ConsAnnos        {cons("Annos")}
+    "implicit"                             -> ConsAnno         {cons("ImplicitAnno")}
+    ID ":" {Type "*"}* "-->" Type          -> ConsDecl         {cons("FunDecl")}
+    ID                                     -> Type             {cons("SimpleSort")}
+    "List" "(" Type ")"                    -> Type             {cons("ListSort")}
+    MapType                                -> Type             
+    "Map" "<" Type "," Type ">"            -> MapType          {cons("MapSort")}
 
   context-free syntax
-    CONTENTCOMPLETE -> ConsDecl         {cons("COMPLETION-ConsDecl")}
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> ImplConsDecl     {cons("COMPLETION-ImplConsDecl")}
+    CONTENTCOMPLETE -> ConsAnnos        {cons("COMPLETION-ConsAnnos")}
+    CONTENTCOMPLETE -> ConsAnno         {cons("COMPLETION-ConsAnno")}
+    CONTENTCOMPLETE -> ConsDecl         {cons("COMPLETION-ConsDecl")}
     CONTENTCOMPLETE -> Type             {cons("COMPLETION-Type")}
     CONTENTCOMPLETE -> MapType          {cons("COMPLETION-MapType")}
 

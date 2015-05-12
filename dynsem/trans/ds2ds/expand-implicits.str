@@ -16,11 +16,8 @@ rules
   expand-implicits = alltd(expand-implicits-constructors <+ expand-implicits-rule)
   
   expand-implicits-constructors:
-  	ImplicitConstructors(c*) -> Constructors(<expand-implicits> c*)
+    ConsDecl(c, child*, ty, Annos(anno*)) -> ConsDecl(c, child*, ty, Annos(<filter(not(?ImplicitAnno()))> anno*))
   
-  expand-implicits-constructors:
-  	ImplConsDecl(name, child-ty, ty) -> ConsDecl(name, [child-ty], ty)
-
   expand-implicits-rule:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
       Rule([p'*, p-rhs*], infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs', tc*)))

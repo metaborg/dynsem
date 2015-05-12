@@ -23,18 +23,18 @@ completions
 completions
   completion template SignatureSection : "constructors " =
     "constructors\n\t" (cursor) (blank)  
-  completion template ConsDecl : "ID : Type -> Type" =
-    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
-  completion template ConsDecl : "ID : Type" =
-    <ID:ID> " : " <Type:Type>  
+  completion template ConsDecl : "ID : Type ConsAnnos" =
+    <ID:ID> " : " <Type:Type> " " <ConsAnnos:ConsAnnos>  
+  completion template ConsDecl : "ID : Type -> Type ConsAnnos" =
+    <ID:ID> " : " <Type:Type> " -> " <Type:Type> " " <ConsAnnos:ConsAnnos>  
+  completion template ConsAnnos : "{}" =
+    "{" <:ConsAnno> "}"            
+  completion template ConsAnno : "implicit" =
+    "implicit"                
   completion template ConsDecl : "ID : --> Type" =
     <ID:ID> " : " <:Type> " --> " <Type:Type>  
-  completion template SignatureSection : "implicit constructors " =
-    "implicit constructors\n\t" (cursor) (blank)  
-  completion template ImplConsDecl : "ID : Type -> Type" =
-    <ID:ID> " : " <Type:Type> " -> " <Type:Type>  
   completion template Type : "List(Type)" =
-    "List(" <Type:Type> ")"  
+    "List(" <Type:Type> ")"     
   completion template MapType : "Map<Type,Type>" =
     "Map<" <Type:Type> "," <Type:Type> ">"  
 

@@ -125,13 +125,16 @@ strategies
 
 strategies
   prettyprint-example =
-    prettyprint-ConsDecl
-
-  prettyprint-example =
     prettyprint-SignatureSection
 
   prettyprint-example =
-    prettyprint-ImplConsDecl
+    prettyprint-ConsAnnos
+
+  prettyprint-example =
+    prettyprint-ConsAnno
+
+  prettyprint-example =
+    prettyprint-ConsDecl
 
   prettyprint-example =
     prettyprint-Type
@@ -152,34 +155,77 @@ strategies
     ?Constructors(_)
 
   prettyprint-ConsDecl :
-    ConsDecl(t1__, t2__, t3__) -> [ H(
-                                      [SOpt(HS(), "0")]
-                                    , [ t1__'
-                                      , S(" : ")
-                                      , t2__'
-                                      , S(" -> ")
-                                      , t3__'
-                                      ]
-                                    )
-                                  ]
+    NullaryConsDecl(t1__, t2__, t3__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [ t1__'
+                                             , S(" : ")
+                                             , t2__'
+                                             , S(" ")
+                                             , t3__'
+                                             ]
+                                           )
+                                         ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+    with t3__' := <pp-one-Z(prettyprint-ConsAnnos)> t3__
+
+  is-ConsDecl =
+    ?NullaryConsDecl(_, _, _)
+
+  prettyprint-ConsDecl :
+    ConsDecl(t1__, t2__, t3__, t4__) -> [ H(
+                                            [SOpt(HS(), "0")]
+                                          , [ t1__'
+                                            , S(" : ")
+                                            , t2__'
+                                            , S(" -> ")
+                                            , t3__'
+                                            , S(" ")
+                                            , t4__'
+                                            ]
+                                          )
+                                        ]
     with t1__' := <pp-one-Z(prettyprint-ID)> t1__
     with t2__' := <pp-H-list(prettyprint-Type|" * ")> t2__
     with t3__' := <pp-one-Z(prettyprint-Type)> t3__
+    with t4__' := <pp-one-Z(prettyprint-ConsAnnos)> t4__
 
   is-ConsDecl =
-    ?ConsDecl(_, _, _)
+    ?ConsDecl(_, _, _, _)
 
-  prettyprint-ConsDecl :
-    NullaryConsDecl(t1__, t2__) -> [ H(
-                                       [SOpt(HS(), "0")]
-                                     , [t1__', S(" : "), t2__']
-                                     )
-                                   ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+  prettyprint-ConsAnnos :
+    NoAnnos() -> [ H(
+                     []
+                   , [S("")]
+                   )
+                 ]
 
-  is-ConsDecl =
-    ?NullaryConsDecl(_, _)
+  is-ConsAnnos =
+    ?NoAnnos()
+
+  prettyprint-ConsAnnos :
+    Annos(t1__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [ S("{")
+                       , t1__'
+                       , S("}")
+                       ]
+                     )
+                   ]
+    with t1__' := <pp-H-list(prettyprint-ConsAnno|",")> t1__
+
+  is-ConsAnnos =
+    ?Annos(_)
+
+  prettyprint-ConsAnno :
+    ImplicitAnno() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("implicit")]
+                        )
+                      ]
+
+  is-ConsAnno =
+    ?ImplicitAnno()
 
   prettyprint-ConsDecl :
     FunDecl(t1__, t2__, t3__) -> [ H(
@@ -198,36 +244,6 @@ strategies
 
   is-ConsDecl =
     ?FunDecl(_, _, _)
-
-  prettyprint-SignatureSection :
-    ImplicitConstructors(t1__) -> [ H(
-                                      [SOpt(HS(), "0")]
-                                    , [S("implicit constructors")]
-                                    )
-                                  , t1__'
-                                  ]
-    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-ImplConsDecl)> t1__]
-
-  is-SignatureSection =
-    ?ImplicitConstructors(_)
-
-  prettyprint-ImplConsDecl :
-    ImplConsDecl(t1__, t2__, t3__) -> [ H(
-                                          [SOpt(HS(), "0")]
-                                        , [ t1__'
-                                          , S(" : ")
-                                          , t2__'
-                                          , S(" -> ")
-                                          , t3__'
-                                          ]
-                                        )
-                                      ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
-    with t3__' := <pp-one-Z(prettyprint-Type)> t3__
-
-  is-ImplConsDecl =
-    ?ImplConsDecl(_, _, _)
 
   prettyprint-Type :
     SimpleSort(t1__) -> [ H(
@@ -280,13 +296,16 @@ strategies
   is-MapType =
     ?MapSort(_, _)
 
-  is-ConsDecl =
-    fail
-
   is-SignatureSection =
     fail
 
-  is-ImplConsDecl =
+  is-ConsAnnos =
+    fail
+
+  is-ConsAnno =
+    fail
+
+  is-ConsDecl =
     fail
 
   is-Type =

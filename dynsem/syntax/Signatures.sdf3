@@ -34,17 +34,18 @@ context-free syntax // constructor declarations
     constructors
       <{ConsDecl "\n"}*>>
 
-  ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
-  ConsDecl.NullaryConsDecl = [[ID] : [Type]]
+  ConsDecl.NullaryConsDecl = [[ID] : [Type] [ConsAnnos]]
+  ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type] [ConsAnnos]]
   
   
+  ConsAnnos.NoAnnos = []
+
+  ConsAnnos.Annos = [{[ { ConsAnno "," }* ]}]
+  ConsAnno.ImplicitAnno = [implicit]
+
   ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
 
-  SignatureSection.ImplicitConstructors = <
-    implicit constructors
-      <{ImplConsDecl "\n"}*>>
-
-  ImplConsDecl.ImplConsDecl = [[ID] : [Type] -> [Type]]
+  // ConsDecl.ImplConsDecl = [[ID] : [Type] -> [Type] {implicit}]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
