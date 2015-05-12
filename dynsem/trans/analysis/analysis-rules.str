@@ -447,8 +447,6 @@ rules
     type-coerce-base
     <+ type-coerce(type-coerce-direct(is-matching))
   
-  type-coerce-simple = with(fail|"Deprecated")
- 
   type-coerce-base = eq; Fst
 
   type-coerce-sym(coerce-s) =
@@ -463,6 +461,9 @@ rules
 
   type-coerce(coerce-s):
     (ListType(ty-from), ListType(ty-to)) -> ListType(<coerce-s> (ty-from, ty-to))
+  
+  type-coerce(coerce-s):
+    (IntType(), RealType()) -> RealType()
   
   type-coerce(coerce-s):
     (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty

@@ -25,9 +25,6 @@ rules /* store signatures */
     ; <store-def(|Types())> RealType() => def-real; <store-prop(|SortKind(), def-real)> SystemSort()
     ; <store-def(|Types())> BoolType() => def-bool; <store-prop(|SortKind(), def-bool)> SystemSort()
     ; <store-def(|Types())> StringType() => def-str; <store-prop(|SortKind(), def-str)> SystemSort()
-    ; <store-def(|Constructors())> "__Int2Real__" => def-int2real;
-        <store-prop(|Type(), def-int2real)> ConstructorType([IntType()], RealType());
-        <store-prop(|ConsKind(), def-int2real)> ImplicitCons()
 
   store-sorts = Sorts(map(store-sort))
 
