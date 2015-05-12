@@ -540,5 +540,3 @@ rules
   		<s> t => t'
     |}
 
-  type-coerce-impl-reduction(coerce-s) = with(fail|"Deprecated")
-
