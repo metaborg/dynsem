@@ -43,15 +43,15 @@ rules
     
     m-in-analysis(
       m-in-backend-extra-analysis(
-        where(
-          get-msgs(mkmsg|Error()) => error*
-          ;if <?[_|_]> error*
-           then
-             <fatal-err(|"Errors encountered: ")> error*
-           end
-        )
+        // where(
+        //   get-msgs(mkmsg|Error()) => error*
+        //   ;if <?[_|_]> error*
+        //    then
+        //      <fatal-err(|"Errors encountered: ")> error*
+        //    end
+        // )
         
-	      ;w-log-timed(
+	      w-log-timed(
 	        ds2java-interfaces;
 	        write-classes
 	        | "Gen interfaces for sorts")
