@@ -18,6 +18,9 @@ rules
     As(v, _) -> <type-of> v
   
   type-of:
+    Cast(_, ty) -> <rw-type> ty
+  
+  type-of:
     MatchedVar(v) -> <type-of> VarRef(v)
   
   type-of:
