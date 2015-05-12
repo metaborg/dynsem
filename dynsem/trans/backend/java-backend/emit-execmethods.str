@@ -167,7 +167,8 @@ rules
     where
       x_classname := <ds2java-returnclassname> (arrow-def, bu-ty);
       t* := [t1 | <map(?LabelComp(_, <id>))> tc*];
-      e* := <map(ds2java-term-build)> t*
+      ty* := [bu-ty | <map(?LabelComp(<id>, _))> tc*];
+      e* := <zip(ds2java-term-build)> (ty*, t*)
 
   ds2java-premise:
     (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
@@ -377,6 +378,9 @@ rules
     		ex_ty' := <lookup-prop(|SuperType())> ex_ty_def
       end
 
+  ds2java-term-build:
+    (ty, t) -> <ds2java-term-build(|ty)> t
+  
   ds2java-term-build(|ex_ty):
     Int(i) -> e |[ i ]|
 
@@ -438,7 +442,7 @@ rules
       h-ex-elem-ty := <?ListType(<id>) <+ !h-ty> ex-ty;
       if <type-of> t-trm => ListType(t-elem-ty)
       then
-        actual_ex_elem_ty := <type-coerce-sym(type-coerce-direct)> (h-ex-elem-ty, t-elem-ty)
+        actual_ex_elem_ty := <type-coerce-sym(type-coerce-direct(fail))> (h-ex-elem-ty, t-elem-ty)
       else
         actual_ex_elem_ty := h-ex-elem-ty
       end;

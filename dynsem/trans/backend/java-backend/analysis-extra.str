@@ -50,7 +50,7 @@ rules
     ?ArrowType(type-name, _)
     <+
     ?ArrowType(ltype-name, _);
-    <type-coerce-direct> (type-name, ltype-name)
+    <type-coerce-direct(fail)> (type-name, ltype-name)
 
   lookup-arrow-def:
     (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
