@@ -13,10 +13,7 @@ rules
     where
       <m-in-analysis(expand-implicits); unmark-vars> m => Module(name, section*)
 
-  expand-implicits = alltd(expand-implicits-constructors <+ expand-implicits-rule)
-  
-  expand-implicits-constructors:
-    ConsDecl(c, child*, ty, Annos(anno*)) -> ConsDecl(c, child*, ty, Annos(<filter(not(?ImplicitAnno()))> anno*))
+  expand-implicits = alltd(expand-implicits-rule)
   
   expand-implicits-rule:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
