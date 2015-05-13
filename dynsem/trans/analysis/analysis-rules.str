@@ -218,13 +218,12 @@ rules
   type-check-build-nativefuncall:
     SortFunCall(fun-name, parent-t, param-t*) -> fun-ty
     where
-      parent-ty := <type-check-build-nativefuncall> parent-t;
+      parent-ty := <type-check-build> parent-t;
       parent-def := <lookup-def(|Types())> parent-ty;
       NativeSort() := <lookup-prop(|SortKind())> parent-def;
       fun-def := <lookup-native-fun-def(|fun-name)> parent-def;
       FunctionType(fparam-ty*, fun-ty) := <lookup-prop(|Type())> fun-def;
-      param-ty* := <map(type-coerce-full(fail))> param-t*;
-      <zip; map(type-coerce-full(fail))> (param-ty*, fparam-ty*)
+      <zip(type-check-build-expect-wrap)> (fparam-ty*, param-t*)
 
   lookup-native-fun-def(|fun-name):
     parent-def -> <lookup-def(|NativeDTFun(parent-def))> fun-name
