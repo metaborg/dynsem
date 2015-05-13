@@ -481,9 +481,18 @@ rules
       <coerce-s> (a-v-ty, e-v-ty)
 
   type-coerce-implicit(is-matching, coerce-s):
-    (ty-from, ty-to) -> <get-typath(coerce-s); last> (ty-from, ty-to, mode)
+    (ty-from, ty-to) -> ty-to'
     where
       is-matching < mode := MatchMode() + mode := BuildMode()
+    where
+      step-def := <get-typath(coerce-s); last> (ty-from, ty-to, mode);
+      (
+        <def-get-namespace> step-def => Arrows();
+        ArrowType(_, ty-to') := <lookup-prop(|Type())> step-def
+        <+
+        <def-get-namespace> step-def => Constructors();
+        ConstructorType(_, ty-to') := <lookup-prop(|Type())> step-def
+      )
 
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths =
