@@ -44,7 +44,7 @@ rules /* store variables */
       if arrow-def := <lookup-def(|Arrows())> arrow-name
       then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <type-of-applicable-arrow(type-coerce-direct(id))> (arrow-ty*, lhs-ty) => arrow-ty
+	      if <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty) => arrow-ty
 	      then
 	        {| InArrow:
 	          rules(InArrow: _ -> arrow-def);

@@ -27,7 +27,7 @@ rules
     Var(v) -> <type-of> VarRef(v)
   
   type-of-applicable-arrow(coerce-s):
-    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <coerce-s> (con-ty, ma-ty) \))> arrow-type*
+    (arrow-type*, con-ty) -> <fetch-elem(where(\ ArrowType(ma-ty, _) -> <coerce-s> (ma-ty, con-ty) \))> arrow-type*
 
   get-arrow-source-type:
     ArrowType(src-ty, _) -> src-ty
