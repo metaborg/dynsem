@@ -363,8 +363,8 @@ rules
   type-check-premise:
   	f@Formula(NMatch(lhs, rhs)) -> f
   	where
-  	  <type-check-build> lhs;
-  	  <type-check-match(|NONETYPE())> rhs
+  	  lhs-ty := <type-check-build> lhs;
+  	  <type-check-match(|lhs-ty)> rhs
 
   type-check-premise:
   	f@Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> f
