@@ -26,9 +26,9 @@ Let's assume that the following is a fragment of the specification after explana
 
   rules
 
-    Env nv |- Plus(e1, e2) :: Sto s -default-> NumV(i) :: Sto s''.
+    Env nv |- Plus(e1, e2) :: Sto s -default-> NumV(i) :: Sto s''
     where
-      Env nv |- e1 :: Sto s  -default-> NumV(i1) :: Sto s'.,
+      Env nv |- e1 :: Sto s  -default-> NumV(i1) :: Sto s';
       Env nv |- e2 :: Sto s' -default-> NumV(i2) :: Sto s''.
 
 ```
