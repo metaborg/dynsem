@@ -18,7 +18,7 @@ context-free syntax // rules
   Rule.Axiom = [[Formula].]
   
   Rule.Rule = [
-    [{Premise ",\n"}+]
+    [{Premise ";\n"}+]
     [INFER]
     [Relation]
   ]
@@ -26,14 +26,14 @@ context-free syntax // rules
   Rule.RuleW = [
     [Relation]
     where
-      [{Premise ",\n"}+].
+      [{Premise ";\n"}+].
   ]
   
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail>
 
   PremisesBlock.PremiseBlock = <{
-    <{Premise ",\n"}*>
+    <{Premise ";\n"}*>
   }>
 
   Premise.MergePoint = [

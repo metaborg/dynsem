@@ -10,11 +10,11 @@ exports
     "strict" ID {INT ","}+ "/" INT              -> Rule          {cons("Strict")}
     "seqstrict" ID {INT ","}+ "/" INT           -> Rule          {cons("Seqstrict")}
     Formula "."                                 -> Rule          {cons("Axiom")}
-    {Premise ","}+ INFER Relation               -> Rule          {cons("Rule")}
-    Relation "where" {Premise ","}+ "."         -> Rule          {cons("RuleW")}
+    {Premise ";"}+ INFER Relation               -> Rule          {cons("Rule")}
+    Relation "where" {Premise ";"}+ "."         -> Rule          {cons("RuleW")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
-    "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
+    "{" {Premise ";"}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
     Premise "<" PremisesBlock "+" PremisesBlock -> Premise       {cons("MergePoint")}
     "try" PremisesBlock "or" PremisesBlock      -> Premise       {cons("TryOr")}
     "_"                                         -> ID            {reject}
