@@ -210,7 +210,7 @@ rules
       <type-coerce-full(fail)> (k-ty, key-ty)
 
   type-check-build-cast:
-    Cast(t, ty-t) -> <type-coerce-full(fail)> (t-ty, cast-ty)
+    Cast(t, ty-t) -> cast-ty
     where
       t-ty := <type-check-build> t;
       cast-ty := <rw-type> ty-t
