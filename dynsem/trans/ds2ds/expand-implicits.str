@@ -43,6 +43,13 @@ rules /* lift and expand subterms on build sides */
       ConstructorType(child-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       (child'*, p*) := <zip(lift-where-indirect <+ \ (_, t) -> (t, []) \); unzip; (id, concat)> (child-ty*, child*)
 
+  expand-implicits-termbuild:
+    ListTail([hd], tl) -> (ListTail([hd'], tl), p*)
+    where
+      hd-ty := <type-of> hd;
+      ListType(tl-ty) := <type-of> tl;
+      (hd', p*) := <lift-where-indirect> (tl-ty, hd)
+
   lift-where-indirect:
     (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, MatchedVar(v-new)))])
     where
