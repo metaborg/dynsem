@@ -158,16 +158,16 @@ rules
 						replacement.replace(this);
 					}
 					replacement = new ~x:gennodename(getSourceInfo(), aterm);
-					return new ~x:implnodename(getSourceInfo(), (~x:sortname) replace(replacement).specialize(1) );
+					return replace(new x_implnodename(getSourceInfo(), (x_sortname) replacement.specialize(1)));
 				} catch(RewritingException ~x:<newname>) {
 					bstm*
 				}
 			]|
 		where
 			ConstructorType([c-ty], ty) := <lookup-prop(|Type())> impl-c-def;
-			sortname := <ds2java-sort-classname> c-ty;
-			implnodename := <def-get-name; ds2java-constr-classname> impl-c-def;
-			gennodename := $[Generic_[sortname]]
+			x_sortname := <ds2java-sort-classname> c-ty;
+			x_implnodename := <def-get-name; ds2java-constr-classname> impl-c-def;
+			gennodename := $[Generic_[x_sortname]]
 
   ds2java-arrow-specializedispatch:
     (arrow-def, ArrowType(_, bu-ty)) ->
