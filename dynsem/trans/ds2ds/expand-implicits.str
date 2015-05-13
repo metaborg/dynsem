@@ -20,19 +20,22 @@ rules
   
   expand-implicits-rule:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
-      Rule(p''*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs', tc*)))
+      Rule(p''*, infer, Relation(Reads(r*), Source(lhs', sc*), arr, Target(rhs', tc*)))
       where
       	arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      	ArrowType(_, bu-ty) := <type-of-applicable-arrow(type-coerce-direct(id))> (arrow-ty*, <type-of> lhs);
+      	ArrowType(ma-ty, bu-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, <type-of> lhs);
+      	(lhs', p-lhs*) := <try-or-mktup(expand-implicits-source(|ma-ty))> lhs;
       	p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> p*;
       	(rhs', p-rhs*) := <try-or-mktup(expand-implicits-target(|bu-ty))> rhs;
-      	p''* := <alltd(eliminate-unneeded-cast)> [p'*, p-rhs*]
+      	p''* := <alltd(eliminate-unneeded-cast)> [p-lhs*, p'*, p-rhs*]
 
   expand-implicits-premise:
     Formula(Match(tl, tr)) -> p*
     where
       (tl', p-tl*) := <try-or-mktup(expand-implicits-termbuild)> tl;
       p* := <mapconcat(try-or-mksingleton(expand-implicits-premise-match <+ expand-implicits-premise-build))> [p-tl*, Formula(Match(tl', tr))]
+
+rules /* lift and expand subterms on build sides */
 
   expand-implicits-termbuild:
     Con(c, child*) -> (Con(c, child'*), p*)
@@ -84,6 +87,20 @@ rules /* introduce explicit reductions/coercions where required on MATCH side */
       v-new := <def-new-variable> bu-ty;
       path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
 
+rules /* introduce explicit coercions where required on the SOURCE side */
+
+  expand-implicits-source(|ma-ty):
+    lhs -> (Con(c-name, [Var(v-new)]), prem*)
+    where
+      lhs-ty := <type-of> lhs;
+      <not(type-coerce-direct(fail))> (ma-ty, lhs-ty)
+    where
+    	[c-def | xs-def] := <get-typath(type-coerce-full(id))> (ma-ty, lhs-ty, MatchMode());
+    	Constructors() := <def-get-namespace> c-def;
+    	ConstructorType([child-ty], _) := <lookup-prop(|Type())> c-def;
+    	c-name := <def-get-name> c-def;
+    	v-new := <def-new-variable> child-ty;
+    	prem* := <expand-typath-match> (xs-def, VarRef(v-new), lhs)
 
 rules /* introduce explicit reductions/coercions where required on BUILD side */
 
