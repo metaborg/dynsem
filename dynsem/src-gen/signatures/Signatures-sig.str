@@ -12,7 +12,6 @@ signature
   constructors
     Sorts    : List(SortDecl) -> SignatureSection
     SortDecl : ID -> SortDecl
-    InjDecl  : ID * ID -> SortDecl
 
   constructors
     VariableSchemes : List(VariableScheme) -> SignatureSection

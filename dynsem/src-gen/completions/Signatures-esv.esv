@@ -11,8 +11,6 @@ completions
 completions
   completion template SignatureSection : "sorts " =
     "sorts\n\t" (cursor) (blank)  
-  completion template SortDecl : "ID -> ID" =
-    <ID:ID> " -> " <ID:ID>  
 
 completions
   completion template SignatureSection : "variables " =

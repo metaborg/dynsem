@@ -34,14 +34,6 @@ rules /* store signatures */
       <store-def(|Types())> ty => ty-def;
       <store-prop(|SortKind(), ty-def)> LanguageSort()
 
-  store-sort:
-    decl@InjDecl(ty, sty-name) -> decl
-    where
-      <id-to-type> sty-name => sty;
-      <store-def(|Types())> ty => ty-def;
-      <store-prop(|SortKind(), ty-def)> LanguageSort();
-      <store-prop(|SuperType(), ty-def)> sty
-
   store-constructors =
     Constructors(map(store-constructor))
     + NativeConstructors(map(store-constructor))
@@ -129,14 +121,13 @@ rules
   check-signatures = alltd(check-signature)
   
   check-signature =
-    ( ?SimpleSort(s) + ?InjDecl(_, s) );
+    ?SimpleSort(s);
     <id-to-type; not(lookup-def(|Types()))> s;
     add-msg(|Error(), s, $[Sort [s] is not declared])
 
   check-signature =
     (
       ?SortDecl(s)
-      + ?InjDecl(s, _)
       + ?NativeBaseTypeDecl(_, s, _)
       + ?NativeSubTypeDecl(_, s, _, _)
     );

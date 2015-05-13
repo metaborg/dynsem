@@ -66,18 +66,6 @@ strategies
   is-SortDecl =
     ?SortDecl(_)
 
-  prettyprint-SortDecl :
-    InjDecl(t1__, t2__) -> [ H(
-                               [SOpt(HS(), "0")]
-                             , [t1__', S(" -> "), t2__']
-                             )
-                           ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
-
-  is-SortDecl =
-    ?InjDecl(_, _)
-
   is-SignatureSection =
     fail
 

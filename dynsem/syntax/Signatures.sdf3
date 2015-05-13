@@ -17,9 +17,7 @@ context-free syntax // sort declarations
       <{SortDecl "\n"}*>>
   
   SortDecl.SortDecl = <<ID>>
-  SortDecl.InjDecl = [[ID] -> [ID]]
   
-
 context-free syntax // variable schemes
   
   SignatureSection.VariableSchemes = <
@@ -44,8 +42,6 @@ context-free syntax // constructor declarations
   ConsAnno.ImplicitAnno = [implicit]
 
   ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
-
-  // ConsDecl.ImplConsDecl = [[ID] : [Type] -> [Type] {implicit}]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
