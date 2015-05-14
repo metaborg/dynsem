@@ -46,10 +46,7 @@ rules /* store variables */
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
 	      if <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty) => arrow-ty
 	      then
-	        {| InArrow:
-	          rules(InArrow: _ -> arrow-def);
-	          <store-rule> (arrow-ty, r)
-	        |}
+          <store-rule> (arrow-ty, r)
 	      else
 	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
 	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
