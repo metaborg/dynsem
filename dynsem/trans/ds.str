@@ -22,6 +22,7 @@ imports
 	ds2ds/constant-propagation
 	ds2ds/expand-implicits
 	ds2ds/desugar-varschemes
+	ds2ds/extra-typeannos
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
@@ -126,6 +127,12 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
+  add-extra-typeannos-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"typeannos.ds")> path;
+      result := <debug(!1); resolve-includes(|path, project-path); debug(!2); desugar-top; debug(!3); fuse-sections; debug(!4); add-extra-typeannos-module; debug(!5); sugar-all; debug(!6); pp-debug> ast
+
   expand-implicits-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
@@ -181,6 +188,9 @@ rules // Builders
         );
         log-timed(
           desugar-varschemes-module | "Desugaring variable schemes"
+        );
+        log-timed(
+          add-extra-typeannos-module | "Adding extra typeannos"
         );
         log-timed(
           factorize-module | "Factorization 1/2"

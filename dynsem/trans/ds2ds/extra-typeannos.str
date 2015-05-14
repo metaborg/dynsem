@@ -1,0 +1,30 @@
+module extra-typeannos
+
+imports
+  include/ds
+  ds
+  analysis/-
+
+rules
+
+  add-extra-typeannos-module:
+    m@Module(_, _) -> Module($[[name]_typeannos], section*)
+    where
+      <m-in-analysis(add-extra-typeannos); unmark-vars> m => Module(name, section*)
+      
+  add-extra-typeannos = alltd(add-extra-typeannos-rule)
+  
+  add-extra-typeannos-rule:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(l@List([]), tc*))) ->
+      Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(l, bu-ty-str), tc*)))
+    where
+      ArrowType(_, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+      bu-ty-str := <derw-type> bu-ty
+  
+  add-extra-typeannos-rule:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(m@Map([]), tc*))) ->
+      Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(m, bu-ty-str), tc*)))
+    where
+      ArrowType(_, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+      bu-ty-str := <derw-type> bu-ty
+
