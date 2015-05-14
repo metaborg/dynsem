@@ -3,6 +3,7 @@ module src-gen/pp/Signatures-pp
 imports
   libstratego-gpp
   runtime/tmpl/pp
+  libstratego-sglr
   src-gen/signatures/Signatures-sig
 
 
@@ -34,6 +35,9 @@ strategies
 
   is-ModuleSection =
     fail
+
+  prettyprint-ModuleSection :
+    amb([h|hs]) -> <prettyprint-ModuleSection> h
 
 
 strategies
@@ -72,6 +76,12 @@ strategies
   is-SortDecl =
     fail
 
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-SortDecl :
+    amb([h|hs]) -> <prettyprint-SortDecl> h
+
 
 strategies
   prettyprint-example =
@@ -109,6 +119,12 @@ strategies
 
   is-VariableScheme =
     fail
+
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-VariableScheme :
+    amb([h|hs]) -> <prettyprint-VariableScheme> h
 
 
 strategies
@@ -302,6 +318,24 @@ strategies
   is-MapType =
     fail
 
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-ConsAnnos :
+    amb([h|hs]) -> <prettyprint-ConsAnnos> h
+
+  prettyprint-ConsAnno :
+    amb([h|hs]) -> <prettyprint-ConsAnno> h
+
+  prettyprint-ConsDecl :
+    amb([h|hs]) -> <prettyprint-ConsDecl> h
+
+  prettyprint-Type :
+    amb([h|hs]) -> <prettyprint-Type> h
+
+  prettyprint-MapType :
+    amb([h|hs]) -> <prettyprint-MapType> h
+
 
 strategies
   prettyprint-example =
@@ -339,6 +373,12 @@ strategies
 
   is-SemanticCompDecl =
     fail
+
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-SemanticCompDecl :
+    amb([h|hs]) -> <prettyprint-SemanticCompDecl> h
 
 
 strategies
@@ -458,6 +498,18 @@ strategies
   is-NativeFunctionDecl =
     fail
 
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-JSNIPPET :
+    amb([h|hs]) -> <prettyprint-JSNIPPET> h
+
+  prettyprint-NativeTypeDecl :
+    amb([h|hs]) -> <prettyprint-NativeTypeDecl> h
+
+  prettyprint-NativeFunctionDecl :
+    amb([h|hs]) -> <prettyprint-NativeFunctionDecl> h
+
 
 strategies
   prettyprint-example =
@@ -514,6 +566,12 @@ strategies
   is-NativeOpDecl =
     fail
 
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-NativeOpDecl :
+    amb([h|hs]) -> <prettyprint-NativeOpDecl> h
+
 
 strategies
   prettyprint-example =
@@ -569,6 +627,12 @@ strategies
 
   is-NativeConsDecl =
     fail
+
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-NativeConsDecl :
+    amb([h|hs]) -> <prettyprint-NativeConsDecl> h
 
 
 strategies
@@ -640,3 +704,12 @@ strategies
 
   is-ArrowDeclaration =
     fail
+
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-DeclaredArrow :
+    amb([h|hs]) -> <prettyprint-DeclaredArrow> h
+
+  prettyprint-ArrowDeclaration :
+    amb([h|hs]) -> <prettyprint-ArrowDeclaration> h

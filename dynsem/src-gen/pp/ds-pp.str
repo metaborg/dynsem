@@ -3,6 +3,7 @@ module src-gen/pp/ds-pp
 imports
   libstratego-gpp
   runtime/tmpl/pp
+  libstratego-sglr
   src-gen/signatures/ds-sig
 
 
@@ -225,6 +226,18 @@ strategies
 
   is-Premise =
     fail
+
+  prettyprint-ModuleSection :
+    amb([h|hs]) -> <prettyprint-ModuleSection> h
+
+  prettyprint-Rule :
+    amb([h|hs]) -> <prettyprint-Rule> h
+
+  prettyprint-PremisesBlock :
+    amb([h|hs]) -> <prettyprint-PremisesBlock> h
+
+  prettyprint-Premise :
+    amb([h|hs]) -> <prettyprint-Premise> h
 
 
 strategies
@@ -530,6 +543,27 @@ strategies
   is-LabelComp =
     fail
 
+  prettyprint-Relation :
+    amb([h|hs]) -> <prettyprint-Relation> h
+
+  prettyprint-Formula :
+    amb([h|hs]) -> <prettyprint-Formula> h
+
+  prettyprint-Reads :
+    amb([h|hs]) -> <prettyprint-Reads> h
+
+  prettyprint-Source :
+    amb([h|hs]) -> <prettyprint-Source> h
+
+  prettyprint-Target :
+    amb([h|hs]) -> <prettyprint-Target> h
+
+  prettyprint-Rel :
+    amb([h|hs]) -> <prettyprint-Rel> h
+
+  prettyprint-LabelComp :
+    amb([h|hs]) -> <prettyprint-LabelComp> h
+
 
 strategies
   prettyprint-TermCon =
@@ -537,6 +571,9 @@ strategies
 
   prettyprint-example =
     prettyprint-TermCon
+
+  prettyprint-TermCon :
+    amb([h|hs]) -> <prettyprint-TermCon> h
 
 
 strategies
@@ -859,3 +896,18 @@ strategies
 
   is-Term =
     fail
+
+  prettyprint-Var :
+    amb([h|hs]) -> <prettyprint-Var> h
+
+  prettyprint-Cast :
+    amb([h|hs]) -> <prettyprint-Cast> h
+
+  prettyprint-List :
+    amb([h|hs]) -> <prettyprint-List> h
+
+  prettyprint-Entry :
+    amb([h|hs]) -> <prettyprint-Entry> h
+
+  prettyprint-Term :
+    amb([h|hs]) -> <prettyprint-Term> h
