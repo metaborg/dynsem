@@ -15,10 +15,10 @@ context-free syntax // rules
   Rule.Strict = [strict [ID] [{INT ","}+]/[INT]]
   Rule.Seqstrict = [seqstrict [ID] [{INT ","}+]/[INT]]
     
-  Rule.Axiom = [[Formula]]
+  Rule.Axiom = [[Formula].]
   
   Rule.Rule = [
-    [{Premise ",\n"}+]
+    [{Premise ";\n"}+]
     [INFER]
     [Relation]
   ]
@@ -26,14 +26,14 @@ context-free syntax // rules
   Rule.RuleW = [
     [Relation]
     where
-      [{Premise ",\n"}+]
+      [{Premise ";\n"}+].
   ]
   
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail>
 
   PremisesBlock.PremiseBlock = <{
-    <{Premise ",\n"}*>
+    <{Premise ";\n"}*>
   }>
 
   Premise.MergePoint = [
@@ -46,7 +46,7 @@ context-free syntax // rules
     try [PremisesBlock]
   	or  [PremisesBlock]
   ]
-  
+  ID = <_> {reject}
   ID = <imports> {reject}
   ID = <signature> {reject}
   ID = <constructors> {reject}
@@ -56,6 +56,7 @@ context-free syntax // rules
   ID = <datatypes> {reject}
   ID = <semantic> {reject}
   ID = <components> {reject}
+  ID = <implicit> {reject}
   ID = <List> {reject}
   ID = <Map> {reject}
   ID = <arrows> {reject}

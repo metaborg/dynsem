@@ -21,7 +21,7 @@ rules // desugaring
 		      <alltd(desugar-fundecl)> sigs1 => sigs2
 		      
   desugar-fundecl :
-  	FunDecl(x, ts, t) -> ConsDecl(x, ts, t_source)
+  	FunDecl(x, ts, t) -> ConsDecl(x, ts, t_source, NoAnnos())
   	where 
   		t_name := $[[x]__Arrow];
   	  t_source := SimpleSort(t_name)
@@ -41,7 +41,10 @@ rules // desugaring
     NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
   
   desugar :
-    NullaryConsDecl(c, s) -> ConsDecl(c, [], s)
+    NullaryConsDecl(c, s, annos) -> ConsDecl(c, [], s, annos)
+  
+  desugar :
+    NoAnnos() -> Annos([])
   
   desugar :
     NullaryNativeConsDecl(c, s) -> NativeConsDecl(c, [], s)
@@ -118,7 +121,10 @@ rules // sugaring
     NativeFunctionDecl(name, [], type) -> NativeNoArgFunctionDecl(name, type)
   
   sugar :
-    ConsDecl(c, [], s) -> NullaryConsDecl(c, s)
+    ConsDecl(c, [], s, annos) -> NullaryConsDecl(c, s, annos)
+  
+  sugar :
+    Annos([]) -> NoAnnos()
   
   sugar :
     NativeConsDecl(c, [], s) -> NullaryNativeConsDecl(c, s)

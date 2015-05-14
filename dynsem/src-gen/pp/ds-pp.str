@@ -93,7 +93,7 @@ strategies
   prettyprint-Rule :
     Axiom(t1__) -> [ H(
                        [SOpt(HS(), "0")]
-                     , [t1__']
+                     , [t1__', S(".")]
                      )
                    ]
     with t1__' := <pp-one-Z(prettyprint-Formula)> t1__
@@ -115,7 +115,7 @@ strategies
                                 , [t3__']
                                 )
                               ]
-    with t1__' := <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+    with t1__' := <pp-V-list(prettyprint-Premise|"0", ";")> t1__
     with t2__' := <pp-one-Z(prettyprint-INFER)> t2__
     with t3__' := <pp-one-Z(prettyprint-Relation)> t3__
 
@@ -134,7 +134,8 @@ strategies
                          , t2__'
                          ]
     with t1__' := <pp-one-Z(prettyprint-Relation)> t1__
-    with t2__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t2__
+    with t2__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ";")> t2__
+                                    , S(".")
                                     ]
 
   is-Rule =
@@ -169,7 +170,7 @@ strategies
                           , t1__'
                           , t2__'
                           ]
-    with t1__' := <pp-indent(|"4")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+    with t1__' := <pp-indent(|"4")> [ <pp-V-list(prettyprint-Premise|"0", ";")> t1__
                                     ]
     with t2__' := <pp-indent(|"2")> [S("}")]
 

@@ -12,7 +12,6 @@ signature
   constructors
     Sorts    : List(SortDecl) -> SignatureSection
     SortDecl : ID -> SortDecl
-    InjDecl  : ID * ID -> SortDecl
 
   constructors
     VariableSchemes : List(VariableScheme) -> SignatureSection
@@ -20,8 +19,11 @@ signature
 
   constructors
     Constructors    : List(ConsDecl) -> SignatureSection
-    ConsDecl        : ID * List(Type) * Type -> ConsDecl
-    NullaryConsDecl : ID * Type -> ConsDecl
+    NullaryConsDecl : ID * Type * ConsAnnos -> ConsDecl
+    ConsDecl        : ID * List(Type) * Type * ConsAnnos -> ConsDecl
+    NoAnnos         : ConsAnnos
+    Annos           : List(ConsAnno) -> ConsAnnos
+    ImplicitAnno    : ConsAnno
     FunDecl         : ID * List(Type) * Type -> ConsDecl
     SimpleSort      : ID -> Type
     ListSort        : Type -> Type

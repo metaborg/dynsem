@@ -17,9 +17,7 @@ context-free syntax // sort declarations
       <{SortDecl "\n"}*>>
   
   SortDecl.SortDecl = <<ID>>
-  SortDecl.InjDecl = [[ID] -> [ID]]
   
-
 context-free syntax // variable schemes
   
   SignatureSection.VariableSchemes = <
@@ -34,10 +32,15 @@ context-free syntax // constructor declarations
     constructors
       <{ConsDecl "\n"}*>>
 
-  ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
-  ConsDecl.NullaryConsDecl = [[ID] : [Type]]
+  ConsDecl.NullaryConsDecl = [[ID] : [Type] [ConsAnnos]]
+  ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type] [ConsAnnos]]
   
   
+  ConsAnnos.NoAnnos = []
+
+  ConsAnnos.Annos = [{[ { ConsAnno "," }* ]}]
+  ConsAnno.ImplicitAnno = [implicit]
+
   ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
 
   Type.SimpleSort = <<ID>>
@@ -45,7 +48,7 @@ context-free syntax // constructor declarations
   Type = [[MapType]]
   
   MapType.MapSort = [Map<[Type],[Type]>]
-  
+
 template options
 
   tokenize: "<("

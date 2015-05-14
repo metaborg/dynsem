@@ -9,14 +9,15 @@ exports
     "rules" Rule*                               -> ModuleSection {cons("Rules")}
     "strict" ID {INT ","}+ "/" INT              -> Rule          {cons("Strict")}
     "seqstrict" ID {INT ","}+ "/" INT           -> Rule          {cons("Seqstrict")}
-    Formula                                     -> Rule          {cons("Axiom")}
-    {Premise ","}+ INFER Relation               -> Rule          {cons("Rule")}
-    Relation "where" {Premise ","}+             -> Rule          {cons("RuleW")}
+    Formula "."                                 -> Rule          {cons("Axiom")}
+    {Premise ";"}+ INFER Relation               -> Rule          {cons("Rule")}
+    Relation "where" {Premise ";"}+ "."         -> Rule          {cons("RuleW")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
-    "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
+    "{" {Premise ";"}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
     Premise "<" PremisesBlock "+" PremisesBlock -> Premise       {cons("MergePoint")}
     "try" PremisesBlock "or" PremisesBlock      -> Premise       {cons("TryOr")}
+    "_"                                         -> ID            {reject}
     "imports"                                   -> ID            {reject}
     "signature"                                 -> ID            {reject}
     "constructors"                              -> ID            {reject}
@@ -26,6 +27,7 @@ exports
     "datatypes"                                 -> ID            {reject}
     "semantic"                                  -> ID            {reject}
     "components"                                -> ID            {reject}
+    "implicit"                                  -> ID            {reject}
     "List"                                      -> ID            {reject}
     "Map"                                       -> ID            {reject}
     "arrows"                                    -> ID            {reject}
