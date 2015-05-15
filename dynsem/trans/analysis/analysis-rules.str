@@ -31,6 +31,11 @@ rules /* syntactic checks */
 
 rules /* store variables */
   
+  store-rules-all =
+    where(init-hitcount);
+    alltd(store-rules);
+    log-hitcount
+  
   store-rules = 
       Rules(where(prime-typaths); (map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked])))))
 
@@ -482,9 +487,7 @@ rules
     where
       is-matching < mode := MatchMode() + mode := BuildMode()
     where
-      debug(!"A ");
       step-def := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
-      debug(!"B ");
       (
         <def-get-namespace> step-def => Arrows();
         ArrowType(_, ty-to') := <lookup-prop(|Type())> step-def
@@ -573,6 +576,13 @@ rules
   init-hitcount = rules(HitStats: _ -> (0, 0))
   
   get-hitcount = HitStats
+  
+  log-hitcount = 
+    where(
+      get-hitcount => (hits, misses);
+      <concat-strings> [ <align-left> (' ', "Memoization efficiency", 27), " : [hits/mises ] = [", <int-to-string> hits, "/", <int-to-string> misses, "]" ];
+      log(|Info(),<id>)
+    )
   
   hit =
     HitStats => (hits, misses);

@@ -40,20 +40,10 @@ rules
 	        <check-signatures> section* | "Checking signatures" 
 	      );
 	      log-timed(
-	        where(init-hitcount);
-	        <map(try(store-rules))> section*;
-	        log-hitcount
-	        | "Storing rules"
+	        <store-rules-all> section* | "Storing rules"
 	      );
 	      log-timed(
 	        <post-analysis-checks> m | "Post analysis checks"
 	      )
       | "Analysis" )
-
-  log-hitcount = 
-    where(
-	    get-hitcount => (hits, misses);
-	    <concat-strings> [ <align-left> (' ', "Memoization efficiency", 27), " : [hits/mises] = [", <int-to-string> hits, "/", <int-to-string> misses, "]" ];
-	    log(|Info(),<id>)
-	  )
 
