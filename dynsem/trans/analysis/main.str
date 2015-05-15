@@ -13,9 +13,13 @@ imports
 rules
 	
 	analyze =
-		log-timed(mark-vars | "Marking variable def sites");
-	  log-timed(rename-all | "Renaming variables");
-	  log-timed(store-all  | "Storing all definitions")
+	  new-analysis-scope(
+	    new-type-transitions-scope(
+				log-timed(mark-vars | "Marking variable def sites");
+			  log-timed(rename-all | "Renaming variables");
+			  log-timed(store-all  | "Storing all definitions")
+	    )
+	  )
 
   m-in-analysis(s) = new-analysis-scope(new-type-transitions-scope(
   	analyze;
@@ -36,12 +40,20 @@ rules
 	        <check-signatures> section* | "Checking signatures" 
 	      );
 	      log-timed(
-	        <map(try(store-rules))> section* | "Storing rules"
+	        where(init-hitcount);
+	        <map(try(store-rules))> section*;
+	        log-hitcount
+	        | "Storing rules"
 	      );
 	      log-timed(
 	        <post-analysis-checks> m | "Post analysis checks"
 	      )
       | "Analysis" )
 
-
+  log-hitcount = 
+    where(
+	    get-hitcount => (hits, misses);
+	    <concat-strings> [ <align-left> (' ', "Memoization efficiency", 27), " : [hits/mises] = [", <int-to-string> hits, "/", <int-to-string> misses, "]" ];
+	    log(|Info(),<id>)
+	  )
 

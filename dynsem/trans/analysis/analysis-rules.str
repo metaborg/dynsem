@@ -482,7 +482,9 @@ rules
     where
       is-matching < mode := MatchMode() + mode := BuildMode()
     where
-      step-def := <get-typath(coerce-s); last> (ty-from, ty-to, mode);
+      debug(!"A ");
+      step-def := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
+      debug(!"B ");
       (
         <def-get-namespace> step-def => Arrows();
         ArrowType(_, ty-to') := <lookup-prop(|Type())> step-def
@@ -526,23 +528,39 @@ rules
         )
       })
 
+  get-typath-memo(coerce-strategy):
+    t@(ty-from, ty-to, mode) -> path*
+    where
+      <MemoTyPath> t => ans
+      <
+        hit;
+        if <?[_ | _]> ans
+        then
+          path* := ans
+        end // in the else case, we have a cached failure and we fail by not binding path*
+      +
+        miss;
+        if <get-typath(coerce-strategy)> t => path*
+        then
+          rules(
+            MemoTyPath: t -> path*
+            MemoTyTrans:+ (ty-from, mode) -> ty-to
+          )
+        else
+          rules(
+            MemoTyPath: t -> None()
+          )
+        end
+
   get-typath(coerce-strategy):
     t@(ty-from, ty-to, mode) -> path*
     where
     	anti-cycle(
-	      ( <MemoTyPath> t => path* )
-	      <+
-	      (
-	        <bagof-MemoTyTrans> (ty-from, mode) => ty-inter*;
-	        ty-inter := <fetch-elem(where(\ ty -> <coerce-strategy> (ty, ty-to) \))> ty-inter*;
-	        path1* := <MemoTyPath> (ty-from, ty-inter, mode);
-	        path2* := <get-typath(coerce-strategy)> (ty-inter, ty-to, mode);
-	        path* := [path1*, path2*];
-	        rules(
-	          MemoTyPath: t -> path*
-	          MemoTyTrans:+ (ty-from, mode) -> ty-to
-	        )
-	      )
+        <bagof-MemoTyTrans> (ty-from, mode) => ty-inter*;
+        ty-inter := <fetch-elem(where(\ ty -> <coerce-strategy> (ty, ty-to) \))> ty-inter*;
+        path1* := <get-typath-memo(coerce-strategy)> (ty-from, ty-inter, mode);
+        path2* := <get-typath-memo(coerce-strategy)> (ty-inter, ty-to, mode);
+        path* := [path1*, path2*]
       )
   
   anti-cycle(s) = {| AntiCycle:
@@ -551,3 +569,18 @@ rules
     rules(AntiCycle:+ t -> t);
     s
   |}
+
+  init-hitcount = rules(HitStats: _ -> (0, 0))
+  
+  get-hitcount = HitStats
+  
+  hit =
+    HitStats => (hits, misses);
+    hits' := <inc> hits;
+    rules(HitStats: _ -> (hits', misses)) 
+
+  miss =
+    HitStats => (hits, misses);
+    misses' := <inc> misses;
+    rules(HitStats: _ -> (hits, misses'))
+  
