@@ -1,19 +1,19 @@
-module src-gen/pp/Signatures-pp
+module pp/Signatures-pp
 
 imports
   libstratego-gpp
   runtime/tmpl/pp
-  src-gen/signatures/Signatures-sig
+  signatures/Signatures-sig
 
 
 imports
-  src-gen/signatures/Common-sig
-  src-gen/signatures/ds-sig
+  signatures/Common-sig
+  signatures/ds-sig
 
 
 imports
-  src-gen/pp/Common-pp
-  src-gen/pp/ds-pp
+  pp/Common-pp
+  pp/ds-pp
 
 
 strategies

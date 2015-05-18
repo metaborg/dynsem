@@ -1,9 +1,9 @@
-module src-gen/pp/Common-pp
+module pp/Common-pp
 
 imports
   libstratego-gpp
   runtime/tmpl/pp
-  src-gen/signatures/Common-sig
+  signatures/Common-sig
 
 
 strategies

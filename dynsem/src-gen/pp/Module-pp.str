@@ -1,9 +1,9 @@
-module src-gen/pp/Module-pp
+module pp/Module-pp
 
 imports
   libstratego-gpp
   runtime/tmpl/pp
-  src-gen/signatures/Module-sig
+  signatures/Module-sig
 
 
 strategies

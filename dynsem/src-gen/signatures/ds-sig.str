@@ -1,9 +1,9 @@
-module src-gen/signatures/ds-sig
+module signatures/ds-sig
 
 imports
-  src-gen/signatures/Common-sig
-  src-gen/signatures/Module-sig
-  src-gen/signatures/Signatures-sig
+  signatures/Common-sig
+  signatures/Module-sig
+  signatures/Signatures-sig
 
 
 signature

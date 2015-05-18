@@ -1,4 +1,4 @@
-module src-gen/signatures/Module-sig
+module signatures/Module-sig
 
 signature
   constructors
