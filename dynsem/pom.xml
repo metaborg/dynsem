@@ -30,6 +30,7 @@
         <groupId>org.metaborg</groupId>
         <artifactId>spoofax-maven-plugin</artifactId>
         <configuration>
+            <format>jar</format>
             <pardonedLanguages>
                 <language>NameBindingLanguage</language>
             </pardonedLanguages>
