@@ -15,10 +15,10 @@ context-free syntax // rules
   Rule.Strict = [strict [ID] [{INT ","}+]/[INT]]
   Rule.Seqstrict = [seqstrict [ID] [{INT ","}+]/[INT]]
     
-  Rule.Axiom = [[Formula]]
+  Rule.Axiom = [[Formula].]
   
   Rule.Rule = [
-    [{Premise ",\n"}+]
+    [{Premise ";\n"}+]
     [INFER]
     [Relation]
   ]
@@ -26,14 +26,14 @@ context-free syntax // rules
   Rule.RuleW = [
     [Relation]
     where
-      [{Premise ",\n"}+]
+      [{Premise ";\n"}+].
   ]
   
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail>
 
   PremisesBlock.PremiseBlock = <{
-    <{Premise ",\n"}*>
+    <{Premise ";\n"}*>
   }>
 
   Premise.MergePoint = [
@@ -46,11 +46,19 @@ context-free syntax // rules
     try [PremisesBlock]
   	or  [PremisesBlock]
   ]
-  
+  ID = <_> {reject}
   ID = <imports> {reject}
   ID = <signature> {reject}
   ID = <constructors> {reject}
   ID = <sorts> {reject}
+  ID = <native> {reject}
+  ID = <operators> {reject}
+  ID = <datatypes> {reject}
+  ID = <semantic> {reject}
+  ID = <components> {reject}
+  ID = <implicit> {reject}
+  ID = <List> {reject}
+  ID = <Map> {reject}
   ID = <arrows> {reject}
   ID = <rules> {reject}
   ID = <fresh> {reject}
@@ -75,23 +83,26 @@ context-free syntax // formulas
   Formula.IsValue  = [value([Term])]
   
   Reads.NoReads = []
-  Reads.Reads   = [[{LabelComp " "}+] |- ]
+  Reads.Reads   = [[{LabelComp ", "}+] |- ]
   
-  Source.Source = [[Term]]
-  Source.Source = [[Term] :: [{LabelComp " "}+]]
+  Source.Source = Term
+  Source.Source = [[Term] :: [{LabelComp ", "}+]]
 
-  Target.Target = [[Term]]
-  Target.Target = [[Term] :: [{LabelComp " "}+].]
+  Target.Target = Term
+  Target.Target = [[Term] :: [{LabelComp ", "}+]]
   
   Rel.Dynamic = [-->]
   Rel.NamedDynamic = [-[ID]->]
-  Rel.NamedDynamicParametric = [-[ID]([ID])->]
   
-  Rel.DynamicEmitted = [-[{LabelComp ", "}+]->]
+  Rel.DynamicEmitted = [-[{LabelComp ", "}+]-->]
   Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[ID]->]
-  Rel.NamedDynamicEmittedParametric = [-[{LabelComp ", "}+]-[ID]([ID])->]
   
   LabelComp.LabelComp = [[Type] [Term]]
+  LabelComp.VarLabelComp = [[Var]]
+
+lexical syntax 
+
+  TermCon = ID 
   
 context-free syntax // terms
 
@@ -108,7 +119,7 @@ context-free syntax // terms
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
   Term.Real     = [[REAL]]
-  Term.Con      = [[ID]([{Term ", "}*])]
+  Term.Con      = [[TermCon]([{Term ", "}*])]
   
   List.List     = <[ <{Term ", "}*> ]>
   List.ListTail = <[ <{Term ", "}*> | <Term> ]>

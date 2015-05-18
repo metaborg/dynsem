@@ -2,6 +2,7 @@
 /.cache
 /include
 /editor/java/trans
+/src-gen
 /utils
 syntax/ds*.generated.esv
 syntax/ds.generated.pp

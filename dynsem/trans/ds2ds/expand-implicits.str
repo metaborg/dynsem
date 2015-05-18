@@ -1,0 +1,163 @@
+module expand-implicits
+
+imports
+  include/ds
+  ds
+  analysis/-
+  lib-ds
+
+rules
+
+  expand-implicits-module:
+    m@Module(_, _) -> Module($[[name]_explimpl], section*)
+    where
+      <m-in-analysis(expand-implicits); unmark-vars> m => Module(name, section*)
+
+  expand-implicits = alltd(expand-implicits-rule)
+  
+  expand-implicits-rule:
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
+      Rule(p''*, infer, Relation(Reads(r*), Source(lhs', sc*), arr, Target(rhs', tc*)))
+      where
+      	arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      	ArrowType(ma-ty, bu-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, <type-of> lhs);
+      	(lhs', p-lhs*) := <try-or-mktup(expand-implicits-source(|ma-ty))> lhs;
+      	p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> p*;
+      	(rhs', p-rhs*) := <try-or-mktup(expand-implicits-target(|bu-ty))> rhs;
+      	p''* := <alltd(eliminate-unneeded-cast)> [p-lhs*, p'*, p-rhs*]
+
+  expand-implicits-premise:
+    Formula(Match(tl, tr)) -> p*
+    where
+      (tl', p-tl*) := <try-or-mktup(expand-implicits-termbuild)> tl;
+      p* := <mapconcat(try-or-mksingleton(expand-implicits-premise-match <+ expand-implicits-premise-build))> [p-tl*, Formula(Match(tl', tr))]
+
+rules /* lift and expand subterms on build sides */
+
+  expand-implicits-termbuild:
+    Con(c, child*) -> (Con(c, child'*), p*)
+    where
+      ConstructorType(child-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      (child'*, p*) := <zip(lift-where-indirect <+ \ (_, t) -> (t, []) \); unzip; (id, concat)> (child-ty*, child*)
+
+  expand-implicits-termbuild:
+    ListTail([hd], tl) -> (ListTail([hd'], tl), p*)
+    where
+      hd-ty := <type-of> hd;
+      ListType(tl-ty) := <type-of> tl;
+      (hd', p*) := <lift-where-indirect> (tl-ty, hd)
+
+  lift-where-indirect:
+    (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, MatchedVar(v-new)))])
+    where
+      t-ty := <type-of> t;
+      <not(type-coerce-direct(fail))> (t-ty, e-ty);
+      v-new := <def-new-variable> e-ty
+
+  eliminate-unneeded-cast:
+    Formula(Match(lt@VarRef(_), Cast(rt, _))) -> Formula(Match(lt, rt)) 
+
+rules /* introduce explicit reductions/coercions where required on MATCH side */
+
+  expand-implicits-premise-match:
+  	f@Formula(Match(lt, rt)) -> <expand-typath-match> (ty-path*, lt, rt)
+  	where
+  	  lt-ty := <type-of> lt;
+  	  rt-ty := <type-of> rt;
+  	  <not(type-coerce-direct(id))> (lt-ty, rt-ty)
+  	where
+  	  ty-path* := <get-typath(type-coerce-full(id))> (lt-ty, rt-ty, MatchMode())
+  
+  expand-typath-match:
+    ([], lt, rt) -> [Formula(Match(lt, rt))]
+  
+  expand-typath-match:
+    ([c-def | xs-def], lt, rt) -> [Formula(Match(lt, Con(c-name, [Var(v-new)]))), path*]
+    where
+      <def-get-namespace> c-def => Constructors()
+    where
+      ConstructorType([c-child-ty], _) := <lookup-prop(|Type())> c-def;
+      c-name := <def-get-name> c-def;
+      v-new := <def-new-variable> c-child-ty;
+      path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
+  
+  expand-typath-match:
+    ([a-def | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
+    where
+      <def-get-namespace> a-def => Arrows()
+    where
+      ArrowType(_, bu-ty) := <lookup-prop(|Type())> a-def;
+      a-name := <def-get-name> a-def;
+      v-new := <def-new-variable> bu-ty;
+      path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
+
+rules /* introduce explicit coercions where required on the SOURCE side */
+
+  expand-implicits-source(|ma-ty):
+    lhs -> (Con(c-name, [Var(v-new)]), prem*)
+    where
+      lhs-ty := <type-of> lhs;
+      <not(type-coerce-direct(fail))> (ma-ty, lhs-ty)
+    where
+    	[c-def | xs-def] := <get-typath(type-coerce-full(id))> (ma-ty, lhs-ty, MatchMode());
+    	Constructors() := <def-get-namespace> c-def;
+    	ConstructorType([child-ty], _) := <lookup-prop(|Type())> c-def;
+    	c-name := <def-get-name> c-def;
+    	v-new := <def-new-variable> child-ty;
+    	prem* := <expand-typath-match> (xs-def, VarRef(v-new), lhs)
+
+rules /* introduce explicit reductions/coercions where required on BUILD side */
+
+  expand-implicits-premise-build:
+    f@Formula(Match(lt, rt)) -> <expand-typath-build> (ty-path*, lt, rt)
+    where
+      lt-ty := <type-of> lt;
+      rt-ty := <type-of> rt;
+      <not(type-coerce-direct(fail))> (lt-ty, rt-ty);
+      ty-path* := <get-typath(type-coerce-full(fail))> (lt-ty, rt-ty, BuildMode())
+      
+  expand-typath-build:
+    ([], lt, rt) -> [Formula(Match(lt, rt))]
+  
+  expand-typath-build:
+    ([c-def | xs-def], lt, rt) -> [Formula(Match(Con(c-name, [lt]), Var(v-new))), path*]
+    where
+      <def-get-namespace> c-def => Constructors();
+      ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def
+    where
+      c-name := <def-get-name> c-def;
+      v-new := <def-new-variable> c-ty;
+      path* := <expand-typath-build> (xs-def, VarRef(v-new), rt)
+  
+  expand-typath-build:
+    ([a-def | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
+    where
+      <def-get-namespace> a-def => Arrows();
+      ArrowType(_, bu-ty) := <lookup-prop(|Type())> a-def
+    where
+      a-name := <def-get-name> a-def;
+      v-new := <def-new-variable> bu-ty;
+      path* := <expand-typath-build> (xs-def, VarRef(v-new), rt)
+
+rules /* introduce explicit reductions/coercions where required on TARGET side */
+
+  expand-implicits-target(|bu-ty):
+    vref@VarRef(_) -> (VarRef(v-new), prem*)
+    where
+      v-ty := <type-of> vref;
+      <not(type-coerce-direct(fail))> (v-ty, bu-ty)
+    where
+      ty-path* := <get-typath(type-coerce-full(fail))> (v-ty, bu-ty, BuildMode());
+      v-new := <def-new-variable> bu-ty;
+      prem* := <expand-typath-build> (ty-path*, vref, Var(v-new))
+
+  try-or-mktup(s) = s <+ \ t -> (t, []) \
+  try-or-mksingleton(s) = s <+ MkSingleton
+  
+  def-new-variable:
+    ty -> v-name
+    where
+      v-name := <next-variable>;
+      v-def := <store-def(|Vars())> v-name;
+      <store-prop(|Type(), v-def)> ty
+    

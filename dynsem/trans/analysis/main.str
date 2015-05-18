@@ -17,26 +17,31 @@ rules
 	  log-timed(rename-all | "Renaming variables");
 	  log-timed(store-all  | "Storing all definitions")
 
-  m-in-analysis(s) = new-analysis-scope(
+  m-in-analysis(s) = new-analysis-scope(new-type-transitions-scope(
   	analyze;
   	s
-  )
+  ))
 
   store-all:
     m@Module(n, section*) -> m
     with
       log-timed(
-        store-built-ins | "Storing built-in signatures" 
-      );
-      log-timed(
-        <map(try(store-signatures))> section* | "Storing signatures"
-      );
-      log-timed(
-        <check-signatures> section* | "Checking signatures" 
-      );
-      log-timed(
-        <map(try(store-rules))> section* | "Storing rules"
-      );
-      log-timed(
-        <post-analysis-checks> m | "Post analysis checks"
-      )
+	      log-timed(
+	        store-built-ins | "Storing built-in signatures" 
+	      );
+	      log-timed(
+	        <map(try(store-signatures))> section* | "Storing signatures"
+	      );
+	      log-timed(
+	        <check-signatures> section* | "Checking signatures" 
+	      );
+	      log-timed(
+	        <map(try(store-rules))> section* | "Storing rules"
+	      );
+	      log-timed(
+	        <post-analysis-checks> m | "Post analysis checks"
+	      )
+      | "Analysis" )
+
+
+

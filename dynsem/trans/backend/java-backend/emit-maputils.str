@@ -12,6 +12,7 @@ imports
 	backend/java-backend/utils
 	backend/java-backend/lib-ds2java
 	backend/java-backend/emit-atermconversion
+	backend/java-backend/emit-genericnodes
 	
 rules
   
@@ -26,22 +27,26 @@ rules
       compilation-unit |[
         package ~x:<AutoPackageName>;
         
+        import java.util.Map;
         import java.util.Map.Entry;
+				import java.util.TreeMap;
         import org.spoofax.interpreter.terms.*;
+        import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.interpreter.framework.*;
         import com.github.krukow.clj_ds.PersistentMap;
+        import com.github.krukow.clj_lang.PersistentTreeMap;
         
         public class AutoMapUtils {
           ~conv*
         }
       ]|
     where
-      conv* := <map(ds2java-maputils-semcomp)> semcomp-def*
+      conv* := <mapconcat(ds2java-maputils-semcomp)> semcomp-def*
   
   ds2java-maputils-semcomp:
     semcomp-def ->
-      class-body-dec |[
-        public static IStrategoTerm x_methodname(PersistentMap<x_kty, x_vty> map, ITermFactory factory) {
+      class-body-dec* |[
+        public static IStrategoTerm x_toterm(PersistentMap<x_kty, x_vty> map, ITermFactory factory) {
           IStrategoConstructor bindCons = factory.makeConstructor("Bind", 2);
 
           IStrategoTerm[] kids = new IStrategoTerm[map.size() + 1];
@@ -56,15 +61,48 @@ rules
           
           return factory.makeAppl(factory.makeConstructor("Map", 2), kids);
         }
+        
+        public static PersistentMap<x_kty, x_vty> x_fromterm(IStrategoTerm term) {
+          final String mapName = ~e:Lit(String([Chars(semcomp-name)]));
+			    final Map<x_kty, x_vty> result = new TreeMap<x_kty, x_vty>();
+			    if (Tools.isTermAppl(term)) {
+			      IStrategoAppl appl = (IStrategoAppl) term;
+			      if (Tools.hasConstructor(appl, "Map", 2)) {
+			        IStrategoTerm kid0 = term.getSubterm(0);
+			        if (Tools.isTermString(kid0)
+			            && Tools.asJavaString(kid0).equals(mapName)) {
+			          for (int idx = 1; idx < term.getSubtermCount(); idx++) {
+			            IStrategoTerm kid = term.getSubterm(idx);
+			            if (Tools.isTermAppl(kid)) {
+			              IStrategoAppl bindAppl = (IStrategoAppl) kid;
+			              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
+			                result.put(e_key, e_value);
+			              }
+			            }
+			          }
+			          return PersistentTreeMap.create(result);
+			        }
+			
+			      }
+			    }
+			
+			    throw new RuntimeException("Malformed map for " + mapName);
+			  }
       ]|
     where
       semcomp-name := <def-get-name> semcomp-def;
-      x_methodname := <ds2java-map2aterm-name> semcomp-name;
+      x_toterm := <ds2java-map2aterm-name> semcomp-name;
+      x_fromterm := <ds2java-aterm2map-name> semcomp-name;
       MapType(k-ty, v-ty) := <lookup-prop(|SuperType())> semcomp-def;
       x_kty := <ds2java-sort-classname; ds2java-box-java-type> k-ty;
       x_vty := <ds2java-sort-classname; ds2java-box-java-type> v-ty;
       e_keytrm := <ds2java-atermconversion-name(| e |[ entry.getKey() ]|)> k-ty;
-      e_valtrm := <ds2java-atermconversion-name(| e |[ entry.getValue() ]|)> v-ty
+      e_valtrm := <ds2java-atermconversion-name(| e |[ entry.getValue() ]|)> v-ty;
+      e_key := <ds2java-gennode-instantiation> (e |[ bindAppl.getSubterm(0) ]|, k-ty);
+      e_value := <ds2java-gennode-instantiation> (e |[ bindAppl.getSubterm(1) ]|, v-ty)
 
   ds2java-map2aterm-name:
   	semcomp-name -> $[toStrategoTerm_[semcomp-name]]
+
+  ds2java-aterm2map-name:
+  	semcomp-name -> $[to_[semcomp-name]]

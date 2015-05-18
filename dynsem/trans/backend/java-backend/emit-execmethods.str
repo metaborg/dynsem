@@ -47,6 +47,7 @@ rules
   ds2java-execmethod(|rule*):
     (arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
+        
         public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
           this.specializeChildren(0);
           
@@ -166,7 +167,8 @@ rules
     where
       x_classname := <ds2java-returnclassname> (arrow-def, bu-ty);
       t* := [t1 | <map(?LabelComp(_, <id>))> tc*];
-      e* := <map(ds2java-term-build)> t*
+      ty* := [bu-ty | <map(?LabelComp(<id>, _))> tc*];
+      e* := <zip(ds2java-term-build)> (ty*, t*)
 
   ds2java-premise:
     (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
@@ -241,6 +243,20 @@ rules
       );
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
+  
+  ds2java-premise:
+    (Formula(Match(lhs@Con(c, _), dec@MatchedVar(v))), on-succ*, _) ->
+      bstm* |[
+        final ~x:<ds2java-constr-classname> c ~x:v = e_lhs;
+        bstm*
+      ]|
+    where
+    	c-kind := <lookup-def(|Constructors()); lookup-prop(|ConsKind())> c;
+    	<not(?NativeOpCons())> c-kind
+    where
+      v-ty := <type-of> dec;
+      e_lhs := <ds2java-term-build-optcast(|v-ty)> lhs;
+      bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
     (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
@@ -340,9 +356,8 @@ rules
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
-  ds2java-premise = debug(!"Premise failure: "); fail 
-
-
+  ds2java-premise = debug(!"Premise failure: "); fail
+  
   ds2java-term-build-optcast(|ex_ty):
     trm -> <ds2java-term-build(|ex_ty)> trm
     where not(
@@ -363,6 +378,9 @@ rules
     		ex_ty' := <lookup-prop(|SuperType())> ex_ty_def
       end
 
+  ds2java-term-build:
+    (ty, t) -> <ds2java-term-build(|ty)> t
+  
   ds2java-term-build(|ex_ty):
     Int(i) -> e |[ i ]|
 
@@ -385,7 +403,7 @@ rules
       x_consclass := <ds2java-constr-classname> c;
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (c-c-ty*, child*)
-  
+
   ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ x_manualpkg.Natives.x_consname(e*) ]|
     where
@@ -424,7 +442,7 @@ rules
       h-ex-elem-ty := <?ListType(<id>) <+ !h-ty> ex-ty;
       if <type-of> t-trm => ListType(t-elem-ty)
       then
-        actual_ex_elem_ty := <type-coerce-sym> (h-ex-elem-ty, t-elem-ty)
+        actual_ex_elem_ty := <type-coerce-sym(type-coerce-direct(fail))> (h-ex-elem-ty, t-elem-ty)
       else
         actual_ex_elem_ty := h-ex-elem-ty
       end;
@@ -434,8 +452,8 @@ rules
   ds2java-term-build(|ex_ty):
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
     where
-      e_t := <ds2java-term-build(|ty-trm)> t;
-      x_ty := <ds2java-sort-classname> ty-trm
+      e_t := <ds2java-term-build(|<try(rw-type)> ty-trm)> t;
+      x_ty := <try(rw-type); ds2java-sort-classname> ty-trm
   
   ds2java-term-build(|ex_ty):
     String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))

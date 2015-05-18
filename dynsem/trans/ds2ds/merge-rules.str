@@ -30,7 +30,7 @@ rules /* merge ovelapping rules */
   merge-rules-in-module:
     Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules([merged-rule*, rule'*])])
     with
-      cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
+      cons-arity* := <collect-all(\ ConsDecl(cons, args, _, _) -> (cons, <length> args) \); make-set> signatures;
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name); make-set> signatures;
       rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
       rule'* := <diff> (rule*, <mapconcat(?(_, _, <id>))> rules-by-cons*); // rules not covered by cons-merging
@@ -53,12 +53,6 @@ rules /* merge ovelapping rules */
       rule'* := <filter(not(?[])); map(unmark-vars; map(remove-aliases; rename-components; rename-output))> rules-by-type-by-arrow*;
       rule''* := <mapconcat(merge-rules-top)> rule'*      
       
-  cons-decl-pair-arity:
-    ConsDecl(cons, args, _) -> (cons, <length> args)
-  
-  cons-decl-pair-arity:
-    InternalConsDecl(cons, args, _) -> (cons, <length> args)
-
   group-rules-by-cons(|rule*):
     (cons, arity) -> (cons, arity, rulez)
     with
