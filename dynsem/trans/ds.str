@@ -4,7 +4,7 @@ imports
 	include/ds
 
 imports
-	lib/editor-common.generated
+	editor-common.generated
 	pp
 	outline
 	ds2ds/refocus

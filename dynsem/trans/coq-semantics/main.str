@@ -4,7 +4,7 @@ imports
   libstratego-gpp
   coq-semantics/-
   names
-  lib/editor-common.generated
+  editor-common.generated
   include/ds
   ds
 

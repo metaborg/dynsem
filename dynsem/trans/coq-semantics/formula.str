@@ -4,12 +4,12 @@ imports
   libstratego-gpp
   coq-semantics/-
   coq-semantics/syntax/-
-  lib/runtime/index/-
-  lib/runtime/nabl/-
-  lib/runtime/properties/-
-  lib/runtime/task/-
+  runtime/index/-
+  runtime/nabl/-
+  runtime/properties/-
+  runtime/task/-
   names
-  lib/editor-common.generated
+  editor-common.generated
   include/ds
 
 rules // Formula

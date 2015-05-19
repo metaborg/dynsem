@@ -2,7 +2,7 @@ module outline
 
 imports
   include/ds
-  lib/runtime/editor/outline-library
+  runtime/editor/outline-library
 
 rules
 

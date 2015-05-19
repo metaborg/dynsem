@@ -2,7 +2,7 @@ module ds2ds/resolve-includes
 
 imports
   include/ds
-  lib/editor-common.generated
+  editor-common.generated
   
 rules
   

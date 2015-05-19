@@ -40,7 +40,7 @@ rules
 
   parse-java-file = parse-file(
         strsglr-perror, strsglr-report-parse-error
-    | <import-term(lib/JavaCompilationUnit-15.tbl)>
+    | <import-term(JavaCompilationUnit-15.tbl)>
     )
 
 rules /* merging of two Java ASTs */

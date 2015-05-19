@@ -2,7 +2,7 @@ module backend/java-backend/main
 
 imports
   include/ds
-  lib/editor-common.generated
+  editor-common.generated
   lib-ds
   ds
 
