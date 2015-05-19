@@ -580,7 +580,7 @@ rules
   log-hitcount = 
     where(
       get-hitcount => (hits, misses);
-      <concat-strings> [ <align-left> (' ', "Memoization efficiency", 27), " : [hits/mises ] = [", <int-to-string> hits, "/", <int-to-string> misses, "]" ];
+      <concat-strings> [ <align-left> (' ', "Memoization efficiency", 27), " : [hits/misses ] = [", <int-to-string> hits, "/", <int-to-string> misses, "]" ];
       log(|Info(),<id>)
     )
   
