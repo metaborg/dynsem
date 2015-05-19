@@ -13,13 +13,9 @@ imports
 rules
 	
 	analyze =
-	  new-analysis-scope(
-	    new-type-transitions-scope(
-				log-timed(mark-vars | "Marking variable def sites");
-			  log-timed(rename-all | "Renaming variables");
-			  log-timed(store-all  | "Storing all definitions")
-	    )
-	  )
+		log-timed(mark-vars | "Marking variable def sites");
+		log-timed(rename-all | "Renaming variables");
+		log-timed(store-all  | "Storing all definitions")
 
   m-in-analysis(s) = new-analysis-scope(new-type-transitions-scope(
   	analyze;
