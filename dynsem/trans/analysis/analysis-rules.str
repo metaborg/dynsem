@@ -375,7 +375,7 @@ rules
     	if arrow-def := <lookup-def(|Arrows())> arrow-name
     	then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <type-of-applicable-arrow(type-coerce-full(fail))> (arrow-ty*, lhs-ty) => ArrowType(in-ty, out-ty)
+	      if <type-of-applicable-arrow(flip(type-coerce-full(fail)))> (arrow-ty*, lhs-ty) => ArrowType(in-ty, out-ty)
 	      then
 	        <type-check-expectation(type-coerce-full(fail)|lhs, in-ty)> lhs-ty;
 	        <type-check-match(|out-ty)> rhs;
