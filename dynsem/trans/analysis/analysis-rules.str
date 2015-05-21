@@ -452,7 +452,7 @@ rules
 
   type-coerce-sym(coerce-s) =
     coerce-s
-    <+ swap; coerce-s
+    <+ flip(coerce-s)
   
   type-coerce-base:
     (ty, ALPHATYPE()) -> ty
