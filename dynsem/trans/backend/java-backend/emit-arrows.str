@@ -17,10 +17,12 @@ imports
 rules
   
   // generate arrow interface methods
-  ds2java-arrow-methodface:
+  ds2java-arrow-absmethod:
     (arrow-def, ArrowType(ma-ty, bu-ty)) ->
       class-body-dec |[
-        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:<ds2java-methodname> (arrow-def, bu-ty) (param*);
+        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:<ds2java-methodname> (arrow-def, bu-ty) (param*) {
+        	throw new InterpreterException("Rule failure");
+        }
       ]|
     where
       param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def

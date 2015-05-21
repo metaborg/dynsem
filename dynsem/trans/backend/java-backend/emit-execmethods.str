@@ -62,14 +62,22 @@ rules
       arrow-name := <def-get-name> arrow-def;
       if rule := <fetch-elem(is-rule-matching-arrow(|arrow-name))> rule*
       then
-        {| LiftedMethods:
+        {| LiftedMethods, CurrentArrow:
+          rules(CurrentArrow: _ -> arrow-def);
           bstm* := <ds2java-rulestatements> rule;
           more-method* := <bagof-LiftedMethods>
         |}
       else
-        bstm* := bstm* |[ throw new InterpreterException("Rule failure"); ]|;
+        bstm* := <ds2java-supercall> arrow-def;
         more-method* := []
       end
+  
+  ds2java-supercall:
+    arrow-def -> bstm* |[ return super.x_methodname(e*); ]|
+    where
+      ArrowType(_, bu-ty) := <lookup-prop(|Type())> arrow-def;
+      x_methodname := <ds2java-methodname> (arrow-def, bu-ty);
+      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def 
   
   ds2java-rulestatements:
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
@@ -171,7 +179,8 @@ rules
       e* := <zip(ds2java-term-build)> (ty*, t*)
 
   ds2java-premise:
-    (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
+    // (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
+    (RuleFail(), _, _) -> <ds2java-supercall> <CurrentArrow>
 
   ds2java-premise:
   	(JavaStm(bstm*), _, _) -> bstm*
@@ -194,7 +203,6 @@ rules
       vout-ty := <type-of; ds2java-sort-classname> vdec;
       bstm1* := <map(?LabelComp(_, <id>)); map-with-index(ds2java-bind-out-var(|x_tmp))> tc*;
       bstm* := <ds2java-premise> on-succ*
-      
 
   ds2java-bind-out-var(|x_result):
     (idx, Var(v)) -> bstm |[ final ~x:v-ty ~x:v = x_result.~x:$[get_[idx]](); ]|

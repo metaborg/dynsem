@@ -35,7 +35,7 @@ rules
 	      import com.github.krukow.clj_lang.PersistentTreeMap;
 
         @SuppressWarnings("unused")
-	      public class x_consname extends AbstractNode implements ~x:<ds2java-sort-classname> c-ty {
+	      public class x_consname extends ~x:<ds2java-sort-classname> c-ty {
 	        
 
 	        ~fdec*
