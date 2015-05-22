@@ -7,6 +7,7 @@ imports
 imports
   analysis/constructors
   analysis/lib-analysis
+  analysis/query
 
 imports
   backend/java-backend/emit-execmethods
