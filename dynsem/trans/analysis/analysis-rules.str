@@ -31,6 +31,11 @@ rules /* syntactic checks */
 
 rules /* store variables */
   
+  store-rules-all =
+    where(init-hitcount);
+    alltd(store-rules);
+    log-hitcount
+  
   store-rules = 
       Rules(where(prime-typaths); (map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked])))))
 
@@ -370,9 +375,9 @@ rules
     	if arrow-def := <lookup-def(|Arrows())> arrow-name
     	then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty) => ArrowType(in-ty, out-ty)
+	      if <type-of-applicable-arrow(flip(type-coerce-full(fail)))> (arrow-ty*, lhs-ty) => ArrowType(in-ty, out-ty)
 	      then
-	        <type-check-expectation(type-coerce-full(id)|lhs, in-ty)> lhs-ty;
+	        <type-check-expectation(type-coerce-full(fail)|lhs, in-ty)> lhs-ty;
 	        <type-check-match(|out-ty)> rhs;
 	        <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> [r*, sc*];
 	        <map(labelcomp-to-type-term-pair; type-check-match-wrap)> tc*
@@ -482,7 +487,7 @@ rules
     where
       is-matching < mode := MatchMode() + mode := BuildMode()
     where
-      step-def := <get-typath(coerce-s); last> (ty-from, ty-to, mode);
+      step-def := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
       (
         <def-get-namespace> step-def => Arrows();
         ArrowType(_, ty-to') := <lookup-prop(|Type())> step-def
@@ -526,23 +531,39 @@ rules
         )
       })
 
+  get-typath-memo(coerce-strategy):
+    t@(ty-from, ty-to, mode) -> path*
+    where
+      <MemoTyPath> t => ans
+      <
+        hit;
+        if <?[_ | _]> ans
+        then
+          path* := ans
+        end // in the else case, we have a cached failure and we fail by not binding path*
+      +
+        miss;
+        if <get-typath(coerce-strategy)> t => path*
+        then
+          rules(
+            MemoTyPath: t -> path*
+            MemoTyTrans:+ (ty-from, mode) -> ty-to
+          )
+        else
+          rules(
+            MemoTyPath: t -> None()
+          )
+        end
+
   get-typath(coerce-strategy):
     t@(ty-from, ty-to, mode) -> path*
     where
     	anti-cycle(
-	      ( <MemoTyPath> t => path* )
-	      <+
-	      (
-	        <bagof-MemoTyTrans> (ty-from, mode) => ty-inter*;
-	        ty-inter := <fetch-elem(where(\ ty -> <coerce-strategy> (ty, ty-to) \))> ty-inter*;
-	        path1* := <MemoTyPath> (ty-from, ty-inter, mode);
-	        path2* := <get-typath(coerce-strategy)> (ty-inter, ty-to, mode);
-	        path* := [path1*, path2*];
-	        rules(
-	          MemoTyPath: t -> path*
-	          MemoTyTrans:+ (ty-from, mode) -> ty-to
-	        )
-	      )
+        <bagof-MemoTyTrans> (ty-from, mode) => ty-inter*;
+        ty-inter := <fetch-elem(where(\ ty -> <coerce-strategy> (ty, ty-to) \))> ty-inter*;
+        path1* := <get-typath-memo(coerce-strategy)> (ty-from, ty-inter, mode);
+        path2* := <get-typath-memo(coerce-strategy)> (ty-inter, ty-to, mode);
+        path* := [path1*, path2*]
       )
   
   anti-cycle(s) = {| AntiCycle:
@@ -551,3 +572,25 @@ rules
     rules(AntiCycle:+ t -> t);
     s
   |}
+
+  init-hitcount = rules(HitStats: _ -> (0, 0))
+  
+  get-hitcount = HitStats
+  
+  log-hitcount = 
+    where(
+      get-hitcount => (hits, misses);
+      <concat-strings> [ <align-left> (' ', "Memoization efficiency", 27), " : [hits/misses ] = [", <int-to-string> hits, "/", <int-to-string> misses, "]" ];
+      log(|Info(),<id>)
+    )
+  
+  hit =
+    HitStats => (hits, misses);
+    hits' := <inc> hits;
+    rules(HitStats: _ -> (hits', misses)) 
+
+  miss =
+    HitStats => (hits, misses);
+    misses' := <inc> misses;
+    rules(HitStats: _ -> (hits, misses'))
+  

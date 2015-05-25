@@ -131,7 +131,7 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"typeannos.ds")> path;
-      result := <debug(!1); resolve-includes(|path, project-path); debug(!2); desugar-top; debug(!3); fuse-sections; debug(!4); add-extra-typeannos-module; debug(!5); sugar-all; debug(!6); pp-debug> ast
+      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; add-extra-typeannos-module; sugar-all; pp-debug> ast
 
   expand-implicits-editor:
     (selected, position, ast, path, project-path) -> (filename, result)

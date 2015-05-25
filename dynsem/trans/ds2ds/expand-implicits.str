@@ -66,7 +66,7 @@ rules /* introduce explicit reductions/coercions where required on MATCH side */
   	  rt-ty := <type-of> rt;
   	  <not(type-coerce-direct(id))> (lt-ty, rt-ty)
   	where
-  	  ty-path* := <get-typath(type-coerce-full(id))> (lt-ty, rt-ty, MatchMode())
+  	  ty-path* := <get-typath-memo(type-coerce-full(id))> (lt-ty, rt-ty, MatchMode())
   
   expand-typath-match:
     ([], lt, rt) -> [Formula(Match(lt, rt))]
@@ -99,7 +99,7 @@ rules /* introduce explicit coercions where required on the SOURCE side */
       lhs-ty := <type-of> lhs;
       <not(type-coerce-direct(fail))> (ma-ty, lhs-ty)
     where
-    	[c-def | xs-def] := <get-typath(type-coerce-full(id))> (ma-ty, lhs-ty, MatchMode());
+    	[c-def | xs-def] := <get-typath-memo(type-coerce-full(id))> (ma-ty, lhs-ty, MatchMode());
     	Constructors() := <def-get-namespace> c-def;
     	ConstructorType([child-ty], _) := <lookup-prop(|Type())> c-def;
     	c-name := <def-get-name> c-def;
@@ -114,7 +114,7 @@ rules /* introduce explicit reductions/coercions where required on BUILD side */
       lt-ty := <type-of> lt;
       rt-ty := <type-of> rt;
       <not(type-coerce-direct(fail))> (lt-ty, rt-ty);
-      ty-path* := <get-typath(type-coerce-full(fail))> (lt-ty, rt-ty, BuildMode())
+      ty-path* := <get-typath-memo(type-coerce-full(fail))> (lt-ty, rt-ty, BuildMode())
       
   expand-typath-build:
     ([], lt, rt) -> [Formula(Match(lt, rt))]
@@ -147,7 +147,7 @@ rules /* introduce explicit reductions/coercions where required on TARGET side *
       v-ty := <type-of> vref;
       <not(type-coerce-direct(fail))> (v-ty, bu-ty)
     where
-      ty-path* := <get-typath(type-coerce-full(fail))> (v-ty, bu-ty, BuildMode());
+      ty-path* := <get-typath-memo(type-coerce-full(fail))> (v-ty, bu-ty, BuildMode());
       v-new := <def-new-variable> bu-ty;
       prem* := <expand-typath-build> (ty-path*, vref, Var(v-new))
 
