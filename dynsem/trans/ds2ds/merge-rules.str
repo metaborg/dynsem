@@ -73,7 +73,7 @@ rules /* Merge lists by sorts in variable-based dispatch */
   merge-varrules-in-module:
     Module(name, [imports, signatures, Rules(rule*)]) -> Module(name, [imports, signatures, Rules([nonvar-rule*, merged-var-rule*])])
     where
-      (var-rule*, nonvar-rule*) := <partition(where(get-rule-relation; get-relation-source; debug(!"S "); ?Cast(Var(_), SimpleSort(_))))> rule*;
+      (var-rule*, nonvar-rule*) := <partition(where(get-rule-relation; get-relation-source; ?Cast(Var(_), SimpleSort(_))))> rule*;
       merged-var-rule* := <merge-var-rules> var-rule*
   
   merge-var-rules:
