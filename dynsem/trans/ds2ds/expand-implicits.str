@@ -36,11 +36,11 @@ rules
     Formula(Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), tgt@Target(_, _))) ->
       [p*, Formula(Relation(Reads(r'*), Source(lhs', sc'*), arr, tgt))]
     where
-      (r'*, p1*) := <map(expand-implicits-termbuild <+ \ (_, t) -> (t, []) \); unzip; (id, concat)> r*;
+      (r'*, p1*) := <map(expand-implicits-termbuild <+ \ LabelComp(ty, t) -> (LabelComp(ty, t), []) \); unzip; (id, concat)> r*;
       arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
       ArrowType(in-ty, _) :=  <type-of-applicable-arrow(flip(type-coerce-full(fail)))> (arrow-ty*, <type-of> lhs); 
       (lhs', p2*) := <lift-where-indirect <+ \ (_, t) -> (t, []) \> (in-ty, lhs);
-      (sc'*, p3*) := <map(expand-implicits-termbuild <+ \ (_, t) -> (t, []) \); unzip; (id, concat)> sc*;
+      (sc'*, p3*) := <map(expand-implicits-termbuild <+ \ LabelComp(ty, t) -> (LabelComp(ty, t), []) \); unzip; (id, concat)> sc*;
       p* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p1*, p2*, p3*]
 
 rules /* lift and expand subterms on build sides */
