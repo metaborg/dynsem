@@ -18,8 +18,8 @@ rules /* syntactic checks */
   post-analysis-check:
     r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> r
     where
-      <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)) + ?Cast(Var(_), SimpleSort(_)))> lhs;
-      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern or a list cast pattern])
+      <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)) + ?Cast(Var(_), SimpleSort(_)) + ?Cast(Wld(), SimpleSort(_)))> lhs;
+      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern, a list cast pattern, a wildcard cast pattern, or a variable cast pattern])
   
   post-analysis-check:
     dec -> dec
