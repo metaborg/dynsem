@@ -25,27 +25,27 @@ imports
   
 signature
   constructors
-    RuleFail: Premise
+    RuleFail: Term -> Premise
     JavaStm: List(BlockStm) -> Premise
     Target: ArrowSomething * Term * LabelComp -> Premise
     
 rules
   
-  ds2java-execmethods(|rule*):
-    c -> <mapconcat(ds2java-execmethod(|rule-c*))> applicable-arrow*
+  ds2java-execmethods(on-norule-generator|rule*):
+    c -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-c*))> applicable-arrow*
     where
       ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
       applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
       rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
   
-  ds2java-execmethods(|rule*):
-    ty -> <mapconcat(ds2java-execmethod(|rule-l*))> applicable-arrow*
+  ds2java-execmethods(on-norule-generator|rule*):
+    ty -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
     where
       applicable-arrow* := <lookup-applicable-arrow-def> ty;
       rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
   
-  ds2java-execmethod(|rule*):
-    (arrow-def, ArrowType(_, bu-ty)) ->
+  ds2java-execmethod(on-norule-generator|rule*):
+    a@(arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
         
         public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
@@ -62,31 +62,30 @@ rules
       arrow-name := <def-get-name> arrow-def;
       if rule := <fetch-elem(is-rule-matching-arrow(|arrow-name))> rule*
       then
-        {| LiftedMethods, CurrentArrow:
-          rules(CurrentArrow: _ -> arrow-def);
-          bstm* := <ds2java-rulestatements> rule;
+        {| LiftedMethods:
+          bstm* := <ds2java-rulestatements(|a)> rule;
           more-method* := <bagof-LiftedMethods>
         |}
       else
-        bstm* := <ds2java-supercall> arrow-def;
+        bstm* := <on-norule-generator> a;
         more-method* := []
       end
   
   ds2java-supercall:
-    arrow-def -> bstm* |[ return super.x_methodname(e*); ]|
+    (arrow-def, ArrowType(_, _)) -> bstm* |[ return super.x_methodname(e*); ]|
     where
       ArrowType(_, bu-ty) := <lookup-prop(|Type())> arrow-def;
       x_methodname := <ds2java-methodname> (arrow-def, bu-ty);
       e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def 
   
-  ds2java-rulestatements:
+  ds2java-rulestatements(|arrow):
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
     where
     	patternbound* := <ds2java-patternbinds> lhs;
     	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
       lhs-ty := <type-of> lhs;
       retgt := Target(<lookup-arrow-def> (lhs-ty, arrow-name), rhs, tc*);
-      prem := <inject-try-or; insert-target(|retgt)> prem*;
+      prem := <inject-try-or(|arrow); insert-target(|retgt)> prem*;
       premstms* := <ds2java-premise> (prem, [], [])
   
   ds2java-patternbinds:
@@ -115,18 +114,15 @@ rules
   	where
   		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
 
-  inject-try-or:
-    [] -> TryOr(PremiseBlock([]), PremiseBlock([RuleFail()]))
-
-  inject-try-or:
+  inject-try-or(|arrow):
     p*@[_|_] -> p*
     where
       <not(fetch-elem(premise-can-fail))> p*
-  
-  inject-try-or:
-    p* -> TryOr(PremiseBlock(p*), PremiseBlock([RuleFail()]))
+
+  inject-try-or(|arrow):
+    p* -> TryOr(PremiseBlock(p*), PremiseBlock([RuleFail(arrow)]))
     where
-      <fetch-elem(premise-can-fail)> p*
+      ?[] <+ fetch-elem(premise-can-fail)
   
   premise-can-fail =
     ?Formula(Match(_, Con(_, _)))
@@ -179,8 +175,7 @@ rules
       e* := <zip(ds2java-term-build)> (ty*, t*)
 
   ds2java-premise:
-    // (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
-    (RuleFail(), _, _) -> <ds2java-supercall> <CurrentArrow>
+    (RuleFail(arrow), _, _) -> <ds2java-supercall> arrow
 
   ds2java-premise:
   	(JavaStm(bstm*), _, _) -> bstm*

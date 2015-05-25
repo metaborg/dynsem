@@ -11,6 +11,7 @@ imports
   backend/java-backend/lib-ds2java
   backend/java-backend/utils
   backend/java-backend/analysis-extra
+  backend/java-backend/emit-execmethods
   backend/java-backend/emit-arrows
 
 rules /* generate interfaces for sort declarations */
@@ -20,9 +21,10 @@ rules /* generate interfaces for sort declarations */
     where
       all-type-def*  := <lookup-def-all(|Types())>;
       type-def* := <filter(where(lookup-prop(|SortKind()) => LanguageSort()))> all-type-def*;
-      iface* := <map(?(_, <id>); ds2java-abstracts)> type-def*
+      rule* := <fetch-elem(?Rules(<id>))> section*;
+      iface* := <map(?(_, <id>); ds2java-abstracts(|rule*))> type-def*
   
-  ds2java-abstracts:
+  ds2java-abstracts(|rule*):
     ty ->
       compilation-unit |[
         package ~x:<AutoPackageName>;
@@ -34,10 +36,9 @@ rules /* generate interfaces for sort declarations */
         }
       ]|
     where
-      ty-def := <lookup-def(|Types())> ty;
-      // supername := <lookup-prop(|SuperType()); ds2java-sort-classname <+ !"IMatchableNode"> ty-def;
-      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-absmethod)> ty
-
-
-
+      exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> ty
+ 
+ ds2java-throw-statement:
+   (arrow-def, ArrowType(_, bu-ty)) ->
+      bstm* |[ throw new InterpreterException("Rule failure"); ]|
 
