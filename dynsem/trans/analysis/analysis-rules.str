@@ -18,8 +18,8 @@ rules /* syntactic checks */
   post-analysis-check:
     r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> r
     where
-      <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)))> lhs;
-      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern or a list cast pattern])
+      <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)) + ?Cast(Var(_), SimpleSort(_)) + ?Cast(Wld(), SimpleSort(_)))> lhs;
+      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern, a list cast pattern, a wildcard cast pattern, or a variable cast pattern])
   
   post-analysis-check:
     dec -> dec
@@ -452,7 +452,7 @@ rules
 
   type-coerce-sym(coerce-s) =
     coerce-s
-    <+ swap; coerce-s
+    <+ flip(coerce-s)
   
   type-coerce-base:
     (ty, ALPHATYPE()) -> ty
@@ -580,7 +580,7 @@ rules
   log-hitcount = 
     where(
       get-hitcount => (hits, misses);
-      <concat-strings> [ <align-left> (' ', "Memoization efficiency", 27), " : [hits/misses ] = [", <int-to-string> hits, "/", <int-to-string> misses, "]" ];
+      <concat-strings> [ <align-left> (' ', "Memoization efficiency", 27), " : [hits/misses] = [", <int-to-string> hits, "/", <int-to-string> misses, "]" ];
       log(|Info(),<id>)
     )
   

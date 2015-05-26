@@ -16,15 +16,6 @@ imports
   
 rules
   
-  // generate arrow interface methods
-  ds2java-arrow-methodface:
-    (arrow-def, ArrowType(ma-ty, bu-ty)) ->
-      class-body-dec |[
-        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:<ds2java-methodname> (arrow-def, bu-ty) (param*);
-      ]|
-    where
-      param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def
-  
   // generate indexed method parameter declaration
   ds2java-method-paramdecl:
     (idx, ty) -> param |[ ~x:<ds2java-sort-classname> ty ~x:$[_[idx]] ]|

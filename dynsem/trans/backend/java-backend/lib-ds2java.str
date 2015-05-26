@@ -68,7 +68,7 @@ rules /* name generation */
   		NativeSort() := <lookup-prop(|SortKind())> ty-def
   
   ds2java-sort-classname:
-  	ty -> $[I_[<def-get-name> ty-def]]
+  	ty -> $[A_[<def-get-name> ty-def]]
   	where
   		ty-def := <lookup-def(|Types())> ty
 

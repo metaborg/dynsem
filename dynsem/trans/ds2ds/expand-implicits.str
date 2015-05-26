@@ -32,6 +32,17 @@ rules
       (tl', p-tl*) := <try-or-mktup(expand-implicits-termbuild)> tl;
       p* := <mapconcat(try-or-mksingleton(expand-implicits-premise-match <+ expand-implicits-premise-build))> [p-tl*, Formula(Match(tl', tr))]
 
+  expand-implicits-premise:
+    Formula(Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), tgt@Target(_, _))) ->
+      [p*, Formula(Relation(Reads(r'*), Source(lhs', sc'*), arr, tgt))]
+    where
+      (r'*, p1*) := <map(expand-implicits-termbuild <+ \ LabelComp(ty, t) -> (LabelComp(ty, t), []) \); unzip; (id, concat)> r*;
+      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      ArrowType(in-ty, _) :=  <type-of-applicable-arrow(flip(type-coerce-full(fail)))> (arrow-ty*, <type-of> lhs); 
+      (lhs', p2*) := <lift-where-indirect <+ \ (_, t) -> (t, []) \> (in-ty, lhs);
+      (sc'*, p3*) := <map(expand-implicits-termbuild <+ \ LabelComp(ty, t) -> (LabelComp(ty, t), []) \); unzip; (id, concat)> sc*;
+      p* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p1*, p2*, p3*]
+
 rules /* lift and expand subterms on build sides */
 
   expand-implicits-termbuild:
@@ -43,9 +54,14 @@ rules /* lift and expand subterms on build sides */
   expand-implicits-termbuild:
     ListTail([hd], tl) -> (ListTail([hd'], tl), p*)
     where
-      hd-ty := <type-of> hd;
       ListType(tl-ty) := <type-of> tl;
       (hd', p*) := <lift-where-indirect> (tl-ty, hd)
+
+  expand-implicits-termbuild:
+    LabelComp(a-ty, t) -> (LabelComp(a-ty, t'), p*)
+    where
+      ty := <rw-type> t;
+      (t', p*) := <lift-where-indirect> (ty, t)
 
   lift-where-indirect:
     (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, MatchedVar(v-new)))])
@@ -115,7 +131,7 @@ rules /* introduce explicit reductions/coercions where required on BUILD side */
       rt-ty := <type-of> rt;
       <not(type-coerce-direct(fail))> (lt-ty, rt-ty);
       ty-path* := <get-typath-memo(type-coerce-full(fail))> (lt-ty, rt-ty, BuildMode())
-      
+  
   expand-typath-build:
     ([], lt, rt) -> [Formula(Match(lt, rt))]
   

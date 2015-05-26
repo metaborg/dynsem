@@ -52,7 +52,7 @@ rules
         // )
         
 	      w-log-timed(
-	        ds2java-interfaces;
+	        ds2java-abstracts;
 	        write-classes
 	        | "Gen interfaces for sorts")
 	      
