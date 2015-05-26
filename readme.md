@@ -95,9 +95,11 @@ Note the following replacements in the above fragment:
 Once the project is built, an open program can be evaluated by invoking the ***Interpreter*** > ***Evaluate*** action. In the example above the evaluation will result in a term *R_Result_V(res, sto)* where *res* has sort *V* and *sto* is an ATerm representation of the *Sto* semantic component
 
 
-### Changenotes and specification update instructions
+### Changenotes 26/05/2015
 
+Dispatch on variables is now supported.
 
+### Changenotes and specification update instructions 20/05/2015
 
 #### 1. Syntax changes
 
