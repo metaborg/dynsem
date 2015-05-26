@@ -14,7 +14,7 @@ imports
   backend/java-backend/lib-ds2java
   backend/java-backend/utils
   backend/java-backend/emit-specializercode
-
+  
 rules
   
   ds2java-listclasses:
@@ -31,7 +31,7 @@ rules
     where
       x_classname := <ds2java-sort-classname> lty;
       specializer* := <mklist-specializer(|x_classname, ety) <+ ![]>;
-      exec* := <ds2java-execmethods(ds2java-supercall|rule*)> lty;
+      exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> lty;
   		ety-def := <lookup-def(|Types())> ety;
   		if sup-ty := <lookup-prop(|SuperType())> ety-def; <not(lookup-prop(|SortKind()); ?SemanticCompSort())> ety-def
   		then

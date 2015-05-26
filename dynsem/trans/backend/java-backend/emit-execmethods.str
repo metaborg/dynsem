@@ -71,6 +71,9 @@ rules
         more-method* := []
       end
   
+  ds2java-throw-statement:
+    (arrow-def, ArrowType(_, bu-ty)) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
+  
   ds2java-supercall:
     (arrow-def, ArrowType(_, _)) -> bstm* |[ return super.x_methodname(e*); ]|
     where

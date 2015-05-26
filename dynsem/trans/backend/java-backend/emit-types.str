@@ -38,7 +38,3 @@ rules /* generate interfaces for sort declarations */
     where
       exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> ty
  
- ds2java-throw-statement:
-   (arrow-def, ArrowType(_, bu-ty)) ->
-      bstm* |[ throw new InterpreterException("Rule failure"); ]|
-
