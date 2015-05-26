@@ -33,7 +33,7 @@ rules
         import org.spoofax.interpreter.core.Tools;
         
         @SuppressWarnings("unused")
-        public class ~x:gennodename extends AbstractNode implements ~x:sortname, IGenericNode {
+        public class ~x:gennodename extends ~x:sortname implements IGenericNode {
           
           public IStrategoTerm aterm;
           

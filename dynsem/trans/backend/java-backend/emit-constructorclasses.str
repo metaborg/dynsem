@@ -35,7 +35,7 @@ rules
 	      import com.github.krukow.clj_lang.PersistentTreeMap;
 
         @SuppressWarnings("unused")
-	      public class x_consname extends AbstractNode implements ~x:<ds2java-sort-classname> c-ty {
+	      public class x_consname extends ~x:<ds2java-sort-classname> c-ty {
 	        
 
 	        ~fdec*
@@ -85,7 +85,7 @@ rules
     	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
     	specializer* := <ds2java-specializer-method> c-c-ty*;
-    	exec* := <ds2java-execmethods(|rule*)> c;
+    	exec* := <ds2java-execmethods(ds2java-supercall|rule*)> c;
     	atermconvert := <ds2java-atermconversion-constructor> c
   
   // generate equality check for a field that is of native type

@@ -349,4 +349,3 @@ rules // utils
   
   foldl(s1, s2) = <foldl(s2)> (<id>, <s1>)
 
-  swap = !(<Snd>, <Fst>)
