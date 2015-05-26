@@ -35,6 +35,7 @@ menus
   menu: "Semantics"
 
     action  : "All to Java"            = all-to-java-editor (source)
+    action  : "All to Core"            = all-to-core-editor (openeditor) (source)
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)
     action  : "Add type annotations"   = add-extra-typeannos-editor (openeditor) (realtime)
