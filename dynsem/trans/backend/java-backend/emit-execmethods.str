@@ -311,39 +311,7 @@ rules
       bstm2* := <ds2java-premise> on-fail*
 
   ds2java-premise:
-    (Formula(TermNeq(t1, t2)), on-succ*, on-fail*) ->
-      bstm* |[
-        if(e_t1 != e_t2){
-          bstm1*
-        } else {
-          bstm2*
-        }
-      ]|
-    where
-      <type-of; ds2java-type-is-primitive> t1;
-      <type-of; ds2java-type-is-primitive> t2;
-      e_t1 := <ds2java-term-build(|ALPHATYPE())> t1;
-      e_t2 := <ds2java-term-build(|ALPHATYPE())> t2;
-      bstm1* := <ds2java-premise> on-succ*;
-      bstm2* := <ds2java-premise> on-fail*
-  
-  ds2java-premise:
-    (Formula(TermNeq(t1, t2)), on-succ*, on-fail*) ->
-      bstm* |[
-        if(e_t1 != null && !e_t1.equals(e_t2)){
-          bstm1*
-        } else {
-          bstm2*
-        }
-      ]|
-    where
-      <type-of; not(ds2java-type-is-primitive)> t1;
-      <type-of; not(ds2java-type-is-primitive)> t2
-    where
-      e_t1 := <ds2java-term-build(|ALPHATYPE())> t1;
-      e_t2 := <ds2java-term-build(|ALPHATYPE())> t2;
-      bstm1* := <ds2java-premise> on-succ*;
-      bstm2* := <ds2java-premise> on-fail*
+    (Formula(TermNeq(t1, t2)), on-succ*, on-fail*) -> <ds2java-premise> (Formula(TermEq(t1, t2)), on-fail*, on-succ*)
   
   ds2java-premise:
     (Formula(TermEq(t1, t2)), on-succ*, on-fail*) ->
