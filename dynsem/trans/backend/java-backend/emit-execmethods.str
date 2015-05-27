@@ -39,7 +39,14 @@ rules
       rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
   
   ds2java-execmethods(on-norule-generator|rule*):
-    ty -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
+    ty-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
+    where
+      ty := <def-get-name> ty-def;
+      applicable-arrow* := <lookup-applicable-arrow-def> ty;
+      rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
+
+  ds2java-execmethods(on-norule-generator|rule*):
+    ty@ListType(_) -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
     where
       applicable-arrow* := <lookup-applicable-arrow-def> ty;
       rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
