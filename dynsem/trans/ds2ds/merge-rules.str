@@ -17,7 +17,7 @@ imports
   ds2ds/sugar
   lib-ds/lib-match
 
-rules /* merge ovelapping rules */
+rules /* merge overlapping rules */
 
   merge-rules-in-module-top =
     log-timed(
