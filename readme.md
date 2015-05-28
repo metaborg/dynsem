@@ -76,10 +76,10 @@ We set-up the project to achieve this as follows:
 			@Override
 			public IStrategoTerm invoke(Context context, IStrategoTerm program) {
 
-				return new Generic_I_Expr(null, program).
+				return new Generic_A_Expr(null, program).
 					exec_default(
 						new PersistentTreeMap<String, Integer>(),
-						new PersistentTreeMap<Integer, I_V>()
+						new PersistentTreeMap<Integer, A_V>()
 					).toStrategoTerm(context.getFactory());
 			}
 		}
@@ -88,7 +88,7 @@ We set-up the project to achieve this as follows:
 Note the following replacements in the above fragment:
 
 * *LANG* should be replaced by your language name
-* `Expr` in `Generic_I_Expr` and in `I_Expr` correspond to the sort `Expr` of your language. For a sort `Foo` they would be `Generic_I_Foo` and `I_Foo`
+* `Expr` in `Generic_A_Expr` and in `A_Expr` correspond to the sort `Expr` of your language. For a sort `Foo` they would be `Generic_A_Foo` and `A_Foo`
 * `default` in `exec_default` corresponds to the name of the arrow (the `-->` arrow is the same as `-default->`). For an arrow named `doit` the method would called `exec_doit`.
 * The arguments of the method correspond to the semantic components of the arrow, first the read-only and then the read-write semantic components.
 
