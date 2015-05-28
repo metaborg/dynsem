@@ -8,6 +8,11 @@ rules
 	
 	new-analysis-scope(s) = {| Renames, InvRenames, Declared, Properties, Messages: s |}
 
+  in-project-path(s|project-path) = {| ProjectPath:
+    rules(ProjectPath: _ -> project-path);
+    s
+  |} 
+
 rules // renaming
   
   new-scope-renames(s) = {| Renames: s |}
