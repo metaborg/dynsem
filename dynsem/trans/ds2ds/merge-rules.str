@@ -33,7 +33,7 @@ rules /* merge ovelapping rules */
 rules /* Merge rules by constructor */
 
   merge-rules-in-module:
-    Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules([merged-rule*, rule'*])])
+    Module(name, [signatures, Rules(rule*)]) -> Module($[[name]_unified], [signatures, Rules([merged-rule*, rule'*])])
     with
       cons-arity* := <collect-all(\ ConsDecl(cons, args, _, _) -> (cons, <length> args) \); make-set> signatures;
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name); make-set> signatures;
@@ -50,7 +50,7 @@ rules /* Merge rules by constructor */
 rules /* Merge rules by list */
 
   merge-listrules-in-module:
-  	Module(name, [imports, signatures, Rules(rule*)]) -> Module(name, [imports, signatures, Rules([nonlist-rule*, merged-list-rule*])])
+  	Module(name, [signatures, Rules(rule*)]) -> Module(name, [signatures, Rules([nonlist-rule*, merged-list-rule*])])
   	where
   		(list-rule*, nonlist-rule*) := <partition(where(get-rule-relation; get-relation-source; ?Cast(_, ListSort(_))))> rule*;
   		merged-list-rule* := <merge-list-rules> list-rule*
@@ -71,7 +71,7 @@ rules /* Merge rules by list */
 rules /* Merge lists by sorts in variable-based dispatch */
 
   merge-varrules-in-module:
-    Module(name, [imports, signatures, Rules(rule*)]) -> Module(name, [imports, signatures, Rules([nonvar-rule*, merged-var-rule*])])
+    Module(name, [signatures, Rules(rule*)]) -> Module(name, [signatures, Rules([nonvar-rule*, merged-var-rule*])])
     where
       (var-rule*, nonvar-rule*) := <partition(where(get-rule-relation; get-relation-source; ?Cast(Var(_), SimpleSort(_))))> rule*;
       merged-var-rule* := <merge-var-rules> var-rule*
