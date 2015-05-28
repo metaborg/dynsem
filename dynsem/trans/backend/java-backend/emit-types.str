@@ -36,5 +36,5 @@ rules /* generate interfaces for sort declarations */
         }
       ]|
     where
-      exec* := <debug(!"IN "); ds2java-execmethods(ds2java-throw-statement|rule*); debug(!"OUT ")> ty-def
+      exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> ty-def
  
