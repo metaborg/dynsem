@@ -32,15 +32,14 @@ rules
       x_classname := <ds2java-sort-classname> lty;
       specializer* := <mklist-specializer(|x_classname, ety) <+ ![]>;
       exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> lty;
-  		ety-def := <lookup-def(|Types())> ety;
-  		if sup-ty := <lookup-prop(|SuperType())> ety-def
+  		if
+  		  sup-ty := <lookup-def(|Types()); lookup-prop(|SuperType())> ety
   		then
   			x_supername := <lookup-def(|Types()); def-get-name; !ListSort(SimpleSort(<id>)); rw-type; ds2java-sort-classname> sup-ty;
   			class := <mklist-class(|x_classname, x_supername, ety, [specializer*, exec*])>
 			else
 				class := <mklist-class(|x_classname, ety, [specializer*, exec*])>
 			end
-  
   
 rules
 	
