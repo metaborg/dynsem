@@ -11,33 +11,30 @@ imports
   backend/java-backend/lib-ds2java
   backend/java-backend/utils
   backend/java-backend/analysis-extra
+  backend/java-backend/emit-execmethods
   backend/java-backend/emit-arrows
 
 rules /* generate interfaces for sort declarations */
   
-  ds2java-interfaces:
+  ds2java-abstracts:
     Module(_, section*) -> iface*
     where
       all-type-def*  := <lookup-def-all(|Types())>;
-      type-def* := <filter(where(lookup-prop(|SortKind()); (?LanguageSort() + ?InternalSort())))> all-type-def*;
-      iface* := <map(?(_, <id>); ds2java-interface)> type-def*
+      type-def* := <filter(where(lookup-prop(|SortKind()) => LanguageSort()))> all-type-def*;
+      rule* := <fetch-elem(?Rules(<id>))> section*;
+      iface* := <map(ds2java-abstracts(|rule*))> type-def*
   
-  ds2java-interface:
-    ty ->
+  ds2java-abstracts(|rule*):
+    ty-def ->
       compilation-unit |[
         package ~x:<AutoPackageName>;
         
         import org.metaborg.meta.interpreter.framework.*;
         
-        public interface ~x:<ds2java-sort-classname> ty extends ~x:supername {
+        public abstract class ~x:<def-get-name; ds2java-sort-classname> ty-def extends AbstractNode implements IMatchableNode {
           ~exec*
         }
       ]|
     where
-      ty-def := <lookup-def(|Types())> ty;
-      supername := <lookup-prop(|SuperType()); ds2java-sort-classname <+ !"IMatchableNode"> ty-def;
-      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-methodface)> ty
-
-
-
-
+      exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> ty-def
+ 

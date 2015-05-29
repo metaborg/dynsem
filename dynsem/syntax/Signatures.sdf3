@@ -17,8 +17,14 @@ context-free syntax // sort declarations
       <{SortDecl "\n"}*>>
   
   SortDecl.SortDecl = <<ID>>
-  SortDecl.InjDecl = [[ID] -> [ID]]
   
+context-free syntax // variable schemes
+  
+  SignatureSection.VariableSchemes = <
+    variables
+      <{VariableScheme "\n"}*>>
+  
+  VariableScheme.VariableScheme = [[ID] : [Type]]
 
 context-free syntax // constructor declarations
 
@@ -26,14 +32,23 @@ context-free syntax // constructor declarations
     constructors
       <{ConsDecl "\n"}*>>
 
-  ConsDecl.ConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
+  ConsDecl.NullaryConsDecl = [[ID] : [Type] [ConsAnnos]]
+  ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type] [ConsAnnos]]
+  
+  
+  ConsAnnos.NoAnnos = []
+
+  ConsAnnos.Annos = [{[ { ConsAnno "," }* ]}]
+  ConsAnno.ImplicitAnno = [implicit]
+
+  ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
   Type = [[MapType]]
   
   MapType.MapSort = [Map<[Type],[Type]>]
-  
+
 template options
 
   tokenize: "<("
@@ -41,24 +56,15 @@ template options
 context-free syntax // semantic component declarations
 
   SignatureSection.SemanticComponents = <
-    semantic-components
+    semantic components
       <{SemanticCompDecl "\n"}*>>
   
   SemanticCompDecl.SemanticComponent = [[ID] -> [MapType]]
 
-context-free syntax // internal sort declarations
-  
-  SignatureSection.InternalSorts = <
-    internal-sorts
-      <{InternalSortDecl "\n"}*>>
-  
-  InternalSortDecl.InternalSortDecl = <<ID>>
-  InternalSortDecl.InternalInjDecl = [[ID] -> [ID]]
-
 context-free syntax // native data types
 
   SignatureSection.NativeDataTypes = <
-    native-datatypes
+    native datatypes
       <{NativeTypeDecl "\n"}*>>
   
   JSNIPPET = <<STRING>>
@@ -78,26 +84,20 @@ context-free syntax // native data types
 context-free syntax // native operator declarations
 
   SignatureSection.NativeOperators = <
-    native-operators
+    native operators
       <{NativeOpDecl "\n"}*>>
   
-  NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}*] -> [Type]]
-
-context-free syntax // internal constructor declarations
-
-  SignatureSection.InternalConstructors = <
-    internal-constructors
-      <{InternalConsDecl "\n"}*>>
-
-  InternalConsDecl.InternalConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
+  NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  NativeOpDecl.NullaryNativeOpDecl = [[ID] : [Type]]
 
 context-free syntax // internal constructor declarations
 
   SignatureSection.NativeConstructors = <
-    native-constructors
+    native constructors
       <{NativeConsDecl "\n"}*>>
 
-  NativeConsDecl.NativeConsDecl = [[ID] : [{Type " * "}*] -> [Type]]
+  NativeConsDecl.NativeConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  NativeConsDecl.NullaryNativeConsDecl = [[ID] : [Type]]
 
 context-free syntax
   
@@ -106,9 +106,7 @@ context-free syntax
       <{DeclaredArrow "\n"}*>>
   
   DeclaredArrow = ArrowDeclaration
-  DeclaredArrow = ArrowTemplateDeclaration
   
   ArrowDeclaration.ArrowDecl = [[Type] -[ID]-> [Type]]
   ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]
 
-  ArrowTemplateDeclaration.ArrowTemplDecl = [forall [{ID " "}+], [Type] -[ID]([ID] -> [ID])-> [Type]]

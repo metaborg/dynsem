@@ -12,24 +12,27 @@ signature
   constructors
     Sorts    : List(SortDecl) -> SignatureSection
     SortDecl : ID -> SortDecl
-    InjDecl  : ID * ID -> SortDecl
 
   constructors
-    Constructors : List(ConsDecl) -> SignatureSection
-    ConsDecl     : ID * List(Type) * Type -> ConsDecl
-    SimpleSort   : ID -> Type
-    ListSort     : Type -> Type
-                 : MapType -> Type
-    MapSort      : Type * Type -> MapType
+    VariableSchemes : List(VariableScheme) -> SignatureSection
+    VariableScheme  : ID * Type -> VariableScheme
+
+  constructors
+    Constructors    : List(ConsDecl) -> SignatureSection
+    NullaryConsDecl : ID * Type * ConsAnnos -> ConsDecl
+    ConsDecl        : ID * List(Type) * Type * ConsAnnos -> ConsDecl
+    NoAnnos         : ConsAnnos
+    Annos           : List(ConsAnno) -> ConsAnnos
+    ImplicitAnno    : ConsAnno
+    FunDecl         : ID * List(Type) * Type -> ConsDecl
+    SimpleSort      : ID -> Type
+    ListSort        : Type -> Type
+                    : MapType -> Type
+    MapSort         : Type * Type -> MapType
 
   constructors
     SemanticComponents : List(SemanticCompDecl) -> SignatureSection
     SemanticComponent  : ID * MapType -> SemanticCompDecl
-
-  constructors
-    InternalSorts    : List(InternalSortDecl) -> SignatureSection
-    InternalSortDecl : ID -> InternalSortDecl
-    InternalInjDecl  : ID * ID -> InternalSortDecl
 
   constructors
     NativeDataTypes         : List(NativeTypeDecl) -> SignatureSection
@@ -40,21 +43,17 @@ signature
     NativeNoArgFunctionDecl : ID * Type -> NativeFunctionDecl
 
   constructors
-    NativeOperators : List(NativeOpDecl) -> SignatureSection
-    NativeOpDecl    : ID * List(Type) * Type -> NativeOpDecl
+    NativeOperators     : List(NativeOpDecl) -> SignatureSection
+    NativeOpDecl        : ID * List(Type) * Type -> NativeOpDecl
+    NullaryNativeOpDecl : ID * Type -> NativeOpDecl
 
   constructors
-    InternalConstructors : List(InternalConsDecl) -> SignatureSection
-    InternalConsDecl     : ID * List(Type) * Type -> InternalConsDecl
-
-  constructors
-    NativeConstructors : List(NativeConsDecl) -> SignatureSection
-    NativeConsDecl     : ID * List(Type) * Type -> NativeConsDecl
+    NativeConstructors    : List(NativeConsDecl) -> SignatureSection
+    NativeConsDecl        : ID * List(Type) * Type -> NativeConsDecl
+    NullaryNativeConsDecl : ID * Type -> NativeConsDecl
 
   constructors
     ArrowDeclarations : List(DeclaredArrow) -> SignatureSection
                       : ArrowDeclaration -> DeclaredArrow
-                      : ArrowTemplateDeclaration -> DeclaredArrow
     ArrowDecl         : Type * ID * Type -> ArrowDeclaration
     DefaultArrowDecl  : Type * Type -> ArrowDeclaration
-    ArrowTemplDecl    : List(ID) * Type * ID * ID * ID * Type -> ArrowTemplateDeclaration

@@ -7,27 +7,31 @@ imports
 imports
   analysis/constructors
   analysis/lib-analysis
+  analysis/query
 
 imports
   backend/java-backend/emit-execmethods
   backend/java-backend/lib-ds2java
   backend/java-backend/utils
   backend/java-backend/emit-specializercode
-
+  
 rules
   
   ds2java-listclasses:
-    Module(_, section*) -> <make-set; map(ds2java-listclass(|rule*))> ltys*
+    Module(_, section*) -> <make-set; map(ds2java-listclass(|rule*))> lty*
     where
       rule* := <fetch-elem(?Rules(<id>))> section*;
-      ltys* := <lookup-def-all(|Types()); filter(not(lookup-prop(|SortKind()) => SystemSort())); map(\ (_, ty) -> ListType(ty) \)>
+      lty-1* := <collect-all(?ListTail(_, _); type-of); filter(where(ListType(not(lookup-def(|Types()); lookup-prop(|SortKind()) => SystemSort()))))> section*;
+      lty-2* := <collect-all(?VarRef(_); type-of; ?ListType(_)); filter(where(ListType(not(lookup-def(|Types()); lookup-prop(|SortKind()) => SystemSort()))))> section*;
+      lty-3* := <collect-all(?ListSort(_); rw-type; ?ListType(_)); filter(where(ListType(not(lookup-def(|Types()); lookup-prop(|SortKind()) => SystemSort()))))> section*;
+      lty* := <make-set; filter(not(?ListType(ALPHATYPE())))> [lty-1*, lty-2*, lty-3*]
   
   ds2java-listclass(|rule*):
   	lty@ListType(ety) -> class
     where
       x_classname := <ds2java-sort-classname> lty;
       specializer* := <mklist-specializer(|x_classname, ety) <+ ![]>;
-      exec* := <ds2java-execmethods(|rule*)> lty;
+      exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> lty;
   		ety-def := <lookup-def(|Types())> ety;
   		if sup-ty := <lookup-prop(|SuperType())> ety-def; <not(lookup-prop(|SortKind()); ?SemanticCompSort())> ety-def
   		then

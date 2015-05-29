@@ -3,6 +3,7 @@ module src-gen/pp/Signatures-pp
 imports
   libstratego-gpp
   runtime/tmpl/pp
+  libstratego-sglr
   src-gen/signatures/Signatures-sig
 
 
@@ -35,6 +36,9 @@ strategies
   is-ModuleSection =
     fail
 
+  prettyprint-ModuleSection :
+    amb([h|hs]) -> <prettyprint-ModuleSection> h
+
 
 strategies
   prettyprint-example =
@@ -66,28 +70,72 @@ strategies
   is-SortDecl =
     ?SortDecl(_)
 
-  prettyprint-SortDecl :
-    InjDecl(t1__, t2__) -> [ H(
-                               [SOpt(HS(), "0")]
-                             , [t1__', S(" -> "), t2__']
-                             )
-                           ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
-
-  is-SortDecl =
-    ?InjDecl(_, _)
-
   is-SignatureSection =
     fail
 
   is-SortDecl =
     fail
 
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-SortDecl :
+    amb([h|hs]) -> <prettyprint-SortDecl> h
+
 
 strategies
   prettyprint-example =
     prettyprint-SignatureSection
+
+  prettyprint-example =
+    prettyprint-VariableScheme
+
+  prettyprint-SignatureSection :
+    VariableSchemes(t1__) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("variables")]
+                               )
+                             , t1__'
+                             ]
+    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-VariableScheme)> t1__]
+
+  is-SignatureSection =
+    ?VariableSchemes(_)
+
+  prettyprint-VariableScheme :
+    VariableScheme(t1__, t2__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [t1__', S(" : "), t2__']
+                                    )
+                                  ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-VariableScheme =
+    ?VariableScheme(_, _)
+
+  is-SignatureSection =
+    fail
+
+  is-VariableScheme =
+    fail
+
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-VariableScheme :
+    amb([h|hs]) -> <prettyprint-VariableScheme> h
+
+
+strategies
+  prettyprint-example =
+    prettyprint-SignatureSection
+
+  prettyprint-example =
+    prettyprint-ConsAnnos
+
+  prettyprint-example =
+    prettyprint-ConsAnno
 
   prettyprint-example =
     prettyprint-ConsDecl
@@ -111,22 +159,95 @@ strategies
     ?Constructors(_)
 
   prettyprint-ConsDecl :
-    ConsDecl(t1__, t2__, t3__) -> [ H(
-                                      [SOpt(HS(), "0")]
-                                    , [ t1__'
-                                      , S(" : ")
-                                      , t2__'
-                                      , S(" -> ")
-                                      , t3__'
-                                      ]
-                                    )
-                                  ]
+    NullaryConsDecl(t1__, t2__, t3__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [ t1__'
+                                             , S(" : ")
+                                             , t2__'
+                                             , S(" ")
+                                             , t3__'
+                                             ]
+                                           )
+                                         ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+    with t3__' := <pp-one-Z(prettyprint-ConsAnnos)> t3__
+
+  is-ConsDecl =
+    ?NullaryConsDecl(_, _, _)
+
+  prettyprint-ConsDecl :
+    ConsDecl(t1__, t2__, t3__, t4__) -> [ H(
+                                            [SOpt(HS(), "0")]
+                                          , [ t1__'
+                                            , S(" : ")
+                                            , t2__'
+                                            , S(" -> ")
+                                            , t3__'
+                                            , S(" ")
+                                            , t4__'
+                                            ]
+                                          )
+                                        ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-H-list(prettyprint-Type|" * ")> t2__
+    with t3__' := <pp-one-Z(prettyprint-Type)> t3__
+    with t4__' := <pp-one-Z(prettyprint-ConsAnnos)> t4__
+
+  is-ConsDecl =
+    ?ConsDecl(_, _, _, _)
+
+  prettyprint-ConsAnnos :
+    NoAnnos() -> [ H(
+                     []
+                   , [S("")]
+                   )
+                 ]
+
+  is-ConsAnnos =
+    ?NoAnnos()
+
+  prettyprint-ConsAnnos :
+    Annos(t1__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [ S("{")
+                       , t1__'
+                       , S("}")
+                       ]
+                     )
+                   ]
+    with t1__' := <pp-H-list(prettyprint-ConsAnno|",")> t1__
+
+  is-ConsAnnos =
+    ?Annos(_)
+
+  prettyprint-ConsAnno :
+    ImplicitAnno() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("implicit")]
+                        )
+                      ]
+
+  is-ConsAnno =
+    ?ImplicitAnno()
+
+  prettyprint-ConsDecl :
+    FunDecl(t1__, t2__, t3__) -> [ H(
+                                     [SOpt(HS(), "0")]
+                                   , [ t1__'
+                                     , S(" : ")
+                                     , t2__'
+                                     , S(" --> ")
+                                     , t3__'
+                                     ]
+                                   )
+                                 ]
     with t1__' := <pp-one-Z(prettyprint-ID)> t1__
     with t2__' := <pp-H-list(prettyprint-Type|" * ")> t2__
     with t3__' := <pp-one-Z(prettyprint-Type)> t3__
 
   is-ConsDecl =
-    ?ConsDecl(_, _, _)
+    ?FunDecl(_, _, _)
 
   prettyprint-Type :
     SimpleSort(t1__) -> [ H(
@@ -182,6 +303,12 @@ strategies
   is-SignatureSection =
     fail
 
+  is-ConsAnnos =
+    fail
+
+  is-ConsAnno =
+    fail
+
   is-ConsDecl =
     fail
 
@@ -190,6 +317,24 @@ strategies
 
   is-MapType =
     fail
+
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-ConsAnnos :
+    amb([h|hs]) -> <prettyprint-ConsAnnos> h
+
+  prettyprint-ConsAnno :
+    amb([h|hs]) -> <prettyprint-ConsAnno> h
+
+  prettyprint-ConsDecl :
+    amb([h|hs]) -> <prettyprint-ConsDecl> h
+
+  prettyprint-Type :
+    amb([h|hs]) -> <prettyprint-Type> h
+
+  prettyprint-MapType :
+    amb([h|hs]) -> <prettyprint-MapType> h
 
 
 strategies
@@ -202,7 +347,7 @@ strategies
   prettyprint-SignatureSection :
     SemanticComponents(t1__) -> [ H(
                                     [SOpt(HS(), "0")]
-                                  , [S("semantic-components")]
+                                  , [S("semantic components")]
                                   )
                                 , t1__'
                                 ]
@@ -229,54 +374,11 @@ strategies
   is-SemanticCompDecl =
     fail
 
-
-strategies
-  prettyprint-example =
-    prettyprint-SignatureSection
-
-  prettyprint-example =
-    prettyprint-InternalSortDecl
-
   prettyprint-SignatureSection :
-    InternalSorts(t1__) -> [ H(
-                               [SOpt(HS(), "0")]
-                             , [S("internal-sorts")]
-                             )
-                           , t1__'
-                           ]
-    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-InternalSortDecl)> t1__]
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
 
-  is-SignatureSection =
-    ?InternalSorts(_)
-
-  prettyprint-InternalSortDecl :
-    InternalSortDecl(t1__) -> [ H(
-                                  [SOpt(HS(), "0")]
-                                , [t1__']
-                                )
-                              ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-
-  is-InternalSortDecl =
-    ?InternalSortDecl(_)
-
-  prettyprint-InternalSortDecl :
-    InternalInjDecl(t1__, t2__) -> [ H(
-                                       [SOpt(HS(), "0")]
-                                     , [t1__', S(" -> "), t2__']
-                                     )
-                                   ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
-
-  is-InternalSortDecl =
-    ?InternalInjDecl(_, _)
-
-  is-SignatureSection =
-    fail
-
-  is-InternalSortDecl =
-    fail
+  prettyprint-SemanticCompDecl :
+    amb([h|hs]) -> <prettyprint-SemanticCompDecl> h
 
 
 strategies
@@ -295,7 +397,7 @@ strategies
   prettyprint-SignatureSection :
     NativeDataTypes(t1__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [S("native-datatypes")]
+                               , [S("native datatypes")]
                                )
                              , t1__'
                              ]
@@ -396,6 +498,18 @@ strategies
   is-NativeFunctionDecl =
     fail
 
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-JSNIPPET :
+    amb([h|hs]) -> <prettyprint-JSNIPPET> h
+
+  prettyprint-NativeTypeDecl :
+    amb([h|hs]) -> <prettyprint-NativeTypeDecl> h
+
+  prettyprint-NativeFunctionDecl :
+    amb([h|hs]) -> <prettyprint-NativeFunctionDecl> h
+
 
 strategies
   prettyprint-example =
@@ -407,7 +521,7 @@ strategies
   prettyprint-SignatureSection :
     NativeOperators(t1__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [S("native-operators")]
+                               , [S("native operators")]
                                )
                              , t1__'
                              ]
@@ -434,55 +548,29 @@ strategies
   is-NativeOpDecl =
     ?NativeOpDecl(_, _, _)
 
+  prettyprint-NativeOpDecl :
+    NullaryNativeOpDecl(t1__, t2__) -> [ H(
+                                           [SOpt(HS(), "0")]
+                                         , [t1__', S(" : "), t2__']
+                                         )
+                                       ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-NativeOpDecl =
+    ?NullaryNativeOpDecl(_, _)
+
   is-SignatureSection =
     fail
 
   is-NativeOpDecl =
     fail
 
-
-strategies
-  prettyprint-example =
-    prettyprint-SignatureSection
-
-  prettyprint-example =
-    prettyprint-InternalConsDecl
-
   prettyprint-SignatureSection :
-    InternalConstructors(t1__) -> [ H(
-                                      [SOpt(HS(), "0")]
-                                    , [S("internal-constructors")]
-                                    )
-                                  , t1__'
-                                  ]
-    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-InternalConsDecl)> t1__]
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
 
-  is-SignatureSection =
-    ?InternalConstructors(_)
-
-  prettyprint-InternalConsDecl :
-    InternalConsDecl(t1__, t2__, t3__) -> [ H(
-                                              [SOpt(HS(), "0")]
-                                            , [ t1__'
-                                              , S(" : ")
-                                              , t2__'
-                                              , S(" -> ")
-                                              , t3__'
-                                              ]
-                                            )
-                                          ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-H-list(prettyprint-Type|" * ")> t2__
-    with t3__' := <pp-one-Z(prettyprint-Type)> t3__
-
-  is-InternalConsDecl =
-    ?InternalConsDecl(_, _, _)
-
-  is-SignatureSection =
-    fail
-
-  is-InternalConsDecl =
-    fail
+  prettyprint-NativeOpDecl :
+    amb([h|hs]) -> <prettyprint-NativeOpDecl> h
 
 
 strategies
@@ -495,7 +583,7 @@ strategies
   prettyprint-SignatureSection :
     NativeConstructors(t1__) -> [ H(
                                     [SOpt(HS(), "0")]
-                                  , [S("native-constructors")]
+                                  , [S("native constructors")]
                                   )
                                 , t1__'
                                 ]
@@ -522,11 +610,29 @@ strategies
   is-NativeConsDecl =
     ?NativeConsDecl(_, _, _)
 
+  prettyprint-NativeConsDecl :
+    NullaryNativeConsDecl(t1__, t2__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [t1__', S(" : "), t2__']
+                                           )
+                                         ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-NativeConsDecl =
+    ?NullaryNativeConsDecl(_, _)
+
   is-SignatureSection =
     fail
 
   is-NativeConsDecl =
     fail
+
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-NativeConsDecl :
+    amb([h|hs]) -> <prettyprint-NativeConsDecl> h
 
 
 strategies
@@ -538,9 +644,6 @@ strategies
 
   prettyprint-example =
     prettyprint-ArrowDeclaration
-
-  prettyprint-example =
-    prettyprint-ArrowTemplateDeclaration
 
   prettyprint-SignatureSection :
     ArrowDeclarations(t1__) -> [ H(
@@ -562,15 +665,6 @@ strategies
             ]
     where not(is-DeclaredArrow)
     where t1__' := <pp-one-Z(prettyprint-ArrowDeclaration)> t1__
-
-  prettyprint-DeclaredArrow :
-    t1__ -> [ H(
-                [SOpt(HS(), "0")]
-              , [t1__']
-              )
-            ]
-    where not(is-DeclaredArrow)
-    where t1__' := <pp-one-Z(prettyprint-ArrowTemplateDeclaration)> t1__
 
   prettyprint-ArrowDeclaration :
     ArrowDecl(t1__, t2__, t3__) -> [ H(
@@ -602,34 +696,6 @@ strategies
   is-ArrowDeclaration =
     ?DefaultArrowDecl(_, _)
 
-  prettyprint-ArrowTemplateDeclaration :
-    ArrowTemplDecl(t1__, t2__, t3__, t4__, t5__, t6__) -> [ H(
-                                                              [SOpt(HS(), "0")]
-                                                            , [ S("forall ")
-                                                              , t1__'
-                                                              , S(", ")
-                                                              , t2__'
-                                                              , S(" -")
-                                                              , t3__'
-                                                              , S("(")
-                                                              , t4__'
-                                                              , S(" -> ")
-                                                              , t5__'
-                                                              , S(")-> ")
-                                                              , t6__'
-                                                              ]
-                                                            )
-                                                          ]
-    with t1__' := <pp-H-list(prettyprint-ID|" ")> t1__
-    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
-    with t3__' := <pp-one-Z(prettyprint-ID)> t3__
-    with t4__' := <pp-one-Z(prettyprint-ID)> t4__
-    with t5__' := <pp-one-Z(prettyprint-ID)> t5__
-    with t6__' := <pp-one-Z(prettyprint-Type)> t6__
-
-  is-ArrowTemplateDeclaration =
-    ?ArrowTemplDecl(_, _, _, _, _, _)
-
   is-SignatureSection =
     fail
 
@@ -639,5 +705,11 @@ strategies
   is-ArrowDeclaration =
     fail
 
-  is-ArrowTemplateDeclaration =
-    fail
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-DeclaredArrow :
+    amb([h|hs]) -> <prettyprint-DeclaredArrow> h
+
+  prettyprint-ArrowDeclaration :
+    amb([h|hs]) -> <prettyprint-ArrowDeclaration> h

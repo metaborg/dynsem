@@ -15,12 +15,14 @@ imports
 	ds2ds/sugar
 	ds2ds/factorize
 	ds2ds/explicate
-	ds2ds/resolve-includes
+	analysis/resolve-includes
 	ds2ds/merge-rules
 	ds2ds/fuse-sections
 	ds2ds/copy-propagation
 	ds2ds/constant-propagation
-	ds2ds/expand-reductions
+	ds2ds/expand-implicits
+	ds2ds/desugar-varschemes
+	ds2ds/extra-typeannos
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
@@ -39,14 +41,13 @@ rules // Analysis
     (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
 		with
 		  editor-init;
-		  ast' := <resolve-includes(|path, project-path); desugar-top> ast;
-			<m-in-analysis(
+			<in-project-path(m-in-analysis(
 				where(
 		  		get-msgs(mkmsg|Error()) => error*;
 		  		get-msgs(mkmsg|Warning()) => warning*;
 		  		get-msgs(mkmsg|Note()) => note*
 		  	)
-			)> ast' => analyzed-ast
+			)|project-path)> ast => analyzed-ast
 	
 	editor-show-analyzed:
 		(selected, position, ast, path, project-path) -> (filename, analyzed-ast)
@@ -125,78 +126,160 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
-  expand-reds-editor:
+  add-extra-typeannos-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      filename := <guarantee-extension(|"expreds.ds")> path;
-      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; expand-reductions-module; sugar-all; pp-debug> ast
+      filename := <guarantee-extension(|"typeannos.ds")> path;
+      in-project-path(
+        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; add-extra-typeannos-module; sugar-all; pp-debug> ast
+      |project-path)
+
+  expand-implicits-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"explimpls.ds")> path;
+      in-project-path(
+        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; expand-implicits-module; sugar-all; pp-debug> ast
+      |project-path)
+
+  desugar-varschemes-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"varschemes.ds")> path;
+      in-project-path(
+        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; desugar-varschemes-module; sugar-all; pp-debug> ast
+      |project-path)
 
   explicate-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; explicate-module; sugar-all; pp-debug> ast
+      in-project-path(
+        result   := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; explicate-module; sugar-all; pp-debug> ast
+      |project-path)
 
   factorize-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"factorized.ds")> path;
-      result := <resolve-includes(|path, project-path); desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
+      in-project-path(
+        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
+      |project-path)
 
   merge-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"merged.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; fuse-sections; merge-rules-in-module-top; sugar-all; pp-debug> ast
+      in-project-path(
+        result   := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; merge-rules-in-module-top; sugar-all; pp-debug> ast
+      |project-path)
 
   copy-propagation-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"copyprop.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; copy-propagation-module; sugar-all; pp-debug> ast
+      in-project-path(
+        result   := <resolve-includes(fatal-err-missing-import); desugar-top; copy-propagation-module; sugar-all; pp-debug> ast
+      |project-path)
 
   constant-propagation-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"constprop.ds")> path;
-      result   := <resolve-includes(|path, project-path); desugar-top; constant-propagation-module; sugar-all; pp-debug> ast
+      in-project-path(
+        result   := <resolve-includes(fatal-err-missing-import); desugar-top; constant-propagation-module; sugar-all; pp-debug> ast
+      |project-path)
 
   all-to-java-editor:
     (_, position, ast, path, project-path) -> None()
     with
-      init-options(|path, project-path);
-      <log-timed(
-        log-timed(
-          resolve-includes(|path, project-path) | "Import resolutions"
-        );
-        log-timed(
-          desugar-top; fuse-sections | "Desugaring"
-        );
-        log-timed(
-          factorize-module | "Factorization 1/2"
-        );
-        log-timed(
-          expand-reductions-module | "Reduction expansion"
-        );
-        log-timed(
-          factorize-module | "Factorization 2/2"
-        );
-        log-timed(
-          explicate-module | "Explication"
-        );
-        log-timed(
-          merge-rules-in-module-top  | "Rule merging"
-        );
-        log-timed(
-          copy-propagation-module | "Copy propagation"
-        );
-        log-timed(
-          constant-propagation-module | "Constant propagation"
-        );
-        log-timed(
-          ds2java | "Interpreter generation"
-        )
-      | "Total")> ast
+      in-project-path(
+        init-options(|path, project-path);
+	      <log-timed(
+	        log-timed(
+	          resolve-includes(fatal-err-missing-import) | "Import resolutions"
+	        );
+	        log-timed(
+	          desugar-top; fuse-sections | "Desugaring"
+	        );
+	        log-timed(
+	          desugar-varschemes-module | "Desugaring variable schemes"
+	        );
+	        log-timed(
+	          add-extra-typeannos-module | "Adding extra typeannos"
+	        );
+	        log-timed(
+	          factorize-module | "Factorization 1/2"
+	        );
+	        log-timed(
+	          expand-implicits-module | "Implicits expansion"
+	        );
+	        log-timed(
+	          factorize-module | "Factorization 2/2"
+	        );
+	        log-timed(
+	          explicate-module | "Explication"
+	        );
+	        log-timed(
+	          merge-rules-in-module-top  | "Rule merging"
+	        );
+	        log-timed(
+	          copy-propagation-module | "Copy propagation"
+	        );
+	        log-timed(
+	          constant-propagation-module | "Constant propagation"
+	        );
+	        log-timed(
+	          ds2java | "Interpreter generation"
+	        )
+	      | "Total")> ast
+	    |project-path)
+      
+  all-to-core-editor:
+    (_, position, ast, path, project-path) -> (filename, result)
+    with
+      in-project-path(
+	      init-options(|path, project-path);
+	      <log-timed(
+	        log-timed(
+	          resolve-includes(fatal-err-missing-import) | "Processing imports"
+	        );
+	        log-timed(
+	          desugar-top; fuse-sections | "Desugaring"
+	        );
+	        log-timed(
+	          desugar-varschemes-module | "Desugaring variable schemes"
+	        );
+	        log-timed(
+	          add-extra-typeannos-module | "Adding extra typeannos"
+	        );
+	        log-timed(
+	          factorize-module | "Factorization 1/2"
+	        );
+	        log-timed(
+	          expand-implicits-module | "Implicits expansion"
+	        );
+	        log-timed(
+	          factorize-module | "Factorization 2/2"
+	        );
+	        log-timed(
+	          explicate-module | "Explication"
+	        );
+	        log-timed(
+	          merge-rules-in-module-top  | "Rule merging"
+	        );
+	        log-timed(
+	          copy-propagation-module | "Copy propagation"
+	        );
+	        log-timed(
+	          constant-propagation-module | "Constant propagation"
+	        );
+	        log-timed(
+	          sugar-all; pp-debug | "Pretty Printing"
+	        )
+	      | "Total")> ast => result
+      |project-path);
+      filename := <guarantee-extension(|"core.ds")> path
       
   // format rules
   format-editor:

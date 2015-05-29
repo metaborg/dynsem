@@ -9,18 +9,27 @@ exports
     "rules" Rule*                               -> ModuleSection {cons("Rules")}
     "strict" ID {INT ","}+ "/" INT              -> Rule          {cons("Strict")}
     "seqstrict" ID {INT ","}+ "/" INT           -> Rule          {cons("Seqstrict")}
-    Formula                                     -> Rule          {cons("Axiom")}
-    {Premise ","}+ INFER Relation               -> Rule          {cons("Rule")}
-    Relation "where" {Premise ","}+             -> Rule          {cons("RuleW")}
+    Formula "."                                 -> Rule          {cons("Axiom")}
+    {Premise ";"}+ INFER Relation               -> Rule          {cons("Rule")}
+    Relation "where" {Premise ";"}+ "."         -> Rule          {cons("RuleW")}
     Formula                                     -> Premise       {cons("Formula")}
     "all-fail"                                  -> Premise       {cons("AllFail")}
-    "{" {Premise ","}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
+    "{" {Premise ";"}* "}"                      -> PremisesBlock {cons("PremiseBlock")}
     Premise "<" PremisesBlock "+" PremisesBlock -> Premise       {cons("MergePoint")}
     "try" PremisesBlock "or" PremisesBlock      -> Premise       {cons("TryOr")}
+    "_"                                         -> ID            {reject}
     "imports"                                   -> ID            {reject}
     "signature"                                 -> ID            {reject}
     "constructors"                              -> ID            {reject}
     "sorts"                                     -> ID            {reject}
+    "native"                                    -> ID            {reject}
+    "operators"                                 -> ID            {reject}
+    "datatypes"                                 -> ID            {reject}
+    "semantic"                                  -> ID            {reject}
+    "components"                                -> ID            {reject}
+    "implicit"                                  -> ID            {reject}
+    "List"                                      -> ID            {reject}
+    "Map"                                       -> ID            {reject}
     "arrows"                                    -> ID            {reject}
     "rules"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}
@@ -38,28 +47,27 @@ exports
     CONTENTCOMPLETE -> ID            {cons("COMPLETION-ID")}
 
   context-free syntax
-    Term "=>" Term                              -> Formula   {cons("Match")}
-    Term "=!=>" Term                            -> Formula   {cons("NMatch")}
-    Term "==" Term                              -> Formula   {cons("TermEq")}
-    Term "!=" Term                              -> Formula   {cons("TermNeq")}
-    Var "<?" Type                               -> Formula   {cons("TypeCheck")}
-    Var "<:" Type                               -> Formula   {cons("TypeCast")}
-    Relation                                    -> Formula   
-    Reads Source Rel Target                     -> Relation  {cons("Relation")}
-    "value" "(" Term ")"                        -> Formula   {cons("IsValue")}
-                                                -> Reads     {cons("NoReads")}
-    LabelComp+ "|-"                             -> Reads     {cons("Reads")}
-    Term                                        -> Source    {cons("Source")}
-    Term "::" LabelComp+                        -> Source    {cons("Source")}
-    Term                                        -> Target    {cons("Target")}
-    Term "::" LabelComp+ "."                    -> Target    {cons("Target")}
-    "-->"                                       -> Rel       {cons("Dynamic")}
-    "-" ID "->"                                 -> Rel       {cons("NamedDynamic")}
-    "-" ID "(" ID ")" "->"                      -> Rel       {cons("NamedDynamicParametric")}
-    "-" {LabelComp ","}+ "->"                   -> Rel       {cons("DynamicEmitted")}
-    "-" {LabelComp ","}+ "-" ID "->"            -> Rel       {cons("NamedDynamicEmitted")}
-    "-" {LabelComp ","}+ "-" ID "(" ID ")" "->" -> Rel       {cons("NamedDynamicEmittedParametric")}
-    Type Term                                   -> LabelComp {cons("LabelComp")}
+    Term "=>" Term                   -> Formula   {cons("Match")}
+    Term "=!=>" Term                 -> Formula   {cons("NMatch")}
+    Term "==" Term                   -> Formula   {cons("TermEq")}
+    Term "!=" Term                   -> Formula   {cons("TermNeq")}
+    Var "<?" Type                    -> Formula   {cons("TypeCheck")}
+    Var "<:" Type                    -> Formula   {cons("TypeCast")}
+    Relation                         -> Formula   
+    Reads Source Rel Target          -> Relation  {cons("Relation")}
+    "value" "(" Term ")"             -> Formula   {cons("IsValue")}
+                                     -> Reads     {cons("NoReads")}
+    {LabelComp ","}+ "|-"            -> Reads     {cons("Reads")}
+    Term                             -> Source    {cons("Source")}
+    Term "::" {LabelComp ","}+       -> Source    {cons("Source")}
+    Term                             -> Target    {cons("Target")}
+    Term "::" {LabelComp ","}+       -> Target    {cons("Target")}
+    "-->"                            -> Rel       {cons("Dynamic")}
+    "-" ID "->"                      -> Rel       {cons("NamedDynamic")}
+    "-" {LabelComp ","}+ "-->"       -> Rel       {cons("DynamicEmitted")}
+    "-" {LabelComp ","}+ "-" ID "->" -> Rel       {cons("NamedDynamicEmitted")}
+    Type Term                        -> LabelComp {cons("LabelComp")}
+    Var                              -> LabelComp {cons("VarLabelComp")}
 
   context-free syntax
     CONTENTCOMPLETE -> Relation  {cons("COMPLETION-Relation")}

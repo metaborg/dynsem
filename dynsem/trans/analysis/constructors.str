@@ -7,6 +7,7 @@ signature
   constructors
     Types: Namespace
     Vars: Namespace
+    VarSchemes: Namespace
     Constructors: Namespace
     Arrows: Namespace
     NativeDTFun: String -> Namespace
@@ -46,14 +47,13 @@ signature
   constructors
     SortKind: Property
     LanguageSort: SortKind
-  	InternalSort: SortKind
   	SemanticCompSort: SortKind
   	NativeSort: SortKind
   	SystemSort: SortKind
   	
   	ConsKind: Property
   	LanguageCons: ConsKind
-  	InternalCons: ConsKind
+  	ImplicitCons: ConsKind
   	NativeCons: ConsKind
   	NativeOpCons: ConsKind
 
