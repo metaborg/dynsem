@@ -22,19 +22,19 @@ rules /* generate interfaces for sort declarations */
       all-type-def*  := <lookup-def-all(|Types())>;
       type-def* := <filter(where(lookup-prop(|SortKind()) => LanguageSort()))> all-type-def*;
       rule* := <fetch-elem(?Rules(<id>))> section*;
-      iface* := <map(?(_, <id>); ds2java-abstracts(|rule*))> type-def*
+      iface* := <map(ds2java-abstracts(|rule*))> type-def*
   
   ds2java-abstracts(|rule*):
-    ty ->
+    ty-def ->
       compilation-unit |[
         package ~x:<AutoPackageName>;
         
         import org.metaborg.meta.interpreter.framework.*;
         
-        public abstract class ~x:<ds2java-sort-classname> ty extends AbstractNode implements IMatchableNode {
+        public abstract class ~x:<def-get-name; ds2java-sort-classname> ty-def extends AbstractNode implements IMatchableNode {
           ~exec*
         }
       ]|
     where
-      exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> ty
+      exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> ty-def
  

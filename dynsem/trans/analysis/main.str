@@ -1,22 +1,26 @@
 module analysis/main
 
 imports
+	ds2ds/sugar
 	analysis/rename
 	analysis/lib-analysis
 	analysis/analysis-signatures
 	analysis/analysis-rules
 	analysis/mark-references
 	analysis/query
+	analysis/resolve-includes
 	include/ds
   lib-ds
 
 rules
 	
 	analyze =
+	  resolve-includes(err-msg-missing-import);
+	  desugar-top;
 		log-timed(mark-vars | "Marking variable def sites");
 		log-timed(rename-all | "Renaming variables");
 		log-timed(store-all  | "Storing all definitions")
-
+  
   m-in-analysis(s) = new-analysis-scope(new-type-transitions-scope(
   	analyze;
   	s

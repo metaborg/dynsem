@@ -1,0 +1,44 @@
+module ds2ds/resolve-includes
+
+imports
+  include/ds
+  editor-common.generated
+  ds
+  
+imports
+  analysis/lib-analysis
+
+rules
+  
+  fatal-err-missing-import(|t, file) = <fatal-err(|"File not found: ")> file
+  
+  err-msg-missing-import(|t, file) = add-msg(|Error(), t, $[Import cannot be resolved])
+  
+  resolve-includes(report-err):
+    Module(name, section*) -> Module(name, section'*)
+    where
+      (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
+      section'* := <include-imports(report-err|<ds-sources-and-includes>, [])> (import*, section-noimports*)
+
+  include-imports(report-err|include-dirs, imported*):
+    ([], section*) -> section*
+
+  include-imports(report-err|include-dirs, imported*):
+    ([Import(i) | ixs*], section*) -> <include-imports(report-err|include-dirs, [i, imported*])> (ixs*, section*)
+    where
+      <fetch-elem(?i)> imported*
+
+  include-imports(report-err|include-dirs, imported*):
+  	([Import(i) | ixs*], section*) -> <include-imports(report-err|include-dirs, [i, imported*])> ([ixs*, new-import*], [section* | imported-section-noimports*])
+  	where
+  	  <not(fetch-elem(?i))> imported*
+    where
+  		file := <resolve-in-path(|include-dirs)> $[[i].ds];
+  		Module(_, imported-section*) := <parse-ds-file-or-err(report-err|i)> file;
+  		(new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*
+
+  parse-ds-file-or-err(report-err|i) = parse-ds-file <+ report-err(|i, <id>); !Module("dummy", [])
+
+
+
+

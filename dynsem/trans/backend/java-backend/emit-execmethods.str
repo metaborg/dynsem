@@ -25,7 +25,7 @@ imports
   
 signature
   constructors
-    RuleFail: Term -> Premise
+    RuleFail: Statement -> Premise
     JavaStm: List(BlockStm) -> Premise
     Target: ArrowSomething * Term * LabelComp -> Premise
     
@@ -39,7 +39,14 @@ rules
       rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
   
   ds2java-execmethods(on-norule-generator|rule*):
-    ty -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
+    ty-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
+    where
+      ty := <def-get-name> ty-def;
+      applicable-arrow* := <lookup-applicable-arrow-def> ty;
+      rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
+
+  ds2java-execmethods(on-norule-generator|rule*):
+    ty@ListType(_) -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
     where
       applicable-arrow* := <lookup-applicable-arrow-def> ty;
       rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
@@ -63,7 +70,7 @@ rules
       if rule := <fetch-elem(is-rule-matching-arrow(|arrow-name))> rule*
       then
         {| LiftedMethods:
-          bstm* := <ds2java-rulestatements(|a)> rule;
+          bstm* := <ds2java-rulestatements(on-norule-generator|a)> rule;
           more-method* := <bagof-LiftedMethods>
         |}
       else
@@ -81,14 +88,14 @@ rules
       x_methodname := <ds2java-methodname> (arrow-def, bu-ty);
       e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def 
   
-  ds2java-rulestatements(|arrow):
+  ds2java-rulestatements(on-norule-generator|arrow):
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
     where
     	patternbound* := <ds2java-patternbinds> lhs;
     	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
       lhs-ty := <type-of> lhs;
       retgt := Target(<lookup-arrow-def> (lhs-ty, arrow-name), rhs, tc*);
-      prem := <inject-try-or(|arrow); insert-target(|retgt)> prem*;
+      prem := <inject-try-or(on-norule-generator|arrow); insert-target(|retgt)> prem*;
       premstms* := <ds2java-premise> (prem, [], [])
   
   ds2java-patternbinds:
@@ -117,13 +124,13 @@ rules
   	where
   		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
 
-  inject-try-or(|arrow):
+  inject-try-or(on-norule-generator|arrow):
     p*@[_|_] -> p*
     where
       <not(fetch-elem(premise-can-fail))> p*
 
-  inject-try-or(|arrow):
-    p* -> TryOr(PremiseBlock(p*), PremiseBlock([RuleFail(arrow)]))
+  inject-try-or(on-norule-generator|arrow):
+    p* -> TryOr(PremiseBlock(p*), PremiseBlock([RuleFail(<on-norule-generator> arrow)]))
     where
       ?[] <+ fetch-elem(premise-can-fail)
   
@@ -178,7 +185,7 @@ rules
       e* := <zip(ds2java-term-build)> (ty*, t*)
 
   ds2java-premise:
-    (RuleFail(arrow), _, _) -> <ds2java-supercall> arrow
+    (RuleFail(bstm*), _, _) -> bstm*
 
   ds2java-premise:
   	(JavaStm(bstm*), _, _) -> bstm*
