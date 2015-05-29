@@ -1,0 +1,34 @@
+module ds2ds/resolve-includes
+
+imports
+  include/ds
+  editor-common.generated
+  
+rules
+  
+  resolve-includes(|f-path, p-path):
+    Module(name, section*) -> Module(name, section'*)
+    where
+      (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
+      section'* := <include-imports(|<ds-sources-and-includes>, [])> (import*, section-noimports*)
+  
+  include-imports(|include-dirs, imported*):
+    ([], section*) -> section*
+
+  include-imports(|include-dirs, imported*):
+    ([Import(i) | ixs*], section*) -> <include-imports(|include-dirs, [i, imported*])> (ixs*, section*)
+    where
+      <fetch-elem(?i)> imported*
+
+  include-imports(|include-dirs, imported*):
+  	([Import(i) | ixs*], section*) -> <include-imports(|include-dirs, [i, imported*])> ([ixs*, new-import*], section'*)
+  	where
+  	  <not(fetch-elem(?i))> imported*
+    with
+        file := <resolve-in-path(|include-dirs)> $[[i].ds];
+  		Module(_, imported-section*) := <parse-ds-file-or-critical-log> file;
+  		(new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*;
+      section'* := [section* | imported-section-noimports*]
+
+  parse-ds-file-or-critical-log = parse-ds-file <+ fatal-err(|"File not found: ")
+

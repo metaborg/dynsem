@@ -2,11 +2,11 @@ module names
 
 imports
   include/ds
-  lib/editor-common.generated
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/properties/-
+  editor-common.generated
+  runtime/nabl/-
+  runtime/types/-
+  runtime/task/-
+  runtime/properties/-
   ds
   names.manual
 

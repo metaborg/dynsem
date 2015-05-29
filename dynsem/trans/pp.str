@@ -3,9 +3,9 @@ module pp
 imports
   libstratego-lib
   libstratego-gpp
-  lib/runtime/tmpl/pp
-  src-gen/signatures/-
-  src-gen/pp/-
+  runtime/tmpl/pp
+  signatures/-
+  pp/-
   include/ds-parenthesize
   ds
   
