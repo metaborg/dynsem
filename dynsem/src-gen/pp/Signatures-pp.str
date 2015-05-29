@@ -342,50 +342,6 @@ strategies
     prettyprint-SignatureSection
 
   prettyprint-example =
-    prettyprint-SemanticCompDecl
-
-  prettyprint-SignatureSection :
-    SemanticComponents(t1__) -> [ H(
-                                    [SOpt(HS(), "0")]
-                                  , [S("semantic components")]
-                                  )
-                                , t1__'
-                                ]
-    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-SemanticCompDecl)> t1__]
-
-  is-SignatureSection =
-    ?SemanticComponents(_)
-
-  prettyprint-SemanticCompDecl :
-    SemanticComponent(t1__, t2__) -> [ H(
-                                         [SOpt(HS(), "0")]
-                                       , [t1__', S(" -> "), t2__']
-                                       )
-                                     ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-MapType)> t2__
-
-  is-SemanticCompDecl =
-    ?SemanticComponent(_, _)
-
-  is-SignatureSection =
-    fail
-
-  is-SemanticCompDecl =
-    fail
-
-  prettyprint-SignatureSection :
-    amb([h|hs]) -> <prettyprint-SignatureSection> h
-
-  prettyprint-SemanticCompDecl :
-    amb([h|hs]) -> <prettyprint-SemanticCompDecl> h
-
-
-strategies
-  prettyprint-example =
-    prettyprint-SignatureSection
-
-  prettyprint-example =
     prettyprint-JSNIPPET
 
   prettyprint-example =

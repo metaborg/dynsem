@@ -16,7 +16,6 @@ rules /* store signatures */
       <+ store-native-operators
       <+ store-arrows
       <+ store-native-datatypes
-      <+ store-semantic-components
       <+ store-variable-schemes
     ))
   
@@ -98,15 +97,6 @@ rules /* store signatures */
     with
       <store-def(|NativeDTFun(par-def))> name => name-def;
       <store-prop(|Type(), name-def)> FunctionType(<rw-type> arg*, <rw-type> s)
-
-  store-semantic-components = SemanticComponents(map(store-semantic-component))
-  
-  store-semantic-component:
-    d@SemanticComponent(name, MapSort(key-ty, val-ty)) -> d
-    with
-      <store-def(|Types())> name => name-def;
-      <store-prop(|SortKind(), name-def)> SemanticCompSort();
-      <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
 
   store-variable-schemes = VariableSchemes(map(store-variable-scheme))
   

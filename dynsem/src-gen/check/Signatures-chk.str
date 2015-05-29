@@ -279,47 +279,6 @@ strategies
     check-SignatureSection
 
   check-example =
-    check-SemanticCompDecl
-
-  check-SignatureSection :
-    SemanticComponents(t1__) -> <id>
-    with <map(check-SemanticCompDecl <+ error-SemanticCompDecl)> t1__
-
-  is-SignatureSection-with-constructor =
-    ?SemanticComponents(_)
-
-  check-SemanticCompDecl :
-    SemanticComponent(t1__, t2__) -> <id>
-    with <(check-ID <+ error-ID)> t1__
-    with <(check-MapType <+ error-MapType)> t2__
-
-  is-SemanticCompDecl-with-constructor =
-    ?SemanticComponent(_, _)
-
-  is-SignatureSection-with-constructor =
-    fail
-
-  is-SemanticCompDecl-with-constructor =
-    fail
-
-  check-SignatureSection :
-    amb([h|hs]) -> <check-SignatureSection> h
-
-  check-SemanticCompDecl :
-    amb([h|hs]) -> <check-SemanticCompDecl> h
-
-  error-SignatureSection =
-    debug(!"Unexpected constructor. Expected constructor from sort SignatureSection instead. ")
-
-  error-SemanticCompDecl =
-    debug(!"Unexpected constructor. Expected constructor from sort SemanticCompDecl instead. ")
-
-
-strategies
-  check-example =
-    check-SignatureSection
-
-  check-example =
     check-JSNIPPET
 
   check-example =

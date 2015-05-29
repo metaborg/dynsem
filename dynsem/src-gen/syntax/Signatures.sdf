@@ -46,14 +46,6 @@ exports
     CONTENTCOMPLETE -> MapType          {cons("COMPLETION-MapType")}
 
   context-free syntax
-    "semantic" "components" SemanticCompDecl* -> SignatureSection {cons("SemanticComponents")}
-    ID "->" MapType                           -> SemanticCompDecl {cons("SemanticComponent")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> SemanticCompDecl {cons("COMPLETION-SemanticCompDecl")}
-
-  context-free syntax
     "native" "datatypes" NativeTypeDecl*                 -> SignatureSection   {cons("NativeDataTypes")}
     STRING                                               -> JSNIPPET           
     JSNIPPET "as" ID "{" NativeFunctionDecl* "}"         -> NativeTypeDecl     {cons("NativeBaseTypeDecl")}

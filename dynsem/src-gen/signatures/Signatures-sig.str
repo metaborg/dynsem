@@ -31,10 +31,6 @@ signature
     MapSort         : Type * Type -> MapType
 
   constructors
-    SemanticComponents : List(SemanticCompDecl) -> SignatureSection
-    SemanticComponent  : ID * MapType -> SemanticCompDecl
-
-  constructors
     NativeDataTypes         : List(NativeTypeDecl) -> SignatureSection
                             : STRING -> JSNIPPET
     NativeBaseTypeDecl      : JSNIPPET * ID * List(NativeFunctionDecl) -> NativeTypeDecl

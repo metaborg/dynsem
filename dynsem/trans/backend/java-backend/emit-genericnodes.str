@@ -115,7 +115,6 @@ rules
       not(!ty => ListType(_));
       ty-def := <lookup-def(|Types())> ty;
       <not(lookup-prop(|SortKind()) => SystemSort())> ty-def;
-      <not(lookup-prop(|SortKind()) => SemanticCompSort())> ty-def;
       <not(lookup-prop(|SortKind()) => NativeSort())> ty-def;
       gennodename := $[Generic_[<ds2java-sort-classname> ty]]
 
@@ -125,12 +124,9 @@ rules
       x_listname := <ds2java-sort-classname> lty
   
   ds2java-gennode-instantiation:
-    (e_trm, ty) -> e |[ AutoMapUtils.x_tosemcomp(e_trm) ]|
+    (e_trm, m-ty@MapType(_, _)) -> e |[ AutoMapUtils.x_tosemcomp(e_trm) ]|
     where
-      ty-def := <lookup-def(|Types())> ty;
-      <lookup-prop(|SortKind())> ty-def => SemanticCompSort();
-      ty-name := <def-get-name> ty-def;
-      x_tosemcomp := <ds2java-aterm2map-name> ty-name
+      x_tosemcomp := <ds2java-aterm2map-name> m-ty
  
   ds2java-gennode-instantiation:
   	(e_trm, ty) -> e |[ null ]|

@@ -33,7 +33,7 @@ rules
       specializer* := <mklist-specializer(|x_classname, ety) <+ ![]>;
       exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> lty;
   		ety-def := <lookup-def(|Types())> ety;
-  		if sup-ty := <lookup-prop(|SuperType())> ety-def; <not(lookup-prop(|SortKind()); ?SemanticCompSort())> ety-def
+  		if sup-ty := <lookup-prop(|SuperType())> ety-def
   		then
   			x_supername := <lookup-def(|Types()); def-get-name; !ListSort(SimpleSort(<id>)); rw-type; ds2java-sort-classname> sup-ty;
   			class := <mklist-class(|x_classname, x_supername, ety, [specializer*, exec*])>

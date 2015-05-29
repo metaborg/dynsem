@@ -17,13 +17,13 @@ imports
 rules
   
   ds2java-maputils =
-    lookup-def-all(|Types());
-    filter(where(lookup-prop(|SortKind()) => SemanticCompSort()));
-    ds2java-maputils-semcomps;
+    collect-all(?MapSort(_, _); rw-type);
+    make-set;
+    ds2java-maputils-maps;
     MkSingleton
-    
-  ds2java-maputils-semcomps:
-    semcomp-def* ->
+  
+  ds2java-maputils-maps:
+    map-ty* ->
       compilation-unit |[
         package ~x:<AutoPackageName>;
         
@@ -41,18 +41,18 @@ rules
         }
       ]|
     where
-      conv* := <mapconcat(ds2java-maputils-semcomp)> semcomp-def*
+      conv* := <mapconcat(ds2java-maputils-map)> map-ty*
   
-  ds2java-maputils-semcomp:
-    semcomp-def ->
+  ds2java-maputils-map:
+    m-ty@MapType(k-ty, v-ty) ->
       class-body-dec* |[
         public static IStrategoTerm x_toterm(PersistentMap<x_kty, x_vty> map, ITermFactory factory) {
           IStrategoConstructor bindCons = factory.makeConstructor("Bind", 2);
 
           IStrategoTerm[] kids = new IStrategoTerm[map.size() + 1];
-          kids[0] = factory.makeString(~e:Lit(String([Chars(semcomp-name)])));
+          // kids[0] = factory.makeString(~e:Lit(String([Chars(semcomp-name)])));
 
-          int idx = 1;
+          int idx = 0;
           for (Entry<x_kty, x_vty> entry : map.entrySet()) {
             kids[idx] = factory.makeAppl(bindCons,
                         e_keytrm, e_valtrm);
@@ -63,25 +63,20 @@ rules
         }
         
         public static PersistentMap<x_kty, x_vty> x_fromterm(IStrategoTerm term) {
-          final String mapName = ~e:Lit(String([Chars(semcomp-name)]));
 			    final Map<x_kty, x_vty> result = new TreeMap<x_kty, x_vty>();
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
 			      if (Tools.hasConstructor(appl, "Map", 2)) {
-			        IStrategoTerm kid0 = term.getSubterm(0);
-			        if (Tools.isTermString(kid0)
-			            && Tools.asJavaString(kid0).equals(mapName)) {
-			          for (int idx = 1; idx < term.getSubtermCount(); idx++) {
-			            IStrategoTerm kid = term.getSubterm(idx);
-			            if (Tools.isTermAppl(kid)) {
-			              IStrategoAppl bindAppl = (IStrategoAppl) kid;
-			              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
-			                result.put(e_key, e_value);
-			              }
-			            }
-			          }
-			          return PersistentTreeMap.create(result);
-			        }
+		          for (int idx = 1; idx < term.getSubtermCount(); idx++) {
+		            IStrategoTerm kid = term.getSubterm(idx);
+		            if (Tools.isTermAppl(kid)) {
+		              IStrategoAppl bindAppl = (IStrategoAppl) kid;
+		              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
+		                result.put(e_key, e_value);
+		              }
+		            }
+		          }
+		          return PersistentTreeMap.create(result);
 			
 			      }
 			    }
@@ -90,10 +85,8 @@ rules
 			  }
       ]|
     where
-      semcomp-name := <def-get-name> semcomp-def;
-      x_toterm := <ds2java-map2aterm-name> semcomp-name;
-      x_fromterm := <ds2java-aterm2map-name> semcomp-name;
-      MapType(k-ty, v-ty) := <lookup-prop(|SuperType())> semcomp-def;
+      x_toterm := <ds2java-map2aterm-name> m-ty;
+      x_fromterm := <ds2java-aterm2map-name> m-ty;
       x_kty := <ds2java-sort-classname; ds2java-box-java-type> k-ty;
       x_vty := <ds2java-sort-classname; ds2java-box-java-type> v-ty;
       e_keytrm := <ds2java-atermconversion-name(| e |[ entry.getKey() ]|)> k-ty;
@@ -102,7 +95,7 @@ rules
       e_value := <ds2java-gennode-instantiation> (e |[ bindAppl.getSubterm(1) ]|, v-ty)
 
   ds2java-map2aterm-name:
-  	semcomp-name -> $[toStrategoTerm_[semcomp-name]]
+    MapType(k-ty, v-ty) -> $[map_[<ds2java-sort-classname> k-ty]_[<ds2java-sort-classname> v-ty]2aterm]
 
   ds2java-aterm2map-name:
-  	semcomp-name -> $[to_[semcomp-name]]
+    MapType(k-ty, v-ty) -> $[aterm2map_[<ds2java-sort-classname> k-ty]_[<ds2java-sort-classname> v-ty]]

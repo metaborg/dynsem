@@ -378,18 +378,9 @@ rules
     )
   
   ds2java-term-build-optcast(|ex_ty):
-    trm -> <ds2java-term-build(|ex_ty)> Cast(trm, ex_ty')
+    trm -> <ds2java-term-build(|ex_ty)> Cast(trm, ex_ty)
     where
       <type-of> trm => MapType(ALPHATYPE(), ALPHATYPE())
-    where
-    	if !ex_ty => MapType(_, _)
-    	then
-    		ex_ty' := ex_ty
-    	else
-    		ex_ty_def := <lookup-def(|Types())> ex_ty;
-    		<lookup-prop(|SortKind())> ex_ty_def => SemanticCompSort();
-    		ex_ty' := <lookup-prop(|SuperType())> ex_ty_def
-      end
 
   ds2java-term-build:
     (ty, t) -> <ds2java-term-build(|ty)> t

@@ -47,7 +47,6 @@ signature
   constructors
     SortKind: Property
     LanguageSort: SortKind
-  	SemanticCompSort: SortKind
   	NativeSort: SortKind
   	SystemSort: SortKind
   	

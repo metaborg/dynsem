@@ -201,13 +201,7 @@ rules
   type-check-build-map:
     MapSelect(m-t, k-t) -> val-ty
     where
-      maybe-map-ty := <type-check-build> m-t;
-      if <?MapType(key-ty, val-ty)> maybe-map-ty
-      then
-        id
-      else
-        <lookup-def(|Types()); lookup-prop(|SuperType())> maybe-map-ty => MapType(key-ty, val-ty)
-      end;
+      MapType(key-ty, val-ty) := <type-check-build> m-t;
       k-ty := <type-check-build> k-t;
       <type-coerce-full(fail)> (k-ty, key-ty)
 
@@ -474,14 +468,11 @@ rules
     (IntType(), RealType()) -> RealType()
   
   type-coerce(coerce-s):
-    (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty
+    (MapType(a-k-ty, a-v-ty), MapType(t-k-ty, t-v-ty)) -> MapType(k-ty, v-ty)
     where
-      <lookup-def(|Types())> to-ty => to-ty-def;
-      <lookup-prop(|SortKind())> to-ty-def => SemanticCompSort();
-      <lookup-prop(|SuperType())> to-ty-def => MapType(e-k-ty, e-v-ty);
-      <coerce-s> (a-k-ty, e-k-ty);
-      <coerce-s> (a-v-ty, e-v-ty)
-
+      k-ty := <coerce-s> (a-k-ty, t-k-ty);
+      v-ty := <coerce-s> (a-v-ty, t-v-ty)
+  
   type-coerce-implicit(is-matching, coerce-s):
     (ty-from, ty-to) -> ty-to'
     where

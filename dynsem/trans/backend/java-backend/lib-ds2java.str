@@ -21,17 +21,6 @@ rules /* name generation */
     ty -> <def-get-name> ty-def
     where
       ty-def := <lookup-def(|Types())> ty;
-      ty-kind := <lookup-prop(|SortKind())> ty-def;
-      (
-        !ty-kind => SemanticCompSort()
-        <+
-        !ty-kind => NativeSort()
-      )  
-  
-  ds2java-listsort-elemname:
-    ty -> <def-get-name> ty-def
-    where
-      ty-def := <lookup-def(|Types())> ty;
       NativeSort() := <lookup-prop(|SortKind())> ty-def
   
   ds2java-listsort-elemname = ds2java-sort-classname
@@ -47,13 +36,6 @@ rules /* name generation */
   	where
   		kty-str := <ds2java-sort-classname; try(ds2java-box-primitive-java-type)> kty;
   		vty-str := <ds2java-sort-classname; try(ds2java-box-primitive-java-type)> vty
-  
-  ds2java-sort-classname:
-    ty -> <ds2java-sort-classname> ty'
-    where
-      ty-def := <lookup-def(|Types())> ty;
-      SemanticCompSort() := <lookup-prop(|SortKind())> ty-def;
-      ty' := <lookup-prop(|SuperType())> ty-def
   
   ds2java-sort-classname:
   	ty -> <ds2java-systemsort-classname> ty-def

@@ -53,14 +53,6 @@ template options
 
   tokenize: "<("
   
-context-free syntax // semantic component declarations
-
-  SignatureSection.SemanticComponents = <
-    semantic components
-      <{SemanticCompDecl "\n"}*>>
-  
-  SemanticCompDecl.SemanticComponent = [[ID] -> [MapType]]
-
 context-free syntax // native data types
 
   SignatureSection.NativeDataTypes = <
