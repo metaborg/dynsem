@@ -533,16 +533,24 @@ rules
     a-def -> a-def
     where
       <lookup-props(|Type())> a-def;
-      map({in-ty, out-ty, a-ty, out-ty-tmp-def, out-ty-tmp:
-        ?a-ty@ArrowType(in-ty, out-ty-tmp);
-        if // HACK
-          out-ty-tmp-def := <lookup-def(|Types())> out-ty-tmp;
-          <lookup-prop(|SortKind())> out-ty-tmp-def => SemanticCompSort()
-        then
-          out-ty := <lookup-prop(|SuperType())> out-ty-tmp-def
-        else
-          out-ty := out-ty-tmp
-        end;
+      map({in-ty, out-ty, a-ty, tmp-out-ty:
+        ?a-ty@ArrowType(in-ty, out-ty);
+        {out-ty-def, extra-out-ty:
+          // HACK: to handle arrows reducing into a semantic component sort. no longer necessary with new dynamic components
+	        if 
+	          out-ty-def := <lookup-def(|Types())> out-ty;
+	          <lookup-prop(|SortKind())> out-ty-def => SemanticCompSort()
+	        then
+	          extra-out-ty := <lookup-prop(|SuperType())> out-ty-def;
+	          rules(
+		          MemoTyPath: (in-ty, extra-out-ty, BuildMode()) -> [(a-def, a-ty)]
+		          MemoTyPath: (in-ty, extra-out-ty, MatchMode()) -> [(a-def, a-ty)]
+		          MemoTyTrans:+ (in-ty, BuildMode()) -> extra-out-ty
+		          MemoTyTrans:+ (in-ty, MatchMode()) -> extra-out-ty
+		        )
+	        end
+	        // END HACK
+        };
         rules(
           MemoTyPath: (in-ty, out-ty, BuildMode()) -> [(a-def, a-ty)]
           MemoTyPath: (in-ty, out-ty, MatchMode()) -> [(a-def, a-ty)]
