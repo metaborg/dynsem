@@ -473,13 +473,26 @@ rules
     (IntType(), RealType()) -> RealType()
   
   type-coerce(coerce-s):
-    (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty
+    (MapType(a-k-ty, a-v-ty), MapType(t-k-ty, t-v-ty)) -> MapType(k-ty, v-ty)
     where
+      k-ty := <coerce-s> (a-k-ty, t-k-ty);
+      v-ty := <coerce-s> (a-v-ty, t-v-ty)
+  
+  type-coerce(coerce-s):
+    (from-map-ty@MapType(_, _), to-ty) -> <type-coerce(coerce-s)> (from-map-ty, to-map-ty)
+    where
+      <not(?MapType(_, _))> to-ty;
       <lookup-def(|Types())> to-ty => to-ty-def;
       <lookup-prop(|SortKind())> to-ty-def => SemanticCompSort();
-      <lookup-prop(|SuperType())> to-ty-def => MapType(e-k-ty, e-v-ty);
-      <coerce-s> (a-k-ty, e-k-ty);
-      <coerce-s> (a-v-ty, e-v-ty)
+      <lookup-prop(|SuperType())> to-ty-def => to-map-ty
+  
+  type-coerce(coerce-s):
+    (from-ty, to-map-ty@MapType(_, _)) -> <type-coerce(coerce-s)> (from-map-ty, to-map-ty)
+    where
+      <not(?MapType(_, _))> from-ty;
+      <lookup-def(|Types())> from-ty => from-ty-def;
+      <lookup-prop(|SortKind())> from-ty-def => SemanticCompSort();
+      <lookup-prop(|SuperType())> from-ty-def => from-map-ty
 
   type-coerce-implicit(is-matching, coerce-s):
     (ty-from, ty-to) -> ty-to'
