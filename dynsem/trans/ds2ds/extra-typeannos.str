@@ -18,13 +18,16 @@ rules
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(l@List([]), tc*))) ->
       Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(l, bu-ty-str), tc*)))
     where
-      ArrowType(_, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      ArrowType(ma-ty, bu-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, <type-of> lhs);
       bu-ty-str := <derw-type> bu-ty
   
   add-extra-typeannos-rule:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(m@Map([]), tc*))) ->
       Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(m, bu-ty-str), tc*)))
     where
-      ArrowType(_, bu-ty) := <lookup-def(|Arrows()); lookup-prop(|Type())> arrow-name;
+      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      ArrowType(ma-ty, bu-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, <type-of> lhs);
       bu-ty-str := <derw-type> bu-ty
+
 
