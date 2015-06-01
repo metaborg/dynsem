@@ -107,7 +107,6 @@ rules
   type-check-expectation-wrap(coerce|t):
     (expected-ty, actual-ty) -> <type-check-expectation(coerce|t, expected-ty)> actual-ty
 
-
   type-check-build =
   	type-check-build-helper
   	<+ type-err-build-match-symbols
@@ -178,7 +177,7 @@ rules
     List([]) -> ListType(ALPHATYPE())
 
   type-check-build-list:
-    ListTail([h], t) -> <type-coerce-sym(type-coerce-full(fail))> (ListType(h-ty), t-ty) // <debug(!4); type-coerce-full(fail); debug(!5)> (ListType(h-ty), t-ty)
+    ListTail([h], t) -> <type-coerce-sym(type-coerce-full(fail))> (ListType(h-ty), t-ty)
     where
       t-ty := <type-check-build> t;
       h-ty := <type-check-build> h
@@ -521,8 +520,16 @@ rules
     a-def -> a-def
     where
       <lookup-props(|Type())> a-def;
-      map({in-ty, out-ty, a-ty:
-        ?a-ty@ArrowType(in-ty, out-ty);
+      map({in-ty, out-ty, a-ty, out-ty-tmp-def, out-ty-tmp:
+        ?a-ty@ArrowType(in-ty, out-ty-tmp);
+        if // HACK
+          out-ty-tmp-def := <lookup-def(|Types())> out-ty-tmp;
+          <lookup-prop(|SortKind())> out-ty-tmp-def => SemanticCompSort()
+        then
+          out-ty := <lookup-prop(|SuperType())> out-ty-tmp-def
+        else
+          out-ty := out-ty-tmp
+        end;
         rules(
           MemoTyPath: (in-ty, out-ty, BuildMode()) -> [(a-def, a-ty)]
           MemoTyPath: (in-ty, out-ty, MatchMode()) -> [(a-def, a-ty)]
