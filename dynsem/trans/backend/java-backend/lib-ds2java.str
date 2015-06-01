@@ -15,7 +15,13 @@ rules /* name generation */
     where
       <not(?ALPHATYPE())> ety
     where
-      ety-str := <ds2java-listsort-elemname; ds2java-box-java-type> ety
+      switch !ety
+        case ?MapType(k-ty, v-ty):
+          ety-str := $[Map_[<ds2java-sort-classname; ds2java-box-java-type> k-ty]_[<ds2java-sort-classname; ds2java-box-java-type> v-ty]]
+        otherwise:
+          ety-str := <ds2java-listsort-elemname; ds2java-box-java-type> ety 
+      end
+      
       
   ds2java-listsort-elemname:
     ty -> <def-get-name> ty-def

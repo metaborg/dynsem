@@ -50,7 +50,6 @@ rules
           IStrategoConstructor bindCons = factory.makeConstructor("Bind", 2);
 
           IStrategoTerm[] kids = new IStrategoTerm[map.size() + 1];
-          // kids[0] = factory.makeString(~e:Lit(String([Chars(semcomp-name)])));
 
           int idx = 0;
           for (Entry<x_kty, x_vty> entry : map.entrySet()) {
@@ -81,7 +80,7 @@ rules
 			      }
 			    }
 			
-			    throw new RuntimeException("Malformed map for " + mapName);
+			    throw new RuntimeException("Malformed map");
 			  }
       ]|
     where
