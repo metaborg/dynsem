@@ -487,13 +487,13 @@ rules
     where
       is-matching < mode := MatchMode() + mode := BuildMode()
     where
-      step-def := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
+      (step-def, step-def-ty) := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
       (
         <def-get-namespace> step-def => Arrows();
-        ArrowType(_, ty-to') := <lookup-prop(|Type())> step-def
+        ArrowType(_, ty-to') := step-def-ty
         <+
         <def-get-namespace> step-def => Constructors();
-        ConstructorType(_, ty-to') := <lookup-prop(|Type())> step-def
+        ConstructorType(_, ty-to') := step-def-ty
       )
 
   // initialize the memo table with the implicit constructors and arrows as paths
@@ -506,13 +506,13 @@ rules
   
   store-prime-conspath:
     c-def -> c-def
-    where {in-ty, out-ty:
-      <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
+    where {in-ty, out-ty, c-ty:
+      <lookup-prop(|Type())> c-def => c-ty@ConstructorType([in-ty], out-ty);
       rules(
-        MemoTyPath: (in-ty, out-ty, BuildMode()) -> [c-def]
+        MemoTyPath: (in-ty, out-ty, BuildMode()) -> [(c-def, c-ty)]
         MemoTyTrans:+ (in-ty, BuildMode()) -> out-ty
 
-        MemoTyPath: (out-ty, in-ty, MatchMode()) -> [c-def]
+        MemoTyPath: (out-ty, in-ty, MatchMode()) -> [(c-def, c-ty)]
         MemoTyTrans:+ (out-ty, MatchMode()) -> in-ty
       )
     }
@@ -521,11 +521,11 @@ rules
     a-def -> a-def
     where
       <lookup-props(|Type())> a-def;
-      map({in-ty, out-ty:
-        ?ArrowType(in-ty, out-ty);
+      map({in-ty, out-ty, a-ty:
+        ?a-ty@ArrowType(in-ty, out-ty);
         rules(
-          MemoTyPath: (in-ty, out-ty, BuildMode()) -> [a-def]
-          MemoTyPath: (in-ty, out-ty, MatchMode()) -> [a-def]
+          MemoTyPath: (in-ty, out-ty, BuildMode()) -> [(a-def, a-ty)]
+          MemoTyPath: (in-ty, out-ty, MatchMode()) -> [(a-def, a-ty)]
           MemoTyTrans:+ (in-ty, BuildMode()) -> out-ty
           MemoTyTrans:+ (in-ty, MatchMode()) -> out-ty
         )
