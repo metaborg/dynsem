@@ -52,6 +52,13 @@ rules /* lift and expand subterms on build sides */
       (child'*, p*) := <zip(lift-where-indirect <+ \ (_, t) -> (t, []) \); unzip; (id, concat)> (child-ty*, child*)
 
   expand-implicits-termbuild:
+    ListTail([hd], tl) -> (ListTail([hd], tl'), p*)
+    where
+      tl-ty := <type-of; not(?ListType(_))> tl;
+      hd-ty := <type-of> hd;
+      (tl', p*) := <lift-where-indirect> (ListType(hd-ty), tl)
+
+  expand-implicits-termbuild:
     ListTail([hd], tl) -> (ListTail([hd'], tl), p*)
     where
       ListType(tl-ty) := <type-of> tl;
