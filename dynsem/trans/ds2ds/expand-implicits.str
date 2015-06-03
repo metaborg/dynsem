@@ -88,7 +88,7 @@ rules /* introduce explicit reductions/coercions where required on MATCH side */
     ([], lt, rt) -> [Formula(Match(lt, rt))]
   
   expand-typath-match:
-    ([c-def | xs-def], lt, rt) -> [Formula(Match(lt, Con(c-name, [Var(v-new)]))), path*]
+    ([(c-def, _) | xs-def], lt, rt) -> [Formula(Match(lt, Con(c-name, [Var(v-new)]))), path*]
     where
       <def-get-namespace> c-def => Constructors()
     where
@@ -98,7 +98,7 @@ rules /* introduce explicit reductions/coercions where required on MATCH side */
       path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
   
   expand-typath-match:
-    ([a-def | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
+    ([(a-def, _) | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
     where
       <def-get-namespace> a-def => Arrows()
     where
@@ -115,7 +115,7 @@ rules /* introduce explicit coercions where required on the SOURCE side */
       lhs-ty := <type-of> lhs;
       <not(type-coerce-direct(fail))> (ma-ty, lhs-ty)
     where
-    	[c-def | xs-def] := <get-typath-memo(type-coerce-full(id))> (ma-ty, lhs-ty, MatchMode());
+    	[(c-def, _) | xs-def] := <get-typath-memo(type-coerce-full(id))> (ma-ty, lhs-ty, MatchMode());
     	Constructors() := <def-get-namespace> c-def;
     	ConstructorType([child-ty], _) := <lookup-prop(|Type())> c-def;
     	c-name := <def-get-name> c-def;
@@ -136,7 +136,7 @@ rules /* introduce explicit reductions/coercions where required on BUILD side */
     ([], lt, rt) -> [Formula(Match(lt, rt))]
   
   expand-typath-build:
-    ([c-def | xs-def], lt, rt) -> [Formula(Match(Con(c-name, [lt]), Var(v-new))), path*]
+    ([(c-def, _) | xs-def], lt, rt) -> [Formula(Match(Con(c-name, [lt]), Var(v-new))), path*]
     where
       <def-get-namespace> c-def => Constructors();
       ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def
@@ -146,7 +146,7 @@ rules /* introduce explicit reductions/coercions where required on BUILD side */
       path* := <expand-typath-build> (xs-def, VarRef(v-new), rt)
   
   expand-typath-build:
-    ([a-def | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
+    ([(a-def, _) | xs-def], lt, rt) -> [Formula(Relation(Reads([]), Source(lt, []), NamedDynamicEmitted([], a-name), Target(Var(v-new), []))), path*]
     where
       <def-get-namespace> a-def => Arrows();
       ArrowType(_, bu-ty) := <lookup-prop(|Type())> a-def
