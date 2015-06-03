@@ -67,7 +67,7 @@ rules /* lift and expand subterms on build sides */
   expand-implicits-termbuild:
     LabelComp(a-ty, t) -> (LabelComp(a-ty, t'), p*)
     where
-      ty := <rw-type> t;
+      ty := <rw-type> a-ty;
       (t', p*) := <lift-where-indirect> (ty, t)
 
   lift-where-indirect:
