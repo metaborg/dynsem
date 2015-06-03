@@ -505,7 +505,12 @@ rules
         ArrowType(_, ty-to') := step-def-ty
         <+
         <def-get-namespace> step-def => Constructors();
-        ConstructorType(_, ty-to') := step-def-ty
+        if is-matching
+        then
+          ConstructorType([ty-to'], _) := step-def-ty
+        else
+          ConstructorType(_, ty-to') := step-def-ty
+        end
       )
 
   // initialize the memo table with the implicit constructors and arrows as paths
