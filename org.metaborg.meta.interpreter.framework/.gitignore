@@ -1,3 +1,5 @@
-/bin
-/target/
-/META-INF/MANIFEST.MF
+/.classpath
+/.project
+/.settings
+/META-INF
+/target
