@@ -65,6 +65,28 @@ rules /* lift and expand subterms on build sides */
       (hd', p*) := <lift-where-indirect> (tl-ty, hd)
 
   expand-implicits-termbuild:
+    MapExtend(e, m) -> (MapExtend(e, m'), p*)
+    where
+      m-ty := <type-of; not(?MapType(_, _) <+ lookup-def(|Types()); lookup-prop(|SortKind()) => SemanticCompSort())> m;
+      e-ty := <type-of> e;
+      (m', p*) := <lift-where-indirect> (e-ty, m)
+
+  expand-implicits-termbuild:
+    MapExtend(Map([Bind(k, v)]), m) -> (MapExtend(Map([Bind(k', v')]), m), [p1*, p2*])
+    where
+      m-ty := <type-of> m;
+      if
+        m-ty-def := <lookup-def(|Types())> m-ty;
+        <lookup-prop(|SortKind())> m-ty-def => SemanticCompSort()
+      then
+        MapType(k-ty, v-ty) := <lookup-prop(|SuperType())> m-ty-def
+      else
+        MapType(k-ty, v-ty) := m-ty
+      end;
+      (k', p1*) := <lift-where-indirect <+ !(k, [])> (k-ty, k);
+      (v', p2*) := <lift-where-indirect <+ !(v, [])> (v-ty, v)
+
+  expand-implicits-termbuild:
     LabelComp(a-ty, t) -> (LabelComp(a-ty, t'), p*)
     where
       ty := <rw-type> a-ty;
