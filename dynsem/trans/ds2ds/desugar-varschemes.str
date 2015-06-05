@@ -8,6 +8,7 @@ imports
   analysis/query
   analysis/lib-analysis
   analysis/constructors
+  ds
 
 rules
   
@@ -24,6 +25,12 @@ rules
     where
     	scheme-def := <get-unique-matching-varscheme> v;
     	scheme-ty := <lookup-prop(|Type())> scheme-def
+  
+  desugar-varscheme:
+    var@Var(v) -> Cast(var, <derw-type> scheme-ty)
+    where
+      scheme-def := <get-unique-matching-varscheme> v;
+      scheme-ty := <lookup-prop(|Type())> scheme-def
     	
 
 
