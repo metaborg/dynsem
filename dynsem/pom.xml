@@ -2,8 +2,9 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+  <name>ds</name>
   <artifactId>dynsem</artifactId>
-  <packaging>eclipse-plugin</packaging>
+  <packaging>spoofax-language</packaging>
   <description>Spoofax DynSem (dynamic semantic specification) language implementation.</description>
   <url>https://github.com/metaborg/dynsem</url>
 
@@ -14,33 +15,55 @@
     <relativePath>../../spoofax-deploy/org.metaborg.maven.parent.language</relativePath>
   </parent>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.spoofax.meta.runtime.libraries</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+    </dependency>
+  </dependencies>
+
   <build>
+    <resources>
+      <resource>
+        <directory>lib</directory>
+        <targetPath>lib</targetPath>
+        <includes>
+          <include>*.tbl</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
-      <!-- Hack to prevent the src-gen folder from being cleaned. Since the build cannot run meta-languages such as SDF3, the
-        src-gen folder is committed to the git repository. The clean goal will clean the src-gen folder, temporarily renaming
-        it will prevent that. This hack overrides the spoofax-clean antrun execution from the parent POM. -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>spoofax-clean</id>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <phase>clean</phase>
-            <configuration>
-              <skip>${skip-language-build}</skip>
-              <target>
-                <move file="src-gen" tofile="src-gen-keep" />
-                <ant antfile="build.main.xml" inheritRefs="true">
-                  <target name="clean" />
-                </ant>
-                <move file="src-gen-keep" tofile="src-gen" />
-              </target>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.metaborg</groupId>
+        <artifactId>spoofax-maven-plugin</artifactId>
+        <configuration>
+            <format>jar</format>
+            <pardonedLanguages>
+                <language>NameBindingLanguage</language>
+            </pardonedLanguages>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.lang.template</artifactId>
+            <version>${metaborg-version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.lang.nabl</artifactId>
+            <version>${metaborg-version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+          <dependency>
+            <groupId>org.metaborg</groupId>
+            <artifactId>org.metaborg.meta.lang.esv</artifactId>
+            <version>${metaborg-version}</version>
+            <type>spoofax-language</type>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
