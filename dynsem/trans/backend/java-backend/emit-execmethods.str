@@ -79,7 +79,9 @@ rules
       end
   
   ds2java-throw-statement:
-    (arrow-def, ArrowType(_, bu-ty)) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
+    (a-def, ArrowType(_, bu-ty)) -> bstm* |[ throw new InterpreterException("Rule failure", e_aname, this); ]|
+    where
+      e_aname := Lit(String([Chars(<def-get-name> a-def)]))
   
   ds2java-supercall:
     (arrow-def, ArrowType(_, _)) -> bstm* |[ return super.x_methodname(e*); ]|

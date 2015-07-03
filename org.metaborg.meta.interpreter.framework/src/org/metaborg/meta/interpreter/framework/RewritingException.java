@@ -18,7 +18,7 @@ public class RewritingException extends InterpreterException {
 	}
 
 	public RewritingException(Exception ex) {
-		super("Rewriting exception", ex);
+		super("Rewriting exception", null, ex);
 	}
 
 	/**
