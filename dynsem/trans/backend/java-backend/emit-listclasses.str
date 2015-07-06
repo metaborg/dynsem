@@ -126,7 +126,7 @@ rules
           @Override
           public x_elemname head() {
             if (head == null) {
-              throw new InterpreterException("No such element exception");
+              throw new InterpreterException("No such element exception", null, this);
             }
             return head;
           }
@@ -139,7 +139,7 @@ rules
           @Override
           public x_classname tail() {
             if (tail == null) {
-              throw new InterpreterException("No such element exception");
+              throw new InterpreterException("No such element exception", null, this);
             }
             return tail;
           }

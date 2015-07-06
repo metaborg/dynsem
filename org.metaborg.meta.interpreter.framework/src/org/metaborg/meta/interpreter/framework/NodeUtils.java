@@ -49,7 +49,7 @@ public class NodeUtils {
 				}
 			}
 		} catch (IllegalAccessException e) {
-			throw new InterpreterException("Failed to rewrite", e);
+			throw new InterpreterException("Failed to rewrite", null, e);
 		}
 
 		throw new RewritingException("Cannot find child field to replace");

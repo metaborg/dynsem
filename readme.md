@@ -3,10 +3,10 @@
 
 To use DynSem in Spoofax you'll first need a Spoofax language project. Once you have that you can create a **.ds** file anywhere you want.
 
-Let's assume that the following is a fragment of the specification after explanation:
+Let's assume that your language is called *LANG*. Let's assume that the following is a fragment of the specification after explanation:
 
 ```
-  module lang
+  module LANG
 
   signature
     sorts
@@ -38,6 +38,20 @@ The evaluation of programs in this language starts on a term of sort **Expr**, e
 ## Generate Java interpreter
 
 Open the top-level file of the specification and invoke the ***All to Java*** transformation from the ***Semantics*** actions menu. This will generate a Java interpreter into the `editor/java/ds/generated/interpreter` directory.
+
+
+## Update the language project for running DynSem-derived interpreters
+
+We'll update the project to correctly include dependencies to DynSem:
+
+1. Add dependency via Maven to the interpreter framework (right click on project > ***Maven*** > ***Add Dependency***):
+    - Group id: **org.metaborg**
+    - Artifact id: **org.metaborg.meta.interpreter.framework**
+    - Version: **1.5.0-SNAPSHOT**
+2. Update Eclipse project using Maven
+3. Add dependency to **org.metaborg.meta.interpreter.framework** plugin project to the project.
+4. Configure the project builder to include DynSem-derived Java classes into the Jar
+    - Add `<property name="javajar-includes" value="LANG/strategies/, ds/**" />` to **build.main.xml**
 
 ## Invoke the interpreter from actions menu
 
@@ -76,10 +90,10 @@ We set-up the project to achieve this as follows:
 			@Override
 			public IStrategoTerm invoke(Context context, IStrategoTerm program) {
 
-				return new Generic_I_Expr(null, program).
+				return new Generic_A_Expr(null, program).
 					exec_default(
 						new PersistentTreeMap<String, Integer>(),
-						new PersistentTreeMap<Integer, I_V>()
+						new PersistentTreeMap<Integer, A_V>()
 					).toStrategoTerm(context.getFactory());
 			}
 		}
@@ -88,7 +102,7 @@ We set-up the project to achieve this as follows:
 Note the following replacements in the above fragment:
 
 * *LANG* should be replaced by your language name
-* `Expr` in `Generic_I_Expr` and in `I_Expr` correspond to the sort `Expr` of your language. For a sort `Foo` they would be `Generic_I_Foo` and `I_Foo`
+* `Expr` in `Generic_A_Expr` and in `A_Expr` correspond to the sort `Expr` of your language. For a sort `Foo` they would be `Generic_A_Foo` and `A_Foo`
 * `default` in `exec_default` corresponds to the name of the arrow (the `-->` arrow is the same as `-default->`). For an arrow named `doit` the method would called `exec_doit`.
 * The arguments of the method correspond to the semantic components of the arrow, first the read-only and then the read-write semantic components.
 
