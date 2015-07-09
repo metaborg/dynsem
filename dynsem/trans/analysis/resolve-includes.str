@@ -18,7 +18,7 @@ rules
     Module(name, section*) -> Module(name, section'*)
     where
       (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
-      section'* := <include-imports(report-err|<ds-sources-and-includes>, [])> (import*, section-noimports*)
+      section'* := <include-imports(report-err|<ds-source-and-include-locations>, [])> (import*, section-noimports*)
 
   include-imports(report-err|include-dirs, imported*):
     ([], section*) -> section*
