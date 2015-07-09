@@ -31,7 +31,7 @@ rules /* generate interfaces for sort declarations */
         
         import org.metaborg.meta.interpreter.framework.*;
         
-        public abstract class ~x:<def-get-name; ds2java-sort-classname> ty-def extends AbstractNode implements IMatchableNode {
+        public abstract class ~x:<def-get-name; ds2java-sort-to-classname> ty-def extends AbstractNode implements IMatchableNode {
           ~exec*
         }
       ]|

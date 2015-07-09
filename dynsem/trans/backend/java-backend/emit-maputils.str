@@ -61,7 +61,7 @@ rules
           return factory.makeAppl(factory.makeConstructor("Map", 2), kids);
         }
         
-        public static PersistentMap<x_kty, x_vty> x_fromterm(IStrategoTerm term) {
+        public static x_maptype x_fromterm(IStrategoTerm term) {        
 			    final Map<x_kty, x_vty> result = new TreeMap<x_kty, x_vty>();
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
@@ -86,15 +86,16 @@ rules
     where
       x_toterm := <ds2java-map2aterm-name> m-ty;
       x_fromterm := <ds2java-aterm2map-name> m-ty;
-      x_kty := <ds2java-sort-classname; ds2java-box-java-type> k-ty;
-      x_vty := <ds2java-sort-classname; ds2java-box-java-type> v-ty;
+      x_maptype := <ds2java-sort-to-classname> m-ty;
+      x_kty := <ds2java-sort-to-classname; box-primitive-type> k-ty;
+      x_vty := <ds2java-sort-to-classname; box-primitive-type> v-ty;
       e_keytrm := <ds2java-atermconversion-name(| e |[ entry.getKey() ]|)> k-ty;
       e_valtrm := <ds2java-atermconversion-name(| e |[ entry.getValue() ]|)> v-ty;
       e_key := <ds2java-gennode-instantiation> (e |[ bindAppl.getSubterm(0) ]|, k-ty);
       e_value := <ds2java-gennode-instantiation> (e |[ bindAppl.getSubterm(1) ]|, v-ty)
 
   ds2java-map2aterm-name:
-    MapType(k-ty, v-ty) -> $[map_[<ds2java-sort-classname> k-ty]_[<ds2java-sort-classname> v-ty]2aterm]
+    MapType(k-ty, v-ty) -> $[map_[<ds2java-sort-to-id> k-ty]_[<ds2java-sort-to-id> v-ty]2aterm]
 
   ds2java-aterm2map-name:
-    MapType(k-ty, v-ty) -> $[aterm2map_[<ds2java-sort-classname> k-ty]_[<ds2java-sort-classname> v-ty]]
+    MapType(k-ty, v-ty) -> $[aterm2map_[<ds2java-sort-to-id> k-ty]_[<ds2java-sort-to-id> v-ty]]

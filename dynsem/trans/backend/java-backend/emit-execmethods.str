@@ -107,24 +107,24 @@ rules
     As(Var(v), con) -> [asbound*, con-bind*]
     where
     	con-bind* := <ds2java-patternbinds> con;
-    	typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
+    	typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-to-classname> v;
       asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
   
   ds2java-patternbinds:
   	Cast(Var(v), _) -> asbound*
   	where
-      typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
+      typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-to-classname> v;
       asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
       
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
   	where
-  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-to-classname> v
 
   ds2java-patternboundbind:
   	(idx, Var(v)) -> bstm |[ final ~x:typename ~x:v = this.~x:$[_[idx]]; ]|
   	where
-  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-to-classname> v
 
   inject-try-or(on-norule-generator|arrow):
     p*@[_|_] -> p*
@@ -207,14 +207,14 @@ rules
       e_lhs := <ds2java-term-build(|ma-ty)> lhs;
       exec := <ds2java-methodname> (arrow-def, bu-ty);
       e* := <map(\ LabelComp(ty, c) -> <ds2java-term-build-optcast(|ty)> c \)> [r*, sc*];
-      vout-ty := <type-of; ds2java-sort-classname> vdec;
+      vout-ty := <type-of; ds2java-sort-to-classname> vdec;
       bstm1* := <map(?LabelComp(_, <id>)); map-with-index(ds2java-bind-out-var(|x_tmp))> tc*;
       bstm* := <ds2java-premise> on-succ*
 
   ds2java-bind-out-var(|x_result):
     (idx, Var(v)) -> bstm |[ final ~x:v-ty ~x:v = x_result.~x:$[get_[idx]](); ]|
     where
-      v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+      v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-to-classname> v
       
   ds2java-premise:
     (MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)), _, _) -> <ds2java-premise> (p, p1*, p2*)
@@ -250,7 +250,7 @@ rules
       rules(
         LiftedMethods:+ _ ->
           class-body-dec |[
-            private boolean x_antimatch(~x:<ds2java-sort-classname> vin-ty x_inputtmp) {
+            private boolean x_antimatch(~x:<ds2java-sort-to-classname> vin-ty x_inputtmp) {
               bstm0*
               return true;
             }
@@ -276,7 +276,7 @@ rules
   ds2java-premise:
     (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
       bstm* |[
-        final ~x:<ds2java-sort-classname> v-ty ~x:v = e_lhs;
+        final ~x:<ds2java-sort-to-classname> v-ty ~x:v = e_lhs;
         bstm*
       ]|
     where
@@ -314,8 +314,8 @@ rules
         }
       ]|
     where
-      hd-ty := <type-of; ds2java-sort-classname> hd;
-      tl-ty := <type-of; ds2java-sort-classname> tl;
+      hd-ty := <type-of; ds2java-sort-to-classname> hd;
+      tl-ty := <type-of; ds2java-sort-to-classname> tl;
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
@@ -367,7 +367,7 @@ rules
         }
       ]|
     where
-      ty := <rw-type; ds2java-sort-classname> ty-trm;
+      ty := <rw-type; ds2java-sort-to-classname> ty-trm;
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
@@ -435,9 +435,9 @@ rules
   	where
   		if <?ListType(_)> ex_ty
   		then
-  			x_type := <ds2java-sort-classname> ex_ty
+  			x_type := <ds2java-sort-to-classname> ex_ty
   		else
-  			x_type := <ds2java-sort-classname> ListType(ex_ty)
+  			x_type := <ds2java-sort-to-classname> ListType(ex_ty)
   		end 
   
   ds2java-term-build(|ex-ty):
@@ -452,14 +452,14 @@ rules
       else
         actual_ex_elem_ty := h-ex-elem-ty
       end;
-      x_type := <ds2java-sort-classname> ListType(actual_ex_elem_ty);
+      x_type := <ds2java-sort-to-classname> ListType(actual_ex_elem_ty);
       e_t := <ds2java-term-build(|ListType(actual_ex_elem_ty))> t-trm
   
   ds2java-term-build(|ex_ty):
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
     where
       e_t := <ds2java-term-build(|<try(rw-type)> ty-trm)> t;
-      x_ty := <try(rw-type); ds2java-sort-classname> ty-trm
+      x_ty := <try(rw-type); ds2java-sort-to-classname> ty-trm
   
   ds2java-term-build(|ex_ty):
     String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))
@@ -484,8 +484,8 @@ rules
   ds2java-term-build(|ex_ty):
     Map([Bind(key, val)]) -> e |[ new com.github.krukow.clj_lang.PersistentTreeMap<x_keyty, x_valty>().plus(e_key, e_val) ]|
     where
-      x_keyty := <type-of; ds2java-sort-classname; ds2java-box-java-type> key;
-      x_valty := <type-of; ds2java-sort-classname; ds2java-box-java-type> val;
+      x_keyty := <type-of; ds2java-sort-to-classname; box-primitive-type> key;
+      x_valty := <type-of; ds2java-sort-to-classname; box-primitive-type> val;
       e_key := <ds2java-term-build(|ALPHATYPE())> key;
       e_val := <ds2java-term-build(|ALPHATYPE())> val
 
