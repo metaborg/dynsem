@@ -132,6 +132,50 @@ strategies
     prettyprint-SignatureSection
 
   prettyprint-example =
+    prettyprint-AliasDecl
+
+  prettyprint-SignatureSection :
+    Aliases(t1__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("aliases")]
+                       )
+                     , t1__'
+                     ]
+    with t1__' := <pp-indent(|"2")> [<pp-V-list(prettyprint-AliasDecl)> t1__]
+
+  is-SignatureSection =
+    ?Aliases(_)
+
+  prettyprint-AliasDecl :
+    AliasDecl(t1__, t2__) -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [t1__', S(" : "), t2__']
+                               )
+                             ]
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Type)> t2__
+
+  is-AliasDecl =
+    ?AliasDecl(_, _)
+
+  is-SignatureSection =
+    fail
+
+  is-AliasDecl =
+    fail
+
+  prettyprint-SignatureSection :
+    amb([h|hs]) -> <prettyprint-SignatureSection> h
+
+  prettyprint-AliasDecl :
+    amb([h|hs]) -> <prettyprint-AliasDecl> h
+
+
+strategies
+  prettyprint-example =
+    prettyprint-SignatureSection
+
+  prettyprint-example =
     prettyprint-ConsAnnos
 
   prettyprint-example =

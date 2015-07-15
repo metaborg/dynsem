@@ -459,6 +459,30 @@ rules
       ty-from-def := <lookup-def(|Types())> ty-from;
       NativeSort() := <lookup-prop(|SortKind())> ty-from-def;
       sup-ty := <lookup-prop(|SuperType())> ty-from-def
+  
+  type-coerce(coerce-s):
+    (ty-from, ty-to) -> <type-coerce(coerce-s)> (<get-alias-base> ty-from, ty-to)
+    where
+      <is-alias> ty-from
+  
+  type-coerce(coerce-s):
+    (ty-from, ty-to) -> <type-coerce(coerce-s)> (ty-from, <get-alias-base> ty-to)
+    where
+      <is-alias> ty-to
+
+  is-alias = where(lookup-def(|Types()); lookup-prop(|SortKind()) => AliasSort())
+  
+  get-alias-base:
+    ty -> ty'
+    where
+	    if
+        ty-def := <lookup-def(|Types())>;
+	      <lookup-prop(|SortKind())> ty-def => AliasSort()
+	    then
+	      ty' := <lookup-prop(|Type()); get-alias-base> ty-def
+	    else
+	      ty' := ty
+	    end
 
   type-coerce(coerce-s):
     (ListType(ty-from), ListType(ty-to)) -> ListType(<coerce-s> (ty-from, ty-to))

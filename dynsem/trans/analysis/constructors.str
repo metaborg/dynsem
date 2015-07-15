@@ -49,6 +49,7 @@ signature
     LanguageSort: SortKind
   	NativeSort: SortKind
   	SystemSort: SortKind
+  	AliasSort: SortKind
   	
   	ConsKind: Property
   	LanguageCons: ConsKind

@@ -18,6 +18,10 @@ signature
     VariableScheme  : ID * Type -> VariableScheme
 
   constructors
+    Aliases   : List(AliasDecl) -> SignatureSection
+    AliasDecl : ID * Type -> AliasDecl
+
+  constructors
     Constructors    : List(ConsDecl) -> SignatureSection
     NullaryConsDecl : ID * Type * ConsAnnos -> ConsDecl
     ConsDecl        : ID * List(Type) * Type * ConsAnnos -> ConsDecl

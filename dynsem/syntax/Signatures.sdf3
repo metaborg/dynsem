@@ -26,6 +26,14 @@ context-free syntax // variable schemes
   
   VariableScheme.VariableScheme = [[ID] : [Type]]
 
+context-free syntax // variable schemes
+  
+  SignatureSection.Aliases = <
+    aliases
+      <{AliasDecl "\n"}*>>
+  
+  AliasDecl.AliasDecl = [[ID] : [Type]]
+
 context-free syntax // constructor declarations
 
   SignatureSection.Constructors = <

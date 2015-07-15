@@ -17,6 +17,7 @@ rules /* store signatures */
       <+ store-arrows
       <+ store-native-datatypes
       <+ store-variable-schemes
+      <+ store-aliases
     ))
   
   store-built-ins =
@@ -105,6 +106,15 @@ rules /* store signatures */
     with
       <store-def(|VarSchemes())> prefix => scheme-def;
       <store-prop(|Type(), scheme-def)> <rw-type> ty
+
+  store-aliases = Aliases(map(store-alias))
+  
+  store-alias:
+    d@AliasDecl(name, ty) -> d
+    with
+      <store-def(|Types())> name => alias-ty-def;
+      <store-prop(|SortKind(), alias-ty-def)> AliasSort();
+      <store-prop(|Type(), alias-ty-def)> <rw-type> ty
 
 rules
   
