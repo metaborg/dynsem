@@ -6,6 +6,7 @@ imports
   analysis/constructors
   analysis/rename
   analysis/query
+  analysis/analysis-signatures
 	pp
   ds
   lib-ds
@@ -469,20 +470,6 @@ rules
     (ty-from, ty-to) -> <type-coerce(coerce-s)> (ty-from, <get-alias-base> ty-to)
     where
       <is-alias> ty-to
-
-  is-alias = where(lookup-def(|Types()); lookup-prop(|SortKind()) => AliasSort())
-  
-  get-alias-base:
-    ty -> ty'
-    where
-	    if
-        ty-def := <lookup-def(|Types())>;
-	      <lookup-prop(|SortKind())> ty-def => AliasSort()
-	    then
-	      ty' := <lookup-prop(|Type()); get-alias-base> ty-def
-	    else
-	      ty' := ty
-	    end
 
   type-coerce(coerce-s):
     (ListType(ty-from), ListType(ty-to)) -> ListType(<coerce-s> (ty-from, ty-to))

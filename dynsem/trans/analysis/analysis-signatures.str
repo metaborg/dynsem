@@ -116,6 +116,24 @@ rules /* store signatures */
       <store-prop(|SortKind(), alias-ty-def)> AliasSort();
       <store-prop(|Type(), alias-ty-def)> <rw-type> ty
 
+  is-alias = where(lookup-def(|Types()); lookup-prop(|SortKind()) => AliasSort())
+  
+  get-alias-base = get-alias-base(|[<id>])
+  
+  get-alias-base(|acc):
+    ty -> ty'
+    where
+      if
+        ty-def := <lookup-def(|Types())>;
+        <lookup-prop(|SortKind())> ty-def => AliasSort()
+      then
+        ty-alias := <lookup-prop(|Type())> ty-def;
+        <not(fetch-elem(?ty-alias))> acc;
+        ty' := <get-alias-base(|[ty-alias | acc])> ty-alias
+      else
+        ty' := ty
+      end
+  
 rules
   
   check-signatures = alltd(check-signature)
@@ -166,4 +184,5 @@ rules
     arrow-ty* := <lookup-props(|Type()); filter(not(?ArrowType(in-ty, out-ty))); make-set> arrow-def;
     <fetch-elem(?ArrowType(<id>, _); !(<id>, in-ty); type-coerce-sym(type-coerce-full(id)))> arrow-ty*;
     add-msg(|Error(), decl, $[Arrow LHS overlaps with another arrow with the same name])
+
     
