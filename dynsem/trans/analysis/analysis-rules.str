@@ -107,7 +107,6 @@ rules
   type-check-expectation-wrap(coerce|t):
     (expected-ty, actual-ty) -> <type-check-expectation(coerce|t, expected-ty)> actual-ty
 
-
   type-check-build =
   	type-check-build-helper
   	<+ type-err-build-match-symbols
@@ -178,7 +177,7 @@ rules
     List([]) -> ListType(ALPHATYPE())
 
   type-check-build-list:
-    ListTail([h], t) -> <type-coerce-full(fail)> (ListType(h-ty), t-ty)
+    ListTail([h], t) -> <type-coerce-sym(type-coerce-full(fail))> (ListType(h-ty), t-ty)
     where
       t-ty := <type-check-build> t;
       h-ty := <type-check-build> h
@@ -193,7 +192,7 @@ rules
       v-ty := <type-check-build> v-t
   
   type-check-build-map:
-    MapExtend(map1, map2) -> <type-coerce-full(fail)> (map1-ty, map2-ty)
+    MapExtend(map1, map2) -> <type-coerce-sym(type-coerce-full(fail))> (map1-ty, map2-ty)
     where
       map1-ty := <type-check-build> map1;
       map2-ty := <type-check-build> map2
@@ -474,26 +473,44 @@ rules
     (IntType(), RealType()) -> RealType()
   
   type-coerce(coerce-s):
-    (MapType(a-k-ty, a-v-ty), to-ty) -> to-ty
+    (MapType(a-k-ty, a-v-ty), MapType(t-k-ty, t-v-ty)) -> MapType(k-ty, v-ty)
     where
+      k-ty := <coerce-s> (a-k-ty, t-k-ty);
+      v-ty := <coerce-s> (a-v-ty, t-v-ty)
+  
+  type-coerce(coerce-s):
+    (from-map-ty@MapType(_, _), to-ty) -> <type-coerce(coerce-s)> (from-map-ty, to-map-ty)
+    where
+      <not(?MapType(_, _))> to-ty;
       <lookup-def(|Types())> to-ty => to-ty-def;
       <lookup-prop(|SortKind())> to-ty-def => SemanticCompSort();
-      <lookup-prop(|SuperType())> to-ty-def => MapType(e-k-ty, e-v-ty);
-      <coerce-s> (a-k-ty, e-k-ty);
-      <coerce-s> (a-v-ty, e-v-ty)
+      <lookup-prop(|SuperType())> to-ty-def => to-map-ty
+  
+  type-coerce(coerce-s):
+    (from-ty, to-map-ty@MapType(_, _)) -> <type-coerce(coerce-s)> (from-map-ty, to-map-ty)
+    where
+      <not(?MapType(_, _))> from-ty;
+      <lookup-def(|Types())> from-ty => from-ty-def;
+      <lookup-prop(|SortKind())> from-ty-def => SemanticCompSort();
+      <lookup-prop(|SuperType())> from-ty-def => from-map-ty
 
   type-coerce-implicit(is-matching, coerce-s):
     (ty-from, ty-to) -> ty-to'
     where
       is-matching < mode := MatchMode() + mode := BuildMode()
     where
-      step-def := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
+      (step-def, step-def-ty) := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
       (
         <def-get-namespace> step-def => Arrows();
-        ArrowType(_, ty-to') := <lookup-prop(|Type())> step-def
+        ArrowType(_, ty-to') := step-def-ty
         <+
         <def-get-namespace> step-def => Constructors();
-        ConstructorType(_, ty-to') := <lookup-prop(|Type())> step-def
+        if is-matching
+        then
+          ConstructorType([ty-to'], _) := step-def-ty
+        else
+          ConstructorType(_, ty-to') := step-def-ty
+        end
       )
 
   // initialize the memo table with the implicit constructors and arrows as paths
@@ -506,13 +523,13 @@ rules
   
   store-prime-conspath:
     c-def -> c-def
-    where {in-ty, out-ty:
-      <lookup-prop(|Type())> c-def => ConstructorType([in-ty], out-ty);
+    where {in-ty, out-ty, c-ty:
+      <lookup-prop(|Type())> c-def => c-ty@ConstructorType([in-ty], out-ty);
       rules(
-        MemoTyPath: (in-ty, out-ty, BuildMode()) -> [c-def]
+        MemoTyPath: (in-ty, out-ty, BuildMode()) -> [(c-def, c-ty)]
         MemoTyTrans:+ (in-ty, BuildMode()) -> out-ty
 
-        MemoTyPath: (out-ty, in-ty, MatchMode()) -> [c-def]
+        MemoTyPath: (out-ty, in-ty, MatchMode()) -> [(c-def, c-ty)]
         MemoTyTrans:+ (out-ty, MatchMode()) -> in-ty
       )
     }
@@ -521,11 +538,27 @@ rules
     a-def -> a-def
     where
       <lookup-props(|Type())> a-def;
-      map({in-ty, out-ty:
-        ?ArrowType(in-ty, out-ty);
+      map({in-ty, out-ty, a-ty, tmp-out-ty:
+        ?a-ty@ArrowType(in-ty, out-ty);
+        {out-ty-def, extra-out-ty:
+          // HACK: to handle arrows reducing into a semantic component sort. no longer necessary with new dynamic components
+	        if 
+	          out-ty-def := <lookup-def(|Types())> out-ty;
+	          <lookup-prop(|SortKind())> out-ty-def => SemanticCompSort()
+	        then
+	          extra-out-ty := <lookup-prop(|SuperType())> out-ty-def;
+	          rules(
+		          MemoTyPath: (in-ty, extra-out-ty, BuildMode()) -> [(a-def, a-ty)]
+		          MemoTyPath: (in-ty, extra-out-ty, MatchMode()) -> [(a-def, a-ty)]
+		          MemoTyTrans:+ (in-ty, BuildMode()) -> extra-out-ty
+		          MemoTyTrans:+ (in-ty, MatchMode()) -> extra-out-ty
+		        )
+	        end
+	        // END HACK
+        };
         rules(
-          MemoTyPath: (in-ty, out-ty, BuildMode()) -> [a-def]
-          MemoTyPath: (in-ty, out-ty, MatchMode()) -> [a-def]
+          MemoTyPath: (in-ty, out-ty, BuildMode()) -> [(a-def, a-ty)]
+          MemoTyPath: (in-ty, out-ty, MatchMode()) -> [(a-def, a-ty)]
           MemoTyTrans:+ (in-ty, BuildMode()) -> out-ty
           MemoTyTrans:+ (in-ty, MatchMode()) -> out-ty
         )

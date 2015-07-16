@@ -16,13 +16,15 @@ public class InterpreterExitException extends InterpreterException {
 
 	private int exitValue;
 
-	public InterpreterExitException(String msg, Throwable t, int exitValue) {
-		super(msg, t);
+	public InterpreterExitException(String msg, String arrowname, Object term,
+			Throwable t, int exitValue) {
+		super(msg, arrowname, term, t);
 		this.exitValue = exitValue;
 	}
 
-	public InterpreterExitException(Throwable t, int exitValue) {
-		super(t);
+	
+	public InterpreterExitException(Object term, Throwable t, int exitValue) {
+		super(null, null, term, t);
 	}
 
 	public int getValue() {

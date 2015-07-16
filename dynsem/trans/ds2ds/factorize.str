@@ -98,7 +98,16 @@ rules // lift constructor sub-terms in match
     factorize-match-in-premise
     <+ factorize-termeq-in-premise
     <+ factorize-relation-in-premise
-    
+  
+  factorize-match-in-premise:
+    Formula(Match(lhs, rhs)) -> [p-lhs*, Formula(Match(lhs', rhs')) ,p-rhs*]
+    where
+      <is-build-nonprime-factor> lhs;
+      <not(is-prime-factor)> rhs;
+      (p-lhs*, lhs') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> lhs;
+      (p-rhs*, rhs') := <lift-match-on-cond(not(is-prime-factor), ?success)> rhs;
+      !success
+  
   factorize-match-in-premise:
     Formula(Match(lhs, rhs)) -> [p-lhs*, Formula(Match(lhs', rhs))]
     where
@@ -180,6 +189,7 @@ rules
     factorize-constructors-in-build
     <+ factorize-sortfuncall-in-build
     <+ factorize-listtail-in-build
+    <+ factorize-mapextend-in-build
     <+ factorize-mapselect-in-build
     <+ factorize-cast-in-build
 
@@ -203,8 +213,14 @@ rules
       (prem2*, xs') := <lift-build-on-cond(is-build-nonprime-factor, ?success2)> xs;
       (!success1 <+ !success2)
   
-  factorize-mapselect-in-build:
+  factorize-mapextend-in-build:
     MapExtend(l, r) -> (prem*, MapExtend(l, r'))
+    where
+      (prem*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
+      !success
+
+  factorize-mapselect-in-build:
+    MapSelect(l, r) -> (prem*, MapSelect(l, r'))
     where
       (prem*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
       !success
