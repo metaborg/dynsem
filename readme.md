@@ -13,9 +13,9 @@ Let's assume that your language is called *LANG*. Let's assume that the followin
       Expr
       V
 
-    semantic-components
-      Env -> Map<String, Int>
-      Sto -> Map<Int, V>
+    aliases
+      Env : Map<String, Int>
+      Sto : Map<Int, V>
 
     constructors
       Plus: Expr * Expr -> Expr
@@ -108,6 +108,27 @@ Note the following replacements in the above fragment:
 
 Once the project is built, an open program can be evaluated by invoking the ***Interpreter*** > ***Evaluate*** action. In the example above the evaluation will result in a term *R_Result_V(res, sto)* where *res* has sort *V* and *sto* is an ATerm representation of the *Sto* semantic component
 
+### Changenotes 17/07/2015
+
+- Eliminated `semantic-components` section
+- Maps can be declared and used everywhere
+- Implements a new signature sections `aliases` where sort aliases can be declared.
+
+#### Updating specifications
+
+Specification which have `semantic-components` sections to declare synonyms for maps will need to declare the maps differently. A specification section declaring `semantic-components` such as:
+
+```
+semantic-components
+  Env -> Map<String, Value>
+```
+
+should be rewritten to:
+
+```
+aliases
+  Env : Map<String, Value>
+```
 
 ### Changenotes 26/05/2015
 
