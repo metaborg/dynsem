@@ -64,10 +64,10 @@ rules
       ]|
     where
       <type-is-adoptable-list> ty;
-      x_ty := <?ListType(<id>); ds2java-sort-classname> ty;
+      x_ty := <?ListType(<id>); ds2java-sort-to-classname> ty;
       x_idx := <mkidx> idx;
       x_idxelem := $[[x_idx]_elem];
       x_idxlist := $[[x_idx]_list];
-      x_listty := <ds2java-sort-classname> ty
+      x_listty := <ds2java-sort-to-classname> ty
 
 

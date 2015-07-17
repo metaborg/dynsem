@@ -17,9 +17,9 @@ signature
     Property
 
   constructors
-    SuperType: Property
     Type: Property
     NativeTypeJString: Property
+    NativeTypeSuperType : Property
     Use: Property
     
 signature
@@ -47,9 +47,9 @@ signature
   constructors
     SortKind: Property
     LanguageSort: SortKind
-  	SemanticCompSort: SortKind
   	NativeSort: SortKind
   	SystemSort: SortKind
+  	AliasSort: SortKind
   	
   	ConsKind: Property
   	LanguageCons: ConsKind

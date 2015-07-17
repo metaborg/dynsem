@@ -25,6 +25,14 @@ exports
     CONTENTCOMPLETE -> VariableScheme   {cons("COMPLETION-VariableScheme")}
 
   context-free syntax
+    "aliases" AliasDecl* -> SignatureSection {cons("Aliases")}
+    ID ":" Type          -> AliasDecl        {cons("AliasDecl")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
+    CONTENTCOMPLETE -> AliasDecl        {cons("COMPLETION-AliasDecl")}
+
+  context-free syntax
     "constructors" ConsDecl*               -> SignatureSection {cons("Constructors")}
     ID ":" Type ConsAnnos                  -> ConsDecl         {cons("NullaryConsDecl")}
     ID ":" {Type "*"}+ "->" Type ConsAnnos -> ConsDecl         {cons("ConsDecl")}
@@ -44,14 +52,6 @@ exports
     CONTENTCOMPLETE -> ConsDecl         {cons("COMPLETION-ConsDecl")}
     CONTENTCOMPLETE -> Type             {cons("COMPLETION-Type")}
     CONTENTCOMPLETE -> MapType          {cons("COMPLETION-MapType")}
-
-  context-free syntax
-    "semantic" "components" SemanticCompDecl* -> SignatureSection {cons("SemanticComponents")}
-    ID "->" MapType                           -> SemanticCompDecl {cons("SemanticComponent")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> SemanticCompDecl {cons("COMPLETION-SemanticCompDecl")}
 
   context-free syntax
     "native" "datatypes" NativeTypeDecl*                 -> SignatureSection   {cons("NativeDataTypes")}

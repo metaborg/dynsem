@@ -124,6 +124,47 @@ strategies
     check-SignatureSection
 
   check-example =
+    check-AliasDecl
+
+  check-SignatureSection :
+    Aliases(t1__) -> <id>
+    with <map(check-AliasDecl <+ error-AliasDecl)> t1__
+
+  is-SignatureSection-with-constructor =
+    ?Aliases(_)
+
+  check-AliasDecl :
+    AliasDecl(t1__, t2__) -> <id>
+    with <(check-ID <+ error-ID)> t1__
+    with <(check-Type <+ error-Type)> t2__
+
+  is-AliasDecl-with-constructor =
+    ?AliasDecl(_, _)
+
+  is-SignatureSection-with-constructor =
+    fail
+
+  is-AliasDecl-with-constructor =
+    fail
+
+  check-SignatureSection :
+    amb([h|hs]) -> <check-SignatureSection> h
+
+  check-AliasDecl :
+    amb([h|hs]) -> <check-AliasDecl> h
+
+  error-SignatureSection =
+    debug(!"Unexpected constructor. Expected constructor from sort SignatureSection instead. ")
+
+  error-AliasDecl =
+    debug(!"Unexpected constructor. Expected constructor from sort AliasDecl instead. ")
+
+
+strategies
+  check-example =
+    check-SignatureSection
+
+  check-example =
     check-ConsAnnos
 
   check-example =
@@ -272,47 +313,6 @@ strategies
 
   error-MapType =
     debug(!"Unexpected constructor. Expected constructor from sort MapType instead. ")
-
-
-strategies
-  check-example =
-    check-SignatureSection
-
-  check-example =
-    check-SemanticCompDecl
-
-  check-SignatureSection :
-    SemanticComponents(t1__) -> <id>
-    with <map(check-SemanticCompDecl <+ error-SemanticCompDecl)> t1__
-
-  is-SignatureSection-with-constructor =
-    ?SemanticComponents(_)
-
-  check-SemanticCompDecl :
-    SemanticComponent(t1__, t2__) -> <id>
-    with <(check-ID <+ error-ID)> t1__
-    with <(check-MapType <+ error-MapType)> t2__
-
-  is-SemanticCompDecl-with-constructor =
-    ?SemanticComponent(_, _)
-
-  is-SignatureSection-with-constructor =
-    fail
-
-  is-SemanticCompDecl-with-constructor =
-    fail
-
-  check-SignatureSection :
-    amb([h|hs]) -> <check-SignatureSection> h
-
-  check-SemanticCompDecl :
-    amb([h|hs]) -> <check-SemanticCompDecl> h
-
-  error-SignatureSection =
-    debug(!"Unexpected constructor. Expected constructor from sort SignatureSection instead. ")
-
-  error-SemanticCompDecl =
-    debug(!"Unexpected constructor. Expected constructor from sort SemanticCompDecl instead. ")
 
 
 strategies

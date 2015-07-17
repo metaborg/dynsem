@@ -18,6 +18,10 @@ signature
     VariableScheme  : ID * Type -> VariableScheme
 
   constructors
+    Aliases   : List(AliasDecl) -> SignatureSection
+    AliasDecl : ID * Type -> AliasDecl
+
+  constructors
     Constructors    : List(ConsDecl) -> SignatureSection
     NullaryConsDecl : ID * Type * ConsAnnos -> ConsDecl
     ConsDecl        : ID * List(Type) * Type * ConsAnnos -> ConsDecl
@@ -29,10 +33,6 @@ signature
     ListSort        : Type -> Type
                     : MapType -> Type
     MapSort         : Type * Type -> MapType
-
-  constructors
-    SemanticComponents : List(SemanticCompDecl) -> SignatureSection
-    SemanticComponent  : ID * MapType -> SemanticCompDecl
 
   constructors
     NativeDataTypes         : List(NativeTypeDecl) -> SignatureSection

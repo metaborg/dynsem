@@ -16,8 +16,8 @@ rules /* store signatures */
       <+ store-native-operators
       <+ store-arrows
       <+ store-native-datatypes
-      <+ store-semantic-components
       <+ store-variable-schemes
+      <+ store-aliases
     ))
   
   store-built-ins =
@@ -90,7 +90,7 @@ rules /* store signatures */
       <store-def(|Types())> name => name-def;
       <store-prop(|SortKind(), name-def)> NativeSort();
       <store-prop(|NativeTypeJString(), name-def)> javastring;
-      <store-prop(|SuperType(), name-def)> sup;
+      <store-prop(|NativeTypeSuperType(), name-def)> sup;
       <map(store-native-datatype-op(|name-def))> func*
       
   store-native-datatype-op(|par-def):
@@ -98,15 +98,6 @@ rules /* store signatures */
     with
       <store-def(|NativeDTFun(par-def))> name => name-def;
       <store-prop(|Type(), name-def)> FunctionType(<rw-type> arg*, <rw-type> s)
-
-  store-semantic-components = SemanticComponents(map(store-semantic-component))
-  
-  store-semantic-component:
-    d@SemanticComponent(name, MapSort(key-ty, val-ty)) -> d
-    with
-      <store-def(|Types())> name => name-def;
-      <store-prop(|SortKind(), name-def)> SemanticCompSort();
-      <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
 
   store-variable-schemes = VariableSchemes(map(store-variable-scheme))
   
@@ -116,54 +107,92 @@ rules /* store signatures */
       <store-def(|VarSchemes())> prefix => scheme-def;
       <store-prop(|Type(), scheme-def)> <rw-type> ty
 
+  store-aliases = Aliases(map(store-alias))
+  
+  store-alias:
+    d@AliasDecl(name, ty) -> d
+    with
+      <store-def(|Types())> name => alias-ty-def;
+      <store-prop(|SortKind(), alias-ty-def)> AliasSort();
+      <store-prop(|Type(), alias-ty-def)> <rw-type> ty
+
+  is-alias = where(lookup-def(|Types()); lookup-prop(|SortKind()) => AliasSort())
+  
+  get-alias-base = get-alias-base(|[<id>])
+  
+  get-alias-base(|acc):
+    ty -> ty'
+    where
+      if
+        ty-def := <lookup-def(|Types())>;
+        <lookup-prop(|SortKind())> ty-def => AliasSort()
+      then
+        ty-alias := <lookup-prop(|Type())> ty-def;
+        <not(fetch-elem(?ty-alias))> acc;
+        ty' := <get-alias-base(|[ty-alias | acc])> ty-alias
+      else
+        ty' := ty
+      end
+  
 rules
   
   check-signatures = alltd(check-signature)
   
-  check-signature =
-    ?SimpleSort(s);
-    <id-to-type; not(lookup-def(|Types()))> s;
-    add-msg(|Error(), s, $[Sort [s] is not declared])
-
-  check-signature =
-    (
-      ?SortDecl(s)
-      + ?NativeBaseTypeDecl(_, s, _)
-      + ?NativeSubTypeDecl(_, s, _, _)
-    );
-    <lookup-defs(|Types())> s => [_, _ | _];
-    add-msg(|Error(), s, $[Duplicate sort [s]])
+  check-signature:
+    SimpleSort(s) -> <fail>
+    where
+      <id-to-type; not(lookup-def(|Types()))> s;
+      add-msg(|Error(), s, $[Sort [s] is not declared])
   
-  check-signature =
-    ?vs@VariableScheme(prefix, _);
-    <get-matching-varschemes> prefix => [_, _ | _];
-    add-msg(|Error(), vs, $[Duplicate or overlapping variable prefix [prefix]])
+  check-signature:
+    <?SortDecl(s)
+    + ?AliasDecl(s, _)
+    + ?NativeBaseTypeDecl(_, s, _)
+    + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
+    where
+      <lookup-defs(|Types())> s => [_, _ | _];
+      add-msg(|Error(), s, $[Duplicate sort [s]])
   
-  check-signature =
-    ?Con(cname, _);
-    <not(lookup-def(|Constructors()))> cname;
-    add-msg(|Error(), cname, $[Constructor [cname] is not declared])
+  check-signature:
+    d@AliasDecl(s, _) -> <fail>
+    where
+      <is-alias; not(get-alias-base)> s;
+      <add-msg(|Error(), s, $[Inconsistent aliasing chain for sort [s]])> d
   
-  check-signature =
-    (
-      ?NativeOpDecl(c, _, _)
-      + ?ConsDecl(c, _, _, _)
-      + ?NativeConsDecl(c, _, _)
-    );
-    <lookup-defs(|Constructors())> c => [_, _ | _];
-    add-msg(|Error(), c, $[Duplicate constructor [c]])
+  check-signature:
+    vs@VariableScheme(prefix, _) -> <fail>
+    where
+	    <get-matching-varschemes> prefix => [_, _ | _];
+	    add-msg(|Error(), vs, $[Duplicate or overlapping variable prefix [prefix]])
+  
+  check-signature:
+    Con(cname, _) -> <fail>
+    where
+      <not(lookup-def(|Constructors()))> cname;
+      add-msg(|Error(), cname, $[Constructor [cname] is not declared])
+  
+  check-signature:
+    <?NativeOpDecl(c, _, _)
+    + ?ConsDecl(c, _, _, _)
+    + ?NativeConsDecl(c, _, _)> -> <fail>
+    where
+      <lookup-defs(|Constructors())> c => [_, _ | _];
+      add-msg(|Error(), c, $[Duplicate constructor [c]])
 
-  check-signature =
-    ?ConsDecl(c, [_, _ | _], _, <id>);
-    fetch-elem(?ImplicitAnno());
-    add-msg(|Error(), c, $[Only unary constructors may be implicit])
+  check-signature:
+    ConsDecl(c, [_, _ | _], _, <id>) -> <fail>
+    where
+      fetch-elem(?ImplicitAnno());
+      add-msg(|Error(), c, $[Only unary constructors may be implicit])
 
-  check-signature =
-    ?decl@ArrowDecl(in-srt, name, out-srt);
-    in-ty := <rw-type> in-srt;
-    out-ty := <rw-type> out-srt;
-    arrow-def := <lookup-def(|Arrows())> name;
-    arrow-ty* := <lookup-props(|Type()); filter(not(?ArrowType(in-ty, out-ty))); make-set> arrow-def;
-    <fetch-elem(?ArrowType(<id>, _); !(<id>, in-ty); type-coerce-sym(type-coerce-full(id)))> arrow-ty*;
-    add-msg(|Error(), decl, $[Arrow LHS overlaps with another arrow with the same name])
+  check-signature:
+    decl@ArrowDecl(in-srt, name, out-srt) -> <fail>
+    where
+	    in-ty := <rw-type> in-srt;
+	    out-ty := <rw-type> out-srt;
+	    arrow-def := <lookup-def(|Arrows())> name;
+	    arrow-ty* := <lookup-props(|Type()); filter(not(?ArrowType(in-ty, out-ty))); make-set> arrow-def;
+	    <fetch-elem(?ArrowType(<id>, _); !(<id>, in-ty); type-coerce-sym(type-coerce-full(id)))> arrow-ty*;
+	    add-msg(|Error(), decl, $[Arrow LHS overlaps with another arrow with the same name])
+
     

@@ -23,6 +23,7 @@ imports
 	ds2ds/expand-implicits
 	ds2ds/desugar-varschemes
 	ds2ds/extra-typeannos
+	ds2ds/desugar-aliases
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
@@ -134,6 +135,14 @@ rules // Builders
         result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; add-extra-typeannos-module; sugar-all; pp-debug> ast
       |project-path)
 
+  desugar-aliases-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"noaliases.ds")> path;
+      in-project-path(
+        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; desugar-aliases-module; sugar-all; pp-debug> ast
+      |project-path)
+
   expand-implicits-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
@@ -209,6 +218,9 @@ rules // Builders
 	          add-extra-typeannos-module | "Adding extra typeannos"
 	        );
 	        log-timed(
+            desugar-aliases-module | "Desugaring aliases"
+          );
+	        log-timed(
 	          factorize-module | "Factorization 1/2"
 	        );
 	        log-timed(
@@ -252,6 +264,9 @@ rules // Builders
 	        );
 	        log-timed(
 	          add-extra-typeannos-module | "Adding extra typeannos"
+	        );
+	        log-timed(
+	          desugar-aliases-module | "Desugaring aliases"
 	        );
 	        log-timed(
 	          factorize-module | "Factorization 1/2"

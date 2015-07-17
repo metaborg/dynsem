@@ -5,95 +5,95 @@ imports
   analysis/constructors
   analysis/lib-analysis
 
-rules /* name generation */
+rules /* projections of types to names */
 
-  ds2java-sort-classname:
-    ListType(ALPHATYPE()) -> "NIL"
+  ds2java-sort-to-classname = ds2java-sort-to-name(id)
   
-  ds2java-sort-classname:
-    ListType(ety) -> $[L_[ety-str]]
+  ds2java-sort-to-id = ds2java-sort-to-name(fail)
+
+  ds2java-sort-to-name(is-classname):
+    ty -> ty-str
     where
-      <not(?ALPHATYPE())> ety
-    where
-      ety-str := <ds2java-listsort-elemname; ds2java-box-java-type> ety
-      
-  ds2java-listsort-elemname:
-    ty -> <def-get-name> ty-def
+      ty-def := <lookup-def(|Types())> ty;
+      NativeSort() := <lookup-prop(|SortKind())> ty-def;
+      if is-classname
+      then
+        ty-str := <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
+      else
+        ty-str := <def-get-name> ty-def
+      end
+  
+  ds2java-sort-to-name(is-classname):
+    ty -> $[A_[<def-get-name> ty-def]]
     where
       ty-def := <lookup-def(|Types())> ty;
       ty-kind := <lookup-prop(|SortKind())> ty-def;
-      (
-        !ty-kind => SemanticCompSort()
-        <+
-        !ty-kind => NativeSort()
-      )  
+      <not(?SystemSort() <+ ?NativeSort())> ty-kind
   
-  ds2java-listsort-elemname:
-    ty -> <def-get-name> ty-def
+  ds2java-sort-to-name(is-classname):
+    ListType(ALPHATYPE()) -> "NIL"
+
+  ds2java-sort-to-name(is-classname):
+    ListType(ety) -> $[L_[<ds2java-sort-to-name(fail)> ety]]
     where
-      ty-def := <lookup-def(|Types())> ty;
-      NativeSort() := <lookup-prop(|SortKind())> ty-def
-  
-  ds2java-listsort-elemname = ds2java-sort-classname
-  
-  ds2java-sort-classname:
+      <not(?ALPHATYPE())> ety
+      
+  ds2java-sort-to-name(is-classname):
     MapType(ALPHATYPE(), ALPHATYPE()) -> $[com.github.krukow.clj_ds.PersistentMap<?, ?>]
+    where is-classname
   
-  ds2java-sort-classname:
-  	MapType(kty, vty) -> $[com.github.krukow.clj_ds.PersistentMap<[kty-str], [vty-str]>]
-  	where not(
-  	  !(kty, vty) => (ALPHATYPE(), ALPHATYPE())
-  	)
-  	where
-  		kty-str := <ds2java-sort-classname; try(ds2java-box-primitive-java-type)> kty;
-  		vty-str := <ds2java-sort-classname; try(ds2java-box-primitive-java-type)> vty
-  
-  ds2java-sort-classname:
-    ty -> <ds2java-sort-classname> ty'
+  ds2java-sort-to-name(is-classname):
+    MapType(kty, vty) -> $[com.github.krukow.clj_ds.PersistentMap<[kty-str], [vty-str]>]
     where
-      ty-def := <lookup-def(|Types())> ty;
-      SemanticCompSort() := <lookup-prop(|SortKind())> ty-def;
-      ty' := <lookup-prop(|SuperType())> ty-def
+      is-classname;
+      <not(?ALPHATYPE())> kty;
+      <not(?ALPHATYPE())> vty
+    where
+     kty-str := <ds2java-sort-to-name(box-primitive-type)> kty;
+     vty-str := <ds2java-sort-to-name(box-primitive-type)> vty
   
-  ds2java-sort-classname:
-  	ty -> <ds2java-systemsort-classname> ty-def
-  	where
-  		ty-def := <lookup-def(|Types())> ty;
-  		SystemSort() := <lookup-prop(|SortKind())> ty-def
-
-  ds2java-sort-classname:
-  	ty -> <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
-  	where
-  		ty-def := <lookup-def(|Types())> ty;
-  		NativeSort() := <lookup-prop(|SortKind())> ty-def
+  ds2java-sort-to-name(is-classname):
+    MapType(ALPHATYPE(), ALPHATYPE()) -> $[Map]
+    where not(is-classname)
   
-  ds2java-sort-classname:
-  	ty -> $[A_[<def-get-name> ty-def]]
-  	where
-  		ty-def := <lookup-def(|Types())> ty
+  ds2java-sort-to-name(is-classname):
+    MapType(kty, vty) -> $[Map_[kty-str]_[vty-str]>]
+    where
+      not(is-classname);
+      <not(?ALPHATYPE())> kty;
+      <not(?ALPHATYPE())> vty
+    where
+     kty-str := <ds2java-sort-to-name(fail)> kty;
+     vty-str := <ds2java-sort-to-name(fail)> vty
 
-  ds2java-systemsort-classname:
-  	(Types(), IntType()) -> "int"
+  ds2java-sort-to-name(is-classnamee):
+    IntType() -> "int" 
   
-  ds2java-systemsort-classname:
-  	(Types(), RealType()) -> "double"
+  ds2java-sort-to-name(is-classname):
+    RealType() -> "double"
 
-  ds2java-systemsort-classname:
-  	(Types(), BoolType()) -> "boolean"
+  ds2java-sort-to-name(is-classname):
+    BoolType() -> "boolean"
 
-  ds2java-systemsort-classname:
-  	(Types(), StringType()) -> "String"
+  ds2java-sort-to-name(is-classname):
+    StringType() -> "String"
 
-  ds2java-box-java-type = try(ds2java-box-primitive-java-type)
-  
-  ds2java-box-primitive-java-type:
+  ds2java-sort-to-name(is-classname) = is-string
+
+  box-primitive-type = try(do-box-primitive-type)
+
+  do-box-primitive-type:
     "int" -> "Integer"
 
-  ds2java-box-primitive-java-type:
+  do-box-primitive-type:
     "double" -> "Double"
   
-  ds2java-box-primitive-java-type:
+  do-box-primitive-type:
     "boolean" -> "Boolean"
+
+
+rules /* name generation */
+
 
   pp-type-java =
     ?ListType(e); !$[List_[<pp-type-java> e]_]

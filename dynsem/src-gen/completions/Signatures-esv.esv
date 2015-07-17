@@ -19,6 +19,12 @@ completions
     <ID:ID> " : " <Type:Type>  
 
 completions
+  completion template SignatureSection : "aliases " =
+    "aliases\n\t" (cursor) (blank)  
+  completion template AliasDecl : "ID : Type" =
+    <ID:ID> " : " <Type:Type>  
+
+completions
   completion template SignatureSection : "constructors " =
     "constructors\n\t" (cursor) (blank)  
   completion template ConsDecl : "ID : Type ConsAnnos" =
@@ -35,12 +41,6 @@ completions
     "List(" <Type:Type> ")"     
   completion template MapType : "Map<Type,Type>" =
     "Map<" <Type:Type> "," <Type:Type> ">"  
-
-completions
-  completion template SignatureSection : "semantic components " =
-    "semantic components\n\t" (cursor) (blank)  
-  completion template SemanticCompDecl : "ID -> MapType" =
-    <ID:ID> " -> " <MapType:MapType>  
 
 completions
   completion template SignatureSection : "native datatypes " =

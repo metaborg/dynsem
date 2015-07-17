@@ -46,7 +46,6 @@ rules
   		f-ty-def := <lookup-def(|Types())> f-ty;
   		f-ty-knd := <lookup-prop(|SortKind())> f-ty-def;
   		<not(?SystemSort())> f-ty-knd;
-  		<not(?SemanticCompSort())> f-ty-knd;
   		<not(?NativeSort())> f-ty-knd
 
   ds2java-atermconversion-name(|e):
@@ -61,12 +60,10 @@ rules
       <?NativeSort()> f-ty-knd
 
   ds2java-atermconversion-name(|e):
-  	f-ty -> e |[ AutoMapUtils.x_map2aterm(e, factory) ]|
-  	where
-  		f-ty-def := <lookup-def(|Types())> f-ty;
-      <lookup-prop(|SortKind())> f-ty-def => SemanticCompSort();
-      x_map2aterm := <def-get-name; ds2java-map2aterm-name> f-ty-def
-  
+    m-ty@MapType(_, _) -> e |[ AutoMapUtils.x_map2aterm(e, factory) ]|
+    where
+      x_map2aterm := <ds2java-map2aterm-name> m-ty
+
   ds2java-atermconversion-name(|e):
     ListType(_) -> e |[ e.toStrategoTerm(factory) ]|
   
