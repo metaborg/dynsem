@@ -154,6 +154,12 @@ rules
       add-msg(|Error(), s, $[Duplicate sort [s]])
   
   check-signature:
+    d@AliasDecl(s, _) -> <fail>
+    where
+      <is-alias; not(get-alias-base)> s;
+      <add-msg(|Error(), s, $[Inconsistent aliasing chain for sort [s]])> d
+  
+  check-signature:
     vs@VariableScheme(prefix, _) -> <fail>
     where
 	    <get-matching-varschemes> prefix => [_, _ | _];
