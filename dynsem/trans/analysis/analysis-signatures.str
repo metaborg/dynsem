@@ -90,7 +90,7 @@ rules /* store signatures */
       <store-def(|Types())> name => name-def;
       <store-prop(|SortKind(), name-def)> NativeSort();
       <store-prop(|NativeTypeJString(), name-def)> javastring;
-      <store-prop(|SuperType(), name-def)> sup;
+      <store-prop(|NativeTypeSuperType(), name-def)> sup;
       <map(store-native-datatype-op(|name-def))> func*
       
   store-native-datatype-op(|par-def):

@@ -229,7 +229,7 @@ rules
     where
       <not(lookup-def(|NativeDTFun(parent-def)))> fun-name
     where
-      <lookup-prop(|SuperType()); lookup-def(|Types())> parent-def => sup-def;
+      <lookup-prop(|NativeTypeSuperType()); lookup-def(|Types())> parent-def => sup-def;
       <lookup-prop(|SortKind())> sup-def => NativeSort()
 
 rules // type rules for match-sides
@@ -459,7 +459,7 @@ rules
     where
       ty-from-def := <lookup-def(|Types())> ty-from;
       NativeSort() := <lookup-prop(|SortKind())> ty-from-def;
-      sup-ty := <lookup-prop(|SuperType())> ty-from-def
+      sup-ty := <lookup-prop(|NativeTypeSuperType())> ty-from-def
   
   type-coerce(coerce-s):
     (ty-from, ty-to) -> <type-coerce(coerce-s)> (<get-alias-base> ty-from, ty-to)

@@ -17,9 +17,9 @@ signature
     Property
 
   constructors
-    SuperType: Property
     Type: Property
     NativeTypeJString: Property
+    NativeTypeSuperType : Property
     Use: Property
     
 signature
