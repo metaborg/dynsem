@@ -201,9 +201,9 @@ rules
   type-check-build-map:
     MapSelect(m-t, k-t) -> val-ty
     where
-      MapType(key-ty, val-ty) := <type-check-build> m-t;
+      map-ty := <type-check-build> m-t;
       k-ty := <type-check-build> k-t;
-      <type-coerce-full(fail)> (k-ty, key-ty)
+      MapType(_, val-ty) := <type-coerce-full(fail)> (map-ty, MapType(k-ty, ALPHATYPE()))
 
   type-check-build-cast:
     Cast(t, ty-t) -> cast-ty
