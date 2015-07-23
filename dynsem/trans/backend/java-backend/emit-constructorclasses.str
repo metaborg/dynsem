@@ -75,18 +75,31 @@ rules
 	      }
 	    ]|
     where
+      debug(!1);
     	x_consname := <ds2java-constr-classname> c;
+      debug(!2);
       c-def := <lookup-def(|Constructors())> c;
+      debug(!3);
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def
+      ;debug(!4)
     where
+      debug(!5);
       fdec* := <map-with-index(ds2java-fielddecl)> c-c-ty*;
+      debug(!6);
     	param0* := <map-with-index(ds2java-method-paramdecl)> c-c-ty*;
+      debug(!7);
     	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*;
+      debug(!8);
     	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
+      debug(!9);
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
+      debug(!10);
     	specializer* := <ds2java-specializer-method> c-c-ty*;
+      debug(!11);
     	exec* := <ds2java-execmethods(ds2java-supercall|rule*)> c;
+      debug(!12);
     	atermconvert := <ds2java-atermconversion-constructor> c
+      ;debug(!13)
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:

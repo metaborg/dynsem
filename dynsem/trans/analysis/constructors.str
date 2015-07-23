@@ -28,6 +28,8 @@ signature
   
   constructors
     IntType: DynSemType
+    LongType: DynSemType
+    FloatType: DynSemType
     RealType: DynSemType
     BoolType: DynSemType
     StringType: DynSemType

@@ -71,6 +71,12 @@ rules
   	IntType() -> e |[ factory.makeInt(e) ]|
 
   ds2java-atermconversion-name(|e):
+  	LongType() -> e |[ factory.makeInt(e) ]|
+
+  ds2java-atermconversion-name(|e):
+  	FloatType() -> e |[ factory.makeReal(e) ]|
+
+  ds2java-atermconversion-name(|e):
   	RealType() -> e |[ factory.makeReal(e) ]|
 
   ds2java-atermconversion-name(|e):

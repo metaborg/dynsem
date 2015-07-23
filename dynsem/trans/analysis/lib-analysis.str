@@ -118,7 +118,11 @@ rules // type rewriting
       is-string
   
   derw-type: IntType() -> <derw-type> "Int"
+
+  derw-type: LongType() -> <derw-type> "Long"
   
+  derw-type: FloatType() -> <derw-type> "Float"
+
   derw-type: RealType() -> <derw-type> "Real"
   
   derw-type: BoolType() -> <derw-type> "Bool"
@@ -129,6 +133,12 @@ rules // type rewriting
 
   id-to-builtin-type:
     "Int" -> IntType()
+
+  id-to-builtin-type:
+    "Long" -> LongType()
+
+  id-to-builtin-type:
+    "Float" -> FloatType()
     
   id-to-builtin-type:
     "Real" -> RealType()
