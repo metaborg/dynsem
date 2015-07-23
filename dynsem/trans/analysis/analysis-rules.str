@@ -257,7 +257,7 @@ rules // type rules for match-sides
   
   type-check-match-num(|in-ty):
     Int(_) -> <type-coerce-full(id)> (in-ty, IntType())
-  
+
   type-check-match-num(|in-ty):
     Real(_) -> <type-coerce-full(id)> (in-ty, RealType())
   
@@ -475,8 +475,20 @@ rules
     (ListType(ty-from), ListType(ty-to)) -> ListType(<coerce-s> (ty-from, ty-to))
   
   type-coerce(coerce-s):
+    (IntType(), LongType()) -> LongType()
+
+  type-coerce(coerce-s):
+    (FloatType(), RealType()) -> RealType()
+
+  type-coerce(coerce-s):
+    (IntType(), FloatType()) -> FloatType()
+
+  type-coerce(coerce-s):
     (IntType(), RealType()) -> RealType()
-  
+
+  type-coerce(coerce-s):
+    (LongType(), RealType()) -> RealType()
+
   type-coerce(coerce-s):
     (MapType(a-k-ty, a-v-ty), MapType(t-k-ty, t-v-ty)) -> MapType(k-ty, v-ty)
     where

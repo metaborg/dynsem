@@ -74,7 +74,25 @@ rules /* projections of types to names */
     else
       !"int"
     end
+
+  ds2java-sort-to-name(box-type) =
+    ?LongType();
+    if box-type
+    then
+      !"Long"
+    else
+      !"long"
+    end
   
+  ds2java-sort-to-name(box-type) =
+    ?FloatType();
+    if box-type
+    then
+      !"Float"
+    else
+      !"float"
+    end
+
   ds2java-sort-to-name(box-type) =
     ?RealType();
     if box-type
