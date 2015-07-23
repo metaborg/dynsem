@@ -87,8 +87,8 @@ rules
       x_toterm := <ds2java-map2aterm-name> m-ty;
       x_fromterm := <ds2java-aterm2map-name> m-ty;
       x_maptype := <ds2java-sort-to-classname> m-ty;
-      x_kty := <ds2java-sort-to-classname; box-primitive-type> k-ty;
-      x_vty := <ds2java-sort-to-classname; box-primitive-type> v-ty;
+      x_kty := <ds2java-sort-to-classname> k-ty;
+      x_vty := <ds2java-sort-to-classname> v-ty;
       e_keytrm := <ds2java-atermconversion-name(| e |[ entry.getKey() ]|)> k-ty;
       e_valtrm := <ds2java-atermconversion-name(| e |[ entry.getValue() ]|)> v-ty;
       e_key := <ds2java-gennode-instantiation> (e |[ bindAppl.getSubterm(0) ]|, k-ty);

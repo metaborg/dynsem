@@ -49,8 +49,8 @@ rules /* projections of types to names */
       <not(?ALPHATYPE())> kty;
       <not(?ALPHATYPE())> vty
     where
-     kty-str := <ds2java-sort-to-name(box-primitive-type)> kty;
-     vty-str := <ds2java-sort-to-name(box-primitive-type)> vty
+     kty-str := <ds2java-sort-to-name(id)> kty;
+     vty-str := <ds2java-sort-to-name(id)> vty
   
   ds2java-sort-to-name(is-classname):
     MapType(ALPHATYPE(), ALPHATYPE()) -> $[Map]
@@ -66,31 +66,37 @@ rules /* projections of types to names */
      kty-str := <ds2java-sort-to-name(fail)> kty;
      vty-str := <ds2java-sort-to-name(fail)> vty
 
-  ds2java-sort-to-name(is-classnamee):
-    IntType() -> "int" 
+  ds2java-sort-to-name(box-type) =
+    ?IntType();
+    if box-type
+    then
+      !"Integer"
+    else
+      !"int"
+    end
   
-  ds2java-sort-to-name(is-classname):
-    RealType() -> "double"
+  ds2java-sort-to-name(box-type) =
+    ?RealType();
+    if box-type
+    then
+      !"Double"
+    else
+      !"double"
+    end
 
-  ds2java-sort-to-name(is-classname):
-    BoolType() -> "boolean"
+  ds2java-sort-to-name(box-type) =
+    ?BoolType();
+    if box-type
+    then
+      !"Boolean"
+    else
+      !"boolean"
+    end
 
-  ds2java-sort-to-name(is-classname):
+  ds2java-sort-to-name(box-type):
     StringType() -> "String"
 
   ds2java-sort-to-name(is-classname) = is-string
-
-  box-primitive-type = try(do-box-primitive-type)
-
-  do-box-primitive-type:
-    "int" -> "Integer"
-
-  do-box-primitive-type:
-    "double" -> "Double"
-  
-  do-box-primitive-type:
-    "boolean" -> "Boolean"
-
 
 rules /* name generation */
 

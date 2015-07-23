@@ -484,8 +484,8 @@ rules
   ds2java-term-build(|ex_ty):
     Map([Bind(key, val)]) -> e |[ new com.github.krukow.clj_lang.PersistentTreeMap<x_keyty, x_valty>().plus(e_key, e_val) ]|
     where
-      x_keyty := <type-of; ds2java-sort-to-classname; box-primitive-type> key;
-      x_valty := <type-of; ds2java-sort-to-classname; box-primitive-type> val;
+      x_keyty := <type-of; ds2java-sort-to-classname> key;
+      x_valty := <type-of; ds2java-sort-to-classname> val;
       e_key := <ds2java-term-build(|ALPHATYPE())> key;
       e_val := <ds2java-term-build(|ALPHATYPE())> val
 

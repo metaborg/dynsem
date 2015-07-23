@@ -38,7 +38,7 @@ rules
 	
   mklist-class(|x_classname, elemty, exec*) =
     body* := <mklist-class-body(|x_classname, elemty, exec*)>;
-    x_elemname := <ds2java-sort-to-classname; box-primitive-type> elemty;
+    x_elemname := <ds2java-sort-to-classname> elemty;
     !compilation-unit |[
       package ~x:<AutoPackageName>;
         
@@ -66,7 +66,7 @@ rules
     ]|
 
   mklist-class-body(|x_classname, elemty, exec*) =
-  	x_elemname := <ds2java-sort-to-classname; box-primitive-type> elemty;
+  	x_elemname := <ds2java-sort-to-classname> elemty;
   	!class-body-dec* |[
   		    @Child
           public x_elemname head;
