@@ -189,6 +189,7 @@ rules
     factorize-constructors-in-build
     <+ factorize-sortfuncall-in-build
     <+ factorize-listtail-in-build
+    <+ factorize-map-in-build
     <+ factorize-mapextend-in-build
     <+ factorize-mapselect-in-build
     <+ factorize-cast-in-build
@@ -213,10 +214,18 @@ rules
       (prem2*, xs') := <lift-build-on-cond(is-build-nonprime-factor, ?success2)> xs;
       (!success1 <+ !success2)
   
-  factorize-mapextend-in-build:
-    MapExtend(l, r) -> (prem*, MapExtend(l, r'))
+  factorize-map-in-build:
+    Map([Bind(k, v)]) -> ([prem1*, prem2*], Map([Bind(k', v')]))
     where
-      (prem*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
+      (prem1*, k') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> k;
+      (prem2*, v') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> v;
+      !success
+  
+  factorize-mapextend-in-build:
+    MapExtend(l, r) -> ([prem1*, prem2*], MapExtend(l', r'))
+    where
+      (prem1*, l') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> l;
+      (prem2*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
       !success
 
   factorize-mapselect-in-build:
