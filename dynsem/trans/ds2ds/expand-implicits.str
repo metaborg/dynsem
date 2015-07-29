@@ -84,6 +84,12 @@ rules /* lift and expand subterms on build sides */
       ty := <rw-type> a-ty;
       (t', p*) := <lift-where-indirect> (ty, t)
 
+  expand-implicits-termbuild:
+    Cast(t, s) -> (t', p*)
+    where
+    	ty := <rw-type> s;
+    	(t', p*) := <lift-where-indirect> (ty, t)
+  
   lift-where-indirect:
     (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, MatchedVar(v-new)))])
     where
