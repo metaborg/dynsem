@@ -525,20 +525,16 @@ rules
   store-prime-conspath:
     c-def -> c-def
     where {in-ty, out-ty, c-ty:
-      c-ty@ConstructorType([in-ty], out-ty) := <lookup-prop(|Type())> c-def;
+      <lookup-prop(|Type())> c-def => c-ty@ConstructorType([in-ty], out-ty);
       rules(
         MemoTyPath: (in-ty, out-ty, BuildMode()) -> [(c-def, c-ty)]
         MemoTyTrans:+ (in-ty, BuildMode()) -> out-ty
-        MemoTyPath: (in-ty, out-ty, MatchMode()) -> [(c-def, c-ty)]
-        MemoTyTrans:+ (in-ty, MatchMode()) -> out-ty
-        
-        MemoTyPath: (out-ty, in-ty, BuildMode()) -> [(c-def, c-ty)]
-        MemoTyTrans:+ (out-ty, BuildMode()) -> in-ty
+
         MemoTyPath: (out-ty, in-ty, MatchMode()) -> [(c-def, c-ty)]
         MemoTyTrans:+ (out-ty, MatchMode()) -> in-ty
       )
     }
-  
+
   store-prime-arrowpath:
     a-def -> a-def
     where
