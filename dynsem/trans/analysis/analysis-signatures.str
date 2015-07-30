@@ -156,6 +156,16 @@ rules
       add-msg(|Warning(), s, $[Duplicate sort [s]])
   
   check-signature:
+    <?SortDecl(s)
+    + ?AliasDecl(s, _)
+    + ?NativeBaseTypeDecl(_, s, _)
+    + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
+    where
+      ty := <rw-type> SimpleSort(s);
+      SystemSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> ty;
+      add-msg(|Error(), s, $[Sort collides with built-in sort [s]])
+  
+  check-signature:
     d@AliasDecl(s, _) -> <fail>
     where
       <is-alias; not(get-alias-base)> s;
