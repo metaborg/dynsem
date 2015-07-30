@@ -7,117 +7,101 @@ imports
 
 rules /* projections of types to names */
 
-  ds2java-sort-to-classname = ds2java-sort-to-name(id)
-  
-  ds2java-sort-to-id = ds2java-sort-to-name(fail)
+  ds2java-type-to-identifier   = ds2java-type-to-java(fail, id)
+  ds2java-type-to-boxed-type   = ds2java-type-to-java(id, ds2java-box-type)
+  ds2java-type-to-unboxed-type = ds2java-type-to-java(id, id)
 
-  ds2java-sort-to-name(is-classname):
+  ds2java-type-to-java(is-mk-type, box):
+    IntType() -> <box> "int"
+  
+  ds2java-type-to-java(is-mk-type, box):
+    LongType() -> <box> "long"
+  
+  ds2java-type-to-java(is-mk-type, box):
+    FloatType() -> <box> "float" 
+
+  ds2java-type-to-java(is-mk-type, box):
+    RealType() -> <box> "double"
+  
+  ds2java-type-to-java(is-mk-type, box):
+    BoolType() -> <box> "boolean"
+
+  ds2java-type-to-java(is-mk-type, box):
     ty -> ty-str
     where
       ty-def := <lookup-def(|Types())> ty;
       NativeSort() := <lookup-prop(|SortKind())> ty-def;
-      if is-classname
+      if is-mk-type
       then
         ty-str := <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
       else
         ty-str := <def-get-name> ty-def
       end
-  
-  ds2java-sort-to-name(is-classname):
+
+  ds2java-type-to-java(is-mk-type, box):
     ty -> $[A_[<def-get-name> ty-def]]
     where
       ty-def := <lookup-def(|Types())> ty;
       ty-kind := <lookup-prop(|SortKind())> ty-def;
       <not(?SystemSort() <+ ?NativeSort())> ty-kind
   
-  ds2java-sort-to-name(is-classname):
+  ds2java-type-to-java(is-mk-type, box):
     ListType(ALPHATYPE()) -> "NIL"
 
-  ds2java-sort-to-name(is-classname):
-    ListType(ety) -> $[L_[<ds2java-sort-to-name(fail)> ety]]
+  ds2java-type-to-java(is-mk-type, box):
+    ListType(ety) -> $[L_[<ds2java-type-to-identifier> ety]]
     where
       <not(?ALPHATYPE())> ety
-      
-  ds2java-sort-to-name(is-classname):
+
+  ds2java-type-to-java(is-mk-type, box):
     MapType(ALPHATYPE(), ALPHATYPE()) -> $[com.github.krukow.clj_ds.PersistentMap<?, ?>]
-    where is-classname
+    where is-mk-type
   
-  ds2java-sort-to-name(is-classname):
+  ds2java-type-to-java(is-mk-type, box):
     MapType(kty, vty) -> $[com.github.krukow.clj_ds.PersistentMap<[kty-str], [vty-str]>]
     where
-      is-classname;
+      is-mk-type;
       <not(?ALPHATYPE())> kty;
       <not(?ALPHATYPE())> vty
     where
-     kty-str := <ds2java-sort-to-name(id)> kty;
-     vty-str := <ds2java-sort-to-name(id)> vty
+     kty-str := <ds2java-type-to-boxed-type> kty;
+     vty-str := <ds2java-type-to-boxed-type> vty
   
-  ds2java-sort-to-name(is-classname):
-    MapType(ALPHATYPE(), ALPHATYPE()) -> $[Map]
-    where not(is-classname)
+  ds2java-type-to-java(is-mk-type, box):
+    MapType(ALPHATYPE(), ALPHATYPE()) -> $[map]
+    where not(is-mk-type)
   
-  ds2java-sort-to-name(is-classname):
-    MapType(kty, vty) -> $[Map_[kty-str]_[vty-str]>]
+  ds2java-type-to-java(is-mk-type, box):
+    MapType(kty, vty) -> $[map_[kty-str]_[vty-str]]
     where
-      not(is-classname);
+      not(is-mk-type);
       <not(?ALPHATYPE())> kty;
       <not(?ALPHATYPE())> vty
     where
-     kty-str := <ds2java-sort-to-name(fail)> kty;
-     vty-str := <ds2java-sort-to-name(fail)> vty
-
-  ds2java-sort-to-name(box-type) =
-    ?IntType();
-    if box-type
-    then
-      !"Integer"
-    else
-      !"int"
-    end
-
-  ds2java-sort-to-name(box-type) =
-    ?LongType();
-    if box-type
-    then
-      !"Long"
-    else
-      !"long"
-    end
+     kty-str := <ds2java-type-to-identifier> kty;
+     vty-str := <ds2java-type-to-identifier> vty
   
-  ds2java-sort-to-name(box-type) =
-    ?FloatType();
-    if box-type
-    then
-      !"Float"
-    else
-      !"float"
-    end
-
-  ds2java-sort-to-name(box-type) =
-    ?RealType();
-    if box-type
-    then
-      !"Double"
-    else
-      !"double"
-    end
-
-  ds2java-sort-to-name(box-type) =
-    ?BoolType();
-    if box-type
-    then
-      !"Boolean"
-    else
-      !"boolean"
-    end
-
-  ds2java-sort-to-name(box-type):
+  ds2java-type-to-java(is-mk-type, box):
     StringType() -> "String"
 
-  ds2java-sort-to-name(is-classname) = is-string
+  ds2java-type-to-java(is-mk-type, box) = is-string
+
+  ds2java-box-type:
+    "int" -> "Integer"
+  
+  ds2java-box-type:
+    "long" -> "Long"
+  
+  ds2java-box-type:
+    "float" -> "Float" 
+
+  ds2java-box-type:
+    "double" -> "Double"
+  
+  ds2java-box-type:
+    "boolean" -> "Boolean"
 
 rules /* name generation */
-
 
   pp-type-java =
     ?ListType(e); !$[List_[<pp-type-java> e]_]
