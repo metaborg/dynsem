@@ -153,7 +153,7 @@ rules
     + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
     where
       <lookup-defs(|Types())> s => [_, _ | _];
-      add-msg(|Error(), s, $[Duplicate sort [s]])
+      add-msg(|Warning(), s, $[Duplicate sort [s]])
   
   check-signature:
     d@AliasDecl(s, _) -> <fail>
