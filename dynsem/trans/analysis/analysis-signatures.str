@@ -192,9 +192,16 @@ rules
       add-msg(|Error(), c, $[Duplicate constructor [c]])
 
   check-signature:
-    ConsDecl(c, [_, _ | _], _, <id>) -> <fail>
+    d@ConsDecl(c, _, ss@SimpleSort(s), _) -> <fail>
     where
-      fetch-elem(?ImplicitAnno());
+      ty := <rw-type> ss;
+      SystemSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> ty;
+      add-msg(|Error(), d, $[Constructor [c] cannot be of built-in sort [s]])
+
+  check-signature:
+    ConsDecl(c, [_, _ | _], _, anno*) -> <fail>
+    where
+      <fetch-elem(?ImplicitAnno())> anno*;
       add-msg(|Error(), c, $[Only unary constructors may be implicit])
 
   check-signature:
