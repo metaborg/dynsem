@@ -18,26 +18,22 @@ rules
     Module(name, section*) -> Module(name, section'*)
     where
       (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
-      section'* := <include-imports(report-err|<ProjectPath>, [])> (import*, section-noimports*)
+      section'* := <include-imports(report-err|<ProjectPath>, [name])> (import*, section-noimports*)
 
   include-imports(report-err|include-dir, imported*):
-    ([], section*) -> section*
-
+  	([], section*) -> section*
+  
   include-imports(report-err|include-dir, imported*):
-    ([Import(i) | ixs*], section*) -> <include-imports(report-err|include-dir, [i, imported*])> (ixs*, section*)
-    where
-      <fetch-elem(?i)> imported*
-
-  include-imports(report-err|include-dir, imported*):
-  	([Import(i) | ixs*], section*) -> <include-imports(report-err|include-dir, [i, imported*])> ([ixs*, new-import*], [section* | imported-section-noimports*])
+  	([Import(i) | ixs*], section*) -> <include-imports(report-err|include-dir, [name, imported*])> ([ixs*, new-import*], [section* | imported-section-noimports*])
   	where
-  	  <not(fetch-elem(?i))> imported*
-    where
-  		Module(_, imported-section*) := <concat-strings; parse-ds-file-or-err(report-err|i)> [include-dir, "/", i, ".ds"];
-  		(new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*
+  		Module(name, imported-section*) := <concat-strings; parse-ds-file-or-err(report-err|i)> [include-dir, "/", i, ".ds"];
+  		if <not(fetch-elem(?name))> imported*
+  		then
+      	(new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*
+      else
+  			new-import* := [];
+  			imported-section-noimports* := []
+      end
 
   parse-ds-file-or-err(report-err|i) = parse-ds-file <+ report-err(|i, <id>); !Module("dummy", [])
-
-
-
 
