@@ -7,33 +7,29 @@ imports
   
 imports
   analysis/lib-analysis
+  analysis/main
 
 rules
-  
-  fatal-err-missing-import(|t, file) = <fatal-err(|"File not found: ")> file
-  
-  err-msg-missing-import(|t, file) = add-msg(|Error(), t, $[Import cannot be resolved])
-  
-  resolve-includes(report-err):
-    Module(name, section*) -> Module(name, section'*)
-    where
-      (import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
-      section'* := <include-imports(report-err|<ProjectPath>, [name])> (import*, section-noimports*)
+	
+	include-imports:
+		Module(name, section*) -> Module(name, section'*)
+		where
+			(import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
+      section'* := <include-imports(|<ProjectPath>, [name])> (import*, section-noimports*)
 
-  include-imports(report-err|include-dir, imported*):
-  	([], section*) -> section*
-  
-  include-imports(report-err|include-dir, imported*):
-  	([Import(i) | ixs*], section*) -> <include-imports(report-err|include-dir, [name, imported*])> ([ixs*, new-import*], [section* | imported-section-noimports*])
-  	where
-  		Module(name, imported-section*) := <concat-strings; parse-ds-file-or-err(report-err|i)> [include-dir, "/", i, ".ds"];
-  		if <not(fetch-elem(?name))> imported*
-  		then
-      	(new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*
+  include-imports(|include-dir, imported*):
+   ([], section*) -> section*
+
+  include-imports(|include-dir, imported*):
+    ([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [name, imported*])> ([ixs*, new-import*], [section* | imported-section-noimports*])
+    where
+    	Module(name, imported-section*) := <resolve-path; parse-ds-import(fatal-err-missing-import(|i))> i;
+      if <not(fetch-elem(?name))> imported*
+      then
+        (new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*
       else
-  			new-import* := [];
-  			imported-section-noimports* := []
+        new-import* := [];
+        imported-section-noimports* := []
       end
 
-  parse-ds-file-or-err(report-err|i) = parse-ds-file <+ report-err(|i, <id>); !Module("dummy", [])
-
+  fatal-err-missing-import(|file) = <fatal-err(|"File not found: ")> file

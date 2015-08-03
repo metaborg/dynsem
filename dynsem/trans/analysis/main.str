@@ -36,7 +36,13 @@ rules
   
   analyze-import(analysis) = 
   	?t@Import(<id>);
-  	open-import(resolve-path, parse-ds-import(\ msg -> <add-msg(|Error(), t, msg)> \), analyze-module)
+  	open-import(
+  	  resolve-path,
+  	  parse-ds-import(\ msg -> <add-msg(|Error(), t, msg)> \); Module(id, filter(?Signatures(_))),
+  	  analyze-module
+  	)
+
+  module-keep-signatures = Module(id, filter(?Signatures(_)))
 
   analyze-module-local =
     desugar-top;
@@ -74,12 +80,4 @@ rules /* helpers for import handling */
     parse-file(
       <mk-err> $[Imported module cannot be resolved],
       <mk-err> $[Imported module contains syntax errors]
-    | <import-term(include/ds.tbl)>);
-    Module(id, filter(?Signatures(_)))
-  
-
-
-
-
-
-
+    | <import-term(include/ds.tbl)>)
