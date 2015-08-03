@@ -42,11 +42,12 @@ rules // Analysis
     (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
 		with
 		  editor-init;
+		  f := <origin-file> ast;
 			<in-project-path(m-in-analysis(
 				where(
-		  		get-msgs(mkmsg|Error()) => error*;
-		  		get-msgs(mkmsg|Warning()) => warning*;
-		  		get-msgs(mkmsg|Note()) => note*
+		  		get-msgs(msg-isin-file(|f); msg-mk-editor-msg| Error()) => error*;
+		  		get-msgs(msg-isin-file(|f); msg-mk-editor-msg| Warning()) => warning*;
+		  		get-msgs(msg-isin-file(|f); msg-mk-editor-msg| Note()) => note*
 		  	)
 			)|project-path)> ast => analyzed-ast
 	
@@ -56,8 +57,6 @@ rules // Analysis
 			filename := <guarantee-extension(|"analyzed.aterm")> path;
 			(analyzed-ast, _, _, _) := <editor-analyze> (ast, path, project-path)
 			
-  mkmsg: Message(_, t, s) -> (t, s)
-	
 rules
   
   // When given a tuple (path, string) this writes string into path.
