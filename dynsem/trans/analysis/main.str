@@ -34,9 +34,9 @@ rules
   analyze-imports(analysis) =
     Module(id, where(filter(Imports(map(analyze-import(analysis))))))
   
-  analyze-import(analysis) =
+  analyze-import(analysis) = 
   	?t@Import(<id>);
-  	open-import(resolve-path, parse-ds-imported-file(\ msg -> <add-msg(|Error(), t, msg)> \), analyze-module)
+  	open-import(resolve-path, parse-ds-import(\ msg -> <add-msg(|Error(), t, msg)> \), analyze-module)
 
   analyze-module-local =
     desugar-top;
@@ -70,15 +70,13 @@ rules /* helpers for import handling */
   resolve-path:
     import-string -> $[[<ProjectPath>]/[import-string].ds]
   
-  parse-ds-imported-file(mk-err) =
-    parse-ds-file-custom(mk-err);
-    Module(id, filter(?Signatures(_))) // drop the rules and only store the signatures
-  
-  parse-ds-file-custom(mk-err) =
+  parse-ds-import(mk-err) =
     parse-file(
       <mk-err> $[Imported module cannot be resolved],
       <mk-err> $[Imported module contains syntax errors]
-    | <import-term(include/ds.tbl)>)
+    | <import-term(include/ds.tbl)>);
+    Module(id, filter(?Signatures(_)))
+  
 
 
 
