@@ -38,7 +38,7 @@ menus
     action  : "All to Core"            = all-to-core-editor (openeditor) (source)
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)
-    action  : "Flatten imports"        = include-imports-editor (openeditor) (realtime) (source) 
+    action  : "Flatten imports"        = flatten-imports-editor (openeditor) (realtime) (source) 
     action  : "Add type annotations"   = add-extra-typeannos-editor (openeditor) (realtime) (source)
     action  : "Desugar aliases"        = desugar-aliases-editor (openeditor) (realtime) (source)
     action  : "Desugar varschemes"     = desugar-varschemes-editor (openeditor) (realtime) (source)
