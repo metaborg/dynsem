@@ -38,6 +38,7 @@ rules
           public IStrategoTerm aterm;
           
           public ~x:gennodename(INodeSource source, IStrategoTerm term) {
+            Objects.requireNonNull(term);
             this.setSourceInfo(source);
             this.aterm = term;
           }
