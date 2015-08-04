@@ -2,6 +2,9 @@ package org.metaborg.meta.interpreter.framework;
 
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoInt;
+import org.spoofax.interpreter.terms.IStrategoReal;
+import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
@@ -16,11 +19,44 @@ public class TermUtils {
 				return true;
 			}
 		}
-		throw new RuntimeException("Malformed boolean: " + term);
+		throw new RewritingException("Malformed boolean: " + term);
 	}
 
 	public static IStrategoTerm termFromBool(boolean bV, ITermFactory factory) {
 		return factory.makeAppl(factory.makeConstructor(bV ? "___DS_True___"
 				: "___DS_False___", 0));
+	}
+
+	public static int intFromTerm(IStrategoTerm term) {
+		if (Tools.isTermInt(term)) {
+			return Tools.asJavaInt(term);
+		}
+		throw new RewritingException("Malformed int: " + term);
+	}
+
+	public static IStrategoInt termFromInt(int i, ITermFactory factory) {
+		return factory.makeInt(i);
+	}
+
+	public static double doubleFromTerm(IStrategoTerm term) {
+		if (Tools.isTermReal(term)) {
+			return Tools.asJavaDouble(term);
+		}
+		throw new RewritingException("Malformed double: " + term);
+	}
+
+	public static IStrategoReal termFromDouble(double d, ITermFactory factory) {
+		return factory.makeReal(d);
+	}
+
+	public static String stringFromTerm(IStrategoTerm term) {
+		if (Tools.isTermString(term)) {
+			return Tools.asJavaString(term);
+		}
+		throw new RewritingException("Malformed string: " + term);
+	}
+
+	public static IStrategoString termFromString(String s, ITermFactory factory) {
+		return factory.makeString(s);
 	}
 }
