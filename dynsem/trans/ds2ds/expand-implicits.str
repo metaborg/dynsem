@@ -48,7 +48,7 @@ rules /* lift and expand subterms on build sides */
   expand-implicits-termbuild:
     Con(c, child*) -> (Con(c, child'*), p*)
     where
-      ConstructorType(child-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      ConstructorType(child-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> child*);
       (child'*, p*) := <zip(lift-where-indirect <+ \ (_, t) -> (t, []) \); unzip; (id, concat)> (child-ty*, child*)
 
   expand-implicits-termbuild:
@@ -114,7 +114,7 @@ rules /* introduce explicit reductions/coercions where required on MATCH side */
       <def-get-namespace> c-def => Constructors()
     where
       ConstructorType([c-child-ty], _) := <lookup-prop(|Type())> c-def;
-      c-name := <def-get-name> c-def;
+      c-name := <consdef-get-name> c-def;
       v-new := <def-new-variable> c-child-ty;
       path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
   

@@ -6,6 +6,7 @@ imports
   
 imports
   analysis/constructors
+  analysis/analysis-signatures
   analysis/lib-analysis
 
 imports
@@ -15,12 +16,12 @@ imports
 rules
 
   ds2java-atermconversion-constructor:
-    c ->
+    c-def ->
 	    class-body-dec |[
 	      @Override
 	      public IStrategoTerm toStrategoTerm(ITermFactory factory) {
 	        IStrategoAppl term = factory.makeAppl(
-	            factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<length; int-to-string> c-c-ty*), 
+	            factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<int-to-string> c-arity), 
 	            e_child*
 	        );
 	        if ( getSourceInfo() != null ) {
@@ -30,11 +31,11 @@ rules
 	      }
 	    ]|
     where
-      x_consname := <ds2java-constr-classname> c;
-      c-def := <lookup-def(|Constructors())> c;
+      x_consname := <ds2java-consdef-classname> c-def;
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def
     where
-      c-name := <def-get-name> c-def;
+      c-name := <consdef-get-name> c-def;
+      c-arity := <consdef-get-arity> c-def;
       e_child* := <map-with-index(ds2java-atermconversion-field)> c-c-ty*
 
   ds2java-atermconversion-field:
@@ -68,22 +69,22 @@ rules
     ListType(_) -> e |[ e.toStrategoTerm(factory) ]|
   
   ds2java-atermconversion-name(|e):
-  	IntType() -> e |[ factory.makeInt(e) ]|
+  	IntType() -> e |[ TermUtils.termFromInt(e, factory) ]|
 
   ds2java-atermconversion-name(|e):
-  	LongType() -> e |[ factory.makeInt(e) ]|
+  	LongType() -> e |[ TermUtils.termFromInt(e, factory) ]|
 
   ds2java-atermconversion-name(|e):
-  	FloatType() -> e |[ factory.makeReal(e) ]|
+  	FloatType() -> e |[ TermUtils.termFromDouble(e, factory) ]|
 
   ds2java-atermconversion-name(|e):
-  	RealType() -> e |[ factory.makeReal(e) ]|
+  	RealType() -> e |[ TermUtils.termFromDouble(e, factory) ]|
 
   ds2java-atermconversion-name(|e):
     BoolType() -> e |[ TermUtils.termFromBool(e, factory) ]|
   
   ds2java-atermconversion-name(|e):
-  	StringType() -> e |[ factory.makeString(e) ]|
+  	StringType() -> e |[ TermUtils.termFromString(e, factory) ]|
 
 
 

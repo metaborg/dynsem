@@ -6,6 +6,7 @@ imports
   
 imports
   analysis/constructors
+  analysis/analysis-signatures
   analysis/lib-analysis
 
 imports
@@ -92,7 +93,7 @@ rules
   ds2java-consdecl-specializer:
   	c-def ->
 			bstm* |[
-			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<length; int-to-string> c-c-ty*) {
+			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<int-to-string> c-arity) {
 			    ~x:sortname replacement = replace(new ~x:consname(source, e*));
 			    if (depth > 0) {
 			      replacement.specializeChildren(depth - 1);
@@ -101,10 +102,11 @@ rules
 		    }
 			]|
     where
-      c-name := <def-get-name> c-def;
+      c-name := <consdef-get-name> c-def;
+      c-arity := <consdef-get-arity> c-def;
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def;
       sortname := <ds2java-type-to-unboxed-type> c-ty;
-      consname := <ds2java-constr-classname> c-name;
+      consname := <ds2java-consdef-classname> c-def;
       e* := <map-with-index((\ idx -> e |[ term.getSubterm(~i:<dec; int-to-string> idx)]| \, id); ds2java-gennode-instantiation)> c-c-ty*
   
   subterm-at-index:
@@ -157,7 +159,7 @@ rules
   	]|
   	where
   	  ConstructorType([c-ty], _) := <lookup-prop(|Type())> impl-c-def;
-  	  x_implconsname := <def-get-name; ds2java-constr-classname> impl-c-def;
+  	  x_implconsname := <ds2java-consdef-classname> impl-c-def;
   	  e_gennode := <ds2java-gennode-instantiation> (e |[ aterm ]|, c-ty)
 
   ds2java-arrow-specializedispatch:
