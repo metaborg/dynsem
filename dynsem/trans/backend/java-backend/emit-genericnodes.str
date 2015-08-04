@@ -135,13 +135,13 @@ rules
   		<lookup-prop(|SortKind())> ty-def => NativeSort()
  
   ds2java-gennode-instantiation:
-    (e_trm, StringType()) -> e |[ Tools.asJavaString(e_trm) ]|
+    (e_trm, StringType()) -> e |[ TermUtils.stringFromTerm(e_trm) ]|
 
   ds2java-gennode-instantiation:
-    (e_trm, IntType()) -> e |[ Tools.asJavaInt(e_trm) ]|
+    (e_trm, IntType()) -> e |[ TermUtils.intFromTerm(e_trm) ]|
 
   ds2java-gennode-instantiation:
-    (e_trm, RealType()) -> e |[ Tools.asJavaDouble(e_trm) ]|
+    (e_trm, RealType()) -> e |[ TermUtils.doubleFromTerm(e_trm) ]|
   
   ds2java-gennode-instantiation:
     (e_trm, BoolType()) -> e |[ TermUtils.boolFromTerm(e_trm) ]|
