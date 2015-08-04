@@ -34,16 +34,14 @@ rules
   |}
 
   analyze-module =
-  	where(?Module(<id>, _); debug(!"processing module: "));
     analyze-imports(analyze-module);
     analyze-module-local
   
   analyze-imports(analysis) =
-    Module(debug(!"processing imports into module: "), where(filter(Imports(map(analyze-import(analysis))))))
+    Module(id, where(filter(Imports(map(analyze-import(analysis))))))
   
   analyze-import(analysis) = 
   	?t@Import(<id>);
-  	debug(!"processing import: ");
   	open-import(
   	  resolve-path,
   	  parse-ds-import(\ msg -> <add-msg(|Error(), t, msg)> \); Module(id, filter(?Imports(_) <+ ?Signatures(_))),
@@ -51,13 +49,10 @@ rules
   	)
 
   analyze-module-local =
-    // if not(IsImported)
-    // then
 	    desugar-top;
 	    log-timed(mark-vars| "Marking variable def sites");
 	    log-timed(rename-all| "Renaming variables");
 	    log-timed(store-all| "Storing all definitions")
-	  // end
   
   store-all:
     m@Module(n, section*) -> m
