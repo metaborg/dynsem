@@ -38,11 +38,9 @@ rules
   	?t@Import(<id>);
   	open-import(
   	  resolve-path,
-  	  parse-ds-import(\ msg -> <add-msg(|Error(), t, msg)> \); Module(id, filter(?Signatures(_))),
+  	  parse-ds-import(\ msg -> <add-msg(|Error(), t, msg)> \); Module(id, filter(?Imports(_) <+ ?Signatures(_))),
   	  analyze-module
   	)
-
-  module-keep-signatures = Module(id, filter(?Signatures(_)))
 
   analyze-module-local =
     desugar-top;
