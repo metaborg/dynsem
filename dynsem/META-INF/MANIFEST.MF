@@ -19,8 +19,7 @@ Require-Bundle: org.spoofax.jsglr,
  org.spoofax.jsglr,
  org.spoofax.interpreter.externaldeps,
  org.strategoxt.strj,
- org.strategoxt.imp.runtime,
- org.metaborg.meta.interpreter.framework
+ org.strategoxt.imp.runtime
 Bundle-ManifestVersion: 2
 Bundle-Activator: dynsem.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
