@@ -418,7 +418,7 @@ rules
   ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ x_manualpkg.Natives.x_consname(e*) ]|
     where
-    	c-def := <lookup-def(|Constructors())> c;
+    	c-def := <lookup-def(|Constructors())> (c, <length> child*);
       <lookup-prop(|ConsKind())> c-def => NativeOpCons();
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       x_manualpkg := <ManuPackageName>;
