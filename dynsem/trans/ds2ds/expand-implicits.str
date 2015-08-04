@@ -139,7 +139,7 @@ rules /* introduce explicit coercions where required on the SOURCE side */
     	[(c-def, _) | xs-def] := <get-typath-memo(type-coerce-full(id))> (ma-ty, lhs-ty, MatchMode());
     	Constructors() := <def-get-namespace> c-def;
     	ConstructorType([child-ty], _) := <lookup-prop(|Type())> c-def;
-    	c-name := <def-get-name> c-def;
+    	c-name := <consdef-get-name> c-def;
     	v-new := <def-new-variable> child-ty;
     	prem* := <expand-typath-match> (xs-def, VarRef(v-new), lhs)
 
@@ -162,7 +162,7 @@ rules /* introduce explicit reductions/coercions where required on BUILD side */
       <def-get-namespace> c-def => Constructors();
       ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def
     where
-      c-name := <def-get-name> c-def;
+      c-name := <consdef-get-name> c-def;
       v-new := <def-new-variable> c-ty;
       path* := <expand-typath-build> (xs-def, VarRef(v-new), rt)
   
