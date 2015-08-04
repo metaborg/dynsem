@@ -31,6 +31,7 @@ rules
         import org.spoofax.interpreter.terms.*;
         import org.spoofax.jsglr.client.imploder.ImploderAttachment;
         import org.spoofax.interpreter.core.Tools;
+        import java.util.Objects;
         
         @SuppressWarnings("unused")
         public class ~x:gennodename extends ~x:sortname implements IGenericNode {
