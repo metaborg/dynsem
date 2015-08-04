@@ -199,10 +199,14 @@ rules
       add-msg(|Error(), d, $[Constructor [c] cannot be of built-in sort [s]])
 
   check-signature:
-    ConsDecl(c, [_, _ | _], _, anno*) -> <fail>
+    d@ConsDecl(_, c*, _, Annos(anno*)) -> <fail>
+    where
+      [_, _ | _] := c*
+      <+
+      [] := c*
     where
       <fetch-elem(?ImplicitAnno())> anno*;
-      add-msg(|Error(), c, $[Only unary constructors may be implicit])
+      add-msg(|Error(), d, $[Non-unary constructors may not be implicit])
 
   check-signature:
     decl@ArrowDecl(in-srt, name, out-srt) -> <fail>
