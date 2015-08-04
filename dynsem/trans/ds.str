@@ -40,7 +40,9 @@ rules // Analysis
 	
   editor-analyze:
     (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
-		with
+		with {| MyCurrentFile:
+		  f-path := $[[project-path]/[path]];
+		  rules(MyCurrentFile: _ -> f-path);
 		  editor-init;
 		  f := <origin-file> ast;
 			<in-project-path(m-in-analysis(
@@ -50,6 +52,7 @@ rules // Analysis
 		  		get-msgs(msg-isin-file(|f); msg-mk-editor-msg| Note()) => note*
 		  	)
 			)|project-path)> ast => analyzed-ast
+		|}
 	
 	editor-show-analyzed:
 		(selected, position, ast, path, project-path) -> (filename, analyzed-ast)
