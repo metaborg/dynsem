@@ -80,7 +80,7 @@ rules
 			      }
 			    }
 			
-			    throw new RuntimeException("Malformed map");
+			    throw new RewritingException("Malformed map");
 			  }
       ]|
     where
