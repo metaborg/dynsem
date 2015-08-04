@@ -60,10 +60,10 @@
     <url>https://github.com/metaborg/dynsem</url>
   </scm>
   <dependencies>
-  	<dependency>
-  		<groupId>org.metaborg</groupId>
-  		<artifactId>org.metaborg.meta.stratego.semantics</artifactId>
-  		<version>1.5.0-SNAPSHOT</version>
-  	</dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.interpreter.framework</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
   </dependencies>
 </project>
