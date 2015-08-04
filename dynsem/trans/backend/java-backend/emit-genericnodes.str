@@ -62,10 +62,9 @@ rules
               final String name = term.getName();
               final INodeSource source = NodeSource.fromStrategoTerm(term);
 
-              ~bstm*:<mapconcat(ds2java-consdecl-specializer)> c-def*
+              ~bstm*:<mapconcat(ds2java-consdecl-specializer)> [c-def*, impl-c-def*]
             }
-            IGenericNode replacement = null;
-            
+
             ~bstm*:<foldr(![], ds2java-implcons-specializer)> impl-c-def*
             
             throw new RewritingException(aterm.toString());
