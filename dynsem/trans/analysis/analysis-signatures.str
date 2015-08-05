@@ -43,9 +43,12 @@ rules /* store signatures */
   store-constructor:
     d@ConsDecl(c, child*, s, Annos(anno*)) -> d
     with
-      c-def := <store-def(|Constructors())> (c, <length> child*);
+      arity := <length> child*;
+      c-def := <store-def(|Constructors())> (c, arity);
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
-      if <fetch-elem(?ImplicitAnno())> anno*
+      if
+        [_] := child*;
+        <fetch-elem(?ImplicitAnno())> anno*
       then
         <store-prop(|ConsKind(), c-def)> ImplicitCons()
       else
