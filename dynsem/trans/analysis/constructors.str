@@ -25,6 +25,7 @@ signature
 signature
   sorts
     DynSemType
+    Definition
   
   constructors
     IntType: DynSemType

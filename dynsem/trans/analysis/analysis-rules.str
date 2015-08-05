@@ -437,7 +437,7 @@ rules
   type-coerce-full(is-matching) =
     type-coerce-base
     <+ type-coerce(type-coerce-full(is-matching))
-    <+ type-coerce-implicit(is-matching, type-coerce-full(is-matching))
+    <+ type-coerce-implicit-wrap(is-matching, type-coerce-full(is-matching))
     
   type-coerce-direct(is-matching) =
     type-coerce-base
@@ -495,25 +495,68 @@ rules
     where
       k-ty := <coerce-s> (a-k-ty, t-k-ty);
       v-ty := <coerce-s> (a-v-ty, t-v-ty)
-
+  
+  type-coerce-implicit-wrap(is-matching, coerce-s):
+    ty-tup@(_, _) -> <type-path-get-out-ty(is-matching)> ty-step*
+    where
+      ty-step* := <type-coerce-implicit(is-matching, coerce-s)> ty-tup
+  
   type-coerce-implicit(is-matching, coerce-s):
-    (ty-from, ty-to) -> ty-to'
+    (ty-from, ty-to) -> <get-typath-memo(coerce-s)> (ty-from, ty-to, mode)
     where
-      is-matching < mode := MatchMode() + mode := BuildMode()
-    where
-      (step-def, step-def-ty) := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
-      (
-        <def-get-namespace> step-def => Arrows();
-        ArrowType(_, ty-to') := step-def-ty
-        <+
-        <def-get-namespace> step-def => Constructors();
-        if is-matching
-        then
-          ConstructorType([ty-to'], _) := step-def-ty
-        else
-          ConstructorType(_, ty-to') := step-def-ty
-        end
-      )
+      is-matching
+      < mode := MatchMode()
+      + mode := BuildMode()
+
+  type-path-get-in-ty(is-matching):
+    [(step-def, step-def-ty) | _] -> in-ty
+    with
+      switch <def-get-namespace> step-def
+        case ?Constructors():
+          if is-matching
+          then
+            ConstructorType([in-ty], _) := step-def-ty
+          else
+            ConstructorType([in-ty], _) := step-def-ty
+          end
+        case ?Arrows():
+          ArrowType(in-ty, _) := step-def-ty
+      end
+
+  type-path-get-out-ty(is-matching):
+    ty-step* -> out-ty
+    with
+      (step-def, step-def-ty) := <last> ty-step*;
+      switch <def-get-namespace> step-def
+        case ?Constructors():
+          if is-matching
+          then
+            ConstructorType([out-ty], _) := step-def-ty
+          else
+            ConstructorType(_, out-ty) := step-def-ty
+          end
+        case ?Arrows():
+          ArrowType(_, out-ty) := step-def-ty
+      end
+
+  // type-coerce-implicit(is-matching, coerce-s):
+  //   (ty-from, ty-to) -> ty-to'
+  //   where
+  //     is-matching < mode := MatchMode() + mode := BuildMode()
+  //   where
+  //     (step-def, step-def-ty) := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
+  //     (
+  //       <def-get-namespace> step-def => Arrows();
+  //       ArrowType(_, ty-to') := step-def-ty
+  //       <+
+  //       <def-get-namespace> step-def => Constructors();
+  //       if is-matching
+  //       then
+  //         ConstructorType([ty-to'], _) := step-def-ty
+  //       else
+  //         ConstructorType(_, ty-to') := step-def-ty
+  //       end
+  //     )
 
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths =
