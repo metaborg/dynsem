@@ -17,13 +17,13 @@ rules /* syntactic checks */
   post-analysis-checks = alltd(post-analysis-check)
   
   post-analysis-check:
-    r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> r
+    r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> <fail>
     where
       <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)) + ?Cast(Var(_), SimpleSort(_)) + ?Cast(Wld(), SimpleSort(_)))> lhs;
       add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern, a list cast pattern, a wildcard cast pattern, or a variable cast pattern])
   
   post-analysis-check:
-    dec -> dec
+    dec -> <fail>
     where
       <?Var(v) + ?MatchedVar(v)> dec
     where
