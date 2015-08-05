@@ -547,24 +547,6 @@ rules
           ArrowType(_, out-ty) := step-def-ty
       end
 
-  // type-coerce-implicit(is-matching, coerce-s):
-  //   (ty-from, ty-to) -> ty-to'
-  //   where
-  //     is-matching < mode := MatchMode() + mode := BuildMode()
-  //   where
-  //     (step-def, step-def-ty) := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
-  //     (
-  //       <def-get-namespace> step-def => Arrows();
-  //       ArrowType(_, ty-to') := step-def-ty
-  //       <+
-  //       <def-get-namespace> step-def => Constructors();
-  //       if is-matching
-  //       then
-  //         ConstructorType([ty-to'], _) := step-def-ty
-  //       else
-  //         ConstructorType(_, ty-to') := step-def-ty
-  //       end
-  //     )
 
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths =
