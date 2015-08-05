@@ -33,7 +33,7 @@ rules
   add-extra-typeannos-term:
     Con(name, c*) -> Con(name, c'*)
     where
-      c-def := <lookup-def(|Constructors())> name;
+      c-def := <lookup-def(|Constructors())> (name, <length> c*);
       ConstructorType(c-ty*, ty) := <lookup-prop(|Type())> c-def;
       c'* := <zip(add-extra-typeannos-term <+ Snd)> (c-ty*, c*)
   

@@ -14,6 +14,7 @@ imports
   analysis/lib-analysis
   analysis/query
   analysis/constructors
+  analysis/analysis-signatures
   analysis/analysis-rules
   analysis/mark-references
 
@@ -32,11 +33,13 @@ signature
 rules
   
   ds2java-execmethods(on-norule-generator|rule*):
-    c -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-c*))> applicable-arrow*
+    c-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-c*))> applicable-arrow*
     where
-      ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def;
       applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
-      rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
+      c-name := <consdef-get-name> c-def;
+      c-arity := <consdef-get-arity> c-def;
+      rule-c* := <filter(is-rule-matching-cons(|c-name, c-arity))> rule*
   
   ds2java-execmethods(on-norule-generator|rule*):
     ty-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
@@ -260,13 +263,14 @@ rules
       bstm2* := <ds2java-premise> on-fail*
   
   ds2java-premise:
-    (Formula(Match(lhs@Con(c, _), dec@MatchedVar(v))), on-succ*, _) ->
+    (Formula(Match(lhs@Con(cname, c*), dec@MatchedVar(v))), on-succ*, _) ->
       bstm* |[
-        final ~x:<ds2java-constr-classname> c ~x:v = e_lhs;
+        final ~x:<ds2java-consdef-classname> c-def ~x:v = e_lhs;
         bstm*
       ]|
     where
-    	c-kind := <lookup-def(|Constructors()); lookup-prop(|ConsKind())> c;
+      c-def := <lookup-def(|Constructors())> (cname, <length> c*);
+    	c-kind := <lookup-prop(|ConsKind())> c-def;
     	<not(?NativeOpCons())> c-kind
     where
       v-ty := <type-of> dec;
@@ -296,7 +300,8 @@ rules
         }
       ]|
     where
-      consname := <ds2java-constr-classname> c;
+      c-def := <lookup-def(|Constructors())> (c, <length> patt-var*);
+      consname := <ds2java-consdef-classname> c-def;
       x_tmp := <newname> "$tmp";
       bstm1* := <map-with-index(ds2java-bind-out-var(|x_tmp))> patt-var*;
       bstm2* := <ds2java-premise> on-succ*;
@@ -402,18 +407,18 @@ rules
   ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ new x_consclass(this.getSourceInfo(), e*) ]|
     where
-      c-def := <lookup-def(|Constructors())> c;
+      c-def := <lookup-def(|Constructors())> (c, <length> child*);
       c-kind := <lookup-prop(|ConsKind())> c-def;
       <not(?NativeOpCons())> c-kind
     where
-      x_consclass := <ds2java-constr-classname> c;
+      x_consclass := <ds2java-consdef-classname> c-def;
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (c-c-ty*, child*)
 
   ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ x_manualpkg.Natives.x_consname(e*) ]|
     where
-    	c-def := <lookup-def(|Constructors())> c;
+    	c-def := <lookup-def(|Constructors())> (c, <length> child*);
       <lookup-prop(|ConsKind())> c-def => NativeOpCons();
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       x_manualpkg := <ManuPackageName>;

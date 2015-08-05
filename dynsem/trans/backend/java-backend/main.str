@@ -50,7 +50,6 @@ rules
         //      <fatal-err(|"Errors encountered: ")> error*
         //    end
         // )
-        
 	      w-log-timed(
 	        ds2java-abstracts;
 	        write-classes

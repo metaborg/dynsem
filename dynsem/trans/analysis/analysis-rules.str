@@ -43,7 +43,8 @@ rules /* store variables */
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr@NamedDynamicEmitted(_, arrow-name), _)) -> r
     where
-      lhs-ty := <try(?As(_, <id>)); ?Con(<id>, _); lookup-def(|Constructors()); lookup-prop(|Type()); ?ConstructorType(_, <id>)> lhs
+      Con(cname, c*) := <try(?As(_, <id>))> lhs;
+      ConstructorType(_, lhs-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (cname, <length> c*)
       <+
       lhs-ty := <?Cast(_, <id>); rw-type> lhs
     where
@@ -171,7 +172,7 @@ rules
   type-check-build-con:
     Con(c, aparam*) -> ty
     where
-      ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> aparam*);
       <zip(type-check-build-expect-wrap)> (fparam-ty*, aparam*)
 
   type-check-build-list:
@@ -312,7 +313,7 @@ rules // type rules for match-sides
   type-check-match-con(|in-ty):
     Con(c, aparam*) -> <type-coerce-full(id)> (in-ty, ty)
     where
-      ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> aparam*);
       <zip(type-check-match-wrap)> (fparam-ty*, aparam*)
   
   type-check-match-list(|in-ty):

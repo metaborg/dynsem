@@ -43,7 +43,7 @@ rules /* store signatures */
   store-constructor:
     d@ConsDecl(c, child*, s, Annos(anno*)) -> d
     with
-      <store-def(|Constructors())> c => c-def;
+      c-def := <store-def(|Constructors())> (c, <length> child*);
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
       if <fetch-elem(?ImplicitAnno())> anno*
       then
@@ -55,9 +55,12 @@ rules /* store signatures */
   store-constructor:
     d@NativeConsDecl(c, child*, s) -> d
     with
-      <store-def(|Constructors())> c => c-def;
+      <store-def(|Constructors())> (c, <length> child*) => c-def;
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
       <store-prop(|ConsKind(), c-def)> NativeCons()
+
+  consdef-get-name = def-get-name; ?(<id>, _)
+  consdef-get-arity = def-get-name; ?(_, <id>)
 
   store-arrows = ArrowDeclarations(map(store-arrow))
   
@@ -72,7 +75,7 @@ rules /* store signatures */
   store-native-operator:
     d@NativeOpDecl(c, child*, s) -> d
     with
-      <store-def(|Constructors())> c => c-def;
+      <store-def(|Constructors())> (c, <length> child*) => c-def;
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
       <store-prop(|ConsKind(), c-def)> NativeOpCons()
 
@@ -153,7 +156,17 @@ rules
     + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
     where
       <lookup-defs(|Types())> s => [_, _ | _];
-      add-msg(|Error(), s, $[Duplicate sort [s]])
+      add-msg(|Warning(), s, $[Duplicate sort [s]])
+  
+  check-signature:
+    <?SortDecl(s)
+    + ?AliasDecl(s, _)
+    + ?NativeBaseTypeDecl(_, s, _)
+    + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
+    where
+      ty := <rw-type> SimpleSort(s);
+      SystemSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> ty;
+      add-msg(|Error(), s, $[Sort collides with built-in sort [s]])
   
   check-signature:
     d@AliasDecl(s, _) -> <fail>
@@ -168,24 +181,38 @@ rules
 	    add-msg(|Error(), vs, $[Duplicate or overlapping variable prefix [prefix]])
   
   check-signature:
-    Con(cname, _) -> <fail>
+    Con(cname, c*) -> <fail>
     where
-      <not(lookup-def(|Constructors()))> cname;
-      add-msg(|Error(), cname, $[Constructor [cname] is not declared])
+      arity := <length> c*;
+      <not(lookup-def(|Constructors()))> (cname, arity);
+      add-msg(|Error(), cname, $[Constructor [cname]/[<int-to-string> arity] is not declared])
   
   check-signature:
-    <?NativeOpDecl(c, _, _)
-    + ?ConsDecl(c, _, _, _)
-    + ?NativeConsDecl(c, _, _)> -> <fail>
+    <?d@NativeOpDecl(cname, c*, _)
+    + ?d@ConsDecl(cname, c*, _, _)
+    + ?d@NativeConsDecl(cname, c*, _)> -> <fail>
     where
-      <lookup-defs(|Constructors())> c => [_, _ | _];
-      add-msg(|Error(), c, $[Duplicate constructor [c]])
+      arity := <length> c*;
+      <lookup-defs(|Constructors())> (cname, arity) => [_, _ | _];
+      add-msg(|Error(), d, $[Duplicate constructor [cname]/[<int-to-string> arity]])
 
   check-signature:
-    ConsDecl(c, [_, _ | _], _, <id>) -> <fail>
+    d@ConsDecl(cname, c*, ss@SimpleSort(s), _) -> <fail>
     where
-      fetch-elem(?ImplicitAnno());
-      add-msg(|Error(), c, $[Only unary constructors may be implicit])
+      arity := <length> c*;
+      ty := <rw-type> ss;
+      SystemSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> ty;
+      add-msg(|Error(), d, $[Constructor [cname]/[<int-to-string> arity] cannot be of built-in sort [s]])
+
+  check-signature:
+    d@ConsDecl(_, c*, _, Annos(anno*)) -> <fail>
+    where
+      [_, _ | _] := c*
+      <+
+      [] := c*
+    where
+      <fetch-elem(?ImplicitAnno())> anno*;
+      add-msg(|Error(), d, $[Non-unary constructors may not be implicit])
 
   check-signature:
     decl@ArrowDecl(in-srt, name, out-srt) -> <fail>

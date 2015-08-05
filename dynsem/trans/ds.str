@@ -40,15 +40,19 @@ rules // Analysis
 	
   editor-analyze:
     (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
-		with
+		with {| MyCurrentFile:
+		  f-path := $[[project-path]/[path]];
+		  rules(MyCurrentFile: _ -> f-path);
 		  editor-init;
+		  f := <origin-file> ast;
 			<in-project-path(m-in-analysis(
 				where(
-		  		get-msgs(mkmsg|Error()) => error*;
-		  		get-msgs(mkmsg|Warning()) => warning*;
-		  		get-msgs(mkmsg|Note()) => note*
+		  		get-msgs(msg-isin-file(|f); msg-mk-editor-msg| Error()) => error*;
+		  		get-msgs(msg-isin-file(|f); msg-mk-editor-msg| Warning()) => warning*;
+		  		get-msgs(msg-isin-file(|f); msg-mk-editor-msg| Note()) => note*
 		  	)
 			)|project-path)> ast => analyzed-ast
+		|}
 	
 	editor-show-analyzed:
 		(selected, position, ast, path, project-path) -> (filename, analyzed-ast)
@@ -56,8 +60,6 @@ rules // Analysis
 			filename := <guarantee-extension(|"analyzed.aterm")> path;
 			(analyzed-ast, _, _, _) := <editor-analyze> (ast, path, project-path)
 			
-  mkmsg: Message(_, t, s) -> (t, s)
-	
 rules
   
   // When given a tuple (path, string) this writes string into path.
@@ -127,12 +129,20 @@ rules // Builders
       filename := <guarantee-extension(|"refocused.ds")> path;
       result   := <refocus-module; pp-debug> selected
 
+  flatten-imports-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"imported.ds")> path;
+      in-project-path(
+        result := <include-imports; sugar-all; pp-debug> ast
+      |project-path)
+
   add-extra-typeannos-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"typeannos.ds")> path;
       in-project-path(
-        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; add-extra-typeannos-module; sugar-all; pp-debug> ast
+        result := <include-imports; desugar-top; fuse-sections; add-extra-typeannos-module; sugar-all; pp-debug> ast
       |project-path)
 
   desugar-aliases-editor:
@@ -140,7 +150,7 @@ rules // Builders
     with
       filename := <guarantee-extension(|"noaliases.ds")> path;
       in-project-path(
-        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; desugar-aliases-module; sugar-all; pp-debug> ast
+        result := <include-imports; desugar-top; fuse-sections; desugar-aliases-module; sugar-all; pp-debug> ast
       |project-path)
 
   expand-implicits-editor:
@@ -148,7 +158,7 @@ rules // Builders
     with
       filename := <guarantee-extension(|"explimpls.ds")> path;
       in-project-path(
-        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; expand-implicits-module; sugar-all; pp-debug> ast
+        result := <include-imports; desugar-top; fuse-sections; expand-implicits-module; sugar-all; pp-debug> ast
       |project-path)
 
   desugar-varschemes-editor:
@@ -156,7 +166,7 @@ rules // Builders
     with
       filename := <guarantee-extension(|"varschemes.ds")> path;
       in-project-path(
-        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; desugar-varschemes-module; sugar-all; pp-debug> ast
+        result := <include-imports; desugar-top; fuse-sections; desugar-varschemes-module; sugar-all; pp-debug> ast
       |project-path)
 
   explicate-editor:
@@ -164,7 +174,7 @@ rules // Builders
     with
       filename := <guarantee-extension(|"explicated.ds")> path;
       in-project-path(
-        result   := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; explicate-module; sugar-all; pp-debug> ast
+        result   := <include-imports; desugar-top; fuse-sections; explicate-module; sugar-all; pp-debug> ast
       |project-path)
 
   factorize-editor:
@@ -172,7 +182,7 @@ rules // Builders
     with
       filename := <guarantee-extension(|"factorized.ds")> path;
       in-project-path(
-        result := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
+        result := <include-imports; desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
       |project-path)
 
   merge-editor:
@@ -180,7 +190,7 @@ rules // Builders
     with
       filename := <guarantee-extension(|"merged.ds")> path;
       in-project-path(
-        result   := <resolve-includes(fatal-err-missing-import); desugar-top; fuse-sections; merge-rules-in-module-top; sugar-all; pp-debug> ast
+        result   := <include-imports; desugar-top; fuse-sections; merge-rules-in-module-top; sugar-all; pp-debug> ast
       |project-path)
 
   copy-propagation-editor:
@@ -188,7 +198,7 @@ rules // Builders
     with
       filename := <guarantee-extension(|"copyprop.ds")> path;
       in-project-path(
-        result   := <resolve-includes(fatal-err-missing-import); desugar-top; copy-propagation-module; sugar-all; pp-debug> ast
+        result   := <include-imports; desugar-top; copy-propagation-module; sugar-all; pp-debug> ast
       |project-path)
 
   constant-propagation-editor:
@@ -196,7 +206,7 @@ rules // Builders
     with
       filename := <guarantee-extension(|"constprop.ds")> path;
       in-project-path(
-        result   := <resolve-includes(fatal-err-missing-import); desugar-top; constant-propagation-module; sugar-all; pp-debug> ast
+        result   := <include-imports; desugar-top; constant-propagation-module; sugar-all; pp-debug> ast
       |project-path)
 
   all-to-java-editor:
@@ -206,7 +216,7 @@ rules // Builders
         init-options(|path, project-path);
 	      <log-timed(
 	        log-timed(
-	          resolve-includes(fatal-err-missing-import) | "Import resolutions"
+	          include-imports | "Import flattening"
 	        );
 	        log-timed(
 	          desugar-top; fuse-sections | "Desugaring"
@@ -254,7 +264,7 @@ rules // Builders
 	      init-options(|path, project-path);
 	      <log-timed(
 	        log-timed(
-	          resolve-includes(fatal-err-missing-import) | "Processing imports"
+	          include-imports | "Import flattening"
 	        );
 	        log-timed(
 	          desugar-top; fuse-sections | "Desugaring"
@@ -281,7 +291,7 @@ rules // Builders
 	          explicate-module | "Explication"
 	        );
 	        log-timed(
-	          merge-rules-in-module-top  | "Rule merging"
+	          merge-rules-in-module-top | "Rule merging"
 	        );
 	        log-timed(
 	          copy-propagation-module | "Copy propagation"

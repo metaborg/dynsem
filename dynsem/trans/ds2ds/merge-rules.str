@@ -20,6 +20,7 @@ imports
 rules /* merge overlapping rules */
 
   merge-rules-in-module-top =
+    Module(id, filter(not(?Imports(_)))); // drop all imports
     log-timed(
       merge-rules-in-module | "Cons merging"
     );

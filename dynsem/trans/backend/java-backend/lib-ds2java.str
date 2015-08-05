@@ -123,13 +123,10 @@ rules /* name generation */
       name := <def-get-name> a-def;
       bu-type-str := <pp-type-java> bu-type
 
-  ds2java-constr-classname:
-    constr -> $[[name]_[arity]]
+  ds2java-consdef-classname:
+    c-def -> $[[cname]_[arity]]
     where
-      <lookup-def(|Constructors())> constr => c-def;
-      <def-get-name> c-def => name;
-      <lookup-prop(|Type())> c-def => ConstructorType(child-ty*, ty);
-      <length> child-ty* => arity
+      <def-get-name> c-def => (cname, arity)
 
   ds2java-type-is-primitive =
   	?IntType()
