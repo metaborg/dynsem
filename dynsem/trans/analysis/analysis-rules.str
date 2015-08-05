@@ -43,10 +43,7 @@ rules /* store variables */
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr@NamedDynamicEmitted(_, arrow-name), _)) -> r
     where
-      Con(cname, c*) := <try(?As(_, <id>))> lhs;
-      ConstructorType(_, lhs-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (cname, <length> c*)
-      <+
-      lhs-ty := <?Cast(_, <id>); rw-type> lhs
+      lhs-ty := <rulelhs-get-type> lhs
     where
       if arrow-def := <lookup-def(|Arrows())> arrow-name
       then
@@ -61,6 +58,17 @@ rules /* store variables */
 	    else
         add-msg(|Error(), arr, $[Arrow [arrow-name] is not declared])
       end
+
+  rulelhs-get-type:
+    Con(cname, c*) -> ty
+    where
+      ConstructorType(_, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (cname, <length> c*)
+  
+  rulelhs-get-type:
+    Cast(_, s) -> <rw-type> s
+
+  rulelhs-get-type:
+    As(_, t) -> <rulelhs-get-type> t
 
   store-rule:
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
