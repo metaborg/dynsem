@@ -72,6 +72,12 @@ rules /* lift and expand subterms on build sides */
       (m', p*) := <lift-where-indirect> (e-ty, m)
 
   expand-implicits-termbuild:
+    MapSelect(m-t, k-t) -> (MapSelect(m-t, k-t'), p*)
+    where
+      MapType(f-k-ty, _) := <type-of> m-t;
+      (k-t', p*) := <lift-where-indirect <+ !(k-t, [])> (f-k-ty, k-t)
+
+  expand-implicits-termbuild:
     MapExtend(Map([Bind(k, v)]), m) -> (MapExtend(Map([Bind(k', v')]), m), [p1*, p2*])
     where
       MapType(k-ty, v-ty) := <type-of> m;

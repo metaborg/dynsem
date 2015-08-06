@@ -118,7 +118,7 @@ rules
     (expected-ty, actual-ty) -> <type-check-expectation(coerce|t, expected-ty)> actual-ty
 
   type-check-build =
-  	type-check-build-helper
+  	type-check-build-helper; get-alias-base
   	<+ type-err-build-match-symbols
     <+ type-err-build
   
@@ -210,9 +210,9 @@ rules
   type-check-build-map:
     MapSelect(m-t, k-t) -> val-ty
     where
-      map-ty := <type-check-build> m-t;
-      k-ty := <type-check-build> k-t;
-      MapType(_, val-ty) := <type-coerce-full(fail)> (map-ty, MapType(k-ty, ALPHATYPE()))
+      map-ty@MapType(f-key-ty, val-ty) := <type-check-build> m-t;
+      a-key-ty := <type-check-build> k-t;
+      <type-coerce-full(fail)> (a-key-ty, f-key-ty)
 
   type-check-build-cast:
     Cast(t, ty-t) -> cast-ty
