@@ -30,6 +30,22 @@ rules /* syntactic checks */
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
       add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
 
+  // post-analysis-check:
+  //   Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), Target(rhs, _)) -> <fail>
+  //   where
+  //     lhs-ty := <rulelhs-get-type> lhs;
+  //     arrow-def := <lookup-def(|Arrows())> arrow-name;
+  //     arrow-ty* := <lookup-props(|Type())> arrow-def;
+  //     ArrowType(lty, rty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
+  //     rhs-ty := <type-check-build-helper> rhs;
+  //     <not(type-coerce-direct(fail))> (rhs-ty, rty);
+  //     ty-step* := <type-coerce-implicit(fail, type-coerce-full(fail))> (rhs-ty, rty);
+  //     path-length := <length; int-to-string> ty-step*;
+  //     add-msg(|Warning(), rhs, $[Comformance through implicit coercion of length [path-length]]);
+  //     debug(!1);
+  //     <expand-implicits-termbuild> rhs
+  //     ;debug(!2)
+  
 rules /* store variables */
   
   store-rules-all =
@@ -503,6 +519,8 @@ rules
     where
       k-ty := <coerce-s> (a-k-ty, t-k-ty);
       v-ty := <coerce-s> (a-v-ty, t-v-ty)
+
+rules /* support for implicit conversions */
   
   type-coerce-implicit-wrap(is-matching, coerce-s):
     ty-tup@(_, _) -> <type-path-get-out-ty(is-matching)> ty-step*
@@ -515,38 +533,6 @@ rules
       is-matching
       < mode := MatchMode()
       + mode := BuildMode()
-
-  type-path-get-in-ty(is-matching):
-    [(step-def, step-def-ty) | _] -> in-ty
-    with
-      switch <def-get-namespace> step-def
-        case ?Constructors():
-          if is-matching
-          then
-            ConstructorType([in-ty], _) := step-def-ty
-          else
-            ConstructorType([in-ty], _) := step-def-ty
-          end
-        case ?Arrows():
-          ArrowType(in-ty, _) := step-def-ty
-      end
-
-  type-path-get-out-ty(is-matching):
-    ty-step* -> out-ty
-    with
-      (step-def, step-def-ty) := <last> ty-step*;
-      switch <def-get-namespace> step-def
-        case ?Constructors():
-          if is-matching
-          then
-            ConstructorType([out-ty], _) := step-def-ty
-          else
-            ConstructorType(_, out-ty) := step-def-ty
-          end
-        case ?Arrows():
-          ArrowType(_, out-ty) := step-def-ty
-      end
-
 
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths =
@@ -634,6 +620,120 @@ rules
         path* := [path1*, path2*]
       )
   
+  type-path-get-in-ty(is-matching):
+    [(step-def, step-def-ty) | _] -> in-ty
+    with
+      switch <def-get-namespace> step-def
+        case ?Constructors():
+          if is-matching
+          then
+            ConstructorType([in-ty], _) := step-def-ty
+          else
+            ConstructorType([in-ty], _) := step-def-ty
+          end
+        case ?Arrows():
+          ArrowType(in-ty, _) := step-def-ty
+      end
+
+  type-path-get-out-ty(is-matching):
+    ty-step* -> out-ty
+    with
+      (step-def, step-def-ty) := <last> ty-step*;
+      switch <def-get-namespace> step-def
+        case ?Constructors():
+          if is-matching
+          then
+            ConstructorType([out-ty], _) := step-def-ty
+          else
+            ConstructorType(_, out-ty) := step-def-ty
+          end
+        case ?Arrows():
+          ArrowType(_, out-ty) := step-def-ty
+      end
+
+  type-path-to-string(is-matching):
+    [] -> ""
+  
+  type-path-to-string(is-matching):
+  	[step | xs-steps] -> <conc-strings> (";<br>", step-string, xs-string)
+  	where
+  		step-string := <type-path-step-to-string(is-matching)> step;
+  		xs-string := <type-path-to-string(is-matching)> xs-steps
+  
+  type-path-step-to-string(is-matching):
+  	(cons-def, ConstructorType([in-ty], out-ty)) -> $[[<pp-type> out-ty] => [cons-name]([<pp-type> in-ty])]
+  	where
+  		is-matching;
+      cons-name := <consdef-get-name> cons-def
+
+  type-path-step-to-string(is-matching):
+  	(cons-def, ConstructorType([in-ty], out-ty)) -> $[[cons-name]([<pp-type> in-ty]) => [<pp-type> out-ty]] 
+    where
+      not(is-matching);
+      cons-name := <consdef-get-name> cons-def;
+      cons-arity := <consdef-get-arity> cons-def
+
+  type-path-step-to-string(is-matching):
+  	(arrow-def, ArrowType(in-ty, out-ty)) -> $[[<pp-type> in-ty] -[arrow-name]-> [<pp-type> out-ty]]
+  	where
+  		arrow-name := <def-get-name> arrow-def
+
+rules /* information providers for implicit conversions */
+  
+  gen-implicit-info-top = where(gen-implicit-info)
+
+  gen-implicit-info = 
+    try(
+		  Module(id, filter(gen-implicit-info)); fail
+		  + Rules(filter(gen-implicit-info)); fail
+		  + Rule(
+		      filter(gen-implicit-info),
+		      id,
+		      Relation(
+		        Reads(filter(gen-implicit-info(id))),
+		        Source(gen-implicit-info(id), filter(gen-implicit-info(id))),
+		        id,
+		        Target(gen-implicit-info(fail), filter(gen-implicit-info(fail)))
+		      )
+		    ); fail
+		  + gen-implicit-info-conclusion; fail
+		  + Formula(gen-implicit-info); fail
+	    + Relation(
+	        Reads(gen-implicit-info(fail)),
+	        Source(gen-implicit-info(fail), filter(gen-implicit-info(fail))),
+	        id,
+	        Target(gen-implicit-info(id), filter(gen-implicit-info(id)))
+	      ); fail
+		  + Match(gen-implicit-info(fail), gen-implicit-info(id)); fail // TODO display message ON this premise
+		  + NMatch(gen-implicit-info(fail), gen-implicit-info(id)); fail
+		  + TermEq(gen-implicit-info(fail), gen-implicit-info(fail)); fail // TODO display message ON this premise
+		  + TermNeq(gen-implicit-info(fail), gen-implicit-info(fail)); fail // TODO display message ON this premise
+		  + gen-implicit-info-premise; fail
+		)
+  
+  gen-implicit-info-conclusion:
+    Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), Target(rhs, _))) -> <fail>
+    where
+      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      lhs-ty := <rulelhs-get-type> lhs;
+      ArrowType(dec-lhs-ty, dec-rhs-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
+      rhs-ty := <type-check-build-helper> rhs;
+      <gen-implicit-info-fact(fail|rhs)> (rhs-ty, dec-rhs-ty)
+  
+  gen-implicit-info-premise = fail // TODO
+  
+  gen-implicit-info(is-matching) = fail // TODO
+
+  gen-implicit-info-fact(is-matching|on-term) =
+    ?(actual-ty, expected-ty);
+    not(type-coerce-direct(fail));
+    type-coerce-implicit(fail, type-coerce-full(fail));
+    type-path-to-string(is-matching);
+    ?path-string;
+    add-msg(|Warning(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
+
+rules /* utilities */
+
   anti-cycle(s) = {| AntiCycle:
     ?t;
     not(AntiCycle);
@@ -661,4 +761,3 @@ rules
     HitStats => (hits, misses);
     misses' := <inc> misses;
     rules(HitStats: _ -> (hits, misses'))
-  

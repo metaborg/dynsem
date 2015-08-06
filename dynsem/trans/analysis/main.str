@@ -72,6 +72,9 @@ rules
         );
         log-timed(
           <post-analysis-checks> m | "Post-analysis checks"
+        );
+        log-timed(
+          <gen-implicit-info-top> m | "Implicit conversion information"
         )
       | "Analysis" )
   
