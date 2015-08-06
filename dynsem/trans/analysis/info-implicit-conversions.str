@@ -85,6 +85,14 @@ rules
       ConstructorType(fc-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
       <zip(try(\ (c, fc-ty) -> <gen-implicit-info-fact(is-matching|c)> (<gen-implicit-type-of(is-matching)> c, fc-ty) \))> (c*, fc-ty*)
 
+  gen-implicit-info-term(is-matching):
+    ListTail([h], t) -> <fail>
+    where
+      h-ty := <gen-implicit-type-of(is-matching)> h;
+      ListType(e-ty) := <gen-implicit-type-of(is-matching)> t;
+      <gen-implicit-info-fact(is-matching|h)> (h-ty, e-ty)
+      
+
   gen-implicit-info-fact(is-matching|on-term) =
     (is-matching < Swap + id);
     ?(actual-ty, expected-ty);

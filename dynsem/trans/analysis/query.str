@@ -21,7 +21,7 @@ rules
     MatchedVar(v) -> <type-of> VarRef(v)
   
   type-of:
-    Var(v) -> <debug(!1); type-of; debug(!2)> VarRef(v)
+    Var(v) -> <type-of> VarRef(v)
 
   type-of:
     ListTail([h], _) -> ListType(<type-of> h)
