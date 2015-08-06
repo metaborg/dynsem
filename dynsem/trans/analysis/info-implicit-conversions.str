@@ -63,11 +63,11 @@ rules
   gen-implicit-info-premise:
     _ -> <fail>
     where
-      ?Match(lt, rt) + ?NMatch(lt, rt)
+      ?p@Match(lt, rt) + ?p@NMatch(lt, rt)
     where
       l-ty := <gen-implicit-type-of(fail)> lt;
       r-ty := <gen-implicit-type-of(id)> rt;
-      <try(gen-implicit-info-fact(id|rt))> (r-ty, l-ty)
+      <try(gen-implicit-info-fact(id|p))> (r-ty, l-ty)
   
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
 
@@ -94,17 +94,7 @@ rules
     ?path-string;
     add-msg(|Warning(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
 
-  gen-implicit-type-of(is-matching):
-    term -> ty
-    where
-      is-matching
-      <
-        ty := <type-check-match-helper(|ALPHATYPE())> term
-      +
-        ty := <type-check-build-helper> term
-
-
-
+    gen-implicit-type-of(is-matching) = type-of
 
 
 
