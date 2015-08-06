@@ -69,7 +69,7 @@ rules
       r-ty := <gen-implicit-type-of(id)> rt;
       <try(gen-implicit-info-fact(id|rt))> (r-ty, l-ty)
   
-  gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching)) // TODO
+  gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
 
   gen-implicit-info-term(is-matching):
     LabelComp(s, t) -> <fail>
@@ -77,14 +77,14 @@ rules
       ty := <rw-type> s;
       t-ty := <gen-implicit-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|t)> (t-ty, ty)
-  
+
   gen-implicit-info-term(is-matching):
     Con(c-name, c*) -> <fail>
     where
       c-arity := <length> c*;
       ConstructorType(fc-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
       <zip(try(\ (c, fc-ty) -> <gen-implicit-info-fact(is-matching|c)> (<gen-implicit-type-of(is-matching)> c, fc-ty) \))> (c*, fc-ty*)
-  
+
   gen-implicit-info-fact(is-matching|on-term) =
     (is-matching < Swap + id);
     ?(actual-ty, expected-ty);
@@ -102,3 +102,15 @@ rules
         ty := <type-check-match-helper(|ALPHATYPE())> term
       +
         ty := <type-check-build-helper> term
+
+
+
+
+
+
+
+
+
+
+
+
