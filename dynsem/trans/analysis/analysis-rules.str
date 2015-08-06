@@ -244,6 +244,10 @@ rules
 rules // type rules for match-sides
   
   type-check-match(|in-ty) =
+    type-check-match-helper(|in-ty)
+    <+ type-err-match(|in-ty)
+  
+  type-check-match-helper(|in-ty) =
     type-check-match-num(|in-ty)
     <+ type-check-match-bool(|in-ty)
     <+ type-check-match-str(|in-ty)
@@ -253,7 +257,6 @@ rules // type rules for match-sides
     <+ type-check-match-con(|in-ty)
     <+ type-check-match-cast(|in-ty)
     <+ type-check-match-list(|in-ty)
-    <+ type-err-match(|in-ty)
   
   type-err-match(|in-ty):
   	t -> in-ty
@@ -688,10 +691,10 @@ rules /* information providers for implicit conversions */
 	        id,
 	        Target(gen-implicit-info(id), filter(gen-implicit-info(id)))
 	      ); fail
-		  + Match(gen-implicit-info(fail), gen-implicit-info(id)); fail // TODO display message ON this premise
+		  + Match(gen-implicit-info(fail), gen-implicit-info(id)); fail
 		  + NMatch(gen-implicit-info(fail), gen-implicit-info(id)); fail
-		  + TermEq(gen-implicit-info(fail), gen-implicit-info(fail)); fail // TODO display message ON this premise
-		  + TermNeq(gen-implicit-info(fail), gen-implicit-info(fail)); fail // TODO display message ON this premise
+		  + TermEq(gen-implicit-info(fail), gen-implicit-info(fail)); fail
+		  + TermNeq(gen-implicit-info(fail), gen-implicit-info(fail)); fail
 		  + gen-implicit-info-premise; fail
 		)
   
@@ -711,7 +714,14 @@ rules /* information providers for implicit conversions */
       ArrowType(dec-lhs-ty, _) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
       <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
   
-  gen-implicit-info-premise = fail // TODO
+  gen-implicit-info-premise:
+  	_ -> <fail>
+  	where
+  		?Match(lt, rt) + ?NMatch(lt, rt)
+    where
+	  	l-ty := <gen-implicit-type-of(fail)> lt;
+	  	r-ty := <gen-implicit-type-of(id)> rt;
+	  	<try(gen-implicit-info-fact(id|rt))> (r-ty, l-ty)
   
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching)) // TODO
 
@@ -719,7 +729,7 @@ rules /* information providers for implicit conversions */
     LabelComp(s, t) -> <fail>
     where
       ty := <rw-type> s;
-      t-ty := <type-of> t;
+      t-ty := <gen-implicit-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|t)> (t-ty, ty)
   
   gen-implicit-info-term(is-matching):
@@ -727,7 +737,16 @@ rules /* information providers for implicit conversions */
     where
       c-arity := <length> c*;
       ConstructorType(fc-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
-      <zip(try(\ (c, fc-ty) -> <gen-implicit-info-fact(is-matching|c)> (<type-of> c, fc-ty) \))> (c*, fc-ty*)
+      <zip(try(\ (c, fc-ty) -> <gen-implicit-info-fact(is-matching|c)> (<gen-implicit-type-of(is-matching)> c, fc-ty) \))> (c*, fc-ty*)
+  
+  gen-implicit-info-term(is-matching):
+  	MapSelect(_, _) -> <fail> // TODO
+
+  gen-implicit-info-term(is-matching):
+  	MapExtend(_, _) -> <fail> // TODO
+
+  gen-implicit-info-term(is-matching):
+  	ListTail(_, _) -> <fail> // TODO
   
   gen-implicit-info-fact(is-matching|on-term) =
     (is-matching < Swap + id);
@@ -737,6 +756,15 @@ rules /* information providers for implicit conversions */
     type-path-to-string(is-matching);
     ?path-string;
     add-msg(|Warning(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
+
+  gen-implicit-type-of(is-matching):
+    term -> ty
+    where
+      is-matching
+      <
+        ty := <type-check-match-helper(|ALPHATYPE())> term
+      +
+        ty := <type-check-build-helper> term
 
 rules /* utilities */
 
