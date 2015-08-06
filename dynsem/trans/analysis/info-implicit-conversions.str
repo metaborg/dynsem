@@ -6,7 +6,7 @@ imports
   analysis/constructors
   analysis/analysis-rules
   analysis/query
-
+  analysis/analysis-signatures
 
 rules
   
@@ -91,7 +91,13 @@ rules
       h-ty := <gen-implicit-type-of(is-matching)> h;
       ListType(e-ty) := <gen-implicit-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|h)> (h-ty, e-ty)
-      
+  
+  gen-implicit-info-term(is-matching):
+    MapSelect(map-t, key-t) -> <fail>
+    where
+      MapType(f-key-ty, _) := <gen-implicit-type-of(is-matching); get-alias-base> map-t;
+      a-key-ty := <gen-implicit-type-of(is-matching)> key-t;
+      <gen-implicit-info-fact(is-matching|key-t)> (a-key-ty, f-key-ty)
 
   gen-implicit-info-fact(is-matching|on-term) =
     (is-matching < Swap + id);
