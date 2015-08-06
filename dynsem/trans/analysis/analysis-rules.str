@@ -717,9 +717,10 @@ rules /* information providers for implicit conversions */
   gen-implicit-info(is-matching) = fail // TODO
 
   gen-implicit-info-fact(is-matching|on-term) =
+    (is-matching < Swap + id);
     ?(actual-ty, expected-ty);
-    not(type-coerce-direct(fail));
-    type-coerce-implicit(is-matching, type-coerce-full(fail));
+    not(type-coerce-direct(is-matching));
+    type-coerce-implicit(is-matching, type-coerce-full(is-matching));
     type-path-to-string(is-matching);
     ?path-string;
     add-msg(|Warning(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
