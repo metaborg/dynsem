@@ -713,8 +713,22 @@ rules /* information providers for implicit conversions */
   
   gen-implicit-info-premise = fail // TODO
   
-  gen-implicit-info(is-matching) = fail // TODO
+  gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching)) // TODO
 
+  gen-implicit-info-term(is-matching):
+    LabelComp(s, t) -> <fail>
+    where
+      ty := <rw-type> s;
+      t-ty := <type-of> t;
+      <gen-implicit-info-fact(is-matching|t)> (t-ty, ty)
+  
+  gen-implicit-info-term(is-matching):
+    Con(c-name, c*) -> <fail>
+    where
+      c-arity := <length> c*;
+      ConstructorType(fc-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
+      <zip(try(\ (c, fc-ty) -> <gen-implicit-info-fact(is-matching|c)> (<type-of> c, fc-ty) \))> (c*, fc-ty*)
+  
   gen-implicit-info-fact(is-matching|on-term) =
     (is-matching < Swap + id);
     ?(actual-ty, expected-ty);
