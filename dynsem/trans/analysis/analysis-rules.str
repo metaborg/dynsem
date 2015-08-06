@@ -639,7 +639,7 @@ rules /* support for implicit conversions */
     [] -> ""
   
   type-path-to-string(is-matching):
-  	[step | xs-steps] -> <conc-strings> (";<br>", step-string, xs-string)
+  	[step | xs-steps] -> <conc-strings> ("<br>", step-string, xs-string)
   	where
   		step-string := <type-path-step-to-string(is-matching)> step;
   		xs-string := <type-path-to-string(is-matching)> xs-steps
