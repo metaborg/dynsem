@@ -30,22 +30,6 @@ rules /* syntactic checks */
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
       add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
 
-  // post-analysis-check:
-  //   Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), Target(rhs, _)) -> <fail>
-  //   where
-  //     lhs-ty := <rulelhs-get-type> lhs;
-  //     arrow-def := <lookup-def(|Arrows())> arrow-name;
-  //     arrow-ty* := <lookup-props(|Type())> arrow-def;
-  //     ArrowType(lty, rty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
-  //     rhs-ty := <type-check-build-helper> rhs;
-  //     <not(type-coerce-direct(fail))> (rhs-ty, rty);
-  //     ty-step* := <type-coerce-implicit(fail, type-coerce-full(fail))> (rhs-ty, rty);
-  //     path-length := <length; int-to-string> ty-step*;
-  //     add-msg(|Warning(), rhs, $[Comformance through implicit coercion of length [path-length]]);
-  //     debug(!1);
-  //     <expand-implicits-termbuild> rhs
-  //     ;debug(!2)
-  
 rules /* store variables */
   
   store-rules-all =
