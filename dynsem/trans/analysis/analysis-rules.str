@@ -719,7 +719,7 @@ rules /* information providers for implicit conversions */
   gen-implicit-info-fact(is-matching|on-term) =
     ?(actual-ty, expected-ty);
     not(type-coerce-direct(fail));
-    type-coerce-implicit(fail, type-coerce-full(fail));
+    type-coerce-implicit(is-matching, type-coerce-full(fail));
     type-path-to-string(is-matching);
     ?path-string;
     add-msg(|Warning(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
