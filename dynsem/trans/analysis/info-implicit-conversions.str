@@ -47,7 +47,6 @@ rules
     Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), _)) -> <fail>
     where
       arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      // lhs-ty := <rulelhs-get-type> lhs;
       lhs-ty := <gen-implicit-type-of(id)> lhs;
       ArrowType(dec-lhs-ty, _) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
       <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
@@ -108,7 +107,7 @@ rules
     ?path-string;
     add-msg(|Warning(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
 
-    gen-implicit-type-of(is-matching) = type-of
+  gen-implicit-type-of(is-matching) = type-of
 
 
 
