@@ -43,10 +43,7 @@ rules /* store variables */
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr@NamedDynamicEmitted(_, arrow-name), _)) -> r
     where
-      Con(cname, c*) := <try(?As(_, <id>))> lhs;
-      ConstructorType(_, lhs-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (cname, <length> c*)
-      <+
-      lhs-ty := <?Cast(_, <id>); rw-type> lhs
+      lhs-ty := <rulelhs-get-type> lhs
     where
       if arrow-def := <lookup-def(|Arrows())> arrow-name
       then
@@ -61,6 +58,17 @@ rules /* store variables */
 	    else
         add-msg(|Error(), arr, $[Arrow [arrow-name] is not declared])
       end
+
+  rulelhs-get-type:
+    Con(cname, c*) -> ty
+    where
+      ConstructorType(_, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (cname, <length> c*)
+  
+  rulelhs-get-type:
+    Cast(_, s) -> <rw-type> s
+
+  rulelhs-get-type:
+    As(_, t) -> <rulelhs-get-type> t
 
   store-rule:
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
@@ -110,7 +118,7 @@ rules
     (expected-ty, actual-ty) -> <type-check-expectation(coerce|t, expected-ty)> actual-ty
 
   type-check-build =
-  	type-check-build-helper
+  	type-check-build-helper; get-alias-base
   	<+ type-err-build-match-symbols
     <+ type-err-build
   
@@ -202,9 +210,9 @@ rules
   type-check-build-map:
     MapSelect(m-t, k-t) -> val-ty
     where
-      map-ty := <type-check-build> m-t;
-      k-ty := <type-check-build> k-t;
-      MapType(_, val-ty) := <type-coerce-full(fail)> (map-ty, MapType(k-ty, ALPHATYPE()))
+      map-ty@MapType(f-key-ty, val-ty) := <type-check-build> m-t;
+      a-key-ty := <type-check-build> k-t;
+      <type-coerce-full(fail)> (a-key-ty, f-key-ty)
 
   type-check-build-cast:
     Cast(t, ty-t) -> cast-ty
@@ -236,6 +244,10 @@ rules
 rules // type rules for match-sides
   
   type-check-match(|in-ty) =
+    type-check-match-helper(|in-ty)
+    <+ type-err-match(|in-ty)
+  
+  type-check-match-helper(|in-ty) =
     type-check-match-num(|in-ty)
     <+ type-check-match-bool(|in-ty)
     <+ type-check-match-str(|in-ty)
@@ -245,7 +257,6 @@ rules // type rules for match-sides
     <+ type-check-match-con(|in-ty)
     <+ type-check-match-cast(|in-ty)
     <+ type-check-match-list(|in-ty)
-    <+ type-err-match(|in-ty)
   
   type-err-match(|in-ty):
   	t -> in-ty
@@ -437,7 +448,7 @@ rules
   type-coerce-full(is-matching) =
     type-coerce-base
     <+ type-coerce(type-coerce-full(is-matching))
-    <+ type-coerce-implicit(is-matching, type-coerce-full(is-matching))
+    <+ type-coerce-implicit-wrap(is-matching, type-coerce-full(is-matching))
     
   type-coerce-direct(is-matching) =
     type-coerce-base
@@ -496,24 +507,19 @@ rules
       k-ty := <coerce-s> (a-k-ty, t-k-ty);
       v-ty := <coerce-s> (a-v-ty, t-v-ty)
 
+rules /* support for implicit conversions */
+  
+  type-coerce-implicit-wrap(is-matching, coerce-s):
+    ty-tup@(_, _) -> <type-path-get-out-ty(is-matching)> ty-step*
+    where
+      ty-step* := <type-coerce-implicit(is-matching, coerce-s)> ty-tup
+  
   type-coerce-implicit(is-matching, coerce-s):
-    (ty-from, ty-to) -> ty-to'
+    (ty-from, ty-to) -> <get-typath-memo(coerce-s)> (ty-from, ty-to, mode)
     where
-      is-matching < mode := MatchMode() + mode := BuildMode()
-    where
-      (step-def, step-def-ty) := <get-typath-memo(coerce-s); last> (ty-from, ty-to, mode);
-      (
-        <def-get-namespace> step-def => Arrows();
-        ArrowType(_, ty-to') := step-def-ty
-        <+
-        <def-get-namespace> step-def => Constructors();
-        if is-matching
-        then
-          ConstructorType([ty-to'], _) := step-def-ty
-        else
-          ConstructorType(_, ty-to') := step-def-ty
-        end
-      )
+      is-matching
+      < mode := MatchMode()
+      + mode := BuildMode()
 
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths =
@@ -601,6 +607,66 @@ rules
         path* := [path1*, path2*]
       )
   
+  type-path-get-in-ty(is-matching):
+    [(step-def, step-def-ty) | _] -> in-ty
+    with
+      switch <def-get-namespace> step-def
+        case ?Constructors():
+          if is-matching
+          then
+            ConstructorType([in-ty], _) := step-def-ty
+          else
+            ConstructorType([in-ty], _) := step-def-ty
+          end
+        case ?Arrows():
+          ArrowType(in-ty, _) := step-def-ty
+      end
+
+  type-path-get-out-ty(is-matching):
+    ty-step* -> out-ty
+    with
+      (step-def, step-def-ty) := <last> ty-step*;
+      switch <def-get-namespace> step-def
+        case ?Constructors():
+          if is-matching
+          then
+            ConstructorType([out-ty], _) := step-def-ty
+          else
+            ConstructorType(_, out-ty) := step-def-ty
+          end
+        case ?Arrows():
+          ArrowType(_, out-ty) := step-def-ty
+      end
+
+  type-path-to-string(is-matching):
+    [] -> ""
+  
+  type-path-to-string(is-matching):
+  	[step | xs-steps] -> <conc-strings> ("<br>", step-string, xs-string)
+  	where
+  		step-string := <type-path-step-to-string(is-matching)> step;
+  		xs-string := <type-path-to-string(is-matching)> xs-steps
+  
+  type-path-step-to-string(is-matching):
+  	(cons-def, ConstructorType([in-ty], out-ty)) -> $[[<pp-type> out-ty] => [cons-name]([<pp-type> in-ty])]
+  	where
+  		is-matching;
+      cons-name := <consdef-get-name> cons-def
+
+  type-path-step-to-string(is-matching):
+  	(cons-def, ConstructorType([in-ty], out-ty)) -> $[[cons-name]([<pp-type> in-ty]) => [<pp-type> out-ty]] 
+    where
+      not(is-matching);
+      cons-name := <consdef-get-name> cons-def;
+      cons-arity := <consdef-get-arity> cons-def
+
+  type-path-step-to-string(is-matching):
+  	(arrow-def, ArrowType(in-ty, out-ty)) -> $[[<pp-type> in-ty] -[arrow-name]-> [<pp-type> out-ty]]
+  	where
+  		arrow-name := <def-get-name> arrow-def
+
+rules /* utilities */
+
   anti-cycle(s) = {| AntiCycle:
     ?t;
     not(AntiCycle);
@@ -628,4 +694,3 @@ rules
     HitStats => (hits, misses);
     misses' := <inc> misses;
     rules(HitStats: _ -> (hits, misses'))
-  

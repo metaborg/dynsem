@@ -1,0 +1,119 @@
+module analysis/info-implicit-conversions
+
+imports
+  include/ds
+  analysis/lib-analysis
+  analysis/constructors
+  analysis/analysis-rules
+  analysis/query
+  analysis/analysis-signatures
+
+rules
+  
+  rules /* information providers for implicit conversions */
+  
+  gen-implicit-info-top = where(gen-implicit-info)
+
+  gen-implicit-info = 
+    try(
+      Module(id, filter(gen-implicit-info)); fail
+      + Rules(filter(gen-implicit-info)); fail
+      + Rule(
+          filter(gen-implicit-info),
+          id,
+          Relation(
+            Reads(filter(gen-implicit-info(id))),
+            Source(gen-implicit-info(id), filter(gen-implicit-info(id))),
+            id,
+            Target(gen-implicit-info(fail), filter(gen-implicit-info(fail)))
+          )
+        ); fail
+      + gen-implicit-info-conclusion; fail
+      + Formula(gen-implicit-info); fail
+      + Relation(
+          Reads(gen-implicit-info(fail)),
+          Source(gen-implicit-info(fail), filter(gen-implicit-info(fail))),
+          id,
+          Target(gen-implicit-info(id), filter(gen-implicit-info(id)))
+        ); fail
+      + Match(gen-implicit-info(fail), gen-implicit-info(id)); fail
+      + NMatch(gen-implicit-info(fail), gen-implicit-info(id)); fail
+      + TermEq(gen-implicit-info(fail), gen-implicit-info(fail)); fail
+      + TermNeq(gen-implicit-info(fail), gen-implicit-info(fail)); fail
+      + gen-implicit-info-premise; fail
+    )
+  
+  gen-implicit-info-conclusion:
+    Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), _)) -> <fail>
+    where
+      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      lhs-ty := <gen-implicit-type-of(id)> lhs;
+      ArrowType(dec-lhs-ty, _) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
+      <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
+
+  gen-implicit-info-conclusion:
+    Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), Target(rhs, _))) -> <fail>
+    where
+      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      lhs-ty := <rulelhs-get-type> lhs;
+      ArrowType(_, dec-rhs-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
+      <gen-implicit-info-fact(fail|rhs)> (<gen-implicit-type-of(fail)> rhs, dec-rhs-ty)
+  
+  gen-implicit-info-premise:
+    _ -> <fail>
+    where
+      ?p@Match(lt, rt) + ?p@NMatch(lt, rt)
+    where
+      l-ty := <gen-implicit-type-of(fail)> lt;
+      r-ty := <gen-implicit-type-of(id)> rt;
+      <try(gen-implicit-info-fact(id|p))> (r-ty, l-ty)
+  
+  gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
+
+  gen-implicit-info-term(is-matching):
+    LabelComp(s, t) -> <fail>
+    where
+      ty := <rw-type> s;
+      t-ty := <gen-implicit-type-of(is-matching)> t;
+      <gen-implicit-info-fact(is-matching|t)> (t-ty, ty)
+
+  gen-implicit-info-term(is-matching):
+    Con(c-name, c*) -> <fail>
+    where
+      c-arity := <length> c*;
+      ConstructorType(fc-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
+      <zip(try(\ (c, fc-ty) -> <gen-implicit-info-fact(is-matching|c)> (<gen-implicit-type-of(is-matching)> c, fc-ty) \))> (c*, fc-ty*)
+
+  gen-implicit-info-term(is-matching):
+    ListTail([h], t) -> <fail>
+    where
+      h-ty := <gen-implicit-type-of(is-matching)> h;
+      ListType(e-ty) := <gen-implicit-type-of(is-matching)> t;
+      <gen-implicit-info-fact(is-matching|h)> (h-ty, e-ty)
+  
+  gen-implicit-info-term(is-matching):
+    MapSelect(map-t, key-t) -> <fail>
+    where
+      MapType(f-key-ty, _) := <gen-implicit-type-of(is-matching); get-alias-base> map-t;
+      a-key-ty := <gen-implicit-type-of(is-matching)> key-t;
+      <gen-implicit-info-fact(is-matching|key-t)> (a-key-ty, f-key-ty)
+
+  gen-implicit-info-fact(is-matching|on-term) =
+    (is-matching < Swap + id);
+    ?(actual-ty, expected-ty);
+    not(type-coerce-direct(is-matching));
+    type-coerce-implicit(is-matching, type-coerce-full(is-matching));
+    type-path-to-string(is-matching);
+    ?path-string;
+    add-msg(|Warning(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
+
+  gen-implicit-type-of(is-matching) = type-of
+
+
+
+
+
+
+
+
+

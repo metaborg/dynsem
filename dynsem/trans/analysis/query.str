@@ -11,9 +11,9 @@ imports
 
 rules
   
-  type-of =
-    type-check-build-helper
-  
+  type-of:
+    Wld() -> ALPHATYPE()
+
   type-of:
     As(v, _) -> <type-of> v
   
@@ -25,7 +25,18 @@ rules
   
   type-of:
     Var(v) -> <type-of> VarRef(v)
+
+  type-of:
+    ListTail([h], _) -> ListType(<type-of> h)
   
+  type-of:
+    Con(name, c*) -> c-ty
+    where
+      ConstructorType(_, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, <length> c*) 
+
+  type-of =
+    type-check-build-helper
+
   type-of-applicable-arrow(coerce-s):
     (arrow-type*, term-ty) -> <fetch-elem(where(\ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-type*
 
