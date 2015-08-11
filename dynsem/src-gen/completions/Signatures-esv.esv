@@ -19,10 +19,10 @@ completions
     <ID:ID> " : " <Type:Type>  
 
 completions
-  completion template SignatureSection : "aliases " =
-    "aliases\n\t" (cursor) (blank)  
-  completion template AliasDecl : "ID : Type" =
-    <ID:ID> " : " <Type:Type>  
+  completion template SignatureSection : "sort aliases " =
+    "sort aliases\n\t" (cursor) (blank)  
+  completion template AliasDecl : "ID = Type" =
+    <ID:ID> " = " <Type:Type>  
 
 completions
   completion template SignatureSection : "constructors " =
