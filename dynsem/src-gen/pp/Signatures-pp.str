@@ -137,7 +137,7 @@ strategies
   prettyprint-SignatureSection :
     Aliases(t1__) -> [ H(
                          [SOpt(HS(), "0")]
-                       , [S("aliases")]
+                       , [S("sort aliases")]
                        )
                      , t1__'
                      ]
@@ -149,7 +149,7 @@ strategies
   prettyprint-AliasDecl :
     AliasDecl(t1__, t2__) -> [ H(
                                  [SOpt(HS(), "0")]
-                               , [t1__', S(" : "), t2__']
+                               , [t1__', S(" = "), t2__']
                                )
                              ]
     with t1__' := <pp-one-Z(prettyprint-ID)> t1__

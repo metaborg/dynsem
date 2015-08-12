@@ -25,8 +25,8 @@ exports
     CONTENTCOMPLETE -> VariableScheme   {cons("COMPLETION-VariableScheme")}
 
   context-free syntax
-    "aliases" AliasDecl* -> SignatureSection {cons("Aliases")}
-    ID ":" Type          -> AliasDecl        {cons("AliasDecl")}
+    "sort" "aliases" AliasDecl* -> SignatureSection {cons("Aliases")}
+    ID "=" Type                 -> AliasDecl        {cons("AliasDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}

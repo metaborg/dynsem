@@ -29,10 +29,10 @@ context-free syntax // variable schemes
 context-free syntax // variable schemes
   
   SignatureSection.Aliases = <
-    aliases
+    sort aliases
       <{AliasDecl "\n"}*>>
   
-  AliasDecl.AliasDecl = [[ID] : [Type]]
+  AliasDecl.AliasDecl = [[ID] = [Type]]
 
 context-free syntax // constructor declarations
 
