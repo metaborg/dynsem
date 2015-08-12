@@ -26,7 +26,7 @@ Let's assume that your language is called *LANG*. Let's assume that the followin
 
   rules
 
-    Env nv |- Plus(e1, e2) :: Sto s -default-> NumV(i) :: Sto s''
+    Env nv |- Plus(e1, e2) :: Sto s -default-> NumV(i1) :: Sto s''
     where
       Env nv |- e1 :: Sto s  -default-> NumV(i1) :: Sto s';
       Env nv |- e2 :: Sto s' -default-> NumV(i2) :: Sto s''.
@@ -63,7 +63,7 @@ The goal is to interpret a program in the language by:
 
 We set-up the project to achieve this as follows:
 
-1. Add a builder that invokes the interpreter (*LANG.str*):
+1. Add a builder that invokes the interpreter (*trans/LANG.str*):
 
 		 external dsevaluate(|)
 
@@ -73,13 +73,13 @@ We set-up the project to achieve this as follows:
 		     filename := <guarantee-extension(|"evaluated.aterm")> path;
 		     result := <dsevaluate> ast
 
-2. Add an action for it in the language menus (*LANG-Menus.esv*):
+2. Add an action for it in the language menus (*editor/LANG-Menus.esv*):
 
 		menu: "Interpreter"
 
 			action: "Evaluate" = editor-evaluate (openeditor) (realtime) (source)
 
-3. Implement the native strategy `dsevaluate(|)` in the *LANG.strategies* package and register it in the `InteropRegisterer`:
+3. Implement the native strategy `dsevaluate(|)` in the *editor/java/LANG.strategies* package and register it in the `InteropRegisterer`:
 
 		package LANG.strategies;
 
