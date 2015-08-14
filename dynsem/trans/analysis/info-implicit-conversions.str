@@ -105,7 +105,7 @@ rules
     type-coerce-implicit(is-matching, type-coerce-full(is-matching));
     type-path-to-string(is-matching);
     ?path-string;
-    add-msg(|Warning(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
+    add-msg(|Note(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
 
   gen-implicit-type-of(is-matching) = type-of
 
