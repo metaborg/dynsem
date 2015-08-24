@@ -16,7 +16,6 @@ imports
 	ds2ds/factorize
 	ds2ds/explicate
 	analysis/resolve-includes
-	ds2ds/merge-rules
 	ds2ds/fuse-sections
 	ds2ds/copy-propagation
 	ds2ds/constant-propagation
@@ -185,14 +184,6 @@ rules // Builders
         result := <include-imports; desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
       |project-path)
 
-  merge-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"merged.ds")> path;
-      in-project-path(
-        result   := <include-imports; desugar-top; fuse-sections; merge-rules-in-module-top; sugar-all; pp-debug> ast
-      |project-path)
-
   copy-propagation-editor:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
@@ -243,9 +234,6 @@ rules // Builders
 	          explicate-module | "Explication"
 	        );
 	        log-timed(
-	          merge-rules-in-module-top  | "Rule merging"
-	        );
-	        log-timed(
 	          copy-propagation-module | "Copy propagation"
 	        );
 	        log-timed(
@@ -289,9 +277,6 @@ rules // Builders
 	        );
 	        log-timed(
 	          explicate-module | "Explication"
-	        );
-	        log-timed(
-	          merge-rules-in-module-top | "Rule merging"
 	        );
 	        log-timed(
 	          copy-propagation-module | "Copy propagation"
