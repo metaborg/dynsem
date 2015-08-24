@@ -23,6 +23,7 @@ imports
 	ds2ds/desugar-varschemes
 	ds2ds/extra-typeannos
 	ds2ds/desugar-aliases
+	ds2ds/meta-functions
 	analysis/main
 	analysis/lib-analysis
 	analysis/constructors
@@ -142,6 +143,14 @@ rules // Builders
       filename := <guarantee-extension(|"typeannos.ds")> path;
       in-project-path(
         result := <include-imports; desugar-top; fuse-sections; add-extra-typeannos-module; sugar-all; pp-debug> ast
+      |project-path)
+  
+  rewrite-metafunctions-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"metafuncs.ds")> path;
+      in-project-path(
+        result := <include-imports; desugar-top; fuse-sections; unmetafunc-module; sugar-all; pp-debug> ast
       |project-path)
 
   desugar-aliases-editor:
