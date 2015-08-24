@@ -48,6 +48,7 @@ context-free syntax // constructor declarations
 
   ConsAnnos.Annos = [{[ { ConsAnno "," }* ]}]
   ConsAnno.ImplicitAnno = [implicit]
+  ConsAnno.MetafunAnno = [meta-function]
 
   ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
 

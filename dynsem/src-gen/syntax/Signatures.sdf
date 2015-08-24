@@ -39,6 +39,7 @@ exports
                                            -> ConsAnnos        {cons("NoAnnos")}
     "{" {ConsAnno ","}* "}"                -> ConsAnnos        {cons("Annos")}
     "implicit"                             -> ConsAnno         {cons("ImplicitAnno")}
+    "meta-function"                        -> ConsAnno         {cons("MetafunAnno")}
     ID ":" {Type "*"}* "-->" Type          -> ConsDecl         {cons("FunDecl")}
     ID                                     -> Type             {cons("SimpleSort")}
     "List" "(" Type ")"                    -> Type             {cons("ListSort")}

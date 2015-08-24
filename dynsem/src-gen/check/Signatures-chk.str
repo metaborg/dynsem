@@ -224,6 +224,12 @@ strategies
   is-ConsAnno-with-constructor =
     ?ImplicitAnno()
 
+  check-ConsAnno :
+    MetafunAnno() -> <id>
+
+  is-ConsAnno-with-constructor =
+    ?MetafunAnno()
+
   check-ConsDecl :
     FunDecl(t1__, t2__, t3__) -> <id>
     with <(check-ID <+ error-ID)> t1__

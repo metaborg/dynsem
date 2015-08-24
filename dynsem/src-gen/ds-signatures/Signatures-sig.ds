@@ -39,6 +39,7 @@ signature
       NoAnnos : ConsAnnos 
       Annos : List(ConsAnno) -> ConsAnnos 
       ImplicitAnno : ConsAnno 
+      MetafunAnno : ConsAnno 
       FunDecl : ID * List(Type) * Type -> ConsDecl 
       SimpleSort : ID -> Type 
       ListSort : Type -> Type 

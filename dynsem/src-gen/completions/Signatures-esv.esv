@@ -35,6 +35,8 @@ completions
     "{" <:ConsAnno> "}"            
   completion template ConsAnno : "implicit" =
     "implicit"                
+  completion template ConsAnno : "meta-function" =
+    "meta-function"      
   completion template ConsDecl : "ID : --> Type" =
     <ID:ID> " : " <:Type> " --> " <Type:Type>  
   completion template Type : "List(Type)" =

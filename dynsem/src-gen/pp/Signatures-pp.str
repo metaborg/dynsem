@@ -275,6 +275,16 @@ strategies
   is-ConsAnno =
     ?ImplicitAnno()
 
+  prettyprint-ConsAnno :
+    MetafunAnno() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("meta-function")]
+                       )
+                     ]
+
+  is-ConsAnno =
+    ?MetafunAnno()
+
   prettyprint-ConsDecl :
     FunDecl(t1__, t2__, t3__) -> [ H(
                                      [SOpt(HS(), "0")]
