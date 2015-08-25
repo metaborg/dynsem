@@ -73,7 +73,10 @@ rules /* store variables */
   store-rule:
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
     where
-      <type-check-match(|ma-ty)> lhs;
+      {| InSource:
+        rules(InSource: t -> t);
+        <type-check-match(|ma-ty)> lhs
+      |};
       <map(labelcomp-to-type-term-pair; type-check-match-wrap)> [r*, sc*];
       <map(type-check-premise-top)> p*;
       <type-check-build-expect(|bu-ty)> rhs;
@@ -322,10 +325,15 @@ rules // type rules for match-sides
   		t-ty := <type-check-match(|cast-ty)> t
   		
   type-check-match-con(|in-ty):
-    Con(c, aparam*) -> <type-coerce-full(id)> (in-ty, ty)
+    t@Con(c, aparam*) -> <type-coerce-full(id)> (in-ty, ty)
     where
-      ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> aparam*);
-      <zip(type-check-match-wrap)> (fparam-ty*, aparam*)
+      c-def := <lookup-def(|Constructors())> (c, <length> aparam*);
+      ConstructorType(fparam-ty*, ty) := <lookup-prop(|Type())> c-def;
+      <zip(type-check-match-wrap)> (fparam-ty*, aparam*);
+      if <not(InSource); lookup-prop(|ConsKind())> c-def => MetafunCons()
+      then
+        add-msg(|Error(), t, $[Cannot match against meta-function [c]])
+      end
   
   type-check-match-list(|in-ty):
   	List([]) -> <type-coerce-full(id)> (in-ty, ListType(ALPHATYPE()))
