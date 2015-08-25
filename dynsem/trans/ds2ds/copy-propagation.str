@@ -15,18 +15,6 @@ rules
     	prem'* := <foldr(![], copy-propagation-prems(|excluded-var*))> prem*
 
   copy-propagation-prems(|excluded-var*):
-  	(TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [TryOr(PremiseBlock(p1'*), PremiseBlock(p2'*)), prem*]
-  	where
-  		p1'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p1*;
-  		p2'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p2*
-
-  copy-propagation-prems(|excluded-var*):
-  	(MergePoint(c, PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [MergePoint(c, PremiseBlock(p1'*), PremiseBlock(p2'*)), prem*]
-  	where
-  		p1'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p1*;
-  		p2'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p2*
-  		
-  copy-propagation-prems(|excluded-var*):
   	(Formula(Match(VarRef(v1), VarRef(v2))), prem*) -> <alltd(?VarRef(v2); !VarRef(v1))> prem*
   	where
   		<not(fetch-elem(?VarRef(v2)))> excluded-var*
