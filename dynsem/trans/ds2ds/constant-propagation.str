@@ -8,7 +8,7 @@ imports
 
 rules
   
-  constant-propagation-module = Module(!$[[<id>]_constantprop], alltd(constant-propagation-rule))
+  constant-propagation-module = Module(!$[[<id>]_constantprop], alltd(constant-propagation-rule); alltd(variable-elimination-rule))
   
   constant-propagation-rule:
     Rule(prem*, infer, Relation(reads, source, arrow, Target(rhs, tc*))) ->
@@ -36,3 +36,29 @@ rules
     + ?True()
     + ?False()
     + ?List([])
+
+  variable-elimination-rule:
+  	Rule(prem*, infer, Relation(reads, source, arrow, target)) ->
+      Rule(prem''*, infer, Relation(reads, source, arrow, target))
+    where {| PropagateExpr:
+      read* := <collect-all(?VarRef(_); strip-annos, conc)> prem*;
+      exclude* := <collect-all(?VarRef(_); strip-annos)> target;
+      candidate* := <filter(not(\ v -> <fetch-elem(?v)> exclude* \))> read*;
+      read-freq* := <frequency-list> candidate*;
+      prem'* := <filter(not(variable-elimination-rec(|read-freq*)))> prem*;
+      prem''* := <variable-elimination-prop> prem'*
+  	|}
+  	
+  variable-elimination-rec(|read-freq*):
+    f@Formula(Match(t, v@VarRef(_))) -> f
+    where
+      v' := <strip-annos> v;
+      <fetch-elem(?(v', _); Snd)> read-freq* => 2;
+      rules(PropagateExpr:+ v' -> <variable-elimination-prop> t)
+  
+  variable-elimination-prop = alltd(PropagateExpr)
+  
+
+
+
+

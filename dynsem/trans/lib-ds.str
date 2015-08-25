@@ -352,3 +352,19 @@ rules // utils
   
   foldl(s1, s2) = <foldl(s2)> (<id>, <s1>)
 
+  frequency-list = frequency-list-internal(|<new-hashtable>)
+
+  frequency-list-internal(|tbl):
+    [] -> <hashtable-getlist> tbl
+  
+  frequency-list-internal(|tbl):
+    [x | xs] -> <frequency-list-internal(|tbl)> xs
+    where
+      if hits := <hashtable-get(|x)> tbl
+      then
+        <hashtable-put(|x, <inc> hits)> tbl
+      else
+        <hashtable-put(|x, 1)> tbl
+      end
+
+  
