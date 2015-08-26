@@ -31,6 +31,12 @@
 			<artifactId>org.spoofax.interpreter.core</artifactId>
 			<version>${metaborg-version}</version>
 		</dependency>
+		<dependency>
+      <groupId>com.oracle.truffle</groupId>
+      <artifactId>truffle-api</artifactId>
+      <version>0.9-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
 	</dependencies>
 
 	<build>

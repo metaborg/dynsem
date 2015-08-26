@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
  * @author vladvergu
  *
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Children {
 
