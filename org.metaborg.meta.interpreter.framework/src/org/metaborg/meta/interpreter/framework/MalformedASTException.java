@@ -7,17 +7,17 @@ package org.metaborg.meta.interpreter.framework;
  * @author vladvergu
  * 
  */
-public class RewritingException extends InterpreterException {
+public class MalformedASTException extends InterpreterException {
 
-	public RewritingException() {
+	public MalformedASTException() {
 		this("Rewriting exception");
 	}
 
-	public RewritingException(String s) {
+	public MalformedASTException(String s) {
 		super(s);
 	}
 
-	public RewritingException(Exception ex) {
+	public MalformedASTException(Exception ex) {
 		super("Rewriting exception", null, ex);
 	}
 
