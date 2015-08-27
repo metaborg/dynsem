@@ -13,8 +13,7 @@ rules
   generate-coq:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      task-setup(|project-path)
-    ; filename := <guarantee-extension(|"v")> path
+      filename := <guarantee-extension(|"v")> path
     ; coq-file := <strip-annos; module-to-coq> ast
     with
        result := <parenthesize-Coq; prettyprintCoq-Start; box2text-string(|100)> coq-file
