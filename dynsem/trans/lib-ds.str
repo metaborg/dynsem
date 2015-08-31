@@ -367,4 +367,6 @@ rules // utils
         <hashtable-put(|x, 1)> tbl
       end
 
+  external read-property(|project-path, propname, defaultval)
+  
   
