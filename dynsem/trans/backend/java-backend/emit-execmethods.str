@@ -85,7 +85,7 @@ rules
       e_aname := Lit(String([Chars(<def-get-name> a-def)]))
   
   ds2java-supercall:
-    (arrow-def, ArrowType(_, _)) -> bstm* |[ return super.x_methodname(e*); ]|
+    (arrow-def, ArrowType(_, _)) -> bstm* |[ return super.x_methodname(frame, e*); ]|
     where
       ArrowType(_, bu-ty) := <lookup-prop(|Type())> arrow-def;
       x_methodname := <ds2java-methodname> (arrow-def, bu-ty);
@@ -196,7 +196,7 @@ rules
   ds2java-premise:
     (Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(vdec@Var(v-name), tc*))), on-succ*, _) ->
       bstm* |[
-        final ~x:resultclass x_tmp = e_lhs.~x:exec(e*);
+        final ~x:resultclass x_tmp = e_lhs.~x:exec(frame, e*);
         final ~x:vout-ty ~x:v-name = x_tmp.value;
         bstm1*
         bstm*
@@ -403,7 +403,7 @@ rules
     VarRef(x_vref) -> e |[ x_vref ]|
   
   ds2java-term-build(|ex_ty):
-    Con(c, child*) -> e |[ new x_consclass(this.getSourceInfo(), e*) ]|
+    Con(c, child*) -> e |[ new x_consclass(this.getSourceSection(), e*) ]|
     where
       c-def := <lookup-def(|Constructors())> (c, <length> child*);
       c-kind := <lookup-prop(|ConsKind())> c-def;

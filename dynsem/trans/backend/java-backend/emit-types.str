@@ -30,11 +30,13 @@ rules /* generate interfaces for sort declarations */
         package ~x:<AutoPackageName>;
         
         import org.metaborg.meta.interpreter.framework.*;
-        import com.oracle.truffle.api.*;
+        import com.oracle.truffle.api.frame.*;
+        import com.oracle.truffle.api.source.*;
         import com.github.krukow.clj_lang.*;
         
         public abstract class x_classname extends AbstractNode {
           
+          @TruffleBoundary
           public x_classname(SourceSection src) {
             super(src);
           }
