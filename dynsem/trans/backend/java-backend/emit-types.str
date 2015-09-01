@@ -32,6 +32,7 @@ rules /* generate interfaces for sort declarations */
         import org.metaborg.meta.interpreter.framework.*;
         import com.oracle.truffle.api.frame.*;
         import com.oracle.truffle.api.source.*;
+        import com.oracle.truffle.api.CompilerDirectives.*;
         import com.github.krukow.clj_lang.*;
         
         public abstract class x_classname extends AbstractNode {
