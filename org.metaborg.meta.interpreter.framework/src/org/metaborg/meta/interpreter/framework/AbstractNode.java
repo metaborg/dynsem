@@ -1,5 +1,6 @@
 package org.metaborg.meta.interpreter.framework;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.source.SourceSection;
@@ -13,6 +14,7 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class AbstractNode extends Node implements IMatchable,
 		IConvertibleToStrategoTerm {
 
+	@TruffleBoundary
 	public AbstractNode(SourceSection src) {
 		super(src);
 	}

@@ -58,6 +58,7 @@ rules
     a@(arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
         
+        @Override
         public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(VirtualFrame frame, param*){
           bstm*
         }

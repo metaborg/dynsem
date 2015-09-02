@@ -37,7 +37,6 @@ rules /* generate interfaces for sort declarations */
         
         public abstract class x_classname extends AbstractNode {
           
-          @TruffleBoundary
           public x_classname(SourceSection src) {
             super(src);
           }
