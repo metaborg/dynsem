@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-SymbolicName: dynsem;singleton:=true
 Export-Package: dynsem
 Bundle-Name: Ds Plug-in
-Bundle-Version: 1.4.0
+Bundle-Version: 1.4.1
 Require-Bundle: org.spoofax.jsglr,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.core.runtime,
