@@ -21,6 +21,12 @@
   <dependencies>
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.interpreter.framework</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.meta.lib.analysis</artifactId>
       <version>${metaborg-version}</version>
       <type>spoofax-language</type>

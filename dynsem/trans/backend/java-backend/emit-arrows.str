@@ -18,24 +18,24 @@ rules
   
   // generate indexed method parameter declaration
   ds2java-method-paramdecl:
-    (idx, ty) -> param |[ ~x:<ds2java-sort-classname> ty ~x:$[_[idx]] ]|
+    (idx, ty) -> param |[ ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]] ]|
   
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ public ~x:<ds2java-sort-classname> ty ~x:$[_[idx]]; ]|
+    (idx, ty) -> class-body-dec |[ public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
     where
       <not(type-is-adoptable + type-is-adoptable-list)> ty
 
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ @Child public ~x:<ds2java-sort-classname> ty ~x:$[_[idx]]; ]|
+    (idx, ty) -> class-body-dec |[ @Child public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
     where
       <type-is-adoptable> ty;
       <not(type-is-adoptable-list)> ty
 
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ @Children public ~x:<ds2java-sort-classname> ty ~x:$[_[idx]]; ]|
+    (idx, ty) -> class-body-dec |[ @Children public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
     where
       <type-is-adoptable-list> ty
   
@@ -72,7 +72,7 @@ rules
   ds2java-getter:
     (idx, ty) ->
       class-body-dec |[
-        public ~x:<ds2java-sort-classname> ty ~x:$[get_[idx]]() {
+        public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[get_[idx]]() {
           return this.~x:$[_[idx]];
         }
       ]|
@@ -118,7 +118,7 @@ rules
 			]|
    where
      x_classname := <ds2java-returnclassname> (arrow-def, bu-ty);
-     x_valueclass := <ds2java-sort-classname> bu-ty;
+     x_valueclass := <ds2java-type-to-unboxed-type> bu-ty;
      changeable* := <lookup-arrow-changeables> arrow-def;
      param* := <map-with-index(ds2java-method-paramdecl)> changeable*;
      fdec* := <map-with-index(ds2java-fielddecl)> changeable*;

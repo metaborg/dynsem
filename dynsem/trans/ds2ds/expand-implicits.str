@@ -48,7 +48,7 @@ rules /* lift and expand subterms on build sides */
   expand-implicits-termbuild:
     Con(c, child*) -> (Con(c, child'*), p*)
     where
-      ConstructorType(child-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
+      ConstructorType(child-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> child*);
       (child'*, p*) := <zip(lift-where-indirect <+ \ (_, t) -> (t, []) \); unzip; (id, concat)> (child-ty*, child*)
 
   expand-implicits-termbuild:
@@ -67,22 +67,20 @@ rules /* lift and expand subterms on build sides */
   expand-implicits-termbuild:
     MapExtend(e, m) -> (MapExtend(e, m'), p*)
     where
-      m-ty := <type-of; not(?MapType(_, _) <+ lookup-def(|Types()); lookup-prop(|SortKind()) => SemanticCompSort())> m;
+      m-ty := <type-of; not(?MapType(_, _))> m;
       e-ty := <type-of> e;
       (m', p*) := <lift-where-indirect> (e-ty, m)
 
   expand-implicits-termbuild:
+    MapSelect(m-t, k-t) -> (MapSelect(m-t, k-t'), p*)
+    where
+      MapType(f-k-ty, _) := <type-of> m-t;
+      (k-t', p*) := <lift-where-indirect <+ !(k-t, [])> (f-k-ty, k-t)
+
+  expand-implicits-termbuild:
     MapExtend(Map([Bind(k, v)]), m) -> (MapExtend(Map([Bind(k', v')]), m), [p1*, p2*])
     where
-      m-ty := <type-of> m;
-      if
-        m-ty-def := <lookup-def(|Types())> m-ty;
-        <lookup-prop(|SortKind())> m-ty-def => SemanticCompSort()
-      then
-        MapType(k-ty, v-ty) := <lookup-prop(|SuperType())> m-ty-def
-      else
-        MapType(k-ty, v-ty) := m-ty
-      end;
+      MapType(k-ty, v-ty) := <type-of> m;
       (k', p1*) := <lift-where-indirect <+ !(k, [])> (k-ty, k);
       (v', p2*) := <lift-where-indirect <+ !(v, [])> (v-ty, v)
 
@@ -122,7 +120,7 @@ rules /* introduce explicit reductions/coercions where required on MATCH side */
       <def-get-namespace> c-def => Constructors()
     where
       ConstructorType([c-child-ty], _) := <lookup-prop(|Type())> c-def;
-      c-name := <def-get-name> c-def;
+      c-name := <consdef-get-name> c-def;
       v-new := <def-new-variable> c-child-ty;
       path* := <expand-typath-match> (xs-def, VarRef(v-new), rt)
   
@@ -147,7 +145,7 @@ rules /* introduce explicit coercions where required on the SOURCE side */
     	[(c-def, _) | xs-def] := <get-typath-memo(type-coerce-full(id))> (ma-ty, lhs-ty, MatchMode());
     	Constructors() := <def-get-namespace> c-def;
     	ConstructorType([child-ty], _) := <lookup-prop(|Type())> c-def;
-    	c-name := <def-get-name> c-def;
+    	c-name := <consdef-get-name> c-def;
     	v-new := <def-new-variable> child-ty;
     	prem* := <expand-typath-match> (xs-def, VarRef(v-new), lhs)
 
@@ -170,7 +168,7 @@ rules /* introduce explicit reductions/coercions where required on BUILD side */
       <def-get-namespace> c-def => Constructors();
       ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def
     where
-      c-name := <def-get-name> c-def;
+      c-name := <consdef-get-name> c-def;
       v-new := <def-new-variable> c-ty;
       path* := <expand-typath-build> (xs-def, VarRef(v-new), rt)
   

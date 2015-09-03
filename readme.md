@@ -13,9 +13,9 @@ Let's assume that your language is called *LANG*. Let's assume that the followin
       Expr
       V
 
-    semantic-components
-      Env -> Map<String, Int>
-      Sto -> Map<Int, V>
+    aliases
+      Env : Map<String, Int>
+      Sto : Map<Int, V>
 
     constructors
       Plus: Expr * Expr -> Expr
@@ -26,7 +26,7 @@ Let's assume that your language is called *LANG*. Let's assume that the followin
 
   rules
 
-    Env nv |- Plus(e1, e2) :: Sto s -default-> NumV(i) :: Sto s''
+    Env nv |- Plus(e1, e2) :: Sto s -default-> NumV(i1) :: Sto s''
     where
       Env nv |- e1 :: Sto s  -default-> NumV(i1) :: Sto s';
       Env nv |- e2 :: Sto s' -default-> NumV(i2) :: Sto s''.
@@ -63,7 +63,7 @@ The goal is to interpret a program in the language by:
 
 We set-up the project to achieve this as follows:
 
-1. Add a builder that invokes the interpreter (*LANG.str*):
+1. Add a builder that invokes the interpreter (*trans/LANG.str*):
 
 		 external dsevaluate(|)
 
@@ -73,13 +73,13 @@ We set-up the project to achieve this as follows:
 		     filename := <guarantee-extension(|"evaluated.aterm")> path;
 		     result := <dsevaluate> ast
 
-2. Add an action for it in the language menus (*LANG-Menus.esv*):
+2. Add an action for it in the language menus (*editor/LANG-Menus.esv*):
 
 		menu: "Interpreter"
 
 			action: "Evaluate" = editor-evaluate (openeditor) (realtime) (source)
 
-3. Implement the native strategy `dsevaluate(|)` in the *LANG.strategies* package and register it in the `InteropRegisterer`:
+3. Implement the native strategy `dsevaluate(|)` in the *editor/java/LANG.strategies* package and register it in the `InteropRegisterer`:
 
 		package LANG.strategies;
 
@@ -108,6 +108,27 @@ Note the following replacements in the above fragment:
 
 Once the project is built, an open program can be evaluated by invoking the ***Interpreter*** > ***Evaluate*** action. In the example above the evaluation will result in a term *R_Result_V(res, sto)* where *res* has sort *V* and *sto* is an ATerm representation of the *Sto* semantic component
 
+### Changenotes 17/07/2015
+
+- Eliminated `semantic-components` section
+- Maps can be declared and used everywhere
+- Implements a new signature sections `aliases` where sort aliases can be declared.
+
+#### Updating specifications
+
+Specification which have `semantic-components` sections to declare synonyms for maps will need to declare the maps differently. A specification section declaring `semantic-components` such as:
+
+```
+semantic-components
+  Env -> Map<String, Value>
+```
+
+should be rewritten to:
+
+```
+aliases
+  Env : Map<String, Value>
+```
 
 ### Changenotes 26/05/2015
 
