@@ -54,31 +54,63 @@ rules
       applicable-arrow* := <lookup-applicable-arrow-def> ty;
       rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
   
-  ds2java-execmethod(on-norule-generator|rule*):
+  ds2java-execmethod(on-norule-generator|allrule*):
     a@(arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
         
-        @Override
-        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(VirtualFrame frame, param*){
-          bstm*
+        public x_rettype ~x:execname(param*){
+          x_rettype res;
+          
+          bstm0*
+          
+          bstm1*
         }
+        
+        ~exec-method*
         
         ~more-method*
       ]|
     where
+      x_rettype := <ds2java-returnclassname> (arrow-def, bu-ty);
       execname := <ds2java-methodname> (arrow-def, bu-ty);
-      param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      func-param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      param* := [param |[ VirtualFrame frame ]|, func-param*];
       arrow-name := <def-get-name> arrow-def;
-      if rule := <fetch-elem(is-rule-matching-arrow(|arrow-name))> rule*
-      then
-        {| LiftedMethods:
-          bstm* := <ds2java-rulestatements(on-norule-generator|a)> rule;
-          more-method* := <bagof-LiftedMethods>
-        |}
-      else
-        bstm* := <on-norule-generator> a;
-        more-method* := []
-      end
+      bstm1* := <on-norule-generator> a
+    where {| LiftedMethods:
+      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def;
+      rule* := <filter(is-rule-matching-arrow(|arrow-name))> allrule*;
+      bstm0* := <ds2java-calldispatch(|[e |[ frame ]|, e*], execname)> <length> rule*;
+      exec-method* := <map-with-index(ds2java-dispatchexec(|a, x_rettype, execname, param*))> rule*;
+      more-method* := <bagof-LiftedMethods>
+    |}
+
+  ds2java-dispatchexec(|arrow, x_rettype, execname, param*):
+    (idx, rule) -> class-body-dec* |[
+      private x_rettype x_execname(param*) {
+        bstm*
+      }
+    ]|
+    where
+      x_execname := $[[execname]_[<int-to-string> idx]];
+      bstm* := <ds2java-rulestatements(ds2java-retnull|arrow)> rule
+      
+  ds2java-calldispatch(|e*, execname):
+    i -> bstm* |[
+      bstm*
+      res = x_execname(e*);
+      if(res != null) {
+        return res;
+      }
+    ]|
+    where
+      <gt> (i, 0);
+      x_execname := $[[execname]_[<int-to-string> i]];
+      bstm* := <ds2java-calldispatch(|e*, execname)> <dec> i
+
+  ds2java-calldispatch(|e*, execname):
+    0 -> bstm* |[ ]|
+  
   
   ds2java-throw-statement:
     (a-def, ArrowType(_, bu-ty)) -> bstm* |[ throw new InterpreterException("Rule failure", e_aname, this); ]|
@@ -90,7 +122,10 @@ rules
     where
       ArrowType(_, bu-ty) := <lookup-prop(|Type())> arrow-def;
       x_methodname := <ds2java-methodname> (arrow-def, bu-ty);
-      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def 
+      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def
+  
+  ds2java-retnull:
+    (arrow-def, ArrowType(_, _)) -> bstm* |[ return null; ]| 
   
   ds2java-rulestatements(on-norule-generator|arrow):
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
