@@ -80,7 +80,7 @@ rules
 			      }
 			    }
 			
-			    throw new RewritingException("Malformed map");
+			    throw new MalformedASTException("Malformed map");
 			  }
       ]|
     where
