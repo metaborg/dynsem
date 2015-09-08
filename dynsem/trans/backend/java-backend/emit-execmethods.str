@@ -259,8 +259,8 @@ rules
   ds2java-premise:
     (TryOr(PremiseBlock([p1x | p1xs]), PremiseBlock([p2x | p2xs])), _, _) ->
       bstm* |[
-        { bstm1* }
-        { bstm2* }
+        bstm1*
+        bstm2*
       ]|
     where
       bstm1* := <ds2java-premise> (p1x, p1xs, []);
