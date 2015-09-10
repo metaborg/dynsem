@@ -34,6 +34,7 @@ rules /* generate interfaces for sort declarations */
         import com.oracle.truffle.api.source.*;
         import com.oracle.truffle.api.CompilerDirectives.*;
         import com.github.krukow.clj_lang.*;
+        import ds.manual.interpreter.*;
         
         public abstract class x_classname extends AbstractNode {
           
