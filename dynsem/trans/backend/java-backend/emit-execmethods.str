@@ -323,9 +323,9 @@ rules
       bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
-    (Formula(Match(VarRef(v), Con(c, patt-var*))), on-succ*, on-fail*) ->
+    (Formula(Match(lhs, Con(c, patt-var*))), on-succ*, on-fail*) ->
       bstm* |[
-        final ~x:consname x_tmp = ~x:v.match(~x:consname.class);
+        final ~x:consname x_tmp = e_lhs.match(~x:consname.class);
         if(x_tmp != null){
           bstm1* // bind pattern variables
           bstm2* // on-success
@@ -334,6 +334,7 @@ rules
         }
       ]|
     where
+      e_lhs := <ds2java-term-build-optcast(|ALPHATYPE())> lhs;
       c-def := <lookup-def(|Constructors())> (c, <length> patt-var*);
       consname := <ds2java-consdef-classname> c-def;
       x_tmp := <newname> "$tmp";
