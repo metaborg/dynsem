@@ -1,4 +1,4 @@
-module expand-implicits
+module ds2ds/expand-implicits
 
 imports
   ds

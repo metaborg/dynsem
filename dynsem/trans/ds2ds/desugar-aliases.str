@@ -1,4 +1,4 @@
-module desugar-aliases
+module ds2ds/desugar-aliases
 
 imports
   ds

@@ -1,4 +1,4 @@
-module java-utils
+module backend/java-backend/utils/java-utils
 
 imports
   libstratego-lib

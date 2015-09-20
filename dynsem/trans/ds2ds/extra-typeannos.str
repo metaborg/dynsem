@@ -1,4 +1,4 @@
-module extra-typeannos
+module ds2ds/extra-typeannos
 
 imports
   ds

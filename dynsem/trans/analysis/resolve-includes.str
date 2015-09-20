@@ -1,4 +1,4 @@
-module ds2ds/resolve-includes
+module analysis/resolve-includes
 
 imports
   ds
