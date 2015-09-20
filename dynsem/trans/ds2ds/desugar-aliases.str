@@ -1,8 +1,8 @@
 module desugar-aliases
 
 imports
-  include/ds
   ds
+  ds-main
   analysis/-
 
 rules

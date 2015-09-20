@@ -1,8 +1,8 @@
 module expand-implicits
 
 imports
-  include/ds
   ds
+  ds-main
   analysis/-
   lib-ds
 

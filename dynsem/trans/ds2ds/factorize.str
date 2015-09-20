@@ -1,7 +1,7 @@
 module ds2ds/factorize
 
 imports
-  include/ds
+  ds
   lib-ds
   
 strategies

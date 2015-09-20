@@ -1,8 +1,8 @@
 module analysis/mark-references
 
 imports
-  include/ds
   ds
+  ds-main
 
 rules
   

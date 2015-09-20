@@ -1,7 +1,7 @@
 module lib-ds
 
 imports
-  include/ds
+  ds-main
   ds
   
 // utilities for DynSem analysis

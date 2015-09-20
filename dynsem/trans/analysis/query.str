@@ -1,8 +1,8 @@
 module analysis/query
 
 imports
-  include/ds
   ds
+  ds-main
 
 imports
   analysis/constructors

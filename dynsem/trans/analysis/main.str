@@ -9,11 +9,11 @@ imports
 	analysis/mark-references
 	analysis/query
 	analysis/info-implicit-conversions
-	include/ds
-  lib-ds
-	lib/editor-common.generated
-	libstratego-sglr
 	ds
+  lib-ds
+	editor-common.generated
+	libstratego-sglr
+	ds-main
 
 rules
 

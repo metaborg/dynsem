@@ -1,10 +1,10 @@
-module ds
+module ds-main
 
 imports
-	include/ds
+	ds
 
 imports
-	lib/editor-common.generated
+	editor-common.generated
 	pp
 	outline
 	ds2ds/refocus

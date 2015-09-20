@@ -1,7 +1,7 @@
 module backend/java-backend/emit-atermconversion
 
 imports
-  include/ds
+  ds
   libjava-front
   
 imports

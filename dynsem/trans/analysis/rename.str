@@ -1,11 +1,11 @@
 module analysis/rename
 
 imports
-  include/ds
   ds
+  ds-main
   analysis/lib-analysis
   analysis/constructors
-  lib/editor-common.generated
+  editor-common.generated
   
 strategies
 	

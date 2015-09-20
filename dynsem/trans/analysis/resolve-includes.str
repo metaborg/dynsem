@@ -1,9 +1,9 @@
 module ds2ds/resolve-includes
 
 imports
-  include/ds
-  lib/editor-common.generated
   ds
+  editor-common.generated
+  ds-main
   
 imports
   analysis/lib-analysis

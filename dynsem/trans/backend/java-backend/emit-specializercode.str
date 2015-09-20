@@ -1,7 +1,7 @@
 module backend/java-backend/emit-specializercode
 
 imports
-  ds
+  ds-main
 
 imports
   analysis/constructors

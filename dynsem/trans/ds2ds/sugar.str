@@ -1,8 +1,8 @@
 module ds2ds/sugar
 
 imports
-	include/ds
 	ds
+	ds-main
 	
 signature
   constructors
