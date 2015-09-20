@@ -1,10 +1,10 @@
-module src-gen/check/Common-chk
+module check/Common-chk
 
 imports
   libstratego-gpp
   runtime/tmpl/pp
   libstratego-sglr
-  src-gen/signatures/Common-sig
+  signatures/Common-sig
 
 
 strategies

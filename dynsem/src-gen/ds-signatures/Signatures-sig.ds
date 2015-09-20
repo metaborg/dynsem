@@ -1,6 +1,6 @@
-module src-gen/ds-signatures/Signatures-sig
+module ds-signatures/Signatures-sig
 
-imports src-gen/ds-signatures/Common-sig src-gen/ds-signatures/ds-sig
+imports ds-signatures/Common-sig ds-signatures/ds-sig
 
 signature
     sorts

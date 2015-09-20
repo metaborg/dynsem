@@ -1,8 +1,8 @@
-module src-gen/completions/Signatures-esv
+module completions/Signatures-esv
 
 imports
-  src-gen/completions/Common-esv
-  src-gen/completions/ds-esv
+  completions/Common-esv
+  completions/ds-esv
 
 completions
   completion template ModuleSection : "signature " =

@@ -1,4 +1,4 @@
-module src-gen/ds-signatures/Module-sig
+module ds-signatures/Module-sig
 
 signature
     sorts

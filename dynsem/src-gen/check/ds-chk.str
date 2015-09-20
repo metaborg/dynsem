@@ -1,22 +1,22 @@
-module src-gen/check/ds-chk
+module check/ds-chk
 
 imports
   libstratego-gpp
   runtime/tmpl/pp
   libstratego-sglr
-  src-gen/signatures/ds-sig
+  signatures/ds-sig
 
 
 imports
-  src-gen/signatures/Common-sig
-  src-gen/signatures/Module-sig
-  src-gen/signatures/Signatures-sig
+  signatures/Common-sig
+  signatures/Module-sig
+  signatures/Signatures-sig
 
 
 imports
-  src-gen/check/Common-chk
-  src-gen/check/Module-chk
-  src-gen/check/Signatures-chk
+  check/Common-chk
+  check/Module-chk
+  check/Signatures-chk
 
 
 strategies

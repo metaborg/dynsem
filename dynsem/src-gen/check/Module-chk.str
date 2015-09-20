@@ -1,10 +1,10 @@
-module src-gen/check/Module-chk
+module check/Module-chk
 
 imports
   libstratego-gpp
   runtime/tmpl/pp
   libstratego-sglr
-  src-gen/signatures/Module-sig
+  signatures/Module-sig
 
 
 strategies

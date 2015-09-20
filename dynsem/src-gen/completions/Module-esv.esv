@@ -1,4 +1,4 @@
-module src-gen/completions/Module-esv
+module completions/Module-esv
 
 completions
   completion template Module : "module ModuleID " =
