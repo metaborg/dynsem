@@ -1,7 +1,7 @@
 module backend/java-backend/emit-constructorclasses
 
 imports
-  include/ds
+  ds
 
 imports
   analysis/constructors

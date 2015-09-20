@@ -1,8 +1,8 @@
 module ds2ds/constant-propagation
 
 imports
-  include/ds
   ds
+  ds-main
   lib-ds
   
 

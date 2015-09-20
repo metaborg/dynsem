@@ -1,7 +1,7 @@
-module utils
+module backend/java-backend/utils
 
 imports
-  lib/editor-common.generated
+  editor-common.generated
   backend/java-backend/utils/java-utils
 
 rules

@@ -1,7 +1,7 @@
 module analysis/analysis-signatures
 
 imports
-  include/ds
+  ds
   analysis/lib-analysis
   analysis/constructors
   analysis/analysis-rules

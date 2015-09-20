@@ -1,8 +1,8 @@
 module ds2ds/merge-rules
 
 imports
-  include/ds
   ds
+  ds-main
   pp
   lib-ds
 

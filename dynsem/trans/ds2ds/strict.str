@@ -4,10 +4,10 @@ imports
   libstratego-lib
   libstratego-gpp
   libstratego-aterm
-  include/ds
-  lib/editor-common.generated
-  ds2ds/sugar
   ds
+  editor-common.generated
+  ds2ds/sugar
+  ds-main
   
 rules
 	

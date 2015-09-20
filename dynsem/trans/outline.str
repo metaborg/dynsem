@@ -1,8 +1,8 @@
 module outline
 
 imports
-  include/ds
-  lib/runtime/editor/outline-library
+  ds
+  runtime/editor/outline-library
 
 rules
 

@@ -1,13 +1,13 @@
 module types.manual
 
 imports
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
-  lib/runtime-libraries/org.spoofax.meta.runtime.libraries/editor/-
-  include/ds
-  names
+  runtime-libraries/org.spoofax.meta.runtime.libraries/types/-
+  runtime-libraries/org.spoofax.meta.runtime.libraries/nabl/-
+  runtime-libraries/org.spoofax.meta.runtime.libraries/task/-
+  runtime-libraries/org.spoofax.meta.runtime.libraries/editor/-
   ds
+  names
+  ds-main
 
 signature
   constructors

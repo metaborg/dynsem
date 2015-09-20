@@ -1,7 +1,7 @@
 module backend/java-backend/lib-ds2java
 
 imports
-  include/ds
+  ds
   analysis/constructors
   analysis/lib-analysis
 

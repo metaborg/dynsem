@@ -1,7 +1,7 @@
 module ds2ds/copy-propagation
 
 imports
-  include/ds
+  ds
 
 rules
   

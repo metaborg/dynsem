@@ -1,14 +1,14 @@
 module analysis/analysis-rules
 
 imports
-  include/ds
+  ds
   analysis/lib-analysis
   analysis/constructors
   analysis/rename
   analysis/query
   analysis/analysis-signatures
 	pp
-  ds
+  ds-main
   lib-ds
 
 rules /* syntactic checks */

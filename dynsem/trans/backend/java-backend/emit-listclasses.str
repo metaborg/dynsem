@@ -1,8 +1,8 @@
 module backend/java-backend/emit-listclasses
 
 imports
-  include/ds
   ds
+  ds-main
 
 imports
   analysis/constructors

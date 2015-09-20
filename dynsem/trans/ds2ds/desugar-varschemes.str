@@ -1,14 +1,14 @@
 module ds2ds/desugar-varschemes
 
 imports
-  include/ds
+  ds
   lib-ds
   analysis/main
   analysis/mark-references
   analysis/query
   analysis/lib-analysis
   analysis/constructors
-  ds
+  ds-main
 
 rules
   

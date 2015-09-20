@@ -1,7 +1,7 @@
 module backend/java-backend/emit-types
 
 imports
-  include/ds
+  ds
 
 imports
   analysis/lib-analysis
