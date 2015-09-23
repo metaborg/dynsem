@@ -1,5 +1,7 @@
 package org.metaborg.meta.interpreter.framework;
 
+import org.spoofax.terms.TermFactory;
+
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeInfo;
@@ -31,7 +33,7 @@ public abstract class AbstractNode extends Node implements IMatchable,
 
 	@Override
 	public String toString() {
-		return NodeUtils.toString(this);
+		return toStrategoTerm(new TermFactory()).toString();
 	}
 
 }

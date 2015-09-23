@@ -522,7 +522,7 @@ rules
       e_lmap := <ds2java-term-build(|ALPHATYPE())> lmap
 
   ds2java-term-build(|ex_ty):
-    Map([Bind(key, val)]) -> e |[ new com.github.krukow.clj_lang.PersistentTreeMap<x_keyty, x_valty>().plus(e_key, e_val) ]|
+    Map([Bind(key, val)]) -> e |[ MapUtils.add(PersistentTreeMap.EMPTY, e_key, e_val) ]|
     where
       x_keyty := <type-of; ds2java-type-to-boxed-type> key;
       x_valty := <type-of; ds2java-type-to-boxed-type> val;
