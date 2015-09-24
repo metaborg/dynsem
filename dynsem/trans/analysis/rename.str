@@ -5,7 +5,7 @@ imports
   ds
   analysis/lib-analysis
   analysis/constructors
-  lib/editor-common.generated
+  editor-common.generated
   
 strategies
 	

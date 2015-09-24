@@ -11,7 +11,7 @@ imports
 	analysis/info-implicit-conversions
 	include/ds
   lib-ds
-	lib/editor-common.generated
+	editor-common.generated
 	libstratego-sglr
 	ds
 
