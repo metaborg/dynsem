@@ -16,7 +16,7 @@
 
   <properties>
     <lang.unpack.artifactId>dynsem</lang.unpack.artifactId>
-    <lang.baseline.unpack.skip>true</lang.baseline.unpack.skip>
+    <lang.baseline.unpack.skip>false</lang.baseline.unpack.skip>
   </properties>
 
   <dependencies>
