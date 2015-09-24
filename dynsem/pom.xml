@@ -12,32 +12,35 @@
 	<url>https://github.com/metaborg/dynsem</url>
 
 	<parent>
-		<groupId>org.metaborg</groupId>
-		<artifactId>parent.language</artifactId>
-		<version>1.5.0-SNAPSHOT</version>
-	</parent>
+    <groupId>org.metaborg</groupId>
+    <artifactId>parent.language</artifactId>
+    <version>1.5.0-SNAPSHOT</version>
+    <relativePath>../../releng/parent/language</relativePath>
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.lib.analysis</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+      <scope>${metaborg-meta-lang-scope}</scope>
+    </dependency>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.metaborg</groupId>
-			<artifactId>org.metaborg.meta.lib.analysis</artifactId>
-			<version>${metaborg-version}</version>
-			<type>spoofax-language</type>
-		</dependency>
-
-		<dependency>
-			<groupId>org.metaborg</groupId>
-			<artifactId>org.metaborg.meta.lang.template</artifactId>
-			<version>${metaborg-version}</version>
-			<type>spoofax-language</type>
-		</dependency>
-		<dependency>
-			<groupId>org.metaborg</groupId>
-			<artifactId>org.metaborg.meta.lang.esv</artifactId>
-			<version>${metaborg-version}</version>
-			<type>spoofax-language</type>
-		</dependency>
-	</dependencies>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.lang.template</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+      <scope>${metaborg-meta-lang-scope}</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.lang.esv</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+      <scope>${metaborg-meta-lang-scope}</scope>
+    </dependency>
+  </dependencies>
 
 	<build>
 		<plugins>
