@@ -2,6 +2,7 @@ package org.metaborg.meta.interpreter.framework;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+@Deprecated
 public interface INodeSource {
 
 	public int getLine();

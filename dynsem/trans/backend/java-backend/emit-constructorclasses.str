@@ -13,7 +13,6 @@ imports
   backend/java-backend/emit-arrows
   backend/java-backend/emit-execmethods
   backend/java-backend/emit-atermconversion
-  backend/java-backend/emit-specializercode
 
 rules
   
@@ -30,18 +29,21 @@ rules
 	    compilation-unit |[
 	      package ~x:<AutoPackageName>;
 	      
-	      import org.metaborg.meta.interpreter.framework.*;
 	      import org.spoofax.interpreter.terms.*;
-	      import com.github.krukow.clj_lang.PersistentTreeMap;
+	      import com.oracle.truffle.api.frame.*;
+        import com.oracle.truffle.api.nodes.*;
+        import com.oracle.truffle.api.source.*;
+	      import com.github.krukow.clj_lang.*;
+	      import ds.manual.interpreter.*;
+	      import org.metaborg.meta.interpreter.framework.*;
 
-        @SuppressWarnings("unused")
 	      public class x_consname extends ~x:<ds2java-type-to-identifier> c-ty {
 	        
 
 	        ~fdec*
 	        
-	        public x_consname(INodeSource source, param0*) {
-            this.setSourceInfo(source);
+	        public x_consname(SourceSection src, param0*) {
+            super(src);
             bstm0*
           }
 	        
@@ -64,8 +66,6 @@ rules
 	          return true;
 	        }
 
-          ~specializer*
-          
 	        ~exec*
 
 	        ~fget*
@@ -83,7 +83,6 @@ rules
     	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*;
     	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
-    	specializer* := <ds2java-specializer-method> c-c-ty*;
     	exec* := <ds2java-execmethods(ds2java-supercall|rule*)> c-def;
     	atermconvert := <ds2java-atermconversion-constructor> c-def
   

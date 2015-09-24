@@ -8,44 +8,27 @@ imports
 
 rules
   
-  constant-propagation-module = Module(!$[[<id>]_constantprop], alltd(constant-propagation-rule))
+  constant-propagation-module = Module(!$[[<id>]_constantprop], alltd(constant-propagation-rule); alltd(variable-elimination-rule))
   
-  constant-propagation-rule =
-    {| ConstantValue:
-      Rule(foldl(![], constant-propagation), id, Relation(id, id, id, Target(alltd(ConstantValue), alltd(ConstantValue))))
+  constant-propagation-rule:
+    Rule(prem*, infer, Relation(reads, source, arrow, Target(rhs, tc*))) ->
+      Rule(prem'*, infer, Relation(reads, source, arrow, Target(rhs', tc'*)))
+    where {| PropagateConstant:
+      prem'* := <filter(constant-propagation)> prem*;
+      rhs' := <constant-propagation-prop> rhs;
+      tc'* := <constant-propagation-prop> tc*
     |}
   
-  constant-propagation:
-    (Formula(Match(const, VarRef(v))), prem*) -> prem*
-    where
-      const' := <alltd(constant-propagation); is-constant> const;
-      rules(ConstantValue:+ VarRef(v) -> const')
+  constant-propagation =
+    not(constant-propagation-prop; constant-propagation-rec); constant-propagation-prop
   
-  constant-propagation:
-    (TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [prem*, TryOr(PremiseBlock(p1'*), PremiseBlock(p2'*))]
-    where
-      {| ConstantValue:
-        p1'* := <foldl(![], constant-propagation)> p1*
-      |};
-      {| ConstantValue:
-        p2'* := <foldl(![], constant-propagation)> p2*
-      |}
-
-  constant-propagation:
-    (MergePoint(pc, PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [prem*, MergePoint(pc', PremiseBlock(p1'*), PremiseBlock(p2'*))]
-    where
-      pc' := <alltd(ConstantValue)> pc;
-      {| ConstantValue:
-        p1'* := <foldl(![], constant-propagation)> p1*
-      |};
-      {| ConstantValue:
-        p2'* := <foldl(![], constant-propagation)> p2*
-      |}
+  constant-propagation-prop = alltd(PropagateConstant)
   
-  constant-propagation:
-    (p, prem*) -> [prem*, <alltd(ConstantValue)> p]
+  constant-propagation-rec:
+    f@Formula(Match(const@<is-constant>, v@VarRef(_))) -> f
     where
-      <not(?TryOr(_, _) + ?MergePoint(_, _, _) + ?Formula(Match(const, VarRef(_))); <alltd(constant-propagation); is-constant> const)> p
+      v' := <strip-annos> v;
+      rules(PropagateConstant:+ v' -> const)
   
   is-constant =
     ?Int(_)
@@ -53,8 +36,28 @@ rules
     + ?True()
     + ?False()
     + ?List([])
-    + ?ListTail([h], t); <is-constant> h; <is-constant> t
 
+  variable-elimination-rule:
+  	Rule(prem*, infer, Relation(reads, source, arrow, target)) ->
+      Rule(prem''*, infer, Relation(reads, source, arrow, target))
+    where {| PropagateExpr:
+      read* := <collect-all(?VarRef(_); strip-annos, conc)> prem*;
+      exclude* := <collect-all(?VarRef(_); strip-annos)> target;
+      candidate* := <filter(not(\ v -> <fetch-elem(?v)> exclude* \))> read*;
+      read-freq* := <frequency-list> candidate*;
+      prem'* := <filter(not(variable-elimination-rec(|read-freq*)))> prem*;
+      prem''* := <variable-elimination-prop> prem'*
+  	|}
+  	
+  variable-elimination-rec(|read-freq*):
+    f@Formula(Match(t, v@VarRef(_))) -> f
+    where
+      v' := <strip-annos> v;
+      <fetch-elem(?(v', _); Snd)> read-freq* => 2;
+      rules(PropagateExpr:+ v' -> <variable-elimination-prop> t)
+  
+  variable-elimination-prop = alltd(PropagateExpr)
+  
 
 
 

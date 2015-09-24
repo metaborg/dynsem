@@ -57,6 +57,7 @@ signature
   	ConsKind: Property
   	LanguageCons: ConsKind
   	ImplicitCons: ConsKind
+  	MetafunCons: ConsKind
   	NativeCons: ConsKind
   	NativeOpCons: ConsKind
 

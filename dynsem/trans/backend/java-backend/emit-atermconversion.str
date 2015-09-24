@@ -24,9 +24,6 @@ rules
 	            factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<int-to-string> c-arity), 
 	            e_child*
 	        );
-	        if ( getSourceInfo() != null ) {
-	          getSourceInfo().apply(term);
-	        }
 	        return term;
 	      }
 	    ]|

@@ -40,11 +40,20 @@ rules
   type-of-applicable-arrow(coerce-s):
     (arrow-type*, term-ty) -> <fetch-elem(where(\ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-type*
 
+rules // projections
+  
   get-arrow-source-type:
     ArrowType(src-ty, _) -> src-ty
   
   get-arrow-target-type:
     ArrowType(_, tgt-ty) -> tgt-ty
+
+rules // type properties
+  
+  is-systemsort:
+    sort -> sort
+    where
+      SystemSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> sort
 
 rules /* variable scheme queries */
 

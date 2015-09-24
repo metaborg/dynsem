@@ -8,40 +8,22 @@ rules
   copy-propagation-module = Module(!$[[<id>]_copyprop], alltd(copy-propagation-rule))
 
   copy-propagation-rule:
-  	Rule(prem*, infer, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(w, arrow-name), Target(rhs, tc*))) ->
-  	 Rule(prem'*, infer, Relation(Reads(r*), Source(Con(c, patt-var*), sc*), NamedDynamicEmitted(w, arrow-name), Target(rhs, tc*)))
+    Rule(prem*, infer, Relation(reads, source, arrow, Target(rhs, tc*))) ->
+      Rule(prem'*, infer, Relation(reads, source, arrow, Target(rhs', tc'*)))
+    where {| PropagateCopy:
+      prem'* := <filter(copy-propagation)> prem*;
+      rhs' := <copy-propagation-prop> rhs;
+      tc'* := <copy-propagation-prop> tc*
+    |}
+  
+  copy-propagation =
+    not(copy-propagation-prop; copy-propagation-rec); copy-propagation-prop
+  
+  copy-propagation-prop = alltd(VarRef(PropagateCopy))
+  
+  copy-propagation-rec:
+    f@Formula(Match(VarRef(var1), VarRef(var2))) -> f
     where
-    	excluded-var* := <collect-all(?VarRef(_))> [rhs, tc*];
-    	prem'* := <foldr(![], copy-propagation-prems(|excluded-var*))> prem*
-
-  copy-propagation-prems(|excluded-var*):
-  	(TryOr(PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [TryOr(PremiseBlock(p1'*), PremiseBlock(p2'*)), prem*]
-  	where
-  		p1'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p1*;
-  		p2'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p2*
-
-  copy-propagation-prems(|excluded-var*):
-  	(MergePoint(c, PremiseBlock(p1*), PremiseBlock(p2*)), prem*) -> [MergePoint(c, PremiseBlock(p1'*), PremiseBlock(p2'*)), prem*]
-  	where
-  		p1'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p1*;
-  		p2'* := <foldr(![], copy-propagation-prems(|excluded-var*))> p2*
-  		
-  copy-propagation-prems(|excluded-var*):
-  	(Formula(Match(VarRef(v1), VarRef(v2))), prem*) -> <alltd(?VarRef(v2); !VarRef(v1))> prem*
-  	where
-  		<not(fetch-elem(?VarRef(v2)))> excluded-var*
-
-  copy-propagation-prems(|excluded-var*):
-  	(f@Formula(Match(VarRef(v1), VarRef(v2))), prem*) -> [f, prem*]
-  	where
-  		<fetch-elem(?VarRef(v2))> excluded-var*
-
-  copy-propagation-prems(|excluded-var*):
-  	(f, prem*) -> [f, prem*]
-  	where
-  		<not(?Formula(Match(VarRef(v1), VarRef(v2))))> f
-
-
-
+      rules(PropagateCopy:+ var2 -> var1)
 
 

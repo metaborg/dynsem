@@ -52,7 +52,13 @@ rules /* store signatures */
       then
         <store-prop(|ConsKind(), c-def)> ImplicitCons()
       else
-        <store-prop(|ConsKind(), c-def)> LanguageCons()
+        if
+          <fetch-elem(?MetafunAnno())> anno*
+        then
+          <store-prop(|ConsKind(), c-def)> MetafunCons()
+        else
+          <store-prop(|ConsKind(), c-def)> LanguageCons()
+        end
       end
 
   store-constructor:

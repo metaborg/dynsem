@@ -54,32 +54,63 @@ rules
       applicable-arrow* := <lookup-applicable-arrow-def> ty;
       rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
   
-  ds2java-execmethod(on-norule-generator|rule*):
+  ds2java-execmethod(on-norule-generator|allrule*):
     a@(arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
         
-        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
-          this.specializeChildren(0);
+        public x_rettype ~x:execname(param*){
+          x_rettype res;
           
-          bstm*
+          bstm0*
+          
+          bstm1*
         }
+        
+        ~exec-method*
         
         ~more-method*
       ]|
     where
+      x_rettype := <ds2java-returnclassname> (arrow-def, bu-ty);
       execname := <ds2java-methodname> (arrow-def, bu-ty);
-      param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      func-param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      param* := [param |[ VirtualFrame frame ]|, func-param*];
       arrow-name := <def-get-name> arrow-def;
-      if rule := <fetch-elem(is-rule-matching-arrow(|arrow-name))> rule*
-      then
-        {| LiftedMethods:
-          bstm* := <ds2java-rulestatements(on-norule-generator|a)> rule;
-          more-method* := <bagof-LiftedMethods>
-        |}
-      else
-        bstm* := <on-norule-generator> a;
-        more-method* := []
-      end
+      bstm1* := <on-norule-generator> a
+    where {| LiftedMethods:
+      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def;
+      rule* := <filter(is-rule-matching-arrow(|arrow-name))> allrule*;
+      bstm0* := <ds2java-calldispatch(|[e |[ frame ]|, e*], execname)> <length> rule*;
+      exec-method* := <map-with-index(ds2java-dispatchexec(|a, x_rettype, execname, param*))> rule*;
+      more-method* := <bagof-LiftedMethods>
+    |}
+
+  ds2java-dispatchexec(|arrow, x_rettype, execname, param*):
+    (idx, rule) -> class-body-dec* |[
+      private x_rettype x_execname(param*) {
+        bstm*
+      }
+    ]|
+    where
+      x_execname := $[[execname]_[<int-to-string> idx]];
+      bstm* := <ds2java-rulestatements(ds2java-retnull|arrow)> rule
+      
+  ds2java-calldispatch(|e*, execname):
+    i -> bstm* |[
+      bstm*
+      res = x_execname(e*);
+      if(res != null) {
+        return res;
+      }
+    ]|
+    where
+      <gt> (i, 0);
+      x_execname := $[[execname]_[<int-to-string> i]];
+      bstm* := <ds2java-calldispatch(|e*, execname)> <dec> i
+
+  ds2java-calldispatch(|e*, execname):
+    0 -> bstm* |[ ]|
+  
   
   ds2java-throw-statement:
     (a-def, ArrowType(_, bu-ty)) -> bstm* |[ throw new InterpreterException("Rule failure", e_aname, this); ]|
@@ -87,11 +118,14 @@ rules
       e_aname := Lit(String([Chars(<def-get-name> a-def)]))
   
   ds2java-supercall:
-    (arrow-def, ArrowType(_, _)) -> bstm* |[ return super.x_methodname(e*); ]|
+    (arrow-def, ArrowType(_, _)) -> bstm* |[ return super.x_methodname(frame, e*); ]|
     where
       ArrowType(_, bu-ty) := <lookup-prop(|Type())> arrow-def;
       x_methodname := <ds2java-methodname> (arrow-def, bu-ty);
-      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def 
+      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def
+  
+  ds2java-retnull:
+    (arrow-def, ArrowType(_, _)) -> bstm* |[ return null; ]| 
   
   ds2java-rulestatements(on-norule-generator|arrow):
     Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
@@ -198,7 +232,7 @@ rules
   ds2java-premise:
     (Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(vdec@Var(v-name), tc*))), on-succ*, _) ->
       bstm* |[
-        final ~x:resultclass x_tmp = e_lhs.~x:exec(e*);
+        final ~x:resultclass x_tmp = e_lhs.~x:exec(frame, e*);
         final ~x:vout-ty ~x:v-name = x_tmp.value;
         bstm1*
         bstm*
@@ -225,8 +259,8 @@ rules
   ds2java-premise:
     (TryOr(PremiseBlock([p1x | p1xs]), PremiseBlock([p2x | p2xs])), _, _) ->
       bstm* |[
-        { bstm1* }
-        { bstm2* }
+        bstm1*
+        bstm2*
       ]|
     where
       bstm1* := <ds2java-premise> (p1x, p1xs, []);
@@ -289,9 +323,9 @@ rules
       bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
-    (Formula(Match(VarRef(v), Con(c, patt-var*))), on-succ*, on-fail*) ->
+    (Formula(Match(lhs, Con(c, patt-var*))), on-succ*, on-fail*) ->
       bstm* |[
-        final ~x:consname x_tmp = ~x:v.match(~x:consname.class);
+        final ~x:consname x_tmp = e_lhs.match(~x:consname.class);
         if(x_tmp != null){
           bstm1* // bind pattern variables
           bstm2* // on-success
@@ -300,6 +334,7 @@ rules
         }
       ]|
     where
+      e_lhs := <ds2java-term-build-optcast(|ALPHATYPE())> lhs;
       c-def := <lookup-def(|Constructors())> (c, <length> patt-var*);
       consname := <ds2java-consdef-classname> c-def;
       x_tmp := <newname> "$tmp";
@@ -405,7 +440,7 @@ rules
     VarRef(x_vref) -> e |[ x_vref ]|
   
   ds2java-term-build(|ex_ty):
-    Con(c, child*) -> e |[ new x_consclass(this.getSourceInfo(), e*) ]|
+    Con(c, child*) -> e |[ new x_consclass(this.getSourceSection(), e*) ]|
     where
       c-def := <lookup-def(|Constructors())> (c, <length> child*);
       c-kind := <lookup-prop(|ConsKind())> c-def;
@@ -487,7 +522,7 @@ rules
       e_lmap := <ds2java-term-build(|ALPHATYPE())> lmap
 
   ds2java-term-build(|ex_ty):
-    Map([Bind(key, val)]) -> e |[ new com.github.krukow.clj_lang.PersistentTreeMap<x_keyty, x_valty>().plus(e_key, e_val) ]|
+    Map([Bind(key, val)]) -> e |[ MapUtils.add(PersistentTreeMap.EMPTY, e_key, e_val) ]|
     where
       x_keyty := <type-of; ds2java-type-to-boxed-type> key;
       x_valty := <type-of; ds2java-type-to-boxed-type> val;

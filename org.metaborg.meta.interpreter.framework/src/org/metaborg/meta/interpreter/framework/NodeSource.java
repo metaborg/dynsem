@@ -14,6 +14,7 @@ import org.spoofax.terms.attachments.OriginAttachment;
  * @author vladvergu
  * 
  */
+@Deprecated
 public class NodeSource implements INodeSource {
 
 	private final int line, column;

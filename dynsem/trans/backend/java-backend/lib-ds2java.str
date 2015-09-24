@@ -111,7 +111,7 @@ rules /* name generation */
     pp-type
 
   ds2java-methodname:
-    (a-def, bu-type) -> $[exec_[name]]
+    (a-def, bu-type) -> $[execute_[name]]
     where
       Arrows() := <def-get-namespace> a-def;
       name := <def-get-name> a-def

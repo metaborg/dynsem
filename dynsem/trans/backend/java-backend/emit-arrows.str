@@ -22,36 +22,27 @@ rules
   
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
+    (idx, ty) -> class-body-dec |[ private ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
     where
       <not(type-is-adoptable + type-is-adoptable-list)> ty
 
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ @Child public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
+    (idx, ty) -> class-body-dec |[ @Child private ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
     where
       <type-is-adoptable> ty;
       <not(type-is-adoptable-list)> ty
 
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ @Children public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
+    (idx, ty) -> class-body-dec |[ @Children private ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
     where
       <type-is-adoptable-list> ty
   
   // generate setter for indexed child adoption
   ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
+    (idx, ty) -> stm |[ this.x_idx = x_idx; ]|
     where
-      <type-is-adoptable> ty;
-      x_idx := $[_[idx]]
-
-  // generate setter for indexed child adoption
-  ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
-    where
-      <type-is-adoptable> ty;
-      <not(type-is-adoptable-list)> ty;
       x_idx := $[_[idx]]
 
   // generate setter for indexed child adoption

@@ -7,7 +7,7 @@ package org.metaborg.meta.interpreter.framework;
  * @author vladvergu
  *
  */
-public interface IGenericNode extends INode {
+public interface IGenericNode {
 
-	public INode specialize(int depth);
+	public AbstractNode specialize();
 }

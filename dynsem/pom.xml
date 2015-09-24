@@ -4,8 +4,12 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>dynsem</artifactId>
+	<version>1.5.0.truffle-SNAPSHOT</version>
 	<name>ds</name>
 	<packaging>spoofax-language</packaging>
+
+	<description>Spoofax DynSem (dynamic semantic specification) language implementation.</description>
+	<url>https://github.com/metaborg/dynsem</url>
 
 	<parent>
 		<groupId>org.metaborg</groupId>
@@ -48,4 +52,9 @@
 			</plugin>
 		</plugins>
 	</build>
+	<scm>
+		<connection>scm:git:git@github.com:metaborg/dynsem.git</connection>
+		<developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
+		<url>https://github.com/metaborg/dynsem</url>
+	</scm>
 </project>
