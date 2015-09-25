@@ -18,6 +18,8 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public abstract class AbstractNodeList<T> extends Node implements INodeList<T> {
 
+	// TODO we need to have different implementation where T extends Node (and
+	// then head can become a @Child)
 	private T head;
 	@Child private AbstractNodeList<T> tail;
 
