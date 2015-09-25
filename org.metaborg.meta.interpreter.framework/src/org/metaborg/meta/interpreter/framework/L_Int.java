@@ -3,14 +3,16 @@ package org.metaborg.meta.interpreter.framework;
 import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-public class L_Int extends AbstractPrimitiveList<Integer> {
+import com.oracle.truffle.api.source.SourceSection;
 
-	public L_Int(INodeSource source) {
-		super(source);
+public class L_Int extends AbstractNodeList<Integer> {
+
+	public L_Int(SourceSection src) {
+		super(src);
 	}
 
-	public L_Int(INodeSource source, Integer head,
-			AbstractPrimitiveList<Integer> tail) {
+	public L_Int(SourceSection source, Integer head,
+			AbstractNodeList<Integer> tail) {
 		super(source, head, tail);
 	}
 
@@ -19,12 +21,12 @@ public class L_Int extends AbstractPrimitiveList<Integer> {
 		return (L_Int) super.tail();
 	}
 
-	@Override
-	public L_Int fromStrategoTerm(IStrategoTerm alist) {
-		L_Int list = new L_Int(NodeSource.fromStrategoTerm(alist));
+	public static L_Int fromStrategoTerm(IStrategoTerm alist) {
+		SourceSection src = SourceSectionUtil.fromStrategoTerm(alist);
+		L_Int list = new L_Int(src);
 		for (int i = alist.getSubtermCount() - 1; i >= 0; i--) {
 			int iv = ((IStrategoInt) alist.getSubterm(i)).intValue();
-			list = new L_Int(NodeSource.fromStrategoTerm(alist), iv, list);
+			list = new L_Int(src, iv, list);
 		}
 		return list;
 	}

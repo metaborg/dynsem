@@ -1,19 +1,18 @@
 package org.metaborg.meta.interpreter.framework;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
-public interface INodeList extends IConvertibleToStrategoTerm, OriginTracked {
+public interface INodeList<T> extends IConvertibleToStrategoTerm {
 
-	public Object head();
+	public T head();
 
-	public void replaceHead(Object newHead);
+	public void replaceHead(T newHead);
 
-	public INodeList tail();
+	public INodeList<T> tail();
 
 	public int size();
 
 	public boolean isEmpty();
-	
-	public INodeList fromStrategoTerm(IStrategoTerm list);
+
+	// public INodeList<T> fromStrategoTerm(IStrategoTerm list);
 
 }
