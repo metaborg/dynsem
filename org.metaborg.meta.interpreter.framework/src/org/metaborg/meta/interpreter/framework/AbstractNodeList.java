@@ -18,7 +18,7 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public abstract class AbstractNodeList<T> extends Node implements INodeList<T> {
 
-	@Child private T head;
+	private T head;
 	@Child private AbstractNodeList<T> tail;
 
 	private final int size;

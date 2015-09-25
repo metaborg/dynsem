@@ -1,6 +1,6 @@
 package org.metaborg.meta.interpreter.framework;
 
-import org.spoofax.interpreter.terms.IStrategoString;
+import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.source.SourceSection;
@@ -22,11 +22,10 @@ public class L_String extends AbstractNodeList<String> {
 	}
 
 	public static L_String fromStrategoTerm(IStrategoTerm alist) {
-		SourceSection src = SourceSectionUtil.fromStrategoTerm(alist);
-		L_String list = new L_String(src);
-		for (int i = alist.getSubtermCount() - 1; i >= 0; i--) {
-			String s = ((IStrategoString) alist.getSubterm(i)).stringValue();
-			list = new L_String(src, s, list);
+		L_String list = new L_String(SourceSectionUtil.fromStrategoTerm(alist));
+		for (IStrategoTerm elem : alist) {
+			final SourceSection src = SourceSectionUtil.fromStrategoTerm(elem);
+			list = new L_String(src, Tools.asJavaString(elem), list);
 		}
 		return list;
 	}

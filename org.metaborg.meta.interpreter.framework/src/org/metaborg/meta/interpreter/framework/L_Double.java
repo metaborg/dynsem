@@ -16,11 +16,10 @@ public class L_Double extends AbstractNodeList<Double> {
 	}
 
 	public static L_Double fromStrategoTerm(IStrategoTerm alist) {
-		SourceSection src = SourceSectionUtil.fromStrategoTerm(alist);
-		L_Double list = new L_Double(src);
-		for (int i = alist.getSubtermCount() - 1; i >= 0; i--) {
-			double dv = Tools.asJavaDouble(alist.getSubterm(i));
-			list = new L_Double(src, dv, list);
+		L_Double list = new L_Double(SourceSectionUtil.fromStrategoTerm(alist));
+		for (IStrategoTerm elem : alist) {
+			final SourceSection src = SourceSectionUtil.fromStrategoTerm(elem);
+			list = new L_Double(src, Tools.asJavaDouble(elem), list);
 		}
 		return list;
 	}
