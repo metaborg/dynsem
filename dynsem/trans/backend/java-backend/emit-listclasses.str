@@ -41,10 +41,10 @@ rules
     !compilation-unit |[
       package ~x:<AutoPackageName>;
         
-        import org.metaborg.meta.interpreter.framework.AbstractNodeList;
-				import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
+				import org.metaborg.meta.interpreter.framework.*;
 				import org.spoofax.interpreter.terms.IStrategoTerm;
 				import com.oracle.truffle.api.source.SourceSection;
+        import com.oracle.truffle.api.frame.VirtualFrame;
         import com.github.krukow.clj_lang.PersistentTreeMap;
         
         public class x_classname extends AbstractNodeList<x_elemname> {
@@ -55,6 +55,11 @@ rules
           
           public x_classname(SourceSection src, x_elemname head, x_classname tail) {
             super(src, head, tail);
+          }
+          
+          @Override
+          public x_classname tail() {
+          	return (x_classname) super.tail();
           }
           
           ~exec*

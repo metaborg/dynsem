@@ -471,7 +471,7 @@ rules
     	e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (farg*, arg*)
   
   ds2java-term-build(|ex_ty):
-  	List([]) -> e |[ new x_type(this.getSourceInfo()) ]|
+  	List([]) -> e |[ new x_type(this.getSourceSection()) ]|
   	where
   		if <?ListType(_)> ex_ty
   		then
@@ -481,7 +481,7 @@ rules
   		end 
   
   ds2java-term-build(|ex-ty):
-    ListTail([h-trm], t-trm) -> e |[ new x_type(this.getSourceInfo(), e_h, e_t) ]|
+    ListTail([h-trm], t-trm) -> e |[ new x_type(this.getSourceSection(), e_h, e_t) ]|
     where
       h-ty := <type-of> h-trm;
       e_h := <ds2java-term-build(|h-ty)> h-trm;

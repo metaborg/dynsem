@@ -72,7 +72,7 @@ public abstract class AbstractNodeList<T> extends Node implements INodeList<T> {
 	}
 
 	@Override
-	public INodeList<T> tail() {
+	public AbstractNodeList<T> tail() {
 		if (tail == null) {
 			throw new NoSuchElementException();
 		}
