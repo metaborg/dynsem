@@ -5,9 +5,10 @@ import java.util.NoSuchElementException;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.ITermFactory;
 
+import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class NIL extends AbstractNodeList<Object> {
+public class NIL extends Node implements IList<Object> {
 
 	public NIL(SourceSection src) {
 		super(src);
@@ -29,7 +30,7 @@ public class NIL extends AbstractNodeList<Object> {
 	}
 
 	@Override
-	public AbstractNodeList<Object> tail() {
+	public IList<Object> tail() {
 		throw new NoSuchElementException();
 	}
 

@@ -16,11 +16,10 @@ import com.oracle.truffle.api.source.SourceSection;
  * @author vladvergu
  *
  */
-public abstract class AbstractNodeList<T> extends Node implements INodeList<T> {
+public abstract class AbstractNodeList<T extends Node> extends Node implements
+		IList<T> {
 
-	// TODO we need to have different implementation where T extends Node (and
-	// then head can become a @Child)
-	private T head;
+	@Child private T head;
 	@Child private AbstractNodeList<T> tail;
 
 	private final int size;
@@ -45,12 +44,6 @@ public abstract class AbstractNodeList<T> extends Node implements INodeList<T> {
 		if (head instanceof IConvertibleToStrategoTerm) {
 			headTerm = ((IConvertibleToStrategoTerm) head)
 					.toStrategoTerm(factory);
-		} else if (head instanceof String) {
-			headTerm = factory.makeString((String) head);
-		} else if (head instanceof Integer) {
-			headTerm = factory.makeInt((Integer) head);
-		} else if (head instanceof Double) {
-			headTerm = factory.makeReal((Double) head);
 		} else {
 			throw new RuntimeException("Unsupported list element: " + head);
 		}
@@ -133,6 +126,10 @@ public abstract class AbstractNodeList<T> extends Node implements INodeList<T> {
 
 	@Override
 	public String toString() {
+		if (size == 0) {
+			return "[]";
+		}
+
 		return "[" + head + ", " + tail + "]";
 	}
 }

@@ -1,24 +1,31 @@
 package org.metaborg.meta.interpreter.framework;
 
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import java.util.NoSuchElementException;
 
+import org.spoofax.interpreter.core.Tools;
+import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+
+import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class L_Int extends AbstractNodeList<Integer> {
+public class L_Int extends Node implements IList<Integer> {
+
+	private Integer head;
+	@Child private L_Int tail;
+
+	private final int size;
 
 	public L_Int(SourceSection src) {
-		super(src);
+		this(src, null, null);
 	}
 
-	public L_Int(SourceSection source, Integer head,
-			AbstractNodeList<Integer> tail) {
-		super(source, head, tail);
-	}
-
-	@Override
-	public L_Int tail() {
-		return (L_Int) super.tail();
+	public L_Int(SourceSection source, Integer head, L_Int tail) {
+		super(source);
+		this.head = head;
+		this.tail = tail;
+		this.size = (head == null ? 0 : 1) + (tail == null ? 0 : tail.size());
 	}
 
 	public static L_Int fromStrategoTerm(IStrategoTerm alist) {
@@ -28,6 +35,93 @@ public class L_Int extends AbstractNodeList<Integer> {
 			list = new L_Int(src, Tools.asJavaInt(elem), list);
 		}
 		return list;
+	}
+
+	@Override
+	public Integer head() {
+		if (head == null) {
+			throw new NoSuchElementException();
+		}
+		return head;
+	}
+
+	@Override
+	public void replaceHead(Integer newHead) {
+		this.head = newHead;
+	}
+
+	@Override
+	public L_Int tail() {
+		if (tail == null) {
+			throw new NoSuchElementException();
+		}
+		return tail;
+	}
+
+	@Override
+	public int size() {
+		return size;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return size == 0;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((head == null) ? 0 : head.hashCode());
+		result = prime * result + size;
+		result = prime * result + ((tail == null) ? 0 : tail.hashCode());
+		return result;
+	}
+
+	@Override
+	public IStrategoList toStrategoTerm(ITermFactory factory) {
+		if (size == 0) {
+			return factory.makeList();
+		}
+
+		return factory.makeListCons(factory.makeInt(head),
+				tail.toStrategoTerm(factory));
+	}
+
+	public String toString() {
+		return "[" + head + ", " + tail + "]";
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		L_Int other = (L_Int) obj;
+		if (size != other.size) {
+			return false;
+		}
+		if (head == null) {
+			if (other.head != null) {
+				return false;
+			}
+		} else if (!head.equals(other.head)) {
+			return false;
+		}
+		if (tail == null) {
+			if (other.tail != null) {
+				return false;
+			}
+		} else if (!tail.equals(other.tail)) {
+			return false;
+		}
+		return true;
 	}
 
 }
