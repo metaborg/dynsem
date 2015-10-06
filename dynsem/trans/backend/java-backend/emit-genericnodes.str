@@ -133,6 +133,9 @@ rules
     (e_trm, IntType()) -> e |[ TermUtils.intFromTerm(e_trm) ]|
 
   ds2java-gennode-instantiation:
+    (e_trm, LongType()) -> e |[ TermUtils.longFromTerm(e_trm) ]|
+
+  ds2java-gennode-instantiation:
     (e_trm, RealType()) -> e |[ TermUtils.doubleFromTerm(e_trm) ]|
   
   ds2java-gennode-instantiation:

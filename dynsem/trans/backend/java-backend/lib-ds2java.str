@@ -132,6 +132,7 @@ rules /* name generation */
   	?IntType()
   	+ ?RealType()
   	+ ?BoolType()
+  	+ ?LongType()
   
   mkidx:
   	idx -> $[_[idx]]
