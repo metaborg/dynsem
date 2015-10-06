@@ -4,8 +4,8 @@ import java.io.File;
 
 public class BenchmarkConfiguration {
 
-	int warmuprounds;
-	int repetitions;
+	public int warmuprounds;
+	public int repetitions;
 
-	File dataFile;
+	public File dataFile;
 }
