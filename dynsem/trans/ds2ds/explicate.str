@@ -104,7 +104,17 @@ rules // premisses
         fatal-err-msg(|$[Arrow [arrow] does NOT emit writables, but they are explicitly expected in premises reducing over [arrow]])
       end;
       init* := <map(\ comp -> <exp-label-comp-init(|<CompNum> comp)> comp \)> [e1*, tc1*]
-
+  
+  explicate-premise:
+    MergePoint(cform, PremiseBlock(prem1*), PremiseBlock(prem2*)) -> [MergePoint(cform, PremiseBlock(prem1'*), PremiseBlock(prem2'*))]
+    with
+    	{| CompNum:
+        prem1'* := <explicate-premises> prem1*
+      |};
+      {| CompNum:
+        prem2'* := <explicate-premises> prem2*
+      |}
+  
   inc-comp-num:
     comp -> comp
     with 
