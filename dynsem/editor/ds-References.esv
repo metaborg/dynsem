@@ -1,7 +1,5 @@
 module ds-References
 
-imports ds-References.generated
-
 references
                                                                                                    
   // This file can be used to specify reference resolving and hover help, and content completion.  

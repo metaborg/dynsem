@@ -1,7 +1,5 @@
 module ds-Refactorings
 
-imports ds-Refactorings.generated
-
 refactorings
 
   

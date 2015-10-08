@@ -1,7 +1,7 @@
 module ds-Completions
 
 imports
-  ds-Completions.generated
+
   completions/ds-esv
 
 completions

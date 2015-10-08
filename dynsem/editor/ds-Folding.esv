@@ -1,7 +1,5 @@
 module ds-Folding
 
-imports ds-Folding.generated
-
 folding
   
   // This file can be used for custom folding rules.
