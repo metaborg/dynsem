@@ -55,6 +55,48 @@ rules
       rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
   
   ds2java-execmethod(on-norule-generator|allrule*):
+    arrow@(arrow-def, ArrowType(_, bu-ty)) ->
+      class-body-dec* |[
+        
+        public x_rettype ~x:execname(param*){
+          bstm*
+        }
+        
+      ]|
+    where
+      arrow-name := <def-get-name> arrow-def;
+      [] := <filter(is-rule-matching-arrow(|arrow-name))> allrule*
+    where
+      execname := <ds2java-methodname> (arrow-def, bu-ty);
+      x_rettype := <ds2java-returnclassname> (arrow-def, bu-ty);
+      func-param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      param* := [param |[ VirtualFrame frame ]|, func-param*];
+      bstm* := <on-norule-generator> arrow
+  
+  ds2java-execmethod(on-norule-generator|allrule*):
+    arrow@(arrow-def, ArrowType(_, bu-ty)) ->
+      class-body-dec* |[
+        
+        public x_rettype ~x:execname(param*){
+          bstm*
+        }
+        
+        ~more-method*
+      ]|
+    where
+      arrow-name := <def-get-name> arrow-def;
+      [rule] := <filter(is-rule-matching-arrow(|arrow-name))> allrule*
+    where
+      x_rettype := <ds2java-returnclassname> (arrow-def, bu-ty);
+      execname := <ds2java-methodname> (arrow-def, bu-ty);
+      func-param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      param* := [param |[ VirtualFrame frame ]|, func-param*]
+    where {| LiftedMethods:
+      bstm* := <ds2java-rulestatements(ds2java-supercall|arrow)> rule;
+      more-method* := <bagof-LiftedMethods>
+    |}
+  
+  ds2java-execmethod(on-norule-generator|allrule*):
     a@(arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
         
@@ -71,15 +113,16 @@ rules
         ~more-method*
       ]|
     where
+      arrow-name := <def-get-name> arrow-def;
+      rule*@[_, _|_] := <filter(is-rule-matching-arrow(|arrow-name))> allrule*
+    where
       x_rettype := <ds2java-returnclassname> (arrow-def, bu-ty);
       execname := <ds2java-methodname> (arrow-def, bu-ty);
       func-param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
       param* := [param |[ VirtualFrame frame ]|, func-param*];
-      arrow-name := <def-get-name> arrow-def;
       bstm1* := <on-norule-generator> a
     where {| LiftedMethods:
       e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def;
-      rule* := <filter(is-rule-matching-arrow(|arrow-name))> allrule*;
       bstm0* := <ds2java-calldispatch(|[e |[ frame ]|, e*], execname)> <length> rule*;
       exec-method* := <map-with-index(ds2java-dispatchexec(|a, x_rettype, execname, param*))> rule*;
       more-method* := <bagof-LiftedMethods>
