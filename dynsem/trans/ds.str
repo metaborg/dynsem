@@ -210,7 +210,7 @@ rules // Builders
       |project-path)
 
   all-to-java-editor:
-    (_, position, ast, path, project-path) -> None()
+    (_, _, ast, path, project-path) -> None()
     with
       in-project-path(
         init-options(|path, project-path);
