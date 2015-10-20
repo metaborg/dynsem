@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bundle-SymbolicName: org.metaborg.language.meta.dynsem;singleton:=true
+Bundle-SymbolicName: dynsem;singleton:=true
 Export-Package: dynsem
 Bundle-Name: Ds Plug-in
 Bundle-Version: 1.5.0.qualifier
