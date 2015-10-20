@@ -2,7 +2,7 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>org.metaborg.language.meta.dynsem</artifactId>
+  <artifactId>dynsem</artifactId>
   <packaging>eclipse-plugin</packaging>
   <description>Spoofax DynSem (dynamic semantic specification) language implementation.</description>
   <url>https://github.com/metaborg/dynsem</url>
@@ -66,5 +66,5 @@
       <version>${metaborg-version}</version>
     </dependency>
   </dependencies>
-  <version>1.5.0-truffle-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version>
 </project>
