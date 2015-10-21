@@ -66,5 +66,4 @@
       <version>${metaborg-version}</version>
     </dependency>
   </dependencies>
-  <version>1.5.0-SNAPSHOT</version>
 </project>
