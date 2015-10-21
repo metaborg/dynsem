@@ -1,8 +1,10 @@
+/**
+ * 
+ */
 package org.metaborg.meta.interpreter.framework;
 
 import java.util.NoSuchElementException;
 
-import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -10,35 +12,47 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class L_Int extends Node implements IList<Integer> {
+/**
+ * @author vladvergu
+ *
+ */
+public abstract class AbstractNodeList<T extends Node> extends Node implements
+		IList<T> {
 
-	private Integer head;
-	@Child private L_Int tail;
+	@Child private T head;
+	@Child private AbstractNodeList<T> tail;
 
 	private final int size;
 
-	public L_Int(SourceSection src) {
+	public AbstractNodeList(SourceSection src) {
 		this(src, null, null);
 	}
 
-	public L_Int(SourceSection source, Integer head, L_Int tail) {
-		super(source);
+	public AbstractNodeList(SourceSection src, T head, AbstractNodeList<T> tail) {
+		super(src);
 		this.head = head;
 		this.tail = tail;
 		this.size = (head == null ? 0 : 1) + (tail == null ? 0 : tail.size());
 	}
 
-	public static L_Int fromStrategoTerm(IStrategoTerm alist) {
-		L_Int list = new L_Int(SourceSectionUtil.fromStrategoTerm(alist));
-		for (IStrategoTerm elem : alist) {
-			final SourceSection src = SourceSectionUtil.fromStrategoTerm(elem);
-			list = new L_Int(src, Tools.asJavaInt(elem), list);
+	@Override
+	public IStrategoList toStrategoTerm(ITermFactory factory) {
+		if (size == 0) {
+			return factory.makeList();
 		}
-		return list;
+		IStrategoTerm headTerm = null;
+		if (head instanceof IConvertibleToStrategoTerm) {
+			headTerm = ((IConvertibleToStrategoTerm) head)
+					.toStrategoTerm(factory);
+		} else {
+			throw new RuntimeException("Unsupported list element: " + head);
+		}
+
+		return factory.makeListCons(headTerm, tail.toStrategoTerm(factory));
 	}
 
 	@Override
-	public Integer head() {
+	public T head() {
 		if (head == null) {
 			throw new NoSuchElementException();
 		}
@@ -46,12 +60,12 @@ public class L_Int extends Node implements IList<Integer> {
 	}
 
 	@Override
-	public void replaceHead(Integer newHead) {
+	public void replaceHead(T newHead) {
 		this.head = newHead;
 	}
 
 	@Override
-	public L_Int tail() {
+	public AbstractNodeList<T> tail() {
 		if (tail == null) {
 			throw new NoSuchElementException();
 		}
@@ -79,20 +93,6 @@ public class L_Int extends Node implements IList<Integer> {
 	}
 
 	@Override
-	public IStrategoList toStrategoTerm(ITermFactory factory) {
-		if (size == 0) {
-			return factory.makeList();
-		}
-
-		return factory.makeListCons(factory.makeInt(head),
-				tail.toStrategoTerm(factory));
-	}
-
-	public String toString() {
-		return "[" + head + ", " + tail + "]";
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -103,7 +103,7 @@ public class L_Int extends Node implements IList<Integer> {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		L_Int other = (L_Int) obj;
+		AbstractNodeList<?> other = (AbstractNodeList<?>) obj;
 		if (size != other.size) {
 			return false;
 		}
@@ -124,4 +124,12 @@ public class L_Int extends Node implements IList<Integer> {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		if (size == 0) {
+			return "[]";
+		}
+
+		return "[" + head + ", " + tail + "]";
+	}
 }

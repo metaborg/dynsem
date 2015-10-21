@@ -55,6 +55,48 @@ rules
       rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
   
   ds2java-execmethod(on-norule-generator|allrule*):
+    arrow@(arrow-def, ArrowType(_, bu-ty)) ->
+      class-body-dec* |[
+        
+        public x_rettype ~x:execname(param*){
+          bstm*
+        }
+        
+      ]|
+    where
+      arrow-name := <def-get-name> arrow-def;
+      [] := <filter(is-rule-matching-arrow(|arrow-name))> allrule*
+    where
+      execname := <ds2java-methodname> (arrow-def, bu-ty);
+      x_rettype := <ds2java-returnclassname> (arrow-def, bu-ty);
+      func-param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      param* := [param |[ VirtualFrame frame ]|, func-param*];
+      bstm* := <on-norule-generator> arrow
+  
+  ds2java-execmethod(on-norule-generator|allrule*):
+    arrow@(arrow-def, ArrowType(_, bu-ty)) ->
+      class-body-dec* |[
+        
+        public x_rettype ~x:execname(param*){
+          bstm*
+        }
+        
+        ~more-method*
+      ]|
+    where
+      arrow-name := <def-get-name> arrow-def;
+      [rule] := <filter(is-rule-matching-arrow(|arrow-name))> allrule*
+    where
+      x_rettype := <ds2java-returnclassname> (arrow-def, bu-ty);
+      execname := <ds2java-methodname> (arrow-def, bu-ty);
+      func-param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
+      param* := [param |[ VirtualFrame frame ]|, func-param*]
+    where {| LiftedMethods:
+      bstm* := <ds2java-rulestatements(ds2java-supercall|arrow)> rule;
+      more-method* := <bagof-LiftedMethods>
+    |}
+  
+  ds2java-execmethod(on-norule-generator|allrule*):
     a@(arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
         
@@ -71,15 +113,16 @@ rules
         ~more-method*
       ]|
     where
+      arrow-name := <def-get-name> arrow-def;
+      rule*@[_, _|_] := <filter(is-rule-matching-arrow(|arrow-name))> allrule*
+    where
       x_rettype := <ds2java-returnclassname> (arrow-def, bu-ty);
       execname := <ds2java-methodname> (arrow-def, bu-ty);
       func-param* := <lookup-arrow-inputs; map-with-index(ds2java-method-paramdecl)> arrow-def;
       param* := [param |[ VirtualFrame frame ]|, func-param*];
-      arrow-name := <def-get-name> arrow-def;
       bstm1* := <on-norule-generator> a
     where {| LiftedMethods:
       e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def;
-      rule* := <filter(is-rule-matching-arrow(|arrow-name))> allrule*;
       bstm0* := <ds2java-calldispatch(|[e |[ frame ]|, e*], execname)> <length> rule*;
       exec-method* := <map-with-index(ds2java-dispatchexec(|a, x_rettype, execname, param*))> rule*;
       more-method* := <bagof-LiftedMethods>
@@ -380,6 +423,28 @@ rules
       bstm2* := <ds2java-premise> on-fail*
   
   ds2java-premise:
+    (Formula(TermEq(t1, List([]))), on-succ*, on-fail*) ->
+      bstm* |[
+        if(e_t1 != null && e_t1.isEmpty()){
+          bstm1*
+        } else {
+          bstm2*
+        }
+      ]|
+    where
+      <type-of; not(ds2java-type-is-primitive)> t1
+    where
+      e_t1 := <ds2java-term-build(|ALPHATYPE())> t1;
+      bstm1* := <ds2java-premise> on-succ*;
+      bstm2* := <ds2java-premise> on-fail*
+      
+  ds2java-premise:
+    (Formula(TermEq(List([]), t2)), on-succ*, on-fail*) ->
+      <ds2java-premise> (Formula(TermEq(t2, List([]))), on-succ*, on-fail*)
+    where
+      <not(?List([]))> t2
+      
+  ds2java-premise:
     (Formula(TermEq(t1, t2)), on-succ*, on-fail*) ->
       bstm* |[
         if(e_t1 != null && e_t1.equals(e_t2)){
@@ -390,7 +455,9 @@ rules
       ]|
     where
       <type-of; not(ds2java-type-is-primitive)> t1;
-      <type-of; not(ds2java-type-is-primitive)> t2
+      <type-of; not(ds2java-type-is-primitive)> t2;
+      <not(?List([]))> t1;
+      <not(?List([]))> t2
     where
       e_t1 := <ds2java-term-build(|ALPHATYPE())> t1;
       e_t2 := <ds2java-term-build(|ALPHATYPE())> t2;
@@ -471,7 +538,7 @@ rules
     	e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (farg*, arg*)
   
   ds2java-term-build(|ex_ty):
-  	List([]) -> e |[ new x_type(this.getSourceInfo()) ]|
+  	List([]) -> e |[ new x_type(this.getSourceSection()) ]|
   	where
   		if <?ListType(_)> ex_ty
   		then
@@ -481,7 +548,7 @@ rules
   		end 
   
   ds2java-term-build(|ex-ty):
-    ListTail([h-trm], t-trm) -> e |[ new x_type(this.getSourceInfo(), e_h, e_t) ]|
+    ListTail([h-trm], t-trm) -> e |[ new x_type(this.getSourceSection(), e_h, e_t) ]|
     where
       h-ty := <type-of> h-trm;
       e_h := <ds2java-term-build(|h-ty)> h-trm;

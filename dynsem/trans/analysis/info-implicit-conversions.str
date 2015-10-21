@@ -29,6 +29,8 @@ rules
           )
         ); fail
       + gen-implicit-info-conclusion; fail
+      + MergePoint(gen-implicit-info, gen-implicit-info, id); fail
+      + PremiseBlock(filter(gen-implicit-info)); fail
       + Formula(gen-implicit-info); fail
       + Relation(
           Reads(gen-implicit-info(fail)),

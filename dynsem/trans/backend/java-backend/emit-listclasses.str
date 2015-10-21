@@ -37,134 +37,50 @@ rules
 rules
 	
   mklist-class(|x_classname, elemty, exec*) =
-    body* := <mklist-class-body(|x_classname, elemty, exec*)>;
     x_elemname := <ds2java-type-to-unboxed-type> elemty;
     !compilation-unit |[
       package ~x:<AutoPackageName>;
         
-        import org.metaborg.meta.interpreter.framework.*;
-        import org.spoofax.interpreter.terms.*;
-        import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+				import org.metaborg.meta.interpreter.framework.*;
+				import org.spoofax.interpreter.terms.IStrategoTerm;
+				import com.oracle.truffle.api.source.SourceSection;
+        import com.oracle.truffle.api.frame.VirtualFrame;
         import com.github.krukow.clj_lang.PersistentTreeMap;
         
-        public class x_classname implements INodeList {
-          public INodeSource source;
+        public class x_classname extends AbstractNodeList<x_elemname> {
           
-          public x_classname(INodeSource source) {
-            this(source, null, null);
+          public x_classname(SourceSection src) {
+            super(src);
           }
           
-          public x_classname(INodeSource source, x_elemname head, x_classname tail) {
-            this.source = source;
-            this.head = head;
-            this.tail = tail;
-            this.size = (head == null ? 0 : 1) + (tail == null ? 0 : tail.size());
-          }
-          
-          ~body*
-        }
-    ]|
-
-  mklist-class-body(|x_classname, elemty, exec*) =
-  	x_elemname := <ds2java-type-to-unboxed-type> elemty;
-  	!class-body-dec* |[
-  		    @Child
-          public x_elemname head;
-          
-          @Children
-          public x_classname tail;
-          
-          public final int size;
-          
-          @Override
-				  public void setSourceInfo(INodeSource source) {
-				    this.source = source;
-				  }
-
-				  @Override
-				  public INodeSource getSourceInfo() {
-				    return source;
-				  }
-  
-          @Override
-          public x_elemname head() {
-            if (head == null) {
-              throw new InterpreterException("No such element exception", null, this);
-            }
-            return head;
-          }
-          
-          @Override
-          public void replaceHead(Object newHead) {
-            this.head = (x_elemname) newHead;
+          public x_classname(SourceSection src, x_elemname head, x_classname tail) {
+            super(src, head, tail);
           }
           
           @Override
           public x_classname tail() {
-            if (tail == null) {
-              throw new InterpreterException("No such element exception", null, this);
-            }
-            return tail;
+          	return (x_classname) super.tail();
           }
-          
-          @Override
-          public int size() {
-            return size;
-          }
-          
-          @Override
-          public boolean isEmpty() {
-            return head == null;
-          }
-          
-          @Override
-          public int hashCode() {
-            return ListUtils.hashCode(this);
-          }
-        
-          @Override
-          public IStrategoTerm toStrategoTerm(ITermFactory factory) {
-            return ListUtils.toStrategoTerm(this, factory);
-          }
-        
-          @Override
-          public boolean equals(Object obj) {
-            return ListUtils.equals(this, obj);
-          }
-        
-          @Override
-          public String toString() {
-            return ListUtils.toString(this);
-          }
-          
-          private boolean hasSpecialized;
-            
-	        public void specializeChildren(int depth) {
-	          if (!hasSpecialized) {
-	            if(head instanceof IGenericNode){
-	            	((IGenericNode) head).specialize(depth);
-	            }
-	            hasSpecialized = true;
-	          }
-	        }
           
           ~exec*
-      ]|
-	
+        }
+    ]|
+
   mklist-specializer(|x_classname, e-ty) =
     e-ty-def := <lookup-def(|Types())> e-ty;
     where(<lookup-prop(|SortKind())> e-ty-def => LanguageSort());
     x_genelem := $[Generic_[<ds2java-type-to-identifier> e-ty]];
     !class-body-dec* |[
-    	@Override
-      public x_classname fromStrategoTerm(IStrategoTerm alist) {
-		    x_classname list = new x_classname(NodeSource.fromStrategoTerm(alist));
-		    for (int l = alist.getSubtermCount() - 1; l >= 0; l--) {
-		      final INodeSource source = NodeSource.fromStrategoTerm(alist.getSubterm(l));
-		      list = new x_classname(NodeSource.fromStrategoTerm(alist), new x_genelem(source, alist.getSubterm(l)), list);
+
+      public static x_classname fromStrategoTerm(IStrategoTerm alist) {
+		    x_classname list = new x_classname(SourceSectionUtil.fromStrategoTerm(alist));
+		    for (IStrategoTerm elem : alist) {
+		      final SourceSection src = SourceSectionUtil.fromStrategoTerm(elem);
+		      list = new x_classname(src, new x_genelem(src, elem), list);
 		    }
 		    return list;
 		  }
+
     ]|
 
   mklist-specializer(|x_classname, e-ty) =

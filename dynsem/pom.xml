@@ -4,7 +4,6 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>dynsem</artifactId>
-	<version>1.5.0.truffle-SNAPSHOT</version>
 	<name>ds</name>
 	<packaging>spoofax-language</packaging>
 
@@ -60,4 +59,5 @@
 		<developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
 		<url>https://github.com/metaborg/dynsem</url>
 	</scm>
+  <version>1.5.0-SNAPSHOT</version>
 </project>

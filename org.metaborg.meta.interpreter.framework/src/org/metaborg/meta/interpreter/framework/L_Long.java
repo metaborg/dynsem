@@ -2,7 +2,6 @@ package org.metaborg.meta.interpreter.framework;
 
 import java.util.NoSuchElementException;
 
-import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -10,35 +9,39 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class L_Int extends Node implements IList<Integer> {
+public class L_Long extends Node implements IList<Long> {
 
-	private Integer head;
-	@Child private L_Int tail;
+	private Long head;
+	@Child private L_Long tail;
 
 	private final int size;
 
-	public L_Int(SourceSection src) {
+	public L_Long(SourceSection src) {
 		this(src, null, null);
 	}
 
-	public L_Int(SourceSection source, Integer head, L_Int tail) {
+	public L_Long(SourceSection source, Long head, L_Long tail) {
 		super(source);
 		this.head = head;
 		this.tail = tail;
 		this.size = (head == null ? 0 : 1) + (tail == null ? 0 : tail.size());
 	}
 
-	public static L_Int fromStrategoTerm(IStrategoTerm alist) {
-		L_Int list = new L_Int(SourceSectionUtil.fromStrategoTerm(alist));
-		for (IStrategoTerm elem : alist) {
-			final SourceSection src = SourceSectionUtil.fromStrategoTerm(elem);
-			list = new L_Int(src, Tools.asJavaInt(elem), list);
-		}
-		return list;
+	public static L_Long fromStrategoTerm(IStrategoTerm alist) {
+
+		// L_Long list = new L_Long(SourceSectionUtil.fromStrategoTerm(alist));
+		// for (IStrategoTerm elem : alist) {
+		// final SourceSection src = SourceSectionUtil.fromStrategoTerm(elem);
+		// list = new L_Long(src, Tools.asJavaInt(elem), list);
+		// }
+		// return list;
+
+		throw new UnsupportedOperationException(
+				"ATerms do not support long types");
 	}
 
 	@Override
-	public Integer head() {
+	public Long head() {
 		if (head == null) {
 			throw new NoSuchElementException();
 		}
@@ -46,12 +49,12 @@ public class L_Int extends Node implements IList<Integer> {
 	}
 
 	@Override
-	public void replaceHead(Integer newHead) {
+	public void replaceHead(Long newHead) {
 		this.head = newHead;
 	}
 
 	@Override
-	public L_Int tail() {
+	public L_Long tail() {
 		if (tail == null) {
 			throw new NoSuchElementException();
 		}
@@ -84,7 +87,7 @@ public class L_Int extends Node implements IList<Integer> {
 			return factory.makeList();
 		}
 
-		return factory.makeListCons(factory.makeInt(head),
+		return factory.makeListCons(factory.makeInt((int) (long) head),
 				tail.toStrategoTerm(factory));
 	}
 
@@ -103,7 +106,7 @@ public class L_Int extends Node implements IList<Integer> {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		L_Int other = (L_Int) obj;
+		L_Long other = (L_Long) obj;
 		if (size != other.size) {
 			return false;
 		}

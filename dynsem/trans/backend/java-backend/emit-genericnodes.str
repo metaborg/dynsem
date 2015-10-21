@@ -111,7 +111,7 @@ rules
       gennodename := $[Generic_[<ds2java-type-to-identifier> ty]]
 
   ds2java-gennode-instantiation:
-    (e_trm, lty@ListType(e-ty)) -> e |[ new x_listname(NodeSource.fromStrategoTerm(e_trm)).fromStrategoTerm(e_trm) ]|
+    (e_trm, lty@ListType(e-ty)) -> e |[ x_listname.fromStrategoTerm(e_trm) ]|
     where
       x_listname := <ds2java-type-to-unboxed-type> lty
   
@@ -131,6 +131,9 @@ rules
 
   ds2java-gennode-instantiation:
     (e_trm, IntType()) -> e |[ TermUtils.intFromTerm(e_trm) ]|
+
+  ds2java-gennode-instantiation:
+    (e_trm, LongType()) -> e |[ TermUtils.longFromTerm(e_trm) ]|
 
   ds2java-gennode-instantiation:
     (e_trm, RealType()) -> e |[ TermUtils.doubleFromTerm(e_trm) ]|

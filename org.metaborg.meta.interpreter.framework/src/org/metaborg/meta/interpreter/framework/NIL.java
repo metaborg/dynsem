@@ -2,19 +2,20 @@ package org.metaborg.meta.interpreter.framework;
 
 import java.util.NoSuchElementException;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-public class NIL implements INodeList {
+import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.source.SourceSection;
 
-	public INodeSource source;
+public class NIL extends Node implements IList<Object> {
 
-	public NIL(INodeSource source) {
-		this.source = source;
+	public NIL(SourceSection src) {
+		super(src);
 	}
 
 	@Override
-	public IStrategoTerm toStrategoTerm(ITermFactory factory) {
+	public IStrategoList toStrategoTerm(ITermFactory factory) {
 		return factory.makeList();
 	}
 
@@ -29,7 +30,7 @@ public class NIL implements INodeList {
 	}
 
 	@Override
-	public INodeList tail() {
+	public IList<Object> tail() {
 		throw new NoSuchElementException();
 	}
 
@@ -44,18 +45,8 @@ public class NIL implements INodeList {
 	}
 
 	@Override
-	public NIL fromStrategoTerm(IStrategoTerm list) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setSourceInfo(INodeSource source) {
-		this.source = source;
-	}
-
-	@Override
-	public INodeSource getSourceInfo() {
-		return source;
+	public String toString() {
+		return "[]";
 	}
 
 }

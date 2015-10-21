@@ -38,6 +38,10 @@ public class TermUtils {
 		return factory.makeInt(i);
 	}
 
+	public static long longFromTerm(IStrategoTerm subterm) {
+		throw new RuntimeException("Unsupported number format");
+	}
+
 	public static double doubleFromTerm(IStrategoTerm term) {
 		if (Tools.isTermReal(term)) {
 			return Tools.asJavaDouble(term);
@@ -59,4 +63,9 @@ public class TermUtils {
 	public static IStrategoString termFromString(String s, ITermFactory factory) {
 		return factory.makeString(s);
 	}
+
+	public static IStrategoTerm termFromLong(long _1, ITermFactory factory) {
+		throw new RuntimeException("Unsupported number format");
+	}
+
 }

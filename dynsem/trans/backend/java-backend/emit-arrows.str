@@ -30,13 +30,8 @@ rules
   ds2java-fielddecl:
     (idx, ty) -> class-body-dec |[ @Child private ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
     where
-      <type-is-adoptable> ty;
-      <not(type-is-adoptable-list)> ty
-
-  // generate indexed field declaration
-  ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ @Children private ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
-    where
+      <type-is-adoptable> ty
+      <+
       <type-is-adoptable-list> ty
   
   // generate setter for indexed child adoption
@@ -84,8 +79,11 @@ rules
 			  import org.metaborg.meta.interpreter.framework.IConvertibleToStrategoTerm;
 			  import org.spoofax.interpreter.terms.IStrategoTerm;
 			  import org.spoofax.interpreter.terms.ITermFactory;
-			  
-			  public class x_classname implements IConvertibleToStrategoTerm {
+        import com.oracle.truffle.api.interop.ForeignAccess;
+        import com.oracle.truffle.api.interop.TruffleObject;
+        import ds.manual.interpreter.*;
+        
+			  public class x_classname implements IConvertibleToStrategoTerm, TruffleObject {
 			    public final x_valueclass value;
 
 			    ~fdec*
@@ -103,6 +101,11 @@ rules
 	                   e_child*
 	                 );
 	        }
+
+					@Override
+					public ForeignAccess getForeignAccess() {
+					  return Natives.getForeignAccess();
+					}
 
 			    ~fget*
 			  }
