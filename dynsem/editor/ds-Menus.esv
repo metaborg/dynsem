@@ -10,9 +10,7 @@ menus
     action: "Show Desugared Syntax" = debug-show-desugared (source) (openeditor) (meta) 
     
   menu: "Analysis"
-    
-    action: "Reset and reanalyze"  = debug-reanalyze (meta)   
-
+  
     submenu: "Show Analysis"
       action: "Project"            = debug-project (openeditor) (meta)
       action: "Partition"          = debug-partition (openeditor) (meta)

@@ -1,6 +1,6 @@
 module ds.main
 
-imports ds-Menus ds-Refactorings ds-Colorer ds-Completions ds-Folding ds-References ds-Syntax ds-Views
+imports ds-Menus ds-Colorer ds-Completions ds-References ds-Syntax ds-Views
 
 language General properties 
                   
@@ -21,5 +21,4 @@ language General properties
                                                                                                   
   observer      : editor-analyze
   // on save       : editor-save
-  
   
