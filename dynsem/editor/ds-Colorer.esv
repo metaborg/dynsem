@@ -1,6 +1,6 @@
 module ds-Colorer
 
-imports ds-Colorer.generated
+imports editor/Colorer.generated
 
 colorer
 
