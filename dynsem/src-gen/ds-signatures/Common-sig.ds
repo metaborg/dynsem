@@ -5,6 +5,7 @@ signature
       NONE
       INFER
       ID
+      IDNOHYPH
       LID
       JID
       INT
@@ -19,6 +20,7 @@ signature
     constructors
       __String2INFER__ : String -> INFER {implicit}
       __String2ID__ : String -> ID {implicit}
+      __String2IDNOHYPH__ : String -> IDNOHYPH {implicit}
       __String2LID__ : String -> LID {implicit}
     constructors
       __String2JID__ : String -> JID {implicit}

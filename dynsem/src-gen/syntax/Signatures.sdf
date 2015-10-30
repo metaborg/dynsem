@@ -87,10 +87,10 @@ exports
     CONTENTCOMPLETE -> NativeConsDecl   {cons("COMPLETION-NativeConsDecl")}
 
   context-free syntax
-    "arrows" DeclaredArrow* -> SignatureSection {cons("ArrowDeclarations")}
-    ArrowDeclaration        -> DeclaredArrow    
-    Type "-" ID "->" Type   -> ArrowDeclaration {cons("ArrowDecl")}
-    Type "-->" Type         -> ArrowDeclaration {cons("DefaultArrowDecl")}
+    "arrows" DeclaredArrow*     -> SignatureSection {cons("ArrowDeclarations")}
+    ArrowDeclaration            -> DeclaredArrow    
+    Type "-" IDNOHYPH "->" Type -> ArrowDeclaration {cons("ArrowDecl")}
+    Type "-->" Type             -> ArrowDeclaration {cons("DefaultArrowDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}

@@ -52,12 +52,12 @@ completions
     <Term:Term> " :: " <LabelComp:LabelComp>  
   completion template Rel : "-->" =
     "-->"                        
-  completion template Rel : "-ID->" =
-    "-" <ID:ID> "->"           
+  completion template Rel : "-IDNOHYPH->" =
+    "-" <IDNOHYPH:IDNOHYPH> "->"  
   completion template Rel : "-LabelComp-->" =
     "-" <LabelComp:LabelComp> "-->"  
-  completion template Rel : "-LabelComp-ID->" =
-    "-" <LabelComp:LabelComp> "-" <ID:ID> "->"  
+  completion template Rel : "-LabelComp-IDNOHYPH->" =
+    "-" <LabelComp:LabelComp> "-" <IDNOHYPH:IDNOHYPH> "->"  
   completion template LabelComp : "Type Term" =
     <Type:Type> " " <Term:Term>  
 

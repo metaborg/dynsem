@@ -85,7 +85,7 @@ rules
   ds2java-consdecl-specializer:
   	c-def ->
 			bstm* |[
-			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<int-to-string> c-arity) {
+			  if(name.equals(~e:Lit(String([Chars(<escape; escape-javaid> c-name)]))) && term.getSubtermCount() == ~i:<int-to-string> c-arity) {
 			    ~x:sortname replacement = replace(new ~x:consname(source, e*));
 			    return replacement;
 		    }

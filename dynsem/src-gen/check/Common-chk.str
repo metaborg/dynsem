@@ -34,6 +34,9 @@ strategies
   check-ID =
     is-string
 
+  check-IDNOHYPH =
+    is-string
+
   check-LID =
     is-string
 
@@ -44,6 +47,9 @@ strategies
     check-ID
 
   check-example =
+    check-IDNOHYPH
+
+  check-example =
     check-LID
 
   check-INFER :
@@ -51,6 +57,9 @@ strategies
 
   check-ID :
     amb([h|hs]) -> <check-ID> h
+
+  check-IDNOHYPH :
+    amb([h|hs]) -> <check-IDNOHYPH> h
 
   check-LID :
     amb([h|hs]) -> <check-LID> h
@@ -60,6 +69,9 @@ strategies
 
   error-ID =
     debug(!"Unexpected constructor. Expected string from sort ID instead. ")
+
+  error-IDNOHYPH =
+    debug(!"Unexpected constructor. Expected string from sort IDNOHYPH instead. ")
 
   error-LID =
     debug(!"Unexpected constructor. Expected string from sort LID instead. ")

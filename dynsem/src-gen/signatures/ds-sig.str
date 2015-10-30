@@ -37,9 +37,9 @@ signature
     Target              : Term -> Target
     Target              : Term * List(LabelComp) -> Target
     Dynamic             : Rel
-    NamedDynamic        : ID -> Rel
+    NamedDynamic        : IDNOHYPH -> Rel
     DynamicEmitted      : List(LabelComp) -> Rel
-    NamedDynamicEmitted : List(LabelComp) * ID -> Rel
+    NamedDynamicEmitted : List(LabelComp) * IDNOHYPH -> Rel
     LabelComp           : Type * Term -> LabelComp
     VarLabelComp        : Var -> LabelComp
 

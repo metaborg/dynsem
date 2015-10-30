@@ -544,7 +544,7 @@ strategies
   check-ArrowDeclaration :
     ArrowDecl(t1__, t2__, t3__) -> <id>
     with <(check-Type <+ error-Type)> t1__
-    with <(check-ID <+ error-ID)> t2__
+    with <(check-IDNOHYPH <+ error-IDNOHYPH)> t2__
     with <(check-Type <+ error-Type)> t3__
 
   is-ArrowDeclaration-with-constructor =

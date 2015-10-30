@@ -303,7 +303,7 @@ strategies
 
   check-Rel :
     NamedDynamic(t1__) -> <id>
-    with <(check-ID <+ error-ID)> t1__
+    with <(check-IDNOHYPH <+ error-IDNOHYPH)> t1__
 
   is-Rel-with-constructor =
     ?NamedDynamic(_)
@@ -318,7 +318,7 @@ strategies
   check-Rel :
     NamedDynamicEmitted(t1__, t2__) -> <id>
     with <map(check-LabelComp <+ error-LabelComp)> t1__
-    with <(check-ID <+ error-ID)> t2__
+    with <(check-IDNOHYPH <+ error-IDNOHYPH)> t2__
 
   is-Rel-with-constructor =
     ?NamedDynamicEmitted(_, _)
