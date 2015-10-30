@@ -27,7 +27,7 @@ rules /* projections of types to names */
     BoolType() -> <box> "boolean"
 
   ds2java-type-to-java(is-mk-type, box):
-    ty -> ty-str
+    ty -> <escape-javaid> ty-str
     where
       ty-def := <lookup-def(|Types())> ty;
       NativeSort() := <lookup-prop(|SortKind())> ty-def;
@@ -39,7 +39,7 @@ rules /* projections of types to names */
       end
 
   ds2java-type-to-java(is-mk-type, box):
-    ty -> $[A_[<def-get-name> ty-def]]
+    ty -> $[A_[<def-get-name; escape-javaid> ty-def]]
     where
       ty-def := <lookup-def(|Types())> ty;
       ty-kind := <lookup-prop(|SortKind())> ty-def;
@@ -114,17 +114,17 @@ rules /* name generation */
     (a-def, bu-type) -> $[execute_[name]]
     where
       Arrows() := <def-get-namespace> a-def;
-      name := <def-get-name> a-def
+      name := <def-get-name; escape-javaid> a-def
 
   ds2java-returnclassname:
     (a-def, bu-type) -> $[R_[name]_[bu-type-str]]
     where
       Arrows() := <def-get-namespace> a-def;
-      name := <def-get-name> a-def;
-      bu-type-str := <pp-type-java> bu-type
+      name := <def-get-name; escape-javaid> a-def;
+      bu-type-str := <pp-type-java; escape-javaid> bu-type
 
   ds2java-consdef-classname:
-    c-def -> $[[cname]_[arity]]
+    c-def -> $[[<escape-javaid> cname]_[arity]]
     where
       <def-get-name> c-def => (cname, arity)
 
@@ -137,6 +137,7 @@ rules /* name generation */
   mkidx:
   	idx -> $[_[idx]]
 
+  escape-javaid = is-string; string-replace(|"'", "_"); string-replace(|"-", "$"); escape
 
 
 

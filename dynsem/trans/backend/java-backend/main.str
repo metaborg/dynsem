@@ -87,5 +87,5 @@ rules /* escape variable names */
 
   escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
   
-  escape-identifier = string-replace(|"'", "_")
+  escape-identifier = string-replace(|"'", "_"); string-replace(|"-", "$")
   
