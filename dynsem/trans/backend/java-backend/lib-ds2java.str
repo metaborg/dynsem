@@ -136,7 +136,7 @@ rules /* name generation */
   mkidx:
   	idx -> $[_[idx]]
 
-  escape-javaid = is-string; debug(!1); string-replace(|"'", "_"); debug(!2); string-replace(|"-", "$"); debug(!3); escape; debug(!4)
+  escape-javaid = is-string; string-replace(|"'", "_"); string-replace(|"-", "$"); escape
 
 
 
