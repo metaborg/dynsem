@@ -107,6 +107,6 @@ context-free syntax
   
   DeclaredArrow = ArrowDeclaration
   
-  ArrowDeclaration.ArrowDecl = [[Type] -[ID]-> [Type]]
+  ArrowDeclaration.ArrowDecl = [[Type] -[IDNOHYPH]-> [Type]]
   ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]
 

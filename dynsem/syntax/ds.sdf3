@@ -92,10 +92,10 @@ context-free syntax // formulas
   Target.Target = [[Term] :: [{LabelComp ", "}+]]
   
   Rel.Dynamic = [-->]
-  Rel.NamedDynamic = [-[ID]->]
+  Rel.NamedDynamic = [-[IDNOHYPH]->]
   
   Rel.DynamicEmitted = [-[{LabelComp ", "}+]-->]
-  Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[ID]->]
+  Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[IDNOHYPH]->]
   
   LabelComp.LabelComp = [[Type] [Term]]
   LabelComp.VarLabelComp = [[Var]]

@@ -5,7 +5,8 @@ module Common
 
   lexical syntax 
     INFER = [\-][\-][\-][\-]*
-    ID = [\_a-zA-Z][a-zA-Z0-9\'\_]*
+    ID = [\_a-zA-Z][a-zA-Z0-9\'\_\-]*
+    IDNOHYPH = [\_a-zA-Z][a-zA-Z0-9\'\_]*
     LID = [a-zA-Z][a-zA-Z0-9\'\_]* "*"
 
   lexical restrictions
@@ -37,7 +38,8 @@ module Common
     CommentChar   -/- [\/]
     INT           -/- [0-9]
     JID           -/- [a-zA-Z0-9\_\.]
-    ID            -/- [a-zA-Z0-9\_\']
+    ID            -/- [a-zA-Z0-9\_\-\']
+    IDNOHYPH      -/- [a-zA-Z0-9\_\']
     INFER         -/- [\-]
 
     %% EOF may not be followed by any char
