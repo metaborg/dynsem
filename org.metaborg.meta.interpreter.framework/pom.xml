@@ -52,5 +52,4 @@
 		<developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
 		<url>https://github.com/metaborg/dynsem</url>
 	</scm>
-	<version>1.5.0-truffle-SNAPSHOT</version>
 </project>
