@@ -60,5 +60,5 @@ signature
     constructors
       ArrowDeclarations : List(DeclaredArrow) -> SignatureSection 
       __ArrowDeclaration2DeclaredArrow__ : ArrowDeclaration -> DeclaredArrow {implicit}
-      ArrowDecl : Type * ID * Type -> ArrowDeclaration 
+      ArrowDecl : Type * IDNOHYPH * Type -> ArrowDeclaration 
       DefaultArrowDecl : Type * Type -> ArrowDeclaration 

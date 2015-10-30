@@ -73,7 +73,7 @@ completions
 completions
   completion template SignatureSection : "arrows " =
     "arrows\n\t" (cursor) (blank)  
-  completion template ArrowDeclaration : "Type -ID-> Type" =
-    <Type:Type> " -" <ID:ID> "-> " <Type:Type>  
+  completion template ArrowDeclaration : "Type -IDNOHYPH-> Type" =
+    <Type:Type> " -" <IDNOHYPH:IDNOHYPH> "-> " <Type:Type>  
   completion template ArrowDeclaration : "Type --> Type" =
     <Type:Type> " --> " <Type:Type>  

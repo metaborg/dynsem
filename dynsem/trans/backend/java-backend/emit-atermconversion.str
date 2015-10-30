@@ -21,7 +21,7 @@ rules
 	      @Override
 	      public IStrategoTerm toStrategoTerm(ITermFactory factory) {
 	        IStrategoAppl term = factory.makeAppl(
-	            factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<int-to-string> c-arity), 
+	            factory.makeConstructor(~e:Lit(String([Chars(<escape-javaid> c-name)])), ~i:<int-to-string> c-arity), 
 	            e_child*
 	        );
 	        if ( getSourceInfo() != null ) {

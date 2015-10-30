@@ -35,6 +35,9 @@ strategies
   prettyprint-ID =
     ![S(<is-string>)]
 
+  prettyprint-IDNOHYPH =
+    ![S(<is-string>)]
+
   prettyprint-LID =
     ![S(<is-string>)]
 
@@ -45,6 +48,9 @@ strategies
     prettyprint-ID
 
   prettyprint-example =
+    prettyprint-IDNOHYPH
+
+  prettyprint-example =
     prettyprint-LID
 
   prettyprint-INFER :
@@ -52,6 +58,9 @@ strategies
 
   prettyprint-ID :
     amb([h|hs]) -> <prettyprint-ID> h
+
+  prettyprint-IDNOHYPH :
+    amb([h|hs]) -> <prettyprint-IDNOHYPH> h
 
   prettyprint-LID :
     amb([h|hs]) -> <prettyprint-LID> h

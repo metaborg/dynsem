@@ -678,7 +678,7 @@ strategies
                                      )
                                    ]
     with t1__' := <pp-one-Z(prettyprint-Type)> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
+    with t2__' := <pp-one-Z(prettyprint-IDNOHYPH)> t2__
     with t3__' := <pp-one-Z(prettyprint-Type)> t3__
 
   is-ArrowDeclaration =
