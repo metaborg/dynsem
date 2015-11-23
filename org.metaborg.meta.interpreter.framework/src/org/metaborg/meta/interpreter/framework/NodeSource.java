@@ -7,7 +7,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.terms.attachments.AbstractTermAttachment;
-import org.spoofax.terms.attachments.DesugaredOriginAttachment;
 import org.spoofax.terms.attachments.OriginAttachment;
 
 /**
