@@ -29,12 +29,12 @@ rules
         
         import java.util.Map;
         import java.util.Map.Entry;
-				import java.util.HashMap;
         import org.spoofax.interpreter.terms.*;
         import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.interpreter.framework.*;
         import com.github.krukow.clj_ds.PersistentMap;
-        import com.github.krukow.clj_lang.PersistentHashMap;
+        import com.github.krukow.clj_lang.PersistentTreeMap;
+        import org.metaborg.meta.interpreter.framework.MapUtils;
         
         public class AutoMapUtils {
           ~conv*
@@ -62,7 +62,7 @@ rules
         }
         
         public static x_maptype x_fromterm(IStrategoTerm term) {        
-			    final Map<x_kty, x_vty> result = new HashMap<x_kty, x_vty>();
+          PersistentMap<x_kty, x_vty> result = PersistentTreeMap.EMPTY;
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
 			      if (Tools.hasConstructor(appl, "Map", 1)) {
@@ -74,7 +74,7 @@ rules
 			            if (Tools.isTermAppl(kid)) {
 			              IStrategoAppl bindAppl = (IStrategoAppl) kid;
 			              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
-			                result.put(e_key, e_value);
+			                result = MapUtils.add(result, e_key, e_value);
 			              } else {
 			                throw new MalformedASTException("Malformed map");
 		                }
@@ -82,7 +82,7 @@ rules
 	                  throw new MalformedASTException("Malformed map");
 	                }
 	              }
-	              return PersistentHashMap.create(result);
+	              return result;
 	            } else {
 	              throw new MalformedASTException("Malformed map");
 	            }
