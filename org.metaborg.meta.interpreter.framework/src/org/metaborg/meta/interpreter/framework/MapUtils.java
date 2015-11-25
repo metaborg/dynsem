@@ -30,7 +30,8 @@ public class MapUtils {
 
 	@TruffleBoundary
 	public static <K, V> V get(PersistentMap<K, V> map, K key) {
-		return map.get(key);
+		return map.get(key instanceof IGenericNode ? ((IGenericNode) key)
+				.specialize() : key);
 	}
 
 }
