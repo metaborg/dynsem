@@ -66,6 +66,13 @@ rules
             
           }
           
+          private ~x:sortname tryReplace(~x:sortname newNode) {
+				    if (getParent() != null) {
+				      return replace(newNode);
+				    }
+				    return newNode;
+				  }
+          
           @Override
           public IStrategoTerm toStrategoTerm(ITermFactory factory) {
             return aterm;
@@ -86,7 +93,7 @@ rules
   	c-def ->
 			bstm* |[
 			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<int-to-string> c-arity) {
-			    ~x:sortname replacement = replace(new ~x:consname(source, e*));
+			    ~x:sortname replacement = tryReplace(new ~x:consname(source, e*));
 			    return replacement;
 		    }
 			]|
@@ -144,7 +151,7 @@ rules
   ds2java-implcons-specializer:
   	(impl-c-def, bstm*) -> bstm* |[
   	  try {
-  	    return replace(new x_implconsname(this.getSourceSection(), e_gennode));
+  	    return tryReplace(new x_implconsname(this.getSourceSection(), e_gennode));
   	  } catch(MalformedASTException ~x:<newname>) {
   	    bstm*
   	  }

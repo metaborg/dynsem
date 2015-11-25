@@ -29,12 +29,12 @@ rules
         
         import java.util.Map;
         import java.util.Map.Entry;
-				import java.util.TreeMap;
         import org.spoofax.interpreter.terms.*;
         import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.interpreter.framework.*;
         import com.github.krukow.clj_ds.PersistentMap;
         import com.github.krukow.clj_lang.PersistentTreeMap;
+        import org.metaborg.meta.interpreter.framework.MapUtils;
         
         public class AutoMapUtils {
           ~conv*
@@ -62,25 +62,36 @@ rules
         }
         
         public static x_maptype x_fromterm(IStrategoTerm term) {        
-			    final Map<x_kty, x_vty> result = new TreeMap<x_kty, x_vty>();
+          PersistentMap<x_kty, x_vty> result = PersistentTreeMap.EMPTY;
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
 			      if (Tools.hasConstructor(appl, "Map", 1)) {
-		          for (int idx = 0; idx < term.getSubtermCount(); idx++) {
-		            IStrategoTerm kid = term.getSubterm(idx);
-		            if (Tools.isTermAppl(kid)) {
-		              IStrategoAppl bindAppl = (IStrategoAppl) kid;
-		              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
-		                result.put(e_key, e_value);
-		              }
-		            }
-		          }
-		          return PersistentTreeMap.create(result);
-			
-			      }
-			    }
-			
-			    throw new MalformedASTException("Malformed map");
+			        IStrategoTerm bindsTerm = appl.getSubterm(0);
+              if (Tools.isTermList(bindsTerm)) {
+	              IStrategoList binds = (IStrategoList) bindsTerm;
+			          for (int idx = 0; idx < binds.getSubtermCount(); idx++) {
+			            IStrategoTerm kid = binds.getSubterm(idx);
+			            if (Tools.isTermAppl(kid)) {
+			              IStrategoAppl bindAppl = (IStrategoAppl) kid;
+			              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
+			                result = MapUtils.add(result, e_key, e_value);
+			              } else {
+			                throw new MalformedASTException("Malformed map");
+		                }
+	                } else {
+	                  throw new MalformedASTException("Malformed map");
+	                }
+	              }
+	              return result;
+	            } else {
+	              throw new MalformedASTException("Malformed map");
+	            }
+            } else {
+              throw new MalformedASTException("Malformed map");
+            }
+          } else {
+            throw new MalformedASTException("Malformed map");
+          }
 			  }
       ]|
     where

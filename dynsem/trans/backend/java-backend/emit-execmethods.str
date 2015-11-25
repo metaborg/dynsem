@@ -577,7 +577,7 @@ rules
       x_manualpkg := <ManuPackageName>
   
   ds2java-term-build(|ex_ty):
-    MapSelect(map-expr, key-expr) -> e |[ e_map.get(e_key) ]|
+    MapSelect(map-expr, key-expr) -> e |[ MapUtils.get(e_map, e_key) ]|
     where
       e_map := <ds2java-term-build(|ALPHATYPE())> map-expr;
       e_key := <ds2java-term-build(|ALPHATYPE())> key-expr
