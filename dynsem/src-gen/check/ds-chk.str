@@ -563,6 +563,14 @@ strategies
     ?MapSelect(_, _)
 
   check-Term :
+    MapHas(t1__, t2__) -> <id>
+    with <(check-Term <+ error-Term)> t1__
+    with <(check-Term <+ error-Term)> t2__
+
+  is-Term-with-constructor =
+    ?MapHas(_, _)
+
+  check-Term :
     MapExtend(t1__, t2__) -> <id>
     with <(check-Term <+ error-Term)> t1__
     with <(check-Term <+ error-Term)> t2__

@@ -227,6 +227,13 @@ rules
     where
       MapType(_, v-ty) := <type-check-build> m-t
 
+  type-check-build-map:
+    MapHas(m-t, k-t) -> BoolType()
+    where
+      MapType(f-k-ty, _) := <type-check-build> m-t;
+      a-k-ty := <type-check-build> k-t;
+      <type-coerce-full(fail)> (a-k-ty, f-k-ty)
+
   type-check-build-cast:
     Cast(t, ty-t) -> cast-ty
     where

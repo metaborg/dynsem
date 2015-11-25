@@ -65,6 +65,7 @@ signature
     Binds       : Term * Term -> Entry
     MapEntry    : Term -> Entry
     MapSelect   : Term * Term -> Term
+    MapHas      : Term * Term -> Term
     MapExtend   : Term * Term -> Term
     MapUnbind   : Term * Term -> Term
     MapKeys     : Term -> Term

@@ -132,11 +132,12 @@ context-free syntax // terms
   Term.False  = [false]
   
   Term.Map    = [{[{Entry  ", "}*]}]
-  Entry.Bind  = [[Term] |--> [Term]] 
+  Entry.Bind  = [[Term] |--> [Term]]
   Entry.Binds = [[Term] |*-> [Term]]
   Entry.MapEntry = [[Term]]
   
   Term.MapSelect = <<Term>[<Term>]>
+  Term.MapHas = <<Term>[<Term>?]>
   Term.MapExtend = [[Term] + [Term]] {assoc}
   Term.MapUnbind = [[Term] \ [Term]] {assoc}
 
@@ -147,5 +148,5 @@ context-free syntax // terms
 
 context-free priorities
 
-  Term.MapKeys, Term.MapValues > Term.Con > Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
+  Term.MapKeys, Term.MapValues > Term.Con > Term.MapHas, Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
   

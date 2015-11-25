@@ -829,6 +829,22 @@ strategies
     ?MapSelect(_, _)
 
   prettyprint-Term :
+    MapHas(t1__, t2__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [ t1__'
+                              , S("[")
+                              , t2__'
+                              , S("?]")
+                              ]
+                            )
+                          ]
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <pp-one-Z(prettyprint-Term)> t2__
+
+  is-Term =
+    ?MapHas(_, _)
+
+  prettyprint-Term :
     MapExtend(t1__, t2__) -> [ H(
                                  [SOpt(HS(), "0")]
                                , [t1__', S(" + "), t2__']

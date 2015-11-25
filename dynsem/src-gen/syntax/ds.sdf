@@ -105,6 +105,7 @@ exports
     Term "|*->" Term                    -> Entry {cons("Binds")}
     Term                                -> Entry {cons("MapEntry")}
     Term "[" Term "]"                   -> Term  {cons("MapSelect")}
+    Term "[" Term "?]"                  -> Term  {cons("MapHas")}
     Term "+" Term                       -> Term  {cons("MapExtend"), assoc}
     Term "\\" Term                      -> Term  {cons("MapUnbind"), assoc}
     "allkeys" "(" Term ")"              -> Term  {cons("MapKeys")}
@@ -123,6 +124,8 @@ exports
     ,
     "allvalues" "(" Term ")" -> Term >
     ID "(" {Term ","}* ")" -> Term >
+    Term "[" Term "?]" -> Term
+    ,
     Term "[" Term "]" -> Term >
     Term "+" Term -> Term
     ,

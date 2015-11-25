@@ -88,6 +88,8 @@ completions
     <Term:Term> " |*-> " <Term:Term>  
   completion template Term : "Term[Term]" =
     <Term:Term> "[" <Term:Term> "]"  
+  completion template Term : "Term[Term?]" =
+    <Term:Term> "[" <Term:Term> "?]"  
   completion template Term : "Term + Term" =
     <Term:Term> " + " <Term:Term>  
   completion template Term : "Term \\ Term" =
