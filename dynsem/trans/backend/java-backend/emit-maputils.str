@@ -66,20 +66,26 @@ rules
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
 			      if (Tools.hasConstructor(appl, "Map", 1)) {
-		          for (int idx = 0; idx < term.getSubtermCount(); idx++) {
-		            IStrategoTerm kid = term.getSubterm(idx);
-		            if (Tools.isTermAppl(kid)) {
-		              IStrategoAppl bindAppl = (IStrategoAppl) kid;
-		              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
-		                result.put(e_key, e_value);
-		              } else {
-		                throw new MalformedASTException("Malformed map");
+			        IStrategoTerm bindsTerm = appl.getSubterm(0);
+              if (Tools.isTermList(bindsTerm)) {
+	              IStrategoList binds = (IStrategoList) bindsTerm;
+			          for (int idx = 0; idx < binds.getSubtermCount(); idx++) {
+			            IStrategoTerm kid = binds.getSubterm(idx);
+			            if (Tools.isTermAppl(kid)) {
+			              IStrategoAppl bindAppl = (IStrategoAppl) kid;
+			              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
+			                result.put(e_key, e_value);
+			              } else {
+			                throw new MalformedASTException("Malformed map");
+		                }
+	                } else {
+	                  throw new MalformedASTException("Malformed map");
 	                }
-                } else {
-                  throw new MalformedASTException("Malformed map");
-                }
-              }
-              return PersistentTreeMap.create(result);
+	              }
+	              return PersistentTreeMap.create(result);
+	            } else {
+	              throw new MalformedASTException("Malformed map");
+	            }
             } else {
               throw new MalformedASTException("Malformed map");
             }
