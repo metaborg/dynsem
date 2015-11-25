@@ -86,7 +86,10 @@ rules
   	c-def ->
 			bstm* |[
 			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<int-to-string> c-arity) {
-			    ~x:sortname replacement = replace(new ~x:consname(source, e*));
+			    ~x:sortname replacement = new ~x:consname(source, e*);
+			    if(getParent() != null) {
+			      replace(replacement);
+			    }
 			    return replacement;
 		    }
 			]|
