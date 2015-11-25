@@ -72,15 +72,20 @@ rules
 		              IStrategoAppl bindAppl = (IStrategoAppl) kid;
 		              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
 		                result.put(e_key, e_value);
-		              }
-		            }
-		          }
-		          return PersistentTreeMap.create(result);
-			
-			      }
-			    }
-			
-			    throw new MalformedASTException("Malformed map");
+		              } else {
+		                throw new MalformedASTException("Malformed map");
+	                }
+                } else {
+                  throw new MalformedASTException("Malformed map");
+                }
+              }
+              return PersistentTreeMap.create(result);
+            } else {
+              throw new MalformedASTException("Malformed map");
+            }
+          } else {
+            throw new MalformedASTException("Malformed map");
+          }
 			  }
       ]|
     where
