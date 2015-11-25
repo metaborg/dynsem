@@ -15,7 +15,6 @@ signature
       Target
       Rel
       LabelComp
-      TermCon
       Var
       Cast
       List_
@@ -55,8 +54,6 @@ signature
       LabelComp : Type * Term -> LabelComp 
       VarLabelComp : Var -> LabelComp 
     constructors
-      __String2TermCon__ : String -> TermCon {implicit}
-    constructors
       VarRef : ID -> Var 
       __Var2Term__ : Var -> Term {implicit}
       Cast : Term * Type -> Cast 
@@ -66,7 +63,7 @@ signature
       String : STRING -> Term 
       Int : INT -> Term 
       Real : REAL -> Term 
-      Con : TermCon * List(Term) -> Term 
+      Con : ID * List(Term) -> Term 
       List_ : List(Term) -> List_ 
       ListTail : List(Term) * Term -> List_ 
       __List2Term__ : List_ -> Term {implicit}
@@ -80,4 +77,6 @@ signature
       MapSelect : Term * Term -> Term 
       MapExtend : Term * Term -> Term 
       MapUnbind : Term * Term -> Term 
+      MapKeys : Term -> Term 
+      MapValues : Term -> Term 
       SortFunCall : ID * Term * List(Term) -> Term 

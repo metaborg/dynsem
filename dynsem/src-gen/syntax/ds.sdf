@@ -38,6 +38,8 @@ exports
     "false"                                     -> ID            {reject}
     "fresh"                                     -> ID            {reject}
     "fail"                                      -> ID            {reject}
+    "allkeys"                                   -> ID            {reject}
+    "allvalues"                                 -> ID            {reject}
 
   context-free syntax
     CONTENTCOMPLETE -> ModuleSection {cons("COMPLETION-ModuleSection")}
@@ -79,7 +81,7 @@ exports
     CONTENTCOMPLETE -> LabelComp {cons("COMPLETION-LabelComp")}
 
   lexical syntax
-    ID -> TermCon 
+    
 
   context-free syntax
     ID                                  -> Var   {cons("VarRef")}
@@ -91,7 +93,7 @@ exports
     STRING                              -> Term  {cons("String")}
     INT                                 -> Term  {cons("Int")}
     REAL                                -> Term  {cons("Real")}
-    TermCon "(" {Term ","}* ")"         -> Term  {cons("Con")}
+    ID "(" {Term ","}* ")"              -> Term  {cons("Con")}
     "[" {Term ","}* "]"                 -> List  {cons("List")}
     "[" {Term ","}* "|" Term "]"        -> List  {cons("ListTail")}
     List                                -> Term  
@@ -105,6 +107,8 @@ exports
     Term "[" Term "]"                   -> Term  {cons("MapSelect")}
     Term "+" Term                       -> Term  {cons("MapExtend"), assoc}
     Term "\\" Term                      -> Term  {cons("MapUnbind"), assoc}
+    "allkeys" "(" Term ")"              -> Term  {cons("MapKeys")}
+    "allvalues" "(" Term ")"            -> Term  {cons("MapValues")}
     ID "[" Term "]" "(" {Term ","}* ")" -> Term  {cons("SortFunCall")}
 
   context-free syntax
@@ -115,6 +119,10 @@ exports
     CONTENTCOMPLETE -> Term  {cons("COMPLETION-Term")}
 
   context-free priorities
+    "allkeys" "(" Term ")" -> Term
+    ,
+    "allvalues" "(" Term ")" -> Term >
+    ID "(" {Term ","}* ")" -> Term >
     Term "[" Term "]" -> Term >
     Term "+" Term -> Term
     ,

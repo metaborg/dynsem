@@ -68,8 +68,8 @@ completions
     <Var:Var> "@" <Term:Term>  
   completion template Term : "_" =
     "_"    
-  completion template Term : "TermCon()" =
-    <TermCon:TermCon> "(" <:Term> ")"  
+  completion template Term : "ID()" =
+    <ID:ID> "(" <:Term> ")"  
   completion template List : "[ ]" =
     "[ " <:Term> " ]"  
   completion template List : "[ | Term ]" =
@@ -92,5 +92,9 @@ completions
     <Term:Term> " + " <Term:Term>  
   completion template Term : "Term \\ Term" =
     <Term:Term> " \\ " <Term:Term>  
+  completion template Term : "allkeys(Term)" =
+    "allkeys(" <Term:Term> ")"  
+  completion template Term : "allvalues(Term)" =
+    "allvalues(" <Term:Term> ")"  
   completion template Term : "ID[Term]()" =
     <ID:ID> "[" <Term:Term> "](" <:Term> ")"  

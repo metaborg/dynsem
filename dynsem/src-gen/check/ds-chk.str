@@ -403,20 +403,6 @@ strategies
 
 
 strategies
-  check-TermCon =
-    is-string
-
-  check-example =
-    check-TermCon
-
-  check-TermCon :
-    amb([h|hs]) -> <check-TermCon> h
-
-  error-TermCon =
-    debug(!"Unexpected constructor. Expected string from sort TermCon instead. ")
-
-
-strategies
   check-example =
     check-Var
 
@@ -494,7 +480,7 @@ strategies
 
   check-Term :
     Con(t1__, t2__) -> <id>
-    with <(check-TermCon <+ error-TermCon)> t1__
+    with <(check-ID <+ error-ID)> t1__
     with <map(check-Term <+ error-Term)> t2__
 
   is-Term-with-constructor =
@@ -591,6 +577,20 @@ strategies
 
   is-Term-with-constructor =
     ?MapUnbind(_, _)
+
+  check-Term :
+    MapKeys(t1__) -> <id>
+    with <(check-Term <+ error-Term)> t1__
+
+  is-Term-with-constructor =
+    ?MapKeys(_)
+
+  check-Term :
+    MapValues(t1__) -> <id>
+    with <(check-Term <+ error-Term)> t1__
+
+  is-Term-with-constructor =
+    ?MapValues(_)
 
   check-Term :
     SortFunCall(t1__, t2__, t3__) -> <id>

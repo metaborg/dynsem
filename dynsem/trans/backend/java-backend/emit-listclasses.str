@@ -30,10 +30,11 @@ rules
   	lty@ListType(ety) -> class
     where
       x_classname := <ds2java-type-to-unboxed-type> lty;
-      specializer* := <mklist-specializer(|x_classname, ety) <+ ![]>;
+      aterm-specializer* := <mklist-atermspecializer(|x_classname, ety) <+ ![]>;
+      list-specializer* := <mklist-listspecializer(|x_classname, ety) <+ ![]>;
       exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> lty;
-		  class := <mklist-class(|x_classname, ety, [specializer*, exec*])>
-  
+		  class := <mklist-class(|x_classname, ety, [list-specializer*, aterm-specializer*, exec*])>
+
 rules
 	
   mklist-class(|x_classname, elemty, exec*) =
@@ -46,6 +47,9 @@ rules
 				import com.oracle.truffle.api.source.SourceSection;
         import com.oracle.truffle.api.frame.VirtualFrame;
         import com.github.krukow.clj_lang.PersistentTreeMap;
+        import java.util.List;
+        import com.google.common.collect.Lists;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         
         public class x_classname extends AbstractNodeList<x_elemname> {
           
@@ -66,7 +70,7 @@ rules
         }
     ]|
 
-  mklist-specializer(|x_classname, e-ty) =
+  mklist-atermspecializer(|x_classname, e-ty) =
     e-ty-def := <lookup-def(|Types())> e-ty;
     where(<lookup-prop(|SortKind())> e-ty-def => LanguageSort());
     x_genelem := $[Generic_[<ds2java-type-to-identifier> e-ty]];
@@ -83,7 +87,7 @@ rules
 
     ]|
 
-  mklist-specializer(|x_classname, e-ty) =
+  mklist-atermspecializer(|x_classname, e-ty) =
     e-ty-def := <lookup-def(|Types())> e-ty;
     not(<lookup-prop(|SortKind())> e-ty-def => LanguageSort());
     !class-body-dec* |[
@@ -91,5 +95,23 @@ rules
       public x_classname fromStrategoTerm(IStrategoTerm alist) {
         throw new UnsupportedOperationException();
 		  }
+    ]|
+
+  mklist-listspecializer(|x_classname, e-ty) =
+    e-ty-def := <lookup-def(|Types())> e-ty;
+    x_elemname := <ds2java-type-to-boxed-type> e-ty;
+    !class-body-dec* |[
+
+      @TruffleBoundary
+		  public static x_classname fromList(List<x_elemname> l) {
+		    final List<x_elemname> revL = Lists.reverse(l);
+		    final SourceSection ss = SourceSectionUtil.none();
+		    x_classname ll = new x_classname(ss);
+		    for (x_elemname a : revL) {
+		      ll = new x_classname(ss, a, ll);
+		    }
+		    return ll;
+		  }
+
     ]|
 

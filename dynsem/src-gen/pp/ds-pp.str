@@ -566,17 +566,6 @@ strategies
 
 
 strategies
-  prettyprint-TermCon =
-    ![S(<is-string>)]
-
-  prettyprint-example =
-    prettyprint-TermCon
-
-  prettyprint-TermCon :
-    amb([h|hs]) -> <prettyprint-TermCon> h
-
-
-strategies
   prettyprint-example =
     prettyprint-Var
 
@@ -698,7 +687,7 @@ strategies
                            ]
                          )
                        ]
-    with t1__' := <pp-one-Z(prettyprint-TermCon)> t1__
+    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
     with t2__' := <pp-H-list(prettyprint-Term|", ")> t2__
 
   is-Term =
@@ -862,6 +851,34 @@ strategies
 
   is-Term =
     ?MapUnbind(_, _)
+
+  prettyprint-Term :
+    MapKeys(t1__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [ S("allkeys(")
+                         , t1__'
+                         , S(")")
+                         ]
+                       )
+                     ]
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+
+  is-Term =
+    ?MapKeys(_)
+
+  prettyprint-Term :
+    MapValues(t1__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [ S("allvalues(")
+                           , t1__'
+                           , S(")")
+                           ]
+                         )
+                       ]
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
+
+  is-Term =
+    ?MapValues(_)
 
   prettyprint-Term :
     SortFunCall(t1__, t2__, t3__) -> [ H(

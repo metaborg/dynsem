@@ -44,9 +44,6 @@ signature
     VarLabelComp        : Var -> LabelComp
 
   constructors
-     : String -> TermCon
-
-  constructors
     VarRef      : ID -> Var
                 : Var -> Term
     Cast        : Term * Type -> Cast
@@ -56,7 +53,7 @@ signature
     String      : STRING -> Term
     Int         : INT -> Term
     Real        : REAL -> Term
-    Con         : TermCon * List(Term) -> Term
+    Con         : ID * List(Term) -> Term
     List        : List(Term) -> List
     ListTail    : List(Term) * Term -> List
                 : List -> Term
@@ -70,4 +67,6 @@ signature
     MapSelect   : Term * Term -> Term
     MapExtend   : Term * Term -> Term
     MapUnbind   : Term * Term -> Term
+    MapKeys     : Term -> Term
+    MapValues   : Term -> Term
     SortFunCall : ID * Term * List(Term) -> Term
