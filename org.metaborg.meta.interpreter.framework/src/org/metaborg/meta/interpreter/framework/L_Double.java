@@ -1,5 +1,6 @@
 package org.metaborg.meta.interpreter.framework;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.spoofax.interpreter.core.Tools;
@@ -7,6 +8,8 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
+import com.google.common.collect.Lists;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -122,5 +125,16 @@ public class L_Double extends Node implements IList<Double> {
 			list = new L_Double(src, Tools.asJavaDouble(elem), list);
 		}
 		return list;
+	}
+
+	@TruffleBoundary
+	public static L_Double fromList(List<Double> l) {
+		final List<Double> revL = Lists.reverse(l);
+		final SourceSection ss = SourceSectionUtil.none();
+		L_Double ll = new L_Double(ss);
+		for (Double a : revL) {
+			ll = new L_Double(ss, a, ll);
+		}
+		return ll;
 	}
 }

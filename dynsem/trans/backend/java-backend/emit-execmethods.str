@@ -588,6 +588,22 @@ rules
       e_rmap := <ds2java-term-build(|ALPHATYPE())> rmap;
       e_lmap := <ds2java-term-build(|ALPHATYPE())> lmap
 
+  ds2java-term-build(|ex-ty):
+    MapKeys(m-t) -> e |[ x_lclass.fromList(new ArrayList<x_eclass>(e_map.keySet())) ]|
+    where
+      MapType(k-ty, _) := <type-of> m-t;
+      x_eclass := <ds2java-type-to-boxed-type> k-ty;
+      x_lclass := <ds2java-type-to-boxed-type> ListType(k-ty);
+      e_map := <ds2java-term-build(|ALPHATYPE())> m-t
+
+  ds2java-term-build(|ex-ty):
+    MapValues(m-t) -> e |[ x_lclass.fromList(new ArrayList<x_eclass>(e_map.values())) ]|
+    where
+      MapType(_, v-ty) := <type-of> m-t;
+      x_eclass := <ds2java-type-to-boxed-type> v-ty;
+      x_lclass := <ds2java-type-to-boxed-type> ListType(v-ty);
+      e_map := <ds2java-term-build(|ALPHATYPE())> m-t
+
   ds2java-term-build(|ex_ty):
     Map([Bind(key, val)]) -> e |[ MapUtils.add(PersistentTreeMap.EMPTY, e_key, e_val) ]|
     where

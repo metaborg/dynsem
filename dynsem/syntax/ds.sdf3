@@ -67,6 +67,8 @@ context-free syntax // rules
   ID = <false> {reject}
   ID = <fresh> {reject}
   ID = <fail> {reject}
+  ID = <allkeys> {reject}
+  ID = <allvalues> {reject}
 
 context-free syntax // formulas
 
@@ -102,7 +104,7 @@ context-free syntax // formulas
 
 lexical syntax 
 
-  TermCon = ID 
+  // TermCon = ID 
   
 context-free syntax // terms
 
@@ -119,7 +121,7 @@ context-free syntax // terms
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
   Term.Real     = [[REAL]]
-  Term.Con      = [[TermCon]([{Term ", "}*])]
+  Term.Con      = [[ID]([{Term ", "}*])]
   
   List.List     = <[ <{Term ", "}*> ]>
   List.ListTail = <[ <{Term ", "}*> | <Term> ]>
@@ -138,9 +140,12 @@ context-free syntax // terms
   Term.MapExtend = [[Term] + [Term]] {assoc}
   Term.MapUnbind = [[Term] \ [Term]] {assoc}
 
+  Term.MapKeys = [allkeys([Term])]
+  Term.MapValues = [allvalues([Term])]
+
   Term.SortFunCall = <<ID>[<Term>](<{Term ", "}*>)>
 
 context-free priorities
 
-  Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
+  Term.MapKeys, Term.MapValues > Term.Con > Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
   

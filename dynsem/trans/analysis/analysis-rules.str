@@ -217,6 +217,16 @@ rules
       a-key-ty := <type-check-build> k-t;
       <type-coerce-full(fail)> (a-key-ty, f-key-ty)
 
+  type-check-build-map:
+    MapKeys(m-t) -> ListType(k-ty)
+    where
+      MapType(k-ty, _) := <type-check-build> m-t
+
+  type-check-build-map:
+    MapValues(m-t) -> ListType(v-ty)
+    where
+      MapType(_, v-ty) := <type-check-build> m-t
+
   type-check-build-cast:
     Cast(t, ty-t) -> cast-ty
     where
