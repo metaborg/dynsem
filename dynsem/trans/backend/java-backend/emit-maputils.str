@@ -33,7 +33,7 @@ rules
         import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.interpreter.framework.*;
         import com.github.krukow.clj_ds.PersistentMap;
-        import com.github.krukow.clj_lang.PersistentTreeMap;
+        import com.github.krukow.clj_lang.PersistentHashMap;
         import org.metaborg.meta.interpreter.framework.MapUtils;
         
         public class AutoMapUtils {
@@ -62,7 +62,7 @@ rules
         }
         
         public static x_maptype x_fromterm(IStrategoTerm term) {        
-          PersistentMap<x_kty, x_vty> result = PersistentTreeMap.EMPTY;
+          PersistentMap<x_kty, x_vty> result = PersistentHashMap.EMPTY;
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
 			      if (Tools.hasConstructor(appl, "Map", 1)) {
