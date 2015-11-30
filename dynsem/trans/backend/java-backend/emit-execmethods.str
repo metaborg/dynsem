@@ -154,7 +154,6 @@ rules
   ds2java-calldispatch(|e*, execname):
     0 -> bstm* |[ ]|
   
-  
   ds2java-throw-statement:
     (a-def, ArrowType(_, bu-ty)) -> bstm* |[ throw new InterpreterException("Rule failure", e_aname, this); ]|
     where
@@ -386,8 +385,9 @@ rules
       bstm3* := <ds2java-premise> on-fail*
   
   ds2java-premise:
-    (Formula(Match(VarRef(x_v), ListTail([hd@Var(x_hv)], tl@Var(x_tv)))), on-succ*, on-fail*) ->
+    (Formula(Match(lhs, ListTail([hd@Var(x_hv)], tl@Var(x_tv)))), on-succ*, on-fail*) ->
       bstm* |[
+        final ~x:<ds2java-type-to-boxed-type> v-ty x_v = e_lhs;
         if(x_v != null && !x_v.isEmpty()){
           final ~x:hd-ty x_hv = x_v.head();
           final ~x:tl-ty x_tv = x_v.tail();
@@ -397,6 +397,9 @@ rules
         }
       ]|
     where
+      v-ty := <type-of> lhs;
+      e_lhs := <ds2java-term-build-optcast(|v-ty)> lhs;
+      x_v := <newname> "$tmp";
       hd-ty := <type-of; ds2java-type-to-unboxed-type> hd;
       tl-ty := <type-of; ds2java-type-to-unboxed-type> tl;
       bstm1* := <ds2java-premise> on-succ*;
@@ -425,7 +428,8 @@ rules
   ds2java-premise:
     (Formula(TermEq(t1, List([]))), on-succ*, on-fail*) ->
       bstm* |[
-        if(e_t1 != null && e_t1.isEmpty()){
+        final ~x:<ds2java-type-to-boxed-type> v-ty x_v = e_lhs;
+        if(x_v != null && x_v.isEmpty()){
           bstm1*
         } else {
           bstm2*
@@ -434,7 +438,9 @@ rules
     where
       <type-of; not(ds2java-type-is-primitive)> t1
     where
-      e_t1 := <ds2java-term-build(|ALPHATYPE())> t1;
+      v-ty := <type-of> t1;
+      e_lhs := <ds2java-term-build-optcast(|v-ty)> t1;
+      x_v := <newname> "$tmp";
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
       
