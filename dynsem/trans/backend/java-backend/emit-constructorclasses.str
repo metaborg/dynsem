@@ -37,6 +37,7 @@ rules
 	      import ds.manual.interpreter.*;
 	      import org.metaborg.meta.interpreter.framework.*;
 	      import java.util.*;
+	      import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 	      public class x_consname extends ~x:<ds2java-type-to-identifier> c-ty {
 	        
@@ -49,24 +50,23 @@ rules
           }
 	        
 	        @Override
-	        public boolean equals(Object obj) {
-	          if (this == obj) {
-	            return true;
-	          }
-	          if (obj == null) {
-	            return false;
-	          }
-	          if (getClass() != obj.getClass()) {
-	            return false;
-	          }
-	          
-	          final x_consname other = (x_consname) obj;
-	          
-	          bstm1*
-	        
-	          return true;
-	        }
+          public boolean equals(Object obj) {
+            if (this == obj)
+              return true;
+            if (obj == null)
+              return false;
+            if (getClass() != obj.getClass())
+              return false;
+            x_consname other = (x_consname) obj;
+            bstm1*
+            return true;
+          }
 
+          @Override
+          public int hashCode() {
+            return e_hash.toHashCode();
+          }
+	        
 	        ~exec*
 
 	        ~fget*
@@ -84,6 +84,7 @@ rules
     	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*;
     	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
+    	e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds2java-field-hashcodecomp)> <range> (1, <length; inc> c-c-ty*);
     	exec* := <ds2java-execmethods(ds2java-supercall|rule*)> c-def;
     	atermconvert := <ds2java-atermconversion-constructor> c-def
   
@@ -115,4 +116,8 @@ rules
       <not(ds2java-type-is-primitive)> ty;
       x_idx := <mkidx> idx
 
+  ds2java-field-hashcodecomp:
+    (idx, e) -> e |[ e.append(x_idx) ]|
+    where
+      x_idx := <mkidx> idx
 

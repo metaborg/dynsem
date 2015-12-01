@@ -80,7 +80,7 @@ rules
 		    x_classname list = new x_classname(SourceSectionUtil.fromStrategoTerm(alist));
 		    for (IStrategoTerm elem : alist) {
 		      final SourceSection src = SourceSectionUtil.fromStrategoTerm(elem);
-		      list = new x_classname(src, new x_genelem(src, elem), list);
+		      list = new x_classname(src, new x_genelem(src, elem).specialize(), list);
 		    }
 		    return list;
 		  }

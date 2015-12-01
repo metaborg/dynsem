@@ -16,22 +16,16 @@ public class MapUtils {
 	}
 
 	@TruffleBoundary
-	@SuppressWarnings("unchecked")
 	public static <K, V> PersistentMap<K, V> add(PersistentMap<K, V> map,
 			K key, V val) {
 
-		return map.plus(
-				(K) (key instanceof IGenericNode ? ((IGenericNode) key)
-						.specialize() : key),
-				(V) (val instanceof IGenericNode ? ((IGenericNode) val)
-						.specialize() : val));
+		return map.plus(key, val);
 
 	}
 
 	@TruffleBoundary
 	public static <K, V> V get(PersistentMap<K, V> map, K key) {
-		return map.get(key instanceof IGenericNode ? ((IGenericNode) key)
-				.specialize() : key);
+		return map.get(key);
 	}
 
 }
