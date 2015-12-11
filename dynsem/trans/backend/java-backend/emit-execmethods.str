@@ -617,7 +617,7 @@ rules
       e_key := <ds2java-term-build(|ALPHATYPE())> k-t
 
   ds2java-term-build(|ex_ty):
-    Map([Bind(key, val)]) -> e |[ MapUtils.add(PersistentTreeMap.EMPTY, e_key, e_val) ]|
+    Map([Bind(key, val)]) -> e |[ MapUtils.add(PersistentHashMap.EMPTY, e_key, e_val) ]|
     where
       x_keyty := <type-of; ds2java-type-to-boxed-type> key;
       x_valty := <type-of; ds2java-type-to-boxed-type> val;
@@ -625,7 +625,7 @@ rules
       e_val := <ds2java-term-build(|ALPHATYPE())> val
 
   ds2java-term-build(|ex_ty):
-    Map([]) -> e |[ PersistentTreeMap.EMPTY ]|
+    Map([]) -> e |[ PersistentHashMap.EMPTY ]|
       
   ds2java-term-build(|ex_ty) = debug(!"Term build failure: "); !e |[ xx ]|
   
