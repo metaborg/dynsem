@@ -11,6 +11,14 @@
 		<relativePath>../../releng/parent/java</relativePath>
 	</parent>
 
+	<repositories>
+		<repository>
+			<id>graal-repo</id>
+			<name>Lafo Graal+Truffle</name>
+			<url>http://lafo.ssw.uni-linz.ac.at/nexus/content/repositories/releases/</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.github.krukow</groupId>
@@ -27,11 +35,11 @@
 			<version>${metaborg-version}</version>
 		</dependency>
 		<dependency>
-      <groupId>com.oracle.truffle</groupId>
-      <artifactId>truffle-api</artifactId>
-      <version>0.9</version>
-      <type>jar</type>
-    </dependency>
+			<groupId>com.oracle.truffle</groupId>
+			<artifactId>truffle-api</artifactId>
+			<version>0.9</version>
+			<type>jar</type>
+		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
