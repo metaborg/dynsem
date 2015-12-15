@@ -1,6 +1,7 @@
 module backend/java-backend/analysis-extra
 
 imports
+  ds
   include/ds
   lib-ds
   analysis/constructors
@@ -11,6 +12,7 @@ signature
   constructors
     ArrowReadables: Property
     ArrowChangeables: Property
+    VarConstant: Property
 
 rules
   
@@ -19,17 +21,20 @@ rules
     s
   
   backend-extra-analyze =
-    log-timed( store-arrows-components | "Java backend extra analysis")
+    log-timed(
+	    log-timed( store-arrows-components | "Store per-rule semantic components");
+	    log-timed( mark-constant-vars | "Mark constant variables")
+	    | "Java backend extra analysis" )
  
   lookup-arrow-readables = lookup-prop(|ArrowReadables())
   lookup-arrow-changeables = lookup-prop(|ArrowChangeables())
   lookup-arrow-inputs = ?a-def; <conc> (<lookup-arrow-readables> a-def, <lookup-arrow-changeables> a-def)
  
-  store-arrows-components =
-    ?m@Module(_, _);
-    
-    lookup-def-all(|Arrows());
-    map(store-arrow-components(|m))
+  store-arrows-components :
+    m@Module(_, _) -> m
+    where
+	    lookup-def-all(|Arrows());
+	    map(store-arrow-components(|m))
   
   store-arrow-components(|m) =
   	?arrow-def;
@@ -42,6 +47,41 @@ rules
 	    <store-prop(|ArrowReadables(), arrow-def)> [];
 	    <store-prop(|ArrowChangeables(), arrow-def)> []
 	  end
+
+  mark-constant-vars :
+    m@Module(_, _) -> m
+    where
+      <collect-all(mark-constant-vars-rule)> m
+  
+  mark-constant-vars-rule =
+    ?Rule(p*, _, Relation(_, Source(src, _), _, _));
+    <alltd(mark-constant-var)> src;
+    <alltd(mark-constant-vars-premise)> p*
+  
+  mark-constant-var:
+    var@Var(v) -> var
+    where
+      vdef := <lookup-def(|Vars())> v;
+      <store-prop(|VarConstant(), vdef)> True()
+
+  mark-constant-vars-premise =
+    ?Formula(Match(VarRef(vin), MatchedVar(vout)));
+    vindef := <lookup-def(|Vars())> vin;
+    True() := <lookup-prop(|VarConstant())> vindef;
+    voutdef := <lookup-def(|Vars())> vout;
+    <store-prop(|VarConstant(), voutdef)> True()
+  
+  mark-constant-vars-premise = 
+    ?Formula(Match(tconst, MatchedVar(vout)));
+    <?Int(_) <+ ?True() <+ ?False()> tconst;
+    voutdef := <lookup-def(|Vars())> vout;
+    <store-prop(|VarConstant(), voutdef)> True()
+  
+  mark-constant-vars-premise =
+    ?Formula(Match(Con(_, carg*), MatchedVar(vout)));
+    <collect-all(?VarRef(<id>)); map(lookup-def(|Vars()); lookup-prop(|VarConstant()); ?True())> carg*;
+    voutdef := <lookup-def(|Vars())> vout;
+    <store-prop(|VarConstant(), voutdef)> True()
 
   lookup-applicable-arrow-def:
     type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
