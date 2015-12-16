@@ -9,6 +9,8 @@ imports
 
 imports
   ds2ds/factorize
+  ds2ds/copy-propagation
+  ds2ds/constant-propagation
 
 imports
   analysis/lib-analysis
@@ -33,13 +35,17 @@ signature
 rules
   
   ds2java-execmethods(on-norule-generator|rule*):
-    c-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-c*))> applicable-arrow*
+    c-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule'*))> applicable-arrow*
     where
       ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def;
       applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
-      c-name := <consdef-get-name> c-def;
-      c-arity := <consdef-get-arity> c-def;
-      rule-c* := <filter(is-rule-matching-cons(|c-name, c-arity))> rule*
+      rule'* := <map(copy-propagation-rule; constant-propagation-rule)> rule*
+  
+  lift-constant-premise:
+    f@Formula(Match(_, MatchedVar(v))) -> f
+    where
+      v-def := <lookup-def(|Vars())> v;
+      True() := <lookup-prop(|VarConstant())> v-def
   
   ds2java-execmethods(on-norule-generator|rule*):
     ty-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*

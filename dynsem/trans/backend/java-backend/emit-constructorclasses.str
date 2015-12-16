@@ -2,10 +2,17 @@ module backend/java-backend/emit-constructorclasses
 
 imports
   include/ds
+  ds
 
 imports
   analysis/constructors
   analysis/lib-analysis
+  analysis/analysis-signatures
+
+imports
+  lib-ds/lib-match
+  ds2ds/copy-propagation
+  ds2ds/constant-propagation
 
 imports
   backend/java-backend/utils
@@ -41,12 +48,14 @@ rules
 
 	      public class x_consname extends ~x:<ds2java-type-to-identifier> c-ty {
 	        
-
 	        ~fdec*
+	        
+	        ~fdec_const*
 	        
 	        public x_consname(SourceSection src, param0*) {
             super(src);
             bstm0*
+            bstm_const*
           }
 	        
 	        @Override
@@ -85,8 +94,16 @@ rules
     	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
     	e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds2java-field-hashcodecomp)> <range> (1, <length; inc> c-c-ty*);
-    	exec* := <ds2java-execmethods(ds2java-supercall|rule*)> c-def;
     	atermconvert := <ds2java-atermconversion-constructor> c-def
+    where
+      c-name := <consdef-get-name> c-def;
+      c-arity := <consdef-get-arity> c-def;
+      cons-rule* := <filter(is-rule-matching-cons(|c-name, c-arity))> rule*;
+      dynamic-rule* := <map(Rule(filter(not(lift-constant-premise)), id, id))> cons-rule*;
+    	exec* := <ds2java-execmethods(ds2java-supercall|dynamic-rule*)> c-def
+    with
+      lifted-constant-premise* := <mapconcat(?Rule(<id>, _, _)); filter(lift-constant-premise); copy-propagation-premises; constant-propagation-premises> cons-rule*;
+    	(bstm_const*, fdec_const*) := <ds2java-emit-constant-fields> lifted-constant-premise*
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:
@@ -120,4 +137,22 @@ rules
     (idx, e) -> e |[ e.append(x_idx) ]|
     where
       x_idx := <mkidx> idx
+
+  ds2java-emit-constant-fields:
+    prem* -> (finit*, fdec*)
+    where
+      v-ty-pair* := <map(?Formula(Match(_, MatchedVar(<varname-to-nametype-pair>))))> prem*;
+      fdec* := <map(ds2java-fielddecl)> v-ty-pair*;
+      finit* := <map(ds2java-emit-constant-field-init)> prem*
+
+  ds2java-emit-constant-field-init:
+  	Formula(Match(t, MatchedVar(v))) -> bstm* |[
+	  		~x:v = ~e:<ds2java-term-build(|ex_ty)> t;
+	  	]|
+  	where
+  		ex_ty := <lookup-def(|Vars()); lookup-prop(|Type())> v
+
+  varname-to-nametype-pair:
+    v -> (v, <lookup-def(|Vars()); lookup-prop(|Type())> v)
+
 
