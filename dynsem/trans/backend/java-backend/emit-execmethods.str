@@ -516,8 +516,16 @@ rules
     False() -> e |[ false ]|
   
   ds2java-term-build(|ex_ty):
-    VarRef(x_vref) -> e |[ x_vref ]|
-  
+    VarRef(v) -> e |[ this.~x:<mkidx> idx ]|
+    where
+      idx := <lookup-def(|Vars()); lookup-prop(|PattBoundVar())> v
+
+  ds2java-term-build(|ex_ty):
+    VarRef(v) -> e |[ ~x:v ]|
+    where
+      v-def := <lookup-def(|Vars())> v;
+      <not(lookup-prop(|PattBoundVar()))> v-def
+      
   ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ new x_consclass(this.getSourceSection(), e*) ]|
     where

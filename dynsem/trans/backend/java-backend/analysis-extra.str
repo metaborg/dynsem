@@ -13,6 +13,7 @@ signature
     ArrowReadables: Property
     ArrowChangeables: Property
     VarConstant: Property
+    PattBoundVar: Property
 
 rules
   
@@ -23,9 +24,12 @@ rules
   backend-extra-analyze =
     log-timed(
 	    log-timed( store-arrows-components | "Store per-rule semantic components");
-	    log-timed( mark-constant-vars | "Mark constant variables")
+	    log-timed( mark-constant-vars | "Mark constant variables");
+	    log-timed( mark-patternbound-vars | "Mark pattern-bound variables")
 	    | "Java backend extra analysis" )
- 
+
+rules // store arrow components
+   
   lookup-arrow-readables = lookup-prop(|ArrowReadables())
   lookup-arrow-changeables = lookup-prop(|ArrowChangeables())
   lookup-arrow-inputs = ?a-def; <conc> (<lookup-arrow-readables> a-def, <lookup-arrow-changeables> a-def)
@@ -48,10 +52,12 @@ rules
 	    <store-prop(|ArrowChangeables(), arrow-def)> []
 	  end
 
+rules // mark constant variables
+  
   mark-constant-vars :
     m@Module(_, _) -> m
     where
-      <collect-all(mark-constant-vars-rule)> m
+      <alltd(mark-constant-vars-rule)> m
   
   mark-constant-vars-rule =
     ?Rule(p*, _, Relation(_, Source(src, _), _, _));
@@ -83,6 +89,24 @@ rules
     voutdef := <lookup-def(|Vars())> vout;
     <store-prop(|VarConstant(), voutdef)> True()
 
+rules // mark pattern-bound variables
+  
+  mark-patternbound-vars:
+    m@Module(_, sec*) -> m
+    where
+      <alltd(?Rule(_, _, Relation(_, Source(<mark-patternbound-vars-lhs>, _), _, _)))> m
+
+  mark-patternbound-vars-lhs = 
+    ?Con(_, <id>);
+    filter(?Var(<lookup-def(|Vars())>));
+    map-with-index(mark-patternbound-var)
+  
+  mark-patternbound-var =
+    ?(idx, vdef);
+    <store-prop(|PattBoundVar(), vdef)> idx
+
+rules
+
   lookup-applicable-arrow-def:
     type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
 
@@ -96,7 +120,6 @@ rules
     (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
     where
       <lookup-applicable-arrow-def> c-ty => arrow*
-      
 
   type-is-adoptable = where(lookup-def(|Types()); lookup-prop(|SortKind()) => LanguageSort())
 
