@@ -186,7 +186,7 @@ rules
       premstms* := <ds2java-premise> (prem, [], [])
   
   ds2java-patternbinds:
-  	Con(c, patt-var*) -> <map-with-index(ds2java-patternboundbind)> patt-var*
+  	Con(_, _) -> []
   
   ds2java-patternbinds:
     As(Var(v), con) -> [asbound*, con-bind*]
@@ -203,11 +203,6 @@ rules
       
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
-  	where
-  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-type-to-unboxed-type> v
-
-  ds2java-patternboundbind:
-  	(idx, Var(v)) -> bstm |[ final ~x:typename ~x:v = this.~x:$[_[idx]]; ]|
   	where
   		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-type-to-unboxed-type> v
 
