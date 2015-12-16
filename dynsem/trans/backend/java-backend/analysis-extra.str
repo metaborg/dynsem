@@ -84,7 +84,8 @@ rules // mark constant variables
     <store-prop(|VarConstant(), voutdef)> True()
   
   mark-constant-vars-premise =
-    ?Formula(Match(Con(_, carg*), MatchedVar(vout)));
+    ?Formula(Match(Con(c, carg*), MatchedVar(vout)));
+    <lookup-def(|Constructors()); lookup-prop(|ConsKind()); not(?NativeOpCons())> (c, <length> carg*);
     <collect-all(?VarRef(<id>)); map(lookup-def(|Vars()); lookup-prop(|VarConstant()); ?True())> carg*;
     voutdef := <lookup-def(|Vars())> vout;
     <store-prop(|VarConstant(), voutdef)> True()
