@@ -88,10 +88,10 @@ rules
     	x_consname := <ds2java-consdef-classname> c-def;
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def
     where
-      fdec* := <map-with-index(ds2java-fielddecl)> c-c-ty*;
+      fdec* := <map-with-jindex(ds2java-fielddecl)> c-c-ty*;
     	param0* := <map-with-index(ds2java-method-paramdecl)> c-c-ty*;
-    	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*;
-    	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
+    	bstm0* := <map-with-jindex(ds2java-fieldinit)> c-c-ty*;
+    	fget* := <map-with-jindex(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
     	e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds2java-field-hashcodecomp)> <range> (1, <length; inc> c-c-ty*);
     	atermconvert := <ds2java-atermconversion-constructor> c-def
