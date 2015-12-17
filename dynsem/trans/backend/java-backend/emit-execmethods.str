@@ -30,6 +30,7 @@ signature
   constructors
     RuleFail: Statement -> Premise
     JavaStm: List(BlockStm) -> Premise
+    NoOpPremise: Premise
     Target: ArrowSomething * Term * LabelComp -> Premise
     
 rules
@@ -265,6 +266,9 @@ rules
       t* := [t1 | <map(?LabelComp(_, <id>))> tc*];
       ty* := [bu-ty | <map(?LabelComp(<id>, _))> tc*];
       e* := <zip(ds2java-term-build)> (ty*, t*)
+
+  ds2java-premise:
+    (NoOpPremise(), p*, _) -> <ds2java-premise> p*
 
   ds2java-premise:
     (RuleFail(bstm*), _, _) -> bstm*

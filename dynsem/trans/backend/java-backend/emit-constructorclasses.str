@@ -99,7 +99,7 @@ rules
       c-name := <consdef-get-name> c-def;
       c-arity := <consdef-get-arity> c-def;
       cons-rule* := <filter(is-rule-matching-cons(|c-name, c-arity))> rule*;
-      dynamic-rule* := <map(Rule(filter(not(lift-constant-premise)), id, id))> cons-rule*;
+      dynamic-rule* := <map(Rule(map(not(lift-constant-premise) <+ !NoOpPremise()), id, id))> cons-rule*;
     	exec* := <ds2java-execmethods(ds2java-supercall|dynamic-rule*)> c-def
     with
       lifted-constant-premise* := <mapconcat(?Rule(<id>, _, _)); filter(lift-constant-premise); copy-propagation-premises; constant-propagation-premises> cons-rule*;
