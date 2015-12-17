@@ -19,6 +19,8 @@ rules
       tc'* := <constant-propagation-prop> tc*
     |}
   
+  constant-propagation-premises = is-list;  {| PropagateConstant: filter(constant-propagation) |}
+  
   constant-propagation =
     not(constant-propagation-prop; constant-propagation-rec); constant-propagation-prop
   
