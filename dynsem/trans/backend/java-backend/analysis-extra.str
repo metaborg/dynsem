@@ -98,6 +98,7 @@ rules // mark pattern-bound variables
       <alltd(?Rule(_, _, Relation(_, Source(<mark-patternbound-vars-lhs>, _), _, _)))> m
 
   mark-patternbound-vars-lhs = 
+    try(?As(_, <id>));
     ?Con(_, <id>);
     filter(?Var(<lookup-def(|Vars())>));
     map-with-index(mark-patternbound-var)
