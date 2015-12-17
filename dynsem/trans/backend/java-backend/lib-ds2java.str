@@ -137,6 +137,11 @@ rules /* name generation */
   mkidx:
   	idx -> $[_[idx]]
 
+  map-with-jindex(s) =
+    let apply(|i) = <s> (<mkidx> i, <id>)
+     in nmap(apply | 1)
+    end
+
   escape-javaid = is-string; string-replace(|"'", "_"); string-replace(|"-", "$"); escape
 
 

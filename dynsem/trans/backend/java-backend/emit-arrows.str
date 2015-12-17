@@ -22,13 +22,13 @@ rules
   
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ private ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
+    (x, ty) -> class-body-dec |[ private ~x:<ds2java-type-to-unboxed-type> ty x; ]|
     where
       <not(type-is-adoptable + type-is-adoptable-list)> ty
 
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ @Child private ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
+    (x, ty) -> class-body-dec |[ @Child private ~x:<ds2java-type-to-unboxed-type> ty x; ]|
     where
       <type-is-adoptable> ty
       <+
@@ -36,30 +36,26 @@ rules
   
   // generate setter for indexed child adoption
   ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = x_idx; ]|
-    where
-      x_idx := $[_[idx]]
+    (x, ty) -> stm |[ this.x = x; ]|
 
   // generate setter for indexed child adoption
   ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = adoptChildren(x_idx); ]|
+    (x, ty) -> stm |[ this.x = adoptChildren(x); ]|
     where
-      <type-is-adoptable-list> ty;
-      x_idx := $[_[idx]]
+      <type-is-adoptable-list> ty
 
   // generate setter for indexed non-adoptable child
   ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = x_idx; ]|
+    (x, ty) -> stm |[ this.x = x; ]|
     where
-      <not(type-is-adoptable + type-is-adoptable-list)> ty;
-      x_idx := $[_[idx]]
+      <not(type-is-adoptable + type-is-adoptable-list)> ty
   
   // generate setter for indexed field
   ds2java-getter:
-    (idx, ty) ->
+    (x, ty) ->
       class-body-dec |[
-        public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[get_[idx]]() {
-          return this.~x:$[_[idx]];
+        public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[get[x]]() {
+          return this.x;
         }
       ]|
   
@@ -116,9 +112,9 @@ rules
      x_valueclass := <ds2java-type-to-unboxed-type> bu-ty;
      changeable* := <lookup-arrow-changeables> arrow-def;
      param* := <map-with-index(ds2java-method-paramdecl)> changeable*;
-     fdec* := <map-with-index(ds2java-fielddecl)> changeable*;
-     bstm* := <map-with-index(ds2java-fieldinit)> changeable*;
-     fget* := <map-with-index(ds2java-getter)> changeable*
+     fdec* := <map-with-jindex(ds2java-fielddecl)> changeable*;
+     bstm* := <map-with-jindex(ds2java-fieldinit)> changeable*;
+     fget* := <map-with-jindex(ds2java-getter)> changeable*
 	 where
 	   e_val := <ds2java-atermconversion-name(| e |[ value ]|)> bu-ty;
 	   e_child* := <map-with-index(ds2java-atermconversion-field)> changeable*

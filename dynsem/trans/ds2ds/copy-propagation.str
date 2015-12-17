@@ -16,6 +16,8 @@ rules
       tc'* := <copy-propagation-prop> tc*
     |}
   
+  copy-propagation-premises = is-list;  {| PropagateCopy: filter(copy-propagation) |}
+  
   copy-propagation =
     not(copy-propagation-prop; copy-propagation-rec); copy-propagation-prop
   

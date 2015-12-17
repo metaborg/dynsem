@@ -243,12 +243,6 @@ rules // Builders
 	          explicate-module | "Explication"
 	        );
 	        log-timed(
-	          copy-propagation-module | "Copy propagation"
-	        );
-	        log-timed(
-	          constant-propagation-module | "Constant propagation"
-	        );
-	        log-timed(
 	          ds2java | "Interpreter generation"
 	        )
 	      | "Total")> ast
@@ -286,12 +280,6 @@ rules // Builders
 	        );
 	        log-timed(
 	          explicate-module | "Explication"
-	        );
-	        log-timed(
-	          copy-propagation-module | "Copy propagation"
-	        );
-	        log-timed(
-	          constant-propagation-module | "Constant propagation"
 	        );
 	        log-timed(
 	          sugar-all; pp-debug | "Pretty Printing"

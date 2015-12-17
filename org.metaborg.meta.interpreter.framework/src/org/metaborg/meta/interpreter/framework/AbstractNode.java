@@ -13,8 +13,8 @@ import com.oracle.truffle.api.source.SourceSection;
  * 
  */
 @NodeInfo(language = "Interpreter framework", description = "The abstract base node for all AST nodes")
-public abstract class AbstractNode extends Node implements IMatchable,
-		IConvertibleToStrategoTerm {
+public abstract class AbstractNode extends Node implements InterpreterNode,
+		IMatchable {
 
 	@TruffleBoundary
 	public AbstractNode(SourceSection src) {
