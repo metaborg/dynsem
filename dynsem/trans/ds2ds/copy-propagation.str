@@ -2,6 +2,7 @@ module ds2ds/copy-propagation
 
 imports
   include/ds
+  analysis/mark-references
 
 rules
   
@@ -19,7 +20,8 @@ rules
   copy-propagation-premises = is-list;  {| PropagateCopy: filter(copy-propagation) |}
   
   copy-propagation =
-    not(copy-propagation-prop; copy-propagation-rec); copy-propagation-prop
+    not(copy-propagation-prop; copy-propagation-rec);
+    copy-propagation-prop
   
   copy-propagation-prop = alltd(VarRef(PropagateCopy))
   
