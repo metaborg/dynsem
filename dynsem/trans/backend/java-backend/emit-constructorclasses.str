@@ -15,6 +15,7 @@ imports
   ds2ds/constant-propagation
 
 imports
+	backend/java-backend/analysis-extra
   backend/java-backend/utils
   backend/java-backend/lib-ds2java
   backend/java-backend/emit-arrows
@@ -141,10 +142,9 @@ rules
   ds2java-emit-constant-fields:
     prem* -> (finit*, fdec*)
     where
-      v-ty-pair* := <map(?Formula(Match(_, MatchedVar(<varname-to-nametype-pair>))))> prem*;
-      fdec* := <map(ds2java-fielddecl)> v-ty-pair*;
-      finit* := <map(ds2java-emit-constant-field-init)> prem*
-
+      finit* := <map(ds2java-emit-constant-field-init)> prem*;
+      fdec* := <map(ds2java-emit-fielddecl-const-prem <+ debug(!"Failed for prem: "); fail)> prem*
+      
   ds2java-emit-constant-field-init:
   	Formula(Match(t, MatchedVar(v))) -> bstm* |[
 	  		~x:v = ~e:<ds2java-term-build(|ex_ty)> t;
@@ -152,7 +152,19 @@ rules
   	where
   		ex_ty := <lookup-def(|Vars()); lookup-prop(|Type())> v
 
-  varname-to-nametype-pair:
-    v -> (v, <lookup-def(|Vars()); lookup-prop(|Type())> v)
+  ds2java-emit-fielddecl-const-prem:
+  	Formula(Match(Con(c, c*), MatchedVar(x))) -> class-body-dec |[ @Child private ~x:<ds2java-consdef-classname> c-def x; ]|
+  	where
+  	  x-ty := <lookup-def(|Vars()); lookup-prop(|Type())> x;
+      <type-is-adoptable + type-is-adoptable-list> x-ty
+    where
+  	  c-def := <lookup-def(|Constructors())> (c, <length> c*)
 
+  ds2java-emit-fielddecl-const-prem:
+  	Formula(Match(Con(c, c*), MatchedVar(x))) -> class-body-dec |[ private ~x:<ds2java-consdef-classname> c-def x; ]|
+  	where
+  	  x-ty := <lookup-def(|Vars()); lookup-prop(|Type())> x;
+      <not(type-is-adoptable + type-is-adoptable-list)> x-ty
+    where
+  	  c-def := <lookup-def(|Constructors())> (c, <length> c*)
 
