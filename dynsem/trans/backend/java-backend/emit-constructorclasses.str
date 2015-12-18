@@ -8,6 +8,7 @@ imports
   analysis/constructors
   analysis/lib-analysis
   analysis/analysis-signatures
+  analysis/mark-references
 
 imports
   lib-ds/lib-match
@@ -103,7 +104,11 @@ rules
       dynamic-rule* := <map(Rule(map(not(lift-constant-premise) <+ !NoOpPremise()), id, id))> cons-rule*;
     	exec* := <ds2java-execmethods(ds2java-supercall|dynamic-rule*)> c-def
     with
-      lifted-constant-premise* := <mapconcat(?Rule(<id>, _, _)); filter(lift-constant-premise); copy-propagation-premises; constant-propagation-premises> cons-rule*;
+    	let
+    	  prep-premises = filter(lift-constant-premise); unmark-vars; copy-propagation-premises; constant-propagation-premises; mark-vardefs-in-premise; mark-match-vars
+    	in
+        lifted-constant-premise* := <mapconcat(?Rule(<id>, _, _)); prep-premises> cons-rule*
+      end;
     	(bstm_const*, fdec_const*) := <ds2java-emit-constant-fields> lifted-constant-premise*
   
   // generate equality check for a field that is of native type
