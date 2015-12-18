@@ -19,8 +19,13 @@ rules // group rules by name
 rules
   
   explicate-rule :
+    r@Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, "init"), _)) -> r
+  
+  explicate-rule :
     Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), NamedDynamicEmitted(e1*, arrow), Target(rhs, tc1*))) ->   
-    Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(e2*, arrow), Target(rhs, tc2*)))
+      Rule(prem3*, infer, Relation(Reads(r2*), Source(lhs, sc2*), NamedDynamicEmitted(e2*, arrow), Target(rhs, tc2*)))
+    where
+      <not(?"init")> arrow
     with { CompNum:
       rules( CompNum: LabelComp(name, _) -> <CompNum> name ); // auto-unbox
       <CompList; map({?comp; rules( CompNum: comp -> 1 )})> arrow;
@@ -35,9 +40,6 @@ rules
   
 rules // components from lhs
 
-  // exp-label-comp-inits(|num) = 
-  //   map(exp-label-comp-init(|num))
-  
   exp-label-comp-init(|num):
     LabelComp(name, t) -> Formula(Match(VarRef(<get-sort-name; comp-var(|num)> name), t))
  

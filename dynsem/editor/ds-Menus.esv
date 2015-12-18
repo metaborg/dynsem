@@ -20,7 +20,7 @@ menus
     
     submenu: "Show Index"
       action: "Show index (current)" = debug-show-index-current (openeditor) (meta) 
-      action: "Show index (all)"     = debug-show-index-all (openeditor) (meta)      
+      action: "Show index (all)"     = debug-show-index-all (openeditor) (meta)
       action: "Project"              = debug-index-project (openeditor) (meta)
       action: "Partition"            = debug-index-partition (openeditor) (meta)
     end
@@ -35,10 +35,15 @@ menus
   menu: "Semantics"
 
     action  : "All to Java"            = all-to-java-editor (source)
+    action  : "All to Core"            = all-to-core-editor (openeditor) (source)
     action  : "Unstrictify"            = unstrict-editor (openeditor) (realtime)
     action  : "Refocus"                = refocus-editor (openeditor) (realtime)
+    action  : "Flatten imports"        = flatten-imports-editor (openeditor) (realtime) (source) 
+    action  : "Add type annotations"   = add-extra-typeannos-editor (openeditor) (realtime) (source)
+    action  : "Desugar aliases"        = desugar-aliases-editor (openeditor) (realtime) (source)
+    action  : "Desugar varschemes"     = desugar-varschemes-editor (openeditor) (realtime) (source)
     action  : "Factorize"              = factorize-editor (openeditor) (realtime) (source)
-    action  : "Expand reductions"      = expand-reds-editor (openeditor) (realtime) (source)
+    action  : "Expand implicits"       = expand-implicits-editor (openeditor) (realtime) (source)
     action  : "Explicate"              = explicate-editor (openeditor) (realtime) (source)
     action  : "Merge"                  = merge-editor (openeditor) (realtime) (source)
     action  : "Copy propagation"       = copy-propagation-editor (openeditor) (realtime) (source)

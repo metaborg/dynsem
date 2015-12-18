@@ -1,42 +1,91 @@
 module analysis/main
 
 imports
+	ds2ds/sugar
 	analysis/rename
 	analysis/lib-analysis
 	analysis/analysis-signatures
 	analysis/analysis-rules
 	analysis/mark-references
 	analysis/query
+	analysis/info-implicit-conversions
 	include/ds
   lib-ds
+	lib/editor-common.generated
+	libstratego-sglr
+	ds
 
 rules
+
+  m-in-analysis(s) =
+    new-analysis-scope(
+      new-type-transitions-scope(
+        analyze-top;
+        s
+      )
+    )
 	
-	analyze =
-		log-timed(mark-vars | "Marking variable def sites");
-	  log-timed(rename-all | "Renaming variables");
-	  log-timed(store-all  | "Storing all definitions")
+	analyze-top = {| IsImported:
+	  where(
+		  if f := <MyCurrentFile>
+		  then
+	  	  rules(IsImported: f)
+	  	end);
+	  analyze-module
+  |}
 
-  m-in-analysis(s) = new-analysis-scope(
-  	analyze;
-  	s
-  )
+  analyze-module =
+    analyze-imports(analyze-module);
+    analyze-module-local
+  
+  analyze-imports(analysis) =
+    Module(id, where(filter(Imports(map(analyze-import(analysis))))))
+  
+  analyze-import(analysis) = 
+  	?t@Import(<id>);
+  	open-import(
+  	  resolve-path,
+  	  parse-ds-import(\ msg -> <add-msg(|Error(), t, msg)> \); Module(id, filter(?Imports(_) <+ ?Signatures(_))),
+  	  analyze-module
+  	)
 
+  analyze-module-local =
+	    desugar-top;
+	    log-timed(mark-vars| "Marking variable def sites");
+	    log-timed(rename-all| "Renaming variables");
+	    log-timed(store-all| "Storing all definitions")
+  
   store-all:
     m@Module(n, section*) -> m
     with
       log-timed(
-        store-built-ins | "Storing built-in signatures" 
-      );
-      log-timed(
-        <map(try(store-signatures))> section* | "Storing signatures"
-      );
-      log-timed(
-        <check-signatures> section* | "Checking signatures" 
-      );
-      log-timed(
-        <map(try(store-rules))> section* | "Storing rules"
-      );
-      log-timed(
-        <post-analysis-checks> m | "Post analysis checks"
-      )
+        log-timed(
+          store-built-ins | "Storing built-in signatures"
+        );
+        log-timed(
+          <map(try(store-signatures))> section* | "Storing signatures"
+        );
+        log-timed(
+          <check-signatures> section* | "Checking signatures" 
+        );
+        log-timed(
+          <store-rules-all> section* | "Storing rules"
+        );
+        log-timed(
+          <post-analysis-checks> m | "Post-analysis checks"
+        );
+        log-timed(
+          <gen-implicit-info-top> m | "Implicit conversion info"
+        )
+      | "Analysis" )
+  
+rules /* helpers for import handling */
+
+  resolve-path:
+    import-string -> $[[<ProjectPath>]/[import-string].ds]
+  
+  parse-ds-import(mk-err) =
+    parse-file(
+      <mk-err> $[Imported module cannot be resolved],
+      <mk-err> $[Imported module contains syntax errors]
+    | <import-term(include/ds.tbl)>)

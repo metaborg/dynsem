@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-SymbolicName: dynsem;singleton:=true
 Export-Package: dynsem
 Bundle-Name: Ds Plug-in
-Bundle-Version: 1.4.1
+Bundle-Version: 1.5.0.qualifier
 Require-Bundle: org.spoofax.jsglr,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.core.runtime,
@@ -19,7 +19,8 @@ Require-Bundle: org.spoofax.jsglr,
  org.spoofax.jsglr,
  org.spoofax.interpreter.externaldeps,
  org.strategoxt.strj,
- org.strategoxt.imp.runtime
+ org.strategoxt.imp.runtime,
+ org.metaborg.meta.interpreter.framework
 Bundle-ManifestVersion: 2
 Bundle-Activator: dynsem.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

@@ -5,35 +5,92 @@ imports
   ds
   pp
   lib-ds
+
+imports
+  analysis/main
+  analysis/lib-analysis
+  analysis/mark-references
+  analysis/query
+  analysis/constructors
+
+imports
   ds2ds/sugar
   lib-ds/lib-match
 
-rules /* merge ovelapping rules */
+rules /* merge overlapping rules */
+
+  merge-rules-in-module-top =
+    Module(id, filter(not(?Imports(_)))); // drop all imports
+    log-timed(
+      merge-rules-in-module | "Cons merging"
+    );
+    log-timed(
+      m-in-analysis(merge-listrules-in-module) |	"List merging"
+    );
+    log-timed(
+      m-in-analysis(merge-varrules-in-module) | "Variable merging"
+    )
+
+rules /* Merge rules by constructor */
 
   merge-rules-in-module:
-    Module(name, [imports, signatures, Rules(rule*)]) -> Module($[[name]_unified], [imports, signatures, Rules(merged-rule*)])
+    Module(name, [signatures, Rules(rule*)]) -> Module($[[name]_unified], [signatures, Rules([merged-rule*, rule'*])])
     with
-      cons-arity* := <collect-all(cons-decl-pair-arity); make-set> signatures;
+      cons-arity* := <collect-all(\ ConsDecl(cons, args, _, _) -> (cons, <length> args) \); make-set> signatures;
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name); make-set> signatures;
       rules-by-cons* := <map(group-rules-by-cons(|rule*))> cons-arity*;
+      rule'* := <diff> (rule*, <mapconcat(?(_, _, <id>))> rules-by-cons*); // rules not covered by cons-merging
       rules-by-cons-arrow* := <map((id, id, group-rules-by-arrow(|arrow-name*)))> rules-by-cons*;
       merged-rule* := <mapconcat(?(_, _, <mapconcat(map(remove-aliases; rename-components; rename-output); merge-rules-top)>))> rules-by-cons-arrow*
-
-  cons-decl-pair-arity:
-    ConsDecl(cons, args, _) -> (cons, <length> args)
-  
-  cons-decl-pair-arity:
-    InternalConsDecl(cons, args, _) -> (cons, <length> args)
 
   group-rules-by-cons(|rule*):
     (cons, arity) -> (cons, arity, rulez)
     with
       rulez := <filter(is-rule-matching-cons(|cons, arity))> rule*
+
+rules /* Merge rules by list */
+
+  merge-listrules-in-module:
+  	Module(name, [signatures, Rules(rule*)]) -> Module(name, [signatures, Rules([nonlist-rule*, merged-list-rule*])])
+  	where
+  		(list-rule*, nonlist-rule*) := <partition(where(get-rule-relation; get-relation-source; ?Cast(_, ListSort(_))))> rule*;
+  		merged-list-rule* := <merge-list-rules> list-rule*
+
+  merge-list-rules:
+    rule* -> rule''*
+    where
+      src-type* := <map(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type); make-set> rule*;
+      rules-by-type* := <map(group-rules-by-type(|rule*))> src-type*;
+      arrow-name* := <lookup-def-all(|Arrows()); map(def-get-name); make-set>;
+      rules-by-type-by-arrow* := <mapconcat(group-rules-by-arrow(|arrow-name*))> rules-by-type*;
+      rule'* := <filter(not(?[])); map(unmark-vars; map(remove-aliases; rename-components; rename-output))> rules-by-type-by-arrow*;
+      rule''* := <mapconcat(merge-rules-top)> rule'*
+
+  group-rules-by-type(|rule*):
+    ty -> <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <rw-type>); ?ty))> rule*
+
+rules /* Merge lists by sorts in variable-based dispatch */
+
+  merge-varrules-in-module:
+    Module(name, [signatures, Rules(rule*)]) -> Module(name, [signatures, Rules([nonvar-rule*, merged-var-rule*])])
+    where
+      (var-rule*, nonvar-rule*) := <partition(where(get-rule-relation; get-relation-source; ?Cast(Var(_), SimpleSort(_))))> rule*;
+      merged-var-rule* := <merge-var-rules> var-rule*
   
-  group-rules-by-arrow(|arrow-name*):
-    rule* -> <strip-annos; map(\ arrow-name -> <filter(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name))> rule* \)> arrow-name*
+  merge-var-rules:
+    rule* -> rule''*
+    where
+      src-type* := <map(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type); make-set> rule*;
+      rules-by-type* := <map(group-rules-by-type(|rule*))> src-type*;
+      arrow-name* := <lookup-def-all(|Arrows()); map(def-get-name); make-set>;
+      rules-by-type-by-arrow* := <mapconcat(group-rules-by-arrow(|arrow-name*))> rules-by-type*;
+      rule'* := <filter(not(?[])); map(unmark-vars; map(remove-aliases; rename-components; rename-output))> rules-by-type-by-arrow*;
+      rule''* := <mapconcat(merge-rules-top)> rule'*
 
 rules
+  
+  group-rules-by-arrow(|arrow-name*):
+    rule* -> <map(\ arrow-name -> <filter(where(get-rule-relation; get-relation-arrow-name; ?arrow-name))> rule* \)> arrow-name*
   
   rename-components:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arrow, Target(rhs, tc*))) ->

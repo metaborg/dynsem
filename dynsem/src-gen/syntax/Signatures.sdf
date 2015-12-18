@@ -1,4 +1,3 @@
-
 module Signatures
 imports Common ds
 
@@ -12,45 +11,50 @@ exports
   context-free syntax
     "sorts" SortDecl* -> SignatureSection {cons("Sorts")}
     ID                -> SortDecl         {cons("SortDecl")}
-    ID "->" ID        -> SortDecl         {cons("InjDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
     CONTENTCOMPLETE -> SortDecl         {cons("COMPLETION-SortDecl")}
 
   context-free syntax
-    "constructors" ConsDecl*     -> SignatureSection {cons("Constructors")}
-    ID ":" {Type "*"}* "->" Type -> ConsDecl         {cons("ConsDecl")}
-    ID                           -> Type             {cons("SimpleSort")}
-    "List" "(" Type ")"          -> Type             {cons("ListSort")}
-    MapType                      -> Type             
-    "Map" "<" Type "," Type ">"  -> MapType          {cons("MapSort")}
+    "variables" VariableScheme* -> SignatureSection {cons("VariableSchemes")}
+    ID ":" Type                 -> VariableScheme   {cons("VariableScheme")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
+    CONTENTCOMPLETE -> VariableScheme   {cons("COMPLETION-VariableScheme")}
+
+  context-free syntax
+    "sort" "aliases" AliasDecl* -> SignatureSection {cons("Aliases")}
+    ID "=" Type                 -> AliasDecl        {cons("AliasDecl")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
+    CONTENTCOMPLETE -> AliasDecl        {cons("COMPLETION-AliasDecl")}
+
+  context-free syntax
+    "constructors" ConsDecl*               -> SignatureSection {cons("Constructors")}
+    ID ":" Type ConsAnnos                  -> ConsDecl         {cons("NullaryConsDecl")}
+    ID ":" {Type "*"}+ "->" Type ConsAnnos -> ConsDecl         {cons("ConsDecl")}
+                                           -> ConsAnnos        {cons("NoAnnos")}
+    "{" {ConsAnno ","}* "}"                -> ConsAnnos        {cons("Annos")}
+    "implicit"                             -> ConsAnno         {cons("ImplicitAnno")}
+    ID ":" {Type "*"}* "-->" Type          -> ConsDecl         {cons("FunDecl")}
+    ID                                     -> Type             {cons("SimpleSort")}
+    "List" "(" Type ")"                    -> Type             {cons("ListSort")}
+    MapType                                -> Type             
+    "Map" "<" Type "," Type ">"            -> MapType          {cons("MapSort")}
+
+  context-free syntax
+    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
+    CONTENTCOMPLETE -> ConsAnnos        {cons("COMPLETION-ConsAnnos")}
+    CONTENTCOMPLETE -> ConsAnno         {cons("COMPLETION-ConsAnno")}
     CONTENTCOMPLETE -> ConsDecl         {cons("COMPLETION-ConsDecl")}
     CONTENTCOMPLETE -> Type             {cons("COMPLETION-Type")}
     CONTENTCOMPLETE -> MapType          {cons("COMPLETION-MapType")}
 
   context-free syntax
-    "semantic-components" SemanticCompDecl* -> SignatureSection {cons("SemanticComponents")}
-    ID "->" MapType                         -> SemanticCompDecl {cons("SemanticComponent")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> SemanticCompDecl {cons("COMPLETION-SemanticCompDecl")}
-
-  context-free syntax
-    "internal-sorts" InternalSortDecl* -> SignatureSection {cons("InternalSorts")}
-    ID                                 -> InternalSortDecl {cons("InternalSortDecl")}
-    ID "->" ID                         -> InternalSortDecl {cons("InternalInjDecl")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> InternalSortDecl {cons("COMPLETION-InternalSortDecl")}
-
-  context-free syntax
-    "native-datatypes" NativeTypeDecl*                   -> SignatureSection   {cons("NativeDataTypes")}
+    "native" "datatypes" NativeTypeDecl*                 -> SignatureSection   {cons("NativeDataTypes")}
     STRING                                               -> JSNIPPET           
     JSNIPPET "as" ID "{" NativeFunctionDecl* "}"         -> NativeTypeDecl     {cons("NativeBaseTypeDecl")}
     JSNIPPET "as" ID "->" ID "{" NativeFunctionDecl* "}" -> NativeTypeDecl     {cons("NativeSubTypeDecl")}
@@ -64,38 +68,29 @@ exports
     CONTENTCOMPLETE -> NativeFunctionDecl {cons("COMPLETION-NativeFunctionDecl")}
 
   context-free syntax
-    "native-operators" NativeOpDecl* -> SignatureSection {cons("NativeOperators")}
-    ID ":" {Type "*"}* "->" Type     -> NativeOpDecl     {cons("NativeOpDecl")}
+    "native" "operators" NativeOpDecl* -> SignatureSection {cons("NativeOperators")}
+    ID ":" {Type "*"}+ "->" Type       -> NativeOpDecl     {cons("NativeOpDecl")}
+    ID ":" Type                        -> NativeOpDecl     {cons("NullaryNativeOpDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
     CONTENTCOMPLETE -> NativeOpDecl     {cons("COMPLETION-NativeOpDecl")}
 
   context-free syntax
-    "internal-constructors" InternalConsDecl* -> SignatureSection {cons("InternalConstructors")}
-    ID ":" {Type "*"}* "->" Type              -> InternalConsDecl {cons("InternalConsDecl")}
-
-  context-free syntax
-    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> InternalConsDecl {cons("COMPLETION-InternalConsDecl")}
-
-  context-free syntax
-    "native-constructors" NativeConsDecl* -> SignatureSection {cons("NativeConstructors")}
-    ID ":" {Type "*"}* "->" Type          -> NativeConsDecl   {cons("NativeConsDecl")}
+    "native" "constructors" NativeConsDecl* -> SignatureSection {cons("NativeConstructors")}
+    ID ":" {Type "*"}+ "->" Type            -> NativeConsDecl   {cons("NativeConsDecl")}
+    ID ":" Type                             -> NativeConsDecl   {cons("NullaryNativeConsDecl")}
 
   context-free syntax
     CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
     CONTENTCOMPLETE -> NativeConsDecl   {cons("COMPLETION-NativeConsDecl")}
 
   context-free syntax
-    "arrows" DeclaredArrow*                                -> SignatureSection         {cons("ArrowDeclarations")}
-    ArrowDeclaration                                       -> DeclaredArrow            
-    ArrowTemplateDeclaration                               -> DeclaredArrow            
-    Type "-" ID "->" Type                                  -> ArrowDeclaration         {cons("ArrowDecl")}
-    Type "-->" Type                                        -> ArrowDeclaration         {cons("DefaultArrowDecl")}
-    "forall" ID+ "," Type "-" ID "(" ID "->" ID ")->" Type -> ArrowTemplateDeclaration {cons("ArrowTemplDecl")}
+    "arrows" DeclaredArrow*     -> SignatureSection {cons("ArrowDeclarations")}
+    ArrowDeclaration            -> DeclaredArrow    
+    Type "-" IDNOHYPH "->" Type -> ArrowDeclaration {cons("ArrowDecl")}
+    Type "-->" Type             -> ArrowDeclaration {cons("DefaultArrowDecl")}
 
   context-free syntax
-    CONTENTCOMPLETE -> SignatureSection         {cons("COMPLETION-SignatureSection")}
-    CONTENTCOMPLETE -> ArrowDeclaration         {cons("COMPLETION-ArrowDeclaration")}
-    CONTENTCOMPLETE -> ArrowTemplateDeclaration {cons("COMPLETION-ArrowTemplateDeclaration")}
+    CONTENTCOMPLETE -> SignatureSection {cons("COMPLETION-SignatureSection")}
+    CONTENTCOMPLETE -> ArrowDeclaration {cons("COMPLETION-ArrowDeclaration")}

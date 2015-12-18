@@ -7,9 +7,10 @@ exports
     CONTENTCOMPLETE -> NONE {cons("COMPLETION-NONE")}
 
   lexical syntax
-    [\-] [\-] [\-] [\-]*          -> INFER 
-    [a-zA-Z] [a-zA-Z0-9\'\_]*     -> ID    
-    [a-zA-Z] [a-zA-Z0-9\'\_]* "*" -> LID   
+    [\-] [\-] [\-] [\-]*          -> INFER    
+    [\_a-zA-Z] [a-zA-Z0-9\'\_\-]* -> ID       
+    [\_a-zA-Z] [a-zA-Z0-9\'\_]*   -> IDNOHYPH 
+    [a-zA-Z] [a-zA-Z0-9\'\_]* "*" -> LID      
 
   lexical restrictions
 
@@ -33,7 +34,8 @@ exports
     CommentChar -/- [\/]
     INT -/- [0-9]
     JID -/- [a-zA-Z0-9\_\.]
-    ID -/- [a-zA-Z0-9\_\']
+    ID -/- [a-zA-Z0-9\_\-\']
+    IDNOHYPH -/- [a-zA-Z0-9\_\']
     INFER -/- [\-]
     EOF -/- ~[]
     BackSlashChar -/- [\"]

@@ -1,0 +1,35 @@
+module ds2ds/resolve-includes
+
+imports
+  include/ds
+  lib/editor-common.generated
+  ds
+  
+imports
+  analysis/lib-analysis
+  analysis/main
+
+rules
+	
+	include-imports:
+		Module(name, section*) -> Module(name, section'*)
+		where
+			(import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
+      section'* := <include-imports(|<ProjectPath>, [name])> (import*, section-noimports*)
+
+  include-imports(|include-dir, imported*):
+   ([], section*) -> section*
+
+  include-imports(|include-dir, imported*):
+    ([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [name, imported*])> ([ixs*, new-import*], [section* | imported-section-noimports*])
+    where
+    	Module(name, imported-section*) := <resolve-path; parse-ds-import(fatal-err-missing-import(|i))> i;
+      if <not(fetch-elem(?name))> imported*
+      then
+        (new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*
+      else
+        new-import* := [];
+        imported-section-noimports* := []
+      end
+
+  fatal-err-missing-import(|file) = <fatal-err(|"File not found: ")> file

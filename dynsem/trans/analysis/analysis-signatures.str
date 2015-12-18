@@ -5,6 +5,7 @@ imports
   analysis/lib-analysis
   analysis/constructors
   analysis/analysis-rules
+  analysis/query
 
 rules /* store signatures */
   
@@ -15,16 +16,19 @@ rules /* store signatures */
       <+ store-native-operators
       <+ store-arrows
       <+ store-native-datatypes
-      <+ store-semantic-components
+      <+ store-variable-schemes
+      <+ store-aliases
     ))
   
   store-built-ins =
     <store-def(|Types())> IntType() => def-int; <store-prop(|SortKind(), def-int)> SystemSort()
+    ; <store-def(|Types())> LongType() => def-long; <store-prop(|SortKind(), def-long)> SystemSort()
+    ; <store-def(|Types())> FloatType() => def-float; <store-prop(|SortKind(), def-float)> SystemSort()
     ; <store-def(|Types())> RealType() => def-real; <store-prop(|SortKind(), def-real)> SystemSort()
     ; <store-def(|Types())> BoolType() => def-bool; <store-prop(|SortKind(), def-bool)> SystemSort()
     ; <store-def(|Types())> StringType() => def-str; <store-prop(|SortKind(), def-str)> SystemSort()
 
-  store-sorts = Sorts(map(store-sort)) + InternalSorts(map(store-sort))
+  store-sorts = Sorts(map(store-sort))
 
   store-sort:
     decl@SortDecl(ty) -> decl
@@ -32,53 +36,34 @@ rules /* store signatures */
       <store-def(|Types())> ty => ty-def;
       <store-prop(|SortKind(), ty-def)> LanguageSort()
 
-  store-sort:
-    decl@InjDecl(ty, sty-name) -> decl
-    where
-      <id-to-type> sty-name => sty;
-      <store-def(|Types())> ty => ty-def;
-      <store-prop(|SortKind(), ty-def)> LanguageSort();
-      <store-prop(|SuperType(), ty-def)> sty
-
-  store-sort:
-    decl@InternalSortDecl(ty) -> decl
-    where
-      <store-def(|Types())> ty => ty-def;
-      <store-prop(|SortKind(), ty-def)> InternalSort()
-
-  store-sort:
-    decl@InternalInjDecl(ty, sty-name) -> decl
-    where
-      <id-to-type> sty-name => sty;
-      <store-def(|Types())> ty => ty-def;
-      <store-prop(|SortKind(), ty-def)> InternalSort();
-      <store-prop(|SuperType(), ty-def)> sty
-
   store-constructors =
     Constructors(map(store-constructor))
-    + InternalConstructors(map(store-constructor))
     + NativeConstructors(map(store-constructor))
   
   store-constructor:
-    d@ConsDecl(c, child*, s) -> d
+    d@ConsDecl(c, child*, s, Annos(anno*)) -> d
     with
-      <store-def(|Constructors())> c => c-def;
+      arity := <length> child*;
+      c-def := <store-def(|Constructors())> (c, arity);
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
-      <store-prop(|ConsKind(), c-def)> LanguageCons()
-
-  store-constructor:
-    d@InternalConsDecl(c, child*, s) -> d
-    with
-      <store-def(|Constructors())> c => c-def;
-      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
-      <store-prop(|ConsKind(), c-def)> InternalCons()
+      if
+        [_] := child*;
+        <fetch-elem(?ImplicitAnno())> anno*
+      then
+        <store-prop(|ConsKind(), c-def)> ImplicitCons()
+      else
+        <store-prop(|ConsKind(), c-def)> LanguageCons()
+      end
 
   store-constructor:
     d@NativeConsDecl(c, child*, s) -> d
     with
-      <store-def(|Constructors())> c => c-def;
+      <store-def(|Constructors())> (c, <length> child*) => c-def;
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
       <store-prop(|ConsKind(), c-def)> NativeCons()
+
+  consdef-get-name = def-get-name; ?(<id>, _)
+  consdef-get-arity = def-get-name; ?(_, <id>)
 
   store-arrows = ArrowDeclarations(map(store-arrow))
   
@@ -93,7 +78,7 @@ rules /* store signatures */
   store-native-operator:
     d@NativeOpDecl(c, child*, s) -> d
     with
-      <store-def(|Constructors())> c => c-def;
+      <store-def(|Constructors())> (c, <length> child*) => c-def;
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
       <store-prop(|ConsKind(), c-def)> NativeOpCons()
 
@@ -113,7 +98,7 @@ rules /* store signatures */
       <store-def(|Types())> name => name-def;
       <store-prop(|SortKind(), name-def)> NativeSort();
       <store-prop(|NativeTypeJString(), name-def)> javastring;
-      <store-prop(|SuperType(), name-def)> sup;
+      <store-prop(|NativeTypeSuperType(), name-def)> sup;
       <map(store-native-datatype-op(|name-def))> func*
       
   store-native-datatype-op(|par-def):
@@ -122,57 +107,124 @@ rules /* store signatures */
       <store-def(|NativeDTFun(par-def))> name => name-def;
       <store-prop(|Type(), name-def)> FunctionType(<rw-type> arg*, <rw-type> s)
 
-  store-semantic-components = SemanticComponents(map(store-semantic-component))
+  store-variable-schemes = VariableSchemes(map(store-variable-scheme))
   
-  store-semantic-component:
-    d@SemanticComponent(name, MapSort(key-ty, val-ty)) -> d
+  store-variable-scheme:
+    d@VariableScheme(prefix, ty) -> d
     with
-      <store-def(|Types())> name => name-def;
-      <store-prop(|SortKind(), name-def)> SemanticCompSort();
-      <store-prop(|SuperType(), name-def)> MapType(<rw-type> key-ty, <rw-type> val-ty)
+      <store-def(|VarSchemes())> prefix => scheme-def;
+      <store-prop(|Type(), scheme-def)> <rw-type> ty
 
+  store-aliases = Aliases(map(store-alias))
+  
+  store-alias:
+    d@AliasDecl(name, ty) -> d
+    with
+      <store-def(|Types())> name => alias-ty-def;
+      <store-prop(|SortKind(), alias-ty-def)> AliasSort();
+      <store-prop(|Type(), alias-ty-def)> <rw-type> ty
+
+  is-alias = where(lookup-def(|Types()); lookup-prop(|SortKind()) => AliasSort())
+  
+  get-alias-base = get-alias-base(|[<id>])
+  
+  get-alias-base(|acc):
+    ty -> ty'
+    where
+      if
+        ty-def := <lookup-def(|Types())>;
+        <lookup-prop(|SortKind())> ty-def => AliasSort()
+      then
+        ty-alias := <lookup-prop(|Type())> ty-def;
+        <not(fetch-elem(?ty-alias))> acc;
+        ty' := <get-alias-base(|[ty-alias | acc])> ty-alias
+      else
+        ty' := ty
+      end
+  
 rules
   
   check-signatures = alltd(check-signature)
   
-  check-signature =
-    ( ?SimpleSort(s) + ?InjDecl(_, s) + ?InternalInjDecl(_, s) );
-    <id-to-type; not(lookup-def(|Types()))> s;
-    add-msg(|Error(), s, $[Sort [s] is not declared])
-
-  check-signature =
-    (
-      ?SortDecl(s)
-      + ?InjDecl(s, _)
-      + ?InternalSortDecl(s)
-      + ?InternalInjDecl(_, s)
-      + ?NativeBaseTypeDecl(_, s, _)
-      + ?NativeSubTypeDecl(_, s, _, _)
-    );
-    <lookup-defs(|Types())> s => [_, _ | _];
-    add-msg(|Error(), s, $[Duplicate sort [s]])
-    
-  check-signature =
-    ?Con(cname, _);
-    <not(lookup-def(|Constructors()))> cname;
-    add-msg(|Error(), cname, $[Constructor [cname] is not declared])
+  check-signature:
+    SimpleSort(s) -> <fail>
+    where
+      <id-to-type; not(lookup-def(|Types()))> s;
+      add-msg(|Error(), s, $[Sort [s] is not declared])
   
-  check-signature =
-    (
-      ?NativeOpDecl(c, _, _)
-      + ?ConsDecl(c, _, _)
-      + ?InternalConsDecl(c, _, _)
-      + ?NativeConsDecl(c, _, _)
-    );
-    <lookup-defs(|Constructors())> c => [_, _ | _];
-    add-msg(|Error(), c, $[Duplicate constructor [c]])
+  check-signature:
+    <?SortDecl(s)
+    + ?AliasDecl(s, _)
+    + ?NativeBaseTypeDecl(_, s, _)
+    + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
+    where
+      <lookup-defs(|Types())> s => [_, _ | _];
+      add-msg(|Warning(), s, $[Duplicate sort [s]])
+  
+  check-signature:
+    <?SortDecl(s)
+    + ?AliasDecl(s, _)
+    + ?NativeBaseTypeDecl(_, s, _)
+    + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
+    where
+      ty := <rw-type> SimpleSort(s);
+      SystemSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> ty;
+      add-msg(|Error(), s, $[Sort collides with built-in sort [s]])
+  
+  check-signature:
+    d@AliasDecl(s, _) -> <fail>
+    where
+      <is-alias; not(get-alias-base)> s;
+      <add-msg(|Error(), s, $[Inconsistent aliasing chain for sort [s]])> d
+  
+  check-signature:
+    vs@VariableScheme(prefix, _) -> <fail>
+    where
+	    <get-matching-varschemes> prefix => [_, _ | _];
+	    add-msg(|Error(), vs, $[Duplicate or overlapping variable prefix [prefix]])
+  
+  check-signature:
+    Con(cname, c*) -> <fail>
+    where
+      arity := <length> c*;
+      <not(lookup-def(|Constructors()))> (cname, arity);
+      add-msg(|Error(), cname, $[Constructor [cname]/[<int-to-string> arity] is not declared])
+  
+  check-signature:
+    <?d@NativeOpDecl(cname, c*, _)
+    + ?d@ConsDecl(cname, c*, _, _)
+    + ?d@NativeConsDecl(cname, c*, _)> -> <fail>
+    where
+      arity := <length> c*;
+      <lookup-defs(|Constructors())> (cname, arity) => [_, _ | _];
+      add-msg(|Error(), d, $[Duplicate constructor [cname]/[<int-to-string> arity]])
 
-  check-signature =
-    ?decl@ArrowDecl(in-srt, name, out-srt);
-    in-ty := <rw-type> in-srt;
-    out-ty := <rw-type> out-srt;
-    arrow-def := <lookup-def(|Arrows())> name;
-    arrow-ty* := <lookup-props(|Type()); filter(not(?ArrowType(in-ty, out-ty))); make-set> arrow-def;
-    <fetch-elem(?ArrowType(<id>, _); !(<id>, in-ty); type-coerce-sym)> arrow-ty*;
-    add-msg(|Error(), decl, $[Arrow LHS overlaps with another arrow with the same name])
+  check-signature:
+    d@ConsDecl(cname, c*, ss@SimpleSort(s), _) -> <fail>
+    where
+      arity := <length> c*;
+      ty := <rw-type> ss;
+      SystemSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> ty;
+      add-msg(|Error(), d, $[Constructor [cname]/[<int-to-string> arity] cannot be of built-in sort [s]])
+
+  check-signature:
+    d@ConsDecl(_, c*, _, Annos(anno*)) -> <fail>
+    where
+      [_, _ | _] := c*
+      <+
+      [] := c*
+    where
+      <fetch-elem(?ImplicitAnno())> anno*;
+      add-msg(|Error(), d, $[Non-unary constructors may not be implicit])
+
+  check-signature:
+    decl@ArrowDecl(in-srt, name, out-srt) -> <fail>
+    where
+	    in-ty := <rw-type> in-srt;
+	    out-ty := <rw-type> out-srt;
+	    arrow-def := <lookup-def(|Arrows())> name;
+	    arrow-ty* := <lookup-props(|Type()); filter(not(?ArrowType(in-ty, out-ty))); make-set> arrow-def;
+	    <fetch-elem(?ArrowType(<id>, _); !(<id>, in-ty); type-coerce-sym(type-coerce-full(id)))> arrow-ty*;
+	    add-msg(|Error(), decl, $[Arrow LHS overlaps with another arrow with the same name])
+
     

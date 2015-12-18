@@ -61,6 +61,17 @@ rules // lift constructor sub-terms in match
   		(p*, t2*) := <map(lift-match-on-cond(not(is-prime-factor), ?succ)); unzip; (concat, id)> t1*;
   		!succ
   
+  factorize-lhs:
+    Cast(t1, ty) -> (p*, Cast(t2, ty))
+    where
+      (p*, t2) := <lift-match-on-cond(not(is-prime-factor), ?succ)> t1;
+      !succ
+  
+  factorize-lhs:
+    As(v, t1) -> (p*, As(v, t2))
+    where
+      (p*, t2) := <factorize-lhs> t1
+  
   factorize-rhs = lift-build-on-cond(not(is-prime-factor), ?succ); where(!succ)
   
   factorize-source-components =
@@ -87,7 +98,16 @@ rules // lift constructor sub-terms in match
     factorize-match-in-premise
     <+ factorize-termeq-in-premise
     <+ factorize-relation-in-premise
-    
+  
+  factorize-match-in-premise:
+    Formula(Match(lhs, rhs)) -> [p-lhs*, Formula(Match(lhs', rhs')) ,p-rhs*]
+    where
+      <is-build-nonprime-factor> lhs;
+      <not(is-prime-factor)> rhs;
+      (p-lhs*, lhs') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> lhs;
+      (p-rhs*, rhs') := <lift-match-on-cond(not(is-prime-factor), ?success)> rhs;
+      !success
+  
   factorize-match-in-premise:
     Formula(Match(lhs, rhs)) -> [p-lhs*, Formula(Match(lhs', rhs))]
     where
@@ -169,46 +189,59 @@ rules
     factorize-constructors-in-build
     <+ factorize-sortfuncall-in-build
     <+ factorize-listtail-in-build
+    <+ factorize-map-in-build
+    <+ factorize-mapextend-in-build
     <+ factorize-mapselect-in-build
+    <+ factorize-cast-in-build
 
   factorize-constructors-in-build:
     Con(c, t1*) -> (prem*, Con(c, t2*))
     where
-      let cond = not(is-prime-factor)
-      in
-        (prem*, t2*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t1*;
-        !success
-      end
+      (prem*, t2*) := <map(lift-build-on-cond(is-build-nonprime-factor, ?success)); unzip; (concat, id)> t1*;
+      !success
   
   factorize-sortfuncall-in-build:
     SortFunCall(name, on, t*) -> ([p1*, p2*], SortFunCall(name, on', t'*))
     where
-      let cond = not(is-prime-factor)
-      in
-        (p1*, on') := <lift-build-on-cond(cond, ?success)> on;
-        (p2*, t'*) := <map(lift-build-on-cond(cond, ?success)); unzip; (concat, id)> t*;
-        !success
-      end
+      (p1*, on') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> on;
+      (p2*, t'*) := <map(lift-build-on-cond(is-build-nonprime-factor, ?success)); unzip; (concat, id)> t*;
+      !success
   
   factorize-listtail-in-build:
     ListTail([x], xs) -> ([prem1*, prem2*], ListTail([x'], xs'))
     where
-      let cond = not(is-prime-factor)
-      in
-        (prem1*, x') := <lift-build-on-cond(cond, ?success1)> x;
-        (prem2*, xs') := <lift-build-on-cond(cond, ?success2)> xs;
-        (!success1 <+ !success2)
-      end
+      (prem1*, x') := <lift-build-on-cond(is-build-nonprime-factor, ?success1)> x;
+      (prem2*, xs') := <lift-build-on-cond(is-build-nonprime-factor, ?success2)> xs;
+      (!success1 <+ !success2)
   
-  factorize-mapselect-in-build:
-    MapExtend(l, r) -> (prem*, MapExtend(l, r'))
+  factorize-map-in-build:
+    Map([Bind(k, v)]) -> ([prem1*, prem2*], Map([Bind(k', v')]))
     where
-      let cond = not(is-prime-factor)
-      in
-        (prem*, r') := <lift-build-on-cond(cond, ?success)> r;
-        !success
-      end
-    
+      (prem1*, k') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> k;
+      (prem2*, v') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> v;
+      !success
+  
+  factorize-mapextend-in-build:
+    MapExtend(l, r) -> ([prem1*, prem2*], MapExtend(l', r'))
+    where
+      (prem1*, l') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> l;
+      (prem2*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
+      !success
+
+  factorize-mapselect-in-build:
+    MapSelect(l, r) -> (prem*, MapSelect(l, r'))
+    where
+      (prem*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
+      !success
+  
+  factorize-cast-in-build:
+    Cast(t1, ty) -> (prem*, Cast(t2, ty))
+    where
+      (prem*, t2) := <lift-build-on-cond(is-build-nonprime-factor, ?success)> t1;
+      !success
+  
+  is-build-nonprime-factor = not(is-prime-factor <+ ?List([])) 
+  
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List([])
   
   is-prime-factor = ?VarRef(_)

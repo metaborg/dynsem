@@ -3,10 +3,16 @@ module analysis/lib-analysis
 imports
   include/ds
   analysis/constructors
+  lib/editor-common.generated
 
 rules
 	
 	new-analysis-scope(s) = {| Renames, InvRenames, Declared, Properties, Messages: s |}
+
+  in-project-path(s|project-path) = {| ProjectPath:
+    rules(ProjectPath: _ -> project-path);
+    s
+  |} 
 
 rules // renaming
   
@@ -74,9 +80,24 @@ rules
     rules(Messages:+ t -> Message(level, t, message))
 
   get-msgs(postprocess|level) =
-  	all-keys-Messages; mapconcat(bagof-Messages); filter(msg-has-level(|level)); map(postprocess)
+  	all-keys-Messages;
+  	mapconcat(
+  	  bagof-Messages;
+  	  filter(
+  	    msg-has-level(|level);
+  	    postprocess
+  	  )
+	  )
   
   msg-has-level(|level) = ?Message(level, _, _)
+  
+  msg-isin-file(|file):
+    msg@Message(_, t, _) -> msg
+    where
+      file := <origin-file> t
+  
+  msg-mk-editor-msg:
+    Message(_, t, msg) -> (t, msg)
   
   get-errors(postprocess) = get-msgs(postprocess|Error())
   get-warnings(postprocess) = get-msgs(postprocess|Warning())
@@ -98,11 +119,42 @@ rules // type rewriting
     MapSort(key-sort, val-sort) -> MapType(<rw-type> key-sort, <rw-type> val-sort)
   
   rw-type = is-list; map(rw-type)
+
+  derw-type = is-list; map(derw-type)
+  
+  derw-type:
+    ListType(ty) -> ListSort(<derw-type> ty)
+  
+  derw-type:
+    MapType(kty, vty) -> MapSort(<derw-type> kty, <derw-type> vty)
+
+  derw-type:
+    ty -> SimpleSort(ty)
+    where
+      is-string
+  
+  derw-type: IntType() -> <derw-type> "Int"
+
+  derw-type: LongType() -> <derw-type> "Long"
+  
+  derw-type: FloatType() -> <derw-type> "Float"
+
+  derw-type: RealType() -> <derw-type> "Real"
+  
+  derw-type: BoolType() -> <derw-type> "Bool"
+  
+  derw-type: StringType() -> <derw-type> "String"
   
   id-to-type = id-to-builtin-type <+ is-string
 
   id-to-builtin-type:
     "Int" -> IntType()
+
+  id-to-builtin-type:
+    "Long" -> LongType()
+
+  id-to-builtin-type:
+    "Float" -> FloatType()
     
   id-to-builtin-type:
     "Real" -> RealType()

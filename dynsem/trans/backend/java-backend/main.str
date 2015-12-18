@@ -18,6 +18,7 @@ imports
 	backend/java-backend/emit-types
 	backend/java-backend/emit-arrows
 	backend/java-backend/emit-constructorclasses
+	backend/java-backend/emit-listclasses
 	backend/java-backend/emit-genericnodes
 	backend/java-backend/emit-maputils
   
@@ -42,16 +43,15 @@ rules
     
     m-in-analysis(
       m-in-backend-extra-analysis(
-        where(
-          get-msgs(mkmsg|Error()) => error*
-          ;if <?[_|_]> error*
-           then
-             <fatal-err(|"Errors encountered: ")> error*
-           end
-        )
-        
-	      ;w-log-timed(
-	        ds2java-interfaces;
+        // where(
+        //   get-msgs(mkmsg|Error()) => error*
+        //   ;if <?[_|_]> error*
+        //    then
+        //      <fatal-err(|"Errors encountered: ")> error*
+        //    end
+        // )
+	      w-log-timed(
+	        ds2java-abstracts;
 	        write-classes
 	        | "Gen interfaces for sorts")
 	      
@@ -65,6 +65,11 @@ rules
 	       	write-classes
 	        | "Gen constructor classes")
 	      
+	      ;w-log-timed(
+	        ds2java-listclasses;
+	        write-classes
+	        | "Gen list classes")
+	       
 	      ;w-log-timed(
 	         ds2java-genericnodes;
 	         write-classes
@@ -82,5 +87,5 @@ rules /* escape variable names */
 
   escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
   
-  escape-identifier = string-replace(|"'", "_")
+  escape-identifier = string-replace(|"'", "_"); string-replace(|"-", "$")
   

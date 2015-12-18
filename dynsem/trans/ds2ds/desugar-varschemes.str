@@ -1,0 +1,36 @@
+module ds2ds/desugar-varschemes
+
+imports
+  include/ds
+  lib-ds
+  analysis/main
+  analysis/mark-references
+  analysis/query
+  analysis/lib-analysis
+  analysis/constructors
+  ds
+
+rules
+  
+  desugar-varschemes-module :
+    mod@Module(_, _) -> Module($[[name]_varschemes], section'*)
+    where
+      <m-in-analysis(desugar-varschemes); unmark-vars> mod => Module(name, section'*)
+
+
+  desugar-varschemes = alltd(desugar-varscheme)
+  
+  desugar-varscheme:
+    VarLabelComp(v) -> LabelComp(<derw-type> scheme-ty, v)
+    where
+    	scheme-def := <get-unique-matching-varscheme> v;
+    	scheme-ty := <lookup-prop(|Type())> scheme-def
+  
+  desugar-varscheme:
+    var@Var(v) -> Cast(var, <derw-type> scheme-ty)
+    where
+      scheme-def := <get-unique-matching-varscheme> v;
+      scheme-ty := <lookup-prop(|Type())> scheme-def
+    	
+
+

@@ -2,18 +2,18 @@ module lib-ds/lib-match
 
 imports
   include/ds
-
+  
 strategies
   
-  is-rule-matching-cons(|cons-goal, arity) =
+  is-rule-matching-cons(|con-name, con-arity) =
     where(
       (
         ?Rule(_, _, Relation(_, Source(Con(cons-actual, conargs), _), _, _))
         +
         ?Rule(_, _, Relation(_, Source(As(_, Con(cons-actual, conargs)), _), _, _))
       );
-      <strip-annos; eq> (cons-actual, cons-goal);
-      <eq> (arity, <length> conargs)
+      <strip-annos; eq> (cons-actual, con-name);
+      <eq> (<length> conargs, con-arity)
     )
 
   is-rule-matching-arrow(|arrow-name) = ?Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, arrow-name), _))

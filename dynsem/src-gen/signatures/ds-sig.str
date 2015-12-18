@@ -21,42 +21,45 @@ signature
     TryOr        : PremisesBlock * PremisesBlock -> Premise
 
   constructors
-    Match                         : Term * Term -> Formula
-    NMatch                        : Term * Term -> Formula
-    TermEq                        : Term * Term -> Formula
-    TermNeq                       : Term * Term -> Formula
-    TypeCheck                     : Var * Type -> Formula
-    TypeCast                      : Var * Type -> Formula
-                                  : Relation -> Formula
-    Relation                      : Reads * Source * Rel * Target -> Relation
-    IsValue                       : Term -> Formula
-    NoReads                       : Reads
-    Reads                         : List(LabelComp) -> Reads
-    Source                        : Term -> Source
-    Source                        : Term * List(LabelComp) -> Source
-    Target                        : Term -> Target
-    Target                        : Term * List(LabelComp) -> Target
-    Dynamic                       : Rel
-    NamedDynamic                  : ID -> Rel
-    NamedDynamicParametric        : ID * ID -> Rel
-    DynamicEmitted                : List(LabelComp) -> Rel
-    NamedDynamicEmitted           : List(LabelComp) * ID -> Rel
-    NamedDynamicEmittedParametric : List(LabelComp) * ID * ID -> Rel
-    LabelComp                     : Type * Term -> LabelComp
+    Match               : Term * Term -> Formula
+    NMatch              : Term * Term -> Formula
+    TermEq              : Term * Term -> Formula
+    TermNeq             : Term * Term -> Formula
+    TypeCheck           : Var * Type -> Formula
+    TypeCast            : Var * Type -> Formula
+                        : Relation -> Formula
+    Relation            : Reads * Source * Rel * Target -> Relation
+    IsValue             : Term -> Formula
+    NoReads             : Reads
+    Reads               : List(LabelComp) -> Reads
+    Source              : Term -> Source
+    Source              : Term * List(LabelComp) -> Source
+    Target              : Term -> Target
+    Target              : Term * List(LabelComp) -> Target
+    Dynamic             : Rel
+    NamedDynamic        : IDNOHYPH -> Rel
+    DynamicEmitted      : List(LabelComp) -> Rel
+    NamedDynamicEmitted : List(LabelComp) * IDNOHYPH -> Rel
+    LabelComp           : Type * Term -> LabelComp
+    VarLabelComp        : Var -> LabelComp
+
+  constructors
+     : String -> TermCon
 
   constructors
     VarRef      : ID -> Var
                 : Var -> Term
-    Cast        : Var * Type -> Cast
+    Cast        : Term * Type -> Cast
                 : Cast -> Term
     As          : Var * Term -> Term
     Wld         : Term
     String      : STRING -> Term
     Int         : INT -> Term
     Real        : REAL -> Term
-    Con         : ID * List(Term) -> Term
-    List        : List(Term) -> Term
-    ListTail    : List(Term) * Term -> Term
+    Con         : TermCon * List(Term) -> Term
+    List        : List(Term) -> List
+    ListTail    : List(Term) * Term -> List
+                : List -> Term
     Fresh       : Term
     True        : Term
     False       : Term

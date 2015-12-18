@@ -6,6 +6,7 @@ imports
   
 imports
   analysis/constructors
+  analysis/analysis-signatures
   analysis/lib-analysis
 
 imports
@@ -13,6 +14,7 @@ imports
   backend/java-backend/analysis-extra
   backend/java-backend/lib-ds2java
   backend/java-backend/emit-arrows
+  backend/java-backend/emit-maputils
 
 rules
   
@@ -30,12 +32,15 @@ rules
         import org.spoofax.interpreter.terms.*;
         import org.spoofax.jsglr.client.imploder.ImploderAttachment;
         import org.spoofax.interpreter.core.Tools;
+        import java.util.Objects;
         
-        public class ~x:gennodename extends AbstractNode implements ~x:sortname, IGenericNode {
+        @SuppressWarnings("unused")
+        public class ~x:gennodename extends ~x:sortname implements IGenericNode {
           
           public IStrategoTerm aterm;
           
           public ~x:gennodename(INodeSource source, IStrategoTerm term) {
+            Objects.requireNonNull(term);
             this.setSourceInfo(source);
             this.aterm = term;
           }
@@ -47,7 +52,7 @@ rules
           
           @Override
           public void specializeChildren(int depth){
-            throw new InterpreterException("Operation not supported");
+            throw new InterpreterException("Operation not supported", "aterm specializer", this);
           }
           
           @Override
@@ -58,14 +63,12 @@ rules
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
-              final ImploderNodeSource source = term.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
-                        term.getAttachment(ImploderAttachment.TYPE)) : null;
+              final INodeSource source = NodeSource.fromStrategoTerm(term);
 
-              ~bstm*:<mapconcat(ds2java-consdecl-specializer)> c-def*
+              ~bstm*:<mapconcat(ds2java-consdecl-specializer)> [c-def*, impl-c-def*]
             }
-            IGenericNode replacement = null;
-            
-            ~bstm*:<foldr(![], ds2java-sortinj-specializer)> ty-def*
+
+            ~bstm*:<foldr(![], ds2java-implcons-specializer)> impl-c-def*
             
             throw new RewritingException(aterm.toString());
             
@@ -81,16 +84,16 @@ rules
         }
       ]|
     where
-      sortname := <ds2java-sort-classname> ty;
+      sortname := <ds2java-type-to-identifier> ty;
       gennodename := $[Generic_[sortname]];
       c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons()))>;
-      ty-def* := <lookup-def-all(|Types()); filter(where(lookup-prop(|SuperType()) => ty); where(lookup-prop(|SortKind()) => LanguageSort()))>;
-      exec* := <lookup-def(|Types()); lookup-applicable-arrow-def; map(ds2java-arrow-specializedispatch)> ty
+      impl-c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => ImplicitCons()))>;
+      exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-specializedispatch)> ty
 
   ds2java-consdecl-specializer:
   	c-def ->
 			bstm* |[
-			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<length; int-to-string> c-c-ty*) {
+			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<int-to-string> c-arity) {
 			    ~x:sortname replacement = replace(new ~x:consname(source, e*));
 			    if (depth > 0) {
 			      replacement.specializeChildren(depth - 1);
@@ -99,58 +102,65 @@ rules
 		    }
 			]|
     where
-      c-name := <def-get-name> c-def;
+      c-name := <consdef-get-name> c-def;
+      c-arity := <consdef-get-arity> c-def;
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def;
-      sortname := <ds2java-sort-classname> c-ty;
-      consname := <ds2java-constr-classname> c-name;
-      e* := <map-with-index((dec, id); ds2java-gennode-instantiation)> c-c-ty*
-      
+      sortname := <ds2java-type-to-unboxed-type> c-ty;
+      consname := <ds2java-consdef-classname> c-def;
+      e* := <map-with-index((\ idx -> e |[ term.getSubterm(~i:<dec; int-to-string> idx)]| \, id); ds2java-gennode-instantiation)> c-c-ty*
+  
+  subterm-at-index:
+    idx -> e |[ term.getSubterm(~i:<int-to-string> idx) ]|
+
   ds2java-gennode-instantiation:
-    (idx, ty) -> e |[ new ~x:gennodename(source, term.getSubterm(~i:<int-to-string> idx)) ]|
+    (e_trm, ty) -> e |[ new ~x:gennodename(NodeSource.fromStrategoTerm(e_trm), e_trm).specialize(1) ]|
     where
       not(!ty => ListType(_));
       ty-def := <lookup-def(|Types())> ty;
       <not(lookup-prop(|SortKind()) => SystemSort())> ty-def;
-      gennodename := $[Generic_[<ds2java-sort-classname> ty]]
+      <not(lookup-prop(|SortKind()) => NativeSort())> ty-def;
+      gennodename := $[Generic_[<ds2java-type-to-identifier> ty]]
 
   ds2java-gennode-instantiation:
-    (idx, ty) -> e |[ (INodeList) NodeUtils.makeList(term.getSubterm(i).getSubtermCount(), term.getSubterm(i), ~x:gennodename.class) ]|
+    (e_trm, lty@ListType(e-ty)) -> e |[ new x_listname(NodeSource.fromStrategoTerm(e_trm)).fromStrategoTerm(e_trm) ]|
     where
-      !ty => ListType(e-ty);
-      i := <int-to-string> idx;
-      e-ty-def := <lookup-def(|Types())> e-ty;
-      if <lookup-prop(|SortKind())> e-ty-def => SystemSort()
-      then
-        gennodename := <ds2java-sort-classname; ds2java-box-java-type> e-ty
-      else
-        gennodename := $[Generic_[<ds2java-sort-classname> e-ty]]
-      end 
+      x_listname := <ds2java-type-to-unboxed-type> lty
   
   ds2java-gennode-instantiation:
-    (idx, StringType()) -> e |[ Tools.asJavaString(term.getSubterm(~i:<int-to-string> idx)) ]|
+    (e_trm, m-ty@MapType(_, _)) -> e |[ AutoMapUtils.x_tosemcomp(e_trm) ]|
+    where
+      x_tosemcomp := <ds2java-aterm2map-name> m-ty
+ 
+  ds2java-gennode-instantiation:
+  	(e_trm, ty) -> e |[ null ]|
+  	where
+  		ty-def := <lookup-def(|Types())> ty;
+  		<lookup-prop(|SortKind())> ty-def => NativeSort()
+ 
+  ds2java-gennode-instantiation:
+    (e_trm, StringType()) -> e |[ TermUtils.stringFromTerm(e_trm) ]|
 
   ds2java-gennode-instantiation:
-    (idx, IntType()) -> e |[ Tools.asJavaInt(term.getSubterm(~i:<int-to-string> idx)) ]|
+    (e_trm, IntType()) -> e |[ TermUtils.intFromTerm(e_trm) ]|
 
   ds2java-gennode-instantiation:
-    (idx, RealType()) -> e |[ Tools.asJavaDouble(term.getSubterm(~i:<int-to-string> idx)) ]|
+    (e_trm, RealType()) -> e |[ TermUtils.doubleFromTerm(e_trm) ]|
+  
+  ds2java-gennode-instantiation:
+    (e_trm, BoolType()) -> e |[ TermUtils.boolFromTerm(e_trm) ]|
 
-  ds2java-sortinj-specializer:
-  	(ty-def, bstm*) ->
-			bstm* |[
-				try {
-					if(replacement != null) {
-						replacement.replace(this);
-					}
-					replacement = new ~x:gennodename(getSourceInfo(), aterm);
-					return (~x:sortname) replace(replacement).specialize(1);
-				} catch(RewritingException ~x:<newname>) {
-					bstm*
-				}
-			]|
-		where
-			sortname := <def-get-name; ds2java-sort-classname> ty-def;
-			gennodename := $[Generic_[sortname]]
+  ds2java-implcons-specializer:
+  	(impl-c-def, bstm*) -> bstm* |[
+  	  try {
+  	    return replace(new x_implconsname(getSourceInfo(), e_gennode));
+  	  } catch(RewritingException ~x:<newname>) {
+  	    bstm*
+  	  }
+  	]|
+  	where
+  	  ConstructorType([c-ty], _) := <lookup-prop(|Type())> impl-c-def;
+  	  x_implconsname := <ds2java-consdef-classname> impl-c-def;
+  	  e_gennode := <ds2java-gennode-instantiation> (e |[ aterm ]|, c-ty)
 
   ds2java-arrow-specializedispatch:
     (arrow-def, ArrowType(_, bu-ty)) ->

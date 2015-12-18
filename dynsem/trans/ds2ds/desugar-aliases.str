@@ -1,0 +1,25 @@
+module desugar-aliases
+
+imports
+  include/ds
+  ds
+  analysis/-
+
+rules
+
+  desugar-aliases-module:
+    m@Module(_, _) -> Module($[[name]_noaliases], section*)
+    where
+      <m-in-analysis(desugar-aliases); unmark-vars> m => Module(name, section*)
+  
+  desugar-aliases = alltd(desugar-alias); Module(id, remove-alias-decls)
+  
+  desugar-alias:
+    d@SimpleSort(s) -> <derw-type> base-ty
+    where
+      ty := <rw-type> d;
+      <is-alias> ty;
+      base-ty := <get-alias-base> s
+
+  remove-alias-decls = alltd(Signatures(filter(not(?Aliases(_)))))
+

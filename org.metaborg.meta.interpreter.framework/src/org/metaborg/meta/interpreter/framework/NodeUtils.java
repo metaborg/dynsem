@@ -1,12 +1,6 @@
 package org.metaborg.meta.interpreter.framework;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-
-import org.spoofax.interpreter.terms.IStrategoInt;
-import org.spoofax.interpreter.terms.IStrategoString;
-import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 
 public class NodeUtils {
 
@@ -17,14 +11,13 @@ public class NodeUtils {
 			try {
 				s += f.get(o) + ", ";
 			} catch (IllegalAccessException e) {
-//				 s += "<" + f.getName() + ">";
+				// s += "<" + f.getName() + ">";
 			}
 		}
 		s += ")";
 		return s;
 	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
 	public static <T extends INode> T replaceChild(INode parent,
 			INode oldChild, T newChild) {
 		// locate the field of the oldChild
@@ -56,40 +49,10 @@ public class NodeUtils {
 				}
 			}
 		} catch (IllegalAccessException e) {
-			throw new InterpreterException("Failed to rewrite", e);
+			throw new InterpreterException("Failed to rewrite", null, e);
 		}
 
 		throw new RewritingException("Cannot find child field to replace");
 	}
 
-	public static <T> INodeList<T> makeList(int length,
-			IStrategoTerm parentTerm, Class<T> clazz) {
-		INodeList<T> list = NodeList.NIL();
-		for (int i = length - 1; i >= 0; i--) {
-			if (clazz == Integer.class) {
-				list = new NodeList<T>(clazz.cast(((IStrategoInt) parentTerm
-						.getSubterm(i)).intValue()), list);
-			} else if (clazz == String.class) {
-				list = new NodeList<T>(clazz.cast(((IStrategoString) parentTerm
-						.getSubterm(i)).stringValue()), list);
-			} else {
-				Constructor<T> c;
-				try {
-					c = clazz.getConstructor(INodeSource.class,
-							IStrategoTerm.class);
-					final ImploderNodeSource source = parentTerm.getSubterm(i)
-							.getAttachment(ImploderAttachment.TYPE) != null ? new ImploderNodeSource(
-							parentTerm.getSubterm(i).getAttachment(
-									ImploderAttachment.TYPE)) : null;
-					list = new NodeList<T>(c.newInstance(source,
-							parentTerm.getSubterm(i)), list);
-				} catch (Exception ex) {
-					throw new RewritingException(ex);
-				}
-			}
-		}
-		return list;
-	}
-
-	
 }

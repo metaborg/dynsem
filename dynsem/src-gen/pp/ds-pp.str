@@ -3,6 +3,7 @@ module src-gen/pp/ds-pp
 imports
   libstratego-gpp
   runtime/tmpl/pp
+  libstratego-sglr
   src-gen/signatures/ds-sig
 
 
@@ -93,7 +94,7 @@ strategies
   prettyprint-Rule :
     Axiom(t1__) -> [ H(
                        [SOpt(HS(), "0")]
-                     , [t1__']
+                     , [t1__', S(".")]
                      )
                    ]
     with t1__' := <pp-one-Z(prettyprint-Formula)> t1__
@@ -115,7 +116,7 @@ strategies
                                 , [t3__']
                                 )
                               ]
-    with t1__' := <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+    with t1__' := <pp-V-list(prettyprint-Premise|"0", ";")> t1__
     with t2__' := <pp-one-Z(prettyprint-INFER)> t2__
     with t3__' := <pp-one-Z(prettyprint-Relation)> t3__
 
@@ -134,7 +135,8 @@ strategies
                          , t2__'
                          ]
     with t1__' := <pp-one-Z(prettyprint-Relation)> t1__
-    with t2__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t2__
+    with t2__' := <pp-indent(|"2")> [ <pp-V-list(prettyprint-Premise|"0", ";")> t2__
+                                    , S(".")
                                     ]
 
   is-Rule =
@@ -169,7 +171,7 @@ strategies
                           , t1__'
                           , t2__'
                           ]
-    with t1__' := <pp-indent(|"4")> [ <pp-V-list(prettyprint-Premise|"0", ",")> t1__
+    with t1__' := <pp-indent(|"4")> [ <pp-V-list(prettyprint-Premise|"0", ";")> t1__
                                     ]
     with t2__' := <pp-indent(|"2")> [S("}")]
 
@@ -224,6 +226,18 @@ strategies
 
   is-Premise =
     fail
+
+  prettyprint-ModuleSection :
+    amb([h|hs]) -> <prettyprint-ModuleSection> h
+
+  prettyprint-Rule :
+    amb([h|hs]) -> <prettyprint-Rule> h
+
+  prettyprint-PremisesBlock :
+    amb([h|hs]) -> <prettyprint-PremisesBlock> h
+
+  prettyprint-Premise :
+    amb([h|hs]) -> <prettyprint-Premise> h
 
 
 strategies
@@ -379,7 +393,7 @@ strategies
                      , [t1__', S(" |- ")]
                      )
                    ]
-    with t1__' := <pp-H-list(prettyprint-LabelComp|" ")> t1__
+    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
 
   is-Reads =
     ?Reads(_)
@@ -402,7 +416,7 @@ strategies
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-LabelComp|" ")> t2__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
 
   is-Source =
     ?Source(_, _)
@@ -421,15 +435,11 @@ strategies
   prettyprint-Target :
     Target(t1__, t2__) -> [ H(
                               [SOpt(HS(), "0")]
-                            , [ t1__'
-                              , S(" :: ")
-                              , t2__'
-                              , S(".")
-                              ]
+                            , [t1__', S(" :: "), t2__']
                             )
                           ]
     with t1__' := <pp-one-Z(prettyprint-Term)> t1__
-    with t2__' := <pp-H-list(prettyprint-LabelComp|" ")> t2__
+    with t2__' := <pp-H-list(prettyprint-LabelComp|", ")> t2__
 
   is-Target =
     ?Target(_, _)
@@ -453,34 +463,17 @@ strategies
                               ]
                             )
                           ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t1__' := <pp-one-Z(prettyprint-IDNOHYPH)> t1__
 
   is-Rel =
     ?NamedDynamic(_)
-
-  prettyprint-Rel :
-    NamedDynamicParametric(t1__, t2__) -> [ H(
-                                              [SOpt(HS(), "0")]
-                                            , [ S("-")
-                                              , t1__'
-                                              , S("(")
-                                              , t2__'
-                                              , S(")->")
-                                              ]
-                                            )
-                                          ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
-
-  is-Rel =
-    ?NamedDynamicParametric(_, _)
 
   prettyprint-Rel :
     DynamicEmitted(t1__) -> [ H(
                                 [SOpt(HS(), "0")]
                               , [ S("-")
                                 , t1__'
-                                , S("->")
+                                , S("-->")
                                 ]
                               )
                             ]
@@ -501,30 +494,10 @@ strategies
                                          )
                                        ]
     with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
+    with t2__' := <pp-one-Z(prettyprint-IDNOHYPH)> t2__
 
   is-Rel =
     ?NamedDynamicEmitted(_, _)
-
-  prettyprint-Rel :
-    NamedDynamicEmittedParametric(t1__, t2__, t3__) -> [ H(
-                                                           [SOpt(HS(), "0")]
-                                                         , [ S("-")
-                                                           , t1__'
-                                                           , S("-")
-                                                           , t2__'
-                                                           , S("(")
-                                                           , t3__'
-                                                           , S(")->")
-                                                           ]
-                                                         )
-                                                       ]
-    with t1__' := <pp-H-list(prettyprint-LabelComp|", ")> t1__
-    with t2__' := <pp-one-Z(prettyprint-ID)> t2__
-    with t3__' := <pp-one-Z(prettyprint-ID)> t3__
-
-  is-Rel =
-    ?NamedDynamicEmittedParametric(_, _, _)
 
   prettyprint-LabelComp :
     LabelComp(t1__, t2__) -> [ H(
@@ -537,6 +510,17 @@ strategies
 
   is-LabelComp =
     ?LabelComp(_, _)
+
+  prettyprint-LabelComp :
+    VarLabelComp(t1__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [t1__']
+                            )
+                          ]
+    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+
+  is-LabelComp =
+    ?VarLabelComp(_)
 
   is-Relation =
     fail
@@ -559,6 +543,38 @@ strategies
   is-LabelComp =
     fail
 
+  prettyprint-Relation :
+    amb([h|hs]) -> <prettyprint-Relation> h
+
+  prettyprint-Formula :
+    amb([h|hs]) -> <prettyprint-Formula> h
+
+  prettyprint-Reads :
+    amb([h|hs]) -> <prettyprint-Reads> h
+
+  prettyprint-Source :
+    amb([h|hs]) -> <prettyprint-Source> h
+
+  prettyprint-Target :
+    amb([h|hs]) -> <prettyprint-Target> h
+
+  prettyprint-Rel :
+    amb([h|hs]) -> <prettyprint-Rel> h
+
+  prettyprint-LabelComp :
+    amb([h|hs]) -> <prettyprint-LabelComp> h
+
+
+strategies
+  prettyprint-TermCon =
+    ![S(<is-string>)]
+
+  prettyprint-example =
+    prettyprint-TermCon
+
+  prettyprint-TermCon :
+    amb([h|hs]) -> <prettyprint-TermCon> h
+
 
 strategies
   prettyprint-example =
@@ -566,6 +582,9 @@ strategies
 
   prettyprint-example =
     prettyprint-Cast
+
+  prettyprint-example =
+    prettyprint-List
 
   prettyprint-example =
     prettyprint-Entry
@@ -599,7 +618,7 @@ strategies
                           , [t1__', S(" : "), t2__']
                           )
                         ]
-    with t1__' := <pp-one-Z(prettyprint-Var)> t1__
+    with t1__' := <pp-one-Z(prettyprint-Term)> t1__
     with t2__' := <pp-one-Z(prettyprint-Type)> t2__
 
   is-Cast =
@@ -679,13 +698,13 @@ strategies
                            ]
                          )
                        ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t1__' := <pp-one-Z(prettyprint-TermCon)> t1__
     with t2__' := <pp-H-list(prettyprint-Term|", ")> t2__
 
   is-Term =
     ?Con(_, _)
 
-  prettyprint-Term :
+  prettyprint-List :
     List(t1__) -> [ H(
                       [SOpt(HS(), "0")]
                     , [ S("[ ")
@@ -696,10 +715,10 @@ strategies
                   ]
     with t1__' := <pp-H-list(prettyprint-Term|", ")> t1__
 
-  is-Term =
+  is-List =
     ?List(_)
 
-  prettyprint-Term :
+  prettyprint-List :
     ListTail(t1__, t2__) -> [ H(
                                 [SOpt(HS(), "0")]
                               , [ S("[ ")
@@ -713,8 +732,17 @@ strategies
     with t1__' := <pp-H-list(prettyprint-Term|", ")> t1__
     with t2__' := <pp-one-Z(prettyprint-Term)> t2__
 
-  is-Term =
+  is-List =
     ?ListTail(_, _)
+
+  prettyprint-Term :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Term)
+    where t1__' := <pp-one-Z(prettyprint-List)> t1__
 
   prettyprint-Term :
     Fresh() -> [ H(
@@ -860,8 +888,26 @@ strategies
   is-Cast =
     fail
 
+  is-List =
+    fail
+
   is-Entry =
     fail
 
   is-Term =
     fail
+
+  prettyprint-Var :
+    amb([h|hs]) -> <prettyprint-Var> h
+
+  prettyprint-Cast :
+    amb([h|hs]) -> <prettyprint-Cast> h
+
+  prettyprint-List :
+    amb([h|hs]) -> <prettyprint-List> h
+
+  prettyprint-Entry :
+    amb([h|hs]) -> <prettyprint-Entry> h
+
+  prettyprint-Term :
+    amb([h|hs]) -> <prettyprint-Term> h

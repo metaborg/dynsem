@@ -15,8 +15,11 @@ rules // utils for deterministic variable name generation
 
 rules // projections for sorts
   
-  get-sort-name = ?SortDecl(<id>) + ?InjDecl(<id>, _) + ?SemanticComponent(<id>, _) + ?InternalSortDecl(<id>)
-  get-sort-name = ?SimpleSort(<id>)
+  get-sort-name =
+    ?SortDecl(<id>)
+    + ?SimpleSort(<id>)
+    + ?ListSort(s); !$[L_[<get-sort-name> s]]
+    + ?MapSort(k-s, v-s); !$[L_[<get-sort-name> k-s]_[<get-sort-name> v-s]]
   
   get-listsort-elementname = ?ListSort(<get-sort-name>)
 
@@ -76,7 +79,13 @@ rules
 
   get-relation-changeables:
     Relation(_, Source(_, sc*), _, Target(_, tc*)) -> [sc*, tc*]
-    
+  
+  get-relation-source:
+    Relation(_, Source(src, _), _, _) -> src
+  
+  get-relation-target:
+    Relation(_, _, _, Target(tgt, _)) -> tgt
+  
   get-relation-arrow-name:
     Relation(_, _, arrow, _) -> <get-arrow-name> arrow
   
@@ -343,4 +352,3 @@ rules // utils
   
   foldl(s1, s2) = <foldl(s2)> (<id>, <s1>)
 
-  swap = !(<Snd>, <Fst>)

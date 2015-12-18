@@ -7,6 +7,7 @@ signature
   constructors
     Types: Namespace
     Vars: Namespace
+    VarSchemes: Namespace
     Constructors: Namespace
     Arrows: Namespace
     NativeDTFun: String -> Namespace
@@ -16,17 +17,20 @@ signature
     Property
 
   constructors
-    SuperType: Property
     Type: Property
     NativeTypeJString: Property
+    NativeTypeSuperType : Property
     Use: Property
     
 signature
   sorts
     DynSemType
+    Definition
   
   constructors
     IntType: DynSemType
+    LongType: DynSemType
+    FloatType: DynSemType
     RealType: DynSemType
     BoolType: DynSemType
     StringType: DynSemType
@@ -46,14 +50,13 @@ signature
   constructors
     SortKind: Property
     LanguageSort: SortKind
-  	InternalSort: SortKind
-  	SemanticCompSort: SortKind
   	NativeSort: SortKind
   	SystemSort: SortKind
+  	AliasSort: SortKind
   	
   	ConsKind: Property
   	LanguageCons: ConsKind
-  	InternalCons: ConsKind
+  	ImplicitCons: ConsKind
   	NativeCons: ConsKind
   	NativeOpCons: ConsKind
 

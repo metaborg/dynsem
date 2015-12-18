@@ -6,6 +6,7 @@ imports
   
 imports
   analysis/constructors
+  analysis/analysis-signatures
   analysis/lib-analysis
 
 imports
@@ -15,22 +16,26 @@ imports
 rules
 
   ds2java-atermconversion-constructor:
-    c ->
+    c-def ->
 	    class-body-dec |[
 	      @Override
 	      public IStrategoTerm toStrategoTerm(ITermFactory factory) {
-	      	return factory.makeAppl(
-	      		       factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<length; int-to-string> c-c-ty*), 
-	      		       e_child*
-	      		     );
+	        IStrategoAppl term = factory.makeAppl(
+	            factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<int-to-string> c-arity), 
+	            e_child*
+	        );
+	        if ( getSourceInfo() != null ) {
+	          getSourceInfo().apply(term);
+	        }
+	        return term;
 	      }
 	    ]|
     where
-      x_consname := <ds2java-constr-classname> c;
-      c-def := <lookup-def(|Constructors())> c;
+      x_consname := <ds2java-consdef-classname> c-def;
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def
     where
-      c-name := <def-get-name> c-def;
+      c-name := <consdef-get-name> c-def;
+      c-arity := <consdef-get-arity> c-def;
       e_child* := <map-with-index(ds2java-atermconversion-field)> c-c-ty*
 
   ds2java-atermconversion-field:
@@ -42,7 +47,6 @@ rules
   		f-ty-def := <lookup-def(|Types())> f-ty;
   		f-ty-knd := <lookup-prop(|SortKind())> f-ty-def;
   		<not(?SystemSort())> f-ty-knd;
-  		<not(?SemanticCompSort())> f-ty-knd;
   		<not(?NativeSort())> f-ty-knd
 
   ds2java-atermconversion-name(|e):
@@ -57,26 +61,30 @@ rules
       <?NativeSort()> f-ty-knd
 
   ds2java-atermconversion-name(|e):
-  	f-ty -> e |[ AutoMapUtils.x_map2aterm(e, factory) ]|
-  	where
-  		f-ty-def := <lookup-def(|Types())> f-ty;
-      <lookup-prop(|SortKind())> f-ty-def => SemanticCompSort();
-      x_map2aterm := <def-get-name; ds2java-map2aterm-name> f-ty-def
-  
+    m-ty@MapType(_, _) -> e |[ AutoMapUtils.x_map2aterm(e, factory) ]|
+    where
+      x_map2aterm := <ds2java-map2aterm-name> m-ty
+
   ds2java-atermconversion-name(|e):
     ListType(_) -> e |[ e.toStrategoTerm(factory) ]|
   
   ds2java-atermconversion-name(|e):
-  	IntType() -> e |[ factory.makeInt(e) ]|
+  	IntType() -> e |[ TermUtils.termFromInt(e, factory) ]|
 
   ds2java-atermconversion-name(|e):
-  	RealType() -> e |[ factory.makeReal(e) ]|
+  	LongType() -> e |[ TermUtils.termFromInt(e, factory) ]|
 
   ds2java-atermconversion-name(|e):
-  	BoolType() -> e |[ factory.makeAppl(factory.makeConstructor(e ? "True" : "False", 0)) ]|
+  	FloatType() -> e |[ TermUtils.termFromDouble(e, factory) ]|
+
+  ds2java-atermconversion-name(|e):
+  	RealType() -> e |[ TermUtils.termFromDouble(e, factory) ]|
+
+  ds2java-atermconversion-name(|e):
+    BoolType() -> e |[ TermUtils.termFromBool(e, factory) ]|
   
   ds2java-atermconversion-name(|e):
-  	StringType() -> e |[ factory.makeString(e) ]|
+  	StringType() -> e |[ TermUtils.termFromString(e, factory) ]|
 
 
 

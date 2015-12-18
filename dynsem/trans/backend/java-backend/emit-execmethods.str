@@ -4,6 +4,7 @@ imports
   include/ds
   ds
   libjava-front
+  lib-ds
   lib-ds/lib-match
 
 imports
@@ -13,6 +14,7 @@ imports
   analysis/lib-analysis
   analysis/query
   analysis/constructors
+  analysis/analysis-signatures
   analysis/analysis-rules
   analysis/mark-references
 
@@ -24,22 +26,38 @@ imports
   
 signature
   constructors
-    RuleFail: Premise
+    RuleFail: Statement -> Premise
     JavaStm: List(BlockStm) -> Premise
     Target: ArrowSomething * Term * LabelComp -> Premise
     
 rules
   
-  ds2java-execmethods(|rule*):
-    c -> <mapconcat(ds2java-execmethod(|rule-c*))> applicable-arrow*
+  ds2java-execmethods(on-norule-generator|rule*):
+    c-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-c*))> applicable-arrow*
     where
-      ConstructorType(c-c-ty*, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> c;
-      applicable-arrow* := <lookup-def(|Types()); lookup-applicable-arrow-def> c-ty;
-      rule-c* := <filter(is-rule-matching-cons(|c, <length> c-c-ty*))> rule*
-      
-  ds2java-execmethod(|rule*):
-    (arrow-def, ArrowType(_, bu-ty)) ->
+      ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def;
+      applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
+      c-name := <consdef-get-name> c-def;
+      c-arity := <consdef-get-arity> c-def;
+      rule-c* := <filter(is-rule-matching-cons(|c-name, c-arity))> rule*
+  
+  ds2java-execmethods(on-norule-generator|rule*):
+    ty-def -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
+    where
+      ty := <def-get-name> ty-def;
+      applicable-arrow* := <lookup-applicable-arrow-def> ty;
+      rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
+
+  ds2java-execmethods(on-norule-generator|rule*):
+    ty@ListType(_) -> <mapconcat(ds2java-execmethod(on-norule-generator|rule-l*))> applicable-arrow*
+    where
+      applicable-arrow* := <lookup-applicable-arrow-def> ty;
+      rule-l* := <filter(where(get-rule-relation; get-relation-source; ?Cast(_, <id>); rw-type; ?ty))> rule*
+  
+  ds2java-execmethod(on-norule-generator|rule*):
+    a@(arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec* |[
+        
         public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
           this.specializeChildren(0);
           
@@ -55,54 +73,71 @@ rules
       if rule := <fetch-elem(is-rule-matching-arrow(|arrow-name))> rule*
       then
         {| LiftedMethods:
-          bstm* := <ds2java-rulestatements> rule;
+          bstm* := <ds2java-rulestatements(on-norule-generator|a)> rule;
           more-method* := <bagof-LiftedMethods>
         |}
       else
-        bstm* := bstm* |[ throw new InterpreterException("Rule failure"); ]|;
+        bstm* := <on-norule-generator> a;
         more-method* := []
       end
-
   
-  ds2java-rulestatements:
-    Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, asbound*, patternbound*, premstms*]
+  ds2java-throw-statement:
+    (a-def, ArrowType(_, bu-ty)) -> bstm* |[ throw new InterpreterException("Rule failure", e_aname, this); ]|
     where
-    	if <?As(Var(v), Con(c, patt-var*))> lhs then
-    		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v;
-    		asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
-    	else
-    		Con(c, patt-var*) := lhs;
-    		asbound* := []
-    	end;
+      e_aname := Lit(String([Chars(<def-get-name; escape-javaid> a-def)]))
+  
+  ds2java-supercall:
+    (arrow-def, ArrowType(_, _)) -> bstm* |[ return super.x_methodname(e*); ]|
+    where
+      ArrowType(_, bu-ty) := <lookup-prop(|Type())> arrow-def;
+      x_methodname := <ds2java-methodname> (arrow-def, bu-ty);
+      e* := <lookup-arrow-inputs; map-with-index(\ (idx, _) -> e |[ ~x:$[_[idx]] ]| \)> arrow-def 
+  
+  ds2java-rulestatements(on-norule-generator|arrow):
+    Rule(prem*, _, Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> [component*, patternbound*, premstms*]
+    where
+    	patternbound* := <ds2java-patternbinds> lhs;
     	component* := <map-with-index(ds2java-componentbind)> [r*, sc*];
-    	patternbound* := <map-with-index(ds2java-patternboundbind)> patt-var*;
-      <lookup-def(|Constructors()); lookup-prop(|Type())> c => ConstructorType(_, c-ty);
-      retgt := Target(<lookup-arrow-def> (c-ty, arrow-name), rhs, tc*);
-    	prem := <inject-try-or; insert-target(|retgt)> prem*;
+      lhs-ty := <type-of> lhs;
+      retgt := Target(<lookup-arrow-def> (lhs-ty, arrow-name), rhs, tc*);
+      prem := <inject-try-or(on-norule-generator|arrow); insert-target(|retgt)> prem*;
       premstms* := <ds2java-premise> (prem, [], [])
   
+  ds2java-patternbinds:
+  	Con(c, patt-var*) -> <map-with-index(ds2java-patternboundbind)> patt-var*
+  
+  ds2java-patternbinds:
+    As(Var(v), con) -> [asbound*, con-bind*]
+    where
+    	con-bind* := <ds2java-patternbinds> con;
+    	typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-type-to-unboxed-type> v;
+      asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
+  
+  ds2java-patternbinds:
+  	Cast(Var(v), _) -> asbound*
+  	where
+      typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-type-to-unboxed-type> v;
+      asbound* := bstm* |[ final ~x:typename ~x:v = this; ]|
+      
   ds2java-componentbind:
   	(idx, LabelComp(_, Var(v))) -> bstm |[ final ~x:typename ~x:v = ~x:$[_[idx]]; ]|
   	where
-  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-type-to-unboxed-type> v
 
   ds2java-patternboundbind:
   	(idx, Var(v)) -> bstm |[ final ~x:typename ~x:v = this.~x:$[_[idx]]; ]|
   	where
-  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+  		typename := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-type-to-unboxed-type> v
 
-  inject-try-or:
-    [] -> TryOr(PremiseBlock([]), PremiseBlock([RuleFail()]))
-
-  inject-try-or:
+  inject-try-or(on-norule-generator|arrow):
     p*@[_|_] -> p*
     where
       <not(fetch-elem(premise-can-fail))> p*
-  
-  inject-try-or:
-    p* -> TryOr(PremiseBlock(p*), PremiseBlock([RuleFail()]))
+
+  inject-try-or(on-norule-generator|arrow):
+    p* -> TryOr(PremiseBlock(p*), PremiseBlock([RuleFail(<on-norule-generator> arrow)]))
     where
-      <fetch-elem(premise-can-fail)> p*
+      ?[] <+ fetch-elem(premise-can-fail)
   
   premise-can-fail =
     ?Formula(Match(_, Con(_, _)))
@@ -151,10 +186,11 @@ rules
     where
       x_classname := <ds2java-returnclassname> (arrow-def, bu-ty);
       t* := [t1 | <map(?LabelComp(_, <id>))> tc*];
-      e* := <map(ds2java-term-build)> t*
+      ty* := [bu-ty | <map(?LabelComp(<id>, _))> tc*];
+      e* := <zip(ds2java-term-build)> (ty*, t*)
 
   ds2java-premise:
-    (RuleFail(), _, _) -> bstm* |[ throw new InterpreterException("Rule failure"); ]|
+    (RuleFail(bstm*), _, _) -> bstm*
 
   ds2java-premise:
   	(JavaStm(bstm*), _, _) -> bstm*
@@ -174,15 +210,14 @@ rules
       e_lhs := <ds2java-term-build(|ma-ty)> lhs;
       exec := <ds2java-methodname> (arrow-def, bu-ty);
       e* := <map(\ LabelComp(ty, c) -> <ds2java-term-build-optcast(|ty)> c \)> [r*, sc*];
-      vout-ty := <type-of; ds2java-sort-classname> vdec;
+      vout-ty := <type-of; ds2java-type-to-unboxed-type> vdec;
       bstm1* := <map(?LabelComp(_, <id>)); map-with-index(ds2java-bind-out-var(|x_tmp))> tc*;
       bstm* := <ds2java-premise> on-succ*
-      
 
   ds2java-bind-out-var(|x_result):
     (idx, Var(v)) -> bstm |[ final ~x:v-ty ~x:v = x_result.~x:$[get_[idx]](); ]|
     where
-      v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-sort-classname> v
+      v-ty := <lookup-def(|Vars()); lookup-prop(|Type()); ds2java-type-to-unboxed-type> v
       
   ds2java-premise:
     (MergePoint(p, PremiseBlock(p1*), PremiseBlock(p2*)), _, _) -> <ds2java-premise> (p, p1*, p2*)
@@ -218,7 +253,7 @@ rules
       rules(
         LiftedMethods:+ _ ->
           class-body-dec |[
-            private boolean x_antimatch(~x:<ds2java-sort-classname> vin-ty x_inputtmp) {
+            private boolean x_antimatch(~x:<ds2java-type-to-unboxed-type> vin-ty x_inputtmp) {
               bstm0*
               return true;
             }
@@ -228,9 +263,24 @@ rules
       bstm2* := <ds2java-premise> on-fail*
   
   ds2java-premise:
+    (Formula(Match(lhs@Con(cname, c*), dec@MatchedVar(v))), on-succ*, _) ->
+      bstm* |[
+        final ~x:<ds2java-consdef-classname> c-def ~x:v = e_lhs;
+        bstm*
+      ]|
+    where
+      c-def := <lookup-def(|Constructors())> (cname, <length> c*);
+    	c-kind := <lookup-prop(|ConsKind())> c-def;
+    	<not(?NativeOpCons())> c-kind
+    where
+      v-ty := <type-of> dec;
+      e_lhs := <ds2java-term-build-optcast(|v-ty)> lhs;
+      bstm* := <ds2java-premise> on-succ*
+  
+  ds2java-premise:
     (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
       bstm* |[
-        final ~x:<ds2java-sort-classname> v-ty ~x:v = e_lhs;
+        final ~x:<ds2java-type-to-unboxed-type> v-ty ~x:v = e_lhs;
         bstm*
       ]|
     where
@@ -250,7 +300,8 @@ rules
         }
       ]|
     where
-      consname := <ds2java-constr-classname> c;
+      c-def := <lookup-def(|Constructors())> (c, <length> patt-var*);
+      consname := <ds2java-consdef-classname> c-def;
       x_tmp := <newname> "$tmp";
       bstm1* := <map-with-index(ds2java-bind-out-var(|x_tmp))> patt-var*;
       bstm2* := <ds2java-premise> on-succ*;
@@ -268,8 +319,8 @@ rules
         }
       ]|
     where
-      hd-ty := <type-of; ds2java-sort-classname> hd;
-      tl-ty := <type-of; ds2java-sort-classname> tl;
+      hd-ty := <type-of; ds2java-type-to-unboxed-type> hd;
+      tl-ty := <type-of; ds2java-type-to-unboxed-type> tl;
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
@@ -321,13 +372,12 @@ rules
         }
       ]|
     where
-      ty := <rw-type; ds2java-sort-classname> ty-trm;
+      ty := <rw-type; ds2java-type-to-unboxed-type> ty-trm;
       bstm1* := <ds2java-premise> on-succ*;
       bstm2* := <ds2java-premise> on-fail*
 
-  ds2java-premise = debug(!"Premise failure: "); fail 
-
-
+  ds2java-premise = debug(!"Premise failure: "); fail
+  
   ds2java-term-build-optcast(|ex_ty):
     trm -> <ds2java-term-build(|ex_ty)> trm
     where not(
@@ -335,19 +385,13 @@ rules
     )
   
   ds2java-term-build-optcast(|ex_ty):
-    trm -> <ds2java-term-build(|ex_ty)> Cast(trm, ex_ty')
+    trm -> <ds2java-term-build(|ex_ty)> Cast(trm, ex_ty)
     where
       <type-of> trm => MapType(ALPHATYPE(), ALPHATYPE())
-    where
-    	if !ex_ty => MapType(_, _)
-    	then
-    		ex_ty' := ex_ty
-    	else
-    		ex_ty_def := <lookup-def(|Types())> ex_ty;
-    		<lookup-prop(|SortKind())> ex_ty_def => SemanticCompSort();
-    		ex_ty' := <lookup-prop(|SuperType())> ex_ty_def
-      end
 
+  ds2java-term-build:
+    (ty, t) -> <ds2java-term-build(|ty)> t
+  
   ds2java-term-build(|ex_ty):
     Int(i) -> e |[ i ]|
 
@@ -361,20 +405,20 @@ rules
     VarRef(x_vref) -> e |[ x_vref ]|
   
   ds2java-term-build(|ex_ty):
-    Con(c, child*) -> e |[ new x_consclass(null, e*) ]|
+    Con(c, child*) -> e |[ new x_consclass(this.getSourceInfo(), e*) ]|
     where
-      c-def := <lookup-def(|Constructors())> c;
+      c-def := <lookup-def(|Constructors())> (c, <length> child*);
       c-kind := <lookup-prop(|ConsKind())> c-def;
       <not(?NativeOpCons())> c-kind
     where
-      x_consclass := <ds2java-constr-classname> c;
+      x_consclass := <ds2java-consdef-classname> c-def;
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (c-c-ty*, child*)
-  
+
   ds2java-term-build(|ex_ty):
     Con(c, child*) -> e |[ x_manualpkg.Natives.x_consname(e*) ]|
     where
-    	c-def := <lookup-def(|Constructors())> c;
+    	c-def := <lookup-def(|Constructors())> (c, <length> child*);
       <lookup-prop(|ConsKind())> c-def => NativeOpCons();
       ConstructorType(c-c-ty*, _) := <lookup-prop(|Type())> c-def;
       x_manualpkg := <ManuPackageName>;
@@ -392,35 +436,35 @@ rules
     	e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (farg*, arg*)
   
   ds2java-term-build(|ex_ty):
-  	List([]) -> e |[ NodeList.NIL(x_exptype.class) ]|
+  	List([]) -> e |[ new x_type(this.getSourceInfo()) ]|
   	where
-  		if <?ListType(ex_elem_ty)> ex_ty
+  		if <?ListType(_)> ex_ty
   		then
-  			x_exptype := <ds2java-sort-classname; ds2java-box-java-type> ex_elem_ty
+  			x_type := <ds2java-type-to-unboxed-type> ex_ty
   		else
-  			x_exptype := <ds2java-sort-classname> ex_ty
-  		end
-  		
+  			x_type := <ds2java-type-to-unboxed-type> ListType(ex_ty)
+  		end 
+  
   ds2java-term-build(|ex-ty):
-    ListTail([h-trm], t-trm) -> e |[ new NodeList<x_type>(e_h, e_t) ]|
+    ListTail([h-trm], t-trm) -> e |[ new x_type(this.getSourceInfo(), e_h, e_t) ]|
     where
       h-ty := <type-of> h-trm;
       e_h := <ds2java-term-build(|h-ty)> h-trm;
       h-ex-elem-ty := <?ListType(<id>) <+ !h-ty> ex-ty;
       if <type-of> t-trm => ListType(t-elem-ty)
       then
-        actual_ex_elem_ty := <type-coerce-sym> (h-ex-elem-ty, t-elem-ty)
+        actual_ex_elem_ty := <type-coerce-sym(type-coerce-direct(fail))> (h-ex-elem-ty, t-elem-ty)
       else
         actual_ex_elem_ty := h-ex-elem-ty
       end;
-      x_type := <ds2java-sort-classname; ds2java-box-java-type> actual_ex_elem_ty;
+      x_type := <ds2java-type-to-unboxed-type> ListType(actual_ex_elem_ty);
       e_t := <ds2java-term-build(|ListType(actual_ex_elem_ty))> t-trm
   
   ds2java-term-build(|ex_ty):
     Cast(t, ty-trm) -> e |[ (x_ty) e_t ]|
     where
-      e_t := <ds2java-term-build(|ty-trm)> t;
-      x_ty := <ds2java-sort-classname> ty-trm
+      e_t := <ds2java-term-build(|<try(rw-type)> ty-trm)> t;
+      x_ty := <try(rw-type); ds2java-type-to-unboxed-type> ty-trm
   
   ds2java-term-build(|ex_ty):
     String(s) -> Lit(String([Chars(<unquote(?'"')> s)]))
@@ -445,8 +489,8 @@ rules
   ds2java-term-build(|ex_ty):
     Map([Bind(key, val)]) -> e |[ new com.github.krukow.clj_lang.PersistentTreeMap<x_keyty, x_valty>().plus(e_key, e_val) ]|
     where
-      x_keyty := <type-of; ds2java-sort-classname; ds2java-box-java-type> key;
-      x_valty := <type-of; ds2java-sort-classname; ds2java-box-java-type> val;
+      x_keyty := <type-of; ds2java-type-to-boxed-type> key;
+      x_valty := <type-of; ds2java-type-to-boxed-type> val;
       e_key := <ds2java-term-build(|ALPHATYPE())> key;
       e_val := <ds2java-term-build(|ALPHATYPE())> val
 

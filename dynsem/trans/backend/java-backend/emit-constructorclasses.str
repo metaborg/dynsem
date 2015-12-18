@@ -11,22 +11,22 @@ imports
   backend/java-backend/utils
   backend/java-backend/lib-ds2java
   backend/java-backend/emit-arrows
-  backend/java-backend/analysis-extra
   backend/java-backend/emit-execmethods
   backend/java-backend/emit-atermconversion
+  backend/java-backend/emit-specializercode
 
 rules
   
   // generate classes for constructors
   ds2java-constructorclasses:
-    Module(_, section*) -> <map(def-get-name; ds2java-constructorclass(|rule*))> constr-def*
+    Module(_, section*) -> <map(ds2java-constructorclass(|rule*))> cons-def*
     where
       rule* := <fetch-elem(?Rules(<id>))> section*;
-      constr-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|ConsKind()); not(?NativeOpCons() + NativeCons())))>
+      cons-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|ConsKind()); not(?NativeOpCons() + NativeCons())))>
   
   // generate class for constructor
   ds2java-constructorclass(|rule*):
-    c ->
+    c-def ->
 	    compilation-unit |[
 	      package ~x:<AutoPackageName>;
 	      
@@ -34,9 +34,9 @@ rules
 	      import org.spoofax.interpreter.terms.*;
 	      import com.github.krukow.clj_lang.PersistentTreeMap;
 
-	      public class x_consname extends AbstractNode implements ~x:<ds2java-sort-classname> c-ty {
+        @SuppressWarnings("unused")
+	      public class x_consname extends ~x:<ds2java-type-to-identifier> c-ty {
 	        
-	        private boolean hasSpecialized;
 
 	        ~fdec*
 	        
@@ -63,15 +63,9 @@ rules
 	        
 	          return true;
 	        }
-	        
-	        @Override
-	        public void specializeChildren(int depth) {
-            if (!hasSpecialized) {
-              bstm2*
-              hasSpecialized = true;
-            }
-          }
 
+          ~specializer*
+          
 	        ~exec*
 
 	        ~fget*
@@ -81,8 +75,7 @@ rules
 	      }
 	    ]|
     where
-    	x_consname := <ds2java-constr-classname> c;
-      c-def := <lookup-def(|Constructors())> c;
+    	x_consname := <ds2java-consdef-classname> c-def;
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def
     where
       fdec* := <map-with-index(ds2java-fielddecl)> c-c-ty*;
@@ -90,9 +83,9 @@ rules
     	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*;
     	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
-    	bstm2* := <map-with-index(ds2java-field-specializer)> c-c-ty*;
-    	exec* := <ds2java-execmethods(|rule*)> c;
-    	atermconvert := <ds2java-atermconversion-constructor> c
+    	specializer* := <ds2java-specializer-method> c-c-ty*;
+    	exec* := <ds2java-execmethods(ds2java-supercall|rule*)> c-def;
+    	atermconvert := <ds2java-atermconversion-constructor> c-def
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:
@@ -122,37 +115,4 @@ rules
       <not(ds2java-type-is-primitive)> ty;
       x_idx := <mkidx> idx
 
-  // no specializer code for a non-adoptable child
-  ds2java-field-specializer:
-  	(_, ty) -> []
-  	where
-  		<not(type-is-adoptable + type-is-adoptable-list)> ty
 
-  // specializer code for an adoptable non-list child
-	ds2java-field-specializer:
-	  (idx, ty) ->
-	    stm |[
-	      if (x_idx instanceof IGenericNode) {
-	        ((IGenericNode) x_idx).specialize(depth);
-	      }
-	    ]|
-	  where
-	  	<type-is-adoptable> ty;
-	  	<not(type-is-adoptable-list)> ty;
-	  	x_idx := <mkidx> idx
-
-  // specializer code for adoptable children
-	ds2java-field-specializer:
-		(idx, ty) ->
-		  stm |[
-		    for (x_ty x_idxelem : x_idx) {
-		      if (x_idxelem instanceof IGenericNode) {
-		        ((IGenericNode) x_idxelem).specialize(depth);
-		      }
-		    }
-		  ]|
-		where
-		  <type-is-adoptable-list> ty;
-		  x_ty := <?ListType(<id>); ds2java-sort-classname> ty;
-		  x_idx := <mkidx> idx;
-		  x_idxelem := $[[x_idx]_elem]
