@@ -53,5 +53,13 @@
         </configuration>
       </plugin>
     </plugins>
+    <resources>
+      <resource>
+        <directory>./</directory>
+        <includes>
+          <include>lib/JavaCompilationUnit-15.tbl</include>
+        </includes>
+      </resource>
+    </resources>
   </build>
 </project>
