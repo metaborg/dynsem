@@ -59,5 +59,4 @@
 		<developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
 		<url>https://github.com/metaborg/dynsem</url>
 	</scm>
-
 </project>
