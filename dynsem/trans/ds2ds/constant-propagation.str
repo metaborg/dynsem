@@ -4,7 +4,7 @@ imports
   include/ds
   ds
   lib-ds
-  
+  analysis/mark-references
 
 rules
   
@@ -19,8 +19,11 @@ rules
       tc'* := <constant-propagation-prop> tc*
     |}
   
+  constant-propagation-premises = is-list;  {| PropagateConstant: filter(constant-propagation) |}
+  
   constant-propagation =
-    not(constant-propagation-prop; constant-propagation-rec); constant-propagation-prop
+    not(constant-propagation-prop; constant-propagation-rec);
+    constant-propagation-prop
   
   constant-propagation-prop = alltd(PropagateConstant)
   

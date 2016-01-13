@@ -1,6 +1,6 @@
 package org.metaborg.meta.interpreter.framework;
 
-public interface IList<T> extends IConvertibleToStrategoTerm {
+public interface IList<T> extends IConvertibleToStrategoTerm, InterpreterNode {
 
 	public T head();
 
