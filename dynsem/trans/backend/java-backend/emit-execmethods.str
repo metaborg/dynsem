@@ -41,7 +41,7 @@ rules
       ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def;
       applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
       let
-        prep-rule = unmark-vars; copy-propagation-premises; constant-propagation-premises; mark-var-defs-in-rule; mark-match-vars
+        prep-rule = unmark-vars; copy-propagation-rule; constant-propagation-rule; mark-var-defs-in-rule; mark-match-vars
       in
         rule'* := <map(prep-rule)> rule*
       end
