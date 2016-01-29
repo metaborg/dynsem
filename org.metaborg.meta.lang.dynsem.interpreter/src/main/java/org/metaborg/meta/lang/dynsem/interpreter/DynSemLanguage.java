@@ -1,4 +1,4 @@
-package org.metaborg.meta.dynsem.interpreter;
+package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.IOException;
 

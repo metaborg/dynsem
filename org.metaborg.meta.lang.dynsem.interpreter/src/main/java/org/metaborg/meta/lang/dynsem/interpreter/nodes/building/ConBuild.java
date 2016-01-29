@@ -1,10 +1,12 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.dynsem.interpreter.DynSemContext;
-import org.spoofax.interpreter.terms.IStrategoConstructor;
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
-import com.oracle.truffle.api.CompilerDirectives;
+import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+
+import org.spoofax.interpreter.terms.IStrategoConstructor;
+
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -25,20 +27,32 @@ public class ConBuild extends TermBuild {
 	}
 
 	@Override
-	@ExplodeLoop
-	public IStrategoTerm execute(VirtualFrame frame) {
-		DynSemContext context = getContext();
-		IStrategoTerm[] kids = new IStrategoTerm[children.length];
-		for (int i = 0; i < children.length; i++) {
-			kids[i] = children[i].execute(frame);
-		}
-		if (constructor == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
-			constructor = context.getTermFactory().makeConstructor(name,
-					children.length);
-		}
+	public ITerm execute(VirtualFrame frame) {
+		Class<TermBuild> buildClass = getContext().lookupTermBuildClass(name,
+				children.length);
 
-		return context.getTermFactory().makeAppl(constructor, kids);
+		try {
+			Constructor<TermBuild> constr = buildClass
+					.getConstructor(getConstructorClasses());
+			TermBuild replacement = constr.newInstance(getSourceSection(),
+					children);
+			return replace(replacement).execute(frame);
+		} catch (NoSuchMethodException | SecurityException
+				| InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(
+					"Interpreter crash: term construction specialization failure", e);
+		}
 	}
 
+	@ExplodeLoop
+	@SuppressWarnings("rawtypes")
+	private Class[] getConstructorClasses() {
+		Class[] classes = new Class[children.length + 1];
+		classes[0] = SourceSection.class;
+		for (int i = 1; i <= children.length; i++) {
+			classes[i] = TermBuild.class;
+		}
+		return classes;
+	}
 }

@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -16,7 +16,7 @@ public class VarBind extends MatchPattern {
 	}
 
 	@Override
-	public boolean execute(IStrategoTerm term, VirtualFrame frame) {
+	public boolean execute(ITerm term, VirtualFrame frame) {
 		FrameSlot slot = frame.getFrameDescriptor().findFrameSlot(name);
 		if (frame.getValue(slot) == null) {
 			frame.setObject(slot, term);

@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -16,9 +16,9 @@ public class VarRead extends TermBuild {
 	}
 
 	@Override
-	public IStrategoTerm execute(VirtualFrame frame) {
+	public ITerm execute(VirtualFrame frame) {
 		FrameSlot slot = frame.getFrameDescriptor().findFrameSlot(name);
-		return (IStrategoTerm) frame.getValue(slot);
+		return (ITerm) frame.getValue(slot);
 	}
 
 }

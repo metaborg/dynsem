@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import org.metaborg.meta.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;

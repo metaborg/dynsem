@@ -1,8 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -21,27 +22,32 @@ public class ConMatch extends MatchPattern {
 
 	@Override
 	@ExplodeLoop
-	public boolean execute(IStrategoTerm term, VirtualFrame frame) {
-		if (!Tools.isTermAppl(term)) {
-			return false;
+	public boolean execute(ITerm term, VirtualFrame frame) {
+		Class<MatchPattern> patternClass = getContext()
+				.lookupMatchPatternClass(name, children.length);
+		try {
+			Constructor<MatchPattern> constr = patternClass
+					.getConstructor(getConstructorClasses());
+			MatchPattern replacement = constr.newInstance(getSourceSection(),
+					children);
+			return replace(replacement).execute(term, frame);
+		} catch (NoSuchMethodException | SecurityException
+				| InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(
+					"Interpreter crash: term match specialization failure", e);
 		}
+	}
 
-		IStrategoAppl appl = (IStrategoAppl) term;
-		if (!appl.getConstructor().getName().equals(name)) {
-			return false;
+	@ExplodeLoop
+	@SuppressWarnings("rawtypes")
+	private Class[] getConstructorClasses() {
+		Class[] classes = new Class[children.length + 1];
+		classes[0] = SourceSection.class;
+		for (int i = 1; i <= children.length; i++) {
+			classes[i] = MatchPattern.class;
 		}
-
-		IStrategoTerm[] kids = appl.getAllSubterms();
-		if (kids.length != children.length) {
-			return false;
-		}
-		for (int i = 0; i < children.length; i++) {
-			if (!children[i].execute(kids[i], frame)) {
-				return false;
-			}
-		}
-
-		return true;
+		return classes;
 	}
 
 }

@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -15,8 +15,8 @@ public class ArgRead extends TermBuild {
 	}
 
 	@Override
-	public IStrategoTerm execute(VirtualFrame frame) {
-		return (IStrategoTerm) frame.getArguments()[index];
+	public ITerm execute(VirtualFrame frame) {
+		return (ITerm) frame.getArguments()[index];
 	}
 
 }

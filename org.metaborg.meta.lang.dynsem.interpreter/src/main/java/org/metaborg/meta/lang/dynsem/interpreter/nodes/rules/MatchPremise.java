@@ -1,9 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
+import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -22,7 +23,7 @@ public class MatchPremise extends Premise {
 
 	@Override
 	public void execute(VirtualFrame frame) {
-		IStrategoTerm trm = term.execute(frame);
+		ITerm trm = term.execute(frame);
 		boolean matchsuccess = pat.execute(trm, frame);
 
 		if (!matchsuccess) {
