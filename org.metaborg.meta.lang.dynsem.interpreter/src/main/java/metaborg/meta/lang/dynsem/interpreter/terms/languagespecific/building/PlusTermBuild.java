@@ -1,4 +1,6 @@
-package metaborg.meta.lang.dynsem.interpreter.terms;
+package metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.building;
+
+import metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.PlusTerm;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
@@ -18,8 +20,6 @@ public class PlusTermBuild extends TermBuild {
 
 	@Override
 	public PlusTerm execute(VirtualFrame frame) {
-
-		// TODO Auto-generated method stub
 		return null;
 	}
 

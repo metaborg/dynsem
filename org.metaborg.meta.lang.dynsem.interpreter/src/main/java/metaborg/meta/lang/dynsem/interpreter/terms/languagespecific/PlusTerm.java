@@ -1,4 +1,4 @@
-package metaborg.meta.lang.dynsem.interpreter.terms;
+package metaborg.meta.lang.dynsem.interpreter.terms.languagespecific;
 
 import com.oracle.truffle.api.CompilerDirectives.ValueType;
 

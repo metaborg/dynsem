@@ -1,4 +1,7 @@
-package metaborg.meta.lang.dynsem.interpreter.terms;
+package metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.matching;
+
+import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.PlusTerm;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 
