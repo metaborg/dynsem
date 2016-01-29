@@ -1,6 +1,5 @@
 package metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.matching;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.PlusTerm;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
@@ -21,7 +20,7 @@ public class PlusMatchPattern extends MatchPattern {
 	}
 
 	@Override
-	public boolean execute(ITerm term, VirtualFrame frame) {
+	public boolean execute(Object term, VirtualFrame frame) {
 		if (term instanceof PlusTerm) {
 			PlusTerm plus = (PlusTerm) term;
 			return p1.execute(plus.get1(), frame)

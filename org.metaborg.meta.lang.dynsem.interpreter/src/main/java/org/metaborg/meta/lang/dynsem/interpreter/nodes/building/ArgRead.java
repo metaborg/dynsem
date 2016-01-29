@@ -1,7 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -15,8 +13,8 @@ public class ArgRead extends TermBuild {
 	}
 
 	@Override
-	public ITerm execute(VirtualFrame frame) {
-		return (ITerm) frame.getArguments()[index];
+	public Object executeGeneric(VirtualFrame frame) {
+		return frame.getArguments()[index];
 	}
 
 }

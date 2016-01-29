@@ -3,8 +3,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -27,7 +25,7 @@ public class ConBuild extends TermBuild {
 	}
 
 	@Override
-	public ITerm execute(VirtualFrame frame) {
+	public Object executeGeneric(VirtualFrame frame) {
 		Class<TermBuild> buildClass = getContext().lookupTermBuildClass(name,
 				children.length);
 
@@ -36,12 +34,13 @@ public class ConBuild extends TermBuild {
 					.getConstructor(getConstructorClasses());
 			TermBuild replacement = constr.newInstance(getSourceSection(),
 					children);
-			return replace(replacement).execute(frame);
+			return replace(replacement).executeGeneric(frame);
 		} catch (NoSuchMethodException | SecurityException
 				| InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(
-					"Interpreter crash: term construction specialization failure", e);
+					"Interpreter crash: term construction specialization failure",
+					e);
 		}
 	}
 

@@ -3,8 +3,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
@@ -21,8 +19,7 @@ public class ConMatch extends MatchPattern {
 	}
 
 	@Override
-	@ExplodeLoop
-	public boolean execute(ITerm term, VirtualFrame frame) {
+	public boolean execute(Object term, VirtualFrame frame) {
 		Class<MatchPattern> patternClass = getContext()
 				.lookupMatchPatternClass(name, children.length);
 		try {

@@ -23,11 +23,11 @@ public class RuleTarget extends Node {
 	@ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
 		RuleResult res = new RuleResult();
-		res.result = rhsNode.execute(frame);
-		IStrategoTerm[] componentValues = new IStrategoTerm[componentNodes.length];
+		res.result = rhsNode.executeGeneric(frame);
+		Object[] componentValues = new IStrategoTerm[componentNodes.length];
 
 		for (int i = 0; i < componentNodes.length; i++) {
-			componentValues[i] = componentNodes[i].execute(frame);
+			componentValues[i] = componentNodes[i].executeGeneric(frame);
 		}
 
 		res.components = componentValues;

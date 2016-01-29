@@ -34,7 +34,7 @@ public class ReductionPremise extends Premise {
 	@Override
 	public void execute(VirtualFrame frame) {
 		IStrategoTerm[] componentArgs = evalComponentsNodes(frame);
-		IStrategoTerm reductionTerm = reductionNode.execute(frame);
+		IStrategoTerm reductionTerm = reductionNode.executeGeneric(frame);
 
 		if (!Tools.isTermAppl(reductionTerm)) {
 			throw new RuntimeException("Cannot reduce on term: "
@@ -52,7 +52,7 @@ public class ReductionPremise extends Premise {
 	private IStrategoTerm[] evalComponentsNodes(VirtualFrame frame) {
 		IStrategoTerm[] roArgs = new IStrategoTerm[componentsNodes.length];
 		for (int i = 0; i < componentsNodes.length; i++) {
-			roArgs[i] = componentsNodes[i].execute(frame);
+			roArgs[i] = componentsNodes[i].executeGeneric(frame);
 		}
 		return roArgs;
 	}

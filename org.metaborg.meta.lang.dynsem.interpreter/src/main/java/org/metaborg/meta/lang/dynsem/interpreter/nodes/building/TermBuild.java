@@ -1,7 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 
@@ -22,5 +20,6 @@ public abstract class TermBuild extends Node {
 		return DynSemLanguage.INSTANCE.findContext0(createContext);
 	}
 
-	public abstract ITerm execute(VirtualFrame frame);
+	public abstract Object executeGeneric(VirtualFrame frame);
+	
 }
