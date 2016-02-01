@@ -48,3 +48,4 @@ menus
     action  : "Constant propagation"   = constant-propagation-editor (openeditor) (realtime) (source)
     action  : "Generate Java"          = ds2java-editor (source)
     action  : "Generate Coq"           = generate-coq (openeditor) (meta)
+    action  : "Generate interpretable" = ds-to-interp-editor

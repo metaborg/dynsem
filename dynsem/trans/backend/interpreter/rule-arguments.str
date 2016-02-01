@@ -1,0 +1,38 @@
+module backend/interpreter/rule-arguments
+
+imports
+  include/ds
+  ds
+  backend/interpreter/signature
+
+rules
+
+  mark-rule-arguments-module:
+    m@Module(_, _) -> Module($[[name]_markedargs], section*)
+    where
+      <mark-rule-arguments> m => Module(name, section*)
+      
+  mark-rule-arguments = alltd(?Rule(_, _, _); mark-rule-arguments-rule)
+  
+  mark-rule-arguments-rule:
+    Rule(prem*, infer, Relation(reads, source, arrow, target))
+      -> Rule(prem'*, infer, Relation(reads', source', arrow, target'))
+    with {| RenameArgument, NextArgument:
+      rules(NextArgument: _ -> 0);
+      reads' := <alltd(mark-rule-arguments-bind)> reads;
+      source' := <alltd(mark-rule-arguments-bind)> source;
+      prem'* := <alltd(mark-rule-arguments-read)> prem*;
+      target' := <alltd(mark-rule-arguments-read)> target
+    |}
+
+
+  mark-rule-arguments-bind:
+    VarRef(v) -> ArgBind(i)
+    with
+      i := <NextArgument>;
+      rules(
+        RenameArgument: VarRef(v) -> ArgRead(i)
+        NextArgument: _ -> <inc> i
+      )
+
+  mark-rule-arguments-read = RenameArgument

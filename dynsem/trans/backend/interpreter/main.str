@@ -7,75 +7,123 @@ imports
   ds
 
 imports
-  ds2ds/sugar
-  analysis/main
-  analysis/lib-analysis
-  analysis/constructors
+  backend/interpreter/-
+  ds2ds/-
+  analysis/-
   
 rules
-  
-  ds2interpreter-editor:
-    (_, position, ast, path, project-path) -> None()
+
+  ds-to-interp-editor:
+    (_, position, ast, path, project-path) -> (filename, result)
     with
-      init-options(|path, project-path);
-      log-timed(
-        class* := <ds2java> ast | "Generating interpreter"
-      )
-
-  ds2java = 
-    log-timed(
-      desugar-top | "Desugaring"
-    );
-    
-    log-timed(
-      escape-variable-names | "Escaping variable names"
-    );
-    
-    m-in-analysis(
-      m-in-backend-extra-analysis(
-        // where(
-        //   get-msgs(mkmsg|Error()) => error*
-        //   ;if <?[_|_]> error*
-        //    then
-        //      <fatal-err(|"Errors encountered: ")> error*
-        //    end
-        // )
-	      w-log-timed(
-	        ds2java-abstracts;
-	        write-classes
-	        | "Gen interfaces for sorts")
-	      
-	      ;w-log-timed(
-	        ds2java-arrowresults;
-	        write-classes
-	        | "Gen result classes")
-         
-	      ;w-log-timed(
-	       	ds2java-constructorclasses;
-	       	write-classes
-	        | "Gen constructor classes")
-	      
-	      ;w-log-timed(
-	        ds2java-listclasses;
-	        write-classes
-	        | "Gen list classes")
-	       
-	      ;w-log-timed(
-	         ds2java-genericnodes;
-	         write-classes
-	         | "Gen specializer classes")
-	      
-	      ;w-log-timed(
-	         ds2java-maputils;
-	         write-classes
-	         | "Gen map utilities"
-	       )
-      )
-    )
-
-rules /* escape variable names */
-
-  escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
+      filename := <guarantee-extension(|"interpretable.aterm")> path;
+      result := <ds-to-interp-main(|path, project-path)> ast
   
-  escape-identifier = string-replace(|"'", "_"); string-replace(|"-", "$")
+  ds-to-interp-main(|path, project-path):
+    ast -> result
+    with
+      in-project-path(
+        ds-to-interp-init-options(|path, project-path);
+        <log-timed(
+          log-timed(
+            include-imports | "Import flattening"
+          );
+          log-timed(
+            desugar-top; fuse-sections | "Desugaring"
+          );
+          log-timed(
+            desugar-varschemes-module | "Desugaring variable schemes"
+          );
+          log-timed(
+            add-extra-typeannos-module | "Adding extra typeannos"
+          );
+          log-timed(
+            desugar-aliases-module | "Desugaring aliases"
+          );
+          log-timed(
+            factorize-module | "Factorization 1/2"
+          );
+          log-timed(
+            expand-implicits-module | "Implicits expansion"
+          );
+          log-timed(
+            factorize-module | "Factorization 2/2"
+          );
+          log-timed(
+            explicate-module | "Explication"
+          );
+          log-timed(
+            copy-propagation-module | "Copy propagation"
+          );
+          log-timed(
+            constant-propagation-module | "Constant propagation"
+          );
+          log-timed(
+            mark-rule-arguments-module | "Marking arguments"
+          )
+          
+          
+          
+//          log-timed(
+//            sugar-all; pp-debug | "Pretty Printing"
+//          )
+        | "Total")> ast => result
+      |project-path)
+  
+//  ds2java = 
+//    log-timed(
+//      desugar-top | "Desugaring"
+//    );
+//    
+//    log-timed(
+//      escape-variable-names | "Escaping variable names"
+//    );
+//    
+//    m-in-analysis(
+//      m-in-backend-extra-analysis(
+//        // where(
+//        //   get-msgs(mkmsg|Error()) => error*
+//        //   ;if <?[_|_]> error*
+//        //    then
+//        //      <fatal-err(|"Errors encountered: ")> error*
+//        //    end
+//        // )
+//	      w-log-timed(
+//	        ds2java-abstracts;
+//	        write-classes
+//	        | "Gen interfaces for sorts")
+//	      
+//	      ;w-log-timed(
+//	        ds2java-arrowresults;
+//	        write-classes
+//	        | "Gen result classes")
+//         
+//	      ;w-log-timed(
+//	       	ds2java-constructorclasses;
+//	       	write-classes
+//	        | "Gen constructor classes")
+//	      
+//	      ;w-log-timed(
+//	        ds2java-listclasses;
+//	        write-classes
+//	        | "Gen list classes")
+//	       
+//	      ;w-log-timed(
+//	         ds2java-genericnodes;
+//	         write-classes
+//	         | "Gen specializer classes") 
+//	      
+//	      ;w-log-timed(
+//	         ds2java-maputils;
+//	         write-classes
+//	         | "Gen map utilities"
+//	       )
+//      )
+//    )
+
+//rules /* escape variable names */
+//
+//  escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
+//  
+//  escape-identifier = string-replace(|"'", "_"); string-replace(|"-", "$")
   

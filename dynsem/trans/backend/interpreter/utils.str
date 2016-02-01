@@ -1,0 +1,12 @@
+module backend/interpreter/utils
+
+rules
+
+  ds-to-interp-init-options(|path, project-path) =
+    rules(
+      AutoPackageName: _ -> <with(fail|"AutoPackageName used but not set")>
+      ManuPackageName: _ -> <with(fail|"ManuPackageName used but not set")>
+      CurrentFilePath: _ -> path
+      ProjectPath: _ -> project-path
+      GenDir: _ -> <with(fail|"GenDir used but not set")>
+    )

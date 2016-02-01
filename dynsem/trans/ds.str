@@ -29,6 +29,7 @@ imports
 	analysis/constructors
 	backend/java-backend/main
 	backend/java-backend/utils
+	backend/interpreter/main
 	
 signature
   constructors
