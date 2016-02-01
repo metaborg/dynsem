@@ -1,12 +1,18 @@
 module backend/interpreter/utils
 
+imports
+  editor-common.generated
+  lib-ds
+  backend/java-backend/utils/java-utils
+  
 rules
 
   ds-to-interp-init-options(|path, project-path) =
     rules(
-      AutoPackageName: _ -> <with(fail|"AutoPackageName used but not set")>
-      ManuPackageName: _ -> <with(fail|"ManuPackageName used but not set")>
+      GenDir: _ -> <read-property(|project-path, "target.project", $[[project-path]/editor/java])> $[[project-path]/dynsem.properties]
       CurrentFilePath: _ -> path
       ProjectPath: _ -> project-path
-      GenDir: _ -> <with(fail|"GenDir used but not set")>
+      PackageName: _ -> <read-property(|project-path, "target.package", $[[<language>].generated.interpreter])> $[[project-path]/dynsem.properties]
     )
+    
+  ds-to-interp-write-classes = emit-java-classes(overwrite-merge-strategy, id | <PackageName>, <GenDir>)

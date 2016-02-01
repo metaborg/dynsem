@@ -17,7 +17,13 @@ rules
     (_, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"interpretable.aterm")> path;
-      result := <ds-to-interp-main(|path, project-path)> ast
+      debug(!"a ");
+      result := <ds-to-interp-main(|path, project-path)> ast;
+      debug(!"b ");
+      class* := <ds-to-interp-terms(|path, project-path)> result;
+      debug(!"c ");
+      <debug(!"c1 "); ds-to-interp-write-classes; debug(!"c2 ")> class*
+      ;debug(!"d ")
   
   ds-to-interp-main(|path, project-path):
     ast -> result
@@ -61,69 +67,20 @@ rules
           log-timed(
             mark-rule-arguments-module | "Marking arguments"
           )
-          
-          
-          
-//          log-timed(
-//            sugar-all; pp-debug | "Pretty Printing"
-//          )
         | "Total")> ast => result
       |project-path)
   
-//  ds2java = 
-//    log-timed(
-//      desugar-top | "Desugaring"
-//    );
-//    
-//    log-timed(
-//      escape-variable-names | "Escaping variable names"
-//    );
-//    
-//    m-in-analysis(
-//      m-in-backend-extra-analysis(
-//        // where(
-//        //   get-msgs(mkmsg|Error()) => error*
-//        //   ;if <?[_|_]> error*
-//        //    then
-//        //      <fatal-err(|"Errors encountered: ")> error*
-//        //    end
-//        // )
-//	      w-log-timed(
-//	        ds2java-abstracts;
-//	        write-classes
-//	        | "Gen interfaces for sorts")
-//	      
-//	      ;w-log-timed(
-//	        ds2java-arrowresults;
-//	        write-classes
-//	        | "Gen result classes")
-//         
-//	      ;w-log-timed(
-//	       	ds2java-constructorclasses;
-//	       	write-classes
-//	        | "Gen constructor classes")
-//	      
-//	      ;w-log-timed(
-//	        ds2java-listclasses;
-//	        write-classes
-//	        | "Gen list classes")
-//	       
-//	      ;w-log-timed(
-//	         ds2java-genericnodes;
-//	         write-classes
-//	         | "Gen specializer classes") 
-//	      
-//	      ;w-log-timed(
-//	         ds2java-maputils;
-//	         write-classes
-//	         | "Gen map utilities"
-//	       )
-//      )
-//    )
+  ds-to-interp-terms(|path, project-path) =
+    in-project-path(
+        ds-to-interp-init-options(|path, project-path);
+        log-timed(
+          debug(!"ba ");
+          ds-to-interp-terms-module;
+          debug(!"bb ") | "Language-specific terms"
+        )
+    |project-path)
 
-//rules /* escape variable names */
-//
-//  escape-variable-names =  alltd(Var(escape-identifier) <+ VarRef(escape-identifier) <+ MatchedVar(escape-identifier))
-//  
-//  escape-identifier = string-replace(|"'", "_"); string-replace(|"-", "$")
-  
+    
+    
+    
+    
