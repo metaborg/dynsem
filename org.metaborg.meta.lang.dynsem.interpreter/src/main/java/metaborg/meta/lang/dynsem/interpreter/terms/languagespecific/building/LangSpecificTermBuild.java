@@ -1,6 +1,5 @@
 package metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.building;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.IExprTerm;
 import metaborg.meta.lang.dynsem.interpreter.terms.languagespecific.TypesGen;
 
@@ -14,11 +13,6 @@ public abstract class LangSpecificTermBuild extends TermBuild {
 
 	public LangSpecificTermBuild(SourceSection source) {
 		super(source);
-	}
-
-	public ITerm executeITerm(VirtualFrame frame)
-			throws UnexpectedResultException {
-		return TypesGen.expectITerm(executeGeneric(frame));
 	}
 
 	public IExprTerm executeIExprTerm(VirtualFrame frame)
