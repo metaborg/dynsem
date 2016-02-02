@@ -37,7 +37,6 @@ public class read_property_0_3 extends Strategy {
 
 		File propfile = new File(Tools.javaString(current));
 		if (!(propfile.exists() && propfile.canRead())) {
-			System.out.println("Hello 1");
 			return defaultvalue;
 		}
 
@@ -51,7 +50,6 @@ public class read_property_0_3 extends Strategy {
 		String propval = prop.getProperty(Tools.javaString(tpropname));
 
 		if (propval == null) {
-			System.out.println("Hello 2");
 			return defaultvalue;
 		}
 
