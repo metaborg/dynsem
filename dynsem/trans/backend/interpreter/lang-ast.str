@@ -20,7 +20,9 @@ rules
     <ds-to-interp-terms-building; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
     debug(!"generating termmatching classes");
     <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
-    debug(!"done generating classes")    
+    debug(!"generating term registry class");
+    <fetch-elem(?Constructors(<id>)); ds-to-interp-terms-registry; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
+    debug(!"done generating classes")
 
 rules /* Sort & Constructor classes */
 
@@ -310,6 +312,86 @@ rules /* term matching */
 
   ds-to-interp-terms-matching-matchdescend:
     (i, e) -> e |[ e && ~x:$[p_[i]].execute(term.~x:$[get_[i]](), frame) ]|
+
+rules /* term registry */
+
+
+  ds-to-interp-terms-registry:
+    consdecl* ->
+      compilation-unit |[
+        package ~x:<TopPackageName>;
+        
+        import java.util.HashMap;
+        import java.util.Map;
+        
+        import ~x:<TermBuildPackageName>.*;
+        import ~x:<TermMatchPackageName>.*;
+        
+        import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.*;
+        
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public class TermRegistry implements ITermRegistry {
+        
+          private final Map<String, ITermBuildFactory> builderFactories = new HashMap<String, ITermBuildFactory>();
+          private final Map<String, ITermMatchPatternFactory> matcherFactories = new HashMap<String, ITermMatchPatternFactory>();
+        
+          public TermRegistry() {
+            init();
+          }
+        
+          private void init() {
+            bstm0*
+          }
+        
+          @Override
+          public ITermBuildFactory getBuildFactory(String constr, int arity) {
+            return builderFactories.get(constr + "/" + arity);
+          }
+        
+          @Override
+          public ITermMatchPatternFactory getMatcherFactory(String constr, int arity) {
+            return matcherFactories.get(constr + "/" + arity);
+          }
+        }
+      ]|
+    where
+      bstm0* := <ds-to-interp-terms-registry-inits> consdecl* 
+
+
+  ds-to-interp-terms-registry-inits = mapconcat(ds-to-interp-terms-registry-init)
+  
+  ds-to-interp-terms-registry-init:
+    dec@ConsDecl(name, kid*, _, _) ->
+      bstm* |[
+       builderFactories.put(e_conkey, new ITermBuildFactory() {
+    
+          @Override
+          public x_termbuildclass apply(SourceSection source,
+              TermBuild... children) {
+            return x_termbuildNODEGEN.create(source, e1*);
+          }
+        });
+
+        matcherFactories.put(e_conkey, new ITermMatchPatternFactory() {
+    
+          @Override
+          public MatchPattern apply(SourceSection source,
+              MatchPattern... children) {
+            return x_termmatchNODEGEN.create(source, e2*);
+          }
+        });
+      ]|
+    with
+      e_conkey := Lit(String([Chars($[[name]/[<length> kid*]])]));
+      x_termbuildclass := $[[<ds-to-interp-terms-types-name> dec]Build];
+      x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
+      e1* := <map-with-index(\ (i, s) -> e |[ (~x:<ds-to-interp-terms-building-absbuildname> s) children[~i:<dec; int-to-string> i] ]| \)> kid*;
+      e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
 
 rules /* utils */
 
