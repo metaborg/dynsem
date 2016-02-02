@@ -12,7 +12,7 @@ rules
       GenDir: _ -> <read-property(|"target.project", $[[project-path]/editor/java]); make-absolute-path(|project-path)> $[[project-path]/dynsem.properties]
       CurrentFilePath: _ -> path
       ProjectPath: _ -> project-path
-      PackageName: _ -> <read-property(|"target.package", $[[<language; debug(!"language is ")>].generated.interpreter]); debug(!"Package reported: ")> $[[project-path]/dynsem.properties]
+      PackageName: _ -> <read-property(|"target.package", $[[<language; debug(!"language is ")>].generated.interpreter])> $[[project-path]/dynsem.properties]
     )
     
   ds-to-interp-write-classes = emit-java-classes(overwrite-merge-strategy, id | <PackageName>, <GenDir>)
