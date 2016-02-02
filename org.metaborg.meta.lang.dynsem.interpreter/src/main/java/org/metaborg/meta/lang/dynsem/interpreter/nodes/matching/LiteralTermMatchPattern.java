@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
+import metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -23,8 +23,8 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 
 		@Override
 		public boolean execute(Object term, VirtualFrame frame) {
-			if (BuiltinTypes.isString(term)) {
-				String s = BuiltinTypes.asString(term);
+			if (BuiltinTypesGen.isString(term)) {
+				String s = BuiltinTypesGen.asString(term);
 				return lit.equals(s);
 			}
 			return false;
@@ -44,8 +44,8 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 
 		@Override
 		public boolean execute(Object term, VirtualFrame frame) {
-			if (BuiltinTypes.isInteger(term)) {
-				int i = BuiltinTypes.asInteger(term);
+			if (BuiltinTypesGen.isInteger(term)) {
+				int i = BuiltinTypesGen.asInteger(term);
 				return lit == i;
 			}
 			return false;

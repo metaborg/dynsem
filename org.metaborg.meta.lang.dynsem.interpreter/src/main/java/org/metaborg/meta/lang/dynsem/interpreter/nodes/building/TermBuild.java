@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
+import metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
@@ -29,22 +29,22 @@ public abstract class TermBuild extends Node {
 
 	public String executeString(VirtualFrame frame)
 			throws UnexpectedResultException {
-		return BuiltinTypes.expectString(executeGeneric(frame));
+		return BuiltinTypesGen.expectString(executeGeneric(frame));
 	}
 
 	public int executeInteger(VirtualFrame frame)
 			throws UnexpectedResultException {
-		return BuiltinTypes.expectInteger(executeGeneric(frame));
+		return BuiltinTypesGen.expectInteger(executeGeneric(frame));
 	}
 
 	public ITerm executeITerm(VirtualFrame frame)
 			throws UnexpectedResultException {
-		return BuiltinTypes.expectITerm(executeGeneric(frame));
+		return BuiltinTypesGen.expectITerm(executeGeneric(frame));
 	}
 
 	public IConTerm executeIConTerm(VirtualFrame frame)
 			throws UnexpectedResultException {
-		return BuiltinTypes.expectIConTerm(executeGeneric(frame));
+		return BuiltinTypesGen.expectIConTerm(executeGeneric(frame));
 	}
 
 }
