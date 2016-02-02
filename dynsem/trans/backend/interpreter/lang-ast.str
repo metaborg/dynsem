@@ -193,40 +193,66 @@ rules /* term building */
   ds-to-interp-terms-building = is-list; fetch-elem(?Constructors(<id>)); map(ds-to-interp-terms-building)
   
   ds-to-interp-terms-building:
-    dec@ConsDecl(_, _, _, _) ->
+    dec@ConsDecl(_, kid*, s, _) ->
       compilation-unit |[
         package ~x:<TermBuildPackageName>;
       
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-        import ~x:$[[<TermsPackageName>].[<ds-to-interp-terms-types-name> dec]];
+        import ~x:$[[<TermsPackageName>].*];
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.nodes.UnexpectedResultException;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
+        import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.source.SourceSection;
-        
-        public class ~x:$[[<ds-to-interp-terms-types-name> dec]Build] extends ~x:$[Abstract[<language>]TermBuild] {
-//        
-//          @Child protected LangSpecificTermBuild e1;
-//          @Child protected LangSpecificTermBuild e2;
-//        
-//          public PlusTermBuild(SourceSection source, TermBuild e1, TermBuild e2) {
-//            super(source);
-//            this.e1 = (LangSpecificTermBuild) e1;
-//            this.e2 = (LangSpecificTermBuild) e2;
-//          }
-//        
-//          @Override
-//          public PlusTerm executeGeneric(VirtualFrame frame) {
-//            try {
-//              return new PlusTerm(e1.executeIExprTerm(frame),
-//                  e2.executeIExprTerm(frame));
-//            } catch (UnexpectedResultException e) {
-//              throw new RuntimeException("Unexpected subterm: " + e.getResult());
-//            }
-//          }
-//
+
+        @NodeChildren({ ~child* })
+        public abstract class x_class extends ~x:$[A[<ds-to-interp-terms-types-name> s]Build] {
+
+          public x_class(SourceSection source) {
+            super(source);
+          }
+          
+          @Specialization
+          public x_termclass doTyped(param0*) {
+            return new x_termclass(e0*);
+          }
+          
         }
       ]|
+    where
+      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
+      child* := <ds-to-interp-terms-building-childannos> kid*;
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      param0* := <ds-to-interp-terms-building-params> kid*;
+      e0* := <ds-to-interp-terms-building-exprs> kid*
+
+  ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
+  
+  ds-to-interp-terms-building-childanno:
+    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = x_childterm.class) ]|
+    where
+      x_childterm := <ds-to-interp-terms-building-absbuildname> s
+  
+  ds-to-interp-terms-building-absbuildname:
+    sref@SimpleSort(s) -> $[A[<ds-to-interp-terms-types-name> sref]Build]
+    where
+      <not(is-builtin-type)> s
+
+  ds-to-interp-terms-building-absbuildname:
+    SimpleSort("String") -> "LiteralTermBuild.StringLiteralTermBuild"
+  
+  ds-to-interp-terms-building-absbuildname:
+    SimpleSort("Int") -> "LiteralTermBuild.IntLiteralTermBuild"
+
+  ds-to-interp-terms-building-params = map-with-index(ds-to-interp-terms-building-param)
+  
+  ds-to-interp-terms-building-param:
+    (i, s) -> param |[ final ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
+
+  ds-to-interp-terms-building-exprs = map-with-index(ds-to-interp-terms-building-expr)
+  
+  ds-to-interp-terms-building-expr:
+    (i, _) -> e |[ ~x:$[tb_[i]] ]|
 
 rules /* term matching */
 
