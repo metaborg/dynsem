@@ -45,7 +45,7 @@ rules
       compilation-unit |[
         package ~x:<debug(!"ba1a1c1 "); PackageName; debug(!"ba1a1c2 ")>;
         
-        public class ~x:<ds-to-interp-terms-types-name> dec extends ~x:<ds-to-interp-terms-types-name> s {
+        public class ~x:<ds-to-interp-terms-types-name> dec implements ~x:<ds-to-interp-terms-types-name> s {
           
         }
       ]|
@@ -65,7 +65,7 @@ rules
     where 
       filter(?Sorts(<id>) + ?Constructors(<id>));
       concat;
-      qsort(?(SortDecl(_), ConsDecl(_, _, _, _)));
+      qsort(?(ConsDecl(_, _, _, _), SortDecl(_)));
       map(ds-to-interp-terms-types-name);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))) => type*
   
@@ -76,7 +76,7 @@ rules
     SimpleSort(s) -> $[I[s]Term]
   
   ds-to-interp-terms-types-name:
-    ConsDecl(name, _, _, _) -> $[[name]Term]
+    ConsDecl(name, child*, _, _) -> $[[name]_[<length> child*]_Term]
 
   ds-to-interp-terms-report-unsupported = debug(!"Unsupported signature section "); ![]
 
