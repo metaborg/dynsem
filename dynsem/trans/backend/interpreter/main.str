@@ -14,7 +14,7 @@ imports
 rules
 
   ds-to-interp-editor:
-    (_, position, ast, path, project-path) -> ($[[<AtermGenDir>]/[<language>].aterm], result)
+    (_, position, ast, path, project-path) -> ($[[<AtermGenDir>]/specification.aterm], result)
     with
       debug(!"a ");
       result := <ds-to-interp-main(|path, project-path)> ast;
