@@ -256,8 +256,60 @@ rules /* term building */
 
 rules /* term matching */
 
+  ds-to-interp-terms-matching = is-list; fetch-elem(?Constructors(<id>)); map(ds-to-interp-terms-matching)
+  
   ds-to-interp-terms-matching:
-    sig* -> []
+    dec@ConsDecl(_, kid*, _, _) -> 
+      compilation-unit |[
+        package ~x:<TermMatchPackageName>;
+        
+        import ~x:<TermsPackageName>.x_termclass;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+        
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_matcherclass extends MatchPattern {
+        
+          ~fdec*
+        
+          public x_matcherclass(SourceSection source, param0*) {
+            super(source);
+            bstm0*
+          }
+        
+          @Specialization
+          public boolean execute(x_termclass term, VirtualFrame frame) {
+            return e1;
+          }
+        }
+      ]|
+    where
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_matcherclass := $[[x_termclass]MatchPattern];
+      fdec* := <ds-to-interp-terms-matching-fdecs> kid*; 
+      param0* := <ds-to-interp-terms-matching-initparams> kid*;
+      bstm0* := <ds-to-interp-terms-matching-finits> kid*;
+      e1 := <foldr(!e |[ true ]|, ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> kid*)
+      
+  ds-to-interp-terms-matching-initparams = map-with-index(ds-to-interp-terms-matching-initparam)
+  
+  ds-to-interp-terms-matching-initparam:
+    (i, s) -> param |[ MatchPattern ~x:$[p_[i]] ]|
+
+  ds-to-interp-terms-matching-fdecs = map-with-index(ds-to-interp-terms-matching-fdec)
+  
+  ds-to-interp-terms-matching-fdec:
+    (i, _) -> class-body-dec |[ @Child protected MatchPattern ~x:$[p_[i]]; ]|
+
+  ds-to-interp-terms-matching-finits = map-with-index(ds-to-interp-terms-matching-finit)
+  
+  ds-to-interp-terms-matching-finit:
+    (i, s) -> bstm |[ this.~x:$[p_[i]] = ~x:$[p_[i]]; ]|
+
+  ds-to-interp-terms-matching-matchdescend:
+    (i, e) -> e |[ e && ~x:$[p_[i]].execute(term.~x:$[get_[i]](), frame) ]|
 
 rules /* utils */
 
