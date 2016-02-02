@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import com.oracle.truffle.api.source.SourceSection;
 
-public interface ITermMatchPatternFactory<T extends MatchPattern> {
+public interface ITermMatchPatternFactory {
 
-	public T apply(SourceSection source, MatchPattern... children);
+	public MatchPattern apply(SourceSection source, MatchPattern... children);
 }

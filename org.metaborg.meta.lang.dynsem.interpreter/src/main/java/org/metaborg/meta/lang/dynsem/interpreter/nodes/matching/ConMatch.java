@@ -16,7 +16,7 @@ public class ConMatch extends MatchPattern {
 
 	@Override
 	public boolean execute(Object term, VirtualFrame frame) {
-		ITermMatchPatternFactory<MatchPattern> matchFactory = getContext()
+		ITermMatchPatternFactory matchFactory = getContext()
 				.lookupMatchPattern(name, children.length);
 		MatchPattern matcher = matchFactory.apply(getSourceSection(), children);
 		return replace(matcher).execute(term, frame);

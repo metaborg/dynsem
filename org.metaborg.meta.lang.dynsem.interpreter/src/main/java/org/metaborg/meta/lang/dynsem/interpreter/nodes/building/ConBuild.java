@@ -22,7 +22,7 @@ public class ConBuild extends TermBuild {
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		ITermBuildFactory<TermBuild> buildFactory = getContext()
+		ITermBuildFactory buildFactory = getContext()
 				.lookupTermBuilder(name, children.length);
 		TermBuild build = buildFactory.apply(getSourceSection(), children);
 		return replace(build).executeGeneric(frame);
