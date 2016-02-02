@@ -9,13 +9,18 @@ rules
 
   ds-to-interp-init-options(|path, project-path) =
     rules(
-      GenDir: _ -> <read-property(|"target.project", $[[project-path]/editor/java]); make-absolute-path(|project-path)> $[[project-path]/dynsem.properties]
       CurrentFilePath: _ -> path
       ProjectPath: _ -> project-path
-      TopPackageName: _ -> <read-property(|"target.package", $[[<language>].generated.interpreter])> $[[project-path]/dynsem.properties]
+      PropertiesFile: _ -> $[[project-path]/dynsem.properties]
+      GenProject: _ -> <PropertiesFile; read-property(|"target.project", project-path); make-absolute-path(|project-path)>
+      JavaGenDir: _ -> $[[<GenProject>][<PropertiesFile; read-property(|"target.java", "/editor/java")>]]
+      AtermGenDir: _ -> $[[<GenProject>][<PropertiesFile; read-property(|"target.aterm", path)>]]
+      TopPackageName: _ -> <PropertiesFile; read-property(|"target.package", $[[<language>].generated.interpreter])>
       TermsPackageName: _ -> $[[<TopPackageName>].terms]
       TermBuildPackageName: _ -> $[[<TermsPackageName>].build]
       TermMatchPackageName: _ -> $[[<TermsPackageName>].match]
     )
     
-  ds-to-interp-write-classes(|package) = emit-java-classes(overwrite-merge-strategy, id | package, <GenDir>)
+  ds-to-interp-write-classes(|package) = emit-java-classes(overwrite-merge-strategy, id | package, <JavaGenDir>)
+  
+  ds-to-interp-write-aterm = fail
