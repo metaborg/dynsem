@@ -20,9 +20,8 @@ rules
       debug(!"a ");
       result := <ds-to-interp-main(|path, project-path)> ast;
       debug(!"b ");
-      class* := <ds-to-interp-terms(|path, project-path)> result;
-      debug(!"c ");
-      <debug(!"c1 "); ds-to-interp-write-classes; debug(!"c2 ")> class*
+      <ds-to-interp-terms(|path, project-path)> result;
+      debug(!"c ")
       ;debug(!"d ")
   
   ds-to-interp-main(|path, project-path):

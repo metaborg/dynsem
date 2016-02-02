@@ -6,5 +6,5 @@ public interface IConTerm extends ITerm {
 
 	public int arity();
 	
-	public ITerm[] allSubterms();
+	public Object[] allSubterms();
 }

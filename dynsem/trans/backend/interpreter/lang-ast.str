@@ -4,18 +4,21 @@ imports
   include/ds
   backend/interpreter/utils
   libjava-front
+  editor-common.generated
 
 rules
   
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
-    debug(!"ba1 ");
-    term* := <mapconcat(debug(!"ba1a "); ds-to-interp-terms-signatures; debug(!"ba1b ") <+ ds-to-interp-terms-report-unsupported)> sig*;
-    debug(!"ba2 ");
-    type := <ds-to-interp-terms-types-signatures> sig*;
-    debug(!"ba3 ");
-    ![term*, type]
-    ;debug(!"ba4 ")
+    debug(!"generating term classes");
+    <mapconcat(debug(!"ba1a "); ds-to-interp-terms-signatures; debug(!"ba1b ") <+ ds-to-interp-terms-report-unsupported); ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
+    debug(!"generating typesystem class");
+    <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
+    debug(!"generating termbuilding classes");
+    <ds-to-interp-terms-building; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
+    debug(!"generating termmatching classes");
+    <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
+    debug(!"done generating classes")    
   
   ds-to-interp-terms-signatures = 
     ?Sorts(<id>);
@@ -24,7 +27,7 @@ rules
   ds-to-interp-terms-sortdecl:
     dec@SortDecl(_) ->
       compilation-unit |[
-        package ~x:<PackageName>;
+        package ~x:<TermsPackageName>;
         
         import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
         
@@ -43,20 +46,96 @@ rules
   ds-to-interp-terms-consdecl:
     dec@ConsDecl(name, kid*, s, _) ->
       compilation-unit |[
-        package ~x:<debug(!"ba1a1c1 "); PackageName; debug(!"ba1a1c2 ")>;
+        package ~x:<debug(!"ba1a1c1 "); TermsPackageName; debug(!"ba1a1c2 ")>;
         
-        public class ~x:<ds-to-interp-terms-types-name> dec implements ~x:<ds-to-interp-terms-types-name> s {
+        public class x_classname implements ~x:<ds-to-interp-terms-types-name> s {
+
+          public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
+          public final static int ARITY = ~i:<length; int-to-string> kid*;
+
+          ~fdec0*
+
+          ~fget0*
+
+          public x_classname(param0*) {
+            bstm0*
+          }
           
+          @Override
+          public String constructor() {
+            return CONSTRUCTOR;
+          }
+        
+          @Override
+          public int arity() {
+            return ARITY;
+          }
+          
+          @Override
+          public Object[] allSubterms() {
+            return new Object[] { e0* };
+          }
         }
       ]|
+    where
+      x_classname := <ds-to-interp-terms-types-name> dec;
+      param0* := <ds-to-interp-sorts-to-params> kid*;
+      bstm0* := <ds-to-interp-sorts-to-finits> kid*;
+      fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
+      fget0* := <ds-to-interp-sorts-to-fgets> kid*;
+      e0* := <ds-to-interp-sorts-to-frefs> kid*
   
+  ds-to-interp-sorts-to-params = is-list; map-with-index(ds-to-interp-sort-to-param)
+  
+  ds-to-interp-sort-to-param:
+    (i, s) -> param |[ x_sortclass x_name ]|
+    where
+      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_name := $[_[i]]
+  
+  ds-to-interp-sorts-to-finits = is-list; map-with-index(ds-to-interp-sort-to-finit)
+  
+  ds-to-interp-sort-to-finit:
+    (i, _) -> bstm |[ this.x_name = x_name; ]|
+    where
+      x_name := $[_[i]]
+
+  ds-to-interp-sorts-to-fdecs = is-list; map-with-index(ds-to-interp-sort-to-fdec)
+  
+  ds-to-interp-sort-to-fdec:
+    (i, s) -> class-body-dec |[ private final x_sortclass x_name; ]|
+    where
+      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_name := $[_[i]]
+
+  ds-to-interp-sorts-to-fgets = is-list; map-with-index(ds-to-interp-sort-to-fget)
+  
+  ds-to-interp-sort-to-fget:
+    (i, s) ->
+      class-body-dec |[
+        public x_sortclass x_getname() {
+          return x_name;
+        }
+      ]|
+    where
+      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_getname := $[get_[i]];
+      x_name := $[_[i]]
+
+  ds-to-interp-sorts-to-frefs = is-list; map-with-index(ds-to-interp-sort-to-fref)
+  
+  ds-to-interp-sort-to-fref:
+    (i, _) -> e |[ x_name ]|
+    where
+      x_name := $[_[i]]
+
   ds-to-interp-terms-types-signatures:
     sig-sec* ->
       compilation-unit |[
-        package ~x:<PackageName>;
+        package ~x:<TopPackageName>;
 
         import com.oracle.truffle.api.dsl.TypeSystem;
-        
+        import ~x:$[[<TermsPackageName>].*];
         @TypeSystem({ ~type* })
         public class Types {
           
@@ -68,6 +147,47 @@ rules
       qsort(?(ConsDecl(_, _, _, _), SortDecl(_)));
       map(ds-to-interp-terms-types-name);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))) => type*
+  
+  ds-to-interp-terms-building = is-list; fetch-elem(?Constructors(<id>)); map(ds-to-interp-terms-building)
+  
+  ds-to-interp-terms-building:
+    dec@ConsDecl(_, _, _, _) ->
+      compilation-unit |[
+        package ~x:<TermBuildPackageName>;
+      
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+        import ~x:$[[<TermsPackageName>].[<ds-to-interp-terms-types-name> dec]];
+        
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.nodes.UnexpectedResultException;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public class ~x:$[[<ds-to-interp-terms-types-name> dec]Build] extends ~x:$[Abstract[<language>]TermBuild] {
+//        
+//          @Child protected LangSpecificTermBuild e1;
+//          @Child protected LangSpecificTermBuild e2;
+//        
+//          public PlusTermBuild(SourceSection source, TermBuild e1, TermBuild e2) {
+//            super(source);
+//            this.e1 = (LangSpecificTermBuild) e1;
+//            this.e2 = (LangSpecificTermBuild) e2;
+//          }
+//        
+//          @Override
+//          public PlusTerm executeGeneric(VirtualFrame frame) {
+//            try {
+//              return new PlusTerm(e1.executeIExprTerm(frame),
+//                  e2.executeIExprTerm(frame));
+//            } catch (UnexpectedResultException e) {
+//              throw new RuntimeException("Unexpected subterm: " + e.getResult());
+//            }
+//          }
+//
+        }
+      ]|
+  
+  ds-to-interp-terms-matching:
+    sig* -> []
   
   ds-to-interp-terms-types-name:
     SortDecl(s) -> $[I[s]Term]
