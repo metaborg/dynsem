@@ -14,12 +14,16 @@ rules
     <mapconcat(debug(!"ba1a "); ds-to-interp-terms-signatures; debug(!"ba1b ") <+ ds-to-interp-terms-report-unsupported); ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
     debug(!"generating typesystem class");
     <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
+    debug(!"generating termbuilding sort-classes");
+    <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
     debug(!"generating termbuilding classes");
     <ds-to-interp-terms-building; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
     debug(!"generating termmatching classes");
     <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
     debug(!"done generating classes")    
-  
+
+rules /* Sort & Constructor classes */
+
   ds-to-interp-terms-signatures = 
     ?Sorts(<id>);
     map(ds-to-interp-terms-sortdecl)
@@ -129,6 +133,8 @@ rules
     where
       x_name := $[_[i]]
 
+rules /* type system class */
+
   ds-to-interp-terms-types-signatures:
     sig-sec* ->
       compilation-unit |[
@@ -147,7 +153,43 @@ rules
       qsort(?(ConsDecl(_, _, _, _), SortDecl(_)));
       map(ds-to-interp-terms-types-name);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))) => type*
+
+rules /* term building */
+
+  ds-to-inter-terms-sortbuilding = is-list; fetch-elem(?Sorts(<id>)); map(ds-to-interp-terms-sortbuilding)
   
+  ds-to-interp-terms-sortbuilding:
+    dec@SortDecl(s) -> 
+      compilation-unit |[
+        package ~x:<TermBuildPackageName>;
+  
+        import ~x:$[[<TermsPackageName>].[<ds-to-interp-terms-types-name> dec]];
+        import ~x:$[[<TopPackageName>].TypesGen];
+        
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.nodes.UnexpectedResultException;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_class extends TermBuild {
+        
+          public x_class(SourceSection source) {
+            super(source);
+          }
+        
+          public x_sortclass x_execmethod(VirtualFrame frame)
+              throws UnexpectedResultException {
+            return TypesGen.x_expectmethod(executeGeneric(frame));
+          }
+        
+        }
+      ]|
+    where
+      x_class := $[A[<ds-to-interp-terms-types-name> dec]Build];
+      x_sortclass := <ds-to-interp-terms-types-name> dec;
+      x_execmethod := $[execute[x_sortclass]];
+      x_expectmethod := $[expect[x_sortclass]]
+
   ds-to-interp-terms-building = is-list; fetch-elem(?Constructors(<id>)); map(ds-to-interp-terms-building)
   
   ds-to-interp-terms-building:
@@ -185,10 +227,14 @@ rules
 //
         }
       ]|
-  
+
+rules /* term matching */
+
   ds-to-interp-terms-matching:
     sig* -> []
-  
+
+rules /* utils */
+
   ds-to-interp-terms-types-name:
     SortDecl(s) -> $[I[s]Term]
 
