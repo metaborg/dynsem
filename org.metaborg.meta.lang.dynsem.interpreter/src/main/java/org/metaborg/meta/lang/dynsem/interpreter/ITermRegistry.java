@@ -6,5 +6,5 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatter
 public interface ITermRegistry {
 	public ITermBuildFactory getBuildFactory(String constr, int arity);
 
-	public ITermMatchPatternFactory getMatcherFactory(String constr, int arity);
+	public ITermMatchPatternFactory getMatcherFactory(String name, int arity);
 }
