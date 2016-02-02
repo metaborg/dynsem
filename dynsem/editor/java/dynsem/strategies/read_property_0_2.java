@@ -11,19 +11,15 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
 
-public class read_property_0_3 extends Strategy {
+public class read_property_0_2 extends Strategy {
 
-	public static read_property_0_3 instance = new read_property_0_3();
+	public static read_property_0_2 instance = new read_property_0_2();
 
 	@Override
 	public IStrategoTerm invoke(Context context, IStrategoTerm current,
-			IStrategoTerm projectpath, IStrategoTerm tpropname,
-			IStrategoTerm defaultvalue) {
+			IStrategoTerm tpropname, IStrategoTerm defaultvalue) {
 
 		if (!(current instanceof IStrategoString)) {
-			return null;
-		}
-		if (!(projectpath instanceof IStrategoString)) {
 			return null;
 		}
 		if (!(tpropname instanceof IStrategoString)) {
@@ -51,12 +47,6 @@ public class read_property_0_3 extends Strategy {
 
 		if (propval == null) {
 			return defaultvalue;
-		}
-
-		File projectdir = new File(Tools.javaString(projectpath));
-
-		if (!new File(propval).isAbsolute()) {
-			propval = new File(projectdir, propval).getAbsolutePath();
 		}
 
 		return context.getFactory().makeString(propval);
