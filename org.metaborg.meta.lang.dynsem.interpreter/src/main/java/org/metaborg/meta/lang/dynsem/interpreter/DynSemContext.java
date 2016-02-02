@@ -4,6 +4,7 @@ import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -30,13 +31,14 @@ public class DynSemContext {
 		throw new NotImplementedException();
 	}
 
-	public <K extends TermBuild> ITermBuildFactory<K> lookupTermBuilder(String name, int arity) {
+	public <K extends TermBuild> ITermBuildFactory<K> lookupTermBuilder(
+			String name, int arity) {
 		throw new NotImplementedException();
 	}
 
-	public Class<MatchPattern> lookupMatchPatternClass(String name, int arity) {
+	public <K extends MatchPattern> ITermMatchPatternFactory<K> lookupMatchPattern(
+			String name, int arity) {
 		throw new NotImplementedException();
 	}
 
-	
 }

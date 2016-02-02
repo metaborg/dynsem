@@ -1,10 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class ConMatch extends MatchPattern {
@@ -20,31 +16,9 @@ public class ConMatch extends MatchPattern {
 
 	@Override
 	public boolean execute(Object term, VirtualFrame frame) {
-		Class<MatchPattern> patternClass = getContext()
-				.lookupMatchPatternClass(name, children.length);
-		try {
-			Constructor<MatchPattern> constr = patternClass
-					.getConstructor(getConstructorClasses());
-			MatchPattern replacement = constr.newInstance(getSourceSection(),
-					children);
-			return replace(replacement).execute(term, frame);
-		} catch (NoSuchMethodException | SecurityException
-				| InstantiationException | IllegalAccessException
-				| IllegalArgumentException | InvocationTargetException e) {
-			throw new RuntimeException(
-					"Interpreter crash: term match specialization failure", e);
-		}
+		ITermMatchPatternFactory<MatchPattern> matchFactory = getContext()
+				.lookupMatchPattern(name, children.length);
+		MatchPattern matcher = matchFactory.apply(getSourceSection(), children);
+		return replace(matcher).execute(term, frame);
 	}
-
-	@ExplodeLoop
-	@SuppressWarnings("rawtypes")
-	private Class[] getConstructorClasses() {
-		Class[] classes = new Class[children.length + 1];
-		classes[0] = SourceSection.class;
-		for (int i = 1; i <= children.length; i++) {
-			classes[i] = MatchPattern.class;
-		}
-		return classes;
-	}
-
 }
