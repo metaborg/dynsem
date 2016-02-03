@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
@@ -17,11 +16,11 @@ public abstract class MatchPattern extends Node {
 
 	public MatchPattern(SourceSection source) {
 		super(source);
-		this.createContext = DynSemLanguage.INSTANCE.createFindContextNode0();
+		this.createContext = DynSemContext.LANGUAGE.createFindContextNode0();
 	}
 
 	protected DynSemContext getContext() {
-		return DynSemLanguage.INSTANCE.findContext0(createContext);
+		return DynSemContext.LANGUAGE.findContext0(createContext);
 	}
 
 	public abstract boolean execute(Object term, VirtualFrame frame);

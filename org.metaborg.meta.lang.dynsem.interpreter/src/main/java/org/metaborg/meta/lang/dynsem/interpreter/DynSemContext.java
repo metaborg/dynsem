@@ -10,11 +10,14 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 
 public class DynSemContext {
 
+	public static DynSemLanguage LANGUAGE;
+	
 	private final BufferedReader input;
 	private final PrintWriter output;
 
 	private final ITermRegistry termRegistry;
 	private final IRuleRegistry ruleRegistry;
+
 
 	public DynSemContext(ITermRegistry termRegistry, IRuleRegistry ruleRegistry) {
 		this(termRegistry, ruleRegistry, new BufferedReader(

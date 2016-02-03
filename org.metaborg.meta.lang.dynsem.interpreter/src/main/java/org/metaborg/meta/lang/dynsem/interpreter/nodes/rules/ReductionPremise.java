@@ -1,11 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
-import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
@@ -84,19 +82,14 @@ public class ReductionPremise extends Premise {
 		return roArgs;
 	}
 
-	private Rule lookupRule(ITerm lshTerm) {
-
-		IStrategoAppl appl = (IStrategoAppl) lshTerm;
-		String ctorName = appl.getConstructor().getName();
-		int ctorAppl = appl.getSubtermCount();
-
+	private Rule lookupRule(IConTerm lshTerm) {
 		if (context == null) {
-			context = DynSemLanguage.INSTANCE
-					.findContext0(DynSemLanguage.INSTANCE
+			context = DynSemContext.LANGUAGE
+					.findContext0(DynSemContext.LANGUAGE
 							.createFindContextNode0());
 		}
 
-		return context.lookupRule(ctorName, ctorAppl);
+		return context.lookupRule(lshTerm.constructor(), lshTerm.arity());
 	}
 
 	public static ReductionPremise create(IStrategoAppl t, FrameDescriptor fd) {
