@@ -81,7 +81,7 @@ public class Rule extends RootNode {
 
 		IStrategoAppl lhsConTerm = Tools.applAt(Tools.applAt(relationT, 1), 0);
 		String constr = Tools.stringAt(lhsConTerm, 0).stringValue();
-		int arity = Tools.intAt(lhsConTerm, 1).intValue();
+		int arity = Tools.listAt(lhsConTerm, 1).size();
 
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 3), fd);
 
