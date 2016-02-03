@@ -6,7 +6,11 @@ import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.spoofax.interpreter.core.Tools;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.terms.util.NotImplementedException;
 
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
@@ -45,6 +49,22 @@ public abstract class TermBuild extends Node {
 	public IConTerm executeIConTerm(VirtualFrame frame)
 			throws UnexpectedResultException {
 		return BuiltinTypesGen.expectIConTerm(executeGeneric(frame));
+	}
+
+	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
+		if (Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)) {
+			return VarRead.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "ArgRead", 1)) {
+			return ArgRead.create(t);
+		}
+		throw new NotImplementedException("Unsupported term build: " + t);
+	}
+
+	public static TermBuild createFromLabelComp(IStrategoAppl t,
+			FrameDescriptor fd) {
+		assert Tools.hasConstructor(t, "LabelComp", 2);
+		return create(Tools.applAt(t, 1), fd);
 	}
 
 }

@@ -1,8 +1,13 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
+import org.metaborg.meta.lang.dynsem.interpreter.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.spoofax.interpreter.core.Tools;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.Node;
@@ -32,5 +37,20 @@ public class RuleTarget extends Node {
 
 		res.components = componentValues;
 		return res;
+	}
+
+	public static RuleTarget create(IStrategoAppl targetT, FrameDescriptor fd) {
+		assert Tools.hasConstructor(targetT, "Target", 2);
+		TermBuild rhsNode = TermBuild.create(Tools.termAt(targetT, 0), fd);
+
+		IStrategoList componentsT = Tools.listAt(targetT, 1);
+		TermBuild[] componentNodes = new TermBuild[componentsT.size()];
+		for (int i = 0; i < componentNodes.length; i++) {
+			componentNodes[0] = TermBuild.createFromLabelComp(
+					Tools.applAt(componentsT, i), fd);
+		}
+
+		return new RuleTarget(rhsNode, componentNodes,
+				SourceSectionUtil.fromStrategoTerm(targetT));
 	}
 }

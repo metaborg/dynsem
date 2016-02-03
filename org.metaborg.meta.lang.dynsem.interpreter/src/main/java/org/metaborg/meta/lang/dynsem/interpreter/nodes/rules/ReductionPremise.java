@@ -6,11 +6,15 @@ import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
@@ -18,24 +22,24 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class ReductionPremise extends Premise {
 
-	@Children protected final TermBuild[] componentsNodes;
+	@Children protected final TermBuild[] rorwNodes;
 
 	@Child protected TermBuild lhsNode;
 
 	@Child protected MatchPattern rhsNode;
 
-	@Children protected final MatchPattern[] rhsComponentNodes;
+	@Children protected final MatchPattern[] rhsRwNodes;
 
 	@CompilationFinal private DynSemContext context;
 
-	public ReductionPremise(TermBuild[] componentsNodes, TermBuild lhsNode,
-			TermBuild[] rwNodes, MatchPattern rhsNode,
-			MatchPattern[] rhsComponentNodes, SourceSection source) {
+	public ReductionPremise(TermBuild[] rorwNodes, TermBuild lhsNode,
+			MatchPattern rhsNode, MatchPattern[] rhsComponentNodes,
+			SourceSection source) {
 		super(source);
-		this.componentsNodes = componentsNodes;
+		this.rorwNodes = rorwNodes;
 		this.lhsNode = lhsNode;
 		this.rhsNode = rhsNode;
-		this.rhsComponentNodes = rhsComponentNodes;
+		this.rhsRwNodes = rhsComponentNodes;
 	}
 
 	@Override
@@ -63,8 +67,8 @@ public class ReductionPremise extends Premise {
 
 	@ExplodeLoop
 	private boolean evalRhsComponents(Object[] components, VirtualFrame frame) {
-		for (int i = 0; i < rhsComponentNodes.length; i++) {
-			if (!rhsComponentNodes[i].execute(components[i], frame)) {
+		for (int i = 0; i < rhsRwNodes.length; i++) {
+			if (!rhsRwNodes[i].execute(components[i], frame)) {
 				return false;
 			}
 		}
@@ -73,9 +77,9 @@ public class ReductionPremise extends Premise {
 
 	@ExplodeLoop
 	private Object[] evalComponentsNodes(VirtualFrame frame) {
-		Object[] roArgs = new Object[componentsNodes.length];
-		for (int i = 0; i < componentsNodes.length; i++) {
-			roArgs[i] = componentsNodes[i].executeGeneric(frame);
+		Object[] roArgs = new Object[rorwNodes.length];
+		for (int i = 0; i < rorwNodes.length; i++) {
+			roArgs[i] = rorwNodes[i].executeGeneric(frame);
 		}
 		return roArgs;
 	}
@@ -95,4 +99,43 @@ public class ReductionPremise extends Premise {
 		return context.lookupRule(ctorName, ctorAppl);
 	}
 
+	public static ReductionPremise create(IStrategoAppl t, FrameDescriptor fd) {
+		assert Tools.hasConstructor(t, "Relation", 4);
+
+		IStrategoList rosT = Tools.listAt(Tools.applAt(t, 0), 0);
+		TermBuild[] roNodes = new TermBuild[rosT.getSubtermCount()];
+		for (int i = 0; i < roNodes.length; i++) {
+			roNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rosT, i),
+					fd);
+		}
+
+		IStrategoAppl sourceT = Tools.applAt(t, 1);
+		assert Tools.hasConstructor(sourceT, "Source", 2);
+		TermBuild lhsNode = TermBuild.create(Tools.applAt(sourceT, 0), fd);
+
+		IStrategoList rwsT = Tools.listAt(sourceT, 1);
+		TermBuild[] rwNodes = new TermBuild[rwsT.getSubtermCount()];
+		for (int i = 0; i < rwNodes.length; i++) {
+			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rwsT, i),
+					fd);
+		}
+
+		TermBuild[] rorwNodes = new TermBuild[roNodes.length + rwNodes.length];
+		System.arraycopy(roNodes, 0, rorwNodes, 0, roNodes.length);
+		System.arraycopy(rwNodes, 0, rorwNodes, roNodes.length, rwNodes.length);
+
+		IStrategoAppl targetT = Tools.applAt(t, 3);
+		assert Tools.hasConstructor(targetT, "Target", 2);
+		MatchPattern rhsNode = MatchPattern
+				.create(Tools.applAt(targetT, 0), fd);
+
+		IStrategoList rhsRwsT = Tools.listAt(targetT, 1);
+		MatchPattern[] rhsRwNodes = new MatchPattern[rhsRwsT.size()];
+		for (int i = 0; i < rhsRwNodes.length; i++) {
+			rhsRwNodes[i] = MatchPattern.create(Tools.applAt(rhsRwsT, i), fd);
+		}
+
+		return new ReductionPremise(rorwNodes, lhsNode, rhsNode, rhsRwNodes,
+				SourceSectionUtil.fromStrategoTerm(t));
+	}
 }
