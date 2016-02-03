@@ -6,4 +6,5 @@ public interface IRuleRegistry {
 
 	public Rule lookupRule(String name, int arity);
 
+	public int ruleCount();
 }

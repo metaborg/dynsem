@@ -39,6 +39,11 @@ public class RuleRegistry implements IRuleRegistry {
 		}
 	}
 
+	@Override
+	public int ruleCount() {
+		return rules.size();
+	}
+
 	private static String makeKey(String name, int arity) {
 		return name + "/" + arity;
 	}
@@ -70,4 +75,5 @@ public class RuleRegistry implements IRuleRegistry {
 		throw new InterpreterException(
 				"Malformed specification: could not find Rules section");
 	}
+
 }
