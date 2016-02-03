@@ -58,6 +58,9 @@ public abstract class TermBuild extends Node {
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
+		if(Tools.hasConstructor(t, "Con", 2)){
+			return ConBuild.create(t, fd);
+		}
 		if (Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)) {
 			return VarRead.create(t, fd);
 		}
