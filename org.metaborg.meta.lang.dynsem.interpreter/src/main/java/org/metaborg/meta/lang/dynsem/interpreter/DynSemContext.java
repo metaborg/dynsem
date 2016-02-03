@@ -18,11 +18,11 @@ public class DynSemContext {
 	}
 
 	public ITermBuildFactory lookupTermBuilder(String name, int arity) {
-		return termRegistry.getBuildFactory(name, arity);
+		return termRegistry.lookupBuildFactory(name, arity);
 	}
 
 	public ITermMatchPatternFactory lookupMatchPattern(String name, int arity) {
-		return termRegistry.getMatcherFactory(name, arity);
+		return termRegistry.lookupMatchFactory(name, arity);
 	}
 
 }

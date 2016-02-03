@@ -4,7 +4,8 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactor
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
 
 public interface ITermRegistry {
-	public ITermBuildFactory getBuildFactory(String constr, int arity);
+	
+	public ITermBuildFactory lookupBuildFactory(String constr, int arity);
 
-	public ITermMatchPatternFactory getMatcherFactory(String name, int arity);
+	public ITermMatchPatternFactory lookupMatchFactory(String name, int arity);
 }

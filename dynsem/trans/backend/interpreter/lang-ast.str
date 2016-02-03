@@ -347,12 +347,12 @@ rules /* term registry */
           }
         
           @Override
-          public ITermBuildFactory getBuildFactory(String constr, int arity) {
+          public ITermBuildFactory lookupBuildFactory(String constr, int arity) {
             return builderFactories.get(constr + "/" + arity);
           }
         
           @Override
-          public ITermMatchPatternFactory getMatcherFactory(String constr, int arity) {
+          public ITermMatchPatternFactory lookupMatchFactory(String constr, int arity) {
             return matcherFactories.get(constr + "/" + arity);
           }
         }
