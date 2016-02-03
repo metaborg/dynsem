@@ -3,10 +3,10 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
+import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
-import org.metaborg.meta.lang.dynsem.interpreter.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.spoofax.interpreter.core.Tools;

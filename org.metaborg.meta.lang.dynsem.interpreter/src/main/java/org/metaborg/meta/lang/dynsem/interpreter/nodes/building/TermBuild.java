@@ -67,6 +67,13 @@ public abstract class TermBuild extends Node {
 		if (Tools.hasConstructor(t, "Map", 1)) {
 			return MapBuild.create(t, fd);
 		}
+		if (Tools.hasConstructor(t, "MapExtend", 2)) {
+			return MapExtendBuild.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "MapSelect", 2)) {
+			return MapSelectBuild.create(t, fd);
+		}
+
 		throw new NotImplementedException("Unsupported term build: " + t);
 	}
 
