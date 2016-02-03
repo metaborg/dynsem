@@ -6,16 +6,15 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class VarRead extends TermBuild {
 
-	private final String name;
+	private final FrameSlot slot;
 
-	public VarRead(String name, SourceSection source) {
+	public VarRead(FrameSlot slot, SourceSection source) {
 		super(source);
-		this.name = name;
+		this.slot = slot;
 	}
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		FrameSlot slot = frame.getFrameDescriptor().findFrameSlot(name);
 		return frame.getValue(slot);
 	}
 

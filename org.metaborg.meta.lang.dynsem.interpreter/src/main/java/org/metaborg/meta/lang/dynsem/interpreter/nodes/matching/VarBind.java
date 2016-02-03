@@ -6,21 +6,17 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class VarBind extends MatchPattern {
 
-	private final String name;
+	private final FrameSlot slot;
 
-	public VarBind(String name, SourceSection source) {
+	public VarBind(FrameSlot slot, SourceSection source) {
 		super(source);
-		this.name = name;
+		this.slot = slot;
 	}
 
 	@Override
 	public boolean execute(Object term, VirtualFrame frame) {
-		FrameSlot slot = frame.getFrameDescriptor().findFrameSlot(name);
-		if (frame.getValue(slot) == null) {
-			frame.setObject(slot, term);
-			return true;
-		}
-		throw new RuntimeException("Variable already bound");
+		frame.setObject(slot, term);
+		return true;
 	}
 
 }
