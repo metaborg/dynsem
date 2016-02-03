@@ -10,6 +10,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
+import com.github.krukow.clj_ds.PersistentMap;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
@@ -51,12 +52,20 @@ public abstract class TermBuild extends Node {
 		return BuiltinTypesGen.expectIConTerm(executeGeneric(frame));
 	}
 
+	public PersistentMap<?, ?> executeMap(VirtualFrame frame)
+			throws UnexpectedResultException {
+		return BuiltinTypesGen.expectPersistentMap(executeGeneric(frame));
+	}
+
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		if (Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)) {
 			return VarRead.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "ArgRead", 1)) {
 			return ArgRead.create(t);
+		}
+		if (Tools.hasConstructor(t, "Map", 1)) {
+			return MapBuild.create(t, fd);
 		}
 		throw new NotImplementedException("Unsupported term build: " + t);
 	}
