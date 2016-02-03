@@ -2,7 +2,6 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +11,6 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.ParseError;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
@@ -48,14 +46,20 @@ public class RuleRegistry implements IRuleRegistry {
 		return name + "/" + arity;
 	}
 
-	public static RuleRegistry create(File specificationFile)
-			throws ParseError, FileNotFoundException, IOException {
+	public static RuleRegistry create(File specificationFile) {
 
 		RuleRegistry reg = new RuleRegistry();
 
 		TAFTermReader reader = new TAFTermReader(new TermFactory());
-		IStrategoTerm topSpecTerm = reader.parseFromStream(new FileInputStream(
-				specificationFile));
+
+		IStrategoTerm topSpecTerm;
+		try {
+			topSpecTerm = reader.parseFromStream(new FileInputStream(
+					specificationFile));
+		} catch (IOException ioex) {
+			throw new RuntimeException("Could not load specification ATerm",
+					ioex);
+		}
 
 		IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 		for (IStrategoTerm ruleTerm : rulesTerm) {
