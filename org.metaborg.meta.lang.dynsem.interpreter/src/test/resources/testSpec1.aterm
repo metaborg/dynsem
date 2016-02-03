@@ -1,0 +1,278 @@
+Module(
+  "trans/semantics/calclang_varschemes_typeannos_noaliases_factorized_explimpl_factorized_explicated_copyprop_constantprop_markedargs"
+, [ Imports([])
+  , Signatures(
+      [ Sorts(
+          [ SortDecl("ID")
+          , SortDecl("INT")
+          , SortDecl("STRING")
+          , SortDecl("StringChar")
+          , SortDecl("BackSlashChar")
+          , SortDecl("CommentChar")
+          , SortDecl("InsideComment")
+          , SortDecl("NewLineEOF")
+          , SortDecl("EOF")
+          , SortDecl("Start")
+          , SortDecl("Expr")
+          ]
+        )
+      , Constructors(
+          [ ConsDecl(
+              "__String2ID__"
+            , [SimpleSort("String")]
+            , SimpleSort("ID")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__String2INT__"
+            , [SimpleSort("String")]
+            , SimpleSort("INT")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__String2STRING__"
+            , [SimpleSort("String")]
+            , SimpleSort("STRING")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__String2StringChar__"
+            , [SimpleSort("String")]
+            , SimpleSort("StringChar")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__String2BackSlashChar__"
+            , [SimpleSort("String")]
+            , SimpleSort("BackSlashChar")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__String2CommentChar__"
+            , [SimpleSort("String")]
+            , SimpleSort("CommentChar")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__String2InsideComment__"
+            , [SimpleSort("String")]
+            , SimpleSort("InsideComment")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__String2NewLineEOF__"
+            , [SimpleSort("String")]
+            , SimpleSort("NewLineEOF")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__String2EOF__"
+            , [SimpleSort("String")]
+            , SimpleSort("EOF")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "__Expr2Start__"
+            , [SimpleSort("Expr")]
+            , SimpleSort("Start")
+            , Annos([ImplicitAnno()])
+            )
+          , ConsDecl(
+              "Num"
+            , [SimpleSort("INT")]
+            , SimpleSort("Expr")
+            , Annos([])
+            )
+          , ConsDecl(
+              "Plus"
+            , [SimpleSort("Expr"), SimpleSort("Expr")]
+            , SimpleSort("Expr")
+            , Annos([])
+            )
+          , ConsDecl(
+              "VarRef"
+            , [SimpleSort("ID")]
+            , SimpleSort("Expr")
+            , Annos([])
+            )
+          , ConsDecl(
+              "With"
+            , [SimpleSort("ID"), SimpleSort("Expr"), SimpleSort("Expr")]
+            , SimpleSort("Expr")
+            , Annos([])
+            )
+          ]
+        )
+      , NativeConstructors([])
+      , NativeOperators(
+          [ NativeOpDecl("str2int", [SimpleSort("String")], SimpleSort("Int"))
+          , NativeOpDecl(
+              "addI"
+            , [SimpleSort("Int"), SimpleSort("Int")]
+            , SimpleSort("Int")
+            )
+          ]
+        )
+      , ArrowDeclarations(
+          [ ArrowDecl(SimpleSort("Start"), "init", SimpleSort("Int"))
+          , ArrowDecl(SimpleSort("Expr"), "default", SimpleSort("Int"))
+          ]
+        )
+      , NativeDataTypes([])
+      , VariableSchemes(
+          [ VariableScheme("i", SimpleSort("Int"))
+          , VariableScheme("E", MapSort(SimpleSort("String"), SimpleSort("Int")))
+          ]
+        )
+      ]
+    )
+  , Rules(
+      [ Rule(
+          [ Formula(
+              Relation(
+                Reads(
+                  [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Map([]))]
+                )
+              , Source(ArgRead(0), [])
+              , NamedDynamicEmitted([], "default")
+              , Target(VarRef("lifted_190"), [])
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Reads([])
+          , Source(Con("__Expr2Start__", [ArgBind(0)]), [])
+          , NamedDynamicEmitted([], "init")
+          , Target(VarRef("lifted_190"), [])
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(ArgRead(1), Con("__String2ID__", [VarRef("v41000")]))
+            )
+          , Formula(
+              Relation(
+                Reads(
+                  [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))]
+                )
+              , Source(ArgRead(2), [])
+              , NamedDynamicEmitted([], "default")
+              , Target(VarRef("lifted_32"), [])
+              )
+            )
+          , Formula(
+              Relation(
+                Reads(
+                  [ LabelComp(
+                      MapSort(SimpleSort("String"), SimpleSort("Int"))
+                    , MapExtend(
+                        Map([Bind(VarRef("v41000"), VarRef("lifted_32"))])
+                      , ArgRead(0)
+                      )
+                    )
+                  ]
+                )
+              , Source(ArgRead(3), [])
+              , NamedDynamicEmitted([], "default")
+              , Target(VarRef("lifted_230"), [])
+              )
+            )
+          ]
+        , "---"
+        , Relation(
+            Reads(
+              [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
+            )
+          , Source(
+              Con(
+                "With"
+              , [ArgBind(1), ArgBind(2), ArgBind(3)]
+              )
+            , []
+            )
+          , NamedDynamicEmitted([], "default")
+          , Target(VarRef("lifted_230"), [])
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(ArgRead(1), Con("__String2ID__", [VarRef("v31000")]))
+            )
+          , Formula(
+              Match(MapSelect(ArgRead(0), VarRef("v31000")), VarRef("lifted_260"))
+            )
+          ]
+        , "---------"
+        , Relation(
+            Reads(
+              [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
+            )
+          , Source(Con("VarRef", [ArgBind(1)]), [])
+          , NamedDynamicEmitted([], "default")
+          , Target(VarRef("lifted_260"), [])
+          )
+        )
+      , Rule(
+          [ Formula(
+              Relation(
+                Reads(
+                  [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))]
+                )
+              , Source(ArgRead(1), [])
+              , NamedDynamicEmitted([], "default")
+              , Target(VarRef("lifted_34"), [])
+              )
+            )
+          , Formula(
+              Relation(
+                Reads(
+                  [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))]
+                )
+              , Source(ArgRead(2), [])
+              , NamedDynamicEmitted([], "default")
+              , Target(VarRef("lifted_33"), [])
+              )
+            )
+          , Formula(
+              Match(
+                Con("addI", [VarRef("lifted_34"), VarRef("lifted_33")])
+              , VarRef("lifted_290")
+              )
+            )
+          ]
+        , "---------"
+        , Relation(
+            Reads(
+              [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
+            )
+          , Source(
+              Con("Plus", [ArgBind(1), ArgBind(2)])
+            , []
+            )
+          , NamedDynamicEmitted([], "default")
+          , Target(VarRef("lifted_290"), [])
+          )
+        )
+      , Rule(
+          [ Formula(
+              Match(ArgRead(1), Con("__String2INT__", [VarRef("si01000")]))
+            )
+          , Formula(
+              Match(Con("str2int", [VarRef("si01000")]), VarRef("lifted_310"))
+            )
+          ]
+        , "---------"
+        , Relation(
+            Reads(
+              [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
+            )
+          , Source(Con("Num", [ArgBind(1)]), [])
+          , NamedDynamicEmitted([], "default")
+          , Target(VarRef("lifted_310"), [])
+          )
+        )
+      ]
+    )
+  ]
+)
