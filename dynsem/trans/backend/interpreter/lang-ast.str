@@ -345,7 +345,12 @@ rules /* term registry */
           private void init() {
             bstm0*
           }
-        
+          
+          @Override
+          public ITerm parseProgramTerm(IStrategoTerm p) {
+            throw new NotImplementedException("Not yet implemented");
+          }
+          
           @Override
           public ITermBuildFactory lookupBuildFactory(String constr, int arity) {
             return builderFactories.get(constr + "/" + arity);
