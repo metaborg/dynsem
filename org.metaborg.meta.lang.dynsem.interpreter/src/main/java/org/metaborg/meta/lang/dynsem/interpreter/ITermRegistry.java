@@ -7,10 +7,10 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatter
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public interface ITermRegistry {
-	
+
 	public ITermBuildFactory lookupBuildFactory(String constr, int arity);
 
 	public ITermMatchPatternFactory lookupMatchFactory(String name, int arity);
-	
+
 	public ITerm parseProgramTerm(IStrategoTerm t);
 }

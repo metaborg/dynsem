@@ -38,6 +38,22 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		return context;
 	}
 
+	public ITermRegistry getTermRegistry() {
+		return termRegistry;
+	}
+
+	public Node createFindContextNode0() {
+		return createFindContextNode();
+	}
+
+	public DynSemContext findContext0(Node n) {
+		return findContext(n);
+	}
+
+	public DynSemContext getContext() {
+		return findContext(createFindContextNode());
+	}
+
 	@Override
 	protected WrapperNode createWrapperNode(Node node) {
 		throw new NotImplementedException();
@@ -47,14 +63,6 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	protected Object evalInContext(Source source, Node node,
 			MaterializedFrame mFrame) throws IOException {
 		throw new IllegalStateException("evalInContext not supported");
-	}
-
-	public Node createFindContextNode0() {
-		return createFindContextNode();
-	}
-
-	public DynSemContext findContext0(Node n) {
-		return findContext(n);
 	}
 
 	@Override
@@ -82,5 +90,4 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	protected boolean isInstrumentable(Node node) {
 		return false;
 	}
-
 }
