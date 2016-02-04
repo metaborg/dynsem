@@ -45,7 +45,7 @@ rules /* Sort & Constructor classes */
 //    map(ds-to-interp-terms-sortdecl)
 
   ds-to-interp-terms-sortdecl(|cons-dec*):
-    dec@SortDecl(_) ->
+    dec@SortDecl(s) ->
       compilation-unit |[
         package ~x:<TermsPackageName>;
         
@@ -57,13 +57,14 @@ rules /* Sort & Constructor classes */
         public abstract class x_class implements IConTerm {
           public static x_class create(IStrategoAppl term) {
             bstm0*
-            throw new NotImplementedException("Unsupported term: " + pterm);
+            throw new NotImplementedException("Unsupported term: " + term);
           }
         }
       ]|
     where
       x_class := <ds-to-interp-terms-types-name> dec;
-      bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> cons-dec*
+      appl-cons-dec* := <filter(?ConsDecl(_, _, SimpleSort(s),_))> cons-dec*; 
+      bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> appl-cons-dec*
 
   ds-to-interp-terms-sortdec-createdisp:
     dec@ConsDecl(name, kid*, _, _) ->
