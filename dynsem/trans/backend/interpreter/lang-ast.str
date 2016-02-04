@@ -11,7 +11,6 @@ rules
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
     debug(!"generating term classes");
-//    <mapconcat(debug(!"ba1a "); ds-to-interp-terms-signatures; debug(!"ba1b ") <+ ds-to-interp-terms-report-unsupported); ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
     <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
     debug(!"generating typesystem class");
     <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
@@ -30,20 +29,11 @@ rules /* Sort & Constructor classes */
   ds-to-interp-terms-signatures-top:
     sig* -> [sort-class*, cons-class*]
     where
-      debug(!1);
       sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
-      debug(!2);
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
-      debug(!3);
       sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
-      debug(!4);
       cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*
-      ;debug(!5)
     
-//  ds-to-interp-terms-signatures = 
-//    ?Sorts(<id>);
-//    map(ds-to-interp-terms-sortdecl)
-
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
       compilation-unit |[
@@ -74,13 +64,6 @@ rules /* Sort & Constructor classes */
         }
       ]| 
 
-//  ds-to-interp-terms-signatures =
-//    debug(!"ba1a1a ");
-//    ?Constructors(<id>);
-//    debug(!"ba1a1b ");    
-//    map(debug(!"ba1a1c "); ds-to-interp-terms-consdecl; debug(!"ba1a1d "))
-//    ;debug(!"ba1a1e ")
-  
   ds-to-interp-terms-consdecl:
     dec@ConsDecl(name, kid*, s, _) ->
       compilation-unit |[
@@ -124,21 +107,13 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      debug(!"a ");
       x_classname := <ds-to-interp-terms-types-name> dec;
-      debug(!"b ");
       param0* := <ds-to-interp-sorts-to-params> kid*;
-      debug(!"c ");
       bstm0* := <ds-to-interp-sorts-to-finits> kid*;
-      debug(!"d ");
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
-      debug(!"e ");
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
-      debug(!"f ");
       e0* := <ds-to-interp-sorts-to-frefs> kid*;
-      debug(!"g ");
       e1* := <map-with-index(debug(!1); ds-to-interp-sorts-to-create-arg; debug(!2))> kid*
-      ;debug(!"h ")
   
   ds-to-interp-sorts-to-create-arg:
     (i, sref@SimpleSort(s)) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(Tools.applAt(term, ~i:<int-to-string> i)) ]|
