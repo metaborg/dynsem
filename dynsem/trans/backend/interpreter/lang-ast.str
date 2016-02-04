@@ -11,7 +11,8 @@ rules
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
     debug(!"generating term classes");
-    <mapconcat(debug(!"ba1a "); ds-to-interp-terms-signatures; debug(!"ba1b ") <+ ds-to-interp-terms-report-unsupported); ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
+//    <mapconcat(debug(!"ba1a "); ds-to-interp-terms-signatures; debug(!"ba1b ") <+ ds-to-interp-terms-report-unsupported); ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
+    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
     debug(!"generating typesystem class");
     <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
     debug(!"generating termbuilding sort-classes");
@@ -26,35 +27,68 @@ rules
 
 rules /* Sort & Constructor classes */
 
-  ds-to-interp-terms-signatures = 
-    ?Sorts(<id>);
-    map(ds-to-interp-terms-sortdecl)
+  ds-to-interp-terms-signatures-top:
+    sig* -> [sort-class*, cons-class*]
+    where
+      debug(!1);
+      sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
+      debug(!2);
+      cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
+      debug(!3);
+      sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
+      debug(!4);
+      cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*
+      ;debug(!5)
+    
+//  ds-to-interp-terms-signatures = 
+//    ?Sorts(<id>);
+//    map(ds-to-interp-terms-sortdecl)
 
-  ds-to-interp-terms-sortdecl:
+  ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(_) ->
       compilation-unit |[
         package ~x:<TermsPackageName>;
         
+        import org.spoofax.interpreter.core.Tools;
         import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+        import org.spoofax.interpreter.terms.IStrategoAppl;
+        import org.spoofax.terms.util.NotImplementedException;
         
-        public interface ~x:<ds-to-interp-terms-types-name> dec extends IConTerm {
-        
+        public abstract class x_class implements IConTerm {
+          public static x_class create(IStrategoAppl term) {
+            bstm0*
+            throw new NotImplementedException("Unsupported term: " + pterm);
+          }
         }
       ]|
+    where
+      x_class := <ds-to-interp-terms-types-name> dec;
+      bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> cons-dec*
 
-  ds-to-interp-terms-signatures =
-    debug(!"ba1a1a ");
-    ?Constructors(<id>);
-    debug(!"ba1a1b ");    
-    map(debug(!"ba1a1c "); ds-to-interp-terms-consdecl; debug(!"ba1a1d "))
-    ;debug(!"ba1a1e ")
+  ds-to-interp-terms-sortdec-createdisp:
+    dec@ConsDecl(name, kid*, _, _) ->
+      bstm |[
+        if (Tools.hasConstructor(term, ~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*)) {
+          return ~x:<ds-to-interp-terms-types-name> dec.create(term);
+        }
+      ]| 
+
+//  ds-to-interp-terms-signatures =
+//    debug(!"ba1a1a ");
+//    ?Constructors(<id>);
+//    debug(!"ba1a1b ");    
+//    map(debug(!"ba1a1c "); ds-to-interp-terms-consdecl; debug(!"ba1a1d "))
+//    ;debug(!"ba1a1e ")
   
   ds-to-interp-terms-consdecl:
     dec@ConsDecl(name, kid*, s, _) ->
       compilation-unit |[
         package ~x:<debug(!"ba1a1c1 "); TermsPackageName; debug(!"ba1a1c2 ")>;
         
-        public class x_classname implements ~x:<ds-to-interp-terms-types-name> s {
+        import org.spoofax.interpreter.core.Tools;
+        import org.spoofax.interpreter.terms.IStrategoAppl;
+        
+        public class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
 
           public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
           public final static int ARITY = ~i:<length; int-to-string> kid*;
@@ -65,6 +99,11 @@ rules /* Sort & Constructor classes */
 
           public x_classname(param0*) {
             bstm0*
+          }
+
+          public static x_classname create(IStrategoAppl term) {
+            assert Tools.hasConstructor(term, CONSTRUCTOR, ARITY);
+            return new x_classname(e1*);
           }
           
           @Override
@@ -84,12 +123,32 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
+      debug(!"a ");
       x_classname := <ds-to-interp-terms-types-name> dec;
+      debug(!"b ");
       param0* := <ds-to-interp-sorts-to-params> kid*;
+      debug(!"c ");
       bstm0* := <ds-to-interp-sorts-to-finits> kid*;
+      debug(!"d ");
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
+      debug(!"e ");
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
-      e0* := <ds-to-interp-sorts-to-frefs> kid*
+      debug(!"f ");
+      e0* := <ds-to-interp-sorts-to-frefs> kid*;
+      debug(!"g ");
+      e1* := <map-with-index(debug(!1); ds-to-interp-sorts-to-create-arg; debug(!2))> kid*
+      ;debug(!"h ")
+  
+  ds-to-interp-sorts-to-create-arg:
+    (i, sref@SimpleSort(s)) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(Tools.applAt(term, ~i:<int-to-string> i)) ]|
+    where
+      <not(is-builtin-type)> s
+
+  ds-to-interp-sorts-to-create-arg:
+    (i, sref@SimpleSort("String")) -> e |[ Tools.stringAt(term, ~i:<int-to-string> i).stringValue() ]|
+
+  ds-to-interp-sorts-to-create-arg:
+    (i, sref@SimpleSort("Int")) -> e |[ Tools.intAt(term, ~i:<int-to-string> i).intValue() ]|
   
   ds-to-interp-sorts-to-params = is-list; map-with-index(ds-to-interp-sort-to-param)
   
@@ -327,6 +386,9 @@ rules /* term registry */
         import ~x:<TermBuildPackageName>.*;
         import ~x:<TermMatchPackageName>.*;
         
+        import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+        import org.spoofax.interpreter.terms.IStrategoTerm;
+        import org.spoofax.terms.util.NotImplementedException;
         import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.*;
