@@ -22,8 +22,8 @@ public class RuleRegistry implements IRuleRegistry {
 	public Rule lookupRule(String name, int arity) {
 		String k = makeKey(name, arity);
 		Rule r = rules.get(k);
-		assert r.getConstructor().equals(name) && r.getArity() == arity;
 		if (r != null) {
+			assert r.getConstructor().equals(name) && r.getArity() == arity;
 			return r;
 		}
 		throw new InterpreterException("No rule found for: " + k);
