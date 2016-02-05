@@ -41,28 +41,53 @@ rules /* Sort & Constructor classes */
         
         import org.spoofax.interpreter.core.Tools;
         import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
-        import org.spoofax.interpreter.terms.IStrategoAppl;
-        import org.spoofax.terms.util.NotImplementedException;
+        import org.spoofax.interpreter.terms.*;
         
         public abstract class x_class implements IConTerm {
-          public static x_class create(IStrategoAppl term) {
+          public static x_class create(IStrategoTerm term) {
             bstm0*
-            throw new NotImplementedException("Unsupported term: " + term);
+            bstm1
           }
         }
       ]|
     where
       x_class := <ds-to-interp-terms-types-name> dec;
       appl-cons-dec* := <filter(?ConsDecl(_, _, SimpleSort(s),_))> cons-dec*; 
-      bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> appl-cons-dec*
+      bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> appl-cons-dec*;
+      impl-consdec* := <filter(?ConsDecl(_, [_], SimpleSort(s), Annos([ImplicitAnno()])))> cons-dec*;
+      bstm1 := <foldr(! bstm |[ throw new IllegalStateException("Unsupported term: " + term); ]|, ds-to-interp-terms-sortdec-impldisp)> impl-consdec*
 
   ds-to-interp-terms-sortdec-createdisp:
     dec@ConsDecl(name, kid*, _, _) ->
       bstm |[
-        if (Tools.hasConstructor(term, ~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*)) {
+        if (Tools.isTermAppl(term) && Tools.hasConstructor((IStrategoAppl) term, ~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*)) {
           return ~x:<ds-to-interp-terms-types-name> dec.create(term);
         }
       ]| 
+
+  ds-to-interp-terms-sortdec-impldisp:
+    (dec@ConsDecl(name, [sref@SimpleSort(_)], _, _), bstm0) ->
+      bstm |[
+        try {
+          return new x_class(e_create);
+        } catch (IllegalStateException ilsex) {
+          bstm0
+        }
+      ]|
+    where
+      x_class := <ds-to-interp-terms-types-name> dec;
+      e_create := <ds-to-interp-terms-sortdec-impldisp-constr> sref 
+  
+  ds-to-interp-terms-sortdec-impldisp-constr:
+    sref@SimpleSort(s) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(term) ]|
+    where
+      <not(is-builtin-type)> s
+
+  ds-to-interp-terms-sortdec-impldisp-constr:
+    sref@SimpleSort("String") -> e |[ ((IStrategoString) term).stringValue() ]|
+
+  ds-to-interp-terms-sortdec-impldisp-constr:
+    sref@SimpleSort("Int") -> e |[ ((IStrategoInt) term).intValue() ]|
 
   ds-to-interp-terms-consdecl:
     dec@ConsDecl(name, kid*, s, _) ->
@@ -71,6 +96,7 @@ rules /* Sort & Constructor classes */
         
         import org.spoofax.interpreter.core.Tools;
         import org.spoofax.interpreter.terms.IStrategoAppl;
+        import org.spoofax.interpreter.terms.IStrategoTerm;
         
         public class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
 
@@ -85,8 +111,8 @@ rules /* Sort & Constructor classes */
             bstm0*
           }
 
-          public static x_classname create(IStrategoAppl term) {
-            assert Tools.hasConstructor(term, CONSTRUCTOR, ARITY);
+          public static x_classname create(IStrategoTerm term) {
+            assert Tools.isTermAppl(term) && Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
             return new x_classname(e1*);
           }
           
@@ -113,10 +139,10 @@ rules /* Sort & Constructor classes */
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
       e0* := <ds-to-interp-sorts-to-frefs> kid*;
-      e1* := <map-with-index(debug(!1); ds-to-interp-sorts-to-create-arg; debug(!2))> kid*
+      e1* := <map-with-index(ds-to-interp-sorts-to-create-arg)> kid*
   
   ds-to-interp-sorts-to-create-arg:
-    (i, sref@SimpleSort(s)) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(Tools.applAt(term, ~i:<int-to-string> i)) ]|
+    (i, sref@SimpleSort(s)) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(term.getSubterm(~i:<dec; int-to-string> i)) ]|
     where
       <not(is-builtin-type)> s
 
@@ -359,12 +385,12 @@ rules /* term registry */
         import java.util.HashMap;
         import java.util.Map;
         
+        import ~x:<TermsPackageName>.*;
         import ~x:<TermBuildPackageName>.*;
         import ~x:<TermMatchPackageName>.*;
         
         import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
         import org.spoofax.interpreter.terms.IStrategoTerm;
-        import org.spoofax.terms.util.NotImplementedException;
         import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.*;
@@ -386,7 +412,7 @@ rules /* term registry */
           
           @Override
           public ITerm parseProgramTerm(IStrategoTerm p) {
-            throw new NotImplementedException("Not yet implemented");
+            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<TargetStartSort>).create(p);
           }
           
           @Override
@@ -401,7 +427,8 @@ rules /* term registry */
         }
       ]|
     where
-      bstm0* := <ds-to-interp-terms-registry-inits> consdecl* 
+      bstm0* := <ds-to-interp-terms-registry-inits> consdecl*
+      
 
 
   ds-to-interp-terms-registry-inits = mapconcat(ds-to-interp-terms-registry-init)

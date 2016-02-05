@@ -24,6 +24,7 @@ rules
       TermsPackageName: _ -> $[[<TopPackageName>].terms]
       TermBuildPackageName: _ -> $[[<TermsPackageName>].build]
       TermMatchPackageName: _ -> $[[<TermsPackageName>].match]
+      TargetStartSort: _ -> <PropertiesFile; read-property(|"target.startsort", "MISSING")>
     )
 
   ds-to-interp-write-classes(|package) = emit-java-classes(overwrite-merge-strategy, id | package, <JavaGenDir>)
