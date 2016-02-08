@@ -77,7 +77,7 @@ public abstract class MapBuild extends TermBuild {
 		@Override
 		public Object executeGeneric(VirtualFrame frame) {
 			Object key = keyNode.executeGeneric(frame);
-			Object val = keyNode.executeGeneric(frame);
+			Object val = valNode.executeGeneric(frame);
 			return PersistentHashMap.emptyMap().plus(key, val);
 		}
 	}
