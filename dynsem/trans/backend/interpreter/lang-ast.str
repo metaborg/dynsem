@@ -292,9 +292,7 @@ rules /* term building */
   ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
   
   ds-to-interp-terms-building-childanno:
-    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = x_childterm.class) ]|
-    where
-      x_childterm := <ds-to-interp-terms-building-absbuildname> s
+    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]|
   
   ds-to-interp-terms-building-absbuildname:
     sref@SimpleSort(s) -> $[A[<ds-to-interp-terms-types-name> sref]Build]
@@ -471,7 +469,7 @@ rules /* term registry */
       x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
       x_termclass := <ds-to-interp-terms-types-name> dec;
       x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
-      e1* := <map-with-index(\ (i, s) -> e |[ (~x:<ds-to-interp-terms-building-absbuildname> s) children[~i:<dec; int-to-string> i] ]| \)> kid*;
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*;
       e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
 
   ds-to-interp-natopterms-registry-inits = debug(!"4a "); mapconcat(debug(!"4b "); ds-to-interp-natopterms-registry-init; debug(!"4c ")); debug(!"4d ")
@@ -494,7 +492,7 @@ rules /* term registry */
       debug(!6);
       x_natop := $[[name]_[<length> kid*]];
       debug(!7);
-      e1* := <map-with-index(\ (i, s) -> e |[ (~x:<ds-to-interp-terms-building-absbuildname> s) children[~i:<dec; int-to-string> i] ]| \)> kid*
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
       ;debug(!8)
 
 rules /* utils */
