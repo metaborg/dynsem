@@ -35,7 +35,7 @@ public abstract class MapSelectBuild extends TermBuild {
 		if (res != null) {
 			return res;
 		}
-		throw new RuntimeException("No map entry for key: " + key);
+		throw new IllegalStateException("No map entry for key: " + key);
 	}
 
 }
