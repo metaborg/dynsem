@@ -1,0 +1,20 @@
+module backend/interpreter/native-ops
+
+imports
+  include/ds
+  ds
+  backend/interpreter/signature
+
+rules
+
+  desugar-native-ops-module:
+    m@Module(_, _) -> Module($[[name]_natops], section*)
+    where
+      <m-in-analysis(desugar-native-ops); unmark-vars> m => Module(name, section*)
+  
+  desugar-native-ops = alltd(desugar-native-ops-con)
+    
+  desugar-native-ops-con:
+    Con(c, k*) -> NativeOp(c, k*)
+    where
+      <lookup-def(|Constructors()); lookup-prop(|ConsKind())> (c, <length> k*) => NativeOpCons()

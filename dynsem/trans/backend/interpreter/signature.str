@@ -8,5 +8,4 @@ signature
   constructors
     ArgBind : Int -> Var
     ArgRead : Int -> Var
-
-
+    NativeOp : ID * List(Term) -> Term
