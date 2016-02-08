@@ -5,7 +5,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -29,7 +28,7 @@ public class RuleTarget extends Node {
 	public RuleResult execute(VirtualFrame frame) {
 		RuleResult res = new RuleResult();
 		res.result = rhsNode.executeGeneric(frame);
-		Object[] componentValues = new IStrategoTerm[componentNodes.length];
+		Object[] componentValues = new Object[componentNodes.length];
 
 		for (int i = 0; i < componentNodes.length; i++) {
 			componentValues[i] = componentNodes[i].executeGeneric(frame);
