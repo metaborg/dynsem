@@ -18,38 +18,66 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
 import com.oracle.truffle.api.source.SourceSection;
 
+/**
+ * {@link ReductionPremise} represents and specifies evaluation logic for a
+ * reduction premise, i.e. a premise which applies a rule to a term.
+ * 
+ * @author vladvergu
+ *
+ */
 public class ReductionPremise extends Premise {
 
-	@Children protected final TermBuild[] rorwNodes;
+	@Children protected final TermBuild[] roNodes;
 
 	@Child protected TermBuild lhsNode;
 
+	@Children protected final TermBuild[] rwNodes;
 	@Child protected MatchPattern rhsNode;
 
 	@Children protected final MatchPattern[] rhsRwNodes;
 
 	@CompilationFinal private DynSemContext context;
 
-	public ReductionPremise(TermBuild[] rorwNodes, TermBuild lhsNode,
-			MatchPattern rhsNode, MatchPattern[] rhsComponentNodes,
-			SourceSection source) {
+	public ReductionPremise(TermBuild[] roNodes, TermBuild lhsNode,
+			TermBuild[] rwNodes, MatchPattern rhsNode,
+			MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
-		this.rorwNodes = rorwNodes;
+		this.roNodes = roNodes;
 		this.lhsNode = lhsNode;
+		this.rwNodes = rwNodes;
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}
 
-	@Override
+	/**
+	 * The {@link #execute(VirtualFrame)} function first evaluates the
+	 * {@link #roNodes} using the {@link #evalRWNodes(VirtualFrame)} helper
+	 * function. Then {@link #rwNodes} are evaluted. Then the {@link #lhsNode}
+	 * representing the input term to the reduction is evaluated. The target
+	 * rule to apply is found based on the term to reduce on. Following
+	 * application of the rule the local variables are bound to values in the
+	 * {@link RuleResult}.
+	 * 
+	 * @Override
+	 */
 	public void execute(VirtualFrame frame) {
-		Object[] componentArgs = evalComponentsNodes(frame);
+		Object[] roArgs = evalRONodes(frame);
+		Object[] rwArgs = evalRWNodes(frame);
 		IConTerm lshTerm;
 		try {
 			lshTerm = lhsNode.executeIConTerm(frame);
 			Rule targetRule = lookupRule(lshTerm);
+			Object[] lhsTerms = lshTerm.allSubterms();
+
+			Object[] args = new Object[roArgs.length + lhsTerms.length
+					+ rwArgs.length];
+			System.arraycopy(roArgs, 0, args, 0, roArgs.length);
+			System.arraycopy(lhsTerms, 0, args, roArgs.length, lhsTerms.length);
+			System.arraycopy(roArgs, 0, args, roArgs.length + lhsTerms.length,
+					rwArgs.length);
 
 			RuleResult ruleRes = (RuleResult) targetRule.getCallTarget().call(
-					lshTerm.allSubterms(), componentArgs);
+					args);
 			if (!rhsNode.execute(ruleRes.result, frame)) {
 				throw new PremiseFailure();
 			}
@@ -64,6 +92,24 @@ public class ReductionPremise extends Premise {
 	}
 
 	@ExplodeLoop
+	private Object[] evalRONodes(VirtualFrame frame) {
+		Object[] roArgs = new Object[roNodes.length];
+		for (int i = 0; i < roNodes.length; i++) {
+			roArgs[i] = roNodes[i].executeGeneric(frame);
+		}
+		return roArgs;
+	}
+
+	@ExplodeLoop
+	private Object[] evalRWNodes(VirtualFrame frame) {
+		Object[] rwArgs = new Object[rwNodes.length];
+		for (int i = 0; i < rwNodes.length; i++) {
+			rwArgs[i] = rwNodes[i].executeGeneric(frame);
+		}
+		return rwArgs;
+	}
+
+	@ExplodeLoop
 	private boolean evalRhsComponents(Object[] components, VirtualFrame frame) {
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			if (!rhsRwNodes[i].execute(components[i], frame)) {
@@ -71,15 +117,6 @@ public class ReductionPremise extends Premise {
 			}
 		}
 		return true;
-	}
-
-	@ExplodeLoop
-	private Object[] evalComponentsNodes(VirtualFrame frame) {
-		Object[] roArgs = new Object[rorwNodes.length];
-		for (int i = 0; i < rorwNodes.length; i++) {
-			roArgs[i] = rorwNodes[i].executeGeneric(frame);
-		}
-		return roArgs;
 	}
 
 	private Rule lookupRule(IConTerm lshTerm) {
@@ -113,10 +150,6 @@ public class ReductionPremise extends Premise {
 					fd);
 		}
 
-		TermBuild[] rorwNodes = new TermBuild[roNodes.length + rwNodes.length];
-		System.arraycopy(roNodes, 0, rorwNodes, 0, roNodes.length);
-		System.arraycopy(rwNodes, 0, rorwNodes, roNodes.length, rwNodes.length);
-
 		IStrategoAppl targetT = Tools.applAt(t, 3);
 		assert Tools.hasConstructor(targetT, "Target", 2);
 		MatchPattern rhsNode = MatchPattern
@@ -128,7 +161,7 @@ public class ReductionPremise extends Premise {
 			rhsRwNodes[i] = MatchPattern.create(Tools.applAt(rhsRwsT, i), fd);
 		}
 
-		return new ReductionPremise(rorwNodes, lhsNode, rhsNode, rhsRwNodes,
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new ReductionPremise(roNodes, lhsNode, rwNodes, rhsNode,
+				rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
 	}
 }
