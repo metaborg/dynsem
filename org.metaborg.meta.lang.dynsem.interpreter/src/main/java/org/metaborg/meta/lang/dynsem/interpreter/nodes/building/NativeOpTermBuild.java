@@ -46,7 +46,7 @@ public class NativeOpTermBuild extends TermBuild {
 		IStrategoList childrenT = Tools.listAt(t, 1);
 		TermBuild[] children = new TermBuild[childrenT.size()];
 		for (int i = 0; i < children.length; i++) {
-			children[0] = TermBuild.create(Tools.applAt(childrenT, i), fd);
+			children[i] = TermBuild.create(Tools.applAt(childrenT, i), fd);
 		}
 
 		return new NativeOpTermBuild(constr, children,
