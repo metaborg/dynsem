@@ -24,6 +24,7 @@ rules
       TermsPackageName: _ -> $[[<TopPackageName>].terms]
       TermBuildPackageName: _ -> $[[<TermsPackageName>].build]
       TermMatchPackageName: _ -> $[[<TermsPackageName>].match]
+      NativePackageName: _ -> <PropertiesFile; read-property(|"target.nativepackage", $[[<language>].natives])>
       TargetStartSort: _ -> <PropertiesFile; read-property(|"target.startsort", "MISSING")>
     )
 
