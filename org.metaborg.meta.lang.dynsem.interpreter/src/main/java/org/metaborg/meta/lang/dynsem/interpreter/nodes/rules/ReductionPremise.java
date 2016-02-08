@@ -158,7 +158,7 @@ public class ReductionPremise extends Premise {
 		IStrategoList rhsRwsT = Tools.listAt(targetT, 1);
 		MatchPattern[] rhsRwNodes = new MatchPattern[rhsRwsT.size()];
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			rhsRwNodes[i] = MatchPattern.create(Tools.applAt(rhsRwsT, i), fd);
+			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
 
 		return new ReductionPremise(roNodes, lhsNode, rwNodes, rhsNode,
