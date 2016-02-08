@@ -73,7 +73,7 @@ public class ReductionPremise extends Premise {
 					+ rwArgs.length];
 			System.arraycopy(roArgs, 0, args, 0, roArgs.length);
 			System.arraycopy(lhsTerms, 0, args, roArgs.length, lhsTerms.length);
-			System.arraycopy(roArgs, 0, args, roArgs.length + lhsTerms.length,
+			System.arraycopy(rwArgs, 0, args, rwArgs.length + lhsTerms.length,
 					rwArgs.length);
 
 			RuleResult ruleRes = (RuleResult) targetRule.getCallTarget().call(
