@@ -12,5 +12,7 @@ public interface ITermRegistry {
 
 	public ITermMatchPatternFactory lookupMatchFactory(String name, int arity);
 
+	public ITermBuildFactory lookupNativeOpBuildFactory(String constr, int arity);
+
 	public ITerm parseProgramTerm(IStrategoTerm t);
 }

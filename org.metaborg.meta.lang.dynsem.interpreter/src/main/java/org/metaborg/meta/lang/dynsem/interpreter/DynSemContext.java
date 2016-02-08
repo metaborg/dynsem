@@ -11,13 +11,12 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 public class DynSemContext {
 
 	public static DynSemLanguage LANGUAGE;
-	
+
 	private final BufferedReader input;
 	private final PrintWriter output;
 
 	private final ITermRegistry termRegistry;
 	private final IRuleRegistry ruleRegistry;
-
 
 	public DynSemContext(ITermRegistry termRegistry, IRuleRegistry ruleRegistry) {
 		this(termRegistry, ruleRegistry, new BufferedReader(
@@ -38,6 +37,10 @@ public class DynSemContext {
 
 	public ITermBuildFactory lookupTermBuilder(String name, int arity) {
 		return termRegistry.lookupBuildFactory(name, arity);
+	}
+
+	public ITermBuildFactory lookupNativeOpBuilder(String name, int arity) {
+		return termRegistry.lookupNativeOpBuildFactory(name, arity);
 	}
 
 	public ITermMatchPatternFactory lookupMatchPattern(String name, int arity) {
