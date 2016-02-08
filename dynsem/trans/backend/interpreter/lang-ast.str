@@ -297,17 +297,6 @@ rules /* term building */
   ds-to-interp-terms-building-childanno:
     (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]|
   
-  ds-to-interp-terms-building-absbuildname:
-    sref@SimpleSort(s) -> $[A[<ds-to-interp-terms-types-name> sref]Build]
-    where
-      <not(is-builtin-type)> s
-
-  ds-to-interp-terms-building-absbuildname:
-    SimpleSort("String") -> "LiteralTermBuild.StringLiteralTermBuild"
-  
-  ds-to-interp-terms-building-absbuildname:
-    SimpleSort("Int") -> "LiteralTermBuild.IntLiteralTermBuild"
-
   ds-to-interp-terms-building-params = map-with-index(ds-to-interp-terms-building-param)
   
   ds-to-interp-terms-building-param:
@@ -512,9 +501,12 @@ rules /* utils */
     SimpleSort("String") -> $[String]
 
   ds-to-interp-terms-types-name:
-    SimpleSort("Int") -> $[Int]
+    SimpleSort("Int") -> $[int]
+
+  ds-to-interp-terms-types-name:
+    SimpleSort("Bool") -> $[boolean]
   
-  is-builtin-type = ?"String" + ?"Int"
+  is-builtin-type = ?"String" + ?"Int" + ?"Bool"
   
   ds-to-interp-terms-types-name:
     ConsDecl(name, child*, _, _) -> $[[name]_[<length> child*]_Term]

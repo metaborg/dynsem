@@ -5,6 +5,8 @@ import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
@@ -56,11 +58,16 @@ public abstract class TermBuild extends Node {
 		return BuiltinTypesGen.expectPersistentMap(executeGeneric(frame));
 	}
 
+	public boolean executeBoolean(VirtualFrame frame)
+			throws UnexpectedResultException {
+		return BuiltinTypesGen.expectBoolean(executeGeneric(frame));
+	}
+
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
-		if(Tools.hasConstructor(t, "Con", 2)){
+		if (Tools.hasConstructor(t, "Con", 2)) {
 			return ConBuild.create(t, fd);
 		}
-		if(Tools.hasConstructor(t, "NativeOp", 2)){
+		if (Tools.hasConstructor(t, "NativeOp", 2)) {
 			return NativeOpTermBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)) {
@@ -77,6 +84,15 @@ public abstract class TermBuild extends Node {
 		}
 		if (Tools.hasConstructor(t, "MapSelect", 2)) {
 			return MapSelectBuild.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "MapHas", 2)) {
+			return MapHas.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "True", 0)) {
+			return TrueLiteralTermBuild.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "False", 0)) {
+			return FalseLiteralTermBuild.create(t, fd);
 		}
 
 		throw new NotImplementedException("Unsupported term build: " + t);

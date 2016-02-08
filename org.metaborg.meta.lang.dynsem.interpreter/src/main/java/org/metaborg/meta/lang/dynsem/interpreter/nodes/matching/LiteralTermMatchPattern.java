@@ -53,4 +53,36 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 
 	}
 
+	public static final class TrueLiteralTermMatchPattern extends
+			LiteralTermMatchPattern {
+
+		public TrueLiteralTermMatchPattern(SourceSection source) {
+			super(source);
+		}
+
+		@Override
+		public boolean execute(Object term, VirtualFrame frame) {
+			if (BuiltinTypesGen.isBoolean(term)) {
+				return BuiltinTypesGen.asBoolean(term);
+			}
+			return false;
+		}
+	}
+
+	public static final class FalseLiteralTermMatchPattern extends
+			LiteralTermMatchPattern {
+
+		public FalseLiteralTermMatchPattern(SourceSection source) {
+			super(source);
+		}
+
+		@Override
+		public boolean execute(Object term, VirtualFrame frame) {
+			if (BuiltinTypesGen.isBoolean(term)) {
+				return !BuiltinTypesGen.asBoolean(term);
+			}
+			return false;
+		}
+	}
+
 }

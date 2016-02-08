@@ -27,6 +27,9 @@ public abstract class Premise extends Node {
 		if(Tools.hasConstructor(premT, "Match", 2)){
 			return MatchPremise.create(premT, fd);
 		}
+		if(Tools.hasConstructor(premT, "TermEq", 2)){
+			return TermEqPremise.create(premT, fd);
+		}
 		
 		throw new NotImplementedException("Unsupported premise: " + t);
 	}
