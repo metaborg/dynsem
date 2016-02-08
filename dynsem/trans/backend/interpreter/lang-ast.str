@@ -45,6 +45,7 @@ rules /* Sort & Constructor classes */
         
         public abstract class x_class implements IConTerm {
           public static x_class create(IStrategoTerm term) {
+            assert term != null;
             bstm0*
             bstm1
           }
@@ -112,7 +113,9 @@ rules /* Sort & Constructor classes */
           }
 
           public static x_classname create(IStrategoTerm term) {
-            assert Tools.isTermAppl(term) && Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
+            assert term != null;
+            assert Tools.isTermAppl(term);
+            assert Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
             return new x_classname(e1*);
           }
           
