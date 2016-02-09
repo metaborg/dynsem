@@ -22,6 +22,8 @@ rules
     <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
     debug(!"generating term registry class");
     <filter(?Constructors(<id>) + ?NativeOperators(<id>)); concat; ds-to-interp-terms-registry; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
+    debug(!"generating interpreter entry point");
+    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>);
     debug(!"done generating classes")
 
 rules /* Sort & Constructor classes */
@@ -366,7 +368,6 @@ rules /* term matching */
 
 rules /* term registry */
 
-
   ds-to-interp-terms-registry:
     decl* ->
       compilation-unit |[
@@ -404,7 +405,7 @@ rules /* term registry */
           
           @Override
           public ITerm parseProgramTerm(IStrategoTerm p) {
-            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<TargetStartSort>).create(p);
+            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<SourceStartSymbol>).create(p);
           }
           
           @Override
@@ -486,6 +487,100 @@ rules /* term registry */
       debug(!7);
       e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
       ;debug(!8)
+
+rules /* language file. interpreter entry point */
+
+  ds-to-interp-language-entrypoint =
+    !compilation-unit |[
+    
+      package ~x:<TopPackageName>;
+      
+      import java.io.File;
+      import java.io.IOException;
+      import java.nio.file.Paths;
+      
+      import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+      import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+      
+      import ~x:<TopPackageName>.TermRegistry;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+      import org.spoofax.interpreter.terms.IStrategoTerm;
+      
+      import com.oracle.truffle.api.CallTarget;
+      import com.oracle.truffle.api.TruffleLanguage;
+      import com.oracle.truffle.api.nodes.Node;
+      import com.oracle.truffle.api.source.Source;
+      import com.oracle.truffle.api.vm.PolyglotEngine;
+      import com.oracle.truffle.api.vm.PolyglotEngine.Value;
+      
+      @TruffleLanguage.Registration(name = ~e:Lit(String([Chars(<LanguageName>)])), version = ~e:Lit(String([Chars(<SourceVersion>)])), mimeType = ~e:Lit(String([Chars(<SourceMimeType>)])))
+      public class ~x:$[[<LanguageName>]Language] extends DynSemLanguage {
+      
+        public final static String PARSE_TABLE = ~e:Lit(String([Chars(<RelativeTableTargetFile>)]));
+        public final static String START_SYMBOL = ~e:Lit(String([Chars(<SourceStartSymbol>)]));
+        public final static String SPEC_FILE = ~e:Lit(String([Chars(<RelativeSpecTargetFile>)]));
+        public final static String MIME_TYPE = ~e:Lit(String([Chars(<SourceMimeType>)]));
+        public final static String START_CONSTR_NAME = ~e:Lit(String([Chars(<ReductionStartConstrName>)]));
+        public final static int START_CONSTR_ARITY = ~i:<ReductionStartConstrArity>;
+        
+        public final static CalcLangLanguage INSTANCE = new CalcLangLanguage();
+      
+        private final DynSemLanguageParser parser;
+      
+        public CalcLangLanguage() {
+          super(new TermRegistry(), new File(SPEC_FILE));
+          parser = new DynSemLanguageParser(Paths.get(PARSE_TABLE));
+        }
+      
+        public static void main(String[] args) throws IOException {
+          PolyglotEngine vm = PolyglotEngine.buildNew().build();
+          assert vm.getLanguages().containsKey(MIME_TYPE);
+      
+          Source source = Source.fromFileName(args[0]).withMimeType(MIME_TYPE);
+          Value v = vm.eval(source);
+          RuleResult res = (RuleResult) v.get();
+      
+          System.out.println(res.result);
+      
+        }
+      
+        @Override
+        protected CallTarget parse(Source code, Node context,
+            String... argumentNames) throws IOException {
+      
+          IStrategoTerm programT = parser.parse(code, START_SYMBOL);
+          ITerm program = getTermRegistry().parseProgramTerm(programT);
+      
+          return new CallTarget() {
+      
+            @Override
+            public Object call(Object... arguments) {
+              Node n = createFindContextNode();
+              DynSemContext c = findContext(n);
+      
+              Rule initRule = c.lookupRule(START_CONSTR_NAME, START_CONSTR_ARITY);
+              if (initRule == null) {
+                throw new IllegalStateException("Rule not found");
+              }
+              if (program instanceof IConTerm) {
+                IConTerm programCon = (IConTerm) program;
+                if (programCon.constructor().equals(START_CONSTR_NAME) && programCon.arity() == START_CONSTR_ARITY) {
+      
+                  return initRule.getCallTarget().call(
+                      programCon.allSubterms());
+                }
+              }
+              throw new IllegalStateException("Malformed program term");
+            }
+          };
+        }
+      }
+    ]|
+    
 
 rules /* utils */
 
