@@ -118,6 +118,7 @@ rules /* Sort & Constructor classes */
             assert term != null;
             assert Tools.isTermAppl(term);
             assert Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
+            bstm1*
             return new x_classname(e1*);
           }
           
@@ -144,18 +145,31 @@ rules /* Sort & Constructor classes */
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
       e0* := <ds-to-interp-sorts-to-frefs> kid*;
-      e1* := <map-with-index(ds-to-interp-sorts-to-create-arg)> kid*
+      (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|"term")); unzip; (concat, id)> kid*
   
-  ds-to-interp-sorts-to-create-arg:
-    (i, sref@SimpleSort(s)) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(term.getSubterm(~i:<dec; int-to-string> i)) ]|
+  ds-to-interp-sorts-to-create-arg(|x_term):
+    (e, sref@SimpleSort(s)) -> ([], e |[ ~x:<ds-to-interp-terms-types-name> sref.create(x_term.getSubterm(e)) ]|)
     where
       <not(is-builtin-type)> s
 
-  ds-to-interp-sorts-to-create-arg:
-    (i, sref@SimpleSort("String")) -> e |[ Tools.stringAt(term, ~i:<int-to-string> i).stringValue() ]|
+  ds-to-interp-sorts-to-create-arg(|x_term):
+    (e, ListSort(s)) -> (
+      bstm* |[
+        java.util.List<x_elemclass> x_tmpres = new java.util.LinkedList<x_elemclass>();
+        for (IStrategoTerm x_tmpelem : Tools.listAt(x_term, e)) {
+          x_tmpres.add(x_elemclass.create(x_tmpelem));
+        }
+      ]|, e |[ com.github.krukow.clj_lang.PersistentList.create(x_tmpres) ]|)
+    where
+      x_elemclass := <ds-to-interp-terms-types-name> s;
+      x_tmpres := $[_[<newname>]];
+      x_tmpelem := $[_[<newname>]]
 
-  ds-to-interp-sorts-to-create-arg:
-    (i, sref@SimpleSort("Int")) -> e |[ Tools.intAt(term, ~i:<int-to-string> i).intValue() ]|
+  ds-to-interp-sorts-to-create-arg(|x_term):
+    (e, sref@SimpleSort("String")) -> ([], e |[ Tools.stringAt(x_term, e).stringValue() ]|)
+
+  ds-to-interp-sorts-to-create-arg(|x_term):
+    (e, sref@SimpleSort("Int")) -> ([], e |[ Tools.intAt(x_term, e).intValue() ]|)
   
   ds-to-interp-sorts-to-params = is-list; map-with-index(ds-to-interp-sort-to-param)
   
@@ -586,6 +600,11 @@ rules /* utils */
 
   ds-to-interp-terms-types-name:
     SortDecl(s) -> $[I[s]Term]
+
+  ds-to-interp-terms-types-name:
+    ListSort(s) -> $[com.github.krukow.clj_lang.IPersistentStack]
+
+//    ListSort(s) -> $[com.github.krukow.clj_lang.IPersistentStack<[<ds-to-interp-terms-types-name> s]>]
 
   ds-to-interp-terms-types-name:
     SimpleSort(s) -> $[I[s]Term]
