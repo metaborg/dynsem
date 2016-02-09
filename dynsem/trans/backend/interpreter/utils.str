@@ -16,16 +16,22 @@ rules
     );
     rules(
       TableSourceFile: _ -> $[[project-path][<PropertiesFile; read-property(|"source.table", $[include/[<LanguageName>].tbl])>]]
+      SourceVersion: _ -> <PropertiesFile; read-property(|"source.version", "0.1")>
+      SourceMimeType: _ -> <PropertiesFile; read-property(|"source.mimetype", "application/x-somelanguage")>
+      ReductionStartConstrName: _ -> <PropertiesFile; read-property(|"source.initconstructor.name", "MISSING")>
+      ReductionStartConstrArity: _ -> <PropertiesFile; read-property(|"source.initconstructor.arity", "MISSING")>
       GenProject: _ -> <PropertiesFile; read-property(|"target.project", project-path); make-absolute-path(|project-path)>
-      JavaGenDir: _ -> $[[<GenProject>][<PropertiesFile; read-property(|"target.java", "/editor/java")>]]
+      JavaGenDir: _ -> $[[<GenProject>]/[<PropertiesFile; read-property(|"target.java", "/editor/java")>]]
       TopPackageName: _ -> <PropertiesFile; read-property(|"target.package", $[[<language>].generated.interpreter])>
-      SpecTargetFile: _ -> $[[<GenProject>][<PropertiesFile; read-property(|"target.specterm", path)>]]
-      TableTargetFile: _ -> $[[<GenProject>][<PropertiesFile; read-property(|"target.table", path)>]]
+      RelativeSpecTargetFile: _ -> <PropertiesFile; read-property(|"target.specterm", path)>
+      SpecTargetFile: _ -> $[[<GenProject>]/[<RelativeSpecTargetFile>]]
+      RelativeTableTargetFile: _ -> <PropertiesFile; read-property(|"target.table", path)>
+      TableTargetFile: _ -> $[[<GenProject>]/[<RelativeTableTargetFile>]]
       TermsPackageName: _ -> $[[<TopPackageName>].terms]
       TermBuildPackageName: _ -> $[[<TermsPackageName>].build]
       TermMatchPackageName: _ -> $[[<TermsPackageName>].match]
       NativePackageName: _ -> <PropertiesFile; read-property(|"target.nativepackage", $[[<language>].natives])>
-      TargetStartSort: _ -> <PropertiesFile; read-property(|"target.startsort", "MISSING")>
+      SourceStartSymbol: _ -> <PropertiesFile; read-property(|"source.startsymbol", "MISSING")>
     )
 
   ds-to-interp-write-classes(|package) = emit-java-classes(overwrite-merge-strategy, id | package, <JavaGenDir>)
