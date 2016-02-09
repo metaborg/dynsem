@@ -34,7 +34,7 @@ public class ConMatch extends MatchPattern {
 		IStrategoList childrenT = Tools.listAt(t, 1);
 		MatchPattern[] children = new MatchPattern[childrenT.size()];
 		for (int i = 0; i < children.length; i++) {
-			children[0] = MatchPattern.create(Tools.applAt(childrenT, i), fd);
+			children[i] = MatchPattern.create(Tools.applAt(childrenT, i), fd);
 		}
 
 		return new ConMatch(constr, children,
