@@ -1,10 +1,13 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
+import metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
 import metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.ConsListBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.NilListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
 import org.spoofax.interpreter.core.Tools;
@@ -12,12 +15,17 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
+import com.github.krukow.clj_lang.IPersistentCollection;
+import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
 import com.oracle.truffle.api.source.SourceSection;
 
+@TypeSystemReference(BuiltinTypes.class)
+@NodeInfo(description = "The abstract base node for all term construction")
 public abstract class TermBuild extends Node {
 
 	private Node createContext;
@@ -63,6 +71,11 @@ public abstract class TermBuild extends Node {
 		return BuiltinTypesGen.expectBoolean(executeGeneric(frame));
 	}
 
+	public IPersistentCollection<?> executeList(VirtualFrame frame)
+			throws UnexpectedResultException {
+		return BuiltinTypesGen.expectIPersistentStack(executeGeneric(frame));
+	}
+
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		if (Tools.hasConstructor(t, "Con", 2)) {
 			return ConBuild.create(t, fd);
@@ -93,6 +106,12 @@ public abstract class TermBuild extends Node {
 		}
 		if (Tools.hasConstructor(t, "False", 0)) {
 			return FalseLiteralTermBuild.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "List", 1)) {
+			return NilListBuild.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "ListTail", 2)) {
+			return ConsListBuild.create(t, fd);
 		}
 
 		throw new NotImplementedException("Unsupported term build: " + t);

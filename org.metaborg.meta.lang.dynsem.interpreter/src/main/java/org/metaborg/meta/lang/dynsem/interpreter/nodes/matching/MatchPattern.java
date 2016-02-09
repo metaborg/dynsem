@@ -1,6 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatch.ConsListMatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatch.NilListMatch;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
@@ -31,6 +33,12 @@ public abstract class MatchPattern extends Node {
 		}
 		if (Tools.hasConstructor(t, "VarRef", 1)) {
 			return VarBind.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "List", 1)) {
+			return NilListMatch.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "ListTail", 2)) {
+			return ConsListMatch.create(t, fd);
 		}
 
 		throw new NotImplementedException("Unsupported match pattern: " + t);
