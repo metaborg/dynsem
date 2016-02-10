@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -16,7 +17,7 @@ import org.spoofax.terms.io.TAFTermReader;
 
 public class RuleRegistry implements IRuleRegistry {
 
-	private final Map<String, Rule> rules = new HashMap<>();
+	private final Map<String, ReductionRule> rules = new HashMap<>();
 
 	@Override
 	public Rule lookupRule(String name, String constr, int arity) {
@@ -31,7 +32,7 @@ public class RuleRegistry implements IRuleRegistry {
 		throw new InterpreterException("No rule found for: " + k);
 	}
 
-	public void registerRule(Rule r) {
+	public void registerRule(ReductionRule r) {
 		String k = makeKey(r.getName(), r.getConstructor(), r.getArity());
 		Rule or = rules.put(k, r);
 		if (or != null) {
@@ -65,7 +66,7 @@ public class RuleRegistry implements IRuleRegistry {
 
 		IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 		for (IStrategoTerm ruleTerm : rulesTerm) {
-			reg.registerRule(Rule.create(ruleTerm));
+			reg.registerRule(ReductionRule.create(ruleTerm));
 		}
 		return reg;
 	}
