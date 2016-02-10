@@ -7,6 +7,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
@@ -14,14 +15,16 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class MatchPattern extends Node {
 
-	private Node createContext;
+	@CompilationFinal private Node createContext;
 
 	public MatchPattern(SourceSection source) {
 		super(source);
-		this.createContext = DynSemContext.LANGUAGE.createFindContextNode0();
 	}
 
 	protected DynSemContext getContext() {
+		if (createContext == null) {
+			createContext = DynSemContext.LANGUAGE.createFindContextNode0();
+		}
 		return DynSemContext.LANGUAGE.findContext0(createContext);
 	}
 
@@ -41,7 +44,8 @@ public abstract class MatchPattern extends Node {
 			return ConsListMatch.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "Cast", 2)) {
-			// FIXME: this is a hack. we should use the type information from the cast
+			// FIXME: this is a hack. we should use the type information from
+			// the cast
 			return MatchPattern.create(Tools.applAt(t, 0), fd);
 		}
 		throw new NotImplementedException("Unsupported match pattern: " + t);

@@ -449,13 +449,13 @@ rules /* term registry */
         
         import com.oracle.truffle.api.source.SourceSection;
         
-        public class TermRegistry implements ITermRegistry {
+        public class ~x:$[[<LanguageName>]TermRegistry] implements ITermRegistry {
         
           private final Map<String, ITermBuildFactory> builderFactories = new HashMap<String, ITermBuildFactory>();
           private final Map<String, ITermMatchPatternFactory> matcherFactories = new HashMap<String, ITermMatchPatternFactory>();
           private final Map<String, ITermBuildFactory> nativeFactories = new HashMap<String, ITermBuildFactory>();
         
-          public TermRegistry() {
+          public ~x:$[[<LanguageName>]TermRegistry]() {
             init();
           }
         
@@ -563,7 +563,7 @@ rules /* language file. interpreter entry point */
       import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
       import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
       
-      import ~x:<TopPackageName>.TermRegistry;
+      import ~x:<TopPackageName>.~x:$[[<LanguageName>]TermRegistry];
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
@@ -593,7 +593,7 @@ rules /* language file. interpreter entry point */
         private final DynSemLanguageParser parser;
       
         public CalcLangLanguage() {
-          super(new TermRegistry(), new File(SPEC_FILE));
+          super(new ~x:$[[<LanguageName>]TermRegistry](), new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)));
           parser = new DynSemLanguageParser(Paths.get(PARSE_TABLE));
         }
       
@@ -623,7 +623,7 @@ rules /* language file. interpreter entry point */
               Node n = createFindContextNode();
               DynSemContext c = findContext(n);
       
-              Rule initRule = c.lookupRule("init", START_CONSTR_NAME, START_CONSTR_ARITY);
+              Rule initRule = c.getRuleRegistry().lookupRule("init", START_CONSTR_NAME, START_CONSTR_ARITY);
               if (initRule == null) {
                 throw new IllegalStateException("Rule not found");
               }

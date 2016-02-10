@@ -130,8 +130,8 @@ public class ReductionPremise extends Premise {
 							.createFindContextNode0());
 		}
 
-		return context.lookupRule(arrowName, lshTerm.constructor(),
-				lshTerm.arity());
+		return context.getRuleRegistry().lookupRule(arrowName,
+				lshTerm.constructor(), lshTerm.arity());
 	}
 
 	public static ReductionPremise create(IStrategoAppl t, FrameDescriptor fd) {

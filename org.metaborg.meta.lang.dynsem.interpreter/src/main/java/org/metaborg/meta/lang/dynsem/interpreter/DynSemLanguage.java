@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -18,11 +17,11 @@ import com.oracle.truffle.api.source.Source;
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 	private ITermRegistry termRegistry;
-	private File specFile;
+	private RuleRegistry ruleRegistry;
 
-	public DynSemLanguage(ITermRegistry termRegistry, File specFile) {
+	public DynSemLanguage(ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
 		this.termRegistry = termRegistry;
-		this.specFile = specFile;
+		this.ruleRegistry = ruleRegistry;
 		DynSemContext.LANGUAGE = this;
 	}
 
@@ -32,8 +31,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 				env.in()));
 		final PrintWriter out = new PrintWriter(env.out(), true);
 
-		DynSemContext context = new DynSemContext(termRegistry,
-				RuleRegistry.create(specFile), in, out);
+		DynSemContext context = new DynSemContext(termRegistry, ruleRegistry,
+				in, out);
 
 		return context;
 	}

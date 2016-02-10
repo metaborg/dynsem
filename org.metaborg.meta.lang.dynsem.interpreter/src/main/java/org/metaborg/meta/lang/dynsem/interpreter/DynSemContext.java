@@ -16,23 +16,27 @@ public class DynSemContext {
 	private final PrintWriter output;
 
 	private final ITermRegistry termRegistry;
-	private final IRuleRegistry ruleRegistry;
+	private final RuleRegistry ruleRegistry;
 
-	public DynSemContext(ITermRegistry termRegistry, IRuleRegistry ruleRegistry) {
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
 		this(termRegistry, ruleRegistry, new BufferedReader(
 				new InputStreamReader(System.in)), new PrintWriter(System.out));
 	}
 
-	public DynSemContext(ITermRegistry termRegistry,
-			IRuleRegistry ruleRegistry, BufferedReader input, PrintWriter output) {
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry,
+			BufferedReader input, PrintWriter output) {
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
 	}
 
-	public Rule lookupRule(String name, String constr, int arity) {
-		return ruleRegistry.lookupRule(name, constr, arity);
+	public RuleRegistry getRuleRegistry() {
+		return ruleRegistry;
+	}
+
+	public ITermRegistry getTermRegistry() {
+		return termRegistry;
 	}
 
 	public ITermBuildFactory lookupTermBuilder(String name, int arity) {

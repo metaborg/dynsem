@@ -7,15 +7,15 @@ import java.io.File;
 import org.junit.Test;
 import org.metaborg.meta.lang.dynsem.interpreter.RuleRegistry;
 
-import com.oracle.truffle.api.nodes.NodeUtil;
-
 public class TestSpecLoad {
 
 	@Test
 	public void testLoadSpec() throws Exception {
 		File testDir = new File("src/test/resources/");
 		File specFile = new File(testDir, "testSpec1.aterm");
-		RuleRegistry rreg = RuleRegistry.create(specFile);
+		RuleRegistry rreg = new RuleRegistry() {
+		};
+		RuleRegistry.populate(rreg, specFile);
 		assertEquals(5, rreg.ruleCount());
 //		NodeUtil.printTreeToString(rreg.lookupRule("Plus", 2));
 	}

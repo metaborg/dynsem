@@ -15,11 +15,10 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
-public class RuleRegistry implements IRuleRegistry {
+public abstract class RuleRegistry {
 
-	private final Map<String, ReductionRule> rules = new HashMap<>();
+	private final Map<String, Rule> rules = new HashMap<>();
 
-	@Override
 	public Rule lookupRule(String name, String constr, int arity) {
 		String k = makeKey(name, constr, arity);
 		Rule r = rules.get(k);
@@ -32,7 +31,7 @@ public class RuleRegistry implements IRuleRegistry {
 		throw new InterpreterException("No rule found for: " + k);
 	}
 
-	public void registerRule(ReductionRule r) {
+	public void registerRule(Rule r) {
 		String k = makeKey(r.getName(), r.getConstructor(), r.getArity());
 		Rule or = rules.put(k, r);
 		if (or != null) {
@@ -40,7 +39,6 @@ public class RuleRegistry implements IRuleRegistry {
 		}
 	}
 
-	@Override
 	public int ruleCount() {
 		return rules.size();
 	}
@@ -49,9 +47,7 @@ public class RuleRegistry implements IRuleRegistry {
 		return name + "/" + constr + "/" + arity;
 	}
 
-	public static RuleRegistry create(File specificationFile) {
-
-		RuleRegistry reg = new RuleRegistry();
+	public static void populate(RuleRegistry reg, File specificationFile) {
 
 		TAFTermReader reader = new TAFTermReader(new TermFactory());
 
@@ -68,7 +64,6 @@ public class RuleRegistry implements IRuleRegistry {
 		for (IStrategoTerm ruleTerm : rulesTerm) {
 			reg.registerRule(ReductionRule.create(ruleTerm));
 		}
-		return reg;
 	}
 
 	private static IStrategoList ruleListTerm(IStrategoTerm topSpecTerm) {
