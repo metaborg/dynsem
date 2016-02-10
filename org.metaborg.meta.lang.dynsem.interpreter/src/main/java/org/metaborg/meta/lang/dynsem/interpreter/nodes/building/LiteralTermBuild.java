@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
+import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -40,6 +41,13 @@ public abstract class LiteralTermBuild extends TermBuild {
 		public IntLiteralTermBuild(int val, SourceSection source) {
 			super(source);
 			this.val = val;
+		}
+
+		public static IntLiteralTermBuild create(IStrategoAppl t,
+				FrameDescriptor fd) {
+			return new IntLiteralTermBuild(Integer.parseInt(Tools
+					.stringAt(t, 0).stringValue()),
+					SourceSectionUtil.fromStrategoTerm(t));
 		}
 
 		@Override

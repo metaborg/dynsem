@@ -9,6 +9,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.ConsListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.NilListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.IntLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -106,6 +107,9 @@ public abstract class TermBuild extends Node {
 		}
 		if (Tools.hasConstructor(t, "False", 0)) {
 			return FalseLiteralTermBuild.create(t, fd);
+		}
+		if(Tools.hasConstructor(t, "Int", 1)){
+			return IntLiteralTermBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "List", 1)) {
 			return NilListBuild.create(t, fd);
