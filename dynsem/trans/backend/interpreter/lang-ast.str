@@ -576,7 +576,7 @@ rules /* language file. interpreter entry point */
               Node n = createFindContextNode();
               DynSemContext c = findContext(n);
       
-              Rule initRule = c.lookupRule(START_CONSTR_NAME, START_CONSTR_ARITY);
+              Rule initRule = c.lookupRule("init", START_CONSTR_NAME, START_CONSTR_ARITY);
               if (initRule == null) {
                 throw new IllegalStateException("Rule not found");
               }

@@ -19,18 +19,20 @@ public class RuleRegistry implements IRuleRegistry {
 	private final Map<String, Rule> rules = new HashMap<>();
 
 	@Override
-	public Rule lookupRule(String name, int arity) {
-		String k = makeKey(name, arity);
+	public Rule lookupRule(String name, String constr, int arity) {
+		String k = makeKey(name, constr, arity);
 		Rule r = rules.get(k);
 		if (r != null) {
-			assert r.getConstructor().equals(name) && r.getArity() == arity;
+			assert r.getName().equals(name)
+					&& r.getConstructor().equals(constr)
+					&& r.getArity() == arity;
 			return r;
 		}
 		throw new InterpreterException("No rule found for: " + k);
 	}
 
 	public void registerRule(Rule r) {
-		String k = makeKey(r.getConstructor(), r.getArity());
+		String k = makeKey(r.getName(), r.getConstructor(), r.getArity());
 		Rule or = rules.put(k, r);
 		if (or != null) {
 			throw new InterpreterException("Duplicate rule for: " + k);
@@ -42,8 +44,8 @@ public class RuleRegistry implements IRuleRegistry {
 		return rules.size();
 	}
 
-	private static String makeKey(String name, int arity) {
-		return name + "/" + arity;
+	private static String makeKey(String name, String constr, int arity) {
+		return name + "/" + constr + "/" + arity;
 	}
 
 	public static RuleRegistry create(File specificationFile) {

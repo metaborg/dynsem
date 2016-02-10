@@ -31,8 +31,8 @@ public class DynSemContext {
 		this.output = output;
 	}
 
-	public Rule lookupRule(String name, int arity) {
-		return ruleRegistry.lookupRule(name, arity);
+	public Rule lookupRule(String name, String constr, int arity) {
+		return ruleRegistry.lookupRule(name, constr, arity);
 	}
 
 	public ITermBuildFactory lookupTermBuilder(String name, int arity) {

@@ -32,6 +32,9 @@ public class ReductionPremise extends Premise {
 	@Child protected TermBuild lhsNode;
 
 	@Children protected final TermBuild[] rwNodes;
+
+	private final String arrowName;
+
 	@Child protected MatchPattern rhsNode;
 
 	@Children protected final MatchPattern[] rhsRwNodes;
@@ -39,11 +42,12 @@ public class ReductionPremise extends Premise {
 	@CompilationFinal private DynSemContext context;
 
 	public ReductionPremise(TermBuild[] roNodes, TermBuild lhsNode,
-			TermBuild[] rwNodes, MatchPattern rhsNode,
+			String arrowName, TermBuild[] rwNodes, MatchPattern rhsNode,
 			MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
 		this.roNodes = roNodes;
 		this.lhsNode = lhsNode;
+		this.arrowName = arrowName;
 		this.rwNodes = rwNodes;
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
@@ -126,7 +130,8 @@ public class ReductionPremise extends Premise {
 							.createFindContextNode0());
 		}
 
-		return context.lookupRule(lshTerm.constructor(), lshTerm.arity());
+		return context.lookupRule(arrowName, lshTerm.constructor(),
+				lshTerm.arity());
 	}
 
 	public static ReductionPremise create(IStrategoAppl t, FrameDescriptor fd) {
@@ -138,6 +143,11 @@ public class ReductionPremise extends Premise {
 			roNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rosT, i),
 					fd);
 		}
+
+		IStrategoAppl arrowTerm = Tools.applAt(t, 2);
+		assert Tools.hasConstructor(arrowTerm, "NamedDynamicEmitted", 2);
+
+		String arrowName = Tools.stringAt(arrowTerm, 1).stringValue();
 
 		IStrategoAppl sourceT = Tools.applAt(t, 1);
 		assert Tools.hasConstructor(sourceT, "Source", 2);
@@ -158,10 +168,11 @@ public class ReductionPremise extends Premise {
 		IStrategoList rhsRwsT = Tools.listAt(targetT, 1);
 		MatchPattern[] rhsRwNodes = new MatchPattern[rhsRwsT.size()];
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
+			rhsRwNodes[i] = MatchPattern.createFromLabelComp(
+					Tools.applAt(rhsRwsT, i), fd);
 		}
 
-		return new ReductionPremise(roNodes, lhsNode, rwNodes, rhsNode,
-				rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
+		return new ReductionPremise(roNodes, lhsNode, arrowName, rwNodes,
+				rhsNode, rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
 	}
 }
