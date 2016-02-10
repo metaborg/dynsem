@@ -70,6 +70,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 
 		public static TrueLiteralTermBuild create(IStrategoAppl t,
 				FrameDescriptor fd) {
+			assert Tools.hasConstructor(t, "True", 0);
 			return new TrueLiteralTermBuild(
 					SourceSectionUtil.fromStrategoTerm(t));
 		}
@@ -94,6 +95,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 
 		public static FalseLiteralTermBuild create(IStrategoAppl t,
 				FrameDescriptor fd) {
+			assert Tools.hasConstructor(t, "False", 0);
 			return new FalseLiteralTermBuild(
 					SourceSectionUtil.fromStrategoTerm(t));
 		}
