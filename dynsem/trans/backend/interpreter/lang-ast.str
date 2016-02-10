@@ -103,8 +103,7 @@ rules /* Sort & Constructor classes */
         package ~x:<debug(!"ba1a1c1 "); TermsPackageName; debug(!"ba1a1c2 ")>;
         
         import org.spoofax.interpreter.core.Tools;
-        import org.spoofax.interpreter.terms.IStrategoAppl;
-        import org.spoofax.interpreter.terms.IStrategoTerm;
+        import org.spoofax.interpreter.terms.*;
         
         public class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
 
@@ -179,6 +178,32 @@ rules /* Sort & Constructor classes */
       x_tmpelem := $[_[<newname>]]
 
   ds-to-interp-sorts-to-create-arg(|x_term):
+    (e, MapSort(skey, sval)) -> (
+      bstm* |[
+        IStrategoAppl x_mapT = Tools.applAt(x_term, e);
+        assert Tools.hasConstructor(x_mapT, "Map", 1);
+      
+        IStrategoList x_bindsT = Tools.listAt(x_mapT, 0);
+      
+        java.util.Map<x_keyclass, x_valclass> x_map = new java.util.HashMap<x_keyclass, x_valclass>(
+            Math.round(x_bindsT.size() / 0.75f), 0.75f);
+        for (IStrategoTerm x_bindT : x_bindsT) {
+          assert Tools.isTermAppl(x_bindT) && Tools.hasConstructor((IStrategoAppl) x_bindT, "Bind", 2);
+          x_map.put(e_keycreate, e_valcreate);
+        }
+      ]|, e |[ com.github.krukow.clj_lang.PersistentHashMap.create(x_map) ]|)
+    where
+      
+      x_mapT := $[_[<newname>]];
+      x_bindsT := $[_[<newname>]];
+      x_map := $[_[<newname>]];
+      x_bindT := $[_[<newname>]];
+      x_keyclass := <ds-to-interp-terms-types-name> skey;
+      x_valclass := <ds-to-interp-terms-types-name> sval;
+      (bstm0*, e_keycreate) := <ds-to-interp-sorts-to-create-arg(|x_bindT)> (e |[ 0 ]|, skey);
+      (bstm1*, e_valcreate) := <ds-to-interp-sorts-to-create-arg(|x_bindT)> (e |[ 1 ]|, sval)
+
+  ds-to-interp-sorts-to-create-arg(|x_term):
     (e, sref@SimpleSort("String")) -> ([], e |[ Tools.stringAt(x_term, e).stringValue() ]|)
 
   ds-to-interp-sorts-to-create-arg(|x_term):
@@ -189,8 +214,6 @@ rules /* Sort & Constructor classes */
       bstm* |[
         IStrategoAppl x_tmp1 = Tools.applAt(x_term, e);
         assert Tools.hasConstructor(x_tmp1, "True", 0) || Tools.hasConstructor(x_tmp1, "False", 0);
-        
-        
       ]|, e |[ Tools.hasConstructor(x_tmp1, "True", 0) ? true : false ]|)
     where
       x_tmp1 := $[_[<newname>]]
@@ -628,7 +651,11 @@ rules /* utils */
   ds-to-interp-terms-types-name:
     ListSort(s) -> $[com.github.krukow.clj_lang.IPersistentStack]
 
-//    ListSort(s) -> $[com.github.krukow.clj_lang.IPersistentStack<[<ds-to-interp-terms-types-name> s]>]
+  ds-to-interp-terms-types-name:
+    MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap<[key],[val]>]
+    where
+      key := <ds-to-interp-terms-types-name> skey;
+      val := <ds-to-interp-terms-types-name> sval
 
   ds-to-interp-terms-types-name:
     SimpleSort(s) -> $[I[s]Term]
