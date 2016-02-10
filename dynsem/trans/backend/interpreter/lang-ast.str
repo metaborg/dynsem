@@ -31,10 +31,15 @@ rules /* Sort & Constructor classes */
   ds-to-interp-terms-signatures-top:
     sig* -> [sort-class*, cons-class*]
     where
+      debug(!1);
       sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
+      debug(!2);
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
+      debug(!3);
       sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
-      cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*
+      debug(!4);
+      cons-class* := <map(debug(!"4a "); ds-to-interp-terms-consdecl; debug(!"4b "))> cons-dec*
+      ;debug(!5)
     
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
@@ -139,13 +144,21 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
+      debug(!"a ");
       x_classname := <ds-to-interp-terms-types-name> dec;
+      debug(!"b ");
       param0* := <ds-to-interp-sorts-to-params> kid*;
+      debug(!"c ");
       bstm0* := <ds-to-interp-sorts-to-finits> kid*;
+      debug(!"d ");
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
+      debug(!"e ");
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
+      debug(!"f ");
       e0* := <ds-to-interp-sorts-to-frefs> kid*;
+      debug(!"g ");
       (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|"term")); unzip; (concat, id)> kid*
+      ;debug(!"h ")
   
   ds-to-interp-sorts-to-create-arg(|x_term):
     (e, sref@SimpleSort(s)) -> ([], e |[ ~x:<ds-to-interp-terms-types-name> sref.create(x_term.getSubterm(e)) ]|)
@@ -170,7 +183,18 @@ rules /* Sort & Constructor classes */
 
   ds-to-interp-sorts-to-create-arg(|x_term):
     (e, sref@SimpleSort("Int")) -> ([], e |[ Tools.intAt(x_term, e).intValue() ]|)
-  
+
+  ds-to-interp-sorts-to-create-arg(|x_term):
+    (e, sref@SimpleSort("Bool")) -> (
+      bstm* |[
+        IStrategoAppl x_tmp1 = Tools.applAt(x_term, e);
+        assert Tools.hasConstructor(x_tmp1, "True", 0) || Tools.hasConstructor(x_tmp1, "False", 0);
+        
+        
+      ]|, e |[ Tools.hasConstructor(x_tmp1, "True", 0) ? true : false ]|)
+    where
+      x_tmp1 := $[_[<newname>]]
+    
   ds-to-interp-sorts-to-params = is-list; map-with-index(ds-to-interp-sort-to-param)
   
   ds-to-interp-sort-to-param:
