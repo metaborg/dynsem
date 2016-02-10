@@ -52,7 +52,7 @@ public class ReductionPremise extends Premise {
 	/**
 	 * The {@link #execute(VirtualFrame)} function first evaluates the
 	 * {@link #roNodes} using the {@link #evalRWNodes(VirtualFrame)} helper
-	 * function. Then {@link #rwNodes} are evaluted. Then the {@link #lhsNode}
+	 * function. Then {@link #rwNodes} are evaluated. Then the {@link #lhsNode}
 	 * representing the input term to the reduction is evaluated. The target
 	 * rule to apply is found based on the term to reduce on. Following
 	 * application of the rule the local variables are bound to values in the
