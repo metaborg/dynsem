@@ -19,7 +19,10 @@ public abstract class Premise extends Node {
 
 	public static Premise create(IStrategoAppl t,
 			FrameDescriptor fd) {
-		assert Tools.hasConstructor(t, "Formula", 1);
+		assert Tools.hasConstructor(t, "Formula", 1) || Tools.hasConstructor(t, "MergePoint", 3);
+		if(Tools.hasConstructor(t, "MergePoint", 3)){
+			return MergePointPremise.create(t, fd);
+		}
 		IStrategoAppl premT = Tools.applAt(t, 0);
 		if(Tools.hasConstructor(premT, "Relation", 4)){
 			return ReductionPremise.create(premT, fd);
