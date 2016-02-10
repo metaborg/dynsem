@@ -58,7 +58,7 @@ public abstract class ListMatch extends MatchPattern {
 
 		public static ConsListMatch create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "ListTail", 2);
-			MatchPattern headPattern = MatchPattern.create(Tools.applAt(t, 0),
+			MatchPattern headPattern = MatchPattern.create(Tools.applAt(Tools.listAt(t, 0), 0),
 					fd);
 			MatchPattern tailPattern = MatchPattern.create(Tools.applAt(t, 1),
 					fd);
