@@ -40,7 +40,10 @@ public abstract class MatchPattern extends Node {
 		if (Tools.hasConstructor(t, "ListTail", 2)) {
 			return ConsListMatch.create(t, fd);
 		}
-
+		if (Tools.hasConstructor(t, "Cast", 2)) {
+			// FIXME: this is a hack. we should use the type information from the cast
+			return MatchPattern.create(Tools.applAt(t, 0), fd);
+		}
 		throw new NotImplementedException("Unsupported match pattern: " + t);
 	}
 
