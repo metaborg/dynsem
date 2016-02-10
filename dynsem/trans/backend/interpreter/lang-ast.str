@@ -552,6 +552,7 @@ rules /* term registry */
 rules /* language file. interpreter entry point */
 
   ds-to-interp-language-entrypoint =
+    x_transformer := <DesugarTransform>;
     !compilation-unit |[
     
       package ~x:<TopPackageName>;
@@ -613,7 +614,7 @@ rules /* language file. interpreter entry point */
         protected CallTarget parse(Source code, Node context,
             String... argumentNames) throws IOException {
       
-          IStrategoTerm programT = parser.parse(code, START_SYMBOL);
+          IStrategoTerm programT = new x_transformer().transform(parser.parse(code, START_SYMBOL));
           ITerm program = getTermRegistry().parseProgramTerm(programT);
       
           return new CallTarget() {
@@ -640,7 +641,7 @@ rules /* language file. interpreter entry point */
           };
         }
       }
-    ]|
+    ]| 
     
 
 rules /* utils */
