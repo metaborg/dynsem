@@ -277,9 +277,9 @@ rules /* type system class */
         }
       ]|
     where 
-      filter(?Sorts(<id>) + ?Constructors(<id>));
+      filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>));
       concat;
-      qsort(?(ConsDecl(_, _, _, _), SortDecl(_)));
+      qsort(?(ConsDecl(_, _, _, _), SortDecl(_)) + ?(SortDecl(_), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)));
       map(ds-to-interp-terms-types-name);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))) => type*
 
@@ -657,6 +657,9 @@ rules /* utils */
     where
       key := <ds-to-interp-terms-types-name> skey;
       val := <ds-to-interp-terms-types-name> sval
+
+  ds-to-interp-terms-types-name:
+    NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
 
   ds-to-interp-terms-types-name:
     SimpleSort(s) -> $[I[s]Term]
