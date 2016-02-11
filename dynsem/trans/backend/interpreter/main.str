@@ -68,6 +68,9 @@ rules
           );
           log-timed(
             desugar-native-ops-module | "Desugaring native ops"
+          );
+          log-timed(
+            desugar-native-types-module | "Desugar native types"
           )
         | "Total")> ast => result
       |project-path)

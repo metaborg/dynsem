@@ -1,0 +1,30 @@
+module backend/interpreter/native-types
+
+imports
+  include/ds
+  ds
+  backend/interpreter/signature
+
+rules
+
+  desugar-native-types-module:
+    m@Module(_, _) -> Module($[[name]_natops], section*)
+    where
+      <m-in-analysis(desugar-native-types); unmark-vars> m => Module(name, section*)
+  
+  desugar-native-types = alltd(desugar-native-types-sortref)
+  
+  desugar-native-types-sortref:
+    SimpleSort(s) -> NativeType(s, ty-str)
+    where
+      ty-def := <lookup-def(|Types())> s;
+      NativeSort() := <lookup-prop(|SortKind())> ty-def;
+      ty-str := <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
+      
+      
+      
+      //    
+//  desugar-native-ops-con:
+//    Con(c, k*) -> NativeOp(c, k*)
+//    where
+//      <lookup-def(|Constructors()); lookup-prop(|ConsKind())> (c, <length> k*) => NativeOpCons()
