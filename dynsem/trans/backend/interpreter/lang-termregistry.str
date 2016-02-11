@@ -1,0 +1,158 @@
+module backend/interpreter/lang-termregistry
+
+imports
+  include/ds
+  libjava-front
+  backend/interpreter/utils
+  backend/interpreter/lang-names
+
+rules
+
+  ds-to-interp-terms-registry-top = 
+    filter(?Constructors(<id>) + ?NativeOperators(<id>) + ?NativeDataTypes(<id>)); concat; ds-to-interp-terms-registry
+
+rules /* term registry */
+
+  ds-to-interp-terms-registry:
+    decl* ->
+      compilation-unit |[
+        package ~x:<TopPackageName>;
+        
+        import java.util.HashMap;
+        import java.util.Map;
+        
+        import ~x:<TermsPackageName>.*;
+        import ~x:<TermBuildPackageName>.*;
+        import ~x:<TermMatchPackageName>.*;
+        
+        import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+        import org.spoofax.interpreter.terms.IStrategoTerm;
+        import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.*;
+        
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public class ~x:$[[<LanguageName>]TermRegistry] implements ITermRegistry {
+        
+          private final Map<String, ITermBuildFactory> builderFactories = new HashMap<String, ITermBuildFactory>();
+          private final Map<String, ITermMatchPatternFactory> matcherFactories = new HashMap<String, ITermMatchPatternFactory>();
+          private final Map<String, ITermBuildFactory> nativeFactories = new HashMap<String, ITermBuildFactory>();
+          private final Map<String, ITermBuildFactory> nativeAdapterFactories = new HashMap<String, ITermBuildFactory>();
+          
+          public ~x:$[[<LanguageName>]TermRegistry]() {
+            init();
+          }
+        
+          private void init() {
+            bstm0*
+            bstm1*
+            bstm2*
+          }
+          
+          @Override
+          public ITerm parseProgramTerm(IStrategoTerm p) {
+            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<SourceStartSymbol>).create(p);
+          }
+          
+          @Override
+          public ITermBuildFactory lookupBuildFactory(String constr, int arity) {
+            return builderFactories.get(constr + "/" + arity);
+          }
+        
+          @Override
+          public ITermMatchPatternFactory lookupMatchFactory(String constr, int arity) {
+            return matcherFactories.get(constr + "/" + arity);
+          }
+          
+          @Override
+          public ITermBuildFactory lookupNativeOpBuildFactory(String constr, int arity) {
+            return nativeFactories.get(constr + "/" + arity);
+          }
+          
+          @Override
+          public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort,
+              String function, int arity) {
+            return nativeAdapterFactories.get(sort + "/" + function + "/" + arity);
+          }
+        }
+      ]|
+    where
+      (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _)))> decl*; 
+      bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
+      bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
+      bstm2* := <ds-to-interp-nattyterms-registry-inits> nattydecl*
+
+  ds-to-interp-terms-registry-inits = mapconcat(ds-to-interp-terms-registry-init)
+  
+  ds-to-interp-terms-registry-init:
+    dec@ConsDecl(name, kid*, _, _) ->
+      bstm* |[
+       builderFactories.put(e_conkey, new ITermBuildFactory() {
+    
+          @Override
+          public x_termbuildclass apply(SourceSection source,
+              TermBuild... children) {
+            return x_termbuildNODEGEN.create(source, e1*);
+          }
+        });
+
+        matcherFactories.put(e_conkey, new ITermMatchPatternFactory() {
+    
+          @Override
+          public MatchPattern apply(SourceSection source,
+              MatchPattern... children) {
+            return x_termmatchNODEGEN.create(source, e2*);
+          }
+        });
+      ]|
+    with
+      e_conkey := Lit(String([Chars($[[name]/[<length> kid*]])]));
+      x_termbuildclass := $[[<ds-to-interp-terms-types-name> dec]Build];
+      x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*;
+      e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+
+  ds-to-interp-natopterms-registry-inits = mapconcat(ds-to-interp-natopterms-registry-init)
+
+  ds-to-interp-natopterms-registry-init:
+    NativeOpDecl(name, kid*, _) -> 
+      bstm* |[
+        nativeFactories.put(e_conkey, new ITermBuildFactory() {
+    
+          @Override
+          public TermBuild apply(SourceSection source,
+              TermBuild... children) {
+            return ~x:<NativePackageName>.x_natop.create(source, e1*);
+          }
+        });
+      ]|
+    where
+      e_conkey := Lit(String([Chars(<concat-strings> [name, "/", <length; int-to-string> kid*])]));
+      x_natop := <concat-strings> [name, "_", <length; int-to-string> kid*];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+
+  ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
+  
+  ds-to-interp-nattyterms-registry-init:
+    NativeBaseTypeDecl(jstring, s, func*) -> <mapconcat(ds-to-interp-nattyterms-registry-init(|s))> func*
+  
+  ds-to-interp-nattyterms-registry-init(|s):
+    NativeFunctionDecl(fun, kid*, _) ->
+      bstm* |[
+        nativeAdapterFactories.put(e_adaptkey, new ITermBuildFactory() {
+    
+          @Override
+          public TermBuild apply(SourceSection source, TermBuild... children) {
+            return x_adapter.create(source, e1*);
+          }
+        });
+      ]|
+    where
+      e_adaptkey := Lit(String([Chars(<concat-strings> [s, "/", fun, "/", <length; int-to-string> kid*])]));
+      x_adapter := <concat-strings> ["_adapt_", s, "_", fun, "_", <length; int-to-string> kid*];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+  
+    

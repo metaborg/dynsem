@@ -1,0 +1,43 @@
+module backend/interpreter/lang-names
+
+imports
+  include/ds
+  backend/interpreter/utils
+  libjava-front
+
+rules
+
+  ds-to-interp-terms-types-name:
+    SortDecl(s) -> $[I[s]Term]
+
+  ds-to-interp-terms-types-name:
+    ListSort(s) -> $[com.github.krukow.clj_lang.IPersistentStack]
+
+  ds-to-interp-terms-types-name:
+    MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap<[key],[val]>]
+    where
+      key := <ds-to-interp-terms-types-name> skey;
+      val := <ds-to-interp-terms-types-name> sval
+
+  ds-to-interp-terms-types-name:
+    NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
+
+  ds-to-interp-terms-types-name:
+    SimpleSort(s) -> $[I[s]Term]
+    where
+      <not(is-builtin-type)> s
+  
+  ds-to-interp-terms-types-name:
+    SimpleSort("String") -> $[String]
+
+  ds-to-interp-terms-types-name:
+    SimpleSort("Int") -> $[int]
+
+  ds-to-interp-terms-types-name:
+    SimpleSort("Bool") -> $[boolean]
+  
+  is-builtin-type = ?"String" + ?"Int" + ?"Bool"
+  
+  ds-to-interp-terms-types-name:
+    ConsDecl(name, child*, _, _) -> $[[name]_[<length> child*]_Term]
+  
