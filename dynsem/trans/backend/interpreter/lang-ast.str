@@ -526,28 +526,24 @@ rules /* term registry */
       e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*;
       e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
 
-  ds-to-interp-natopterms-registry-inits = debug(!"4a "); mapconcat(debug(!"4b "); ds-to-interp-natopterms-registry-init; debug(!"4c ")); debug(!"4d ")
+  ds-to-interp-natopterms-registry-inits = mapconcat(ds-to-interp-natopterms-registry-init)
 
   ds-to-interp-natopterms-registry-init:
-    dec@NativeOpDecl(name, kid*, _) -> 
+    NativeOpDecl(name, kid*, _) -> 
       bstm* |[
         nativeFactories.put(e_conkey, new ITermBuildFactory() {
     
           @Override
           public TermBuild apply(SourceSection source,
               TermBuild... children) {
-            return ~x:<debug(!9); NativePackageName; debug(!10)>.x_natop.create(source, e1*);
+            return ~x:<NativePackageName>.x_natop.create(source, e1*);
           }
         });
       ]|
     where
-      debug(!5);
-      e_conkey := Lit(String([Chars($[[name]/[<length> kid*]])]));
-      debug(!6);
-      x_natop := $[[name]_[<length> kid*]];
-      debug(!7);
+      e_conkey := Lit(String([Chars(<concat-strings> [name, "/", <length; int-to-string> kid*])]));
+      x_natop := <concat-strings> [name, "_", <length; int-to-string> kid*];
       e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
-      ;debug(!8)
 
 rules /* language file. interpreter entry point */
 
