@@ -20,6 +20,8 @@ rules
     <ds-to-interp-terms-building; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
     debug(!"generating termmatching classes");
     <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
+    debug(!"generating native datatype adapter classes");
+    <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
     debug(!"generating term registry class");
     <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
     debug(!"generating interpreter entry point");

@@ -1,0 +1,102 @@
+module backend/interpreter/lang-nativeadapters
+
+imports
+  include/ds
+  backend/interpreter/utils
+  backend/interpreter/lang-names
+  libjava-front
+//  editor-common.generated
+
+rules
+  
+  ds-to-interp-nattypes-adapters-top =
+    debug(!1); 
+    fetch-elem(?NativeDataTypes(<id>));
+    debug(!2); 
+    mapconcat(ds-to-interp-nattypes-adapter)
+    ;debug(!3) 
+  
+  ds-to-interp-nattypes-adapter:
+    NativeBaseTypeDecl(jstring, s, func*) -> <map(debug(!4); ds-to-interp-nattype-func-adapter(|jstring, s); debug(!5)); debug(!6)> func*
+  
+  ds-to-interp-nattype-func-adapter(|jstring, sort_nat):
+    NativeFunctionDecl(fun, kid*, sort_res) ->
+      compilation-unit |[
+        package ~x:<TermBuildPackageName>;
+      
+        import ~x:$[[<TermsPackageName>].*];
+        
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.source.SourceSection;
+
+        @NodeChildren({ @NodeChild(value="receiver", type=TermBuild.class), ~child* })
+        public abstract class x_adapter extends TermBuild {
+
+          public x_adapter(SourceSection source) {
+            super(source);
+          }
+          
+          public static x_adapter create(param2*) {
+            return ~x:$[[x_adapter]NodeGen].create(e2*);
+//            throw new ThreeLeggedChickenException();
+          }
+
+          @Specialization
+          public x_res doEvaluated(param1*) {
+            return receiver.~x:fun(e1*);
+          }
+        }
+      ]|
+    where
+      debug(!7);
+      x_adapter := <concat-strings> ["_adapt_", sort_nat, "_", fun, "_", <length; int-to-string> kid*];
+      debug(!8);
+      child* := <ds-to-interp-nattype-func-adapter-childannos> kid*;
+      debug(!9);
+      x_res := <ds-to-interp-terms-types-name> sort_res;
+      debug(!10);
+      x_recvtype := <unquote(?'"')> jstring; 
+      debug(!11);
+      param0* := <ds-to-interp-nattype-func-adapter-eval-params> kid*;
+      debug(!12);
+      param1* := [ param |[ x_recvtype receiver ]|, param0*];
+      debug(!13);
+      e1* := <ds-to-interp-nattype-func-adapter-eval-exprs> kid*;
+      debug(!14);
+      param2* := <concat> [ [ param |[ SourceSection source ]|, param |[ TermBuild receiver ]| ], <ds-to-interp-nattype-func-adapter-create-params> kid* ];      //[ param |[ SourceSection source ]|, param |[ TermBuild receiver ]|, param2* ];
+      debug(!15);
+      e2* := <concat> [ [e |[ source ]|, e |[ receiver ]| ], <ds-to-interp-nattype-func-adapter-create-exprs> kid* ];
+      debug(!16)
+      
+
+  ds-to-interp-nattype-func-adapter-childannos = map-with-index(ds-to-interp-nattype-func-adapter-childanno)
+  
+  ds-to-interp-nattype-func-adapter-childanno:
+    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]|
+
+  ds-to-interp-nattype-func-adapter-eval-params = map-with-index(ds-to-interp-nattype-func-adapter-eval-param)
+  
+  ds-to-interp-nattype-func-adapter-eval-param:
+    (i, s) -> param |[ ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
+
+  ds-to-interp-nattype-func-adapter-eval-exprs = map-with-index(ds-to-interp-nattype-func-adapter-eval-expr)
+  
+  ds-to-interp-nattype-func-adapter-eval-expr:
+    (i, _) -> e |[ ~x:$[tb_[i]] ]|
+
+  ds-to-interp-nattype-func-adapter-create-params = map-with-index(ds-to-interp-nattype-func-adapter-create-param)
+  
+  ds-to-interp-nattype-func-adapter-create-param:
+    (i, s) -> param |[ ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
+  
+  ds-to-interp-nattype-func-adapter-create-exprs = map-with-index(ds-to-interp-nattype-func-adapter-create-expr)
+  
+  ds-to-interp-nattype-func-adapter-create-expr:
+    (i, _) -> e |[ ~x:$[tb_[i]] ]|
+
+
+
