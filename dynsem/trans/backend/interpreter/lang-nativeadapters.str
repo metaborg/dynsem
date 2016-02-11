@@ -91,7 +91,7 @@ rules
   ds-to-interp-nattype-func-adapter-create-params = map-with-index(ds-to-interp-nattype-func-adapter-create-param)
   
   ds-to-interp-nattype-func-adapter-create-param:
-    (i, s) -> param |[ ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
+    (i, s) -> param |[ TermBuild ~x:$[tb_[i]] ]|
   
   ds-to-interp-nattype-func-adapter-create-exprs = map-with-index(ds-to-interp-nattype-func-adapter-create-expr)
   

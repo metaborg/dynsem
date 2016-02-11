@@ -146,13 +146,13 @@ rules /* term registry */
     
           @Override
           public TermBuild apply(SourceSection source, TermBuild... children) {
-            return x_adapter.create(source, e1*);
+            return x_adapter.create(source, children[0], e1*);
           }
         });
       ]|
     where
       e_adaptkey := Lit(String([Chars(<concat-strings> [s, "/", fun, "/", <length; int-to-string> kid*])]));
       x_adapter := <concat-strings> ["_adapt_", s, "_", fun, "_", <length; int-to-string> kid*];
-      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<int-to-string> i] ]| \)> kid*
   
     
