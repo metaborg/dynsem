@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 
 public class DynSemContext {
 
@@ -51,6 +50,12 @@ public class DynSemContext {
 		return termRegistry.lookupMatchFactory(name, arity);
 	}
 
+	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort,
+			String function, int arity) {
+		return termRegistry.lookupNativeTypeAdapterBuildFactory(sort, function,
+				arity);
+	}
+
 	public BufferedReader getInput() {
 		return input;
 	}
@@ -58,4 +63,5 @@ public class DynSemContext {
 	public PrintWriter getOutput() {
 		return output;
 	}
+
 }

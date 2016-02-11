@@ -21,7 +21,7 @@ rules
     debug(!"generating termmatching classes");
     <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
     debug(!"generating term registry class");
-    <filter(?Constructors(<id>) + ?NativeOperators(<id>)); concat; ds-to-interp-terms-registry; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
+    <filter(?Constructors(<id>) + ?NativeOperators(<id>) + ?NativeDataTypes(<id>)); concat; ds-to-interp-terms-registry; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
     debug(!"generating interpreter entry point");
     ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>);
     debug(!"done generating classes")
@@ -454,7 +454,8 @@ rules /* term registry */
           private final Map<String, ITermBuildFactory> builderFactories = new HashMap<String, ITermBuildFactory>();
           private final Map<String, ITermMatchPatternFactory> matcherFactories = new HashMap<String, ITermMatchPatternFactory>();
           private final Map<String, ITermBuildFactory> nativeFactories = new HashMap<String, ITermBuildFactory>();
-        
+          private final Map<String, ITermBuildFactory> nativeAdapterFactories = new HashMap<String, ITermBuildFactory>();
+          
           public ~x:$[[<LanguageName>]TermRegistry]() {
             init();
           }
@@ -462,6 +463,7 @@ rules /* term registry */
           private void init() {
             bstm0*
             bstm1*
+            bstm2*
           }
           
           @Override
@@ -483,16 +485,19 @@ rules /* term registry */
           public ITermBuildFactory lookupNativeOpBuildFactory(String constr, int arity) {
             return nativeFactories.get(constr + "/" + arity);
           }
+          
+          @Override
+          public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort,
+              String function, int arity) {
+            return nativeAdapterFactories.get(sort + "/" + function + "/" + arity);
+          }
         }
       ]|
     where
-      debug(!1);
-      (consdecl*, natopdecl*) := <partition(?ConsDecl(_, _, _, _))> decl*; 
-      debug(!2);
+      (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _)))> decl*; 
       bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
-      debug(!3);
-      bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*
-      ;debug(!4)
+      bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
+      bstm2* := <ds-to-interp-nattyterms-registry-inits> nattydecl*
 
   ds-to-interp-terms-registry-inits = mapconcat(ds-to-interp-terms-registry-init)
   
@@ -544,6 +549,28 @@ rules /* term registry */
       e_conkey := Lit(String([Chars(<concat-strings> [name, "/", <length; int-to-string> kid*])]));
       x_natop := <concat-strings> [name, "_", <length; int-to-string> kid*];
       e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+
+  ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
+  
+  ds-to-interp-nattyterms-registry-init:
+    NativeBaseTypeDecl(jstring, s, func*) -> <mapconcat(ds-to-interp-nattyterms-registry-init(|s))> func*
+  
+  ds-to-interp-nattyterms-registry-init(|s):
+    NativeFunctionDecl(fun, kid*, _) ->
+      bstm* |[
+        nativeAdapterFactories.put(e_adaptkey, new ITermBuildFactory() {
+    
+          @Override
+          public TermBuild apply(SourceSection source, TermBuild... children) {
+            return x_adapter.create(source, e1*);
+          }
+        });
+      ]|
+    where
+      e_adaptkey := Lit(String([Chars(<concat-strings> [s, "/", fun, "/", <length; int-to-string> kid*])]));
+      x_adapter := <concat-strings> ["_adapt_", s, "_", fun, "_", <length; int-to-string> kid*];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+  
 
 rules /* language file. interpreter entry point */
 
