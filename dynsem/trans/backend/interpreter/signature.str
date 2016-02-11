@@ -10,3 +10,4 @@ signature
     ArgRead : Int -> Var
     NativeOp : ID * List(Term) -> Term
     NativeType: ID * String -> Type
+    NativeFunCall: String * String * Term * List(Term) -> Term
