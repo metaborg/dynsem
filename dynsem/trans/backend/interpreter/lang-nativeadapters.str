@@ -27,7 +27,6 @@ rules
         import ~x:$[[<TermsPackageName>].*];
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
         import com.oracle.truffle.api.dsl.NodeChild;
         import com.oracle.truffle.api.dsl.NodeChildren;
         import com.oracle.truffle.api.dsl.Specialization;
