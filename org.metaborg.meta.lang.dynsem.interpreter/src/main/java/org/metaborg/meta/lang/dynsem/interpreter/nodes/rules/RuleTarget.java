@@ -45,7 +45,7 @@ public class RuleTarget extends Node {
 		IStrategoList componentsT = Tools.listAt(targetT, 1);
 		TermBuild[] componentNodes = new TermBuild[componentsT.size()];
 		for (int i = 0; i < componentNodes.length; i++) {
-			componentNodes[0] = TermBuild.createFromLabelComp(
+			componentNodes[i] = TermBuild.createFromLabelComp(
 					Tools.applAt(componentsT, i), fd);
 		}
 
