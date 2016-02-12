@@ -7,14 +7,38 @@ imports
 
 rules
 
-  desugar-native-ops-module:
+  desugar-natives-module:
     m@Module(_, _) -> Module($[[name]_natops], section*)
     where
-      <m-in-analysis(desugar-native-ops); unmark-vars> m => Module(name, section*)
+      <m-in-analysis(desugar-natives); unmark-vars> m => Module(name, section*)
   
-  desugar-native-ops = alltd(desugar-native-ops-con)
+  desugar-natives = innermost(desugar-native-ops + desugar-native-types)
     
-  desugar-native-ops-con:
+  desugar-native-ops:
     Con(c, k*) -> NativeOp(c, k*)
     where
       <lookup-def(|Constructors()); lookup-prop(|ConsKind())> (c, <length> k*) => NativeOpCons()
+
+  desugar-native-types:
+    SimpleSort(s) -> NativeType(s, ty-str)
+    where
+      ty-def := <lookup-def(|Types())> s;
+      NativeSort() := <lookup-prop(|SortKind())> ty-def;
+      ty-str := <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
+
+  desugar-native-types:
+    SortFunCall(name, recv, arg*) -> NativeFunCall(<desugared-type-of> recv, name, recv, arg*)
+  
+  desugared-type-of = type-of
+  
+  desugared-type-of:
+    NativeOp(c, k*) -> ty
+    where
+      ConstructorType(_, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> k*)
+  
+  desugared-type-of:
+    NativeFunCall(srecv, name, _, _) -> ty
+    where
+      s-def := <lookup-def(|Types())> srecv;
+      f-def := <lookup-native-fun-def(|name)> s-def;
+      FunctionType(_, ty) := <lookup-prop(|Type())> f-def

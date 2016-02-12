@@ -67,10 +67,7 @@ rules
             mark-rule-arguments-module | "Marking arguments"
           );
           log-timed(
-            desugar-native-ops-module | "Desugaring native ops"
-          );
-          log-timed(
-            desugar-native-types-module | "Desugar native types"
+            desugar-natives-module | "Desugaring native ops"
           )
         | "Total")> ast => result
       |project-path)

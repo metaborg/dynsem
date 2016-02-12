@@ -120,6 +120,9 @@ public abstract class TermBuild extends Node {
 		if (Tools.hasConstructor(t, "ListTail", 2)) {
 			return ConsListBuild.create(t, fd);
 		}
+		if (Tools.hasConstructor(t, "NativeFunCall", 4)) {
+			return SortFunCallBuild.create(t, fd);
+		}
 
 		throw new NotImplementedException("Unsupported term build: " + t);
 	}
