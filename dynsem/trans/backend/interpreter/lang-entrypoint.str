@@ -8,6 +8,7 @@ imports
 rules /* language file. interpreter entry point */
 
   ds-to-interp-language-entrypoint =
+    x_language := $[[<LanguageName>]Language];
     x_transformer := <DesugarTransform>;
     !compilation-unit |[
     
@@ -36,7 +37,7 @@ rules /* language file. interpreter entry point */
       import com.oracle.truffle.api.vm.PolyglotEngine.Value;
       
       @TruffleLanguage.Registration(name = ~e:Lit(String([Chars(<LanguageName>)])), version = ~e:Lit(String([Chars(<SourceVersion>)])), mimeType = ~e:Lit(String([Chars(<SourceMimeType>)])))
-      public class ~x:$[[<LanguageName>]Language] extends DynSemLanguage {
+      public class x_language extends DynSemLanguage {
       
         public final static String PARSE_TABLE = ~e:Lit(String([Chars(<RelativeTableTargetFile>)]));
         public final static String START_SYMBOL = ~e:Lit(String([Chars(<SourceStartSymbol>)]));
@@ -45,11 +46,11 @@ rules /* language file. interpreter entry point */
         public final static String START_CONSTR_NAME = ~e:Lit(String([Chars(<ReductionStartConstrName>)]));
         public final static int START_CONSTR_ARITY = ~i:<ReductionStartConstrArity>;
         
-        public final static CalcLangLanguage INSTANCE = new CalcLangLanguage();
+        public final static x_language INSTANCE = new x_language();
       
         private final DynSemLanguageParser parser;
       
-        public CalcLangLanguage() {
+        public x_language() {
           super(new ~x:$[[<LanguageName>]TermRegistry](), new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)));
           parser = new DynSemLanguageParser(Paths.get(PARSE_TABLE));
         }
