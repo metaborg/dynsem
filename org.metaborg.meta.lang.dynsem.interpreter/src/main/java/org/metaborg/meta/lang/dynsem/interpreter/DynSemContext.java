@@ -39,21 +39,31 @@ public class DynSemContext {
 	}
 
 	public ITermBuildFactory lookupTermBuilder(String name, int arity) {
-		return termRegistry.lookupBuildFactory(name, arity);
+		ITermBuildFactory f = termRegistry.lookupBuildFactory(name, arity);
+		assert f != null;
+		return f;
 	}
 
 	public ITermBuildFactory lookupNativeOpBuilder(String name, int arity) {
-		return termRegistry.lookupNativeOpBuildFactory(name, arity);
+		ITermBuildFactory f = termRegistry.lookupNativeOpBuildFactory(name,
+				arity);
+		assert f != null;
+		return f;
 	}
 
 	public ITermMatchPatternFactory lookupMatchPattern(String name, int arity) {
-		return termRegistry.lookupMatchFactory(name, arity);
+		ITermMatchPatternFactory f = termRegistry.lookupMatchFactory(name,
+				arity);
+		assert f != null;
+		return f;
 	}
 
 	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort,
 			String function, int arity) {
-		return termRegistry.lookupNativeTypeAdapterBuildFactory(sort, function,
-				arity);
+		ITermBuildFactory f = termRegistry.lookupNativeTypeAdapterBuildFactory(
+				sort, function, arity);
+		assert f != null;
+		return f;
 	}
 
 	public BufferedReader getInput() {
