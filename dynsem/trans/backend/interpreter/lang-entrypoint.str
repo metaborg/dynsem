@@ -26,7 +26,6 @@ rules /* language file. interpreter entry point */
       import ~x:<TopPackageName>.~x:$[[<LanguageName>]TermRegistry];
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-      import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
       import org.spoofax.interpreter.terms.IStrategoTerm;
