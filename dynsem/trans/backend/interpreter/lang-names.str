@@ -15,7 +15,7 @@ rules
     ListSort(s) -> $[com.github.krukow.clj_lang.IPersistentStack]
 
   ds-to-interp-terms-types-name:
-    MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap<[key],[val]>]
+    MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap] // $[com.github.krukow.clj_lang.IPersistentMap<[key],[val]>]
     where
       key := <ds-to-interp-terms-types-name> skey;
       val := <ds-to-interp-terms-types-name> sval

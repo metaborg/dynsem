@@ -53,15 +53,18 @@ rules /* language file. interpreter entry point */
         }
       
         public static void main(String[] args) throws IOException {
-          PolyglotEngine vm = PolyglotEngine.buildNew().build();
-          assert vm.getLanguages().containsKey(MIME_TYPE);
-      
-          Source source = Source.fromFileName(args[0]).withMimeType(MIME_TYPE);
-          Value v = vm.eval(source);
+          Value v = evaluate(args[0], System.in, System.out, System.err);
           RuleResult res = (RuleResult) v.get();
-      
           System.out.println(res.result);
+        }
       
+        public static Value evaluate(String file, InputStream input,
+            OutputStream output, OutputStream error) throws IOException {
+          PolyglotEngine vm = PolyglotEngine.buildNew().setIn(input)
+              .setOut(output).setErr(error).build();
+          assert vm.getLanguages().containsKey(MIME_TYPE);
+          Source source = Source.fromFileName(file).withMimeType(MIME_TYPE);
+          return vm.eval(source);
         }
       
         @Override
