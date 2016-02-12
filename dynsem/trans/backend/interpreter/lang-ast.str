@@ -389,6 +389,7 @@ rules /* term matching */
         import ~x:<NativePackageName>.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         
+        import com.oracle.truffle.api.dsl.Fallback;
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.frame.VirtualFrame;
         import com.oracle.truffle.api.source.SourceSection;
@@ -406,6 +407,12 @@ rules /* term matching */
           public boolean execute(x_termclass term, VirtualFrame frame) {
             return e1;
           }
+
+          @Fallback
+          public boolean matchFail(Object term, VirtualFrame frame) {
+            return false;
+          }
+          
         }
       ]|
     where
