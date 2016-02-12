@@ -40,8 +40,9 @@ public class ReductionRule extends Rule {
 
 	@Child protected RuleTarget target;
 
-	public ReductionRule(String name, String constr, int arity, Premise[] premises,
-			RuleTarget output, SourceSection source, FrameDescriptor fd) {
+	public ReductionRule(String name, String constr, int arity,
+			Premise[] premises, RuleTarget output, SourceSection source,
+			FrameDescriptor fd) {
 		super(source, fd);
 		this.name = name;
 		this.constr = constr;
@@ -67,7 +68,7 @@ public class ReductionRule extends Rule {
 	public String getName() {
 		return name;
 	}
-	
+
 	@Override
 	public String getConstructor() {
 		return constr;
@@ -95,10 +96,21 @@ public class ReductionRule extends Rule {
 
 		IStrategoAppl arrowTerm = Tools.applAt(relationT, 2);
 		assert Tools.hasConstructor(arrowTerm, "NamedDynamicEmitted", 2);
-		
-		String name = Tools.stringAt(arrowTerm, 1).stringValue(); 
-		
-		IStrategoAppl lhsConTerm = Tools.applAt(Tools.applAt(relationT, 1), 0);
+
+		String name = Tools.stringAt(arrowTerm, 1).stringValue();
+
+		IStrategoAppl lhsLeftTerm = Tools.applAt(Tools.applAt(relationT, 1), 0);
+		IStrategoAppl lhsConTerm = null;
+
+		// FIXME this should be done differently perhaps through desugaring of
+		// the spec to bring the constructor name and arity outwards
+		if (Tools.hasConstructor(lhsLeftTerm, "As", 2)) {
+			lhsConTerm = Tools.applAt(lhsLeftTerm, 1);
+		} else {
+			lhsConTerm = lhsLeftTerm;
+		}
+
+		assert lhsConTerm != null && Tools.hasConstructor(lhsConTerm, "Con", 2);
 		String constr = Tools.stringAt(lhsConTerm, 0).stringValue();
 		int arity = Tools.listAt(lhsConTerm, 1).size();
 
