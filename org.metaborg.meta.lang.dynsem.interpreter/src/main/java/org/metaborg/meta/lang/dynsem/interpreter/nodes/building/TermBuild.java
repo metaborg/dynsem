@@ -11,6 +11,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.NilLis
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.IntLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
@@ -122,6 +123,11 @@ public abstract class TermBuild extends Node {
 		}
 		if (Tools.hasConstructor(t, "NativeFunCall", 4)) {
 			return SortFunCallBuild.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "Cast", 2)) {
+			// FIXME: this is a hack. we should use the type information from
+			// the cast
+			return TermBuild.create(Tools.applAt(t, 0), fd);
 		}
 
 		throw new NotImplementedException("Unsupported term build: " + t);
