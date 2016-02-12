@@ -158,7 +158,7 @@ rules /* Sort & Constructor classes */
       debug(!"f ");
       e0* := <ds-to-interp-sorts-to-frefs> kid*;
       debug(!"g ");
-      (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|"term")); unzip; (concat, id)> kid*
+      (bstm1*, e1*) := <debug(!"g1 "); map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); debug(!"g2 "); ds-to-interp-sorts-to-create-arg(|"term")); debug(!"g3 "); unzip; debug(!"g4 "); (concat, id); debug(!"g5 ")> kid*
       ;debug(!"h ")
   
   ds-to-interp-sorts-to-create-arg(|x_term):
@@ -195,7 +195,6 @@ rules /* Sort & Constructor classes */
         }
       ]|, e |[ com.github.krukow.clj_lang.PersistentHashMap.create(x_map) ]|)
     where
-      
       x_mapT := $[_[<newname>]];
       x_bindsT := $[_[<newname>]];
       x_map := $[_[<newname>]];
@@ -204,6 +203,9 @@ rules /* Sort & Constructor classes */
       x_valclass := <ds-to-interp-terms-types-name> sval;
       (bstm0*, e_keycreate) := <ds-to-interp-sorts-to-create-arg(|x_bindT)> (e |[ 0 ]|, skey);
       (bstm1*, e_valcreate) := <ds-to-interp-sorts-to-create-arg(|x_bindT)> (e |[ 1 ]|, sval)
+
+  ds-to-interp-sorts-to-create-arg(|x_term):
+    (e, sref@NativeType(_, _)) -> (bstm* |[ throw new IllegalStateException("Cannot convert to native type"); ]|, e |[ null ]| )
 
   ds-to-interp-sorts-to-create-arg(|x_term):
     (e, sref@SimpleSort("String")) -> ([], e |[ Tools.stringAt(x_term, e).stringValue() ]|)
