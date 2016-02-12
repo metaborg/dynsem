@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 
 import org.spoofax.terms.util.NotImplementedException;
 
@@ -16,12 +17,15 @@ import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
-	private ITermRegistry termRegistry;
-	private RuleRegistry ruleRegistry;
+	private final ITermRegistry termRegistry;
+	private final RuleRegistry ruleRegistry;
+	private final DynSemLanguageParser parser;
 
-	public DynSemLanguage(ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
+	public DynSemLanguage(ITermRegistry termRegistry,
+			RuleRegistry ruleRegistry, Path parseTablePath) {
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
+		this.parser = new DynSemLanguageParser(parseTablePath);
 		DynSemContext.LANGUAGE = this;
 	}
 
@@ -39,6 +43,14 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 	public ITermRegistry getTermRegistry() {
 		return termRegistry;
+	}
+
+	public RuleRegistry getRuleRegistry() {
+		return ruleRegistry;
+	}
+
+	public DynSemLanguageParser getParser() {
+		return parser;
 	}
 
 	public Node createFindContextNode0() {

@@ -48,11 +48,8 @@ rules /* language file. interpreter entry point */
         
         public final static x_language INSTANCE = new x_language();
       
-        private final DynSemLanguageParser parser;
-      
         public x_language() {
-          super(new ~x:$[[<LanguageName>]TermRegistry](), new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)));
-          parser = new DynSemLanguageParser(Paths.get(PARSE_TABLE));
+          super(new ~x:$[[<LanguageName>]TermRegistry](), new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)), Paths.get(PARSE_TABLE));
         }
       
         public static void main(String[] args) throws IOException {
@@ -71,7 +68,7 @@ rules /* language file. interpreter entry point */
         protected CallTarget parse(Source code, Node context,
             String... argumentNames) throws IOException {
       
-          IStrategoTerm programT = new x_transformer().transform(parser.parse(code, START_SYMBOL));
+          IStrategoTerm programT = new x_transformer().transform(getParser().parse(code, START_SYMBOL));
           ITerm program = getTermRegistry().parseProgramTerm(programT);
       
           return new CallTarget() {
