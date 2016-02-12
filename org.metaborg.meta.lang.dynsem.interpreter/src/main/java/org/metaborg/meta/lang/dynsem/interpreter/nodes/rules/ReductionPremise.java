@@ -11,6 +11,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
+import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -21,6 +22,8 @@ import com.oracle.truffle.api.source.SourceSection;
 /**
  * {@link ReductionPremise} represents and specifies evaluation logic for a
  * reduction premise, i.e. a premise which applies a rule to a term.
+ * 
+ * TODO extract a dispatch interpreter node out of this class
  * 
  * @author vladvergu
  *
@@ -80,8 +83,9 @@ public class ReductionPremise extends Premise {
 			System.arraycopy(rwArgs, 0, args, roArgs.length + lhsTerms.length,
 					rwArgs.length);
 
-			RuleResult ruleRes = (RuleResult) targetRule.getCallTarget().call(
-					args);
+			CallTarget ct = targetRule.getCallTarget();
+			assert ct != null;
+			RuleResult ruleRes = (RuleResult) ct.call(args);
 			if (!rhsNode.execute(ruleRes.result, frame)) {
 				throw new PremiseFailure();
 			}
@@ -92,7 +96,6 @@ public class ReductionPremise extends Premise {
 			throw new RuntimeException("Cannot reduce on term: "
 					+ e.getResult());
 		}
-
 	}
 
 	@ExplodeLoop
