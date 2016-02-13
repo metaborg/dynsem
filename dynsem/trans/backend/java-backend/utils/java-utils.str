@@ -21,13 +21,16 @@ rules
       outputdir := basedir
     end;
     filepath := <concat-strings> [outputdir, "/", filename];
-    ( 
-      <file-exists> filepath;
-      ast' := <parse-java-file> filepath;
-      ast'' := <merge-strategy> (ast', ast)
-      <+
-      ast'' := ast
-    );
+    /* FIXME: temporary disable of merging due to http://yellowgrass.org/issue/SpoofaxWithCore/74 */
+//    
+//    (
+//      <file-exists> filepath;
+//      ast' := <parse-java-file> filepath;
+//      ast'' := <merge-strategy> (ast', ast)
+//      <+
+//      ast'' := ast
+//    );
+    ast'' := ast;
     pp-java := <debugged-java-pp> ast'';
     fout     := <fopen> (filepath, "w");
     <fputs> (pp-java, fout);
