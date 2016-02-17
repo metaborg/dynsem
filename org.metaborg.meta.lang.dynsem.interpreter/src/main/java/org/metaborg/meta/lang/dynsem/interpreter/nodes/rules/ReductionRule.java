@@ -53,17 +53,9 @@ public class ReductionRule extends Rule {
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
-	@Override
-	public RuleResult execute(VirtualFrame frame) {
-		try {
-			return executeSafe(frame);
-		} catch (Exception ex) {
-			throw new InterpreterException("Rule failure", ex);
-		}
-	}
 
 	@ExplodeLoop
-	private RuleResult executeSafe(VirtualFrame frame) {
+	protected RuleResult executeSafe(VirtualFrame frame) {
 		/* evaluate the premises */
 		for (int i = 0; i < premises.length; i++) {
 			premises[i].execute(frame);
