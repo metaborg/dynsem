@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -53,8 +54,16 @@ public class ReductionRule extends Rule {
 	}
 
 	@Override
-	@ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
+		try {
+			return executeSafe(frame);
+		} catch (Exception ex) {
+			throw new InterpreterException("Rule failure", ex);
+		}
+	}
+
+	@ExplodeLoop
+	private RuleResult executeSafe(VirtualFrame frame) {
 		/* evaluate the premises */
 		for (int i = 0; i < premises.length; i++) {
 			premises[i].execute(frame);
