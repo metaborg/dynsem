@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -20,15 +19,6 @@ public abstract class Rule extends RootNode {
 
 	public abstract String getName();
 
-	protected abstract RuleResult executeSafe(VirtualFrame frame);
-
-	public RuleResult execute(VirtualFrame frame) {
-		try {
-			return executeSafe(frame);
-		} catch (Exception ex) {
-			throw new InterpreterException("Rule failure: " + getName() + "/"
-					+ getConstructor() + "/" + getArity(), ex);
-		}
-	}
+	public abstract RuleResult execute(VirtualFrame frame);
 
 }

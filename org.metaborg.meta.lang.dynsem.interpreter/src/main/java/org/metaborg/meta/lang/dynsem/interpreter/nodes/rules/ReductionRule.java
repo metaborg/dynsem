@@ -54,8 +54,9 @@ public class ReductionRule extends Rule {
 	}
 
 
+	@Override
 	@ExplodeLoop
-	protected RuleResult executeSafe(VirtualFrame frame) {
+	public RuleResult execute(VirtualFrame frame) {
 		/* evaluate the premises */
 		for (int i = 0; i < premises.length; i++) {
 			premises[i].execute(frame);
