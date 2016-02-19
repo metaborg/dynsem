@@ -16,13 +16,9 @@ rules
   ds-to-interp-editor:
     (_, position, ast, path, project-path) -> (<SpecTargetFile>, result)
     with
-      debug(!"a ");
       result := <ds-to-interp-main(|path, project-path)> ast;
-      debug(!"b ");
       <ds-to-interp-terms(|path, project-path)> result;
-      debug(!"c ");
-      <file-copy> (<debug(!1); TableSourceFile; debug(!2)>, <debug(!3); TableTargetFile; debug(!4)>);
-      debug(!"d ")
+      <file-copy> (<TableSourceFile>, <TableTargetFile>)
   
   ds-to-interp-main(|path, project-path):
     ast -> result
@@ -76,9 +72,7 @@ rules
     in-project-path(
         ds-to-interp-init-options(|path, project-path);
         log-timed(
-          debug(!"ba ");
-          ds-to-interp-terms-module;
-          debug(!"bb ") | "Language-specific terms"
+          ds-to-interp-terms-module | "Language-specific terms"
         )
     |project-path)
 

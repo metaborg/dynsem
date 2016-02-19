@@ -29,7 +29,7 @@ rules
   mark-rule-arguments-bind-source = not(?As(_, _)); alltd(mark-rule-arguments-bind)
 
   mark-rule-arguments-bind-source:
-    As(VarRef(v), source) -> <debug(!"x "); alltd(mark-rule-arguments-bind); debug(!"y ")> source
+    As(VarRef(v), source) -> <alltd(mark-rule-arguments-bind)> source
     where rules( RenameArgument: VarRef(v) -> ArgRead(0) )
 
   mark-rule-arguments-bind:

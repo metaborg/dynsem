@@ -10,14 +10,11 @@ imports
 rules
   
   ds-to-interp-nattypes-adapters-top =
-    debug(!1); 
     fetch-elem(?NativeDataTypes(<id>));
-    debug(!2); 
     mapconcat(ds-to-interp-nattypes-adapter)
-    ;debug(!3) 
   
   ds-to-interp-nattypes-adapter:
-    NativeBaseTypeDecl(jstring, s, func*) -> <map(debug(!4); ds-to-interp-nattype-func-adapter(|jstring, s); debug(!5)); debug(!6)> func*
+    NativeBaseTypeDecl(jstring, s, func*) -> <map(ds-to-interp-nattype-func-adapter(|jstring, s))> func*
   
   ds-to-interp-nattype-func-adapter(|jstring, sort_nat):
     NativeFunctionDecl(fun, kid*, sort_res) ->
@@ -42,7 +39,6 @@ rules
           
           public static x_adapter create(param2*) {
             return ~x:$[[x_adapter]NodeGen].create(e2*);
-//            throw new ThreeLeggedChickenException();
           }
 
           @Specialization
@@ -52,25 +48,15 @@ rules
         }
       ]|
     where
-      debug(!7);
       x_adapter := <concat-strings> ["_adapt_", sort_nat, "_", fun, "_", <length; int-to-string> kid*];
-      debug(!8);
       child* := <ds-to-interp-nattype-func-adapter-childannos> kid*;
-      debug(!9);
       x_res := <ds-to-interp-terms-types-name> sort_res;
-      debug(!10);
       x_recvtype := <unquote(?'"')> jstring; 
-      debug(!11);
       param0* := <ds-to-interp-nattype-func-adapter-eval-params> kid*;
-      debug(!12);
       param1* := [ param |[ x_recvtype receiver ]|, param0*];
-      debug(!13);
       e1* := <ds-to-interp-nattype-func-adapter-eval-exprs> kid*;
-      debug(!14);
-      param2* := <concat> [ [ param |[ SourceSection source ]|, param |[ TermBuild receiver ]| ], <ds-to-interp-nattype-func-adapter-create-params> kid* ];      //[ param |[ SourceSection source ]|, param |[ TermBuild receiver ]|, param2* ];
-      debug(!15);
-      e2* := <concat> [ [e |[ source ]|, e |[ receiver ]| ], <ds-to-interp-nattype-func-adapter-create-exprs> kid* ];
-      debug(!16)
+      param2* := <concat> [ [ param |[ SourceSection source ]|, param |[ TermBuild receiver ]| ], <ds-to-interp-nattype-func-adapter-create-params> kid* ];
+      e2* := <concat> [ [e |[ source ]|, e |[ receiver ]| ], <ds-to-interp-nattype-func-adapter-create-exprs> kid* ]
       
 
   ds-to-interp-nattype-func-adapter-childannos = map-with-index(ds-to-interp-nattype-func-adapter-childanno)

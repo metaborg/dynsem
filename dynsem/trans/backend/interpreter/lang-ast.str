@@ -10,38 +10,24 @@ rules
   
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
-    debug(!"generating term classes");
     <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
-    debug(!"generating typesystem class");
     <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
-    debug(!"generating termbuilding sort-classes");
     <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
-    debug(!"generating termbuilding classes");
     <ds-to-interp-terms-building; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
-    debug(!"generating termmatching classes");
     <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
-    debug(!"generating native datatype adapter classes");
     <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
-    debug(!"generating term registry class");
     <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
-    debug(!"generating interpreter entry point");
-    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>);
-    debug(!"done generating classes")
+    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)
 
 rules /* Sort & Constructor classes */
 
   ds-to-interp-terms-signatures-top:
     sig* -> [sort-class*, cons-class*]
     where
-      debug(!1);
       sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
-      debug(!2);
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
-      debug(!3);
       sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
-      debug(!4);
-      cons-class* := <map(debug(!"4a "); ds-to-interp-terms-consdecl; debug(!"4b "))> cons-dec*
-      ;debug(!5)
+      cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*
     
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
@@ -102,7 +88,7 @@ rules /* Sort & Constructor classes */
   ds-to-interp-terms-consdecl:
     dec@ConsDecl(name, kid*, s, _) ->
       compilation-unit |[
-        package ~x:<debug(!"ba1a1c1 "); TermsPackageName; debug(!"ba1a1c2 ")>;
+        package ~x:<TermsPackageName>;
         
         import org.spoofax.interpreter.core.Tools;
         import org.spoofax.interpreter.terms.*;
@@ -159,23 +145,14 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      debug(!"a ");
       x_classname := <ds-to-interp-terms-types-name> dec;
-      debug(!"b ");
       param0* := <ds-to-interp-sorts-to-params> kid*;
-      debug(!"c ");
       bstm0* := <ds-to-interp-sorts-to-finits> kid*;
-      debug(!"d ");
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
-      debug(!"e ");
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
-      debug(!"f ");
       e0* := <ds-to-interp-sorts-to-frefs> kid*;
-      debug(!"g ");
-      (bstm1*, e1*) := <debug(!"g1 "); map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); debug(!"g2 "); ds-to-interp-sorts-to-create-arg(|"term")); debug(!"g3 "); unzip; debug(!"g4 "); (concat, id); debug(!"g5 ")> kid*;
-      debug(!"h ");
+      (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|"term")); unzip; (concat, id)> kid*;
       bstm2* := <map-with-index(ds2java-field-eq-check)> kid*
-      ;debug(!"i ")
   
   ds-to-interp-sorts-to-create-arg(|x_term):
     (e, sref@SimpleSort(s)) -> ([], e |[ ~x:<ds-to-interp-terms-types-name> sref.create(x_term.getSubterm(e)) ]|)
@@ -263,7 +240,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      <not(is-builtin-type);debug(!"User type: ")> ty;
+      <not(is-builtin-type)> ty;
       x_idx := $[_[idx]]
   
   ds-to-interp-sorts-to-params = is-list; map-with-index(ds-to-interp-sort-to-param)
