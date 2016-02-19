@@ -11,7 +11,7 @@ dependencies:
   java:
   - org.metaborg:org.metaborg.meta.interpreter.framework:${metaborgVersion}
 exports:
-- directory: .
+- directory: ./
   includes:
   - lib/JavaCompilationUnit-15.tbl
 pardonedLanguages:
