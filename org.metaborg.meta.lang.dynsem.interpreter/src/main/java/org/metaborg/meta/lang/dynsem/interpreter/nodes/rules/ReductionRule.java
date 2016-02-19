@@ -15,6 +15,7 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
 /**
@@ -141,6 +142,11 @@ public class ReductionRule extends Rule {
 			fd.addFrameSlot(v);
 		}
 		return fd;
+	}
+	
+	@Override
+	public String toString() {
+		return NodeUtil.printCompactTreeToString(this);
 	}
 
 }

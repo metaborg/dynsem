@@ -9,6 +9,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class MergePointPremise extends Premise {
@@ -66,6 +67,11 @@ public class MergePointPremise extends Premise {
 		for (int i = 0; i < branch2.length; i++) {
 			branch2[i].execute(frame);
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return NodeUtil.printCompactTreeToString(this);
 	}
 
 }

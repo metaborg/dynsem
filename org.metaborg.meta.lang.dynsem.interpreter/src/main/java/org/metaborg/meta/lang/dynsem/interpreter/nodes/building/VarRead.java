@@ -30,5 +30,10 @@ public class VarRead extends TermBuild {
 				fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
 				SourceSectionUtil.fromStrategoTerm(t));
 	}
+	
+	@Override
+	public String toString() {
+		return "VarRead(" + slot.getIdentifier() + ")";
+	}
 
 }

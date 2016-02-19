@@ -9,6 +9,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class MatchPremise extends Premise {
@@ -41,4 +42,8 @@ public class MatchPremise extends Premise {
 		return new MatchPremise(lhs, rhs, SourceSectionUtil.fromStrategoTerm(t));
 	}
 
+	@Override
+	public String toString() {
+		return NodeUtil.printCompactTreeToString(this);
+	}
 }

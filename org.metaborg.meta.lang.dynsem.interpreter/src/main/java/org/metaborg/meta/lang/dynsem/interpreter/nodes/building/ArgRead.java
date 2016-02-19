@@ -26,5 +26,10 @@ public class ArgRead extends TermBuild {
 		return new ArgRead(Tools.intAt(t, 0).intValue(),
 				SourceSectionUtil.fromStrategoTerm(t));
 	}
+	
+	@Override
+	public String toString() {
+		return "ArgRead(" + index + ")";
+	}
 
 }

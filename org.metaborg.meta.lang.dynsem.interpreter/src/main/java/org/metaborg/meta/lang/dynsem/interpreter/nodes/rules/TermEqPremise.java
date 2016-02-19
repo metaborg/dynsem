@@ -10,6 +10,7 @@ import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "left", type = TermBuild.class),
@@ -35,4 +36,8 @@ public abstract class TermEqPremise extends Premise {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return NodeUtil.printCompactTreeToString(this);
+	}
 }
