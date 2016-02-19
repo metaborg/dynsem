@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
-import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
