@@ -89,9 +89,11 @@ rules /* language file. interpreter entry point */
               if (program instanceof IConTerm) {
                 IConTerm programCon = (IConTerm) program;
                 if (programCon.constructor().equals(START_CONSTR_NAME) && programCon.arity() == START_CONSTR_ARITY) {
-      
-                  return initRule.getCallTarget().call(
-                      programCon.allSubterms());
+                  return initRule.getCallTarget()
+                                  .call(Rule
+                                      .buildArguments(programCon,
+                                          programCon.allSubterms(),
+                                          new Object[0]));      
                 }
               }
               throw new IllegalStateException("Malformed program term");

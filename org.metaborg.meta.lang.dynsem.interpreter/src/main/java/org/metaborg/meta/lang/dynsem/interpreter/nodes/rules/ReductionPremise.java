@@ -16,6 +16,7 @@ import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -70,22 +71,14 @@ public class ReductionPremise extends Premise {
 	public void execute(VirtualFrame frame) {
 		Object[] roArgs = evalRONodes(frame);
 		Object[] rwArgs = evalRWNodes(frame);
-		IConTerm lshTerm;
+		IConTerm lhsTerm;
 		try {
-			lshTerm = lhsNode.executeIConTerm(frame);
-			Rule targetRule = lookupRule(lshTerm);
-			Object[] lhsTerms = lshTerm.allSubterms();
-
-			Object[] args = new Object[roArgs.length + lhsTerms.length
-					+ rwArgs.length];
-			System.arraycopy(roArgs, 0, args, 0, roArgs.length);
-			System.arraycopy(lhsTerms, 0, args, roArgs.length, lhsTerms.length);
-			System.arraycopy(rwArgs, 0, args, roArgs.length + lhsTerms.length,
-					rwArgs.length);
-
-			CallTarget ct = targetRule.getCallTarget();
-			assert ct != null;
-			RuleResult ruleRes = (RuleResult) ct.call(args);
+			lhsTerm = lhsNode.executeIConTerm(frame);
+			Rule targetRule = lookupRule(lhsTerm);
+			
+			Object[] args = Rule.buildArguments(lhsTerm, lhsTerm.allSubterms(), roArgs, rwArgs);
+			RuleResult ruleRes = (RuleResult) targetRule.getCallTarget().call(args);
+			
 			if (!rhsNode.execute(ruleRes.result, frame)) {
 				throw new PremiseFailure();
 			}
@@ -177,5 +170,10 @@ public class ReductionPremise extends Premise {
 
 		return new ReductionPremise(roNodes, lhsNode, arrowName, rwNodes,
 				rhsNode, rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
+	}
+	
+	@Override
+	public String toString() {
+		return NodeUtil.printCompactTreeToString(this);
 	}
 }

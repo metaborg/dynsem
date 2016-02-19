@@ -15,16 +15,22 @@ rules
   mark-rule-arguments = alltd(?Rule(_, _, _); mark-rule-arguments-rule)
   
   mark-rule-arguments-rule:
-    Rule(prem*, infer, Relation(reads, source, arrow, target))
-      -> Rule(prem'*, infer, Relation(reads', source', arrow, target'))
+    Rule(prem*, infer, Relation(ro, Source(lhs, rw), arrow, target))
+      -> Rule(prem'*, infer, Relation(ro', Source(lhs', rw'), arrow, target'))
     with {| RenameArgument, NextArgument:
-      rules(NextArgument: _ -> 0);
-      reads' := <alltd(mark-rule-arguments-bind)> reads;
-      source' := <alltd(mark-rule-arguments-bind)> source;
+      rules(NextArgument: _ -> 1);
+      lhs' := <mark-rule-arguments-bind-source> lhs;
+      ro' := <alltd(mark-rule-arguments-bind)> ro;
+      rw' := <alltd(mark-rule-arguments-bind)> rw;
       prem'* := <alltd(mark-rule-arguments-read)> prem*;
       target' := <alltd(mark-rule-arguments-read)> target
     |}
 
+  mark-rule-arguments-bind-source = not(?As(_, _)); alltd(mark-rule-arguments-bind)
+
+  mark-rule-arguments-bind-source:
+    As(VarRef(v), source) -> <debug(!"x "); alltd(mark-rule-arguments-bind); debug(!"y ")> source
+    where rules( RenameArgument: VarRef(v) -> ArgRead(0) )
 
   mark-rule-arguments-bind:
     VarRef(v) -> ArgBind(i)
