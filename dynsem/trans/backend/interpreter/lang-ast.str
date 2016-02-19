@@ -224,7 +224,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      <is-builtin-type> ty;
+      <is-primitive-type> ty;
       x_idx := $[_[idx]]
   
   // generate equality check for a field that is of user type
