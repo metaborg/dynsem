@@ -1,0 +1,31 @@
+---
+metaborgVersion: "2.0.0-SNAPSHOT"
+id: "org.metaborg:dynsem:${metaborgVersion}"
+name: "ds"
+format: "jar"
+compileDependencies:
+- "org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}"
+- "org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}"
+runtimeDependencies:
+- "org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}"
+pardonedLanguages:
+- "EditorService"
+- "Stratego-Sugar"
+- "SDF"
+language:
+  stratego:
+    args:
+    - "-la"
+    - "stratego-lib"
+    - "-la"
+    - "stratego-sglr"
+    - "-la"
+    - "stratego-gpp"
+    - "-la"
+    - "stratego-xtc"
+    - "-la"
+    - "stratego-aterm"
+    - "-la"
+    - "stratego-sdf"
+    - "-la"
+    - "strc"

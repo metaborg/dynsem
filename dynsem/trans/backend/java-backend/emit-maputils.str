@@ -13,20 +13,20 @@ imports
 	backend/java-backend/lib-ds2java
 	backend/java-backend/emit-atermconversion
 	backend/java-backend/emit-genericnodes
-	
+
 rules
-  
+
   ds2java-maputils =
     collect-all(?MapSort(_, _); rw-type);
     make-set;
     ds2java-maputils-maps;
     MkSingleton
-  
+
   ds2java-maputils-maps:
     map-ty* ->
       compilation-unit |[
         package ~x:<AutoPackageName>;
-        
+
         import java.util.Map;
         import java.util.Map.Entry;
         import org.spoofax.interpreter.terms.*;
@@ -35,14 +35,14 @@ rules
         import com.github.krukow.clj_ds.PersistentMap;
         import com.github.krukow.clj_lang.PersistentHashMap;
         import org.metaborg.meta.interpreter.framework.MapUtils;
-        
+
         public class AutoMapUtils {
           ~conv*
         }
       ]|
     where
       conv* := <mapconcat(ds2java-maputils-map)> map-ty*
-  
+
   ds2java-maputils-map:
     m-ty@MapType(k-ty, v-ty) ->
       class-body-dec* |[
@@ -57,11 +57,11 @@ rules
                         e_keytrm, e_valtrm);
             idx++;
           }
-          
+
           return factory.makeAppl(factory.makeConstructor("Map", 1), factory.makeList(kids));
         }
-        
-        public static x_maptype x_fromterm(IStrategoTerm term) {        
+
+        public static x_maptype x_fromterm(IStrategoTerm term) {
           PersistentMap<x_kty, x_vty> result = PersistentHashMap.EMPTY;
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
