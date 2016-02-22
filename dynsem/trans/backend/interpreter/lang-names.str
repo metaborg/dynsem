@@ -40,7 +40,7 @@ rules
   ds-to-interp-terms-types-name:
     SimpleSort("Bool") -> $[boolean]
   
-  is-primitive-type = try(?SimpleSort(<id>)); ?"Int" + ?"Bool"
+  is-primitive-type = try(?SimpleSort(<id>)); (?"Int" + ?"Bool")
   
   is-builtin-type = try(?SimpleSort(<id>)); (?"String" + ?"Int" + ?"Bool")
   

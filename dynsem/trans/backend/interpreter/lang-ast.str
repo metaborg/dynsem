@@ -240,7 +240,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      <not(is-builtin-type)> ty;
+      <not(is-primitive-type)> ty;
       x_idx := $[_[idx]]
   
   ds-to-interp-sorts-to-params = is-list; map-with-index(ds-to-interp-sort-to-param)
