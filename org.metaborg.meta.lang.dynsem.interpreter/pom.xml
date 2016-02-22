@@ -3,7 +3,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.metaborg</groupId>
 	<artifactId>org.metaborg.meta.lang.dynsem.interpreter</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>DynSem Interpreter</name>
 	<build>
 		<!-- <sourceDirectory>src</sourceDirectory> -->
