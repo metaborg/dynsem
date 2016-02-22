@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>dynsem</artifactId>
-	<name>ds</name>
-	<packaging>spoofax-language</packaging>
-
-	<description>Spoofax DynSem (dynamic semantic specification) language implementation.</description>
-	<url>https://github.com/metaborg/dynsem</url>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>dynsem</artifactId>
+  <name>ds</name>
+  <packaging>spoofax-language</packaging>
+  <description>Spoofax DynSem (dynamic semantic specification) language implementation.</description>
+  <url>https://github.com/metaborg/dynsem</url>
 
 	<parent>
     <groupId>org.metaborg</groupId>
     <artifactId>parent.language</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <relativePath>../../releng/parent/language</relativePath>
   </parent>
   <dependencies>
@@ -39,24 +37,48 @@
       <type>spoofax-language</type>
       <scope>${metaborg-meta-lang-scope}</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.interpreter.framework</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
   </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.metaborg</groupId>
-				<artifactId>spoofax-maven-plugin</artifactId>
-				<version>${metaborg-version}</version>
-				<extensions>true</extensions>
-				<configuration>
-					<format>jar</format>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<scm>
-		<connection>scm:git:git@github.com:metaborg/dynsem.git</connection>
-		<developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
-		<url>https://github.com/metaborg/dynsem</url>
-	</scm>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.metaborg</groupId>
+        <artifactId>spoofax-maven-plugin</artifactId>
+        <version>${metaborg-version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <format>jar</format>
+        </configuration>
+      </plugin>
+    </plugins>
+    <resources>
+      <resource>
+        <directory>./</directory>
+        <includes>
+          <include>lib/JavaCompilationUnit-15.tbl</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
+
+  <developers>
+    <developer>
+      <name>Vlad Vergu</name>
+      <email>v.a.vergu@tudelft.nl</email>
+      <organization>Delft University of Technology</organization>
+      <organizationUrl>http://www.ewi.tudelft.nl/en</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:metaborg/dynsem.git</connection>
+    <developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
+    <url>https://github.com/metaborg/dynsem</url>
+  </scm>
 </project>
