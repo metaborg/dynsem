@@ -17,7 +17,8 @@ rules
     <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
     <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
     <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
-    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)
+    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>);
+    ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)
 
 rules /* Sort & Constructor classes */
 

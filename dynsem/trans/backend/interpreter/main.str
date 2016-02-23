@@ -21,7 +21,6 @@ rules
       <ds-to-interp-terms(|path, project-path)> result;
       fout := <fopen> (<SpecTargetFile>, "w");
       <pp-aterm-stream(|fout)> result;
-//      <fputs> (<pp-aterm> result, fout);
       <fclose> fout;
       <file-copy> (<TableSourceFile>, <TableTargetFile>)
       
