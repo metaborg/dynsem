@@ -1,8 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
-
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.Truffle;

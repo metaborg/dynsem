@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.interop.ForeignAccess;

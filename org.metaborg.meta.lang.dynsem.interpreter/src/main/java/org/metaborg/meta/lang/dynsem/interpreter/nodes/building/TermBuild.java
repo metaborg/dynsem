@@ -1,16 +1,15 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
-import metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
-import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
-import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.ConsListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.NilListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.IntLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;

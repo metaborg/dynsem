@@ -1,4 +1,4 @@
-package metaborg.meta.lang.dynsem.interpreter.terms;
+package org.metaborg.meta.lang.dynsem.interpreter.terms;
 
 public interface IConTerm extends ITerm {
 
