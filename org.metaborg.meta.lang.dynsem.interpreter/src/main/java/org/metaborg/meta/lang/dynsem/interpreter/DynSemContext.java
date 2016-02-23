@@ -17,6 +17,8 @@ public class DynSemContext {
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
 
+	private DynSemPrimedRun primedRun;
+
 	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
 		this(termRegistry, ruleRegistry, new BufferedReader(
 				new InputStreamReader(System.in)), new PrintWriter(System.out));
@@ -36,6 +38,14 @@ public class DynSemContext {
 
 	public ITermRegistry getTermRegistry() {
 		return termRegistry;
+	}
+
+	public DynSemPrimedRun getRun() {
+		return primedRun;
+	}
+
+	public void setRun(DynSemPrimedRun run) {
+		this.primedRun = run;
 	}
 
 	public ITermBuildFactory lookupTermBuilder(String name, int arity) {

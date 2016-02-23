@@ -2,9 +2,12 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Path;
+import java.util.concurrent.Callable;
 
 import org.spoofax.terms.util.NotImplementedException;
 
@@ -14,6 +17,7 @@ import com.oracle.truffle.api.instrument.Visualizer;
 import com.oracle.truffle.api.instrument.WrapperNode;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
+import com.oracle.truffle.api.vm.PolyglotEngine.Value;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
@@ -27,6 +31,12 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		this.ruleRegistry = ruleRegistry;
 		this.parser = new DynSemLanguageParser(parseTablePath);
 		DynSemContext.LANGUAGE = this;
+	}
+
+	public Callable<Value> getCallable(String filePath, InputStream stdin,
+			OutputStream stdout, OutputStream stderr) {
+		// TODO implement
+		throw new RuntimeException("Not implemented");
 	}
 
 	@Override
@@ -79,7 +89,10 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	@Override
 	protected Object findExportedSymbol(DynSemContext context,
 			String globalName, boolean onlyExplicit) {
-		throw new NotImplementedException();
+		if (globalName.equals("INIT")) {
+			return context.getRun();
+		}
+		return null;
 	}
 
 	@Override
