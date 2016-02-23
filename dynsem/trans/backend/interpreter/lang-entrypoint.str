@@ -26,6 +26,7 @@ rules /* language file. interpreter entry point */
       import ~x:<TopPackageName>.~x:$[[<LanguageName>]TermRegistry];
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemPrimedRun;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
       import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -54,23 +55,23 @@ rules /* language file. interpreter entry point */
         }
       
         public static void main(String[] args) throws IOException {
-          Value v = evaluate(args[0], System.in, System.out, System.err);
-          RuleResult res = (RuleResult) v.get();
+          RuleResult res = evaluate(args[0], System.in, System.out, System.err);
           System.out.println(res.result);
         }
       
-        public static Value evaluate(String file, InputStream input,
-            OutputStream output, OutputStream error) throws IOException {
+        public static RuleResult evaluate(String file, InputStream input, OutputStream output, OutputStream error) throws IOException {
           PolyglotEngine vm = PolyglotEngine.buildNew().setIn(input)
               .setOut(output).setErr(error).build();
           assert vm.getLanguages().containsKey(MIME_TYPE);
           Source source = Source.fromFileName(file).withMimeType(MIME_TYPE);
-          return vm.eval(source);
+          vm.eval(source);
+          Value prog = vm.findGlobalSymbol("INIT");
+      
+          return prog.invoke(null).as(RuleResult.class);
         }
       
         @Override
-        protected CallTarget parse(Source code, Node context,
-            String... argumentNames) throws IOException {
+        protected CallTarget parse(Source code, Node context, String... argumentNames) throws IOException {
       
           IStrategoTerm programT = new x_transformer().transform(getParser().parse(code, START_SYMBOL));
           ITerm program = getTermRegistry().parseProgramTerm(programT);
@@ -79,21 +80,22 @@ rules /* language file. interpreter entry point */
       
             @Override
             public Object call(Object... arguments) {
-              Node n = createFindContextNode();
-              DynSemContext c = findContext(n);
+              DynSemContext c = getContext();
       
-              Rule initRule = c.getRuleRegistry().lookupRule("init", START_CONSTR_NAME, START_CONSTR_ARITY);
+              Rule initRule = c.getRuleRegistry().lookupRule("init",
+                  START_CONSTR_NAME, START_CONSTR_ARITY);
               if (initRule == null) {
                 throw new IllegalStateException("Rule not found");
               }
               if (program instanceof IConTerm) {
                 IConTerm programCon = (IConTerm) program;
-                if (programCon.constructor().equals(START_CONSTR_NAME) && programCon.arity() == START_CONSTR_ARITY) {
-                  return initRule.getCallTarget()
-                                  .call(Rule
-                                      .buildArguments(programCon,
-                                          programCon.allSubterms(),
-                                          new Object[0]));      
+                if (programCon.constructor().equals(START_CONSTR_NAME)
+                    && programCon.arity() == START_CONSTR_ARITY) {
+                  DynSemPrimedRun run = new DynSemPrimedRun();
+                  run.setCallTarget(initRule.getCallTarget());
+                  run.setProgram(programCon);
+                  c.setRun(run);
+                  return null;
                 }
               }
               throw new IllegalStateException("Malformed program term");
