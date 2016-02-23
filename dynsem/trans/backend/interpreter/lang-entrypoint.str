@@ -54,22 +54,34 @@ rules /* language file. interpreter entry point */
           super(new ~x:$[[<LanguageName>]TermRegistry](), new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)), Paths.get(PARSE_TABLE));
         }
       
-        public static void main(String[] args) throws IOException {
+        public static void main(String[] args) throws Exception {
           RuleResult res = evaluate(args[0], System.in, System.out, System.err);
           System.out.println(res.result);
         }
       
-        public static RuleResult evaluate(String file, InputStream input, OutputStream output, OutputStream error) throws IOException {
+        public static RuleResult evaluate(String file, InputStream input, OutputStream output, OutputStream error) throws Exception {
+          return getCallable(file, input, output, error).call();
+        }
+      
+        public static Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
           PolyglotEngine vm = PolyglotEngine.buildNew().setIn(input)
               .setOut(output).setErr(error).build();
           assert vm.getLanguages().containsKey(MIME_TYPE);
-          Source source = Source.fromFileName(file).withMimeType(MIME_TYPE);
-          vm.eval(source);
+          try {
+            vm.eval(Source.fromFileName(file).withMimeType(MIME_TYPE));
+          } catch (IOException ioex) {
+            throw new RuntimeException("Eval failed", ioex);
+          }
           Value prog = vm.findGlobalSymbol("INIT");
+          return new Callable<RuleResult>() {
       
-          return prog.invoke(null).as(RuleResult.class);
+            @Override
+            public RuleResult call() throws Exception {
+              return prog.invoke(null).as(RuleResult.class);
+            }
+          };
         }
-      
+  
         @Override
         protected CallTarget parse(Source code, Node context, String... argumentNames) throws IOException {
       
