@@ -8,18 +8,18 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
+import com.oracle.truffle.api.utilities.ConditionProfile;
 
 public class MergePointPremise extends Premise {
 
 	@Child protected Premise condition;
-	@Children protected final Premise[] branch1;
-	@Children protected final Premise[] branch2;
+	@Child protected Premise branch1;
+	@Child protected Premise branch2;
 
-	public MergePointPremise(Premise condition, Premise[] branch1,
-			Premise[] branch2, SourceSection source) {
+	public MergePointPremise(Premise condition, Premise branch1,
+			Premise branch2, SourceSection source) {
 		super(source);
 		this.condition = condition;
 		this.branch1 = branch1;
@@ -30,45 +30,46 @@ public class MergePointPremise extends Premise {
 		assert Tools.hasConstructor(t, "MergePoint", 3);
 		Premise condition = Premise.create(Tools.applAt(t, 0), fd);
 		IStrategoList branch1Ts = Tools.listAt(Tools.applAt(t, 1), 0);
-		Premise[] branch1 = new Premise[branch1Ts.size()];
-		for (int i = 0; i < branch1.length; i++) {
-			branch1[i] = Premise.create(Tools.applAt(branch1Ts, i), fd);
+		Premise[] branch1Premises = new Premise[branch1Ts.size()];
+		for (int i = 0; i < branch1Premises.length; i++) {
+			branch1Premises[i] = Premise.create(Tools.applAt(branch1Ts, i), fd);
 		}
+		Premise branch1 = new PremisesSequence(branch1Premises,
+				SourceSectionUtil.fromStrategoTerm(Tools.termAt(t, 1)));
 
 		IStrategoList branch2Ts = Tools.listAt(Tools.applAt(t, 2), 0);
-		Premise[] branch2 = new Premise[branch2Ts.size()];
-		for (int i = 0; i < branch2.length; i++) {
-			branch2[i] = Premise.create(Tools.applAt(branch2Ts, i), fd);
+		Premise[] branch2Premises = new Premise[branch2Ts.size()];
+		for (int i = 0; i < branch2Premises.length; i++) {
+			branch2Premises[i] = Premise.create(Tools.applAt(branch2Ts, i), fd);
 		}
+		Premise branch2 = new PremisesSequence(branch2Premises,
+				SourceSectionUtil.fromStrategoTerm(Tools.termAt(t, 2)));
 
 		return new MergePointPremise(condition, branch1, branch2,
 				SourceSectionUtil.fromStrategoTerm(t));
 	}
 
+	private final ConditionProfile conditionProfile = ConditionProfile
+			.createCountingProfile();
+
 	@Override
 	public void execute(VirtualFrame frame) {
+		if (conditionProfile.profile(evaluateCondition(frame))) {
+			branch1.execute(frame);
+		} else {
+			branch2.execute(frame);
+		}
+	}
+
+	private boolean evaluateCondition(VirtualFrame frame) {
 		try {
 			condition.execute(frame);
-			execBranch1(frame);
+			return true;
 		} catch (PremiseFailure f) {
-			execBranch2(frame);
+			return false;
 		}
 	}
 
-	@ExplodeLoop
-	private void execBranch1(VirtualFrame frame) {
-		for (int i = 0; i < branch1.length; i++) {
-			branch1[i].execute(frame);
-		}
-	}
-
-	@ExplodeLoop
-	private void execBranch2(VirtualFrame frame) {
-		for (int i = 0; i < branch2.length; i++) {
-			branch2[i].execute(frame);
-		}
-	}
-	
 	@Override
 	public String toString() {
 		return NodeUtil.printCompactTreeToString(this);
