@@ -8,8 +8,8 @@ dependencies:
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
   source:
   - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
-  java:
-  - org.metaborg:org.metaborg.meta.interpreter.framework:${metaborgVersion}
+#  java:
+#  - org.metaborg:org.metaborg.meta.interpreter.framework:${metaborgVersion}
 exports:
 - directory: ./
   includes:
