@@ -140,8 +140,8 @@ rules /* language file. interpreter entry point */
               System.out, System.err);
       
           BenchmarkConfiguration benchconfig = new BenchmarkConfiguration();
-          benchconfig.warmuprounds = 1;
-          benchconfig.repetitions = 65;
+          benchconfig.warmuprounds = Integer.parseInt(args[2]);
+          benchconfig.repetitions = Integer.parseInt(args[3]);
           benchconfig.dataFile = new File(args[1]);
       
           Benchmark benchmark = new Benchmark(callee, benchconfig);
