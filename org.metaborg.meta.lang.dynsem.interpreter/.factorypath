@@ -2,6 +2,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/github/krukow/clj-ds/0.0.4/clj-ds-0.0.4.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/oracle/truffle/truffle-api/0.9/truffle-api-0.9.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/oracle/truffle/truffle-dsl-processor/0.9/truffle-dsl-processor-0.9.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="/Users/vladvergu/tud/slde/software/languages/meta/dynsem-core/org.metaborg.meta.interpreter.framework/pom.xml" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/metaborg/org.spoofax.terms/2.0.0-SNAPSHOT/org.spoofax.terms-2.0.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/metaborg/org.spoofax.interpreter.core/2.0.0-SNAPSHOT/org.spoofax.interpreter.core-2.0.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/metaborg/org.spoofax.jsglr/2.0.0-SNAPSHOT/org.spoofax.jsglr-2.0.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
