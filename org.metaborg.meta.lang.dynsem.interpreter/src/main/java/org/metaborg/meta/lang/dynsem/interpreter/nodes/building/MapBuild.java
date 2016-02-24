@@ -7,6 +7,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.PersistentHashMap;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -50,6 +51,11 @@ public abstract class MapBuild extends TermBuild {
 
 		@Override
 		public PersistentMap<?, ?> executeMap(VirtualFrame frame) {
+			return create();
+		}
+		
+		@TruffleBoundary
+		private PersistentMap<?, ?> create() {
 			return PersistentHashMap.emptyMap();
 		}
 	}
@@ -89,6 +95,11 @@ public abstract class MapBuild extends TermBuild {
 		public PersistentMap<?, ?> executeMap(VirtualFrame frame) {
 			Object key = keyNode.executeGeneric(frame);
 			Object val = valNode.executeGeneric(frame);
+			return create(key, val);
+		}
+
+		@TruffleBoundary
+		private PersistentMap<?, ?> create(Object key, Object val) {
 			return PersistentHashMap.emptyMap().plus(key, val);
 		}
 	}

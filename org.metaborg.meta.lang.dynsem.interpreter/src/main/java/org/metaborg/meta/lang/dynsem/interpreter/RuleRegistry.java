@@ -15,10 +15,13 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+
 public abstract class RuleRegistry {
 
 	private final Map<String, Rule> rules = new HashMap<>();
 
+	@TruffleBoundary
 	public Rule lookupRule(String name, String constr, int arity) {
 		String k = makeKey(name, constr, arity);
 		Rule r = rules.get(k);

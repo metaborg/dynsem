@@ -5,6 +5,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_ds.PersistentMap;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -30,6 +31,7 @@ public abstract class MapSelectBuild extends TermBuild {
 
 	@Specialization
 	@SuppressWarnings({ "rawtypes" })
+	@TruffleBoundary
 	public Object doEvaluated(PersistentMap map, Object key) {
 		Object res = map.get(key);
 		if (res != null) {
