@@ -21,8 +21,8 @@ rules /* language file. interpreter entry point */
       import java.nio.file.Paths;
       import java.util.concurrent.Callable;
       
-      import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
-      import metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+      import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+      import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
       
       import ~x:<TopPackageName>.~x:$[[<LanguageName>]TermRegistry];
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;

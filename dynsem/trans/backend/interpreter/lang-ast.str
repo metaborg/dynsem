@@ -36,7 +36,7 @@ rules /* Sort & Constructor classes */
         package ~x:<TermsPackageName>;
         
         import org.spoofax.interpreter.core.Tools;
-        import metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
         import org.spoofax.interpreter.terms.*;
         
         public abstract class x_class implements IConTerm {
