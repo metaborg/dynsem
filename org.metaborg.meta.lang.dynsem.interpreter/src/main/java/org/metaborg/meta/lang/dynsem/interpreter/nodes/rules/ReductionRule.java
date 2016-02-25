@@ -15,7 +15,6 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
 /**
@@ -145,8 +144,7 @@ public class ReductionRule extends Rule {
 
 	@Override
 	public String toString() {
-		return name + "/" + constr + "/" + arity + " "
-				+ NodeUtil.printCompactTreeToString(this);
+		return "Reduction rule: " + name + "/" + constr + "/" + arity;
 	}
 
 }
