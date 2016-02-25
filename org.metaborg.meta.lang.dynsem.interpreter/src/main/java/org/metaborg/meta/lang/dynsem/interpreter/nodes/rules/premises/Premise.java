@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;

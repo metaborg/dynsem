@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -52,7 +53,6 @@ public class ReductionRule extends Rule {
 		this.target = output;
 		Truffle.getRuntime().createCallTarget(this);
 	}
-
 
 	@Override
 	@ExplodeLoop
@@ -142,10 +142,11 @@ public class ReductionRule extends Rule {
 		}
 		return fd;
 	}
-	
+
 	@Override
 	public String toString() {
-		return NodeUtil.printCompactTreeToString(this);
+		return name + "/" + constr + "/" + arity + " "
+				+ NodeUtil.printCompactTreeToString(this);
 	}
 
 }

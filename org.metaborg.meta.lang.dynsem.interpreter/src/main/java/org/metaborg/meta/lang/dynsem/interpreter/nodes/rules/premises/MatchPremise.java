@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;

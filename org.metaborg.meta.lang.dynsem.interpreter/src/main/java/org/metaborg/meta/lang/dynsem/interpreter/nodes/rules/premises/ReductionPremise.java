@@ -1,10 +1,12 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -53,17 +55,7 @@ public class ReductionPremise extends Premise {
 		this.rhsRwNodes = rhsComponentNodes;
 	}
 
-	/**
-	 * The {@link #execute(VirtualFrame)} function first evaluates the
-	 * {@link #roNodes} using the {@link #evalRWNodes(VirtualFrame)} helper
-	 * function. Then {@link #rwNodes} are evaluated. Then the {@link #lhsNode}
-	 * representing the input term to the reduction is evaluated. The target
-	 * rule to apply is found based on the term to reduce on. Following
-	 * application of the rule the local variables are bound to values in the
-	 * {@link RuleResult}.
-	 * 
-	 * @Override
-	 */
+	@Override
 	public void execute(VirtualFrame frame) {
 		Object[] roArgs = evalRONodes(frame);
 		Object[] rwArgs = evalRWNodes(frame);
@@ -71,10 +63,12 @@ public class ReductionPremise extends Premise {
 		try {
 			lhsTerm = lhsNode.executeIConTerm(frame);
 			Rule targetRule = lookupRule(lhsTerm);
-			
-			Object[] args = Rule.buildArguments(lhsTerm, lhsTerm.allSubterms(), roArgs, rwArgs);
-			RuleResult ruleRes = (RuleResult) targetRule.getCallTarget().call(args);
-			
+
+			Object[] args = Rule.buildArguments(lhsTerm, lhsTerm.allSubterms(),
+					roArgs, rwArgs);
+			RuleResult ruleRes = (RuleResult) targetRule.getCallTarget().call(
+					args);
+
 			if (!rhsNode.execute(ruleRes.result, frame)) {
 				throw new PremiseFailure();
 			}
@@ -167,9 +161,10 @@ public class ReductionPremise extends Premise {
 		return new ReductionPremise(roNodes, lhsNode, arrowName, rwNodes,
 				rhsNode, rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
 	}
-	
+
 	@Override
 	public String toString() {
-		return NodeUtil.printCompactTreeToString(this);
+		return "--" + arrowName + "--> "
+				+ NodeUtil.printCompactTreeToString(this);
 	}
 }

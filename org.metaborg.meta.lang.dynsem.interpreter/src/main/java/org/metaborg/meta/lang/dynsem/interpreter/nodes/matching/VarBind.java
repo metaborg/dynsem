@@ -27,7 +27,9 @@ public class VarBind extends MatchPattern {
 
 	public static VarBind create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "VarRef", 1);
-		return new VarBind(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
+		return new VarBind(
+				fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
 				SourceSectionUtil.fromStrategoTerm(t));
 	}
+
 }
