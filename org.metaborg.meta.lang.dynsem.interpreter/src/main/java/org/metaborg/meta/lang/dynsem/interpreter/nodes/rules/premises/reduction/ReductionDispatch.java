@@ -2,11 +2,11 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 
+import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -33,26 +33,27 @@ public abstract class ReductionDispatch extends Node {
 
 	@Specialization(limit = "INLINE_CACHE_SIZE", guards = "check.isInstance(term)")
 	protected RuleResult doDirect(VirtualFrame frame, Object term,
-			Object[] args, @Cached("lookupRule(term)") Rule rule,
-			@Cached("lookupInstanceChecker(term)") ITermInstanceChecker check,
-			@Cached("create(rule.getCallTarget())") DirectCallNode callnode) {
+			Object[] args, //
+			@Cached("lookupInstanceChecker(term)") ITermInstanceChecker check, //
+			@Cached("create(lookupCallTarget(term))") DirectCallNode callnode) {
 		return (RuleResult) callnode.call(frame, args);
 	}
 
 	@Specialization(contains = "doDirect")
 	protected RuleResult doIndirect(VirtualFrame frame, Object term,
-			Object[] args, @Cached("create()") IndirectCallNode callnode) {
-		return (RuleResult) callnode.call(frame, lookupRule(term)
-				.getCallTarget(), args);
+			Object[] args, //
+			@Cached("create()") IndirectCallNode callnode) {
+		return (RuleResult) callnode.call(frame, lookupCallTarget(term), args);
 	}
 
-	protected Rule lookupRule(Object term) {
+	protected CallTarget lookupCallTarget(Object term) {
 		IConTerm con = BuiltinTypesGen.asIConTerm(term);
 		if (context == null) {
 			context = DynSemContext.LANGUAGE.getContext();
 		}
-		return context.getRuleRegistry().lookupRule(arrowname,
-				con.constructor(), con.arity());
+		return context.getRuleRegistry()
+				.lookupRule(arrowname, con.constructor(), con.arity())
+				.getCallTarget();
 	}
 
 	protected ITermInstanceChecker lookupInstanceChecker(Object o) {
