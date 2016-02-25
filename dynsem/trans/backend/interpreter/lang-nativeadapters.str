@@ -29,6 +29,7 @@ rules
         import com.oracle.truffle.api.dsl.NodeChildren;
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.source.SourceSection;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
         @NodeChildren({ @NodeChild(value="receiver", type=TermBuild.class), ~child* })
         public abstract class x_adapter extends TermBuild {
@@ -42,6 +43,7 @@ rules
           }
 
           @Specialization
+          @TruffleBoundary
           public x_res doEvaluated(param1*) {
             return receiver.~x:fun(e1*);
           }
