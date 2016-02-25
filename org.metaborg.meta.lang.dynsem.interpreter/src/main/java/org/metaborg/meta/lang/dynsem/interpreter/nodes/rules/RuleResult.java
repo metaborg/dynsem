@@ -8,8 +8,13 @@ import com.oracle.truffle.api.interop.TruffleObject;
 
 @ValueType
 public class RuleResult implements TruffleObject {
-	public Object result;
-	public Object[] components;
+	public final Object result;
+	public final Object[] components;
+
+	public RuleResult(Object result, Object[] components) {
+		this.result = result;
+		this.components = components;
+	}
 
 	@Override
 	public ForeignAccess getForeignAccess() {
