@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
@@ -7,6 +7,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -37,6 +38,8 @@ public class ReductionPremise extends Premise {
 
 	private final String arrowName;
 
+	@Child protected ReductionDispatch dispatchNode;
+
 	@Child protected MatchPattern rhsNode;
 
 	@Children protected final MatchPattern[] rhsRwNodes;
@@ -50,6 +53,7 @@ public class ReductionPremise extends Premise {
 		this.roNodes = roNodes;
 		this.lhsNode = lhsNode;
 		this.arrowName = arrowName;
+		this.dispatchNode = ReductionDispatchNodeGen.create(arrowName, source);
 		this.rwNodes = rwNodes;
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
@@ -62,11 +66,10 @@ public class ReductionPremise extends Premise {
 		IConTerm lhsTerm;
 		try {
 			lhsTerm = lhsNode.executeIConTerm(frame);
-			Rule targetRule = lookupRule(lhsTerm);
 
 			Object[] args = Rule.buildArguments(lhsTerm, lhsTerm.allSubterms(),
 					roArgs, rwArgs);
-			RuleResult ruleRes = (RuleResult) targetRule.getCallTarget().call(
+			RuleResult ruleRes = dispatchNode.executeDispatch(frame, lhsTerm,
 					args);
 
 			if (!rhsNode.execute(ruleRes.result, frame)) {
@@ -109,16 +112,16 @@ public class ReductionPremise extends Premise {
 		return true;
 	}
 
-	private Rule lookupRule(IConTerm lshTerm) {
-		if (context == null) {
-			context = DynSemContext.LANGUAGE
-					.findContext0(DynSemContext.LANGUAGE
-							.createFindContextNode0());
-		}
-
-		return context.getRuleRegistry().lookupRule(arrowName,
-				lshTerm.constructor(), lshTerm.arity());
-	}
+	// private Rule lookupRule(IConTerm lshTerm) {
+	// if (context == null) {
+	// context = DynSemContext.LANGUAGE
+	// .findContext0(DynSemContext.LANGUAGE
+	// .createFindContextNode0());
+	// }
+	//
+	// return context.getRuleRegistry().lookupRule(arrowName,
+	// lshTerm.constructor(), lshTerm.arity());
+	// }
 
 	public static ReductionPremise create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "Relation", 4);

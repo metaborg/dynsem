@@ -51,7 +51,6 @@ public class ReductionRule extends Rule {
 		this.arity = arity;
 		this.premises = premises;
 		this.target = output;
-		Truffle.getRuntime().createCallTarget(this);
 	}
 
 	@Override

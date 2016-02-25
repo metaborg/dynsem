@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
 
 public class DynSemContext {

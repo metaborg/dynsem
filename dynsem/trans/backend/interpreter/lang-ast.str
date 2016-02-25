@@ -94,7 +94,9 @@ rules /* Sort & Constructor classes */
         import org.spoofax.interpreter.core.Tools;
         import org.spoofax.interpreter.terms.*;
         import ~x:<NativePackageName>.*;
-        
+        import org.metaborg.lang.sl.interpreter.generated.TypesGen;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
+                
         public class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
 
           public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
@@ -142,6 +144,17 @@ rules /* Sort & Constructor classes */
             x_classname other = (x_classname) obj;
             bstm2*
             return true;
+          }
+          
+          @Override
+          public ITermInstanceChecker getCheck() {
+            return new ITermInstanceChecker() {
+        
+              @Override
+              public boolean isInstance(Object obj) {
+                return TypesGen.~x:$[is[x_classname]](obj);
+              }
+            };
           }
         }
       ]|
