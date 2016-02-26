@@ -39,12 +39,12 @@ rules
           }
           
           public static x_adapter create(param2*) {
-            return ~x:$[[x_adapter]NodeGen].create(e2*);
+            return ~x:$[[x_adapter]NodeGen].create(e3*);
           }
 
           @Specialization
           public x_res doEvaluated(param1*) {
-            return doLogic(receiver, e1*);
+            return doLogic(e2*);
           }
           
           @TruffleBoundary
@@ -61,8 +61,9 @@ rules
       param0* := <ds-to-interp-nattype-func-adapter-eval-params> kid*;
       param1* := [ param |[ x_recvtype receiver ]|, param0*];
       e1* := <ds-to-interp-nattype-func-adapter-eval-exprs> kid*;
+      e2* := [ e |[ receiver ]|, e1* ];
       param2* := <concat> [ [ param |[ SourceSection source ]|, param |[ TermBuild receiver ]| ], <ds-to-interp-nattype-func-adapter-create-params> kid* ];
-      e2* := <concat> [ [e |[ source ]|, e |[ receiver ]| ], <ds-to-interp-nattype-func-adapter-create-exprs> kid* ]
+      e3* := <concat> [ [e |[ source ]|, e |[ receiver ]| ], <ds-to-interp-nattype-func-adapter-create-exprs> kid* ]
       
 
   ds-to-interp-nattype-func-adapter-childannos = map-with-index(ds-to-interp-nattype-func-adapter-childanno)
