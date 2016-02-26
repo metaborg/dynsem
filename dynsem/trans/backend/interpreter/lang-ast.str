@@ -438,12 +438,12 @@ rules /* term matching */
           }
         
           @Specialization
-          public boolean execute(x_termclass term, VirtualFrame frame) {
+          public boolean doMatch(x_termclass term, VirtualFrame frame) {
             return e1;
           }
 
-          @Fallback
-          public boolean matchFail(Object term, VirtualFrame frame) {
+          @Specialization
+          public boolean doMatchFailed(Object term, VirtualFrame frame) {
             return false;
           }
           
