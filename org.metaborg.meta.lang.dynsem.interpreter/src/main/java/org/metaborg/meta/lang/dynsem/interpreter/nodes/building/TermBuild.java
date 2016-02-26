@@ -16,7 +16,7 @@ import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.IPersistentCollection;
-import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -30,18 +30,17 @@ import com.oracle.truffle.api.source.SourceSection;
 @NodeInfo(description = "The abstract base node for all term construction")
 public abstract class TermBuild extends Node {
 
-	@CompilationFinal private DynSemContext context;
+	@CompilationFinal private DynSemContext cachedContext;
 
 	public TermBuild(SourceSection source) {
 		super(source);
 	}
 
 	protected DynSemContext getContext() {
-		if (context == null) {
-			CompilerAsserts.neverPartOfCompilation();
-			context = DynSemContext.LANGUAGE.getContext();
+		if (cachedContext == null) {
+			cachedContext = DynSemContext.LANGUAGE.getContext();
 		}
-		return context;
+		return cachedContext;
 	}
 
 	public abstract Object executeGeneric(VirtualFrame frame);
