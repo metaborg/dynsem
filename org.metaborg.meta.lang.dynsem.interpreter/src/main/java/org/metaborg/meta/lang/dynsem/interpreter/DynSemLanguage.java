@@ -1,10 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.io.PrintStream;
 
 import org.spoofax.terms.util.NotImplementedException;
 
@@ -17,41 +15,16 @@ import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
-	private final ITermRegistry termRegistry;
-	private final RuleRegistry ruleRegistry;
-	private final DynSemLanguageParser parser;
-
-	public DynSemLanguage(ITermRegistry termRegistry,
-			RuleRegistry ruleRegistry, Path parseTablePath) {
-		this.termRegistry = termRegistry;
-		this.ruleRegistry = ruleRegistry;
-		this.parser = new DynSemLanguageParser(parseTablePath);
-		DynSemContext.LANGUAGE = this;
+	public DynSemLanguage() {
 	}
 
 	@Override
 	protected DynSemContext createContext(Env env) {
-		final BufferedReader in = new BufferedReader(new InputStreamReader(
-				env.in()));
-		final PrintWriter out = new PrintWriter(env.out(), true);
-
-		DynSemContext context = new DynSemContext(termRegistry, ruleRegistry,
-				in, out);
-
-		return context;
+		return createDynSemContext(env.in(), new PrintStream(env.out()));
 	}
 
-	public ITermRegistry getTermRegistry() {
-		return termRegistry;
-	}
-
-	public RuleRegistry getRuleRegistry() {
-		return ruleRegistry;
-	}
-
-	public DynSemLanguageParser getParser() {
-		return parser;
-	}
+	public abstract DynSemContext createDynSemContext(InputStream input,
+			PrintStream output);
 
 	public Node createFindContextNode0() {
 		return createFindContextNode();

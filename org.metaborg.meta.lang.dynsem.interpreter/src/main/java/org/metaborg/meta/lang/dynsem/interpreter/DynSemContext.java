@@ -1,8 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.file.Path;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
@@ -11,25 +11,31 @@ public class DynSemContext {
 
 	public static DynSemLanguage LANGUAGE;
 
-	private final BufferedReader input;
-	private final PrintWriter output;
+	private final InputStream input;
+	private final PrintStream output;
 
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
+	private final DynSemLanguageParser langParser;
 
 	private DynSemPrimedRun primedRun;
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
-		this(termRegistry, ruleRegistry, new BufferedReader(
-				new InputStreamReader(System.in)), new PrintWriter(System.out));
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry,
+			Path parseTable) {
+		this(termRegistry, ruleRegistry, parseTable, System.in, System.out);
 	}
 
 	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry,
-			BufferedReader input, PrintWriter output) {
+			Path parseTable, InputStream input, PrintStream output) {
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
+		this.langParser = new DynSemLanguageParser(parseTable);
+	}
+
+	public DynSemLanguageParser getParser() {
+		return langParser;
 	}
 
 	public RuleRegistry getRuleRegistry() {
@@ -76,11 +82,11 @@ public class DynSemContext {
 		return f;
 	}
 
-	public BufferedReader getInput() {
+	public InputStream getInput() {
 		return input;
 	}
 
-	public PrintWriter getOutput() {
+	public PrintStream getOutput() {
 		return output;
 	}
 
