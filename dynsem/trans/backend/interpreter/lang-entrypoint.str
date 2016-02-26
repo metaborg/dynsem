@@ -18,6 +18,7 @@ rules /* language file. interpreter entry point */
       import java.io.IOException;
       import java.io.InputStream;
       import java.io.OutputStream;
+      import java.io.PrintStream;
       import java.nio.file.Paths;
       import java.util.concurrent.Callable;
       
@@ -52,7 +53,16 @@ rules /* language file. interpreter entry point */
         public final static x_language INSTANCE = new x_language();
       
         public x_language() {
-          super(new ~x:$[[<LanguageName>]TermRegistry](), new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)), Paths.get(PARSE_TABLE));
+//          super(new ~x:$[[<LanguageName>]TermRegistry](), new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)), Paths.get(PARSE_TABLE));
+          super();
+          DynSemContext.LANGUAGE = this;
+        }
+        
+        @Override
+        public DynSemContext createDynSemContext(InputStream in, PrintStream out) {
+          return new DynSemContext(new ~x:$[[<LanguageName>]TermRegistry](), 
+                    new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)), 
+                        Paths.get(PARSE_TABLE), in, out);
         }
       
         public static void main(String[] args) throws Exception {
@@ -86,14 +96,14 @@ rules /* language file. interpreter entry point */
         @Override
         protected CallTarget parse(Source code, Node context, String... argumentNames) throws IOException {
       
-          IStrategoTerm programT = new x_transformer().transform(getParser().parse(code, START_SYMBOL));
-          ITerm program = getTermRegistry().parseProgramTerm(programT);
+          DynSemContext c = getContext();
+          IStrategoTerm programT = new x_transformer().transform(c.getParser().parse(code, START_SYMBOL));
+          ITerm program = c.getTermRegistry().parseProgramTerm(programT);
       
           return new CallTarget() {
       
             @Override
             public Object call(Object... arguments) {
-              DynSemContext c = getContext();
       
               Rule initRule = c.getRuleRegistry().lookupRule("init",
                   START_CONSTR_NAME, START_CONSTR_ARITY);
