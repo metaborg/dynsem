@@ -43,10 +43,14 @@ rules
           }
 
           @Specialization
-          @TruffleBoundary
           public x_res doEvaluated(param1*) {
-            return receiver.~x:fun(e1*);
+            return doLogic(receiver, e1*);
           }
+          
+          @TruffleBoundary
+          private x_res doLogic(param1*) {
+            return receiver.~x:fun(e1*);
+          }          
         }
       ]|
     where
