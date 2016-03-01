@@ -27,7 +27,7 @@ public abstract class ListBuild extends TermBuild {
 			super(source);
 		}
 
-		public static NilListBuild create(IStrategoAppl t) {
+		public static NilListBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "List", 1);
 			assert Tools.isTermList(t.getSubterm(0))
 					&& Tools.listAt(t, 0).size() == 0;
