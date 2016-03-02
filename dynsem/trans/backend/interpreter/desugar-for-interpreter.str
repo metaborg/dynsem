@@ -1,0 +1,102 @@
+module backend/interpreter/desugar-for-interpreter
+
+imports
+  include/ds
+  ds
+  backend/interpreter/signature
+
+
+rules
+
+  desugar-for-interpreter-module:
+    m@Module(_, _) -> Module($[[name]_natops], section*)
+    where
+      <m-in-analysis(desugar-for-interpreter); unmark-vars> m => Module(name, section*)
+
+  desugar-for-interpreter = mark-rule-arguments; desugar-natives; desugar-list-reductions
+
+rules /* rename arguments */
+
+  mark-rule-arguments = alltd(?Rule(_, _, _); mark-rule-arguments-rule)
+  
+  mark-rule-arguments-rule:
+    Rule(prem*, infer, Relation(ro, Source(lhs, rw), arrow, target))
+      -> Rule(prem'*, infer, Relation(ro', Source(lhs', rw'), arrow, target'))
+    with {| RenameArgument, NextArgument:
+      rules(NextArgument: _ -> 1);
+      lhs' := <mark-rule-arguments-bind-source> lhs;
+      ro' := <alltd(mark-rule-arguments-bind)> ro;
+      rw' := <alltd(mark-rule-arguments-bind)> rw;
+      prem'* := <alltd(mark-rule-arguments-read)> prem*;
+      target' := <alltd(mark-rule-arguments-read)> target
+    |}
+
+  mark-rule-arguments-bind-source = not(?As(_, _)); alltd(mark-rule-arguments-bind)
+
+  mark-rule-arguments-bind-source:
+    As(var@Var(v), source) -> <alltd(mark-rule-arguments-bind)> source
+    where
+      rules(RenameArgument: VarRef(v) -> ArgRead(0));
+      ty := <type-of> var; 
+      arg-def := <store-def(|Vars())> 0;
+      <store-prop(|Type(), arg-def)> ty
+
+  mark-rule-arguments-bind:
+    r@Var(v) -> ArgBind(i)
+    with
+      i := <NextArgument>;
+      rules(
+        RenameArgument: VarRef(v) -> ArgRead(i)
+        NextArgument: _ -> <inc> i
+      );
+      ty := <type-of> r; 
+      arg-def := <store-def(|Vars())> i;
+      <store-prop(|Type(), arg-def)> ty
+
+  mark-rule-arguments-read = RenameArgument
+
+  type-of:
+    ArgRead(i) -> ty
+    where
+      ty := <lookup-def(|Vars()); lookup-prop(|Type())> i
+
+rules /* native operators */
+
+  desugar-natives = innermost(desugar-native-ops + desugar-native-types)
+
+  desugar-native-ops:
+    Con(c, k*) -> NativeOp(c, k*)
+    where
+      <lookup-def(|Constructors()); lookup-prop(|ConsKind())> (c, <length> k*) => NativeOpCons()
+
+  desugar-native-types:
+    SimpleSort(s) -> NativeType(s, ty-str)
+    where
+      ty-def := <lookup-def(|Types())> s;
+      NativeSort() := <lookup-prop(|SortKind())> ty-def;
+      ty-str := <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
+
+  desugar-native-types:
+    SortFunCall(name, recv, arg*) -> NativeFunCall(<type-of> recv, name, recv, arg*)
+  
+  type-of:
+    NativeOp(c, k*) -> ty
+    where
+      ConstructorType(_, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> k*)
+  
+  type-of:
+    NativeFunCall(srecv, name, _, _) -> ty
+    where
+      s-def := <lookup-def(|Types())> srecv;
+      f-def := <lookup-native-fun-def(|name)> s-def;
+      FunctionType(_, ty) := <lookup-prop(|Type())> f-def
+
+rules /* list reductions */
+
+  desugar-list-reductions = alltd(desugar-list-reduction)
+  
+  desugar-list-reduction:
+    Formula(Relation(ros, src@Source(t, _), rel, target)) -> Formula(ListRelation(ty, ros, src, rel, target))
+    where
+      <type-of> t => ty@ListType(_)
+  

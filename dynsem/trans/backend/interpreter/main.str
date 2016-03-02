@@ -23,7 +23,6 @@ rules
       <pp-aterm-stream(|fout)> result;
       <fclose> fout;
       <file-copy> (<TableSourceFile>, <TableTargetFile>)
-      
   
   ds-to-interp-main(|path, project-path):
     ast -> result
@@ -65,11 +64,17 @@ rules
             constant-propagation-module | "Constant propagation"
           );
           log-timed(
-            mark-rule-arguments-module | "Marking arguments"
-          );
-          log-timed(
-            desugar-natives-module | "Desugaring native ops"
+            desugar-for-interpreter-module | "Disambiguation for interpretation"
           )
+//          log-timed(
+//            mark-list-reductions-module | "Marking list reductions"
+//          );
+//          log-timed(
+//            mark-rule-arguments-module | "Marking arguments"
+//          );
+//          log-timed(
+//            desugar-natives-module | "Desugaring native ops"
+//          )
         | "Total")> ast => result
       |project-path)
   
