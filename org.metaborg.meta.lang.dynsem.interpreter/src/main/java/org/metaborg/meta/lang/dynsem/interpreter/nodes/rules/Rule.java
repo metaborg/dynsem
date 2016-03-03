@@ -21,6 +21,7 @@ public abstract class Rule extends RootNode {
 
 	public abstract RuleResult execute(VirtualFrame frame);
 
+	@Deprecated
 	public static Object[] buildArguments(Object reductionTerm,
 			Object[] children, Object[] ros, Object[] rws) {
 
@@ -35,6 +36,7 @@ public abstract class Rule extends RootNode {
 		return args;
 	}
 
+	@Deprecated
 	public static Object[] buildArguments(Object reductionTerm,
 			Object[] children, Object[] components) {
 

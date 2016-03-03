@@ -36,6 +36,7 @@ public abstract class RuleRegistry {
 
 	public void registerRule(Rule r) {
 		String k = makeKey(r.getName(), r.getConstructor(), r.getArity());
+		System.out.println("Registering rule >" + k + "<");
 		Rule or = rules.put(k, r);
 		if (or != null) {
 			throw new InterpreterException("Duplicate rule for: " + k);

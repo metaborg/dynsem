@@ -5,40 +5,31 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeUtil;
-import com.oracle.truffle.api.nodes.UnexpectedResultException;
 import com.oracle.truffle.api.source.SourceSection;
 
 /**
- * {@link ReductionPremise} represents and specifies evaluation logic for a
+ * {@link ConReductionPremise} represents and specifies evaluation logic for a
  * reduction premise, i.e. a premise which applies a rule to a term.
  * 
  * @author vladvergu
  *
  */
-public class ReductionPremise extends Premise {
+public class ConReductionPremise extends Premise {
 
-	@Children protected final TermBuild[] roNodes;
-
-	@Child protected TermBuild lhsNode;
-
-	@Children protected final TermBuild[] rwNodes;
-
-	private final String arrowName;
-
-	@Child protected ReductionDispatch dispatchNode;
+	@Child protected ConReductionPremiseLHS lhsNode;
+	@Child protected ConReductionDispatch dispatchNode;
 
 	@Child protected MatchPattern rhsNode;
 
@@ -46,64 +37,37 @@ public class ReductionPremise extends Premise {
 
 	@CompilationFinal private DynSemContext context;
 
-	public ReductionPremise(TermBuild[] roNodes, TermBuild lhsNode,
+	public ConReductionPremise(TermBuild[] roNodes, TermBuild lhsNode,
 			String arrowName, TermBuild[] rwNodes, MatchPattern rhsNode,
 			MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
-		this.roNodes = roNodes;
-		this.lhsNode = lhsNode;
-		this.arrowName = arrowName;
-		this.dispatchNode = ReductionDispatchNodeGen.create(arrowName, source);
-		this.rwNodes = rwNodes;
+		this.lhsNode = new ConReductionPremiseLHS(lhsNode, roNodes, rwNodes,
+				source);
+		this.dispatchNode = ConReductionDispatchNodeGen.create(arrowName,
+				source);
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}
 
 	@Override
 	public void execute(VirtualFrame frame) {
-		Object[] roArgs = evalRONodes(frame);
-		Object[] rwArgs = evalRWNodes(frame);
-		IConTerm lhsTerm;
-		try {
-			lhsTerm = lhsNode.executeIConTerm(frame);
 
-			Object[] args = Rule.buildArguments(lhsTerm, lhsTerm.allSubterms(),
-					roArgs, rwArgs);
-			RuleResult ruleRes = dispatchNode.executeDispatch(frame, lhsTerm,
-					args);
+		Object[] args = lhsNode.executeObjectArray(frame);
+		RuleResult ruleRes = dispatchNode.executeDispatch(frame, args[0], args);
 
-			if (!rhsNode.execute(ruleRes.result, frame)) {
-				throw new PremiseFailure();
-			}
-			if (!evalRhsComponents(ruleRes.components, frame)) {
-				throw new PremiseFailure();
-			}
-		} catch (UnexpectedResultException e) {
-			throw new RuntimeException("Cannot reduce on term: "
-					+ e.getResult());
+		if (!rhsNode.execute(ruleRes.result, frame)) {
+			throw new PremiseFailure();
 		}
-	}
-
-	@ExplodeLoop
-	private Object[] evalRONodes(VirtualFrame frame) {
-		Object[] roArgs = new Object[roNodes.length];
-		for (int i = 0; i < roNodes.length; i++) {
-			roArgs[i] = roNodes[i].executeGeneric(frame);
+		if (!evalRhsComponents(ruleRes.components, frame)) {
+			throw new PremiseFailure();
 		}
-		return roArgs;
-	}
 
-	@ExplodeLoop
-	private Object[] evalRWNodes(VirtualFrame frame) {
-		Object[] rwArgs = new Object[rwNodes.length];
-		for (int i = 0; i < rwNodes.length; i++) {
-			rwArgs[i] = rwNodes[i].executeGeneric(frame);
-		}
-		return rwArgs;
 	}
 
 	@ExplodeLoop
 	private boolean evalRhsComponents(Object[] components, VirtualFrame frame) {
+		CompilerAsserts.compilationConstant(components.length);
+		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			if (!rhsRwNodes[i].execute(components[i], frame)) {
 				return false;
@@ -112,18 +76,7 @@ public class ReductionPremise extends Premise {
 		return true;
 	}
 
-	// private Rule lookupRule(IConTerm lshTerm) {
-	// if (context == null) {
-	// context = DynSemContext.LANGUAGE
-	// .findContext0(DynSemContext.LANGUAGE
-	// .createFindContextNode0());
-	// }
-	//
-	// return context.getRuleRegistry().lookupRule(arrowName,
-	// lshTerm.constructor(), lshTerm.arity());
-	// }
-
-	public static ReductionPremise create(IStrategoAppl t, FrameDescriptor fd) {
+	public static ConReductionPremise create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "Relation", 4);
 
 		IStrategoList rosT = Tools.listAt(Tools.applAt(t, 0), 0);
@@ -161,13 +114,13 @@ public class ReductionPremise extends Premise {
 					Tools.applAt(rhsRwsT, i), fd);
 		}
 
-		return new ReductionPremise(roNodes, lhsNode, arrowName, rwNodes,
+		return new ConReductionPremise(roNodes, lhsNode, arrowName, rwNodes,
 				rhsNode, rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
 	}
 
 	@Override
 	public String toString() {
-		return "--" + arrowName + "--> "
+		return "--" + dispatchNode.getArrowname() + "--> "
 				+ NodeUtil.printCompactTreeToString(this);
 	}
 }

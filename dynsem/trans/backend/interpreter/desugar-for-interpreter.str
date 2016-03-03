@@ -31,10 +31,18 @@ rules /* rename arguments */
       target' := <alltd(mark-rule-arguments-read)> target
     |}
 
-  mark-rule-arguments-bind-source = not(?As(_, _)); alltd(mark-rule-arguments-bind)
+  mark-rule-arguments-bind-source = not(?As(_, _) + ?Cast(_, ListSort(_))); alltd(mark-rule-arguments-bind)
 
   mark-rule-arguments-bind-source:
     As(var@Var(v), source) -> <alltd(mark-rule-arguments-bind)> source
+    where
+      rules(RenameArgument: VarRef(v) -> ArgRead(0));
+      ty := <type-of> var; 
+      arg-def := <store-def(|Vars())> 0;
+      <store-prop(|Type(), arg-def)> ty
+  
+  mark-rule-arguments-bind-source:
+    Cast(var@Var(v), l@ListSort(_)) -> Cast(ArgBind(0), l)
     where
       rules(RenameArgument: VarRef(v) -> ArgRead(0));
       ty := <type-of> var; 
@@ -96,7 +104,7 @@ rules /* list reductions */
   desugar-list-reductions = alltd(desugar-list-reduction)
   
   desugar-list-reduction:
-    Formula(Relation(ros, src@Source(t, _), rel, target)) -> Formula(ListRelation(ty, ros, src, rel, target))
+    Formula(Relation(ros, src@Source(t, _), rel, target)) -> Formula(ListRelation(ros, src, rel, target, ty))
     where
       <type-of> t => ty@ListType(_)
   

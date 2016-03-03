@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.ReductionPremise;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.ConReductionPremise;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.ListReductionPremise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
@@ -18,23 +19,26 @@ public abstract class Premise extends Node {
 
 	public abstract void execute(VirtualFrame frame);
 
-	public static Premise create(IStrategoAppl t,
-			FrameDescriptor fd) {
-		assert Tools.hasConstructor(t, "Formula", 1) || Tools.hasConstructor(t, "MergePoint", 3);
-		if(Tools.hasConstructor(t, "MergePoint", 3)){
+	public static Premise create(IStrategoAppl t, FrameDescriptor fd) {
+		assert Tools.hasConstructor(t, "Formula", 1)
+				|| Tools.hasConstructor(t, "MergePoint", 3);
+		if (Tools.hasConstructor(t, "MergePoint", 3)) {
 			return MergePointPremise.create(t, fd);
 		}
 		IStrategoAppl premT = Tools.applAt(t, 0);
-		if(Tools.hasConstructor(premT, "Relation", 4)){
-			return ReductionPremise.create(premT, fd);
+		if (Tools.hasConstructor(premT, "Relation", 4)) {
+			return ConReductionPremise.create(premT, fd);
 		}
-		if(Tools.hasConstructor(premT, "Match", 2)){
+		if (Tools.hasConstructor(premT, "ListRelation", 5)) {
+			return ListReductionPremise.create(premT, fd);
+		}
+		if (Tools.hasConstructor(premT, "Match", 2)) {
 			return MatchPremise.create(premT, fd);
 		}
-		if(Tools.hasConstructor(premT, "TermEq", 2)){
+		if (Tools.hasConstructor(premT, "TermEq", 2)) {
 			return TermEqPremise.create(premT, fd);
 		}
-		
+
 		throw new NotImplementedException("Unsupported premise: " + t);
 	}
 }

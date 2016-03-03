@@ -16,6 +16,7 @@ import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.IPersistentCollection;
+import com.github.krukow.clj_lang.IPersistentStack;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -76,7 +77,12 @@ public abstract class TermBuild extends Node {
 		return BuiltinTypesGen.expectBoolean(executeGeneric(frame));
 	}
 
-	public IPersistentCollection<?> executeList(VirtualFrame frame)
+	public Object[] executeObjectArray(VirtualFrame frame)
+			throws UnexpectedResultException {
+		return BuiltinTypesGen.expectObjectArray(executeGeneric(frame));
+	}
+	
+	public IPersistentStack<?> executeList(VirtualFrame frame)
 			throws UnexpectedResultException {
 		return BuiltinTypesGen.expectIPersistentStack(executeGeneric(frame));
 	}

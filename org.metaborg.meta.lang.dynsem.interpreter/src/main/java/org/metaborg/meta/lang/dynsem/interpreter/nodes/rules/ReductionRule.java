@@ -10,6 +10,11 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermVisitor;
+import org.strategoxt.lang.Context;
+
+import trans.pp_type_0_0;
+import trans.rw_type_0_0;
+import trans.trans;
 
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -111,9 +116,25 @@ public class ReductionRule extends Rule {
 			lhsConTerm = lhsLeftTerm;
 		}
 
-		assert lhsConTerm != null && Tools.hasConstructor(lhsConTerm, "Con", 2);
-		String constr = Tools.stringAt(lhsConTerm, 0).stringValue();
-		int arity = Tools.listAt(lhsConTerm, 1).size();
+		String constr = null;
+		int arity;
+		if (Tools.hasConstructor(lhsConTerm, "Con", 2)) {
+			assert lhsConTerm != null
+					&& Tools.hasConstructor(lhsConTerm, "Con", 2);
+			lhsConTerm = lhsLeftTerm;
+			constr = Tools.stringAt(lhsConTerm, 0).stringValue();
+			arity = Tools.listAt(lhsConTerm, 1).size();
+		} else if (Tools.hasConstructor(lhsConTerm, "Cast", 2)) {
+			IStrategoAppl tyTerm = Tools.applAt(lhsConTerm, 1);
+			assert Tools.hasConstructor(tyTerm, "ListSort", 1);
+			Context ctx = trans.init();
+			constr = "_"
+					+ Tools.asJavaString(pp_type_0_0.instance.invoke(ctx,
+							rw_type_0_0.instance.invoke(ctx, tyTerm)));
+			arity = 1;
+		} else {
+			throw new RuntimeException("Unsupported rule LHS: " + lhsLeftTerm);
+		}
 
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 3), fd);
 

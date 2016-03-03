@@ -5,7 +5,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuildFactory
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
-import com.github.krukow.clj_lang.IPersistentCollection;
 import com.github.krukow.clj_lang.IPersistentStack;
 import com.github.krukow.clj_lang.PersistentList;
 import com.oracle.truffle.api.dsl.NodeChild;
@@ -41,7 +40,7 @@ public abstract class ListBuild extends TermBuild {
 		}
 
 		@Override
-		public IPersistentCollection<?> executeList(VirtualFrame frame) {
+		public IPersistentStack<?> executeList(VirtualFrame frame) {
 			return PersistentList.EMPTY;
 		}
 	}

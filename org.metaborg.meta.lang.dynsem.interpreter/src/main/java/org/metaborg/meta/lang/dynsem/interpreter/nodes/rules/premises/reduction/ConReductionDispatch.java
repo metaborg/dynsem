@@ -16,18 +16,22 @@ import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class ReductionDispatch extends Node {
+public abstract class ConReductionDispatch extends Node {
 
 	protected static final int INLINE_CACHE_SIZE = 3;
 
 	@CompilationFinal protected DynSemContext context;
-	private final String arrowname;
+	private final String arrowName;
 
-	public ReductionDispatch(String arrowname, SourceSection source) {
+	public ConReductionDispatch(String arrowname, SourceSection source) {
 		super(source);
-		this.arrowname = arrowname;
+		this.arrowName = arrowname;
 	}
 
+	public String getArrowname() {
+		return arrowName;
+	}
+	
 	public abstract RuleResult executeDispatch(VirtualFrame frame, Object term,
 			Object[] args);
 
@@ -52,7 +56,7 @@ public abstract class ReductionDispatch extends Node {
 			context = DynSemContext.LANGUAGE.getContext();
 		}
 		return context.getRuleRegistry()
-				.lookupRule(arrowname, con.constructor(), con.arity())
+				.lookupRule(arrowName, con.constructor(), con.arity())
 				.getCallTarget();
 	}
 
