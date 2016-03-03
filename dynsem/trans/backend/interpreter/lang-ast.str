@@ -178,13 +178,26 @@ rules /* Sort & Constructor classes */
       bstm* |[
         java.util.List<x_elemclass> x_tmpres = new java.util.LinkedList<x_elemclass>();
         for (IStrategoTerm x_tmpelem : Tools.listAt(x_term, e)) {
-          x_tmpres.add(x_elemclass.create(x_tmpelem));
+          x_tmpres.add(e_elem);
         }
       ]|, e |[ com.github.krukow.clj_lang.PersistentList.create(x_tmpres) ]|)
     where
       x_elemclass := <ds-to-interp-terms-types-name> s;
       x_tmpres := $[_[<newname>]];
-      x_tmpelem := $[_[<newname>]]
+      x_tmpelem := $[_[<newname>]];
+      e_elem := <ds-to-interp-sortelem-to-create-arg(|x_tmpelem)> s
+
+  ds-to-interp-sortelem-to-create-arg(|x_tmpelem):
+    s@SimpleSort(_) -> e |[ x_elemclass.create(x_tmpelem) ]|
+    where
+      <not(is-builtin-type)> s;
+      x_elemclass := <ds-to-interp-terms-types-name> s
+      
+  ds-to-interp-sortelem-to-create-arg(|x_tmpelem):
+    SimpleSort("String") -> e |[ Tools.asJavaString(x_tmpelem) ]|
+
+  ds-to-interp-sortelem-to-create-arg(|x_tmpelem):
+    SimpleSort("Int") -> e |[ Tools.asJavInt(x_tmpelem) ]|
 
   ds-to-interp-sorts-to-create-arg(|x_term):
     (e, MapSort(skey, sval)) -> (

@@ -55,7 +55,7 @@ public abstract class ListBuild extends TermBuild {
 
 		public static ConsListBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "ListTail", 2);
-			TermBuild headNode = TermBuild.create(Tools.applAt(t, 0), fd);
+			TermBuild headNode = TermBuild.create(Tools.applAt(Tools.termAt(t, 0), 0), fd);
 			TermBuild tailNode = TermBuild.create(Tools.applAt(t, 1), fd);
 
 			return ConsListBuildNodeGen.create(
