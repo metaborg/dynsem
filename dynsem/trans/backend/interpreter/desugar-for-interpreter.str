@@ -36,37 +36,26 @@ rules /* rename arguments */
   mark-rule-arguments-bind-source:
     As(var@Var(v), source) -> <alltd(mark-rule-arguments-bind)> source
     where
-      rules(RenameArgument: VarRef(v) -> ArgRead(0));
-      ty := <type-of> var; 
-      arg-def := <store-def(|Vars())> 0;
-      <store-prop(|Type(), arg-def)> ty
+      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
   
   mark-rule-arguments-bind-source:
     Cast(var@Var(v), l@ListSort(_)) -> Cast(ArgBind(0), l)
     where
-      rules(RenameArgument: VarRef(v) -> ArgRead(0));
-      ty := <type-of> var; 
-      arg-def := <store-def(|Vars())> 0;
-      <store-prop(|Type(), arg-def)> ty
+      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
 
   mark-rule-arguments-bind:
     r@Var(v) -> ArgBind(i)
     with
       i := <NextArgument>;
       rules(
-        RenameArgument: VarRef(v) -> ArgRead(i)
+        RenameArgument: VarRef(v) -> ArgRead(i){r}
         NextArgument: _ -> <inc> i
-      );
-      ty := <type-of> r; 
-      arg-def := <store-def(|Vars())> i;
-      <store-prop(|Type(), arg-def)> ty
+      )
 
   mark-rule-arguments-read = RenameArgument
 
   type-of:
-    ArgRead(i) -> ty
-    where
-      ty := <lookup-def(|Vars()); lookup-prop(|Type())> i
+    ArgRead(i){v} -> <type-of> v
 
 rules /* native operators */
 
