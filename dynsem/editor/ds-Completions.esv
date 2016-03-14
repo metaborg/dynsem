@@ -1,9 +1,5 @@
 module ds-Completions
 
-imports
-
-  completions/ds-esv
-
 completions
                                                                    
   // This file is used to define content completion.               
