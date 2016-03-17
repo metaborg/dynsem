@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ChainedRule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.spoofax.interpreter.core.Tools;
@@ -36,9 +37,17 @@ public abstract class RuleRegistry {
 
 	public void registerRule(Rule r) {
 		String k = makeKey(r.getName(), r.getConstructor(), r.getArity());
-		Rule or = rules.put(k, r);
-		if (or != null) {
-			throw new InterpreterException("Duplicate rule for: " + k);
+
+		Rule prevRule = rules.put(k, r);
+		if (prevRule != null) {
+			ChainedRule ruleChain = null;
+			if (prevRule instanceof ChainedRule) {
+				ruleChain = (ChainedRule) prevRule;
+			} else {
+				ruleChain = new ChainedRule(prevRule);
+			}
+			ruleChain.addNext(r);
+			rules.put(k, ruleChain);
 		}
 	}
 
