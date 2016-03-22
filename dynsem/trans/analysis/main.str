@@ -9,9 +9,9 @@ imports
 	analysis/mark-references
 	analysis/query
 	analysis/info-implicit-conversions
-	include/ds
+	signatures/ds-sig
   lib-ds
-	editor-common.generated
+	stratego/metaborg
 	libstratego-sglr
 	ds
 
@@ -89,4 +89,4 @@ rules /* helpers for import handling */
     parse-file(
       <mk-err> $[Imported module cannot be resolved],
       <mk-err> $[Imported module contains syntax errors]
-    | <import-term(include/ds.tbl)>)
+    | <import-term(target/metaborg/sdf.tbl)>)

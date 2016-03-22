@@ -1,7 +1,7 @@
 module utils
 
 imports
-  editor-common.generated
+  stratego/metaborg
   backend/java-backend/utils/java-utils
 
 rules

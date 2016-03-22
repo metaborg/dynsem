@@ -1,7 +1,7 @@
 module lib-ds/lib-match
 
 imports
-  include/ds
+  signatures/ds-sig
   
 strategies
   

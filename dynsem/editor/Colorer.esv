@@ -1,4 +1,4 @@
-module ds-Colorer
+module Colorer
 
 imports editor/Colorer.generated
 
