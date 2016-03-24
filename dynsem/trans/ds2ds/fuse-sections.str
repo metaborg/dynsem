@@ -1,7 +1,7 @@
 module ds2ds/fuse-sections
 
 imports
-  include/ds
+  signatures/ds-sig
 
 rules
   

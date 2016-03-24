@@ -1,7 +1,7 @@
 module backend/java-backend/emit-maputils
 
 imports
-  include/ds
+  signatures/ds-sig
   libjava-front
 
 imports

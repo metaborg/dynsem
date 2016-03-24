@@ -1,7 +1,7 @@
 module analysis/query
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
 
 imports

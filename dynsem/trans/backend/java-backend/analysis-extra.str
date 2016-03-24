@@ -1,8 +1,8 @@
 module backend/java-backend/analysis-extra
 
 imports
-  ds
-  include/ds
+  signatures/ds-sig
+  ds  
   lib-ds
   analysis/constructors
   analysis/lib-analysis

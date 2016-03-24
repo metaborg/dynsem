@@ -1,7 +1,7 @@
 module analysis/analysis-rules
 
 imports
-  include/ds
+  signatures/ds-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/rename

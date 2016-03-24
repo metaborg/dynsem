@@ -6,7 +6,7 @@ imports
   runtime/tmpl/pp
   signatures/-
   pp/-
-  include/ds-parenthesize
+  pp/ds-parenthesize
   ds
   
 rules

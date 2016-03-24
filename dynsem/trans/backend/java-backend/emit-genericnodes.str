@@ -1,7 +1,7 @@
 module backend/java-backend/emit-genericnodes
 
 imports
-  include/ds
+  signatures/ds-sig
   libjava-front
   
 imports

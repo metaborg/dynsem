@@ -1,7 +1,7 @@
 module backend/java-backend/emit-listclasses
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
 
 imports

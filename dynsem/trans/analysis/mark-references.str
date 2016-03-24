@@ -1,7 +1,7 @@
 module analysis/mark-references
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
 
 rules

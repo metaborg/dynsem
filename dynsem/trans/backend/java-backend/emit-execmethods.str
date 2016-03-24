@@ -1,7 +1,7 @@
 module backend/java-backend/emit-execmethods
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
   libjava-front
   lib-ds

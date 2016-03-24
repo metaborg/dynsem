@@ -1,7 +1,7 @@
 module outline
 
 imports
-  include/ds
+  signatures/ds-sig
   runtime/editor/outline-library
 
 rules

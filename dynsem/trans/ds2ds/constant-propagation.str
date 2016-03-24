@@ -1,7 +1,7 @@
 module ds2ds/constant-propagation
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
   lib-ds
   analysis/mark-references

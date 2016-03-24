@@ -1,8 +1,7 @@
 module ds2ds/copy-propagation
 
 imports
-  include/ds
-  analysis/mark-references
+  signatures/ds-sig
 
 rules
   

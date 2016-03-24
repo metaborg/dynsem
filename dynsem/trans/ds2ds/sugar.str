@@ -1,7 +1,7 @@
 module ds2ds/sugar
 
 imports
-	include/ds
+	signatures/ds-sig
 	ds
 	
 signature
