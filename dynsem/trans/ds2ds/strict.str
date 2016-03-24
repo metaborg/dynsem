@@ -4,8 +4,8 @@ imports
   libstratego-lib
   libstratego-gpp
   libstratego-aterm
-  include/ds
-  editor-common.generated
+  signatures/ds-sig
+  stratego/metaborg
   ds2ds/sugar
   ds
   

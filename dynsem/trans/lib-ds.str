@@ -1,7 +1,7 @@
 module lib-ds
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
   
 // utilities for DynSem analysis

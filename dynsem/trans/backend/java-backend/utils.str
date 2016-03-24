@@ -1,7 +1,7 @@
 module utils
 
 imports
-  editor-common.generated
+  stratego/metaborg
   backend/java-backend/utils/java-utils
 
 rules
@@ -12,7 +12,7 @@ rules
       ManuPackageName: _ -> $[[<language>].manual.interpreter]
       CurrentFilePath: _ -> path
       ProjectPath: _ -> project-path
-      GenDir: _ -> $[[project-path]/editor/java]
+      GenDir: _ -> $[[project-path]/src-gen/ds-java]
     )
 
   write-classes = emit-java-classes(overwrite-merge-strategy, id | <AutoPackageName>, <GenDir>)
