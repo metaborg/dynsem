@@ -1,42 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
->
-  <modelVersion>4.0.0</modelVersion>
-  <artifactId>dynsem</artifactId>
-  <name>ds</name>
-  <packaging>spoofax-language</packaging>
-  <description>Spoofax DynSem (dynamic semantic specification) language implementation.</description>
-  <url>https://github.com/metaborg/dynsem</url>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>dynsem</artifactId>
+	<name>ds</name>
+	<packaging>spoofax-language</packaging>
+	<description>Spoofax DynSem (dynamic semantic specification) language implementation.</description>
+	<url>https://github.com/metaborg/dynsem</url>
 
 	<parent>
-    <groupId>org.metaborg</groupId>
-    <artifactId>parent.language</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-    <relativePath>../../releng/parent/language</relativePath>
-  </parent>
-  <dependencies>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.metaborg.meta.interpreter.framework</artifactId>
-      <version>${metaborg-version}</version>
-    </dependency>
-  </dependencies>
+		<groupId>org.metaborg</groupId>
+		<artifactId>parent.language</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+		<relativePath>../../releng/parent/language</relativePath>
+	</parent>
 
-  <developers>
-    <developer>
-      <name>Vlad Vergu</name>
-      <email>v.a.vergu@tudelft.nl</email>
-      <organization>Delft University of Technology</organization>
-      <organizationUrl>http://www.ewi.tudelft.nl/en</organizationUrl>
-    </developer>
-  </developers>
+	<build>
+		<plugins>
+			<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${basedir}/include/ds.jar</file>
+                  <type>jar</type>
+                  <classifier>transjar</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+		</plugins>
+	</build>
 
-  <scm>
-    <connection>scm:git:git@github.com:metaborg/dynsem.git</connection>
-    <developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
-    <url>https://github.com/metaborg/dynsem</url>
-  </scm>
+	<dependencies>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.metaborg.meta.lang.esv</artifactId>
+			<type>spoofax-language</type>
+			<version>${metaborg-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.metaborg.meta.lang.template</artifactId>
+			<type>spoofax-language</type>
+			<version>${metaborg-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.metaborg.meta.lib.analysis</artifactId>
+			<type>spoofax-language</type>
+			<version>${metaborg-version}</version>
+		</dependency>
+	</dependencies>
+
+	<developers>
+		<developer>
+			<name>Vlad Vergu</name>
+			<email>v.a.vergu@tudelft.nl</email>
+			<organization>Delft University of Technology</organization>
+			<organizationUrl>http://www.ewi.tudelft.nl/en</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git@github.com:metaborg/dynsem.git</connection>
+		<developerConnection>scm:git:git@github.com:metaborg/dynsem.git</developerConnection>
+		<url>https://github.com/metaborg/dynsem</url>
+	</scm>
 </project>

@@ -50,6 +50,7 @@
 		<dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>dynsem</artifactId>
+      <classifier>transjar</classifier>
       <version>2.0.0-SNAPSHOT</version>
     </dependency>
 		<dependency>
