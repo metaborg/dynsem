@@ -1,7 +1,7 @@
 module backend/interpreter/lang-names
 
 imports
-  include/ds
+  signatures/ds-sig
   backend/interpreter/utils
   backend/interpreter/signature
   libjava-front

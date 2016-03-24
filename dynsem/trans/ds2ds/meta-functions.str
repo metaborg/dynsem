@@ -2,7 +2,7 @@ module ds2ds/meta-functions
 
 imports
   analysis/-
-  include/ds
+  signatures/ds-sig
   ds
   lib-ds
 

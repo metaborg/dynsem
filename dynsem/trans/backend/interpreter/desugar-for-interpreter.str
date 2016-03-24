@@ -1,7 +1,7 @@
 module backend/interpreter/desugar-for-interpreter
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
   backend/interpreter/signature
 

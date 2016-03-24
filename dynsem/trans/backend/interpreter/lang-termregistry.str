@@ -1,7 +1,7 @@
 module backend/interpreter/lang-termregistry
 
 imports
-  include/ds
+  signatures/ds-sig
   libjava-front
   backend/interpreter/utils
   backend/interpreter/lang-names

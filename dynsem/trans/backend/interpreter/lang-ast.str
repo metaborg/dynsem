@@ -1,10 +1,10 @@
 module backend/interpreter/lang-ast
 
 imports
-  include/ds
+  signatures/ds-sig
   backend/interpreter/-
   libjava-front
-  editor-common.generated
+  stratego/metaborg
 
 rules
   

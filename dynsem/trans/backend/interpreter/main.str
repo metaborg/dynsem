@@ -1,8 +1,8 @@
 module backend/interpreter/main
 
 imports
-  include/ds
-  editor-common.generated
+  signatures/ds-sig
+  stratego/metaborg
   lib-ds
   ds
   libstratego-aterm

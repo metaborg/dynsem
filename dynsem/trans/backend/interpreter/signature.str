@@ -1,7 +1,7 @@
 module backend/interpreter/signature
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
 
 signature
