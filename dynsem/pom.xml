@@ -31,7 +31,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>${basedir}/include/ds.jar</file>
+                  <file>${basedir}/target/metaborg/stratego.jar</file>
                   <type>jar</type>
                   <classifier>transjar</classifier>
                 </artifact>
