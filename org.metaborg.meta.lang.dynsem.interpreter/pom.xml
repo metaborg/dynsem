@@ -53,6 +53,12 @@
       <classifier>transjar</classifier>
       <version>2.0.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>dynsem</artifactId>
+      <classifier>javajar</classifier>
+      <version>2.0.0-SNAPSHOT</version>
+    </dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
