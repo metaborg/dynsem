@@ -35,13 +35,11 @@
                   <type>jar</type>
                   <classifier>transjar</classifier>
                 </artifact>
-              </artifacts>
-              <artifacts>
-                <artifact>
-                  <file>${basedir}/target/metaborg/stratego-javastrat.jar</file>
-                  <type>jar</type>
-                  <classifier>javajar</classifier>
-                </artifact>
+								<artifact>
+									<file>${basedir}/target/metaborg/stratego-javastrat.jar</file>
+									<type>jar</type>
+									<classifier>javajar</classifier>
+								</artifact>
               </artifacts>
             </configuration>
           </execution>
