@@ -16,6 +16,8 @@ pardonedLanguages:
 - EditorService
 - Stratego-Sugar
 - SDF
+build:
+ useBuildSystemSpec: true
 language:
   stratego:
     format: jar
