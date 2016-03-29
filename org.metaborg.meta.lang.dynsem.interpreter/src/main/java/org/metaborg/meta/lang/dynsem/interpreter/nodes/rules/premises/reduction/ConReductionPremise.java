@@ -81,7 +81,6 @@ public class ConReductionPremise extends Premise {
 
 	@ExplodeLoop
 	private boolean evalRhsComponents(Object[] components, VirtualFrame frame) {
-		CompilerAsserts.compilationConstant(components.length);
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			if (!rhsRwNodes[i].execute(components[i], frame)) {
