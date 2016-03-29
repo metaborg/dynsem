@@ -4,6 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.utilities.BranchProfile;
 
 public class OverloadedRule extends Rule {

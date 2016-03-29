@@ -16,14 +16,14 @@ import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class ConReductionDispatch extends Node {
+public abstract class IndirectReductionDispatch extends Node {
 
 	protected static final int INLINE_CACHE_SIZE = 3;
 
 	@CompilationFinal protected DynSemContext context;
 	private final String arrowName;
 
-	public ConReductionDispatch(String arrowname, SourceSection source) {
+	public IndirectReductionDispatch(String arrowname, SourceSection source) {
 		super(source);
 		this.arrowName = arrowname;
 	}

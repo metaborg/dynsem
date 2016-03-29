@@ -1,18 +1,18 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ConBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.ReductionDispatch;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -28,22 +28,39 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public class ConReductionPremise extends Premise {
 
-	@Child protected PremiseLhs lhsNode;
-	@Child protected ConReductionDispatch dispatchNode;
+	@Child protected ReductionDispatch dispatchNode;
 
 	@Child protected MatchPattern rhsNode;
 
 	@Children protected final MatchPattern[] rhsRwNodes;
 
-	@CompilationFinal private DynSemContext context;
-
-	public ConReductionPremise(TermBuild[] roNodes, TermBuild lhsNode,
-			String arrowName, TermBuild[] rwNodes, MatchPattern rhsNode,
+	public static ConReductionPremise createDynamicDispatch(
+			TermBuild[] roNodes, TermBuild lhsNode, String arrowName,
+			TermBuild[] rwNodes, MatchPattern rhsNode,
 			MatchPattern[] rhsComponentNodes, SourceSection source) {
-		super(source);
-		this.lhsNode = new PremiseLhs(lhsNode, roNodes, rwNodes, source);
-		this.dispatchNode = ConReductionDispatchNodeGen.create(arrowName,
+		PremiseLhs lhs = new PremiseLhs(lhsNode, roNodes, rwNodes, source);
+		ReductionDispatch dispatch = new ReductionDispatch.DynamicReductionDispatch(
+				lhs, arrowName, source);
+		return new ConReductionPremise(dispatch, rhsNode, rhsComponentNodes,
 				source);
+	}
+
+	public static ConReductionPremise createStaticDispatch(TermBuild[] roNodes,
+			TermBuild lhsNode, String arrowName, String conName, int arity,
+			TermBuild[] rwNodes, MatchPattern rhsNode,
+			MatchPattern[] rhsComponentNodes, SourceSection source) {
+		PremiseLhs lhs = new PremiseLhs(lhsNode, roNodes, rwNodes, source);
+		ReductionDispatch dispatch = new ReductionDispatch.InlineableReductionDispatch(
+				conName, arity, arrowName, lhs, source);
+		return new ConReductionPremise(dispatch, rhsNode, rhsComponentNodes,
+				source);
+	}
+
+	public ConReductionPremise(ReductionDispatch dispatch,
+			MatchPattern rhsNode, MatchPattern[] rhsComponentNodes,
+			SourceSection source) {
+		super(source);
+		this.dispatchNode = dispatch;
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}
@@ -51,8 +68,7 @@ public class ConReductionPremise extends Premise {
 	@Override
 	public void execute(VirtualFrame frame) {
 
-		Object[] args = lhsNode.executeObjectArray(frame);
-		RuleResult ruleRes = dispatchNode.executeDispatch(frame, args[0], args);
+		RuleResult ruleRes = dispatchNode.execute(frame);
 
 		if (!rhsNode.execute(ruleRes.result, frame)) {
 			throw new PremiseFailure();
@@ -113,13 +129,17 @@ public class ConReductionPremise extends Premise {
 					Tools.applAt(rhsRwsT, i), fd);
 		}
 
-		return new ConReductionPremise(roNodes, lhsNode, arrowName, rwNodes,
-				rhsNode, rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
-	}
-
-	@Override
-	public String toString() {
-		return "--" + dispatchNode.getArrowname() + "--> "
-				+ NodeUtil.printCompactTreeToString(this);
+		if (lhsNode instanceof ConBuild) {
+			IStrategoAppl conBuildTerm = Tools.applAt(sourceT, 0);
+			String conName = Tools.stringAt(conBuildTerm, 0).stringValue();
+			int arity = Tools.listAt(conBuildTerm, 1).size();
+			return ConReductionPremise.createStaticDispatch(roNodes, lhsNode,
+					arrowName, conName, arity, rwNodes, rhsNode, rhsRwNodes,
+					SourceSectionUtil.fromStrategoTerm(t));
+		} else {
+			return ConReductionPremise.createDynamicDispatch(roNodes, lhsNode,
+					arrowName, rwNodes, rhsNode, rhsRwNodes,
+					SourceSectionUtil.fromStrategoTerm(t));
+		}
 	}
 }
