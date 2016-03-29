@@ -1,16 +1,13 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.RootNode;
+import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class Rule extends RootNode {
+public abstract class Rule extends Node {
 
-	public Rule(SourceSection sourceSection, FrameDescriptor frameDescriptor) {
-		super(DynSemLanguage.class, sourceSection, frameDescriptor);
+	public Rule(SourceSection sourceSection) {
+		super(sourceSection);
 	}
 
 	public abstract int getArity();

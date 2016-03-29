@@ -29,8 +29,8 @@ rules /* language file. interpreter entry point */
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemPrimedRun;
-      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
       import org.spoofax.interpreter.terms.IStrategoTerm;
       
       import com.oracle.truffle.api.CallTarget;
@@ -105,9 +105,9 @@ rules /* language file. interpreter entry point */
             @Override
             public Object call(Object... arguments) {
       
-              Rule initRule = c.getRuleRegistry().lookupRule("init",
+              RuleRoot initRuleRoot = c.getRuleRegistry().lookupRule("init",
                   START_CONSTR_NAME, START_CONSTR_ARITY);
-              if (initRule == null) {
+              if (initRuleRoot == null) {
                 throw new IllegalStateException("Rule not found");
               }
               if (program instanceof IConTerm) {
@@ -115,7 +115,7 @@ rules /* language file. interpreter entry point */
                 if (programCon.constructor().equals(START_CONSTR_NAME)
                     && programCon.arity() == START_CONSTR_ARITY) {
                   DynSemPrimedRun run = new DynSemPrimedRun();
-                  run.setCallTarget(initRule.getCallTarget());
+                  run.setCallTarget(initRuleRoot.getCallTarget());
                   run.setProgram(programCon);
                   c.setRun(run);
                   return null;

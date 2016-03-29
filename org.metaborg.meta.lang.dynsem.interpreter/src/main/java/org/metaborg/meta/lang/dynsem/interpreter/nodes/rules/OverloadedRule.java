@@ -2,30 +2,27 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 
-import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.utilities.BranchProfile;
 
-public class ChainedRule extends Rule {
+public class OverloadedRule extends Rule {
 
-	@CompilationFinal private ChainedRule next;
+	@CompilationFinal protected OverloadedRule next;
+	@Child protected InlinedRuleAdapter rule;
 
 	private final BranchProfile ruleFailedTaken = BranchProfile.create();
 
 	private String constr;
 	private String name;
 	private int arity;
-	@Child private DirectCallNode callNode;
 
-	public ChainedRule(Rule rule) {
-		super(rule.getSourceSection(), rule.getFrameDescriptor());
-		this.constr = rule.getConstructor();
-		this.name = rule.getName();
-		this.arity = rule.getArity();
-		this.callNode = DirectCallNode.create(rule.getCallTarget());
-		Truffle.getRuntime().createCallTarget(this);
+	public OverloadedRule(InlinedRuleAdapter rule) {
+		super(rule.getSourceSection());
+		this.constr = rule.getRule().getConstructor();
+		this.name = rule.getRule().getName();
+		this.arity = rule.getRule().getArity();
+		this.rule = rule;
 	}
 
 	@Override
@@ -43,18 +40,18 @@ public class ChainedRule extends Rule {
 		return name;
 	}
 
-	public void addNext(Rule r) {
+	public void addNext(InlinedRuleAdapter adaptedRule) {
 		if (next != null) {
-			next.addNext(r);
+			next.addNext(adaptedRule);
 		} else {
-			next = new ChainedRule(r);
+			next = new OverloadedRule(adaptedRule);
 		}
 	}
 
 	@Override
 	public RuleResult execute(VirtualFrame frame) {
 		try {
-			return (RuleResult) callNode.call(frame, frame.getArguments());
+			return (RuleResult) rule.execute(frame);
 		} catch (PremiseFailure pfx) {
 			ruleFailedTaken.enter();
 			if (next != null) {
@@ -64,5 +61,4 @@ public class ChainedRule extends Rule {
 			}
 		}
 	}
-
 }

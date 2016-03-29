@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -19,73 +20,28 @@ import trans.trans;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.source.SourceSection;
+import com.oracle.truffle.api.nodes.RootNode;
 
-/**
- * 
- * A node corresponding to a (merged) DynSem rule.
- * 
- *
- * A rule has inputs of three types: (1) Read-only semantic components (ROs),
- * (2) Pattern-bound variables (PVs), (3) Read-write semantic components (RWs)
- * 
- * These inputs are passed through the arguments array in the following order
- * <ROs,PVs,RWs>. This order coincides with the binding order inside the rule.
- * 
- * @author vladvergu
- *
- */
-public class ReductionRule extends Rule {
+public class RuleRoot extends RootNode {
 
-	private final String name;
-	private final String constr;
-	private final int arity;
+	@Child protected Rule rule;
 
-	@Children protected final Premise[] premises;
-
-	@Child protected RuleTarget target;
-
-	public ReductionRule(String name, String constr, int arity,
-			Premise[] premises, RuleTarget output, SourceSection source,
-			FrameDescriptor fd) {
-		super(source, fd);
-		this.name = name;
-		this.constr = constr;
-		this.arity = arity;
-		this.premises = premises;
-		this.target = output;
+	public RuleRoot(Rule rule, FrameDescriptor fd) {
+		super(DynSemLanguage.class, rule.getSourceSection(), fd);
+		this.rule = rule;
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
 	@Override
-	@ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
-		/* evaluate the premises */
-		for (int i = 0; i < premises.length; i++) {
-			premises[i].execute(frame);
-		}
-
-		/* evaluate the rule target */
-		return target.execute(frame);
+		return rule.execute(frame);
 	}
 
-	@Override
-	public String getName() {
-		return name;
+	public Rule getRule() {
+		return rule;
 	}
 
-	@Override
-	public String getConstructor() {
-		return constr;
-	}
-
-	@Override
-	public int getArity() {
-		return arity;
-	}
-
-	public static ReductionRule create(IStrategoTerm ruleT) {
+	public static RuleRoot create(IStrategoTerm ruleT) {
 		assert Tools.isTermAppl(ruleT);
 		assert Tools.hasConstructor((IStrategoAppl) ruleT, "Rule", 3);
 
@@ -138,8 +94,8 @@ public class ReductionRule extends Rule {
 
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 3), fd);
 
-		return new ReductionRule(name, constr, arity, premises, target,
-				SourceSectionUtil.fromStrategoTerm(ruleT), fd);
+		return new RuleRoot(new DynSemRule(name, constr, arity, premises,
+				target, SourceSectionUtil.fromStrategoTerm(ruleT)), fd);
 	}
 
 	private static FrameDescriptor createFrameDescriptor(IStrategoTerm t) {
@@ -162,10 +118,4 @@ public class ReductionRule extends Rule {
 		}
 		return fd;
 	}
-
-	@Override
-	public String toString() {
-		return "Reduction rule: " + name + "/" + constr + "/" + arity;
-	}
-
 }

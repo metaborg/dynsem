@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ChainedRule;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InlinedRuleAdapter;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.OverloadedRule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -20,34 +21,39 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public abstract class RuleRegistry {
 
-	private final Map<String, Rule> rules = new HashMap<>();
+	private final Map<String, RuleRoot> rules = new HashMap<>();
 
 	@TruffleBoundary
-	public Rule lookupRule(String name, String constr, int arity) {
+	public RuleRoot lookupRule(String name, String constr, int arity) {
 		String k = makeKey(name, constr, arity);
-		Rule r = rules.get(k);
-		if (r != null) {
-			assert r.getName().equals(name)
-					&& r.getConstructor().equals(constr)
-					&& r.getArity() == arity;
-			return r;
+		RuleRoot rr = rules.get(k);
+		if (rr != null) {
+			// Rule r = rr.getRule();
+			// assert r.getName().equals(name)
+			// && r.getConstructor().equals(constr)
+			// && r.getArity() == arity;
+			return rr;
 		}
 		throw new InterpreterException("No rule found for: " + k);
 	}
 
-	public void registerRule(Rule r) {
+	public void registerRule(RuleRoot rr) {
+		Rule r = rr.getRule();
 		String k = makeKey(r.getName(), r.getConstructor(), r.getArity());
 
-		Rule prevRule = rules.put(k, r);
-		if (prevRule != null) {
-			ChainedRule ruleChain = null;
-			if (prevRule instanceof ChainedRule) {
-				ruleChain = (ChainedRule) prevRule;
+		RuleRoot prevRR = rules.put(k, rr);
+		if (prevRR != null) {
+			Rule prevRule = prevRR.getRule();
+			OverloadedRule ruleChain = null;
+			if (prevRule instanceof OverloadedRule) {
+				ruleChain = (OverloadedRule) prevRule;
 			} else {
-				ruleChain = new ChainedRule(prevRule);
+				ruleChain = new OverloadedRule(new InlinedRuleAdapter(prevRule,
+						prevRR.getFrameDescriptor()));
 			}
-			ruleChain.addNext(r);
-			rules.put(k, ruleChain);
+			ruleChain
+					.addNext(new InlinedRuleAdapter(r, rr.getFrameDescriptor()));
+			rules.put(k, new RuleRoot(ruleChain, rr.getFrameDescriptor()));
 		}
 	}
 
@@ -74,7 +80,7 @@ public abstract class RuleRegistry {
 
 		IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 		for (IStrategoTerm ruleTerm : rulesTerm) {
-			reg.registerRule(ReductionRule.create(ruleTerm));
+			reg.registerRule(RuleRoot.create(ruleTerm));
 		}
 	}
 
