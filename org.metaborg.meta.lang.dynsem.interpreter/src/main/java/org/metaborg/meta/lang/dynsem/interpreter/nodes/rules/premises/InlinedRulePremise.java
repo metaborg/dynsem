@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.ConReductionPremiseLHS;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.PremiseLhs;
 
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -11,7 +11,8 @@ import com.oracle.truffle.api.source.SourceSection;
 public class InlinedRulePremise extends Premise {
 
 	@Child protected Rule rule;
-	@Child protected ConReductionPremiseLHS lhs;
+	@Child protected PremiseLhs lhs;
+	
 	private final FrameDescriptor fd;
 
 	public InlinedRulePremise(Rule rule, FrameDescriptor fd,

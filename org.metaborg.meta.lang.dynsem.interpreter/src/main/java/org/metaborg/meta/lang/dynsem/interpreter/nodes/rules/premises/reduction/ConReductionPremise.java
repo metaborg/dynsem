@@ -28,7 +28,7 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public class ConReductionPremise extends Premise {
 
-	@Child protected ConReductionPremiseLHS lhsNode;
+	@Child protected PremiseLhs lhsNode;
 	@Child protected ConReductionDispatch dispatchNode;
 
 	@Child protected MatchPattern rhsNode;
@@ -41,8 +41,7 @@ public class ConReductionPremise extends Premise {
 			String arrowName, TermBuild[] rwNodes, MatchPattern rhsNode,
 			MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
-		this.lhsNode = new ConReductionPremiseLHS(lhsNode, roNodes, rwNodes,
-				source);
+		this.lhsNode = new PremiseLhs(lhsNode, roNodes, rwNodes, source);
 		this.dispatchNode = ConReductionDispatchNodeGen.create(arrowName,
 				source);
 		this.rhsNode = rhsNode;

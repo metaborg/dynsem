@@ -25,14 +25,14 @@ import com.oracle.truffle.api.source.SourceSection;
 
 /**
  * {@link ListReductionPremise} represents and specifies evaluation logic for a
- * reduction premise, i.e. a premise which applies a rule to a term.
+ * list reduction premise, i.e. a premise which applies a rule to a term of type list.
  * 
  * @author vladvergu
  *
  */
 public class ListReductionPremise extends Premise {
 
-	@Child protected ListReductionPremiseLHS lhsNode;
+	@Child protected PremiseLhs lhsNode;
 
 	private final String ruleKey;
 	private final String arrowName;
@@ -50,7 +50,7 @@ public class ListReductionPremise extends Premise {
 			MatchPattern[] rhsComponentNodes, String ruleKey,
 			SourceSection source) {
 		super(source);
-		this.lhsNode = new ListReductionPremiseLHS(lhsNode, roNodes, rwNodes,
+		this.lhsNode = new PremiseLhs(lhsNode, roNodes, rwNodes,
 				source);
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
