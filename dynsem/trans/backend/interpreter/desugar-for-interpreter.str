@@ -93,7 +93,7 @@ rules /* list reductions */
   desugar-list-reductions = alltd(desugar-list-reduction)
   
   desugar-list-reduction:
-    Formula(Relation(ros, src@Source(t, _), rel, target)) -> Formula(ListRelation(ros, src, rel, target, ty))
+    Formula(Relation(ros, Source(t, rws), rel, target)) -> Formula(Relation(ros, Source(ListSource(t, ty), rws), rel, target))
     where
       <type-of> t => ty@ListType(_)
   

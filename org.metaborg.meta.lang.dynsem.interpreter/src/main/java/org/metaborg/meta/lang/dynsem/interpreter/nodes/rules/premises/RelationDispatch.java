@@ -11,6 +11,12 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.TermFactory;
+
+import trans.pp_type_0_0;
+import trans.trans;
 
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -38,6 +44,20 @@ public abstract class RelationDispatch extends Node {
 					.stringValue(), Tools.listAt(lhsT, 1).size(), arrowName,
 					RelationAppLhs.create(reads, source, fd),
 					SourceSectionUtil.fromStrategoTerm(source));
+		} else if (lhsC.getName().equals("ListSource") && lhsC.getArity() == 2) {
+			String key = "_"
+					+ Tools.asJavaString(pp_type_0_0.instance.invoke(
+							trans.init(), Tools.termAt(lhsT, 1)));
+			ITermFactory tf = new TermFactory();
+
+			IStrategoAppl newSource = tf.makeAppl(
+					source.getConstructor(),
+					new IStrategoTerm[] { Tools.termAt(lhsT, 0),
+							Tools.termAt(source, 1) });
+
+			return new ListRelationDispatch(key, arrowName,
+					RelationAppLhs.create(reads, newSource, fd),
+					SourceSectionUtil.fromStrategoTerm(lhsT));
 		} else {
 			// dynamic dispatch
 			return new DynamicRelationDispatch(RelationAppLhs.create(reads,
@@ -72,6 +92,31 @@ public abstract class RelationDispatch extends Node {
 			// CompilerDirectives.transferToInterpreterAndInvalidate();
 			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry()
 					.lookupRule(arrowName, conName, arity);
+			return replace(
+					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs),
+							NodeUtil.cloneNode(rr.getRule()), rr
+									.getFrameDescriptor(), getSourceSection()))
+					.execute(frame);
+		}
+
+	}
+
+	public static class ListRelationDispatch extends RelationDispatch {
+
+		private final String arrowName;
+		private final String ruleKey;
+
+		public ListRelationDispatch(String ruleKey, String arrowName,
+				RelationAppLhs lhs, SourceSection source) {
+			super(lhs, source);
+			this.arrowName = arrowName;
+			this.ruleKey = ruleKey;
+		}
+
+		@Override
+		public RuleResult execute(VirtualFrame frame) {
+			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry()
+					.lookupRule(arrowName, ruleKey, 1);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs),
 							NodeUtil.cloneNode(rr.getRule()), rr
