@@ -32,7 +32,7 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public class ListReductionPremise extends Premise {
 
-	@Child protected PremiseLhs lhsNode;
+	@Child protected RelationAppLhs lhsNode;
 
 	private final String ruleKey;
 	private final String arrowName;
@@ -50,7 +50,7 @@ public class ListReductionPremise extends Premise {
 			MatchPattern[] rhsComponentNodes, String ruleKey,
 			SourceSection source) {
 		super(source);
-		this.lhsNode = new PremiseLhs(lhsNode, roNodes, rwNodes,
+		this.lhsNode = new RelationAppLhs(lhsNode, roNodes, rwNodes,
 				source);
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
@@ -77,7 +77,6 @@ public class ListReductionPremise extends Premise {
 		if (!evalRhsComponents(ruleRes.components, frame)) {
 			throw new PremiseFailure();
 		}
-
 	}
 
 	@ExplodeLoop

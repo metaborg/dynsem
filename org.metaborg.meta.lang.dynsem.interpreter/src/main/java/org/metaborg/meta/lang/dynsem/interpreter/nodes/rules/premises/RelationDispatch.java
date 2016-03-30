@@ -1,12 +1,16 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.IndirectReductionDispatch;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.IndirectReductionDispatchNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.PremiseLhs;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationAppLhs;
+import org.spoofax.interpreter.core.Tools;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoConstructor;
 
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -15,25 +19,48 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class ReductionDispatch extends Node {
+public abstract class RelationDispatch extends Node {
 
-	@Child protected PremiseLhs lhs;
+	@Child protected RelationAppLhs lhs;
 
-	public ReductionDispatch(PremiseLhs lhs, SourceSection source) {
+	public static RelationDispatch create(IStrategoAppl reads,
+			IStrategoAppl source, IStrategoAppl arrow, FrameDescriptor fd) {
+
+		assert Tools.hasConstructor(arrow, "NamedDynamicEmitted", 2);
+		String arrowName = Tools.stringAt(arrow, 1).stringValue();
+
+		assert Tools.hasConstructor(source, "Source", 2);
+		IStrategoAppl lhsT = Tools.applAt(source, 0);
+		IStrategoConstructor lhsC = lhsT.getConstructor();
+		if (lhsC.getName().equals("Con") && lhsC.getArity() == 2) {
+			// static dispatch
+			return new InlineableRelationDispatch(Tools.stringAt(lhsT, 0)
+					.stringValue(), Tools.listAt(lhsT, 1).size(), arrowName,
+					RelationAppLhs.create(reads, source, fd),
+					SourceSectionUtil.fromStrategoTerm(source));
+		} else {
+			// dynamic dispatch
+			return new DynamicRelationDispatch(RelationAppLhs.create(reads,
+					source, fd), arrowName,
+					SourceSectionUtil.fromStrategoTerm(source));
+		}
+	}
+
+	public RelationDispatch(RelationAppLhs lhs, SourceSection source) {
 		super(source);
 		this.lhs = lhs;
 	}
 
 	public abstract RuleResult execute(VirtualFrame frame);
 
-	public static class InlineableReductionDispatch extends ReductionDispatch {
+	public static class InlineableRelationDispatch extends RelationDispatch {
 
 		private final String conName;
 		private final int arity;
 		private final String arrowName;
 
-		public InlineableReductionDispatch(String conName, int arity,
-				String arrowName, PremiseLhs lhs, SourceSection source) {
+		public InlineableRelationDispatch(String conName, int arity,
+				String arrowName, RelationAppLhs lhs, SourceSection source) {
 			super(lhs, source);
 			this.conName = conName;
 			this.arrowName = arrowName;
@@ -46,7 +73,7 @@ public abstract class ReductionDispatch extends Node {
 			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry()
 					.lookupRule(arrowName, conName, arity);
 			return replace(
-					new InlinedReductionDispatch(NodeUtil.cloneNode(lhs),
+					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs),
 							NodeUtil.cloneNode(rr.getRule()), rr
 									.getFrameDescriptor(), getSourceSection()))
 					.execute(frame);
@@ -54,12 +81,12 @@ public abstract class ReductionDispatch extends Node {
 
 	}
 
-	public static class InlinedReductionDispatch extends ReductionDispatch {
+	public static class InlinedRelationDispatch extends RelationDispatch {
 
 		@Child protected Rule rule;
 		private final FrameDescriptor fd;
 
-		public InlinedReductionDispatch(PremiseLhs lhs, Rule rule,
+		public InlinedRelationDispatch(RelationAppLhs lhs, Rule rule,
 				FrameDescriptor fd, SourceSection source) {
 			super(lhs, source);
 			this.rule = rule;
@@ -74,11 +101,11 @@ public abstract class ReductionDispatch extends Node {
 
 	}
 
-	public static class DynamicReductionDispatch extends ReductionDispatch {
+	public static class DynamicRelationDispatch extends RelationDispatch {
 
 		@Child protected IndirectReductionDispatch dispatcher;
 
-		public DynamicReductionDispatch(PremiseLhs lhs, String arrowName,
+		public DynamicRelationDispatch(RelationAppLhs lhs, String arrowName,
 				SourceSection source) {
 			super(lhs, source);
 			this.dispatcher = IndirectReductionDispatchNodeGen.create(

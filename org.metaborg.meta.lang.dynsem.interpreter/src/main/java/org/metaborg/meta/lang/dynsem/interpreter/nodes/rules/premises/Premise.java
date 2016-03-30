@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.ConReductionPremise;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationPremise;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.ListReductionPremise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -27,7 +27,7 @@ public abstract class Premise extends Node {
 		}
 		IStrategoAppl premT = Tools.applAt(t, 0);
 		if (Tools.hasConstructor(premT, "Relation", 4)) {
-			return ConReductionPremise.create(premT, fd);
+			return RelationPremise.create(premT, fd);
 		}
 		if (Tools.hasConstructor(premT, "ListRelation", 5)) {
 			return ListReductionPremise.create(premT, fd);
