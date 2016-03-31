@@ -36,14 +36,8 @@ public abstract class Rule extends Node {
 	@Deprecated
 	public static Object[] buildArguments(Object reductionTerm,
 			Object[] children, Object[] components) {
-
-		Object[] args = new Object[1 + children.length + components.length];
-		args[0] = reductionTerm;
-		System.arraycopy(children, 0, args, 1, children.length);
-		System.arraycopy(components, 0, args, children.length + 1,
-				components.length);
-
-		return args;
+		return buildArguments(reductionTerm, children, new Object[0],
+				components);
 	}
 
 }
