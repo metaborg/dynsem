@@ -4,8 +4,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
 
 import com.github.krukow.clj_lang.IPersistentStack;
-import com.oracle.truffle.api.Assumption;
-import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -17,8 +15,6 @@ public abstract class TermExpansion extends Node {
 
 	public abstract Object[] execute(VirtualFrame frame);
 
-	private final Assumption conStable = Truffle.getRuntime().createAssumption("ConStable");
-	
 	@Specialization
 	public Object[] doConBuild(final IConTerm term) {
 		int arity = term.arity();

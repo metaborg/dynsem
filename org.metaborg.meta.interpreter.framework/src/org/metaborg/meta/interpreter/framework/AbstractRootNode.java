@@ -3,6 +3,7 @@ package org.metaborg.meta.interpreter.framework;
 import org.spoofax.terms.TermFactory;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.SourceSection;
@@ -18,7 +19,7 @@ public abstract class AbstractRootNode extends RootNode implements IMatchable,
 
 	@TruffleBoundary
 	public AbstractRootNode(SourceSection src) {
-		super(src);
+		super(null, src, FrameDescriptor.create());
 	}
 
 	@Override

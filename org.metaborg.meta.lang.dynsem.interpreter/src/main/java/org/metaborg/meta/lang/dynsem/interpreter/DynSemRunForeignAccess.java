@@ -26,16 +26,26 @@ public class DynSemRunForeignAccess implements Factory {
 	public CallTarget accessMessage(Message tree) {
 		if (Message.createExecute(0).equals(tree)) {
 			return Truffle.getRuntime().createCallTarget(
-					new DynSemRunForeignCallerNode());
+					new DynSemForeignCallerRootNode());
+
+		} else if (Message.IS_NULL.equals(tree)) {
+			return Truffle.getRuntime().createCallTarget(
+					new DynSemForeignNullCheckNode());
+		} else if (Message.IS_EXECUTABLE.equals(tree)) {
+			return Truffle.getRuntime().createCallTarget(
+					new DynSemForeignExecutableCheckNode());
+		} else if (Message.IS_BOXED.equals(tree)) {
+			return Truffle.getRuntime().createCallTarget(
+					RootNode.createConstantNode(false));
 		} else {
 			throw new IllegalArgumentException(tree.toString()
 					+ " not supported");
 		}
 	}
 
-	private static class DynSemRunForeignCallerNode extends RootNode {
+	private static class DynSemForeignCallerRootNode extends RootNode {
 
-		public DynSemRunForeignCallerNode() {
+		public DynSemForeignCallerRootNode() {
 			super(DynSemLanguage.class, null, null);
 		}
 
@@ -50,6 +60,30 @@ public class DynSemRunForeignAccess implements Factory {
 							new Object[] {}));
 		}
 
+	}
+
+	private static class DynSemForeignExecutableCheckNode extends RootNode {
+		public DynSemForeignExecutableCheckNode() {
+			super(DynSemLanguage.class, null, null);
+		}
+
+		@Override
+		public Object execute(VirtualFrame frame) {
+			Object receiver = ForeignAccess.getReceiver(frame);
+			return receiver instanceof DynSemPrimedRun;
+		}
+	}
+
+	private static class DynSemForeignNullCheckNode extends RootNode {
+		public DynSemForeignNullCheckNode() {
+			super(DynSemLanguage.class, null, null);
+		}
+
+		@Override
+		public Object execute(VirtualFrame frame) {
+			Object receiver = ForeignAccess.getReceiver(frame);
+			return receiver == null;
+		}
 	}
 
 }

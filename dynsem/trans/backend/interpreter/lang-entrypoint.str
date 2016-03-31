@@ -75,7 +75,7 @@ rules /* language file. interpreter entry point */
         }
       
         public static Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
-          PolyglotEngine vm = PolyglotEngine.buildNew().setIn(input)
+          PolyglotEngine vm = PolyglotEngine.newBuilder().setIn(input)
               .setOut(output).setErr(error).build();
           assert vm.getLanguages().containsKey(MIME_TYPE);
           try {
@@ -88,7 +88,7 @@ rules /* language file. interpreter entry point */
       
             @Override
             public RuleResult call() throws Exception {
-              return prog.invoke(null).as(RuleResult.class);
+              return prog.execute().as(RuleResult.class);
             }
           };
         }
@@ -100,13 +100,14 @@ rules /* language file. interpreter entry point */
           IStrategoTerm programT = new x_transformer().transform(c.getParser().parse(code, START_SYMBOL));
           ITerm program = c.getTermRegistry().parseProgramTerm(programT);
       
-          return new CallTarget() {
-      
+          RootNode rootNode = new RootNode(SLLanguage.class, null, null) {
+
             @Override
-            public Object call(Object... arguments) {
+            public Object execute(VirtualFrame frame) {
+              CompilerDirectives.transferToInterpreter();
       
-              RuleRoot initRuleRoot = c.getRuleRegistry().lookupRule("init",
-                  START_CONSTR_NAME, START_CONSTR_ARITY);
+              RuleRoot initRuleRoot = ctx.getRuleRegistry().lookupRule(
+                  "init", START_CONSTR_NAME, START_CONSTR_ARITY);
               if (initRuleRoot == null) {
                 throw new IllegalStateException("Rule not found");
               }
@@ -117,13 +118,16 @@ rules /* language file. interpreter entry point */
                   DynSemPrimedRun run = new DynSemPrimedRun();
                   run.setCallTarget(initRuleRoot.getCallTarget());
                   run.setProgram(programCon);
-                  c.setRun(run);
+                  ctx.setRun(run);
                   return null;
                 }
               }
               throw new IllegalStateException("Malformed program term");
             }
+
           };
+
+          return Truffle.getRuntime().createCallTarget(rootNode);
         }
       }
     ]|
