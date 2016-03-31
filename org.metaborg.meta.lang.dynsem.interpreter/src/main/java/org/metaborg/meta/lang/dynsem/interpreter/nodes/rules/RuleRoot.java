@@ -20,6 +20,7 @@ import trans.trans;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.nodes.RootNode;
 
 public class RuleRoot extends RootNode {
@@ -40,7 +41,12 @@ public class RuleRoot extends RootNode {
 	public Rule getRule() {
 		return rule;
 	}
-
+	
+	@Override
+	public String toString() {
+		return "RuleRoot: " + rule.getName() + "/" + rule.getConstructor() + "/" + rule.getArity();
+	}
+	
 	public static RuleRoot create(IStrategoTerm ruleT) {
 		assert Tools.isTermAppl(ruleT);
 		assert Tools.hasConstructor((IStrategoAppl) ruleT, "Rule", 3);
