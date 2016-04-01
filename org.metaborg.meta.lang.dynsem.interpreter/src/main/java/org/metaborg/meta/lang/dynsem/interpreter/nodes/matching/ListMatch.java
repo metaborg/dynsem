@@ -26,8 +26,7 @@ public abstract class ListMatch extends MatchPattern {
 
 		public static NilListMatch create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "List", 1);
-			assert Tools.isTermList(t.getSubterm(0))
-					&& Tools.listAt(t, 0).size() == 0;
+			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
 			return new NilListMatch(SourceSectionUtil.fromStrategoTerm(t));
 		}
 
@@ -45,8 +44,7 @@ public abstract class ListMatch extends MatchPattern {
 		@Child protected MatchPattern headPattern;
 		@Child protected MatchPattern tailPattern;
 
-		public ConsListMatch(MatchPattern headPattern,
-				MatchPattern tailPattern, SourceSection source) {
+		public ConsListMatch(MatchPattern headPattern, MatchPattern tailPattern, SourceSection source) {
 			super(source);
 			this.headPattern = headPattern;
 			this.tailPattern = tailPattern;
@@ -54,13 +52,10 @@ public abstract class ListMatch extends MatchPattern {
 
 		public static ConsListMatch create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "ListTail", 2);
-			MatchPattern headPattern = MatchPattern.create(Tools.applAt(Tools.listAt(t, 0), 0),
-					fd);
-			MatchPattern tailPattern = MatchPattern.create(Tools.applAt(t, 1),
-					fd);
+			MatchPattern headPattern = MatchPattern.create(Tools.applAt(Tools.listAt(t, 0), 0), fd);
+			MatchPattern tailPattern = MatchPattern.create(Tools.applAt(t, 1), fd);
 
-			return ConsListMatchNodeGen.create(headPattern, tailPattern,
-					SourceSectionUtil.fromStrategoTerm(t));
+			return ConsListMatchNodeGen.create(headPattern, tailPattern, SourceSectionUtil.fromStrategoTerm(t));
 		}
 
 		@SuppressWarnings("rawtypes")

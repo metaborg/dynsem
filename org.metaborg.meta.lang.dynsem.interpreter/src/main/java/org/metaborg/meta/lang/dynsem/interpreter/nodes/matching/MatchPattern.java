@@ -51,8 +51,7 @@ public abstract class MatchPattern extends Node {
 		throw new NotImplementedException("Unsupported match pattern: " + t);
 	}
 
-	public static MatchPattern createFromLabelComp(IStrategoAppl t,
-			FrameDescriptor fd) {
+	public static MatchPattern createFromLabelComp(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "LabelComp", 2);
 		return create(Tools.applAt(t, 1), fd);
 	}

@@ -47,43 +47,35 @@ public abstract class TermBuild extends Node {
 
 	public abstract Object executeGeneric(VirtualFrame frame);
 
-	public String executeString(VirtualFrame frame)
-			throws UnexpectedResultException {
+	public String executeString(VirtualFrame frame) throws UnexpectedResultException {
 		return BuiltinTypesGen.expectString(executeGeneric(frame));
 	}
 
-	public int executeInteger(VirtualFrame frame)
-			throws UnexpectedResultException {
+	public int executeInteger(VirtualFrame frame) throws UnexpectedResultException {
 		return BuiltinTypesGen.expectInteger(executeGeneric(frame));
 	}
 
-	public ITerm executeITerm(VirtualFrame frame)
-			throws UnexpectedResultException {
+	public ITerm executeITerm(VirtualFrame frame) throws UnexpectedResultException {
 		return BuiltinTypesGen.expectITerm(executeGeneric(frame));
 	}
 
-	public IConTerm executeIConTerm(VirtualFrame frame)
-			throws UnexpectedResultException {
+	public IConTerm executeIConTerm(VirtualFrame frame) throws UnexpectedResultException {
 		return BuiltinTypesGen.expectIConTerm(executeGeneric(frame));
 	}
 
-	public PersistentMap<?, ?> executeMap(VirtualFrame frame)
-			throws UnexpectedResultException {
+	public PersistentMap<?, ?> executeMap(VirtualFrame frame) throws UnexpectedResultException {
 		return BuiltinTypesGen.expectPersistentMap(executeGeneric(frame));
 	}
 
-	public boolean executeBoolean(VirtualFrame frame)
-			throws UnexpectedResultException {
+	public boolean executeBoolean(VirtualFrame frame) throws UnexpectedResultException {
 		return BuiltinTypesGen.expectBoolean(executeGeneric(frame));
 	}
 
-	public Object[] executeObjectArray(VirtualFrame frame)
-			throws UnexpectedResultException {
+	public Object[] executeObjectArray(VirtualFrame frame) throws UnexpectedResultException {
 		return BuiltinTypesGen.expectObjectArray(executeGeneric(frame));
 	}
-	
-	public IPersistentStack<?> executeList(VirtualFrame frame)
-			throws UnexpectedResultException {
+
+	public IPersistentStack<?> executeList(VirtualFrame frame) throws UnexpectedResultException {
 		return BuiltinTypesGen.expectIPersistentStack(executeGeneric(frame));
 	}
 
@@ -139,8 +131,7 @@ public abstract class TermBuild extends Node {
 		throw new NotImplementedException("Unsupported term build: " + t);
 	}
 
-	public static TermBuild createFromLabelComp(IStrategoAppl t,
-			FrameDescriptor fd) {
+	public static TermBuild createFromLabelComp(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "LabelComp", 2);
 		return create(Tools.applAt(t, 1), fd);
 	}

@@ -28,8 +28,7 @@ public abstract class ListBuild extends TermBuild {
 
 		public static NilListBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "List", 1);
-			assert Tools.isTermList(t.getSubterm(0))
-					&& Tools.listAt(t, 0).size() == 0;
+			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
 
 			return new NilListBuild(SourceSectionUtil.fromStrategoTerm(t));
 		}
@@ -58,8 +57,7 @@ public abstract class ListBuild extends TermBuild {
 			TermBuild headNode = TermBuild.create(Tools.applAt(Tools.termAt(t, 0), 0), fd);
 			TermBuild tailNode = TermBuild.create(Tools.applAt(t, 1), fd);
 
-			return ConsListBuildNodeGen.create(
-					SourceSectionUtil.fromStrategoTerm(t), headNode, tailNode);
+			return ConsListBuildNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), headNode, tailNode);
 		}
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })

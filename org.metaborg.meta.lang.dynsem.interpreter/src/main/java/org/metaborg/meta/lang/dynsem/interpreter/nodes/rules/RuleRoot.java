@@ -40,12 +40,12 @@ public class RuleRoot extends RootNode {
 	public Rule getRule() {
 		return rule;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "RuleRoot: " + rule.getName() + "/" + rule.getConstructor() + "/" + rule.getArity();
 	}
-	
+
 	public static RuleRoot create(IStrategoTerm ruleT) {
 		assert Tools.isTermAppl(ruleT);
 		assert Tools.hasConstructor((IStrategoAppl) ruleT, "Rule", 3);
@@ -80,8 +80,7 @@ public class RuleRoot extends RootNode {
 		String constr = null;
 		int arity;
 		if (Tools.hasConstructor(lhsConTerm, "Con", 2)) {
-			assert lhsConTerm != null
-					&& Tools.hasConstructor(lhsConTerm, "Con", 2);
+			assert lhsConTerm != null && Tools.hasConstructor(lhsConTerm, "Con", 2);
 			lhsConTerm = lhsLeftTerm;
 			constr = Tools.stringAt(lhsConTerm, 0).stringValue();
 			arity = Tools.listAt(lhsConTerm, 1).size();
@@ -90,8 +89,7 @@ public class RuleRoot extends RootNode {
 			assert Tools.hasConstructor(tyTerm, "ListSort", 1);
 			Context ctx = trans.init();
 			constr = "_"
-					+ Tools.asJavaString(pp_type_0_0.instance.invoke(ctx,
-							rw_type_0_0.instance.invoke(ctx, tyTerm)));
+					+ Tools.asJavaString(pp_type_0_0.instance.invoke(ctx, rw_type_0_0.instance.invoke(ctx, tyTerm)));
 			arity = 1;
 		} else {
 			throw new RuntimeException("Unsupported rule LHS: " + lhsLeftTerm);
@@ -99,8 +97,8 @@ public class RuleRoot extends RootNode {
 
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 3), fd);
 
-		return new RuleRoot(new DynSemRule(name, constr, arity, premises,
-				target, SourceSectionUtil.fromStrategoTerm(ruleT)), fd);
+		return new RuleRoot(new DynSemRule(name, constr, arity, premises, target,
+				SourceSectionUtil.fromStrategoTerm(ruleT)), fd);
 	}
 
 	private static FrameDescriptor createFrameDescriptor(IStrategoTerm t) {
@@ -109,8 +107,7 @@ public class RuleRoot extends RootNode {
 
 			@Override
 			public void preVisit(IStrategoTerm t) {
-				if (Tools.isTermAppl(t)
-						&& Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)) {
+				if (Tools.isTermAppl(t) && Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)) {
 					vars.add(Tools.stringAt(t, 0).stringValue());
 				}
 			}

@@ -17,8 +17,7 @@ public class MatchPremise extends Premise {
 	@Child protected TermBuild term;
 	@Child protected MatchPattern pat;
 
-	public MatchPremise(TermBuild term, MatchPattern pattern,
-			SourceSection source) {
+	public MatchPremise(TermBuild term, MatchPattern pattern, SourceSection source) {
 		super(source);
 		this.term = term;
 		this.pat = pattern;

@@ -12,8 +12,7 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
 
-@NodeChildren({ @NodeChild(value = "map", type = TermBuild.class),
-		@NodeChild(value = "key", type = TermBuild.class) })
+@NodeChildren({ @NodeChild(value = "map", type = TermBuild.class), @NodeChild(value = "key", type = TermBuild.class) })
 public abstract class MapSelectBuild extends TermBuild {
 
 	public MapSelectBuild(SourceSection source) {
@@ -25,8 +24,7 @@ public abstract class MapSelectBuild extends TermBuild {
 		TermBuild map = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild key = TermBuild.create(Tools.applAt(t, 1), fd);
 
-		return MapSelectBuildNodeGen.create(
-				SourceSectionUtil.fromStrategoTerm(t), map, key);
+		return MapSelectBuildNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), map, key);
 	}
 
 	@Specialization

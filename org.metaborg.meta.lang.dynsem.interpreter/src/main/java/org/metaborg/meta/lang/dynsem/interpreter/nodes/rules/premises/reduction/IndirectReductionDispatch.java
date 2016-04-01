@@ -31,21 +31,18 @@ public abstract class IndirectReductionDispatch extends Node {
 	public String getArrowname() {
 		return arrowName;
 	}
-	
-	public abstract RuleResult executeDispatch(VirtualFrame frame, Object term,
-			Object[] args);
+
+	public abstract RuleResult executeDispatch(VirtualFrame frame, Object term, Object[] args);
 
 	@Specialization(limit = "INLINE_CACHE_SIZE", guards = "check.isInstance(term)")
-	protected RuleResult doDirect(VirtualFrame frame, Object term,
-			Object[] args, //
+	protected RuleResult doDirect(VirtualFrame frame, Object term, Object[] args, //
 			@Cached("lookupInstanceChecker(term)") ITermInstanceChecker check, //
 			@Cached("create(lookupCallTarget(term))") DirectCallNode callnode) {
 		return (RuleResult) callnode.call(frame, args);
 	}
 
 	@Specialization(contains = "doDirect")
-	protected RuleResult doIndirect(VirtualFrame frame, Object term,
-			Object[] args, //
+	protected RuleResult doIndirect(VirtualFrame frame, Object term, Object[] args, //
 			@Cached("create()") IndirectCallNode callnode) {
 		return (RuleResult) callnode.call(frame, lookupCallTarget(term), args);
 	}
@@ -55,9 +52,7 @@ public abstract class IndirectReductionDispatch extends Node {
 		if (context == null) {
 			context = DynSemContext.LANGUAGE.getContext();
 		}
-		return context.getRuleRegistry()
-				.lookupRule(arrowName, con.constructor(), con.arity())
-				.getCallTarget();
+		return context.getRuleRegistry().lookupRule(arrowName, con.constructor(), con.arity()).getCallTarget();
 	}
 
 	protected ITermInstanceChecker lookupInstanceChecker(Object o) {

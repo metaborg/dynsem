@@ -26,11 +26,9 @@ public class VarRead extends TermBuild {
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "VarRef", 1);
-		return new VarRead(
-				fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new VarRead(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()), SourceSectionUtil.fromStrategoTerm(t));
 	}
-	
+
 	@Override
 	public String toString() {
 		return "VarRead(" + slot.getIdentifier() + ")";

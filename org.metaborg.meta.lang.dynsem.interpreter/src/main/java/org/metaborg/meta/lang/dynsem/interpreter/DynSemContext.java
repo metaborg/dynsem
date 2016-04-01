@@ -20,13 +20,12 @@ public class DynSemContext {
 
 	private DynSemPrimedRun primedRun;
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry,
-			Path parseTable) {
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, Path parseTable) {
 		this(termRegistry, ruleRegistry, parseTable, System.in, System.out);
 	}
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry,
-			Path parseTable, InputStream input, PrintStream output) {
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, Path parseTable, InputStream input,
+			PrintStream output) {
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
@@ -61,23 +60,19 @@ public class DynSemContext {
 	}
 
 	public ITermBuildFactory lookupNativeOpBuilder(String name, int arity) {
-		ITermBuildFactory f = termRegistry.lookupNativeOpBuildFactory(name,
-				arity);
+		ITermBuildFactory f = termRegistry.lookupNativeOpBuildFactory(name, arity);
 		assert f != null;
 		return f;
 	}
 
 	public ITermMatchPatternFactory lookupMatchPattern(String name, int arity) {
-		ITermMatchPatternFactory f = termRegistry.lookupMatchFactory(name,
-				arity);
+		ITermMatchPatternFactory f = termRegistry.lookupMatchFactory(name, arity);
 		assert f != null;
 		return f;
 	}
 
-	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort,
-			String function, int arity) {
-		ITermBuildFactory f = termRegistry.lookupNativeTypeAdapterBuildFactory(
-				sort, function, arity);
+	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort, String function, int arity) {
+		ITermBuildFactory f = termRegistry.lookupNativeTypeAdapterBuildFactory(sort, function, arity);
 		assert f != null;
 		return f;
 	}

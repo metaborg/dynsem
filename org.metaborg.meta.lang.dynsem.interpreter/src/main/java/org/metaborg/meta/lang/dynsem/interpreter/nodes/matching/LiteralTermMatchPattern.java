@@ -11,8 +11,7 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 		super(source);
 	}
 
-	public static final class StringLiteralTermMatchPattern extends
-			LiteralTermMatchPattern {
+	public static final class StringLiteralTermMatchPattern extends LiteralTermMatchPattern {
 
 		private final String lit;
 
@@ -32,8 +31,7 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 
 	}
 
-	public static final class IntLiteralTermMatchPattern extends
-			LiteralTermMatchPattern {
+	public static final class IntLiteralTermMatchPattern extends LiteralTermMatchPattern {
 
 		private final int lit;
 
@@ -53,8 +51,7 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 
 	}
 
-	public static final class TrueLiteralTermMatchPattern extends
-			LiteralTermMatchPattern {
+	public static final class TrueLiteralTermMatchPattern extends LiteralTermMatchPattern {
 
 		public TrueLiteralTermMatchPattern(SourceSection source) {
 			super(source);
@@ -69,8 +66,7 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 		}
 	}
 
-	public static final class FalseLiteralTermMatchPattern extends
-			LiteralTermMatchPattern {
+	public static final class FalseLiteralTermMatchPattern extends LiteralTermMatchPattern {
 
 		public FalseLiteralTermMatchPattern(SourceSection source) {
 			super(source);

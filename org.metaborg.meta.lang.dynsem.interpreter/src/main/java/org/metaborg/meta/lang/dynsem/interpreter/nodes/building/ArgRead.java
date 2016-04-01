@@ -23,10 +23,9 @@ public class ArgRead extends TermBuild {
 
 	public static TermBuild create(IStrategoAppl t) {
 		assert Tools.hasConstructor(t, "ArgRead", 1);
-		return new ArgRead(Tools.intAt(t, 0).intValue(),
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new ArgRead(Tools.intAt(t, 0).intValue(), SourceSectionUtil.fromStrategoTerm(t));
 	}
-	
+
 	@Override
 	public String toString() {
 		return "ArgRead(" + index + ")";

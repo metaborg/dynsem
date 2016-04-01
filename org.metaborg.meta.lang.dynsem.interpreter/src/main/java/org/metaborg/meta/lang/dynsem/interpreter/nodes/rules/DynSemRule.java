@@ -11,11 +11,11 @@ import com.oracle.truffle.api.source.SourceSection;
  * A node corresponding to a (merged) DynSem rule.
  * 
  *
- * A rule has inputs of three types: (1) Read-only semantic components (ROs),
- * (2) Pattern-bound variables (PVs), (3) Read-write semantic components (RWs)
+ * A rule has inputs of three types: (1) Read-only semantic components (ROs), (2) Pattern-bound variables (PVs), (3)
+ * Read-write semantic components (RWs)
  * 
- * These inputs are passed through the arguments array in the following order
- * <ROs,PVs,RWs>. This order coincides with the binding order inside the rule.
+ * These inputs are passed through the arguments array in the following order <ROs,PVs,RWs>. This order coincides with
+ * the binding order inside the rule.
  * 
  * @author vladvergu
  *
@@ -30,8 +30,7 @@ public class DynSemRule extends Rule {
 
 	@Child protected RuleTarget target;
 
-	public DynSemRule(String name, String constr, int arity,
-			Premise[] premises, RuleTarget output, SourceSection source) {
+	public DynSemRule(String name, String constr, int arity, Premise[] premises, RuleTarget output, SourceSection source) {
 		super(source);
 		this.name = name;
 		this.constr = constr;

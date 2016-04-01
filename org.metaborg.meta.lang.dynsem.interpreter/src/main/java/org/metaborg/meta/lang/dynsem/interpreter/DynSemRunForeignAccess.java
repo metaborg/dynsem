@@ -14,8 +14,7 @@ import com.oracle.truffle.api.nodes.RootNode;
 
 public class DynSemRunForeignAccess implements Factory {
 
-	public static final ForeignAccess INSTANCE = ForeignAccess
-			.create(new DynSemRunForeignAccess());
+	public static final ForeignAccess INSTANCE = ForeignAccess.create(new DynSemRunForeignAccess());
 
 	@Override
 	public boolean canHandle(TruffleObject o) {
@@ -25,21 +24,16 @@ public class DynSemRunForeignAccess implements Factory {
 	@Override
 	public CallTarget accessMessage(Message tree) {
 		if (Message.createExecute(0).equals(tree)) {
-			return Truffle.getRuntime().createCallTarget(
-					new DynSemForeignCallerRootNode());
+			return Truffle.getRuntime().createCallTarget(new DynSemForeignCallerRootNode());
 
 		} else if (Message.IS_NULL.equals(tree)) {
-			return Truffle.getRuntime().createCallTarget(
-					new DynSemForeignNullCheckNode());
+			return Truffle.getRuntime().createCallTarget(new DynSemForeignNullCheckNode());
 		} else if (Message.IS_EXECUTABLE.equals(tree)) {
-			return Truffle.getRuntime().createCallTarget(
-					new DynSemForeignExecutableCheckNode());
+			return Truffle.getRuntime().createCallTarget(new DynSemForeignExecutableCheckNode());
 		} else if (Message.IS_BOXED.equals(tree)) {
-			return Truffle.getRuntime().createCallTarget(
-					RootNode.createConstantNode(false));
+			return Truffle.getRuntime().createCallTarget(RootNode.createConstantNode(false));
 		} else {
-			throw new IllegalArgumentException(tree.toString()
-					+ " not supported");
+			throw new IllegalArgumentException(tree.toString() + " not supported");
 		}
 	}
 
@@ -51,13 +45,10 @@ public class DynSemRunForeignAccess implements Factory {
 
 		@Override
 		public Object execute(VirtualFrame frame) {
-			DynSemPrimedRun run = (DynSemPrimedRun) ForeignAccess
-					.getReceiver(frame);
+			DynSemPrimedRun run = (DynSemPrimedRun) ForeignAccess.getReceiver(frame);
 			IConTerm program = run.getProgram();
 
-			return run.getCallTarget().call(
-					Rule.buildArguments(program, program.allSubterms(),
-							new Object[] {}));
+			return run.getCallTarget().call(Rule.buildArguments(program, program.allSubterms(), new Object[] {}));
 		}
 
 	}

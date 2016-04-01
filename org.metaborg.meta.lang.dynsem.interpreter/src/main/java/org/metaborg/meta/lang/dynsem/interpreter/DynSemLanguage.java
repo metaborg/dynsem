@@ -23,8 +23,7 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		return createDynSemContext(env.in(), new PrintStream(env.out()));
 	}
 
-	public abstract DynSemContext createDynSemContext(InputStream input,
-			PrintStream output);
+	public abstract DynSemContext createDynSemContext(InputStream input, PrintStream output);
 
 	public Node createFindContextNode0() {
 		return createFindContextNode();
@@ -44,14 +43,12 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	}
 
 	@Override
-	protected Object evalInContext(Source source, Node node,
-			MaterializedFrame mFrame) throws IOException {
+	protected Object evalInContext(Source source, Node node, MaterializedFrame mFrame) throws IOException {
 		throw new IllegalStateException("evalInContext not supported");
 	}
 
 	@Override
-	protected Object findExportedSymbol(DynSemContext context,
-			String globalName, boolean onlyExplicit) {
+	protected Object findExportedSymbol(DynSemContext context, String globalName, boolean onlyExplicit) {
 		if (globalName.equals("INIT")) {
 			return context.getRun();
 		}

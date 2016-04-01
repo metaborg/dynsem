@@ -18,8 +18,7 @@ public class MergePointPremise extends Premise {
 	@Children protected final Premise[] branch1;
 	@Children protected final Premise[] branch2;
 
-	public MergePointPremise(Premise condition, Premise[] branch1,
-			Premise[] branch2, SourceSection source) {
+	public MergePointPremise(Premise condition, Premise[] branch1, Premise[] branch2, SourceSection source) {
 		super(source);
 		this.condition = condition;
 		this.branch1 = branch1;
@@ -41,8 +40,7 @@ public class MergePointPremise extends Premise {
 			branch2[i] = Premise.create(Tools.applAt(branch2Ts, i), fd);
 		}
 
-		return new MergePointPremise(condition, branch1, branch2,
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new MergePointPremise(condition, branch1, branch2, SourceSectionUtil.fromStrategoTerm(t));
 	}
 
 	@Override
@@ -68,7 +66,7 @@ public class MergePointPremise extends Premise {
 			branch2[i].execute(frame);
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return NodeUtil.printCompactTreeToString(this);

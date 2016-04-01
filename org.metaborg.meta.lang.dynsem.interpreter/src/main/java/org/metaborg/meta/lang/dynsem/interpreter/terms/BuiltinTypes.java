@@ -4,9 +4,8 @@ import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.IPersistentStack;
 import com.oracle.truffle.api.dsl.TypeSystem;
 
-@TypeSystem({ IConTerm.class, ITerm.class, PersistentMap.class,
-		IPersistentStack.class, String.class, int.class, boolean.class,
-		Object[].class })
+@TypeSystem({ IConTerm.class, ITerm.class, PersistentMap.class, IPersistentStack.class, String.class, int.class,
+		boolean.class, Object[].class })
 public class BuiltinTypes {
 
 }

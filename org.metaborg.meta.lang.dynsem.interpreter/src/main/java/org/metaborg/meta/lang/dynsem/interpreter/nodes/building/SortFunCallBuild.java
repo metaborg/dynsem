@@ -16,8 +16,7 @@ public class SortFunCallBuild extends TermBuild {
 
 	@Children protected final TermBuild[] children;
 
-	public SortFunCallBuild(String sort, String function, TermBuild[] children,
-			SourceSection source) {
+	public SortFunCallBuild(String sort, String function, TermBuild[] children, SourceSection source) {
 		super(source);
 		this.sort = sort;
 		this.function = function;
@@ -37,15 +36,13 @@ public class SortFunCallBuild extends TermBuild {
 			children[i + 1] = TermBuild.create(Tools.applAt(argsT, i), fd);
 		}
 
-		return new SortFunCallBuild(sort, function, children,
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new SortFunCallBuild(sort, function, children, SourceSectionUtil.fromStrategoTerm(t));
 	}
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		ITermBuildFactory buildFactory = getContext()
-				.lookupNativeTypeAdapterBuildFactory(sort, function,
-						children.length - 1);
+		ITermBuildFactory buildFactory = getContext().lookupNativeTypeAdapterBuildFactory(sort, function,
+				children.length - 1);
 		TermBuild build = buildFactory.apply(getSourceSection(), children);
 		return replace(build).executeGeneric(frame);
 	}

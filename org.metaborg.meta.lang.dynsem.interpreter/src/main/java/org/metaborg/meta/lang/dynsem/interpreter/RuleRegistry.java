@@ -48,11 +48,9 @@ public abstract class RuleRegistry {
 			if (prevRule instanceof OverloadedRule) {
 				ruleChain = (OverloadedRule) prevRule;
 			} else {
-				ruleChain = new OverloadedRule(new InlinedRuleAdapter(prevRule,
-						prevRR.getFrameDescriptor()));
+				ruleChain = new OverloadedRule(new InlinedRuleAdapter(prevRule, prevRR.getFrameDescriptor()));
 			}
-			ruleChain
-					.addNext(new InlinedRuleAdapter(r, rr.getFrameDescriptor()));
+			ruleChain.addNext(new InlinedRuleAdapter(r, rr.getFrameDescriptor()));
 			rules.put(k, new RuleRoot(ruleChain, rr.getFrameDescriptor()));
 		}
 	}
@@ -71,11 +69,9 @@ public abstract class RuleRegistry {
 
 		IStrategoTerm topSpecTerm;
 		try {
-			topSpecTerm = reader.parseFromStream(new FileInputStream(
-					specificationFile));
+			topSpecTerm = reader.parseFromStream(new FileInputStream(specificationFile));
 		} catch (IOException ioex) {
-			throw new RuntimeException("Could not load specification ATerm",
-					ioex);
+			throw new RuntimeException("Could not load specification ATerm", ioex);
 		}
 
 		IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
@@ -87,13 +83,11 @@ public abstract class RuleRegistry {
 	private static IStrategoList ruleListTerm(IStrategoTerm topSpecTerm) {
 		IStrategoList sections = Tools.listAt(topSpecTerm, 1);
 		for (IStrategoTerm section : sections) {
-			if (Tools.isTermAppl(section)
-					&& Tools.hasConstructor((IStrategoAppl) section, "Rules", 1)) {
+			if (Tools.isTermAppl(section) && Tools.hasConstructor((IStrategoAppl) section, "Rules", 1)) {
 				return Tools.listAt(section, 0);
 			}
 		}
-		throw new InterpreterException(
-				"Malformed specification: could not find Rules section");
+		throw new InterpreterException("Malformed specification: could not find Rules section");
 	}
 
 }

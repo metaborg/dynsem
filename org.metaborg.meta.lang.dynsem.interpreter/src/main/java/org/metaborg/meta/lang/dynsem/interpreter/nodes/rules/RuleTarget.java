@@ -17,8 +17,7 @@ public class RuleTarget extends Node {
 	@Child protected TermBuild rhsNode;
 	@Children protected final TermBuild[] componentNodes;
 
-	public RuleTarget(TermBuild rhsNode, TermBuild[] componentNodes,
-			SourceSection source) {
+	public RuleTarget(TermBuild rhsNode, TermBuild[] componentNodes, SourceSection source) {
 		super(source);
 		this.rhsNode = rhsNode;
 		this.componentNodes = componentNodes;
@@ -43,11 +42,9 @@ public class RuleTarget extends Node {
 		IStrategoList componentsT = Tools.listAt(targetT, 1);
 		TermBuild[] componentNodes = new TermBuild[componentsT.size()];
 		for (int i = 0; i < componentNodes.length; i++) {
-			componentNodes[i] = TermBuild.createFromLabelComp(
-					Tools.applAt(componentsT, i), fd);
+			componentNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(componentsT, i), fd);
 		}
 
-		return new RuleTarget(rhsNode, componentNodes,
-				SourceSectionUtil.fromStrategoTerm(targetT));
+		return new RuleTarget(rhsNode, componentNodes, SourceSectionUtil.fromStrategoTerm(targetT));
 	}
 }

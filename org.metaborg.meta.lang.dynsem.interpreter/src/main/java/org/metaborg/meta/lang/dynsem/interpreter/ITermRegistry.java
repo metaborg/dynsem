@@ -13,8 +13,7 @@ public interface ITermRegistry {
 
 	public ITermBuildFactory lookupNativeOpBuildFactory(String constr, int arity);
 
-	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort,
-			String function, int arity);
+	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort, String function, int arity);
 
 	public ITerm parseProgramTerm(IStrategoTerm t);
 }

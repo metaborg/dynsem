@@ -19,8 +19,7 @@ public abstract class Premise extends Node {
 	public abstract void execute(VirtualFrame frame);
 
 	public static Premise create(IStrategoAppl t, FrameDescriptor fd) {
-		assert Tools.hasConstructor(t, "Formula", 1)
-				|| Tools.hasConstructor(t, "MergePoint", 3);
+		assert Tools.hasConstructor(t, "Formula", 1) || Tools.hasConstructor(t, "MergePoint", 3);
 		if (Tools.hasConstructor(t, "MergePoint", 3)) {
 			return MergePointPremise.create(t, fd);
 		}

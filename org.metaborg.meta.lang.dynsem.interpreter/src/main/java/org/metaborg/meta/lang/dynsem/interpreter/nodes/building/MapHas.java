@@ -20,8 +20,7 @@ public abstract class MapHas extends TermBuild {
 		assert Tools.hasConstructor(t, "MapHas", 2);
 		TermBuild mapNode = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild keyNode = TermBuild.create(Tools.applAt(t, 1), fd);
-		return MapHasNodeGen.create(SourceSectionUtil.fromStrategoTerm(t),
-				mapNode, keyNode);
+		return MapHasNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), mapNode, keyNode);
 	}
 
 	public MapHas(SourceSection source) {
@@ -30,8 +29,7 @@ public abstract class MapHas extends TermBuild {
 
 	@Specialization
 	@TruffleBoundary
-	public boolean doEvaluated(@SuppressWarnings("rawtypes") PersistentMap map,
-			Object key) {
+	public boolean doEvaluated(@SuppressWarnings("rawtypes") PersistentMap map, Object key) {
 		return map.containsKey(key);
 	}
 

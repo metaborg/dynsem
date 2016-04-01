@@ -19,16 +19,14 @@ public class RelationAppLhs extends Node {
 	@Children protected final TermBuild[] roNodes;
 	@Children protected final TermBuild[] rwNodes;
 
-	public RelationAppLhs(TermBuild termNode, TermBuild[] roNodes,
-			TermBuild[] rwNodes, SourceSection source) {
+	public RelationAppLhs(TermBuild termNode, TermBuild[] roNodes, TermBuild[] rwNodes, SourceSection source) {
 		super(source);
 		this.termExpansionNode = TermExpansionNodeGen.create(termNode);
 		this.roNodes = roNodes;
 		this.rwNodes = rwNodes;
 	}
 
-	public static RelationAppLhs create(IStrategoAppl reads, IStrategoAppl source,
-			FrameDescriptor fd) {
+	public static RelationAppLhs create(IStrategoAppl reads, IStrategoAppl source, FrameDescriptor fd) {
 		assert Tools.hasConstructor(source, "Source", 2);
 		TermBuild lhsNode = TermBuild.create(Tools.applAt(source, 0), fd);
 
@@ -36,19 +34,16 @@ public class RelationAppLhs extends Node {
 		IStrategoList ros = Tools.listAt(reads, 0);
 		TermBuild[] roNodes = new TermBuild[ros.getSubtermCount()];
 		for (int i = 0; i < roNodes.length; i++) {
-			roNodes[i] = TermBuild
-					.createFromLabelComp(Tools.applAt(ros, i), fd);
+			roNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(ros, i), fd);
 		}
 
 		IStrategoList rws = Tools.listAt(source, 1);
 		TermBuild[] rwNodes = new TermBuild[rws.getSubtermCount()];
 		for (int i = 0; i < rwNodes.length; i++) {
-			rwNodes[i] = TermBuild
-					.createFromLabelComp(Tools.applAt(rws, i), fd);
+			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
 		}
 
-		return new RelationAppLhs(lhsNode, roNodes, rwNodes,
-				SourceSectionUtil.fromStrategoTerm(source));
+		return new RelationAppLhs(lhsNode, roNodes, rwNodes, SourceSectionUtil.fromStrategoTerm(source));
 	}
 
 	@ExplodeLoop

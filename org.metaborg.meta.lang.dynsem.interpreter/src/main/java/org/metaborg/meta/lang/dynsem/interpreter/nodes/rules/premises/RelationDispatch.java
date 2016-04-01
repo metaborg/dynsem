@@ -29,8 +29,8 @@ public abstract class RelationDispatch extends Node {
 
 	@Child protected RelationAppLhs lhs;
 
-	public static RelationDispatch create(IStrategoAppl reads,
-			IStrategoAppl source, IStrategoAppl arrow, FrameDescriptor fd) {
+	public static RelationDispatch create(IStrategoAppl reads, IStrategoAppl source, IStrategoAppl arrow,
+			FrameDescriptor fd) {
 
 		assert Tools.hasConstructor(arrow, "NamedDynamicEmitted", 2);
 		String arrowName = Tools.stringAt(arrow, 1).stringValue();
@@ -40,28 +40,20 @@ public abstract class RelationDispatch extends Node {
 		IStrategoConstructor lhsC = lhsT.getConstructor();
 		if (lhsC.getName().equals("Con") && lhsC.getArity() == 2) {
 			// static dispatch
-			return new InlineableRelationDispatch(Tools.stringAt(lhsT, 0)
-					.stringValue(), Tools.listAt(lhsT, 1).size(), arrowName,
-					RelationAppLhs.create(reads, source, fd),
-					SourceSectionUtil.fromStrategoTerm(source));
+			return new InlineableRelationDispatch(Tools.stringAt(lhsT, 0).stringValue(), Tools.listAt(lhsT, 1).size(),
+					arrowName, RelationAppLhs.create(reads, source, fd), SourceSectionUtil.fromStrategoTerm(source));
 		} else if (lhsC.getName().equals("ListSource") && lhsC.getArity() == 2) {
-			String key = "_"
-					+ Tools.asJavaString(pp_type_0_0.instance.invoke(
-							trans.init(), Tools.termAt(lhsT, 1)));
+			String key = "_" + Tools.asJavaString(pp_type_0_0.instance.invoke(trans.init(), Tools.termAt(lhsT, 1)));
 			ITermFactory tf = new TermFactory();
 
-			IStrategoAppl newSource = tf.makeAppl(
-					source.getConstructor(),
-					new IStrategoTerm[] { Tools.termAt(lhsT, 0),
-							Tools.termAt(source, 1) });
+			IStrategoAppl newSource = tf.makeAppl(source.getConstructor(), new IStrategoTerm[] { Tools.termAt(lhsT, 0),
+					Tools.termAt(source, 1) });
 
-			return new ListRelationDispatch(key, arrowName,
-					RelationAppLhs.create(reads, newSource, fd),
+			return new ListRelationDispatch(key, arrowName, RelationAppLhs.create(reads, newSource, fd),
 					SourceSectionUtil.fromStrategoTerm(lhsT));
 		} else {
 			// dynamic dispatch
-			return new DynamicRelationDispatch(RelationAppLhs.create(reads,
-					source, fd), arrowName,
+			return new DynamicRelationDispatch(RelationAppLhs.create(reads, source, fd), arrowName,
 					SourceSectionUtil.fromStrategoTerm(source));
 		}
 	}
@@ -79,8 +71,8 @@ public abstract class RelationDispatch extends Node {
 		private final int arity;
 		private final String arrowName;
 
-		public InlineableRelationDispatch(String conName, int arity,
-				String arrowName, RelationAppLhs lhs, SourceSection source) {
+		public InlineableRelationDispatch(String conName, int arity, String arrowName, RelationAppLhs lhs,
+				SourceSection source) {
 			super(lhs, source);
 			this.conName = conName;
 			this.arrowName = arrowName;
@@ -90,13 +82,10 @@ public abstract class RelationDispatch extends Node {
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
 			// CompilerDirectives.transferToInterpreterAndInvalidate();
-			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry()
-					.lookupRule(arrowName, conName, arity);
+			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry().lookupRule(arrowName, conName, arity);
 			return replace(
-					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs),
-							NodeUtil.cloneNode(rr.getRule()), rr
-									.getFrameDescriptor(), getSourceSection()))
-					.execute(frame);
+					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
+							.getFrameDescriptor(), getSourceSection())).execute(frame);
 		}
 
 	}
@@ -106,8 +95,7 @@ public abstract class RelationDispatch extends Node {
 		private final String arrowName;
 		private final String ruleKey;
 
-		public ListRelationDispatch(String ruleKey, String arrowName,
-				RelationAppLhs lhs, SourceSection source) {
+		public ListRelationDispatch(String ruleKey, String arrowName, RelationAppLhs lhs, SourceSection source) {
 			super(lhs, source);
 			this.arrowName = arrowName;
 			this.ruleKey = ruleKey;
@@ -115,13 +103,10 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
-			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry()
-					.lookupRule(arrowName, ruleKey, 1);
+			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry().lookupRule(arrowName, ruleKey, 1);
 			return replace(
-					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs),
-							NodeUtil.cloneNode(rr.getRule()), rr
-									.getFrameDescriptor(), getSourceSection()))
-					.execute(frame);
+					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
+							.getFrameDescriptor(), getSourceSection())).execute(frame);
 		}
 
 	}
@@ -131,8 +116,7 @@ public abstract class RelationDispatch extends Node {
 		@Child protected Rule rule;
 		private final FrameDescriptor fd;
 
-		public InlinedRelationDispatch(RelationAppLhs lhs, Rule rule,
-				FrameDescriptor fd, SourceSection source) {
+		public InlinedRelationDispatch(RelationAppLhs lhs, Rule rule, FrameDescriptor fd, SourceSection source) {
 			super(lhs, source);
 			this.rule = rule;
 			this.fd = fd;
@@ -140,8 +124,7 @@ public abstract class RelationDispatch extends Node {
 
 		public RuleResult execute(VirtualFrame frame) {
 			Object[] args = lhs.executeObjectArray(frame);
-			return rule.execute(Truffle.getRuntime().createVirtualFrame(args,
-					fd));
+			return rule.execute(Truffle.getRuntime().createVirtualFrame(args, fd));
 		}
 
 	}
@@ -150,11 +133,9 @@ public abstract class RelationDispatch extends Node {
 
 		@Child protected IndirectReductionDispatch dispatcher;
 
-		public DynamicRelationDispatch(RelationAppLhs lhs, String arrowName,
-				SourceSection source) {
+		public DynamicRelationDispatch(RelationAppLhs lhs, String arrowName, SourceSection source) {
 			super(lhs, source);
-			this.dispatcher = IndirectReductionDispatchNodeGen.create(
-					arrowName, source);
+			this.dispatcher = IndirectReductionDispatchNodeGen.create(arrowName, source);
 		}
 
 		@Override

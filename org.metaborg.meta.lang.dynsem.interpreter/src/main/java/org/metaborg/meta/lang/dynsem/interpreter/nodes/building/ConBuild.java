@@ -31,14 +31,12 @@ public class ConBuild extends TermBuild {
 			children[i] = TermBuild.create(Tools.applAt(childrenT, i), fd);
 		}
 
-		return new ConBuild(constr, children,
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new ConBuild(constr, children, SourceSectionUtil.fromStrategoTerm(t));
 	}
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		ITermBuildFactory buildFactory = getContext().lookupTermBuilder(name,
-				children.length);
+		ITermBuildFactory buildFactory = getContext().lookupTermBuilder(name, children.length);
 		TermBuild build = buildFactory.apply(getSourceSection(), children);
 		return replace(build).executeGeneric(frame);
 	}

@@ -43,10 +43,8 @@ public abstract class LiteralTermBuild extends TermBuild {
 			this.val = val;
 		}
 
-		public static IntLiteralTermBuild create(IStrategoAppl t,
-				FrameDescriptor fd) {
-			return new IntLiteralTermBuild(Integer.parseInt(Tools
-					.stringAt(t, 0).stringValue()),
+		public static IntLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
+			return new IntLiteralTermBuild(Integer.parseInt(Tools.stringAt(t, 0).stringValue()),
 					SourceSectionUtil.fromStrategoTerm(t));
 		}
 
@@ -68,11 +66,9 @@ public abstract class LiteralTermBuild extends TermBuild {
 			super(source);
 		}
 
-		public static TrueLiteralTermBuild create(IStrategoAppl t,
-				FrameDescriptor fd) {
+		public static TrueLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "True", 0);
-			return new TrueLiteralTermBuild(
-					SourceSectionUtil.fromStrategoTerm(t));
+			return new TrueLiteralTermBuild(SourceSectionUtil.fromStrategoTerm(t));
 		}
 
 		@Override
@@ -93,11 +89,9 @@ public abstract class LiteralTermBuild extends TermBuild {
 			super(source);
 		}
 
-		public static FalseLiteralTermBuild create(IStrategoAppl t,
-				FrameDescriptor fd) {
+		public static FalseLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "False", 0);
-			return new FalseLiteralTermBuild(
-					SourceSectionUtil.fromStrategoTerm(t));
+			return new FalseLiteralTermBuild(SourceSectionUtil.fromStrategoTerm(t));
 		}
 
 		@Override

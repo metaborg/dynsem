@@ -13,8 +13,7 @@ public interface ITermTransformer {
 
 	public IStrategoTerm transform(IStrategoTerm term);
 
-	public static final class IdentityTermTransformer implements
-			ITermTransformer {
+	public static final class IdentityTermTransformer implements ITermTransformer {
 
 		@Override
 		public IStrategoTerm transform(IStrategoTerm term) {

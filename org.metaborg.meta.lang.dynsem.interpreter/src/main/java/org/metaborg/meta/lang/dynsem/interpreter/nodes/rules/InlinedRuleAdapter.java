@@ -17,10 +17,9 @@ public class InlinedRuleAdapter extends Node {
 	}
 
 	public RuleResult execute(VirtualFrame frame) {
-		return rule.execute(Truffle.getRuntime().createVirtualFrame(
-				frame.getArguments(), fd));
+		return rule.execute(Truffle.getRuntime().createVirtualFrame(frame.getArguments(), fd));
 	}
-	
+
 	public Rule getRule() {
 		return rule;
 	}

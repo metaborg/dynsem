@@ -11,10 +11,9 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 /**
- * A generic node for a NativeOp cons. This node only contains the necessary
- * logic to replace itself with a specific node which implements the
- * functionality. That replacement node must be registered in the
- * {@link ITermRegistry} associated with the context.
+ * A generic node for a NativeOp cons. This node only contains the necessary logic to replace itself with a specific
+ * node which implements the functionality. That replacement node must be registered in the {@link ITermRegistry}
+ * associated with the context.
  * 
  * @author vladvergu
  *
@@ -24,8 +23,7 @@ public class NativeOpTermBuild extends TermBuild {
 	protected final String constr;
 	@Children protected final TermBuild[] children;
 
-	public NativeOpTermBuild(String constr, TermBuild[] children,
-			SourceSection source) {
+	public NativeOpTermBuild(String constr, TermBuild[] children, SourceSection source) {
 		super(source);
 		this.constr = constr;
 		this.children = children;
@@ -33,8 +31,7 @@ public class NativeOpTermBuild extends TermBuild {
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		ITermBuildFactory buildFactory = getContext().lookupNativeOpBuilder(
-				constr, children.length);
+		ITermBuildFactory buildFactory = getContext().lookupNativeOpBuilder(constr, children.length);
 		TermBuild build = buildFactory.apply(getSourceSection(), children);
 		return replace(build).executeGeneric(frame);
 	}
@@ -49,8 +46,7 @@ public class NativeOpTermBuild extends TermBuild {
 			children[i] = TermBuild.create(Tools.applAt(childrenT, i), fd);
 		}
 
-		return new NativeOpTermBuild(constr, children,
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new NativeOpTermBuild(constr, children, SourceSectionUtil.fromStrategoTerm(t));
 
 	}
 

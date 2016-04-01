@@ -22,8 +22,7 @@ public class ConMatch extends MatchPattern {
 
 	@Override
 	public boolean execute(Object term, VirtualFrame frame) {
-		ITermMatchPatternFactory matchFactory = getContext()
-				.lookupMatchPattern(name, children.length);
+		ITermMatchPatternFactory matchFactory = getContext().lookupMatchPattern(name, children.length);
 		MatchPattern matcher = matchFactory.apply(getSourceSection(), children);
 		return replace(matcher).execute(term, frame);
 	}
@@ -37,7 +36,6 @@ public class ConMatch extends MatchPattern {
 			children[i] = MatchPattern.create(Tools.applAt(childrenT, i), fd);
 		}
 
-		return new ConMatch(constr, children,
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new ConMatch(constr, children, SourceSectionUtil.fromStrategoTerm(t));
 	}
 }

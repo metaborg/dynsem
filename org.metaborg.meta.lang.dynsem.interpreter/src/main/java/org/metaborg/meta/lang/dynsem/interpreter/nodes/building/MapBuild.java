@@ -39,8 +39,7 @@ public abstract class MapBuild extends TermBuild {
 
 		public static EmptyMapBuild create(IStrategoAppl t) {
 			assert Tools.hasConstructor(t, "Map", 1);
-			assert Tools.isTermList(t.getSubterm(0))
-					&& Tools.listAt(t, 0).size() == 0;
+			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
 			return new EmptyMapBuild(SourceSectionUtil.fromStrategoTerm(t));
 		}
 
@@ -53,7 +52,7 @@ public abstract class MapBuild extends TermBuild {
 		public PersistentMap<?, ?> executeMap(VirtualFrame frame) {
 			return create();
 		}
-		
+
 		@TruffleBoundary
 		private PersistentMap<?, ?> create() {
 			return PersistentHashMap.emptyMap();
@@ -65,8 +64,7 @@ public abstract class MapBuild extends TermBuild {
 		@Child private TermBuild keyNode;
 		@Child private TermBuild valNode;
 
-		public BindMapBuild(TermBuild keyNode, TermBuild valNode,
-				SourceSection source) {
+		public BindMapBuild(TermBuild keyNode, TermBuild valNode, SourceSection source) {
 			super(source);
 			this.keyNode = keyNode;
 			this.valNode = valNode;
@@ -74,16 +72,14 @@ public abstract class MapBuild extends TermBuild {
 
 		public static BindMapBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "Map", 1);
-			assert Tools.isTermList(t.getSubterm(0))
-					&& Tools.listAt(t, 0).size() == 1;
+			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 1;
 			IStrategoAppl bind = Tools.applAt(Tools.listAt(t, 0), 0);
 
 			assert Tools.hasConstructor(bind, "Bind", 2);
 			TermBuild keyNode = TermBuild.create(Tools.applAt(bind, 0), fd);
 			TermBuild valNode = TermBuild.create(Tools.applAt(bind, 1), fd);
 
-			return new BindMapBuild(keyNode, valNode,
-					SourceSectionUtil.fromStrategoTerm(t));
+			return new BindMapBuild(keyNode, valNode, SourceSectionUtil.fromStrategoTerm(t));
 		}
 
 		@Override
