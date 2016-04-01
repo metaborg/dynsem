@@ -6,6 +6,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.IndirectReductionDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.IndirectReductionDispatch2;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.IndirectReductionDispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationAppLhs;
 import org.spoofax.interpreter.core.Tools;
@@ -18,6 +19,7 @@ import org.spoofax.terms.TermFactory;
 import trans.pp_type_0_0;
 import trans.trans;
 
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -81,7 +83,7 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
-			// CompilerDirectives.transferToInterpreterAndInvalidate();
+//			CompilerDirectives.transferToInterpreter();
 			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry().lookupRule(arrowName, conName, arity);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
@@ -103,6 +105,7 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
+//			CompilerDirectives.transferToInterpreter();
 			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry().lookupRule(arrowName, ruleKey, 1);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
@@ -131,17 +134,18 @@ public abstract class RelationDispatch extends Node {
 
 	public static class DynamicRelationDispatch extends RelationDispatch {
 
-		@Child protected IndirectReductionDispatch dispatcher;
+		@Child protected IndirectReductionDispatch2 dispatcher;
 
 		public DynamicRelationDispatch(RelationAppLhs lhs, String arrowName, SourceSection source) {
 			super(lhs, source);
-			this.dispatcher = IndirectReductionDispatchNodeGen.create(arrowName, source);
+//			this.dispatcher = IndirectReductionDispatchNodeGen.create(arrowName, source);
+			this.dispatcher = new IndirectReductionDispatch2._Uninitialized(arrowName, source);
 		}
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
 			Object[] args = lhs.executeObjectArray(frame);
-			return dispatcher.executeDispatch(frame, args[0], args);
+			return dispatcher.executeDispatch(frame, args);
 		}
 
 	}

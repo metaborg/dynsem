@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.github.krukow.clj_lang.IPersistentStack;
 import com.oracle.truffle.api.dsl.NodeChild;
@@ -16,7 +16,7 @@ public abstract class TermExpansion extends Node {
 	public abstract Object[] execute(VirtualFrame frame);
 
 	@Specialization
-	public Object[] doConBuild(final IConTerm term) {
+	public Object[] doConBuild(final ITerm term) {
 		int arity = term.arity();
 		Object[] terms = new Object[arity + 1];
 		terms[0] = term;

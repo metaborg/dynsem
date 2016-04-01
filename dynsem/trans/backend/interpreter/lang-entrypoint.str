@@ -22,7 +22,6 @@ rules /* language file. interpreter entry point */
       import java.nio.file.Paths;
       import java.util.concurrent.Callable;
       
-      import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
       import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
       
       import ~x:<TopPackageName>.~x:$[[<LanguageName>]TermRegistry];
@@ -115,8 +114,8 @@ rules /* language file. interpreter entry point */
               if (initRuleRoot == null) {
                 throw new IllegalStateException("Rule not found");
               }
-              if (program instanceof IConTerm) {
-                IConTerm programCon = (IConTerm) program;
+              if (program instanceof ITerm) {
+                ITerm programCon = (ITerm) program;
                 if (programCon.constructor().equals(START_CONSTR_NAME)
                     && programCon.arity() == START_CONSTR_ARITY) {
                   DynSemPrimedRun run = new DynSemPrimedRun();

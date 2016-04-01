@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.Truffle;
@@ -46,7 +46,7 @@ public class DynSemRunForeignAccess implements Factory {
 		@Override
 		public Object execute(VirtualFrame frame) {
 			DynSemPrimedRun run = (DynSemPrimedRun) ForeignAccess.getReceiver(frame);
-			IConTerm program = run.getProgram();
+			ITerm program = run.getProgram();
 
 			return run.getCallTarget().call(Rule.buildArguments(program, program.allSubterms(), new Object[] {}));
 		}

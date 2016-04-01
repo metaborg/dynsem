@@ -8,7 +8,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -59,8 +59,8 @@ public abstract class TermBuild extends Node {
 		return BuiltinTypesGen.expectITerm(executeGeneric(frame));
 	}
 
-	public IConTerm executeIConTerm(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectIConTerm(executeGeneric(frame));
+	public ITerm executeIConTerm(VirtualFrame frame) throws UnexpectedResultException {
+		return BuiltinTypesGen.expectITerm(executeGeneric(frame));
 	}
 
 	public PersistentMap<?, ?> executeMap(VirtualFrame frame) throws UnexpectedResultException {

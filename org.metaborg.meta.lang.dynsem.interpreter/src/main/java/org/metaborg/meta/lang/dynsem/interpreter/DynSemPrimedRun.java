@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.interop.ForeignAccess;
@@ -9,7 +9,7 @@ import com.oracle.truffle.api.interop.TruffleObject;
 public class DynSemPrimedRun implements TruffleObject {
 
 	private RootCallTarget callTarget;
-	private IConTerm program;
+	private ITerm program;
 
 	public void setCallTarget(RootCallTarget callTarget) {
 		this.callTarget = callTarget;
@@ -19,11 +19,11 @@ public class DynSemPrimedRun implements TruffleObject {
 		return callTarget;
 	}
 
-	public void setProgram(IConTerm program) {
+	public void setProgram(ITerm program) {
 		this.program = program;
 	}
 
-	public IConTerm getProgram() {
+	public ITerm getProgram() {
 		return program;
 	}
 

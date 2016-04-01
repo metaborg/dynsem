@@ -4,7 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IConTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -48,7 +48,7 @@ public abstract class IndirectReductionDispatch extends Node {
 	}
 
 	protected CallTarget lookupCallTarget(Object term) {
-		IConTerm con = BuiltinTypesGen.asIConTerm(term);
+		ITerm con = BuiltinTypesGen.asITerm(term);
 		if (context == null) {
 			context = DynSemContext.LANGUAGE.getContext();
 		}
@@ -56,7 +56,7 @@ public abstract class IndirectReductionDispatch extends Node {
 	}
 
 	protected ITermInstanceChecker lookupInstanceChecker(Object o) {
-		return BuiltinTypesGen.asIConTerm(o).getCheck();
+		return BuiltinTypesGen.asITerm(o).getCheck();
 	}
 
 }
