@@ -15,7 +15,7 @@ language General properties
   table         : include/ds.tbl
   start symbols : Module
   
-  provider      : include/ds.jar
+  provider      : include/ds-main.jar
   // provider      : include/ds.ctree
   provider      : include/ds-main-java.jar
                                                                                                   

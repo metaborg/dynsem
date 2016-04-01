@@ -34,75 +34,75 @@ rules // desugaring
   	  	
   desugar-top = 
   	alltd(desugar-functions);
-  	innermost(desugar); 
+  	innermost(ds-desugar); 
   	alltd(rules-concat)
   
-  desugar :
+  ds-desugar :
     NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
   
-  desugar :
+  ds-desugar :
     NullaryConsDecl(c, s, annos) -> ConsDecl(c, [], s, annos)
   
-  desugar :
+  ds-desugar :
     NoAnnos() -> Annos([])
   
-  desugar :
+  ds-desugar :
     NullaryNativeConsDecl(c, s) -> NativeConsDecl(c, [], s)
 
-  desugar :
+  ds-desugar :
     NullaryNativeOpDecl(c, s) -> NativeOpDecl(c, [], s)
   
-  desugar :
+  ds-desugar :
     RuleW(form, prem*) -> Rule(prem*, "---", form)
   
-  desugar :
+  ds-desugar :
     DefaultArrowDecl(l-ty, r-ty) -> ArrowDecl(l-ty, "default", r-ty)
   
-  desugar :
+  ds-desugar :
     Dynamic() -> NamedDynamic("default")
   
-  desugar :
+  ds-desugar :
     DynamicEmitted(e) -> NamedDynamicEmitted(e, "default")
   
-  desugar :
+  ds-desugar :
     NamedDynamic(n) -> NamedDynamicEmitted([], n)
   
-  desugar :
+  ds-desugar :
     List(x*) -> ListTail(x*, List([]))
     where <not(?[])> x*
 
-  desugar :
+  ds-desugar :
     ListTail([x | xs*], xxs) -> ListTail([x], ListTail(xs*, xxs))
     where
       <not(?[])> xs*
 
-  desugar :
+  ds-desugar :
     NoReads() -> Reads([])
 
-  desugar :
+  ds-desugar :
     Source(lhs) -> Source(lhs, [])
 
-  desugar :
+  ds-desugar :
     Target(rhs) -> Target(rhs, [])
 
-  desugar :
+  ds-desugar :
     Axiom(form) -> Rule([], "---------", form)
     
-  desugar :
+  ds-desugar :
     IsValue(term) -> TermEq(Con("IsValue",[term]),Con("True",[]))
 
-  desugar :
+  ds-desugar :
     Map([b | b*@[_|_]]) -> MapExtend(Map([b]), Map(b*))
     
-  desugar :
+  ds-desugar :
     Map([MapEntry(x)]) -> x
 
-  desugar :
+  ds-desugar :
     Strict(con,params1,params2) -> list
      where Cons(_,Cons(_,_)) := params1;
            list := <map( \ param -> Strict(con,[param],params2) \)> params1
 
-  desugar :
+  ds-desugar :
     Seqstrict(con,params1,params2) -> list
      where Cons(_,Cons(_,_)) := params1;
            list := <map( \ param -> Seqstrict(con,[param],params2) \)> params1
@@ -115,44 +115,44 @@ rules // desugaring
 
 rules // sugaring
   
-  sugar-all = innermost(sugar)
+  sugar-all = innermost(ds-sugar)
   
-  sugar :
+  ds-sugar :
     NativeFunctionDecl(name, [], type) -> NativeNoArgFunctionDecl(name, type)
   
-  sugar :
+  ds-sugar :
     ConsDecl(c, [], s, annos) -> NullaryConsDecl(c, s, annos)
   
-  sugar :
+  ds-sugar :
     Annos([]) -> NoAnnos()
   
-  sugar :
+  ds-sugar :
     NativeConsDecl(c, [], s) -> NullaryNativeConsDecl(c, s)
 
-  sugar :
+  ds-sugar :
     NativeOpDecl(c, [], s) -> NullaryNativeOpDecl(c, s)
   
-  sugar :
+  ds-sugar :
   	Rule([],infer,conc) -> Axiom(conc)
 
-  sugar :
+  ds-sugar :
   	Reads([]) -> NoReads()
 
-  sugar :
+  ds-sugar :
   	NamedDynamicEmitted([], name) -> NamedDynamic(name)
 
-  sugar :
+  ds-sugar :
   	Target(term,[]) -> Target(term)
 
-  sugar :
+  ds-sugar :
   	Source(term,[]) -> Source(term)
 
-  sugar :
+  ds-sugar :
     TermEq(Con("IsValue",[term]),Con("True",[])) -> IsValue(term)
     
-  sugar :
+  ds-sugar :
     Rule(prem*, _, form) -> RuleW(form, prem*)
 
-  sugar :
+  ds-sugar :
   	MatchedVar(v) -> Var(v)
   
