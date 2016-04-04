@@ -103,7 +103,7 @@ rules /* language file. interpreter entry point */
           IStrategoTerm programT = new x_transformer().transform(ctx.getParser().parse(code, START_SYMBOL));
           ITerm program = ctx.getTermRegistry().parseProgramTerm(programT);
       
-          RootNode rootNode = new RootNode(SLLanguage.class, null, null) {
+          RootNode rootNode = new RootNode(x_language.class, null, null) {
 
             @Override
             public Object execute(VirtualFrame frame) {
