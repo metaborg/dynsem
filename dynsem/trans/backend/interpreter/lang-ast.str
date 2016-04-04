@@ -334,7 +334,7 @@ rules /* type system class */
       concat;
       qsort(?(ConsDecl(_, _, _, _), SortDecl(_)) + ?(SortDecl(_), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)));
       map(ds-to-interp-terms-types-name);
-      map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))) => type*
+      map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
 
 rules /* term building */
 
