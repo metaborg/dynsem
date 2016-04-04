@@ -1,7 +1,7 @@
 module backend/interpreter/lang-names
 
 imports
-  signatures/ds-sig
+  signatures/-
   backend/interpreter/utils
   backend/interpreter/signature
   libjava-front
@@ -40,6 +40,12 @@ rules
   ds-to-interp-terms-types-name:
     SimpleSort("Bool") -> $[boolean]
   
+  ds-box-java-type:
+    "int" -> $[Integer]
+
+  ds-box-java-type:
+    "boolean" -> $[Boolean]
+    
   is-primitive-type = try(?SimpleSort(<id>)); (?"Int" + ?"Bool")
   
   is-builtin-type = try(?SimpleSort(<id>)); (?"String" + ?"Int" + ?"Bool")

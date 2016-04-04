@@ -94,7 +94,7 @@ rules /* Sort & Constructor classes */
         import org.spoofax.interpreter.core.Tools;
         import org.spoofax.interpreter.terms.*;
         import ~x:<NativePackageName>.*;
-        import org.metaborg.lang.sl.interpreter.generated.TypesGen;
+        import ~x:<TopPackageName>.TypesGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
                 
         public class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
@@ -219,8 +219,8 @@ rules /* Sort & Constructor classes */
       x_bindsT := $[_[<newname>]];
       x_map := $[_[<newname>]];
       x_bindT := $[_[<newname>]];
-      x_keyclass := <ds-to-interp-terms-types-name> skey;
-      x_valclass := <ds-to-interp-terms-types-name> sval;
+      x_keyclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> skey;
+      x_valclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> sval;
       (bstm0*, e_keycreate) := <ds-to-interp-sorts-to-create-arg(|x_bindT)> (e |[ 0 ]|, skey);
       (bstm1*, e_valcreate) := <ds-to-interp-sorts-to-create-arg(|x_bindT)> (e |[ 1 ]|, sval)
 

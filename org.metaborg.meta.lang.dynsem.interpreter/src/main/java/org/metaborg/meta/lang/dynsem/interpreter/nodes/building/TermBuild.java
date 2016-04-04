@@ -122,6 +122,9 @@ public abstract class TermBuild extends Node {
 		if (Tools.hasConstructor(t, "NativeFunCall", 4)) {
 			return SortFunCallBuild.create(t, fd);
 		}
+		if(Tools.hasConstructor(t, "Fresh", 0)) {
+			return Fresh.create(t, fd);
+		}
 		if (Tools.hasConstructor(t, "Cast", 2)) {
 			// FIXME: this is a hack. we should use the type information from
 			// the cast
