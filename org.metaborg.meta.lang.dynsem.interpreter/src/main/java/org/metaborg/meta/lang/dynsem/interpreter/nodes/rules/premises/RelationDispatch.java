@@ -5,9 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.IndirectReductionDispatch;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.IndirectReductionDispatch2;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.IndirectReductionDispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationAppLhs;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -21,6 +19,7 @@ import trans.trans;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
@@ -29,7 +28,24 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class RelationDispatch extends Node {
 
+	
 	@Child protected RelationAppLhs lhs;
+
+	private final Node contextNode;
+	@CompilationFinal private DynSemContext cachedContext;
+	
+	protected DynSemContext getContext() {
+		if (cachedContext == null) {
+			cachedContext = DynSemContext.LANGUAGE.findContext0(contextNode);
+		}
+		return cachedContext;
+	}
+
+	public RelationDispatch(RelationAppLhs lhs, SourceSection source) {
+		super(source);
+		this.lhs = lhs;
+		this.contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
+	}
 
 	public static RelationDispatch create(IStrategoAppl reads, IStrategoAppl source, IStrategoAppl arrow,
 			FrameDescriptor fd) {
@@ -60,11 +76,6 @@ public abstract class RelationDispatch extends Node {
 		}
 	}
 
-	public RelationDispatch(RelationAppLhs lhs, SourceSection source) {
-		super(source);
-		this.lhs = lhs;
-	}
-
 	public abstract RuleResult execute(VirtualFrame frame);
 
 	public static class InlineableRelationDispatch extends RelationDispatch {
@@ -83,8 +94,8 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
-			// CompilerDirectives.transferToInterpreter();
-			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry().lookupRule(arrowName, conName, arity);
+			CompilerDirectives.transferToInterpreter();
+			RuleRoot rr = getContext().getRuleRegistry().lookupRule(arrowName, conName, arity);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
 							.getFrameDescriptor(), getSourceSection())).execute(frame);
@@ -105,8 +116,8 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
-			// CompilerDirectives.transferToInterpreter();
-			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry().lookupRule(arrowName, ruleKey, 1);
+			CompilerDirectives.transferToInterpreter();
+			RuleRoot rr = getContext().getRuleRegistry().lookupRule(arrowName, ruleKey, 1);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
 							.getFrameDescriptor(), getSourceSection())).execute(frame);
@@ -134,6 +145,7 @@ public abstract class RelationDispatch extends Node {
 
 	public static class DynamicRelationDispatch extends RelationDispatch {
 
+		// @Child protected IndirectReductionDispatch dispatcher;
 		@Child protected IndirectReductionDispatch2 dispatcher;
 
 		public DynamicRelationDispatch(RelationAppLhs lhs, String arrowName, SourceSection source) {
@@ -146,6 +158,7 @@ public abstract class RelationDispatch extends Node {
 		public RuleResult execute(VirtualFrame frame) {
 			Object[] args = lhs.executeObjectArray(frame);
 			return dispatcher.executeDispatch(frame, args);
+			// return dispatcher.executeDispatch(frame, args[0], args);
 		}
 
 	}

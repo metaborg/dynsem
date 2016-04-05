@@ -9,13 +9,11 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
-import com.github.krukow.clj_lang.IPersistentCollection;
 import com.github.krukow.clj_lang.IPersistentStack;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
@@ -35,7 +33,7 @@ public abstract class TermBuild extends Node {
 
 	public TermBuild(SourceSection source) {
 		super(source);
-		contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
+		this.contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
 	}
 
 	protected DynSemContext getContext() {
@@ -122,7 +120,7 @@ public abstract class TermBuild extends Node {
 		if (Tools.hasConstructor(t, "NativeFunCall", 4)) {
 			return SortFunCallBuild.create(t, fd);
 		}
-		if(Tools.hasConstructor(t, "Fresh", 0)) {
+		if (Tools.hasConstructor(t, "Fresh", 0)) {
 			return Fresh.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "Cast", 2)) {

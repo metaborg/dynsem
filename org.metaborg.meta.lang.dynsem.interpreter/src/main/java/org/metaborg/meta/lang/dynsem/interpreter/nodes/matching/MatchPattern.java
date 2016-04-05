@@ -14,18 +14,19 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class MatchPattern extends Node {
-
-	@CompilationFinal private Node createContext;
+	private final Node contextNode;
+	@CompilationFinal private DynSemContext cachedContext;
 
 	public MatchPattern(SourceSection source) {
 		super(source);
+		this.contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
 	}
 
 	protected DynSemContext getContext() {
-		if (createContext == null) {
-			createContext = DynSemContext.LANGUAGE.createFindContextNode0();
+		if (cachedContext == null) {
+			cachedContext = DynSemContext.LANGUAGE.findContext0(contextNode);
 		}
-		return DynSemContext.LANGUAGE.findContext0(createContext);
+		return cachedContext;
 	}
 
 	public abstract boolean execute(Object term, VirtualFrame frame);
