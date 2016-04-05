@@ -83,7 +83,7 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
-//			CompilerDirectives.transferToInterpreter();
+			// CompilerDirectives.transferToInterpreter();
 			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry().lookupRule(arrowName, conName, arity);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
@@ -105,7 +105,7 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
-//			CompilerDirectives.transferToInterpreter();
+			// CompilerDirectives.transferToInterpreter();
 			RuleRoot rr = DynSemContext.LANGUAGE.getContext().getRuleRegistry().lookupRule(arrowName, ruleKey, 1);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
@@ -138,7 +138,7 @@ public abstract class RelationDispatch extends Node {
 
 		public DynamicRelationDispatch(RelationAppLhs lhs, String arrowName, SourceSection source) {
 			super(lhs, source);
-//			this.dispatcher = IndirectReductionDispatchNodeGen.create(arrowName, source);
+			// this.dispatcher = IndirectReductionDispatchNodeGen.create(arrowName, source);
 			this.dispatcher = new IndirectReductionDispatch2._Uninitialized(arrowName, source);
 		}
 
