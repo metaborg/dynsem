@@ -1,11 +1,11 @@
 module analysis/rename
 
 imports
-  include/ds
+  signatures/ds-sig
   ds
   analysis/lib-analysis
   analysis/constructors
-  lib/editor-common.generated
+  stratego/metaborg
   
 strategies
 	

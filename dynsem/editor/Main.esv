@@ -1,0 +1,23 @@
+module Main
+
+imports 
+
+  Menus
+  Colorer
+  Syntax
+  Views
+
+language 
+                        
+  extensions : ds
+  
+  table         : target/metaborg/sdf.tbl
+  start symbols : Module
+  
+  provider : target/metaborg/stratego.jar
+  observer : editor-analyze
+
+references
+                
+  reference _ : editor-resolve
+  hover _     : editor-hover

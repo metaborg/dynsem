@@ -1,9 +1,9 @@
 module analysis/lib-analysis
 
 imports
-  include/ds
+  signatures/ds-sig
   analysis/constructors
-  lib/editor-common.generated
+  stratego/metaborg
 
 rules
 	

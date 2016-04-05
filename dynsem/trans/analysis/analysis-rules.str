@@ -1,7 +1,7 @@
 module analysis/analysis-rules
 
 imports
-  include/ds
+  signatures/ds-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/rename
@@ -474,12 +474,12 @@ rules
       sup-ty := <lookup-prop(|NativeTypeSuperType())> ty-from-def
   
   type-coerce(coerce-s):
-    (ty-from, ty-to) -> <type-coerce(coerce-s)> (<get-alias-base> ty-from, ty-to)
+    (ty-from, ty-to) -> <coerce-s> (<get-alias-base> ty-from, ty-to)
     where
       <is-alias> ty-from
   
   type-coerce(coerce-s):
-    (ty-from, ty-to) -> <type-coerce(coerce-s)> (ty-from, <get-alias-base> ty-to)
+    (ty-from, ty-to) -> <coerce-s> (ty-from, <get-alias-base> ty-to)
     where
       <is-alias> ty-to
 

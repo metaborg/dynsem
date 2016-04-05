@@ -1,12 +1,13 @@
 module outline
 
 imports
-  include/ds
-  lib/runtime/editor/outline-library
+  signatures/ds-sig
+  runtime/editor/outline-library
 
 rules
 
-  outline-strategy = fail
+  outline = simple-label-outline(to-outline-label)
+  to-outline-label = fail
   outline-expand-to-level = !0
 
   // outline-strategy = !Node("", []) // simple-label-outline(to-outline-label)

@@ -1,8 +1,8 @@
 module ds2ds/resolve-includes
 
 imports
-  include/ds
-  lib/editor-common.generated
+  signatures/ds-sig
+  stratego/metaborg
   ds
   
 imports

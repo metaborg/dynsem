@@ -1,0 +1,15 @@
+module mwe
+
+signature
+    sorts
+        Expr
+    sort aliases
+        ID = String
+    constructors
+        Ref : ID -> Expr
+    arrows
+        Expr --> Expr
+
+rules
+
+    Ref(id) --> Ref(id).

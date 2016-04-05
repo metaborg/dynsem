@@ -1,7 +1,7 @@
 module backend/java-backend/emit-maputils
 
 imports
-  include/ds
+  signatures/ds-sig
   libjava-front
 
 imports
@@ -49,7 +49,7 @@ rules
         public static IStrategoTerm x_toterm(PersistentMap<x_kty, x_vty> map, ITermFactory factory) {
           IStrategoConstructor bindCons = factory.makeConstructor("Bind", 2);
 
-          IStrategoTerm[] kids = new IStrategoTerm[map.size() + 1];
+          IStrategoTerm[] kids = new IStrategoTerm[map.size()];
 
           int idx = 0;
           for (Entry<x_kty, x_vty> entry : map.entrySet()) {
@@ -58,15 +58,15 @@ rules
             idx++;
           }
           
-          return factory.makeAppl(factory.makeConstructor("Map", 2), kids);
+          return factory.makeAppl(factory.makeConstructor("Map", 1), kids);
         }
         
         public static x_maptype x_fromterm(IStrategoTerm term) {        
 			    final Map<x_kty, x_vty> result = new TreeMap<x_kty, x_vty>();
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
-			      if (Tools.hasConstructor(appl, "Map", 2)) {
-		          for (int idx = 1; idx < term.getSubtermCount(); idx++) {
+			      if (Tools.hasConstructor(appl, "Map", 1)) {
+		          for (int idx = 0; idx < term.getSubtermCount(); idx++) {
 		            IStrategoTerm kid = term.getSubterm(idx);
 		            if (Tools.isTermAppl(kid)) {
 		              IStrategoAppl bindAppl = (IStrategoAppl) kid;

@@ -1,10 +1,10 @@
 module ds
 
 imports
-	include/ds
+	signatures/ds-sig
 
 imports
-	lib/editor-common.generated
+	stratego/metaborg
 	pp
 	outline
 	ds2ds/refocus
