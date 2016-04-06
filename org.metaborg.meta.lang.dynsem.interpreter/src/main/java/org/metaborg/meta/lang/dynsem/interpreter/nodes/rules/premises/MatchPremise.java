@@ -7,6 +7,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -40,6 +41,7 @@ public class MatchPremise extends Premise {
 	}
 
 	public static MatchPremise create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "Match", 2);
 		TermBuild lhs = TermBuild.create(Tools.applAt(t, 0), fd);
 		MatchPattern rhs = MatchPattern.create(Tools.applAt(t, 1), fd);

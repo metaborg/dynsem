@@ -6,6 +6,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -36,6 +37,7 @@ public class RuleTarget extends Node {
 	}
 
 	public static RuleTarget create(IStrategoAppl targetT, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(targetT, "Target", 2);
 		TermBuild rhsNode = TermBuild.create(Tools.termAt(targetT, 0), fd);
 

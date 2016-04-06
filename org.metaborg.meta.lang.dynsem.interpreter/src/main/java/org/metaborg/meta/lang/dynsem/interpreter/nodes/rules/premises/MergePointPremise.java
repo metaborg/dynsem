@@ -6,6 +6,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -27,6 +28,7 @@ public class MergePointPremise extends Premise {
 	}
 
 	public static MergePointPremise create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "MergePoint", 3);
 		Premise condition = Premise.create(Tools.applAt(t, 0), fd);
 		IStrategoList branch1Ts = Tools.listAt(Tools.applAt(t, 1), 0);

@@ -6,6 +6,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
@@ -22,6 +23,7 @@ public abstract class TermEqPremise extends Premise {
 	}
 
 	public static TermEqPremise create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "TermEq", 2);
 		TermBuild lhs = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild rhs = TermBuild.create(Tools.applAt(t, 1), fd);
