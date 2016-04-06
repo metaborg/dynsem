@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.interop.ForeignAccess;
 import com.oracle.truffle.api.interop.ForeignAccess.Factory;
@@ -33,8 +34,13 @@ public class DynSemRunForeignAccess implements Factory {
 		} else if (Message.IS_BOXED.equals(tree)) {
 			return Truffle.getRuntime().createCallTarget(RootNode.createConstantNode(false));
 		} else {
-			throw new IllegalArgumentException(tree.toString() + " not supported");
+			throw new IllegalArgumentException(stringConcat(tree.toString(), " not supported"));
 		}
+	}
+
+	@TruffleBoundary
+	private String stringConcat(String s1, String s2) {
+		return s1 + s2;
 	}
 
 	private static class DynSemForeignCallerRootNode extends RootNode {

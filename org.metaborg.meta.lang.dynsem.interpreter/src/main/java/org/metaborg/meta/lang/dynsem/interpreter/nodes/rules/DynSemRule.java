@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
@@ -67,6 +68,7 @@ public class DynSemRule extends Rule {
 	}
 
 	@Override
+	@TruffleBoundary
 	public String toString() {
 		return "Reduction rule: " + name + "/" + constr + "/" + arity;
 	}

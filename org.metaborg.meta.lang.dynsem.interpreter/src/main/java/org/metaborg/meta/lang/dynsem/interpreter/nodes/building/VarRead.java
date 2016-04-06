@@ -4,6 +4,7 @@ import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -30,6 +31,7 @@ public class VarRead extends TermBuild {
 	}
 
 	@Override
+	@TruffleBoundary
 	public String toString() {
 		return "VarRead(" + slot.getIdentifier() + ")";
 	}

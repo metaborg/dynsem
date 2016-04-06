@@ -17,6 +17,7 @@ import trans.pp_type_0_0;
 import trans.rw_type_0_0;
 import trans.trans;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -42,6 +43,7 @@ public class RuleRoot extends RootNode {
 	}
 
 	@Override
+	@TruffleBoundary
 	public String toString() {
 		return "RuleRoot: " + rule.getName() + "/" + rule.getConstructor() + "/" + rule.getArity();
 	}

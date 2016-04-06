@@ -6,6 +6,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -68,6 +69,7 @@ public class MergePointPremise extends Premise {
 	}
 
 	@Override
+	@TruffleBoundary
 	public String toString() {
 		return NodeUtil.printCompactTreeToString(this);
 	}

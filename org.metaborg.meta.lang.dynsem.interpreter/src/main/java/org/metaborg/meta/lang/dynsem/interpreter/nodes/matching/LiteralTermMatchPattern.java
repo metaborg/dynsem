@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -24,9 +25,14 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 		public boolean execute(Object term, VirtualFrame frame) {
 			if (BuiltinTypesGen.isString(term)) {
 				String s = BuiltinTypesGen.asString(term);
-				return lit.equals(s);
+				return isStringEq(s);
 			}
 			return false;
+		}
+
+		@TruffleBoundary
+		private boolean isStringEq(String s) {
+			return lit.equals(s);
 		}
 
 	}

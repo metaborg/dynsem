@@ -11,7 +11,7 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class ConBuild extends TermBuild {
 
-	private String name;
+	private final String name;
 
 	@Children private final TermBuild[] children;
 

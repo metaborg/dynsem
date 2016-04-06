@@ -4,6 +4,7 @@ import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -27,6 +28,7 @@ public class ArgRead extends TermBuild {
 	}
 
 	@Override
+	@TruffleBoundary
 	public String toString() {
 		return "ArgRead(" + index + ")";
 	}

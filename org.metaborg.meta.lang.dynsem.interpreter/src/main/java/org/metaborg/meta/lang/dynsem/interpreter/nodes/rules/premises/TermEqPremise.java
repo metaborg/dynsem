@@ -6,6 +6,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -37,6 +38,7 @@ public abstract class TermEqPremise extends Premise {
 	}
 
 	@Override
+	@TruffleBoundary
 	public String toString() {
 		return NodeUtil.printCompactTreeToString(this);
 	}
