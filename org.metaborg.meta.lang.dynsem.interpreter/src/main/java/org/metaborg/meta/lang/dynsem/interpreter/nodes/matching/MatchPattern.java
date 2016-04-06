@@ -7,6 +7,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -24,6 +25,7 @@ public abstract class MatchPattern extends Node {
 
 	protected DynSemContext getContext() {
 		if (cachedContext == null) {
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			cachedContext = DynSemContext.LANGUAGE.findContext0(contextNode);
 		}
 		return cachedContext;

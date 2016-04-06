@@ -11,6 +11,7 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class ListMatch extends MatchPattern {
@@ -31,9 +32,11 @@ public abstract class ListMatch extends MatchPattern {
 			return new NilListMatch(SourceSectionUtil.fromStrategoTerm(t));
 		}
 
+		private final ConditionProfile condProfile = ConditionProfile.createBinaryProfile();
+
 		@Override
 		public boolean execute(Object term, VirtualFrame frame) {
-			if (BuiltinTypesGen.isIPersistentStack(term)) {
+			if (condProfile.profile(BuiltinTypesGen.isIPersistentStack(term))) {
 				return BuiltinTypesGen.asIPersistentStack(term).count() == 0;
 			}
 			return false;

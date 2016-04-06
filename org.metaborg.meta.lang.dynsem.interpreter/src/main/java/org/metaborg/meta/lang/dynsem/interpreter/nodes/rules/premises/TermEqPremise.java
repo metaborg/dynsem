@@ -27,6 +27,8 @@ public abstract class TermEqPremise extends Premise {
 		return TermEqPremiseNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), lhs, rhs);
 	}
 
+	// TODO specialize for different types of left & right
+	
 	@Specialization
 	public void doEvaluated(Object left, Object right) {
 		if (!left.equals(right)) {

@@ -36,6 +36,7 @@ public abstract class RelationDispatch extends Node {
 	
 	protected DynSemContext getContext() {
 		if (cachedContext == null) {
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			cachedContext = DynSemContext.LANGUAGE.findContext0(contextNode);
 		}
 		return cachedContext;
@@ -94,7 +95,7 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
-			CompilerDirectives.transferToInterpreter();
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			RuleRoot rr = getContext().getRuleRegistry().lookupRule(arrowName, conName, arity);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr
@@ -116,7 +117,7 @@ public abstract class RelationDispatch extends Node {
 
 		@Override
 		public RuleResult execute(VirtualFrame frame) {
-			CompilerDirectives.transferToInterpreter();
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			RuleRoot rr = getContext().getRuleRegistry().lookupRule(arrowName, ruleKey, 1);
 			return replace(
 					new InlinedRelationDispatch(NodeUtil.cloneNode(lhs), NodeUtil.cloneNode(rr.getRule()), rr

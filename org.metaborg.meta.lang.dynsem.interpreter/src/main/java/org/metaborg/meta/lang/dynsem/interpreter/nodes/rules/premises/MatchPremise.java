@@ -7,9 +7,11 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class MatchPremise extends Premise {
@@ -23,6 +25,8 @@ public class MatchPremise extends Premise {
 		this.pat = pattern;
 	}
 
+	private final BranchProfile matchFailProfile = BranchProfile.create();
+
 	@Override
 	public void execute(VirtualFrame frame) {
 		Object res = term.executeGeneric(frame);
@@ -30,6 +34,7 @@ public class MatchPremise extends Premise {
 		boolean matchsuccess = pat.execute(res, frame);
 
 		if (!matchsuccess) {
+			matchFailProfile.enter();
 			throw new PremiseFailure();
 		}
 	}
@@ -42,6 +47,7 @@ public class MatchPremise extends Premise {
 	}
 
 	@Override
+	@TruffleBoundary
 	public String toString() {
 		return NodeUtil.printCompactTreeToString(this);
 	}
