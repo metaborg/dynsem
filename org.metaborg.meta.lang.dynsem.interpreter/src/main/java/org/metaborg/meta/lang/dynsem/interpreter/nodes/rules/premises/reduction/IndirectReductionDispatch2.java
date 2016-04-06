@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
@@ -10,12 +9,10 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -107,7 +104,7 @@ public abstract class IndirectReductionDispatch2 extends DynSemNode {
 		}
 	}
 
-	public class _Generic extends IndirectReductionDispatch2 {
+	public static class _Generic extends IndirectReductionDispatch2 {
 
 		@Child private IndirectCallNode callNode;
 

@@ -44,7 +44,7 @@ public abstract class RelationDispatch extends DynSemNode {
 		IStrategoConstructor lhsC = lhsT.getConstructor();
 		if (lhsC.getName().equals("Con") && lhsC.getArity() == 2) {
 			// static dispatch
-			return new InlineableRelationDispatch(Tools.stringAt(lhsT, 0).stringValue(), Tools.listAt(lhsT, 1).size(),
+			return new MetafunctionDispatch(Tools.stringAt(lhsT, 0).stringValue(), Tools.listAt(lhsT, 1).size(),
 					arrowName, RelationAppLhs.create(reads, source, fd), SourceSectionUtil.fromStrategoTerm(source));
 		} else if (lhsC.getName().equals("ListSource") && lhsC.getArity() == 2) {
 			String key = "_" + Tools.asJavaString(pp_type_0_0.instance.invoke(trans.init(), Tools.termAt(lhsT, 1)));
@@ -64,15 +64,13 @@ public abstract class RelationDispatch extends DynSemNode {
 
 	public abstract RuleResult execute(VirtualFrame frame);
 
-	@Deprecated
-	public static class InlineableRelationDispatch extends RelationDispatch {
+	public static class MetafunctionDispatch extends RelationDispatch {
 
 		private final String conName;
 		private final int arity;
 		private final String arrowName;
 
-		@Deprecated
-		public InlineableRelationDispatch(String conName, int arity, String arrowName, RelationAppLhs lhs,
+		public MetafunctionDispatch(String conName, int arity, String arrowName, RelationAppLhs lhs,
 				SourceSection source) {
 			super(lhs, source);
 			this.conName = conName;
@@ -81,7 +79,6 @@ public abstract class RelationDispatch extends DynSemNode {
 		}
 
 		@Override
-		@Deprecated
 		public RuleResult execute(VirtualFrame frame) {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
 			RuleRoot rr = getContext().getRuleRegistry().lookupRule(arrowName, conName, arity);
