@@ -38,13 +38,17 @@ rules /* Sort & Constructor classes */
         import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
         import org.spoofax.interpreter.terms.*;
+        import com.oracle.truffle.api.CompilerAsserts;
         
         public abstract class x_class implements ITerm {
+        
           public static x_class create(IStrategoTerm term) {
+            CompilerAsserts.neverPartOfCompilation();
             assert term != null;
             bstm0*
             bstm1
           }
+          
         }
       ]|
     where
@@ -96,7 +100,8 @@ rules /* Sort & Constructor classes */
         import ~x:<NativePackageName>.*;
         import ~x:<TopPackageName>.TypesGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
-                
+        import com.oracle.truffle.api.CompilerAsserts;
+        
         public class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
 
           public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
@@ -111,6 +116,7 @@ rules /* Sort & Constructor classes */
           }
 
           public static x_classname create(IStrategoTerm term) {
+            CompilerAsserts.neverPartOfCompilation();
             assert term != null;
             assert Tools.isTermAppl(term);
             assert Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
