@@ -4,6 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.github.krukow.clj_lang.IPersistentStack;
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -15,13 +16,22 @@ public abstract class TermExpansion extends Node {
 
 	public abstract Object[] execute(VirtualFrame frame);
 
-	@Specialization
-	public Object[] doConBuild(final ITerm term) {
-		int arity = term.arity();
-		Object[] terms = new Object[arity + 1];
-		terms[0] = term;
+	@Specialization(guards="term == cachedTerm")
+	public Object[] doConBuild(final ITerm term, @Cached("term") ITerm cachedTerm) {
+		return doConBuildForReal(cachedTerm);
+	}
 
-		System.arraycopy(term.allSubterms(), 0, terms, 1, arity);
+	@Specialization(contains="doConBuild")
+	public Object[] doConBuildCacheMiss(final ITerm term){
+		return doConBuildForReal(term);
+	}
+	
+	private Object[] doConBuildForReal(ITerm cachedTerm) {
+		int arity = cachedTerm.arity();
+		Object[] terms = new Object[arity + 1];
+		terms[0] = cachedTerm;
+
+		System.arraycopy(cachedTerm.allSubterms(), 0, terms, 1, arity);
 
 		return terms;
 	}
