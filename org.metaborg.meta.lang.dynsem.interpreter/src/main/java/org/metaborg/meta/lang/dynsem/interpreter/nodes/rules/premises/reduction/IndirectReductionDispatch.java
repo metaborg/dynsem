@@ -1,26 +1,23 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.CallTarget;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class IndirectReductionDispatch extends Node {
+public abstract class IndirectReductionDispatch extends DynSemNode {
 
 	protected static final int INLINE_CACHE_SIZE = 3;
 
-	@CompilationFinal protected DynSemContext context;
 	private final String arrowName;
 
 	public IndirectReductionDispatch(String arrowname, SourceSection source) {
@@ -49,10 +46,7 @@ public abstract class IndirectReductionDispatch extends Node {
 
 	protected CallTarget lookupCallTarget(Object term) {
 		ITerm con = BuiltinTypesGen.asITerm(term);
-		if (context == null) {
-			context = DynSemContext.LANGUAGE.getContext();
-		}
-		return context.getRuleRegistry().lookupRule(arrowName, con.constructor(), con.arity()).getCallTarget();
+		return getContext().getRuleRegistry().lookupRule(arrowName, con.constructor(), con.arity()).getCallTarget();
 	}
 
 	protected ITermInstanceChecker lookupInstanceChecker(Object o) {

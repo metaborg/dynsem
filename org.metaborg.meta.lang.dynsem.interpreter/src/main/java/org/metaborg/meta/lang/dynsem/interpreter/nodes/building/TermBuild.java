@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.ConsListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.NilListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
@@ -15,32 +15,19 @@ import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.IPersistentStack;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
 import com.oracle.truffle.api.source.SourceSection;
 
 @TypeSystemReference(BuiltinTypes.class)
 @NodeInfo(description = "The abstract base node for all term construction")
-public abstract class TermBuild extends Node {
-
-	private final Node contextNode;
-	@CompilationFinal private DynSemContext cachedContext;
+public abstract class TermBuild extends DynSemNode {
 
 	public TermBuild(SourceSection source) {
 		super(source);
-		this.contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
-	}
-
-	protected DynSemContext getContext() {
-		if (cachedContext == null) {
-			cachedContext = DynSemContext.LANGUAGE.findContext0(contextNode);
-		}
-		return cachedContext;
 	}
 
 	public abstract Object executeGeneric(VirtualFrame frame);

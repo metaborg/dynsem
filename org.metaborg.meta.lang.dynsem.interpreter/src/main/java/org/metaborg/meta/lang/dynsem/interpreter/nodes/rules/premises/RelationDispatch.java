@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
@@ -19,32 +19,18 @@ import trans.trans;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class RelationDispatch extends Node {
+public abstract class RelationDispatch extends DynSemNode {
 
 	@Child protected RelationAppLhs lhs;
-
-	private final Node contextNode;
-	@CompilationFinal private DynSemContext cachedContext;
-
-	protected DynSemContext getContext() {
-		if (cachedContext == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
-			cachedContext = DynSemContext.LANGUAGE.findContext0(contextNode);
-		}
-		return cachedContext;
-	}
 
 	public RelationDispatch(RelationAppLhs lhs, SourceSection source) {
 		super(source);
 		this.lhs = lhs;
-		this.contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
 	}
 
 	public static RelationDispatch create(IStrategoAppl reads, IStrategoAppl source, IStrategoAppl arrow,

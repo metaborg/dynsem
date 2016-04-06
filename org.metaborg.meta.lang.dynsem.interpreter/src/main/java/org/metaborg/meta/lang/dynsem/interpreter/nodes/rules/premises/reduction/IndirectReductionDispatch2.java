@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
@@ -18,24 +19,13 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class IndirectReductionDispatch2 extends Node {
-
-	private final Node contextNode;
-	@CompilationFinal private DynSemContext cachedContext;
+public abstract class IndirectReductionDispatch2 extends DynSemNode {
 
 	protected final String arrowName;
 
 	public IndirectReductionDispatch2(String arrowname, SourceSection source) {
 		super(source);
 		this.arrowName = arrowname;
-		this.contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
-	}
-
-	protected DynSemContext getContext() {
-		if (cachedContext == null) {
-			cachedContext = DynSemContext.LANGUAGE.findContext0(contextNode);
-		}
-		return cachedContext;
 	}
 
 	public abstract RuleResult executeDispatch(VirtualFrame frame, Object[] args);

@@ -1,34 +1,20 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatch.ConsListMatch;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatch.NilListMatch;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
-import com.oracle.truffle.api.CompilerDirectives;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class MatchPattern extends Node {
-	private final Node contextNode;
-	@CompilationFinal private DynSemContext cachedContext;
+public abstract class MatchPattern extends DynSemNode {
 
 	public MatchPattern(SourceSection source) {
 		super(source);
-		this.contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
-	}
-
-	protected DynSemContext getContext() {
-		if (cachedContext == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
-			cachedContext = DynSemContext.LANGUAGE.findContext0(contextNode);
-		}
-		return cachedContext;
 	}
 
 	public abstract boolean execute(Object term, VirtualFrame frame);
