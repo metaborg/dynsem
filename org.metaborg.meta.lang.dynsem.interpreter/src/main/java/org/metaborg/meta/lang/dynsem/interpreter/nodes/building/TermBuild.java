@@ -98,6 +98,9 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "Int", 1)) {
 			return IntLiteralTermBuild.create(t, fd);
 		}
+		if (Tools.hasConstructor(t, "ListSource", 2)) {
+			return create(Tools.applAt(t, 0), fd);
+		}
 		if (Tools.hasConstructor(t, "List", 1)) {
 			return NilListBuild.create(t, fd);
 		}

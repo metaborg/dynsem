@@ -10,23 +10,23 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class RelationAppLhs extends Node {
+public class RelationPremiseInputBuilder extends TermBuild {
 
 	@Child protected TermExpansion termExpansionNode;
 	@Children protected final TermBuild[] roNodes;
 	@Children protected final TermBuild[] rwNodes;
 
-	public RelationAppLhs(TermBuild termNode, TermBuild[] roNodes, TermBuild[] rwNodes, SourceSection source) {
+	public RelationPremiseInputBuilder(TermBuild termNode, TermBuild[] roNodes, TermBuild[] rwNodes,
+			SourceSection source) {
 		super(source);
 		this.termExpansionNode = TermExpansionNodeGen.create(termNode);
 		this.roNodes = roNodes;
 		this.rwNodes = rwNodes;
 	}
 
-	public static RelationAppLhs create(IStrategoAppl reads, IStrategoAppl source, FrameDescriptor fd) {
+	public static RelationPremiseInputBuilder create(IStrategoAppl reads, IStrategoAppl source, FrameDescriptor fd) {
 		assert Tools.hasConstructor(source, "Source", 2);
 		TermBuild lhsNode = TermBuild.create(Tools.applAt(source, 0), fd);
 
@@ -43,7 +43,7 @@ public class RelationAppLhs extends Node {
 			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
 		}
 
-		return new RelationAppLhs(lhsNode, roNodes, rwNodes, SourceSectionUtil.fromStrategoTerm(source));
+		return new RelationPremiseInputBuilder(lhsNode, roNodes, rwNodes, SourceSectionUtil.fromStrategoTerm(source));
 	}
 
 	@ExplodeLoop
@@ -69,6 +69,11 @@ public class RelationAppLhs extends Node {
 		}
 
 		return args;
+	}
+
+	@Override
+	public Object[] executeGeneric(VirtualFrame frame) {
+		return executeObjectArray(frame);
 	}
 
 }

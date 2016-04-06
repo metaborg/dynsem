@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationPremise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -7,10 +8,9 @@ import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class Premise extends Node {
+public abstract class Premise extends DynSemNode {
 
 	public Premise(SourceSection source) {
 		super(source);

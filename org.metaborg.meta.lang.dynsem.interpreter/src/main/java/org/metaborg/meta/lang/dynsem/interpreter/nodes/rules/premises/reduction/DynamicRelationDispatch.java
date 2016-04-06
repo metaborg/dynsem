@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
@@ -16,25 +15,23 @@ import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class IndirectReductionDispatch2 extends DynSemNode {
+public abstract class DynamicRelationDispatch extends RelationDispatch {
 
 	protected final String arrowName;
 
-	public IndirectReductionDispatch2(String arrowname, SourceSection source) {
+	public DynamicRelationDispatch(String arrowname, SourceSection source) {
 		super(source);
 		this.arrowName = arrowname;
 	}
 
-	public abstract RuleResult executeDispatch(VirtualFrame frame, Object[] args);
-
-	public static class _Uninitialized extends IndirectReductionDispatch2 {
+	public static class _Uninitialized extends DynamicRelationDispatch {
 
 		public _Uninitialized(String arrowName, SourceSection source) {
 			super(arrowName, source);
 		}
 
 		@Override
-		public RuleResult executeDispatch(VirtualFrame frame, Object[] args) {
+		public RuleResult execute(VirtualFrame frame, Object[] args) {
 			CompilerDirectives.transferToInterpreter();
 			ITerm redTerm = BuiltinTypesGen.asITerm(args[0]);
 
@@ -42,13 +39,13 @@ public abstract class IndirectReductionDispatch2 extends DynSemNode {
 					redTerm.arity());
 			return replace(
 					new _Monomorphic(redTerm, NodeUtil.cloneNode(redTarget.getRule()), redTarget.getFrameDescriptor(),
-							arrowName, getSourceSection())).executeDispatch(frame, args);
+							arrowName, getSourceSection())).execute(frame, args);
 
 		}
 
 	}
 
-	public static class _Monomorphic extends IndirectReductionDispatch2 {
+	public static class _Monomorphic extends DynamicRelationDispatch {
 
 		private final ITerm redTerm;
 
@@ -64,19 +61,19 @@ public abstract class IndirectReductionDispatch2 extends DynSemNode {
 		}
 
 		@Override
-		public RuleResult executeDispatch(VirtualFrame frame, Object[] args) {
+		public RuleResult execute(VirtualFrame frame, Object[] args) {
 			ITerm redTerm = BuiltinTypesGen.asITerm(args[0]);
 			if (this.redTerm == redTerm) {
 				return rule.execute(Truffle.getRuntime().createVirtualFrame(args, fd));
 			} else {
 				CompilerDirectives.transferToInterpreterAndInvalidate();
-				return replace(new _Polymorphic(this.redTerm, rule, fd, arrowName, getSourceSection()))
-						.executeDispatch(frame, args);
+				return replace(new _Polymorphic(this.redTerm, rule, fd, arrowName, getSourceSection())).execute(frame,
+						args);
 			}
 		}
 	}
 
-	public static class _Polymorphic extends IndirectReductionDispatch2 {
+	public static class _Polymorphic extends DynamicRelationDispatch {
 		private final String constr;
 		private final int arity;
 
@@ -93,18 +90,20 @@ public abstract class IndirectReductionDispatch2 extends DynSemNode {
 		}
 
 		@Override
-		public RuleResult executeDispatch(VirtualFrame frame, Object[] args) {
+		public RuleResult execute(VirtualFrame frame, Object[] args) {
 			ITerm redTerm = BuiltinTypesGen.asITerm(args[0]);
+			// TODO specialize to a particular language-specific term in order to have a leaf type. that will eliminate
+			// the guard below
 			if (redTerm.arity() == this.arity && redTerm.constructor().equals(this.constr)) {
 				return rule.execute(Truffle.getRuntime().createVirtualFrame(args, fd));
 			} else {
 				CompilerDirectives.transferToInterpreterAndInvalidate();
-				return replace(new _Generic(arrowName, getSourceSection())).executeDispatch(frame, args);
+				return replace(new _Generic(arrowName, getSourceSection())).execute(frame, args);
 			}
 		}
 	}
 
-	public static class _Generic extends IndirectReductionDispatch2 {
+	public static class _Generic extends DynamicRelationDispatch {
 
 		@Child private IndirectCallNode callNode;
 
@@ -114,7 +113,7 @@ public abstract class IndirectReductionDispatch2 extends DynSemNode {
 		}
 
 		@Override
-		public RuleResult executeDispatch(VirtualFrame frame, Object[] args) {
+		public RuleResult execute(VirtualFrame frame, Object[] args) {
 			ITerm redTerm = BuiltinTypesGen.asITerm(args[0]);
 
 			RuleRoot redTarget = getContext().getRuleRegistry().lookupRule(arrowName, redTerm.constructor(),
