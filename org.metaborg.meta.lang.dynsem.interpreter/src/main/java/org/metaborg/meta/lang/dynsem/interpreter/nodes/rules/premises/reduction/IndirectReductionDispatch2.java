@@ -53,7 +53,6 @@ public abstract class IndirectReductionDispatch2 extends Node {
 
 			RuleRoot redTarget = getContext().getRuleRegistry().lookupRule(arrowName, redTerm.constructor(),
 					redTerm.arity());
-//			System.out.println("-> Mono (" + redTerm.constructor() + "/" + redTerm.arity() + ")");
 			return replace(
 					new _Monomorphic(redTerm, NodeUtil.cloneNode(redTarget.getRule()), redTarget.getFrameDescriptor(),
 							arrowName, getSourceSection())).executeDispatch(frame, args);
@@ -80,18 +79,42 @@ public abstract class IndirectReductionDispatch2 extends Node {
 		@Override
 		public RuleResult executeDispatch(VirtualFrame frame, Object[] args) {
 			ITerm redTerm = BuiltinTypesGen.asITerm(args[0]);
-			// if (this.redTerm.constructor().equals(redTerm.constructor()) && this.redTerm.arity() == redTerm.arity())
-			// {
 			if (this.redTerm == redTerm) {
-//				System.out.println("! Mono (" + redTerm.constructor() + "/" + redTerm.arity() + ")");
 				return rule.execute(Truffle.getRuntime().createVirtualFrame(args, fd));
 			} else {
-				CompilerDirectives.transferToInterpreter();
-//				System.out.println("-> Generic (" + redTerm.constructor() + "/" + redTerm.arity() + ")");
+				CompilerDirectives.transferToInterpreterAndInvalidate();
+				return replace(new _Polymorphic(this.redTerm, rule, fd, arrowName, getSourceSection()))
+						.executeDispatch(frame, args);
+			}
+		}
+	}
+
+	public static class _Polymorphic extends IndirectReductionDispatch2 {
+		private final String constr;
+		private final int arity;
+
+		@Child private Rule rule;
+
+		private final FrameDescriptor fd;
+
+		public _Polymorphic(ITerm redTerm, Rule rule, FrameDescriptor fd, String arrowName, SourceSection source) {
+			super(arrowName, source);
+			this.constr = redTerm.constructor();
+			this.arity = redTerm.arity();
+			this.rule = rule;
+			this.fd = fd;
+		}
+
+		@Override
+		public RuleResult executeDispatch(VirtualFrame frame, Object[] args) {
+			ITerm redTerm = BuiltinTypesGen.asITerm(args[0]);
+			if (redTerm.arity() == this.arity && redTerm.constructor().equals(this.constr)) {
+				return rule.execute(Truffle.getRuntime().createVirtualFrame(args, fd));
+			} else {
+				CompilerDirectives.transferToInterpreterAndInvalidate();
 				return replace(new _Generic(arrowName, getSourceSection())).executeDispatch(frame, args);
 			}
 		}
-
 	}
 
 	public class _Generic extends IndirectReductionDispatch2 {
@@ -106,7 +129,6 @@ public abstract class IndirectReductionDispatch2 extends Node {
 		@Override
 		public RuleResult executeDispatch(VirtualFrame frame, Object[] args) {
 			ITerm redTerm = BuiltinTypesGen.asITerm(args[0]);
-//			System.out.println("! Generic (" + redTerm.constructor() + "/" + redTerm.arity() + ")");
 
 			RuleRoot redTarget = getContext().getRuleRegistry().lookupRule(arrowName, redTerm.constructor(),
 					redTerm.arity());

@@ -15,7 +15,6 @@ import org.spoofax.jsglr.client.imploder.TermTreeFactory;
 import org.spoofax.jsglr.client.imploder.TreeBuilder;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.terms.TermFactory;
-import org.spoofax.terms.attachments.ParentTermFactory;
 import org.spoofax.terms.io.binary.TermReader;
 
 import com.oracle.truffle.api.source.Source;
@@ -45,9 +44,10 @@ public class DynSemLanguageParser {
 	}
 
 	private void createParser() {
-		TreeBuilder treebuilder = new TreeBuilder(new TermTreeFactory(new ParentTermFactory(new TermFactory())));
+		TreeBuilder treebuilder = new TreeBuilder(new TermTreeFactory(new TermFactory()));
 
 		parser = new SGLR(treebuilder, loadPT());
+
 		parser.setUseStructureRecovery(false);
 	}
 

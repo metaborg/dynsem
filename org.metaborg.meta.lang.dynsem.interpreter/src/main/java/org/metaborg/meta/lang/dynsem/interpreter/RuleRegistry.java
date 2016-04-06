@@ -28,10 +28,6 @@ public abstract class RuleRegistry {
 		String k = makeKey(name, constr, arity);
 		RuleRoot rr = rules.get(k);
 		if (rr != null) {
-			// Rule r = rr.getRule();
-			// assert r.getName().equals(name)
-			// && r.getConstructor().equals(constr)
-			// && r.getArity() == arity;
 			return rr;
 		}
 		throw new InterpreterException("No rule found for: " + k);

@@ -14,5 +14,5 @@ public interface ITerm {
 	public Object[] allSubterms();
 
 	public ITermInstanceChecker getCheck();
-
+	
 }

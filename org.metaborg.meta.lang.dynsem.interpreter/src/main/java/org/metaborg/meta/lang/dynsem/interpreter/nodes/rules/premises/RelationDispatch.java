@@ -28,12 +28,11 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class RelationDispatch extends Node {
 
-	
 	@Child protected RelationAppLhs lhs;
 
 	private final Node contextNode;
 	@CompilationFinal private DynSemContext cachedContext;
-	
+
 	protected DynSemContext getContext() {
 		if (cachedContext == null) {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
@@ -79,12 +78,14 @@ public abstract class RelationDispatch extends Node {
 
 	public abstract RuleResult execute(VirtualFrame frame);
 
+	@Deprecated
 	public static class InlineableRelationDispatch extends RelationDispatch {
 
 		private final String conName;
 		private final int arity;
 		private final String arrowName;
 
+		@Deprecated
 		public InlineableRelationDispatch(String conName, int arity, String arrowName, RelationAppLhs lhs,
 				SourceSection source) {
 			super(lhs, source);
@@ -94,6 +95,7 @@ public abstract class RelationDispatch extends Node {
 		}
 
 		@Override
+		@Deprecated
 		public RuleResult execute(VirtualFrame frame) {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
 			RuleRoot rr = getContext().getRuleRegistry().lookupRule(arrowName, conName, arity);
@@ -146,12 +148,10 @@ public abstract class RelationDispatch extends Node {
 
 	public static class DynamicRelationDispatch extends RelationDispatch {
 
-		// @Child protected IndirectReductionDispatch dispatcher;
 		@Child protected IndirectReductionDispatch2 dispatcher;
 
 		public DynamicRelationDispatch(RelationAppLhs lhs, String arrowName, SourceSection source) {
 			super(lhs, source);
-			// this.dispatcher = IndirectReductionDispatchNodeGen.create(arrowName, source);
 			this.dispatcher = new IndirectReductionDispatch2._Uninitialized(arrowName, source);
 		}
 
@@ -159,7 +159,6 @@ public abstract class RelationDispatch extends Node {
 		public RuleResult execute(VirtualFrame frame) {
 			Object[] args = lhs.executeObjectArray(frame);
 			return dispatcher.executeDispatch(frame, args);
-			// return dispatcher.executeDispatch(frame, args[0], args);
 		}
 
 	}
