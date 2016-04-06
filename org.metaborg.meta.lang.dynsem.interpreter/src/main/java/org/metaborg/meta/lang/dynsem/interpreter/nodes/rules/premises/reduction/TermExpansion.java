@@ -27,8 +27,7 @@ public abstract class TermExpansion extends Node {
 	}
 
 	@Specialization
-	@SuppressWarnings("rawtypes")
-	public Object[] doListBuild(final IPersistentStack list) {
+	public Object[] doListBuild(@SuppressWarnings("rawtypes") final IPersistentStack list) {
 		return new Object[] { list };
 	}
 }

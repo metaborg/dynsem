@@ -7,6 +7,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_lang.IPersistentStack;
 import com.github.krukow.clj_lang.PersistentList;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -62,6 +63,7 @@ public abstract class ListBuild extends TermBuild {
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Specialization
+		@TruffleBoundary
 		public IPersistentStack execute(Object head, IPersistentStack tail) {
 			return (IPersistentStack) tail.cons(head);
 		}

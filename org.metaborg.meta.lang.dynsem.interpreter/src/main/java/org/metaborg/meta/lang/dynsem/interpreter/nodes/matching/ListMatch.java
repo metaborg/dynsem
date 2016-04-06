@@ -7,6 +7,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_lang.IPersistentStack;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -58,11 +59,25 @@ public abstract class ListMatch extends MatchPattern {
 			return ConsListMatchNodeGen.create(headPattern, tailPattern, SourceSectionUtil.fromStrategoTerm(t));
 		}
 
-		@SuppressWarnings("rawtypes")
 		@Specialization
-		public boolean execute(IPersistentStack term, VirtualFrame frame) {
-			return term.count() > 0 && headPattern.execute(term.peek(), frame)
-					&& tailPattern.execute(term.pop(), frame);
+		public boolean execute(@SuppressWarnings("rawtypes") IPersistentStack term, VirtualFrame frame) {
+			return stackCount(term) > 0 && headPattern.execute(stackPeek(term), frame)
+					&& tailPattern.execute(stackPop(term), frame);
+		}
+
+		@TruffleBoundary
+		private int stackCount(@SuppressWarnings("rawtypes") IPersistentStack s) {
+			return s.count();
+		}
+
+		@TruffleBoundary
+		private Object stackPeek(@SuppressWarnings("rawtypes") IPersistentStack s) {
+			return s.peek();
+		}
+
+		@TruffleBoundary
+		private Object stackPop(@SuppressWarnings("rawtypes") IPersistentStack s) {
+			return s.pop();
 		}
 
 	}
