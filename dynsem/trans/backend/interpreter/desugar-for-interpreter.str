@@ -13,33 +13,34 @@ rules
     where
       <m-in-analysis(desugar-for-interpreter); unmark-vars> m => Module(name, section*)
 
-  desugar-for-interpreter = mark-rule-arguments; desugar-natives; desugar-list-reductions
+  desugar-for-interpreter =
+    desugar-semantic-components;
+    mark-rule-arguments;
+    desugar-natives;
+    desugar-list-reductions
 
 rules /* rename arguments */
 
   mark-rule-arguments = alltd(?Rule(_, _, _); mark-rule-arguments-rule)
   
   mark-rule-arguments-rule:
-    Rule(prem*, infer, Relation(ro, Source(lhs, rw), arrow, target))
-      -> Rule(prem'*, infer, Relation(ro', Source(lhs', rw'), arrow, target'))
+    Rule(prem*, infer, MonoRelation(Source(lhs, rw), arrow, target))
+      -> Rule(prem'*, infer, MonoRelation(Source(lhs', rw'), arrow, target'))
     with {| RenameArgument, NextArgument:
       rules(NextArgument: _ -> 1);
-      lhs' := <mark-rule-arguments-bind-source> lhs;
-      ro' := <alltd(mark-rule-arguments-bind)> ro;
+      lhs' := <try(mark-rule-arguments-bind-source)> lhs;
       rw' := <alltd(mark-rule-arguments-bind)> rw;
       prem'* := <alltd(mark-rule-arguments-read)> prem*;
       target' := <alltd(mark-rule-arguments-read)> target
     |}
 
-  mark-rule-arguments-bind-source = not(?As(_, _) + ?Cast(_, ListSort(_))); alltd(mark-rule-arguments-bind)
+  mark-rule-arguments-bind-source:
+    Cast(var@Var(v), l@ListSort(_)) -> Cast(ArgBind(0), l)
+    where
+      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
 
   mark-rule-arguments-bind-source:
     As(var@Var(v), source) -> <alltd(mark-rule-arguments-bind)> source
-    where
-      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
-  
-  mark-rule-arguments-bind-source:
-    Cast(var@Var(v), l@ListSort(_)) -> Cast(ArgBind(0), l)
     where
       rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
 
@@ -88,12 +89,22 @@ rules /* native operators */
       f-def := <lookup-native-fun-def(|name)> s-def;
       FunctionType(_, ty) := <lookup-prop(|Type())> f-def
 
+rules /* desugar rule conclusion/premise source */
+
+  desugar-semantic-components = alltd(desugar-rule-conclusion-source); alltd(desugar-relation-premise-source)
+
+  desugar-rule-conclusion-source:
+    Rule(p*, infer, Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Rule(p*, infer, MonoRelation(Source(t, [ro*, rw*]), rel, tgt)) 
+
+  desugar-relation-premise-source:
+    Formula(Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Formula(MonoRelation(Source(t, [ro*, rw*]), rel, tgt))
+
 rules /* list reductions */
 
   desugar-list-reductions = alltd(desugar-list-reduction)
   
   desugar-list-reduction:
-    Formula(Relation(ros, Source(t, rws), rel, target)) -> Formula(Relation(ros, Source(ListSource(t, ty), rws), rel, target))
+    Formula(MonoRelation(Source(t, rws), rel, target)) -> Formula(MonoRelation(Source(ListSource(t, ty), rws), rel, target))
     where
       <type-of> t => ty@ListType(_)
   

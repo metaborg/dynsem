@@ -12,4 +12,5 @@ signature
     NativeType: ID * String -> Type
     NativeFunCall: String * String * Term * List(Term) -> Term
     ListSource: Term * Type -> Term
+    MonoRelation : Source * Rel * Target -> Relation
 
