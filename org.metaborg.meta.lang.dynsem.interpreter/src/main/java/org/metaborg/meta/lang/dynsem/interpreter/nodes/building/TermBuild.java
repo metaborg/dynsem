@@ -15,6 +15,7 @@ import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.IPersistentStack;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -65,6 +66,7 @@ public abstract class TermBuild extends DynSemNode {
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		if (Tools.hasConstructor(t, "Con", 2)) {
 			return ConBuild.create(t, fd);
 		}
@@ -123,6 +125,7 @@ public abstract class TermBuild extends DynSemNode {
 	}
 
 	public static TermBuild createFromLabelComp(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "LabelComp", 2);
 		return create(Tools.applAt(t, 1), fd);
 	}

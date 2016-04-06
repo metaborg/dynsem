@@ -21,6 +21,7 @@ public abstract class MapExtendBuild extends TermBuild {
 	}
 
 	public static MapExtendBuild create(IStrategoAppl t, FrameDescriptor fd) {
+		
 		assert Tools.hasConstructor(t, "MapExtend", 2);
 		TermBuild lmap = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild rmap = TermBuild.create(Tools.applAt(t, 1), fd);

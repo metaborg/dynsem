@@ -4,6 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class LiteralTermMatchPattern extends MatchPattern {
@@ -21,9 +22,11 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 			this.lit = lit;
 		}
 
+		private final ConditionProfile conditionProfile = ConditionProfile.createBinaryProfile();
+
 		@Override
 		public boolean execute(Object term, VirtualFrame frame) {
-			if (BuiltinTypesGen.isString(term)) {
+			if (conditionProfile.profile(BuiltinTypesGen.isString(term))) {
 				String s = BuiltinTypesGen.asString(term);
 				return isStringEq(s);
 			}
@@ -46,9 +49,11 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 			this.lit = lit;
 		}
 
+		private final ConditionProfile conditionProfile = ConditionProfile.createBinaryProfile();
+
 		@Override
 		public boolean execute(Object term, VirtualFrame frame) {
-			if (BuiltinTypesGen.isInteger(term)) {
+			if (conditionProfile.profile(BuiltinTypesGen.isInteger(term))) {
 				int i = BuiltinTypesGen.asInteger(term);
 				return lit == i;
 			}
@@ -63,9 +68,11 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 			super(source);
 		}
 
+		private final ConditionProfile conditionProfile = ConditionProfile.createBinaryProfile();
+
 		@Override
 		public boolean execute(Object term, VirtualFrame frame) {
-			if (BuiltinTypesGen.isBoolean(term)) {
+			if (conditionProfile.profile(BuiltinTypesGen.isBoolean(term))) {
 				return BuiltinTypesGen.asBoolean(term);
 			}
 			return false;
@@ -78,9 +85,11 @@ public abstract class LiteralTermMatchPattern extends MatchPattern {
 			super(source);
 		}
 
+		private final ConditionProfile conditionProfile = ConditionProfile.createBinaryProfile();
+
 		@Override
 		public boolean execute(Object term, VirtualFrame frame) {
-			if (BuiltinTypesGen.isBoolean(term)) {
+			if (conditionProfile.profile(BuiltinTypesGen.isBoolean(term))) {
 				return !BuiltinTypesGen.asBoolean(term);
 			}
 			return false;

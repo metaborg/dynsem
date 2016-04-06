@@ -7,6 +7,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_lang.IPersistentStack;
 import com.github.krukow.clj_lang.PersistentList;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
@@ -54,6 +55,7 @@ public abstract class ListBuild extends TermBuild {
 		}
 
 		public static ConsListBuild create(IStrategoAppl t, FrameDescriptor fd) {
+			CompilerAsserts.neverPartOfCompilation();
 			assert Tools.hasConstructor(t, "ListTail", 2);
 			TermBuild headNode = TermBuild.create(Tools.applAt(Tools.termAt(t, 0), 0), fd);
 			TermBuild tailNode = TermBuild.create(Tools.applAt(t, 1), fd);

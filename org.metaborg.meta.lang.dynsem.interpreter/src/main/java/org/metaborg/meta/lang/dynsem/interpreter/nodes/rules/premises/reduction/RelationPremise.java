@@ -13,6 +13,7 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 /**
@@ -38,15 +39,20 @@ public class RelationPremise extends Premise {
 		this.rhsRwNodes = rhsComponentNodes;
 	}
 
+	private final BranchProfile rhsMatchFailure = BranchProfile.create();
+	private final BranchProfile rhsCompFailure = BranchProfile.create();
+
 	@Override
 	public void execute(VirtualFrame frame) {
 
 		RuleResult ruleRes = relationLhs.execute(frame);
 
 		if (!rhsNode.execute(ruleRes.result, frame)) {
+			rhsMatchFailure.enter();
 			throw new PremiseFailure();
 		}
 		if (!evalRhsComponents(ruleRes.components, frame)) {
+			rhsCompFailure.enter();
 			throw new PremiseFailure();
 		}
 
@@ -64,6 +70,7 @@ public class RelationPremise extends Premise {
 	}
 
 	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "Relation", 4);
 
 		IStrategoAppl targetT = Tools.applAt(t, 3);

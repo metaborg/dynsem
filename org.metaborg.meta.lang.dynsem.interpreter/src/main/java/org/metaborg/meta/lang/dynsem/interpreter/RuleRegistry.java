@@ -17,6 +17,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
+import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public abstract class RuleRegistry {
@@ -34,6 +36,7 @@ public abstract class RuleRegistry {
 	}
 
 	public void registerRule(RuleRoot rr) {
+		CompilerAsserts.neverPartOfCompilation();
 		Rule r = rr.getRule();
 		String k = makeKey(r.getName(), r.getConstructor(), r.getArity());
 
@@ -51,6 +54,7 @@ public abstract class RuleRegistry {
 		}
 	}
 
+	@TruffleBoundary
 	public int ruleCount() {
 		return rules.size();
 	}
@@ -60,7 +64,6 @@ public abstract class RuleRegistry {
 	}
 
 	public static void populate(RuleRegistry reg, File specificationFile) {
-
 		TAFTermReader reader = new TAFTermReader(new TermFactory());
 
 		IStrategoTerm topSpecTerm;

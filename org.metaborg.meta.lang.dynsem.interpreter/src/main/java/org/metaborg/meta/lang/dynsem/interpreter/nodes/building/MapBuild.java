@@ -7,6 +7,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.PersistentHashMap;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -19,6 +20,7 @@ public abstract class MapBuild extends TermBuild {
 	}
 
 	public static MapBuild create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "Map", 1);
 		IStrategoList bindsT = Tools.listAt(t, 0);
 		if (bindsT.size() == 0) {

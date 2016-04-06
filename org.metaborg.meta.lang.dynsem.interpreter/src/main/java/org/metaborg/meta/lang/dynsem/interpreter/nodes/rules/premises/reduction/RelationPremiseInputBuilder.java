@@ -27,6 +27,7 @@ public class RelationPremiseInputBuilder extends TermBuild {
 	}
 
 	public static RelationPremiseInputBuilder create(IStrategoAppl reads, IStrategoAppl source, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(source, "Source", 2);
 		TermBuild lhsNode = TermBuild.create(Tools.applAt(source, 0), fd);
 

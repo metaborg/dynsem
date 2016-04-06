@@ -5,6 +5,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -28,6 +29,7 @@ public class ConMatch extends MatchPattern {
 	}
 
 	public static ConMatch create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "Con", 2);
 		String constr = Tools.stringAt(t, 0).stringValue();
 		IStrategoList childrenT = Tools.listAt(t, 1);

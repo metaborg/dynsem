@@ -5,6 +5,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_ds.PersistentMap;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
@@ -20,6 +21,7 @@ public abstract class MapSelectBuild extends TermBuild {
 	}
 
 	public static MapSelectBuild create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "MapSelect", 2);
 		TermBuild map = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild key = TermBuild.create(Tools.applAt(t, 1), fd);

@@ -4,6 +4,7 @@ import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -44,6 +45,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 		}
 
 		public static IntLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
+			CompilerAsserts.neverPartOfCompilation();
 			return new IntLiteralTermBuild(Integer.parseInt(Tools.stringAt(t, 0).stringValue()),
 					SourceSectionUtil.fromStrategoTerm(t));
 		}

@@ -7,6 +7,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -20,6 +21,7 @@ public abstract class MatchPattern extends DynSemNode {
 	public abstract boolean execute(Object term, VirtualFrame frame);
 
 	public static MatchPattern create(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		if (Tools.hasConstructor(t, "Con", 2)) {
 			return ConMatch.create(t, fd);
 		}
@@ -41,6 +43,7 @@ public abstract class MatchPattern extends DynSemNode {
 	}
 
 	public static MatchPattern createFromLabelComp(IStrategoAppl t, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "LabelComp", 2);
 		return create(Tools.applAt(t, 1), fd);
 	}

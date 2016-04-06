@@ -7,6 +7,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_lang.IPersistentStack;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -70,6 +71,7 @@ public abstract class ListMatch extends MatchPattern {
 		}
 
 		public static ConsListMatch create(IStrategoAppl t, FrameDescriptor fd) {
+			CompilerAsserts.neverPartOfCompilation();
 			assert Tools.hasConstructor(t, "ListTail", 2);
 			MatchPattern headPattern = MatchPattern.create(Tools.applAt(Tools.listAt(t, 0), 0), fd);
 			MatchPattern tailPattern = MatchPattern.create(Tools.applAt(t, 1), fd);

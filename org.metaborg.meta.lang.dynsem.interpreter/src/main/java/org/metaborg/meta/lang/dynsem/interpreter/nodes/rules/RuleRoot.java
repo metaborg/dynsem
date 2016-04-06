@@ -18,6 +18,7 @@ import trans.rw_type_0_0;
 import trans.trans;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -49,6 +50,7 @@ public class RuleRoot extends RootNode {
 	}
 
 	public static RuleRoot create(IStrategoTerm ruleT) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.isTermAppl(ruleT);
 		assert Tools.hasConstructor((IStrategoAppl) ruleT, "Rule", 3);
 
