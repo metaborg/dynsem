@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -63,14 +64,14 @@ public class RuleRoot extends RootNode {
 		}
 
 		IStrategoAppl relationT = Tools.applAt(ruleT, 2);
-		assert Tools.hasConstructor(relationT, "Relation", 4);
+		assert Tools.hasConstructor(relationT, "MonoRelation", 3);
 
-		IStrategoAppl arrowTerm = Tools.applAt(relationT, 2);
+		IStrategoAppl arrowTerm = Tools.applAt(relationT, 1);
 		assert Tools.hasConstructor(arrowTerm, "NamedDynamicEmitted", 2);
 
 		String name = Tools.stringAt(arrowTerm, 1).stringValue();
 
-		IStrategoAppl lhsLeftTerm = Tools.applAt(Tools.applAt(relationT, 1), 0);
+		IStrategoAppl lhsLeftTerm = Tools.applAt(Tools.applAt(relationT, 0), 0);
 		IStrategoAppl lhsConTerm = null;
 
 		// FIXME this should be done differently perhaps through desugaring of
@@ -99,9 +100,9 @@ public class RuleRoot extends RootNode {
 			throw new RuntimeException("Unsupported rule LHS: " + lhsLeftTerm);
 		}
 
-		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 3), fd);
+		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
 
-		return new RuleRoot(new DynSemRule(name, constr, arity, premises, target,
+		return new RuleRoot(new DynSemRule(name, constr, arity, MatchPattern.create(lhsConTerm, fd), premises, target,
 				SourceSectionUtil.fromStrategoTerm(ruleT)), fd);
 	}
 

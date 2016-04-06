@@ -54,7 +54,7 @@ public class DynSemRunForeignAccess implements Factory {
 			DynSemPrimedRun run = (DynSemPrimedRun) ForeignAccess.getReceiver(frame);
 			ITerm program = run.getProgram();
 
-			return run.getCallTarget().call(Rule.buildArguments(program, program.allSubterms(), new Object[] {}));
+			return run.getCallTarget().call(new Object[] { program });
 		}
 
 	}

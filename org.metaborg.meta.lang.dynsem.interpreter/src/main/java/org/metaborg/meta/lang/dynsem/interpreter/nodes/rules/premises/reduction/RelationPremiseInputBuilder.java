@@ -14,29 +14,19 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class RelationPremiseInputBuilder extends TermBuild {
 
-	@Child protected TermExpansion termExpansionNode;
-	@Children protected final TermBuild[] roNodes;
+	@Child protected TermBuild termNode;
 	@Children protected final TermBuild[] rwNodes;
 
-	public RelationPremiseInputBuilder(TermBuild termNode, TermBuild[] roNodes, TermBuild[] rwNodes,
-			SourceSection source) {
+	public RelationPremiseInputBuilder(TermBuild termNode, TermBuild[] rwNodes, SourceSection source) {
 		super(source);
-		this.termExpansionNode = TermExpansionNodeGen.create(termNode);
-		this.roNodes = roNodes;
+		this.termNode = termNode;
 		this.rwNodes = rwNodes;
 	}
 
-	public static RelationPremiseInputBuilder create(IStrategoAppl reads, IStrategoAppl source, FrameDescriptor fd) {
+	public static RelationPremiseInputBuilder create(IStrategoAppl source, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(source, "Source", 2);
 		TermBuild lhsNode = TermBuild.create(Tools.applAt(source, 0), fd);
-
-		assert Tools.hasConstructor(reads, "Reads", 1);
-		IStrategoList ros = Tools.listAt(reads, 0);
-		TermBuild[] roNodes = new TermBuild[ros.getSubtermCount()];
-		for (int i = 0; i < roNodes.length; i++) {
-			roNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(ros, i), fd);
-		}
 
 		IStrategoList rws = Tools.listAt(source, 1);
 		TermBuild[] rwNodes = new TermBuild[rws.getSubtermCount()];
@@ -44,29 +34,20 @@ public class RelationPremiseInputBuilder extends TermBuild {
 			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
 		}
 
-		return new RelationPremiseInputBuilder(lhsNode, roNodes, rwNodes, SourceSectionUtil.fromStrategoTerm(source));
+		return new RelationPremiseInputBuilder(lhsNode, rwNodes, SourceSectionUtil.fromStrategoTerm(source));
 	}
 
 	@ExplodeLoop
 	public Object[] executeObjectArray(VirtualFrame frame) {
-		Object[] termBits = termExpansionNode.execute(frame);
+		Object term = termNode.executeGeneric(frame);
 
-		int offset = termBits.length;
-		Object[] args = new Object[offset + roNodes.length + rwNodes.length];
-
-		System.arraycopy(termBits, 0, args, 0, offset);
-
-		CompilerAsserts.compilationConstant(roNodes.length);
-
-		for (int i = 0; i < roNodes.length; i++) {
-			args[offset + i] = roNodes[i].executeGeneric(frame);
-		}
-
-		offset += roNodes.length;
+		Object[] args = new Object[rwNodes.length + 1];
+		args[0] = term;
 
 		CompilerAsserts.compilationConstant(rwNodes.length);
+
 		for (int i = 0; i < rwNodes.length; i++) {
-			args[offset + i] = rwNodes[i].executeGeneric(frame);
+			args[i + 1] = rwNodes[i].executeGeneric(frame);
 		}
 
 		return args;

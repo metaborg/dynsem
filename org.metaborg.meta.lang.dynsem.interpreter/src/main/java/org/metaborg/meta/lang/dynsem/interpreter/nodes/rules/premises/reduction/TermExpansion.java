@@ -12,6 +12,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
 
 @NodeChildren({ @NodeChild(value = "termBuild", type = TermBuild.class) })
+@Deprecated
 public abstract class TermExpansion extends Node {
 
 	public abstract Object[] execute(VirtualFrame frame);

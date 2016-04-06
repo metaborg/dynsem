@@ -71,9 +71,9 @@ public class RelationPremise extends Premise {
 
 	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "Relation", 4);
+		assert Tools.hasConstructor(t, "MonoRelation", 3);
 
-		IStrategoAppl targetT = Tools.applAt(t, 3);
+		IStrategoAppl targetT = Tools.applAt(t, 2);
 		assert Tools.hasConstructor(targetT, "Target", 2);
 		MatchPattern rhsNode = MatchPattern.create(Tools.applAt(targetT, 0), fd);
 
@@ -83,8 +83,8 @@ public class RelationPremise extends Premise {
 			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
 		;
-		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd),
-				RelationDispatch.create(Tools.applAt(t, 1), Tools.applAt(t, 2), fd), rhsNode, rhsRwNodes,
+		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
+				RelationDispatch.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
 				SourceSectionUtil.fromStrategoTerm(t));
 	}
 }
