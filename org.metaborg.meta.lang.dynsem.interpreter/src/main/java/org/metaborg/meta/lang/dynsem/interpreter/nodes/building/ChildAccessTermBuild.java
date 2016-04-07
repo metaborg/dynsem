@@ -6,6 +6,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
+// TODO occurrences of this node should be replaced with constructor specific logic for accessing a field in a constant constructor.
 public class ChildAccessTermBuild extends TermBuild {
 
 	private final int childIdx;

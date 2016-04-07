@@ -129,20 +129,16 @@ Module(
   , Rules(
       [ Rule(
           [ Formula(
-              Relation(
-                Reads(
-                  [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Map([]))]
-                )
-              , Source(ArgRead(0), [])
+              MonoRelation(
+                Source(ArgRead(0), [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), Map([]))])
               , NamedDynamicEmitted([], "default")
               , Target(VarRef("lifted_190"), [])
               )
             )
           ]
         , "---"
-        , Relation(
-            Reads([])
-          , Source(Con("__Expr2Start__", [ArgBind(0)]), [])
+        , MonoRelation(
+          Source(Con("__Expr2Start__", [ArgBind(0)]), [])
           , NamedDynamicEmitted([], "init")
           , Target(VarRef("lifted_190"), [])
           )
@@ -152,44 +148,34 @@ Module(
               Match(ArgRead(1), Con("__String2ID__", [VarRef("v41000")]))
             )
           , Formula(
-              Relation(
-                Reads(
-                  [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))]
-                )
-              , Source(ArgRead(2), [])
+              MonoRelation(
+              Source(ArgRead(2), [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))])
               , NamedDynamicEmitted([], "default")
               , Target(VarRef("lifted_32"), [])
               )
             )
           , Formula(
-              Relation(
-                Reads(
-                  [ LabelComp(
+              MonoRelation(
+              Source(ArgRead(3), [LabelComp(
                       MapSort(SimpleSort("String"), SimpleSort("Int"))
                     , MapExtend(
                         Map([Bind(VarRef("v41000"), VarRef("lifted_32"))])
                       , ArgRead(0)
                       )
-                    )
-                  ]
-                )
-              , Source(ArgRead(3), [])
+                    )])
               , NamedDynamicEmitted([], "default")
               , Target(VarRef("lifted_230"), [])
               )
             )
           ]
         , "---"
-        , Relation(
-            Reads(
-              [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
-            )
-          , Source(
+        , MonoRelation(
+          Source(
               Con(
                 "With"
               , [ArgBind(1), ArgBind(2), ArgBind(3)]
               )
-            , []
+            , [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
             )
           , NamedDynamicEmitted([], "default")
           , Target(VarRef("lifted_230"), [])
@@ -204,32 +190,23 @@ Module(
             )
           ]
         , "---------"
-        , Relation(
-            Reads(
-              [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
-            )
-          , Source(Con("VarRef", [ArgBind(1)]), [])
+        , MonoRelation(
+          Source(Con("VarRef", [ArgBind(1)]), [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))])
           , NamedDynamicEmitted([], "default")
           , Target(VarRef("lifted_260"), [])
           )
         )
       , Rule(
           [ Formula(
-              Relation(
-                Reads(
-                  [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))]
-                )
-              , Source(ArgRead(1), [])
+              MonoRelation(
+              Source(ArgRead(1), [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))])
               , NamedDynamicEmitted([], "default")
               , Target(VarRef("lifted_34"), [])
               )
             )
           , Formula(
-              Relation(
-                Reads(
-                  [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))]
-                )
-              , Source(ArgRead(2), [])
+              MonoRelation(
+                Source(ArgRead(2), [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgRead(0))])
               , NamedDynamicEmitted([], "default")
               , Target(VarRef("lifted_33"), [])
               )
@@ -242,13 +219,10 @@ Module(
             )
           ]
         , "---------"
-        , Relation(
-            Reads(
-              [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
-            )
-          , Source(
+        , MonoRelation(
+            Source(
               Con("Plus", [ArgBind(1), ArgBind(2)])
-            , []
+            , [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
             )
           , NamedDynamicEmitted([], "default")
           , Target(VarRef("lifted_290"), [])
@@ -263,11 +237,8 @@ Module(
             )
           ]
         , "---------"
-        , Relation(
-            Reads(
-              [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))]
-            )
-          , Source(Con("Num", [ArgBind(1)]), [])
+        , MonoRelation(
+            Source(Con("Num", [ArgBind(1)]), [LabelComp(MapSort(SimpleSort("String"), SimpleSort("Int")), ArgBind(0))])
           , NamedDynamicEmitted([], "default")
           , Target(VarRef("lifted_310"), [])
           )
