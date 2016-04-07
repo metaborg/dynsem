@@ -74,8 +74,8 @@ public abstract class DynamicRelationDispatch extends RelationDispatch {
 	}
 
 	public static class _Polymorphic extends DynamicRelationDispatch {
-		private final String constr;
-		private final int arity;
+
+		private final Class<? extends ITerm> termClazz;
 
 		@Child private Rule rule;
 
@@ -83,18 +83,15 @@ public abstract class DynamicRelationDispatch extends RelationDispatch {
 
 		public _Polymorphic(ITerm redTerm, Rule rule, FrameDescriptor fd, String arrowName, SourceSection source) {
 			super(arrowName, source);
-			this.constr = redTerm.constructor();
-			this.arity = redTerm.arity();
+			this.termClazz = redTerm.getClass();
 			this.rule = rule;
 			this.fd = fd;
 		}
 
 		@Override
 		public RuleResult execute(VirtualFrame frame, Object[] args) {
-			ITerm redTerm = BuiltinTypesGen.asITerm(args[0]);
-			// TODO specialize to a particular language-specific term in order to have a leaf type. that will eliminate
-			// the guard below
-			if (redTerm.arity() == this.arity && redTerm.constructor().equals(this.constr)) {
+			// TODO this kind of check should actually be generated to be specific to the LHS term
+			if (termClazz == args[0].getClass()) {
 				return rule.execute(Truffle.getRuntime().createVirtualFrame(args, fd));
 			} else {
 				CompilerDirectives.transferToInterpreterAndInvalidate();
