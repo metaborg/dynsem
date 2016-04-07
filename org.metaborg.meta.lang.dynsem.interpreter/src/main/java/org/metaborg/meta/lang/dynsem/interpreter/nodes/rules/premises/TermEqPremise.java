@@ -33,6 +33,7 @@ public abstract class TermEqPremise extends Premise {
 	// TODO specialize for different types of left & right
 	
 	@Specialization
+	@TruffleBoundary
 	public void doEvaluated(Object left, Object right) {
 		if (!left.equals(right)) {
 			throw new PremiseFailure();
