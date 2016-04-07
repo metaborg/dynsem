@@ -20,6 +20,8 @@ import org.spoofax.terms.io.TAFTermReader;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.source.Source;
+import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class RuleRegistry {
 
@@ -64,18 +66,19 @@ public abstract class RuleRegistry {
 	}
 
 	public static void populate(RuleRegistry reg, File specificationFile) {
-		TAFTermReader reader = new TAFTermReader(new TermFactory());
-
-		IStrategoTerm topSpecTerm;
 		try {
-			topSpecTerm = reader.parseFromStream(new FileInputStream(specificationFile));
+			Source source = Source.fromFileName(specificationFile.getAbsolutePath().toString());
+			TAFTermReader reader = new TAFTermReader(new TermFactory());
+
+			IStrategoTerm topSpecTerm;
+			topSpecTerm = reader.parseFromStream(source.getInputStream());
+
+			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
+			for (IStrategoTerm ruleTerm : rulesTerm) {
+				reg.registerRule(RuleRoot.create(ruleTerm));
+			}
 		} catch (IOException ioex) {
 			throw new RuntimeException("Could not load specification ATerm", ioex);
-		}
-
-		IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
-		for (IStrategoTerm ruleTerm : rulesTerm) {
-			reg.registerRule(RuleRoot.create(ruleTerm));
 		}
 	}
 
