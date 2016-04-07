@@ -15,12 +15,12 @@ import com.oracle.truffle.api.source.SourceSection;
 public class RelationPremiseInputBuilder extends TermBuild {
 
 	@Child protected TermBuild termNode;
-	@Children protected final TermBuild[] rwNodes;
+	@Children protected final TermBuild[] componentNodes;
 
-	public RelationPremiseInputBuilder(TermBuild termNode, TermBuild[] rwNodes, SourceSection source) {
+	public RelationPremiseInputBuilder(TermBuild termNode, TermBuild[] componentNodes, SourceSection source) {
 		super(source);
 		this.termNode = termNode;
-		this.rwNodes = rwNodes;
+		this.componentNodes = componentNodes;
 	}
 
 	public static RelationPremiseInputBuilder create(IStrategoAppl source, FrameDescriptor fd) {
@@ -41,13 +41,13 @@ public class RelationPremiseInputBuilder extends TermBuild {
 	public Object[] executeObjectArray(VirtualFrame frame) {
 		Object term = termNode.executeGeneric(frame);
 
-		Object[] args = new Object[rwNodes.length + 1];
+		Object[] args = new Object[componentNodes.length + 1];
 		args[0] = term;
 
-		CompilerAsserts.compilationConstant(rwNodes.length);
+		CompilerAsserts.compilationConstant(componentNodes.length);
 
-		for (int i = 0; i < rwNodes.length; i++) {
-			args[i + 1] = rwNodes[i].executeGeneric(frame);
+		for (int i = 0; i < componentNodes.length; i++) {
+			args[i + 1] = componentNodes[i].executeGeneric(frame);
 		}
 
 		return args;
