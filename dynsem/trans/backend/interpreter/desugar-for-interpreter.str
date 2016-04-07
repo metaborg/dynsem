@@ -1,10 +1,10 @@
 module backend/interpreter/desugar-for-interpreter
 
 imports
-  signatures/ds-sig
-  ds
+  stratego/metaborg
+  signatures/-
   backend/interpreter/signature
-
+  analysis/-
 
 rules
 
