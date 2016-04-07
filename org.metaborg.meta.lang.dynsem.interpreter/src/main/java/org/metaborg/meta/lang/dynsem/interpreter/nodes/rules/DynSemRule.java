@@ -4,7 +4,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
