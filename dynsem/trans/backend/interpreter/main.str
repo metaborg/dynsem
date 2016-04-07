@@ -39,6 +39,7 @@ rules
         ; explicate-module
         ; copy-propagation-module
         ; constant-propagation-module
+        ; defactorize-module
         ; desugar-for-interpreter-module
     |project-path)
   

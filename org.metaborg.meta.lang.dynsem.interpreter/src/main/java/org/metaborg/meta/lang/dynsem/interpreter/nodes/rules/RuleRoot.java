@@ -71,7 +71,8 @@ public class RuleRoot extends RootNode {
 
 		String name = Tools.stringAt(arrowTerm, 1).stringValue();
 
-		IStrategoAppl lhsLeftTerm = Tools.applAt(Tools.applAt(relationT, 0), 0);
+		IStrategoAppl lhsSourceTerm = Tools.applAt(relationT, 0);
+		IStrategoAppl lhsLeftTerm = Tools.applAt(lhsSourceTerm, 0);
 		IStrategoAppl lhsConTerm = null;
 
 		// FIXME this should be done differently perhaps through desugaring of
@@ -100,10 +101,16 @@ public class RuleRoot extends RootNode {
 			throw new RuntimeException("Unsupported rule LHS: " + lhsLeftTerm);
 		}
 
+		IStrategoList lhsSemCompTerms = Tools.listAt(lhsSourceTerm, 1);
+		MatchPattern[] lhsSemCompPatterns = new MatchPattern[lhsSemCompTerms.size()];
+		for (int i = 0; i < lhsSemCompPatterns.length; i++) {
+			lhsSemCompPatterns[i] = MatchPattern.create(Tools.applAt(lhsSemCompTerms, i), fd);
+		}
+
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
 
-		return new RuleRoot(new DynSemRule(name, constr, arity, MatchPattern.create(lhsConTerm, fd), premises, target,
-				SourceSectionUtil.fromStrategoTerm(ruleT)), fd);
+		return new RuleRoot(new DynSemRule(name, constr, arity, MatchPattern.create(lhsConTerm, fd),
+				lhsSemCompPatterns, premises, target, SourceSectionUtil.fromStrategoTerm(ruleT)), fd);
 	}
 
 	private static FrameDescriptor createFrameDescriptor(IStrategoTerm t) {

@@ -24,12 +24,12 @@ rules /* rename arguments */
   mark-rule-arguments = alltd(?Rule(_, _, _); mark-rule-arguments-rule)
   
   mark-rule-arguments-rule:
-    Rule(prem*, infer, MonoRelation(Source(lhs, rw), arrow, target))
-      -> Rule(prem'*, infer, MonoRelation(Source(lhs', rw'), arrow, target'))
+    Rule(prem*, infer, MonoRelation(Source(lhs, rw*), arrow, target))
+      -> Rule(prem'*, infer, MonoRelation(Source(lhs', rw*), arrow, target'))
     with {| RenameArgument, NextArgument:
       rules(NextArgument: _ -> 1);
       lhs' := <try(mark-rule-arguments-bind-source)> lhs;
-      rw' := <alltd(mark-rule-arguments-bind)> rw;
+//      rw'* := <alltd(mark-rule-arguments-bind))> rw*;
       prem'* := <alltd(mark-rule-arguments-read)> prem*;
       target' := <alltd(mark-rule-arguments-read)> target
     |}
@@ -40,18 +40,18 @@ rules /* rename arguments */
       rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
 
   mark-rule-arguments-bind-source:
-    As(var@Var(v), source) -> <alltd(mark-rule-arguments-bind)> source
+    As(var@Var(v), source) -> source
     where
       rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
 
-  mark-rule-arguments-bind:
-    r@Var(v) -> ArgBind(i)
-    with
-      i := <NextArgument>;
-      rules(
-        RenameArgument: VarRef(v) -> ArgRead(i){r}
-        NextArgument: _ -> <inc> i
-      )
+//  mark-rule-arguments-bind:
+//    LabelComp(ty, r@Var(v)) -> LabelComp(ty, ArgBind(i))
+//    with
+//      i := <NextArgument>;
+//      rules(
+//        RenameArgument: VarRef(v) -> ArgRead(i){r}
+//        NextArgument: _ -> <inc> i
+//      )
 
   mark-rule-arguments-read = RenameArgument
 

@@ -272,6 +272,7 @@ rules // Builders
           explicate-module;
           copy-propagation-module;
           constant-propagation-module;
+          defactorize-module;
           sugar-all;
           pp-debug
         |project-path)> ast;

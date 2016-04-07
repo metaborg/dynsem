@@ -7,9 +7,9 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class AlwaysTrueMatchPattern extends MatchPattern {
+public class WldMatchPattern extends MatchPattern {
 
-	public AlwaysTrueMatchPattern(SourceSection source) {
+	public WldMatchPattern(SourceSection source) {
 		super(source);
 	}
 
@@ -18,9 +18,9 @@ public class AlwaysTrueMatchPattern extends MatchPattern {
 		return true;
 	}
 
-	public static AlwaysTrueMatchPattern create(IStrategoAppl t) {
+	public static WldMatchPattern create(IStrategoAppl t) {
 		CompilerAsserts.neverPartOfCompilation();
-		return new AlwaysTrueMatchPattern(SourceSectionUtil.fromStrategoTerm(t));
+		return new WldMatchPattern(SourceSectionUtil.fromStrategoTerm(t));
 	}
 
 }

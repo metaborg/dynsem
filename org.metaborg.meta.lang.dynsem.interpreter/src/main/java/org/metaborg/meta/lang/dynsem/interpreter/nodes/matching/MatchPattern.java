@@ -22,8 +22,11 @@ public abstract class MatchPattern extends DynSemNode {
 
 	public static MatchPattern create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
-		if (Tools.hasConstructor(t, "ArgBind", 1)){
-			return AlwaysTrueMatchPattern.create(t);
+		if (Tools.hasConstructor(t, "ArgBind", 1)) {
+			return WldMatchPattern.create(t);
+		}
+		if (Tools.hasConstructor(t, "Wld", 0)) {
+			return WldMatchPattern.create(t);
 		}
 		if (Tools.hasConstructor(t, "Con", 2)) {
 			return ConMatch.create(t, fd);
@@ -37,9 +40,12 @@ public abstract class MatchPattern extends DynSemNode {
 		if (Tools.hasConstructor(t, "ListTail", 2)) {
 			return ConsListMatch.create(t, fd);
 		}
+		if (Tools.hasConstructor(t, "LabelComp", 2)) {
+			// TODO we should use the type information from the labelcomp instead of skipping over it
+			return MatchPattern.create(Tools.applAt(t, 1), fd);
+		}
 		if (Tools.hasConstructor(t, "Cast", 2)) {
-			// FIXME: this is a hack. we should use the type information from
-			// the cast
+			// TODO we should use the type information from the cast instead of skipping over it
 			return MatchPattern.create(Tools.applAt(t, 0), fd);
 		}
 		throw new NotImplementedException("Unsupported match pattern: " + t);
