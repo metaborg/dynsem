@@ -12,6 +12,7 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class MergePointPremise extends Premise {
@@ -46,12 +47,15 @@ public class MergePointPremise extends Premise {
 		return new MergePointPremise(condition, branch1, branch2, SourceSectionUtil.fromStrategoTerm(t));
 	}
 
+	private final BranchProfile alternativeTaken = BranchProfile.create(); 
+	
 	@Override
 	public void execute(VirtualFrame frame) {
 		try {
 			condition.execute(frame);
 			execBranch1(frame);
 		} catch (PremiseFailure f) {
+			alternativeTaken.enter();
 			execBranch2(frame);
 		}
 	}
