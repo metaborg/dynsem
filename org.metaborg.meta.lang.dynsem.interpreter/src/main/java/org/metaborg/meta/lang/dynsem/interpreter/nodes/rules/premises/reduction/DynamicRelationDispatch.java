@@ -6,6 +6,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
+import com.github.krukow.clj_lang.PersistentList;
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
@@ -91,6 +92,7 @@ public abstract class DynamicRelationDispatch extends RelationDispatch {
 		@Override
 		public RuleResult execute(VirtualFrame frame, Object[] args) {
 			// TODO this kind of check should actually be generated to be specific to the LHS term
+			assert ITerm.class.isAssignableFrom(termClazz) || PersistentList.class.isAssignableFrom(termClazz);
 			if (termClazz == args[0].getClass()) {
 				return rule.execute(Truffle.getRuntime().createVirtualFrame(args, fd));
 			} else {
