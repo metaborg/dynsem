@@ -36,7 +36,7 @@ public class MatchPremise extends Premise {
 
 		if (!matchsuccess) {
 			matchFailProfile.enter();
-			throw new PremiseFailure();
+			throw PremiseFailure.INSTANCE;
 		}
 	}
 

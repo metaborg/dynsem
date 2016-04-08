@@ -49,11 +49,11 @@ public class RelationPremise extends Premise {
 
 		if (!rhsNode.execute(ruleRes.result, frame)) {
 			rhsMatchFailure.enter();
-			throw new PremiseFailure();
+			throw PremiseFailure.INSTANCE;
 		}
 		if (!evalRhsComponents(ruleRes.components, frame)) {
 			rhsCompFailure.enter();
-			throw new PremiseFailure();
+			throw PremiseFailure.INSTANCE;
 		}
 
 	}
@@ -83,8 +83,7 @@ public class RelationPremise extends Premise {
 			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
 		;
-		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
-				RelationDispatch.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
-				SourceSectionUtil.fromStrategoTerm(t));
+		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd), RelationDispatch.create(
+				Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
 	}
 }
