@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheNode;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -19,7 +20,10 @@ public class RelationPremiseInputBuilder extends TermBuild {
 
 	public RelationPremiseInputBuilder(TermBuild termNode, TermBuild[] componentNodes, SourceSection source) {
 		super(source);
-		this.termNode = termNode;
+		this.termNode = TermBuildCacheNode.create(termNode);
+		for (int i = 0; i < componentNodes.length; i++) {
+			componentNodes[i] = TermBuildCacheNode.create(componentNodes[i]);
+		}
 		this.componentNodes = componentNodes;
 	}
 
