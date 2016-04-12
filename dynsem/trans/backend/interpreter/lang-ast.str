@@ -107,15 +107,11 @@ rules /* Sort & Constructor classes */
           public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
           public final static int ARITY = ~i:<length; int-to-string> kid*;
 
-          ~fsingleton*
+          ~finit*
 
           ~fdec0*
 
           ~fget0*
-
-          public x_classname(param0*) {
-            bstm0*
-          }
 
           public static x_classname create(IStrategoTerm term) {
             CompilerAsserts.neverPartOfCompilation();
@@ -178,9 +174,12 @@ rules /* Sort & Constructor classes */
     where
       if [] := kid*
       then
-        fsingleton* := class-body-dec* |[ public final static x_classname SINGLETON = new x_classname(); ]|
+        finit* := class-body-dec* |[
+          public final static x_classname SINGLETON = new x_classname();
+          private x_classname() { }
+        ]|
       else
-        fsingleton* := []
+        finit* := class-body-dec* |[ public x_classname(param0*) { bstm0* } ]|
       end
         
   
