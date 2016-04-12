@@ -7,7 +7,8 @@ import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.nodes.NodeVisitor;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChild(value = "wrapped", type = TermBuild.class)
@@ -21,15 +22,32 @@ public abstract class TermBuildCacheNode extends TermBuild {
 	}
 
 	public static TermBuild create(TermBuild wrapped) {
-		if (wrapped instanceof VarRead || wrapped instanceof ArgRead || wrapped instanceof NativeOpTermBuild) {
+		if (wrapped instanceof VarRead || wrapped instanceof ArgRead) {
 			return wrapped;
-		} else {
-			List<TermBuild> depdendencyList = new ArrayList<>();
-			depdendencyList.addAll(NodeUtil.findAllNodeInstances(wrapped, VarRead.class));
-			depdendencyList.addAll(NodeUtil.findAllNodeInstances(wrapped, ArgRead.class));
-			return TermBuildCacheNodeGen.create(wrapped.getSourceSection(),
-					TermBuildDependenciesNode.create(depdendencyList.toArray(new TermBuild[0])), wrapped);
 		}
+		List<TermBuild> dependencies = new ArrayList<>();
+		try {
+			wrapped.accept(new NodeVisitor() {
+
+				@Override
+				public boolean visit(Node node) {
+					if (node instanceof TermBuild) {
+						TermBuild tb = (TermBuild) node;
+						if (tb instanceof VarRead || tb instanceof ArgRead) {
+							dependencies.add(tb);
+						} else if (tb instanceof NativeOpTermBuild || tb instanceof Fresh
+								|| tb instanceof SortFunCallBuild) {
+							throw TermBuildUnstableException.INSTANCE;
+						}
+					}
+					return true;
+				}
+			});
+		} catch (TermBuildUnstableException tbex) {
+			return wrapped;
+		}
+		return TermBuildCacheNodeGen.create(wrapped.getSourceSection(),
+				TermBuildDependenciesNode.create(dependencies.toArray(new TermBuild[0])), wrapped);
 	}
 
 	protected boolean checkGuard(VirtualFrame frame) {
@@ -41,7 +59,6 @@ public abstract class TermBuildCacheNode extends TermBuild {
 		}
 	}
 
-	// @Specialization(rewriteOn = TermBuildUnstableException.class, limit="1")
 	@Specialization(guards = "checkGuard(frame)")
 	public Object doCached(VirtualFrame frame, Object term, @Cached("term") Object cachedTerm) {
 		return cachedTerm;
