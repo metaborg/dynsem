@@ -107,6 +107,8 @@ rules /* Sort & Constructor classes */
           public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
           public final static int ARITY = ~i:<length; int-to-string> kid*;
 
+          ~fsingleton*
+
           ~fdec0*
 
           ~fget0*
@@ -173,6 +175,14 @@ rules /* Sort & Constructor classes */
       e0* := <ds-to-interp-sorts-to-frefs> kid*;
       (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|"term")); unzip; (concat, id)> kid*;
       bstm2* := <map-with-index(ds2java-field-eq-check)> kid*
+    where
+      if [] := kid*
+      then
+        fsingleton* := class-body-dec* |[ public final static x_classname SINGLETON = new x_classname(); ]|
+      else
+        fsingleton* := []
+      end
+        
   
   ds-to-interp-sorts-to-create-arg(|x_term):
     (e, sref@SimpleSort(s)) -> ([], e |[ ~x:<ds-to-interp-terms-types-name> sref.create(x_term.getSubterm(e)) ]|)
@@ -402,7 +412,7 @@ rules /* term building */
           
           @Specialization
           public x_termclass doTyped(param0*) {
-            return new x_termclass(e0*);
+            return e_term;
           }
           
         }
@@ -413,6 +423,13 @@ rules /* term building */
       x_termclass := <ds-to-interp-terms-types-name> dec;
       param0* := <ds-to-interp-terms-building-params> kid*;
       e0* := <ds-to-interp-terms-building-exprs> kid*
+    where
+      if [] := kid*
+      then
+        e_term := e |[ x_termclass.SINGLETON ]|
+      else
+        e_term := e |[ new x_termclass(e0*) ]|
+      end
 
   ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
   
