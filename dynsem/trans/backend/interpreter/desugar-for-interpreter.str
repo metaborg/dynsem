@@ -9,7 +9,7 @@ imports
 rules
 
   desugar-for-interpreter-module:
-    m@Module(_, _) -> Module($[[name]_natops], section*)
+    m@Module(_, _) -> Module($[[name]_interp], section*)
     where
       <m-in-analysis(desugar-for-interpreter); unmark-vars> m => Module(name, section*)
 
@@ -29,7 +29,6 @@ rules /* rename arguments */
     with {| RenameArgument, NextArgument:
       rules(NextArgument: _ -> 1);
       lhs' := <try(mark-rule-arguments-bind-source)> lhs;
-//      rw'* := <alltd(mark-rule-arguments-bind))> rw*;
       prem'* := <alltd(mark-rule-arguments-read)> prem*;
       target' := <alltd(mark-rule-arguments-read)> target
     |}
@@ -43,15 +42,6 @@ rules /* rename arguments */
     As(var@Var(v), source) -> source
     where
       rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
-
-//  mark-rule-arguments-bind:
-//    LabelComp(ty, r@Var(v)) -> LabelComp(ty, ArgBind(i))
-//    with
-//      i := <NextArgument>;
-//      rules(
-//        RenameArgument: VarRef(v) -> ArgRead(i){r}
-//        NextArgument: _ -> <inc> i
-//      )
 
   mark-rule-arguments-read = RenameArgument
 
