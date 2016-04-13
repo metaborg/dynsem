@@ -17,15 +17,16 @@ rules
     desugar-semantic-components;
     mark-rule-arguments;
     desugar-natives;
-    desugar-list-reductions
+    desugar-list-reductions;
+    desugar-rec-tco
 
 rules /* rename arguments */
 
   mark-rule-arguments = alltd(?Rule(_, _, _); mark-rule-arguments-rule)
   
   mark-rule-arguments-rule:
-    Rule(prem*, infer, MonoRelation(Source(lhs, rw*), arrow, target))
-      -> Rule(prem'*, infer, MonoRelation(Source(lhs', rw*), arrow, target'))
+    Rule(prem*, infer, Relation(Source(lhs, rw*), arrow, target))
+      -> Rule(prem'*, infer, Relation(Source(lhs', rw*), arrow, target'))
     with {| RenameArgument, NextArgument:
       rules(NextArgument: _ -> 1);
       lhs' := <try(mark-rule-arguments-bind-source)> lhs;
@@ -84,17 +85,21 @@ rules /* desugar rule conclusion/premise source */
   desugar-semantic-components = alltd(desugar-rule-conclusion-source); alltd(desugar-relation-premise-source)
 
   desugar-rule-conclusion-source:
-    Rule(p*, infer, Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Rule(p*, infer, MonoRelation(Source(t, [ro*, rw*]), rel, tgt)) 
+    Rule(p*, infer, Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Rule(p*, infer, Relation(Source(t, [ro*, rw*]), rel, tgt)) 
 
   desugar-relation-premise-source:
-    Formula(Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Formula(MonoRelation(Source(t, [ro*, rw*]), rel, tgt))
+    Formula(Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Formula(Relation(Source(t, [ro*, rw*]), rel, tgt))
 
 rules /* list reductions */
 
   desugar-list-reductions = alltd(desugar-list-reduction)
   
   desugar-list-reduction:
-    Formula(MonoRelation(Source(t, rws), rel, target)) -> Formula(MonoRelation(Source(ListSource(t, ty), rws), rel, target))
+    Formula(Relation(Source(t, rws), rel, target)) -> Formula(Relation(Source(ListSource(t, ty), rws), rel, target))
     where
       <type-of> t => ty@ListType(_)
-  
+
+rules /* TCO */
+
+  desugar-rec-tco = alltd(fail)
+

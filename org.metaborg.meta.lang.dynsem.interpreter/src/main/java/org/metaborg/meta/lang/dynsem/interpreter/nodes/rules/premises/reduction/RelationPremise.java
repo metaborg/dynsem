@@ -71,7 +71,7 @@ public class RelationPremise extends Premise {
 
 	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "MonoRelation", 3);
+		assert Tools.hasConstructor(t, "Relation", 3);
 
 		IStrategoAppl targetT = Tools.applAt(t, 2);
 		assert Tools.hasConstructor(targetT, "Target", 2);

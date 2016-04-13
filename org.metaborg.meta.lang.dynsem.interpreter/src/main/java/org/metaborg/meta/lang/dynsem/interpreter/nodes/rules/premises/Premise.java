@@ -26,7 +26,7 @@ public abstract class Premise extends DynSemNode {
 			return MergePointPremise.create(t, fd);
 		}
 		IStrategoAppl premT = Tools.applAt(t, 0);
-		if (Tools.hasConstructor(premT, "MonoRelation", 3)) {
+		if (Tools.hasConstructor(premT, "Relation", 3)) {
 			return RelationPremise.create(premT, fd);
 		}
 		if (Tools.hasConstructor(premT, "Match", 2)) {

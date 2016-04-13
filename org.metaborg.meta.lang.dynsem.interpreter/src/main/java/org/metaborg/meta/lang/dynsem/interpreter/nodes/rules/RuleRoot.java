@@ -64,7 +64,7 @@ public class RuleRoot extends RootNode {
 		}
 
 		IStrategoAppl relationT = Tools.applAt(ruleT, 2);
-		assert Tools.hasConstructor(relationT, "MonoRelation", 3);
+		assert Tools.hasConstructor(relationT, "Relation", 3);
 
 		IStrategoAppl arrowTerm = Tools.applAt(relationT, 1);
 		assert Tools.hasConstructor(arrowTerm, "NamedDynamicEmitted", 2);
