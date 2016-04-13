@@ -111,6 +111,14 @@ rules /* TCO */
       !succ // ensure we have rewritten at least one call
     |}
   
+  desugar-rule-rec-tco:
+    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name), _)) -> RecRule(p'*, infer, rel)
+    where {| CurrentRelation:
+      rules(CurrentRelation: _ -> (<rw-type> ty, -1, arrow-name));
+      p'* := <desugar-prems-rec-tco(try(?succ))> p*;
+      !succ // ensure we have rewritten at least one call
+    |}
+  
   desugar-prems-rec-tco(s) = is-list; try(at-last(desugar-prem-rec-tco(s)))
   
   desugar-prem-rec-tco(s) =
@@ -130,4 +138,10 @@ rules /* TCO */
       (_, _, arrow-name) := <CurrentRelation>;
       s
   
-
+  desugar-prem-rec-tco(s):
+    [Formula(Relation(src@Source(ListSource(_, lty), _), rel@NamedDynamicEmitted(_, arrow-name), tgt))] ->
+      [Formula(RecRelation(src, rel, tgt))]
+    where
+      (lty, -1, arrow-name) := <CurrentRelation>; 
+      s
+  
