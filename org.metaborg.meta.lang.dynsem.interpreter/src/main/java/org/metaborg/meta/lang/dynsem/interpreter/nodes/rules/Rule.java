@@ -3,12 +3,18 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.metaborg.meta.lang.dynsem.interpreter.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermVisitor;
 import org.spoofax.terms.util.NotImplementedException;
+import org.strategoxt.lang.Context;
+
+import trans.pp_type_0_0;
+import trans.rw_type_0_0;
+import trans.trans;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -17,17 +23,17 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class Rule extends DynSemNode {
 
 	private final FrameDescriptor fd;
+	private final String key;
 
-	public Rule(SourceSection sourceSection, FrameDescriptor fd) {
+	public Rule(SourceSection sourceSection, FrameDescriptor fd, String key) {
 		super(sourceSection);
 		this.fd = fd;
+		this.key = key;
 	}
 
-	public abstract int getArity();
-
-	public abstract String getConstructor();
-
-	public abstract String getName();
+	public String getKey() {
+		return key;
+	}
 
 	public abstract RuleResult execute(VirtualFrame frame);
 
@@ -65,6 +71,45 @@ public abstract class Rule extends DynSemNode {
 			fd.addFrameSlot(v);
 		}
 		return fd;
+	}
+
+	protected static String createRuleKey(IStrategoAppl relationT) {
+		assert Tools.hasConstructor(relationT, "Relation", 3);
+
+		IStrategoAppl arrowTerm = Tools.applAt(relationT, 1);
+		assert Tools.hasConstructor(arrowTerm, "NamedDynamicEmitted", 2);
+
+		String name = Tools.stringAt(arrowTerm, 1).stringValue();
+
+		IStrategoAppl lhsLeftTerm = Tools.applAt(Tools.applAt(relationT, 0), 0);
+
+		IStrategoAppl lhsConTerm = null;
+
+		if (Tools.hasConstructor(lhsLeftTerm, "As", 2)) {
+			lhsConTerm = Tools.applAt(lhsLeftTerm, 1);
+		} else {
+			lhsConTerm = lhsLeftTerm;
+		}
+
+		String constr = null;
+		int arity;
+		if (Tools.hasConstructor(lhsConTerm, "Con", 2)) {
+			assert lhsConTerm != null && Tools.hasConstructor(lhsConTerm, "Con", 2);
+			lhsConTerm = lhsLeftTerm;
+			constr = Tools.stringAt(lhsConTerm, 0).stringValue();
+			arity = Tools.listAt(lhsConTerm, 1).size();
+		} else if (Tools.hasConstructor(lhsConTerm, "Cast", 2)) {
+			IStrategoAppl tyTerm = Tools.applAt(lhsConTerm, 1);
+			assert Tools.hasConstructor(tyTerm, "ListSort", 1);
+			Context ctx = trans.init();
+			constr = "_"
+					+ Tools.asJavaString(pp_type_0_0.instance.invoke(ctx, rw_type_0_0.instance.invoke(ctx, tyTerm)));
+			arity = 1;
+		} else {
+			throw new RuntimeException("Unsupported rule LHS: " + lhsLeftTerm);
+		}
+
+		return RuleRegistry.makeKey(name, constr, arity);
 	}
 
 }

@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +17,8 @@ import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.Source;
-import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class RuleRegistry {
 
@@ -40,7 +37,7 @@ public abstract class RuleRegistry {
 	public void registerRule(RuleRoot rr) {
 		CompilerAsserts.neverPartOfCompilation();
 		Rule r = rr.getRule();
-		String k = makeKey(r.getName(), r.getConstructor(), r.getArity());
+		String k = r.getKey();
 
 		RuleRoot prevRR = rules.put(k, rr);
 		if (prevRR != null) {
@@ -61,7 +58,7 @@ public abstract class RuleRegistry {
 		return rules.size();
 	}
 
-	private static String makeKey(String name, String constr, int arity) {
+	public static String makeKey(String name, String constr, int arity) {
 		return name + "/" + constr + "/" + arity;
 	}
 

@@ -29,7 +29,7 @@ public class RuleRoot extends RootNode {
 	@Override
 	@TruffleBoundary
 	public String toString() {
-		return "RuleRoot: " + rule.getName() + "/" + rule.getConstructor() + "/" + rule.getArity();
+		return "RuleRoot: " + rule.toString();
 	}
 
 }
