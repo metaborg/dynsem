@@ -1,12 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
 
 import trans.pp_type_0_0;
@@ -18,7 +16,6 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 /**
@@ -41,44 +38,33 @@ public class ReductionRule extends Rule {
 	private final String constr;
 	private final int arity;
 
-	@Child protected MatchPattern inPattern;
-	@Children protected final MatchPattern[] componentPatterns;
+	@Child protected RuleInputsNode inputsNode;
 
 	@Children protected final Premise[] premises;
 
 	@Child protected RuleTarget target;
 
 	public ReductionRule(SourceSection source, FrameDescriptor fd, String name, String constr, int arity,
-			MatchPattern inPattern, MatchPattern[] componentPatterns, Premise[] premises, RuleTarget output) {
+			RuleInputsNode inputsNode, Premise[] premises, RuleTarget output) {
 		super(source, fd);
 		this.name = name;
 		this.constr = constr;
 		this.arity = arity;
-		this.inPattern = inPattern;
-		this.componentPatterns = componentPatterns;
+		this.inputsNode = inputsNode;
 		this.premises = premises;
 		this.target = output;
 	}
 
-	private final ConditionProfile condProfile = ConditionProfile.createBinaryProfile();
-
 	@Override
 	public RuleResult execute(VirtualFrame frame) {
-		Object[] args = frame.getArguments();
-		if (condProfile.profile(inPattern.execute(args[0], frame))) {
+		/* evaluate the inputs node */
+		inputsNode.execute(frame);
 
-			/* evaluate the semantic component pattern matches */
-			evaluateComponentPatterns(args, frame);
+		/* evaluate the premises */
+		evaluatePremises(frame);
 
-			/* evaluate the premises */
-			evaluatePremises(frame);
-
-			/* evaluate the rule target */
-			return target.execute(frame);
-		} else {
-			CompilerAsserts.neverPartOfCompilation();
-			throw new RuntimeException("Incompatible rule selection");
-		}
+		/* evaluate the rule target */
+		return target.execute(frame);
 	}
 
 	@ExplodeLoop
@@ -86,14 +72,6 @@ public class ReductionRule extends Rule {
 		CompilerAsserts.compilationConstant(premises.length);
 		for (int i = 0; i < premises.length; i++) {
 			premises[i].execute(frame);
-		}
-	}
-
-	@ExplodeLoop
-	private void evaluateComponentPatterns(Object[] args, VirtualFrame frame) {
-		CompilerAsserts.compilationConstant(componentPatterns.length);
-		for (int i = 0; i < componentPatterns.length; i++) {
-			componentPatterns[i].execute(args[i + 1], frame);
 		}
 	}
 
@@ -140,10 +118,10 @@ public class ReductionRule extends Rule {
 
 		IStrategoAppl lhsSourceTerm = Tools.applAt(relationT, 0);
 		IStrategoAppl lhsLeftTerm = Tools.applAt(lhsSourceTerm, 0);
+		IStrategoList lhsCompsTerm = Tools.listAt(lhsSourceTerm, 1);
+
 		IStrategoAppl lhsConTerm = null;
 
-		// FIXME this should be done differently perhaps through desugaring of
-		// the spec to bring the constructor name and arity outwards
 		if (Tools.hasConstructor(lhsLeftTerm, "As", 2)) {
 			lhsConTerm = Tools.applAt(lhsLeftTerm, 1);
 		} else {
@@ -168,16 +146,9 @@ public class ReductionRule extends Rule {
 			throw new RuntimeException("Unsupported rule LHS: " + lhsLeftTerm);
 		}
 
-		IStrategoList lhsSemCompTerms = Tools.listAt(lhsSourceTerm, 1);
-		MatchPattern[] lhsSemCompPatterns = new MatchPattern[lhsSemCompTerms.size()];
-		for (int i = 0; i < lhsSemCompPatterns.length; i++) {
-			lhsSemCompPatterns[i] = MatchPattern.create(Tools.applAt(lhsSemCompTerms, i), fd);
-		}
-
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
 
 		return new ReductionRule(SourceSectionUtil.fromStrategoTerm(ruleT), fd, name, constr, arity,
-				MatchPattern.create(lhsConTerm, fd), lhsSemCompPatterns, premises, target);
+				RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
 	}
-
 }
