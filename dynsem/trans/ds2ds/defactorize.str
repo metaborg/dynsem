@@ -36,6 +36,11 @@ rules
       <collect-all(?Var(_)); nub; map(init-count-varread)> r;
       <alltd(count-varread)> r
   
+  count-varreads-premises =
+    is-list;
+    where(collect-all(?Var(_)); nub; map(init-count-varread));
+    alltd(count-varread)
+  
   init-count-varread = ?Var(v); rules(ReadCount: v -> 0)
   
   count-varread = 
@@ -60,8 +65,23 @@ rules
 
   eliminate-patternmatch-premises =
     filter(
-      MergePoint(id, PremiseBlock(eliminate-patternmatch-premises), PremiseBlock(eliminate-patternmatch-premises))
+      hoist-patternmatches-mergepoint
       <+ not(eliminate-patternmatch-premise))
+
+  hoist-patternmatches-mergepoint:
+    MergePoint(c, PremiseBlock(p1*), PremiseBlock(p2*)) -> MergePoint(c, PremiseBlock(p1''*), PremiseBlock(p2''*))
+    where {| ReadCount, PropagatePatternMatch:
+      <count-varreads-premises> p1*;
+      p1'* := <eliminate-patternmatch-premises> p1*;
+      p1''* := <alltd(replace-singletonwrite(try(?succ)))> p1'*
+    |}
+    where {| ReadCount, PropagatePatternMatch:
+      <count-varreads-premises> p2*;
+      p2'* := <eliminate-patternmatch-premises> p2*;
+      p2''* := <alltd(replace-singletonwrite(try(?succ)))> p2'*
+    |}
+    where
+      !succ
 
   eliminate-patternmatch-premise =
     ?Formula(Match(VarRef(v), rhs));
