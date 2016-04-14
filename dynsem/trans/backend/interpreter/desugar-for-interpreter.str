@@ -14,11 +14,11 @@ rules
       <m-in-analysis(desugar-for-interpreter); unmark-vars> m => Module(name, section*)
 
   desugar-for-interpreter =
-    desugar-semantic-components;
-    mark-rule-arguments;
-    desugar-natives;
-    desugar-list-reductions;
-    desugar-rec-tco
+    desugar-semantic-components
+    ; mark-rule-arguments
+    ; desugar-natives
+    ; desugar-list-reductions
+    ; desugar-rec-tco
 
 rules /* rename arguments */
 
