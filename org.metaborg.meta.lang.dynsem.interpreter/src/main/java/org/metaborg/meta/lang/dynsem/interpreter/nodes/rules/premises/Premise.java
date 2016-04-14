@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RecursiveRelationPremise;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationPremise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -28,6 +29,9 @@ public abstract class Premise extends DynSemNode {
 		IStrategoAppl premT = Tools.applAt(t, 0);
 		if (Tools.hasConstructor(premT, "Relation", 3)) {
 			return RelationPremise.create(premT, fd);
+		}
+		if (Tools.hasConstructor(premT, "RecRelation", 3)) {
+			return RecursiveRelationPremise.create(premT, fd);
 		}
 		if (Tools.hasConstructor(premT, "Match", 2)) {
 			return MatchPremise.create(premT, fd);

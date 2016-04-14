@@ -49,6 +49,8 @@ public abstract class Rule extends DynSemNode {
 	public static Rule create(IStrategoAppl t) {
 		if (Tools.hasConstructor(t, "Rule", 3)) {
 			return ReductionRule.create(t);
+		} else if (Tools.hasConstructor(t, "RecRule", 3)) {
+			return RecursiveReductionRule.create(t);
 		}
 		throw new NotImplementedException("Unsupported rule term: " + t);
 	}
