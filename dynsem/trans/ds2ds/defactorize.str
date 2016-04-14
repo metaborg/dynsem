@@ -40,7 +40,6 @@ rules
   
   count-varread = 
     ?VarRef(v);
-    v' := <strip-annos> v;
     reads := <ReadCount; inc> v;
     rules(ReadCount: v -> reads)
 
@@ -55,19 +54,24 @@ rules
   hoist-patternmatches-rule(record-progress):
     Rule(p*, infer, rel) -> r'
     where {| PropagatePatternMatch:
-      p'* := <filter(not(eliminate-patternmatch-premise))> p*;
+      p'* := <eliminate-patternmatch-premises> p*;
       r' := <alltd(replace-singletonwrite(record-progress))> Rule(p'*, infer, rel)
     |}
+
+  eliminate-patternmatch-premises =
+    filter(
+      MergePoint(id, PremiseBlock(eliminate-patternmatch-premises), PremiseBlock(eliminate-patternmatch-premises))
+      <+ not(eliminate-patternmatch-premise))
 
   eliminate-patternmatch-premise =
     ?Formula(Match(VarRef(v), rhs));
     <ReadCount> v => 1;
-    rules(PropagatePatternMatch: v -> rhs) 
+    rules(PropagatePatternMatch: Var(v) -> rhs)
 
   replace-singletonwrite(record-progress):
-    Var(v) -> t
+    var@Var(v) -> t
     where
-      <PropagatePatternMatch> v => t;
+      <repeat1(PropagatePatternMatch)> var => t;
       record-progress
 
   lower-termbuilds-rule(record-progress):
