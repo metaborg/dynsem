@@ -119,28 +119,28 @@ rules /* TCO */
       !succ // ensure we have rewritten at least one call
     |}
   
-  desugar-prems-rec-tco(s) = is-list; try(at-last(desugar-prem-rec-tco(s)))
+  desugar-prems-rec-tco(s) = is-list; try(at-last([desugar-prem-rec-tco(s)]))
   
   desugar-prem-rec-tco(s) =
     MergePoint(id, PremiseBlock(desugar-prems-rec-tco(s)), PremiseBlock(desugar-prems-rec-tco(s)))
 
   desugar-prem-rec-tco(s):
-    [Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name), tgt))] ->
-      [Formula(RecRelation(src, rel, tgt))]
+    Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name), tgt)) ->
+      Formula(RecRelation(src, rel, tgt))
     where
       (c, <length> k*, arrow-name) := <CurrentRelation>;
       s
 
   desugar-prem-rec-tco(s):
-    [Formula(Relation(src@Source(ArgRead(0), _), rel@NamedDynamicEmitted(_, arrow-name), tgt))] ->
-      [Formula(RecRelation(src, rel, tgt))]
+    Formula(Relation(src@Source(ArgRead(0), _), rel@NamedDynamicEmitted(_, arrow-name), tgt)) ->
+      Formula(RecRelation(src, rel, tgt))
     where
       (_, _, arrow-name) := <CurrentRelation>;
       s
   
   desugar-prem-rec-tco(s):
-    [Formula(Relation(src@Source(ListSource(_, lty), _), rel@NamedDynamicEmitted(_, arrow-name), tgt))] ->
-      [Formula(RecRelation(src, rel, tgt))]
+    Formula(Relation(src@Source(ListSource(_, lty), _), rel@NamedDynamicEmitted(_, arrow-name), tgt)) ->
+      Formula(RecRelation(src, rel, tgt))
     where
       (lty, -1, arrow-name) := <CurrentRelation>; 
       s
