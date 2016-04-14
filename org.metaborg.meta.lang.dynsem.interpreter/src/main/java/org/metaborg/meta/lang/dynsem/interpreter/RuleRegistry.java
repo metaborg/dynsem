@@ -49,10 +49,10 @@ public abstract class RuleRegistry {
 			if (prevRule instanceof OverloadedRule) {
 				ruleChain = (OverloadedRule) prevRule;
 			} else {
-				ruleChain = new OverloadedRule(new InlinedRuleAdapter(prevRule, prevRR.getFrameDescriptor()));
+				ruleChain = new OverloadedRule(new InlinedRuleAdapter(prevRule));
 			}
-			ruleChain.addNext(new InlinedRuleAdapter(r, rr.getFrameDescriptor()));
-			rules.put(k, new RuleRoot(ruleChain, rr.getFrameDescriptor()));
+			ruleChain.addNext(new InlinedRuleAdapter(r));
+			rules.put(k, new RuleRoot(ruleChain));
 		}
 	}
 
@@ -75,7 +75,7 @@ public abstract class RuleRegistry {
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 			for (IStrategoTerm ruleTerm : rulesTerm) {
-				reg.registerRule(RuleRoot.create(ruleTerm));
+				reg.registerRule(new RuleRoot(Rule.create(ruleTerm)));
 			}
 		} catch (IOException ioex) {
 			throw new RuntimeException("Could not load specification ATerm", ioex);
