@@ -40,7 +40,7 @@ public class RuleInputsNode extends DynSemNode {
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
 			// FIXME check that the match actually suceeds
-			assert componentPatterns[i].execute(args[i + 1], frame);
+			componentPatterns[i].execute(args[i + 1], frame);
 		}
 	}
 
