@@ -1,40 +1,57 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RecurException;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-// FIXME implement
-public class RecursiveRelationPremise extends RelationPremise {
+public class RecursiveRelationPremise extends Premise {
 
-	public RecursiveRelationPremise(RelationPremiseInputBuilder inputBuilderNode, RelationDispatch dispatchNode,
-			MatchPattern rhsNode, MatchPattern[] rhsComponentNodes, SourceSection source) {
-		super(inputBuilderNode, dispatchNode, rhsNode, rhsComponentNodes, source);
+	@Child protected TermBuild inputNode;
+	@Children protected final TermBuild[] componentNodes;
+
+	public RecursiveRelationPremise(SourceSection source, TermBuild inputNode, TermBuild[] componentNodes) {
+		super(source);
+		this.inputNode = inputNode;
+		this.componentNodes = componentNodes;
 	}
 
-	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
+	@Override
+	@ExplodeLoop
+	public void execute(VirtualFrame frame) {
+		Object[] args = frame.getArguments();
+		args[0] = inputNode.executeGeneric(frame);
+		for (int i = 0; i < componentNodes.length; i++) {
+			args[i + 1] = componentNodes[i].executeGeneric(frame);
+		}
+
+		throw RecurException.INSTANCE;
+	}
+
+	public static RecursiveRelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "RecRelation", 3);
 
-		IStrategoAppl targetT = Tools.applAt(t, 2);
-		assert Tools.hasConstructor(targetT, "Target", 2);
-		MatchPattern rhsNode = MatchPattern.create(Tools.applAt(targetT, 0), fd);
+		IStrategoAppl source = Tools.applAt(t, 0);
+		assert Tools.hasConstructor(source, "Source", 2);
+		TermBuild lhsNode = TermBuild.create(Tools.applAt(source, 0), fd);
 
-		IStrategoList rhsRwsT = Tools.listAt(targetT, 1);
-		MatchPattern[] rhsRwNodes = new MatchPattern[rhsRwsT.size()];
-		for (int i = 0; i < rhsRwNodes.length; i++) {
-			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
+		IStrategoList rws = Tools.listAt(source, 1);
+		TermBuild[] rwNodes = new TermBuild[rws.getSubtermCount()];
+		for (int i = 0; i < rwNodes.length; i++) {
+			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
 		}
-		;
-		return new RecursiveRelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
-				RelationDispatch.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
-				SourceSectionUtil.fromStrategoTerm(t));
-	}
 
+		return new RecursiveRelationPremise(SourceSectionUtil.fromStrategoTerm(t), lhsNode, rwNodes);
+
+	}
 }

@@ -8,14 +8,35 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
-// FIXME implement this
 public class RecursiveReductionRule extends ReductionRule {
 
 	public RecursiveReductionRule(SourceSection source, FrameDescriptor fd, String key, RuleInputsNode inputsNode,
 			Premise[] premises, RuleTarget output) {
 		super(source, fd, key, inputsNode, premises, output);
+	}
+
+	private final BranchProfile recurTaken = BranchProfile.create();
+
+	@Override
+	public RuleResult execute(VirtualFrame frame) {
+		RuleResult result = null;
+		boolean repeat = true;
+		while (repeat) {
+			try {
+				result = super.execute(frame);
+				repeat = false;
+			} catch (RecurException recex) {
+				recurTaken.enter();
+				repeat = true;
+			}
+		}
+
+		assert result != null;
+		return result;
 	}
 
 	public static RecursiveReductionRule create(IStrategoAppl ruleT) {

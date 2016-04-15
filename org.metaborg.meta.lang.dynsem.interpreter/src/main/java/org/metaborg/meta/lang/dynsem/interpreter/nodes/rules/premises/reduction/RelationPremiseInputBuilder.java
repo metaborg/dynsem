@@ -13,6 +13,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
+// TODO experiment with dissolving this node into its parent
 public class RelationPremiseInputBuilder extends TermBuild {
 
 	@Child protected TermBuild termNode;
