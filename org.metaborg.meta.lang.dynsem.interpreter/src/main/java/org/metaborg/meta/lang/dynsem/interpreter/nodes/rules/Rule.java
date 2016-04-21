@@ -3,16 +3,18 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermVisitor;
 import org.spoofax.terms.util.NotImplementedException;
-import org.strategoxt.HybridInterpreter;
+import org.strategoxt.lang.Context;
+
+import trans.pp_type_0_0;
+import trans.rw_type_0_0;
+import trans.trans;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -101,18 +103,9 @@ public abstract class Rule extends DynSemNode {
 		} else if (Tools.hasConstructor(lhsConTerm, "Cast", 2)) {
 			IStrategoAppl tyTerm = Tools.applAt(lhsConTerm, 1);
 			assert Tools.hasConstructor(tyTerm, "ListSort", 1);
-			
-			HybridInterpreter dynsemStrategoRuntime = DynSemContext.getDynSemStrategoRuntime();
-
-			dynsemStrategoRuntime.setCurrent(tyTerm);
-			try {
-				dynsemStrategoRuntime.invoke("rw-type");
-				dynsemStrategoRuntime.invoke("pp-type");
-				
-				constr = "_" + Tools.asJavaString(dynsemStrategoRuntime.current());
-			} catch (InterpreterException e) {
-				throw new RuntimeException("Failed to invoke DynSem pp-type strategy", e);
-			}
+			Context ctx = trans.init();
+			constr = "_"
+					+ Tools.asJavaString(pp_type_0_0.instance.invoke(ctx, rw_type_0_0.instance.invoke(ctx, tyTerm)));
 			arity = 1;
 		} else {
 			throw new RuntimeException("Unsupported rule LHS: " + lhsLeftTerm);
