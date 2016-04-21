@@ -4,14 +4,12 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgException;
 import org.metaborg.core.language.ILanguageComponent;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
 import org.metaborg.spoofax.core.Spoofax;
-import org.metaborg.spoofax.core.SpoofaxModule;
 import org.strategoxt.HybridInterpreter;
 
 import com.google.common.collect.Iterables;
@@ -52,13 +50,8 @@ public class DynSemContext {
 		if (dynsemStrategoRuntime == null) {
 			assert DYNSEMPATH != null;
 			try {
-				Spoofax spoofax = new Spoofax(new SpoofaxModule(ClassLoader.getSystemClassLoader()));
-				FileObject dynsemResource = null;
-				if (FilenameUtils.isExtension(DYNSEMPATH, "spoofax-language")) {
-					dynsemResource = spoofax.resourceService.resolve("zip:" + DYNSEMPATH + "!/");
-				} else {
-					dynsemResource = spoofax.resourceService.resolve(DYNSEMPATH);
-				}
+				Spoofax spoofax = new Spoofax();
+				FileObject dynsemResource = spoofax.resourceService.resolve(DYNSEMPATH);
 				Iterable<ILanguageComponent> components = spoofax.discoverLanguages(dynsemResource);
 				ILanguageComponent dynsem = Iterables.get(components, 0);
 
