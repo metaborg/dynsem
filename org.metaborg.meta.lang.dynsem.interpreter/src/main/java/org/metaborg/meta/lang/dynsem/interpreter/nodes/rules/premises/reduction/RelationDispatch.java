@@ -1,16 +1,16 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
 import org.metaborg.meta.interpreter.framework.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
+import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
-
-import trans.pp_type_0_0;
-import trans.trans;
+import org.strategoxt.HybridInterpreter;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
@@ -38,7 +38,17 @@ public abstract class RelationDispatch extends DynSemNode {
 			return new MetafunctionDispatch(Tools.stringAt(lhsT, 0).stringValue(), Tools.listAt(lhsT, 1).size(),
 					arrowName, SourceSectionUtil.fromStrategoTerm(source));
 		} else if (lhsC.getName().equals("ListSource") && lhsC.getArity() == 2) {
-			String key = "_" + Tools.asJavaString(pp_type_0_0.instance.invoke(trans.init(), Tools.termAt(lhsT, 1)));
+			HybridInterpreter dynsemStrategoRuntime = DynSemContext.getDynSemStrategoRuntime();
+
+			dynsemStrategoRuntime.setCurrent(Tools.termAt(lhsT, 1));
+			try {
+				dynsemStrategoRuntime.invoke("pp-type");
+			} catch (InterpreterException e) {
+				throw new RuntimeException("Failed to invoke DynSem pp-type strategy", e);
+			}
+
+			String key = "_" + Tools.asJavaString(dynsemStrategoRuntime.current());
+
 			return new ListRelationDispatch(key, arrowName, SourceSectionUtil.fromStrategoTerm(lhsT));
 		} else {
 			// dynamic dispatch

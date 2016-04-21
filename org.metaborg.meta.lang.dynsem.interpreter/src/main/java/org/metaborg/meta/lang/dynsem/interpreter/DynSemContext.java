@@ -4,10 +4,20 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
 
+import org.apache.commons.vfs2.FileObject;
+import org.metaborg.core.MetaborgException;
+import org.metaborg.core.language.ILanguageComponent;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
+import org.metaborg.spoofax.core.Spoofax;
+import org.strategoxt.HybridInterpreter;
+
+import com.google.common.collect.Iterables;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class DynSemContext {
+
+	public static String DYNSEMPATH;
 
 	public static DynSemLanguage LANGUAGE;
 
@@ -31,6 +41,28 @@ public class DynSemContext {
 		this.input = input;
 		this.output = output;
 		this.langParser = new DynSemLanguageParser(parseTable);
+	}
+
+	private static HybridInterpreter dynsemStrategoRuntime;
+
+	@TruffleBoundary
+	public static HybridInterpreter getDynSemStrategoRuntime() {
+		if (dynsemStrategoRuntime == null) {
+			assert DYNSEMPATH != null;
+			try {
+				Spoofax spoofax = new Spoofax();
+				FileObject dynsemResource = spoofax.resourceService.resolve(DYNSEMPATH);
+				Iterable<ILanguageComponent> components = spoofax.discoverLanguages(dynsemResource);
+				ILanguageComponent dynsem = Iterables.get(components, 0);
+
+				dynsemStrategoRuntime = spoofax.strategoRuntimeService.runtime(dynsem,
+						spoofax.resourceService.resolve(System.getProperty("user.dir")));
+				dynsemStrategoRuntime.init();
+			} catch (MetaborgException e) {
+				throw new RuntimeException("Cannot initialize Spoofax", e);
+			}
+		}
+		return dynsemStrategoRuntime;
 	}
 
 	public DynSemLanguageParser getParser() {

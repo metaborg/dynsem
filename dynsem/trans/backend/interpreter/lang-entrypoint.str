@@ -69,15 +69,16 @@ rules /* language file. interpreter entry point */
         }
       
         public static void main(String[] args) throws Exception {
-          RuleResult res = evaluate(args[0], System.in, System.out, System.err);
+          RuleResult res = evaluate(args[0], args[1], System.in, System.out, System.err);
           System.out.println(res.result);
         }
-      
-        public static RuleResult evaluate(String file, InputStream input, OutputStream output, OutputStream error) throws Exception {
-          return getCallable(file, input, output, error).call();
+        
+        public static RuleResult evaluate(String dynsemPath, String file, InputStream input, OutputStream output, OutputStream error) throws Exception {
+          return getCallable(dynsemPath, file, input, output, error).call();
         }
       
-        public static Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
+        public static Callable<RuleResult> getCallable(String dynsemPath, String file, InputStream input, OutputStream output, OutputStream error) {
+          DynSemContext.DYNSEMPATH = dynsemPath;
           PolyglotEngine vm = PolyglotEngine.newBuilder().setIn(input)
               .setOut(output).setErr(error).build();
           assert vm.getLanguages().containsKey(MIME_TYPE);
@@ -151,15 +152,16 @@ rules /* language file. interpreter entry point */
       public class BenchmarkRunner {
       
         public static void main(String[] args) throws IOException {
-          String file = args[0];
+          String dynsemPath = args[0];
+          String file = args[1];
       
-          Callable<RuleResult> callee = x_language.getCallable(file, System.in,
+          Callable<RuleResult> callee = x_language.getCallable(dynsemPath, file, System.in,
               System.out, System.err);
       
           BenchmarkConfiguration benchconfig = new BenchmarkConfiguration();
-          benchconfig.warmuprounds = Integer.parseInt(args[2]);
-          benchconfig.repetitions = Integer.parseInt(args[3]);
-          benchconfig.dataFile = new File(args[1]);
+          benchconfig.warmuprounds = Integer.parseInt(args[3]);
+          benchconfig.repetitions = Integer.parseInt(args[4]);
+          benchconfig.dataFile = new File(args[2]);
       
           Benchmark benchmark = new Benchmark(callee, benchconfig);
           benchmark.execute();
