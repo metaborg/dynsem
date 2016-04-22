@@ -16,38 +16,80 @@
 		<relativePath>../../releng/parent/language</relativePath>
 	</parent>
 
+
 	<build>
 		<plugins>
 			<plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>${basedir}/target/metaborg/stratego.jar</file>
-                  <type>jar</type>
-                  <classifier>transjar</classifier>
-                </artifact>
-								<artifact>
-									<file>${basedir}/target/metaborg/stratego-javastrat.jar</file>
-									<type>jar</type>
-									<classifier>javajar</classifier>
-								</artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>install-stratego-jar</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>dynsem.lib.stratego.jar</artifactId>
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/target/metaborg/stratego.jar</file>
+						</configuration>
+					</execution>
+					<execution>
+						<id>install-stratego-javastrat</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>dynsem.lib.stratego.javastrat</artifactId>
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/target/metaborg/stratego-javastrat.jar</file>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy-stratego-jar</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>dynsem.lib.stratego.jar</artifactId>
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/target/metaborg/stratego.jar</file>
+						</configuration>
+					</execution>
+					<execution>
+						<id>deploy-stratego-javastrat</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>dynsem.lib.stratego.javastrat</artifactId>
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<file>${basedir}/target/metaborg/stratego-javastrat.jar</file>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.metaborg</groupId>
