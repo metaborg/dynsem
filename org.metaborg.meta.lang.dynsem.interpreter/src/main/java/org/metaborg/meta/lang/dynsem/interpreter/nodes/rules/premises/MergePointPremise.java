@@ -47,8 +47,8 @@ public class MergePointPremise extends Premise {
 		return new MergePointPremise(condition, branch1, branch2, SourceSectionUtil.fromStrategoTerm(t));
 	}
 
-	private final BranchProfile alternativeTaken = BranchProfile.create(); 
-	
+	private final BranchProfile alternativeTaken = BranchProfile.create();
+
 	@Override
 	public void execute(VirtualFrame frame) {
 		try {

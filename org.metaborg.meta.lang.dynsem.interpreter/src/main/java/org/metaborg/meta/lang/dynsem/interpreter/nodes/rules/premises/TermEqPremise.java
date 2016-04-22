@@ -86,10 +86,10 @@ public abstract class TermEqPremise extends Premise {
 			throw PremiseFailure.INSTANCE;
 		}
 	}
-	
+
 	@TruffleBoundary
 	@SuppressWarnings("rawtypes")
-	protected boolean doListEq(PersistentList l1, PersistentList l2){
+	protected boolean doListEq(PersistentList l1, PersistentList l2) {
 		return l1.equals(l2);
 	}
 

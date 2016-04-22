@@ -5,10 +5,10 @@ import com.oracle.truffle.api.nodes.ControlFlowException;
 public class PremiseFailure extends ControlFlowException {
 
 	public static final PremiseFailure INSTANCE = new PremiseFailure();
-	
+
 	private PremiseFailure() {
 	}
-	
+
 	/**
 	 * 
 	 */

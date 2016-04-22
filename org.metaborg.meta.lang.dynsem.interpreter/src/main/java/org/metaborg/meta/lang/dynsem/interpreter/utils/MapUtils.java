@@ -6,8 +6,7 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 public class MapUtils {
 
 	@TruffleBoundary
-	public static <K, V> PersistentMap<K, V> plus(PersistentMap<K, V> one,
-			PersistentMap<K, V> other) {
+	public static <K, V> PersistentMap<K, V> plus(PersistentMap<K, V> one, PersistentMap<K, V> other) {
 		PersistentMap<K, V> nmap = one;
 		for (K key : other.keySet()) {
 			nmap = nmap.plus(key, other.get(key));
@@ -16,8 +15,7 @@ public class MapUtils {
 	}
 
 	@TruffleBoundary
-	public static <K, V> PersistentMap<K, V> add(PersistentMap<K, V> map,
-			K key, V val) {
+	public static <K, V> PersistentMap<K, V> add(PersistentMap<K, V> map, K key, V val) {
 
 		return map.plus(key, val);
 

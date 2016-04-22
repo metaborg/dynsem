@@ -27,7 +27,7 @@ public class RuleTarget extends Node {
 	@ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
 		Object result = rhsNode.executeGeneric(frame);
-		
+
 		CompilerAsserts.compilationConstant(componentNodes.length);
 
 		Object[] componentValues = new Object[componentNodes.length];
