@@ -17,7 +17,7 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.Source;
 
-public abstract class RuleRegistry {
+public class RuleRegistry {
 
 	private final Map<String, RuleRoot> rules = new HashMap<>();
 
@@ -26,7 +26,9 @@ public abstract class RuleRegistry {
 		init();
 	}
 
-	protected abstract void init();
+	protected void init() {
+
+	}
 
 	@TruffleBoundary
 	public RuleRoot lookupRule(String name, String constr, int arity) {
