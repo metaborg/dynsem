@@ -33,7 +33,7 @@ rules
       NativePackageName: _ -> <PropertiesFile; read-property(|"target.nativepackage", $[[<language>].natives])>
       SourceStartSymbol: _ -> <PropertiesFile; read-property(|"source.startsymbol", "MISSING")>
       RuleRegistry: _ -> <PropertiesFile; read-property(|"target.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")>
-      DesugarTransform: _ -> <PropertiesFile; read-property(|"target.desugarer", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY.INSTANCE")>
+      DesugarTransform: _ -> <PropertiesFile; read-property(|"target.desugarer", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")>
     )
 
   ds-to-interp-write-classes(|package) = emit-java-classes(overwrite-merge-strategy, id | package, <JavaGenDir>)
