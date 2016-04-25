@@ -16,18 +16,10 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<!-- <dependencies> <dependency> <groupId>com.oracle.truffle</groupId> 
-					<artifactId>truffle-dsl-processor</artifactId> <version>0.11</version> </dependency> 
-					</dependencies> -->
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
 					<compilerId>javac</compilerId>
-					<!-- <annotationProcessorPaths> <path> <groupId>com.oracle.truffle</groupId> 
-						<artifactId>truffle-dsl-processor</artifactId> <version>0.11</version> </path> 
-						</annotationProcessorPaths> -->
-					<!-- <annotationProcessors> <annotationProcessor>com.oracle.truffle.dsl.processor.AnnotationProcessor</annotationProcessor> 
-						</annotationProcessors> -->
 				</configuration>
 			</plugin>
 		</plugins>
