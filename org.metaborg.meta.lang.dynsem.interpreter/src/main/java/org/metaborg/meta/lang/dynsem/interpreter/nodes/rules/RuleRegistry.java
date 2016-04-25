@@ -1,14 +1,11 @@
-package org.metaborg.meta.lang.dynsem.interpreter;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InlinedRuleAdapter;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.OverloadedRule;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
+import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -23,6 +20,13 @@ import com.oracle.truffle.api.source.Source;
 public abstract class RuleRegistry {
 
 	private final Map<String, RuleRoot> rules = new HashMap<>();
+
+	public RuleRegistry(File specFile) {
+		populate(this, specFile);
+		init();
+	}
+
+	protected abstract void init();
 
 	@TruffleBoundary
 	public RuleRoot lookupRule(String name, String constr, int arity) {
@@ -62,7 +66,7 @@ public abstract class RuleRegistry {
 		return name + "/" + constr + "/" + arity;
 	}
 
-	public static void populate(RuleRegistry reg, File specificationFile) {
+	private static void populate(RuleRegistry reg, File specificationFile) {
 		try {
 			Source source = Source.fromFileName(specificationFile.getAbsolutePath().toString());
 			TAFTermReader reader = new TAFTermReader(new TermFactory());

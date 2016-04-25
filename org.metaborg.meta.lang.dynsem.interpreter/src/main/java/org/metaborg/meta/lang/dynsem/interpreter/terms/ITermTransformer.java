@@ -12,4 +12,18 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 public interface ITermTransformer {
 
 	public IStrategoTerm transform(IStrategoTerm term);
+
+	public class IDENTITY implements ITermTransformer {
+
+		public static final ITermTransformer INSTANCE = new IDENTITY();
+
+		private IDENTITY() {
+
+		}
+
+		@Override
+		public IStrategoTerm transform(IStrategoTerm term) {
+			return term;
+		}
+	}
 }

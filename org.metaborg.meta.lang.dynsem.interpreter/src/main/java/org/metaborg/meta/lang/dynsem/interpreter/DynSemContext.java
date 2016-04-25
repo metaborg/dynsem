@@ -6,6 +6,7 @@ import java.nio.file.Path;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 
 public class DynSemContext {
 

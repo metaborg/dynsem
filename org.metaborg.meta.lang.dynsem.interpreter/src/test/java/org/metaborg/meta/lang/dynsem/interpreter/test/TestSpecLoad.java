@@ -10,7 +10,7 @@ import java.io.PrintStream;
 import org.junit.Test;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-import org.metaborg.meta.lang.dynsem.interpreter.RuleRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.TruffleLanguage;
