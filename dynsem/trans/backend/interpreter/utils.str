@@ -32,7 +32,7 @@ rules
       TermMatchPackageName: _ -> $[[<TermsPackageName>].match]
       NativePackageName: _ -> <PropertiesFile; read-property(|"target.nativepackage", $[[<language>].natives])>
       SourceStartSymbol: _ -> <PropertiesFile; read-property(|"source.startsymbol", "MISSING")>
-      RuleRegistry: _ -> <PropertiesFile; read-property(|"target.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.RuleRegistry")>
+      RuleRegistry: _ -> <PropertiesFile; read-property(|"target.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")>
       DesugarTransform: _ -> <PropertiesFile; read-property(|"target.desugarer", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY.INSTANCE")>
     )
 
