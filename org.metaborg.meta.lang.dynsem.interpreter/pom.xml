@@ -5,30 +5,76 @@
 	<!-- <version>0.1.0-SNAPSHOT</version> -->
 	<name>DynSem Interpreter</name>
 
-	<parent>
-		<groupId>org.metaborg</groupId>
-		<artifactId>parent.java</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
-		<relativePath>../../releng/parent/java</relativePath>
-	</parent>
+	<groupId>org.metaborg</groupId>
+	<version>2.0.0-SNAPSHOT</version>
+
+	<properties>
+		<forceContextQualifier>qualifier</forceContextQualifier>
+	</properties>
 
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<!-- <dependencies> <dependency> <groupId>com.oracle.truffle</groupId> 
-					<artifactId>truffle-dsl-processor</artifactId> <version>0.11</version> </dependency> 
-					</dependencies> -->
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-					<compilerId>javac</compilerId>
-					<!-- <annotationProcessorPaths> <path> <groupId>com.oracle.truffle</groupId> 
-						<artifactId>truffle-dsl-processor</artifactId> <version>0.11</version> </path> 
-						</annotationProcessorPaths> -->
-					<!-- <annotationProcessors> <annotationProcessor>com.oracle.truffle.dsl.processor.AnnotationProcessor</annotationProcessor> 
-						</annotationProcessors> -->
 				</configuration>
+			</plugin>
+
+
+			<!-- Generate MANIFEST.MF, to make project available as an Eclipse plugin. -->
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<!-- Fix names not to include the groupId. -->
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Name>${project.artifactId}</Bundle-Name>
+						<!-- Replace SNAPSHOT in the manifest version with given qualifier. -->
+						<Bundle-Version>$(replace;${project.version};-SNAPSHOT;.${forceContextQualifier})</Bundle-Version>
+						<!-- Also export packages that contain '.impl', because it would exclude 
+							'.imploder' in jsglr. -->
+						<Export-Package>*</Export-Package>
+						<!-- Don't declare dependency on Java library packages. -->
+						<!-- Allow dependencies to Metaborg artifacts without a provider. -->
+						<!-- Use Metaborg provider for rest of the packages, these are external 
+							dependencies that should not conflict with other Eclipse plugins. -->
+						<Import-Package>
+							!sun.misc,
+							!sun.nio.cs,
+							!org.junit,
+							!javax*,
+							!org.xml*,
+							org.spoofax*,
+							org.metaborg*,
+							org.strategoxt.*,
+							org.apache.tools.ant,
+							*;provider=metaborg;mandatory:=provider
+						</Import-Package>
+						<!-- Include transitive dependencies, so that classes of transitive 
+							dependencies are available. -->
+						<Embed-Transitive>true</Embed-Transitive>
+						<!-- Allow buddy loading -->
+						<Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
+						<!-- Don't generate uses declarations in exported packages. -->
+						<_nouses>true</_nouses>
+						<!-- Don't use version of this package if no version can be determined. -->
+						<_nodefaultversion>true</_nodefaultversion>
+					</instructions>
+				</configuration>
+				<!-- Hook manifest generation into the process-classes phase, because 
+					this is not automatically done for projects with 'jar' packaging. -->
+				<executions>
+					<execution>
+						<id>bundle-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -37,6 +83,7 @@
 		<dependency>
 			<groupId>com.github.krukow</groupId>
 			<artifactId>clj-ds</artifactId>
+			<version>0.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.oracle.truffle</groupId>
@@ -69,14 +116,17 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
