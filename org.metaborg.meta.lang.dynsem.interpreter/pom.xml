@@ -38,7 +38,9 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>3.0.1</version>
+        <extensions>true</extensions>
         <configuration>
+          <manifestLocation>META-INF</manifestLocation>
           <instructions>
             <!-- Fix names not to include the groupId. -->
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
@@ -125,13 +127,11 @@
       <groupId>org.metaborg</groupId>
       <artifactId>dynsem.lib.stratego.javastrat</artifactId>
       <version>2.0.0-SNAPSHOT</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>dynsem.lib.stratego.jar</artifactId>
       <version>2.0.0-SNAPSHOT</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
