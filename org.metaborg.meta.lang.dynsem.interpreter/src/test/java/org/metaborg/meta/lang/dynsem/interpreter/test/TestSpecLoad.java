@@ -24,12 +24,11 @@ public class TestSpecLoad {
 		File testDir = new File("src/test/resources/");
 		File specFile = new File(testDir, "testSpec1.aterm");
 
-		RuleRegistry rreg = new RuleRegistry() {
+		RuleRegistry rreg = new RuleRegistry(specFile) {
 		};
 
 		assert (DummyDynSemLanguage.INSTANCE != null);
 
-		RuleRegistry.populate(rreg, specFile);
 		assertEquals(5, rreg.ruleCount());
 	}
 
