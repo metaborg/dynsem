@@ -23,11 +23,11 @@ public class TestSpecLoad {
 	public void testLoadSpec() throws Exception {
 		File testDir = new File("src/test/resources/");
 		File specFile = new File(testDir, "testSpec1.aterm");
-
-		RuleRegistry rreg = new RuleRegistry(specFile) {
-		};
-
+		
 		assert (DummyDynSemLanguage.INSTANCE != null);
+		
+		RuleRegistry rreg = new RuleRegistry(specFile);
+
 
 		assertEquals(5, rreg.ruleCount());
 	}
