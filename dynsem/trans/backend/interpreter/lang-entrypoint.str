@@ -10,6 +10,7 @@ rules /* language file. interpreter entry point */
   ds-to-interp-language-entrypoint =
     x_language := $[[<LanguageName>]Language];
     x_transformer := <DesugarTransform>;
+    x_ruleregistry := <RuleRegistry>;
     !compilation-unit |[
     
       package ~x:<TopPackageName>;
@@ -56,16 +57,14 @@ rules /* language file. interpreter entry point */
         public final static x_language INSTANCE = new x_language();
       
         public x_language() {
-//          super(new ~x:$[[<LanguageName>]TermRegistry](), new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)), Paths.get(PARSE_TABLE));
           super();
           DynSemContext.LANGUAGE = this;
         }
         
         @Override
         public DynSemContext createDynSemContext(InputStream in, PrintStream out) {
-          return new DynSemContext(new ~x:$[[<LanguageName>]TermRegistry](), 
-                    new ~x:$[[<NativePackageName>].[<LanguageName>]RuleRegistry](new File(SPEC_FILE)), 
-                        Paths.get(PARSE_TABLE), in, out);
+          return new DynSemContext(new ~x:$[[<LanguageName>]TermRegistry](),
+                      new x_ruleregistry(new File(SPEC_FILE)), Paths.get(PARSE_TABLE), in, out);  
         }
       
         public static void main(String[] args) throws Exception {

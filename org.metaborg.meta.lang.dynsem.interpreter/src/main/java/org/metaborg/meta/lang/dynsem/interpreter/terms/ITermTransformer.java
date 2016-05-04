@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.metaborg.meta.lang.dynsem.interpreter;
+package org.metaborg.meta.lang.dynsem.interpreter.terms;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -13,12 +13,11 @@ public interface ITermTransformer {
 
 	public IStrategoTerm transform(IStrategoTerm term);
 
-	public static final class IdentityTermTransformer implements ITermTransformer {
+	public final class IDENTITY implements ITermTransformer {
 
 		@Override
 		public IStrategoTerm transform(IStrategoTerm term) {
 			return term;
 		}
-
 	}
 }
