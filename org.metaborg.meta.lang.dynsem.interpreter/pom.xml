@@ -11,7 +11,62 @@
 
   <properties>
     <forceContextQualifier>qualifier</forceContextQualifier>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <deployFileUrl>${project.distributionManagement.snapshotRepository.url}</deployFileUrl>
+    <deployRepositoryId>metaborg-nexus</deployRepositoryId>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.github.krukow</groupId>
+      <artifactId>clj-ds</artifactId>
+      <version>0.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle.truffle</groupId>
+      <artifactId>truffle-api</artifactId>
+      <version>0.11</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle.truffle</groupId>
+      <artifactId>truffle-dsl-processor</artifactId>
+      <version>0.11</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.strategoxt.strj</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>dynsem.lib.stratego.javastrat</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>dynsem.lib.stratego.jar</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -32,6 +87,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.8.2</version>
+        <configuration>
+          <retryFailedDeploymentCount>10</retryFailedDeploymentCount>
+          <releaseProfiles>release</releaseProfiles>
+        </configuration>
       </plugin>
       <!-- Generate MANIFEST.MF, to make project available as an Eclipse plugin. -->
       <plugin>
@@ -99,55 +158,63 @@
         </configuration>
       </plugin>
     </plugins>
+
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-http</artifactId>
+        <version>2.10</version>
+      </extension>
+    </extensions>
   </build>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.github.krukow</groupId>
-      <artifactId>clj-ds</artifactId>
-      <version>0.0.4</version>
-    </dependency>
-    <dependency>
-      <groupId>com.oracle.truffle</groupId>
-      <artifactId>truffle-api</artifactId>
-      <version>0.11</version>
-      <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>com.oracle.truffle</groupId>
-      <artifactId>truffle-dsl-processor</artifactId>
-      <version>0.11</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.strategoxt.strj</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>dynsem.lib.stratego.javastrat</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>dynsem.lib.stratego.jar</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.3.2</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <properties>
+        <deployFileUrl>${project.distributionManagement.repository.url}</deployFileUrl>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-no-snapshots</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireReleaseDeps>
+                      <message>No snapshot dependencies are allowed in release builds</message>
+                    </requireReleaseDeps>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>${deployRepositoryId}</id>
+      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>${deployRepositoryId}</id>
+      <url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+    </repository>
+  </distributionManagement>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
 </project>
