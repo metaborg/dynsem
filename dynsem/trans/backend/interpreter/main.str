@@ -20,7 +20,7 @@ rules
       local-project-path := $[[<prim("local_path")> project-path]/];
       result := <ds-to-interp-main(|path, local-project-path)> ast;
       <ds-to-interp-terms(|path, local-project-path)> result;
-      fout := <debug(!"fopen: "); fopen> (<SpecTargetFile>, "w");
+      fout := <fopen> (<SpecTargetFile>, "w");
       <pp-aterm-stream(|fout)> result;
       <fclose> fout;
       <copy-file> (<TableSourceFile>, <TableTargetFile>)
