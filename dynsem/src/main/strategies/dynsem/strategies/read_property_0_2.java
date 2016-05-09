@@ -1,8 +1,7 @@
 package dynsem.strategies;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.spoofax.interpreter.core.Tools;
@@ -31,18 +30,13 @@ public class read_property_0_2 extends Strategy {
 
 		Properties prop = new Properties();
 
-		File propfile = new File(Tools.javaString(current));
-		if (!(propfile.exists() && propfile.canRead())) {
-			return defaultvalue;
-		}
-
-		try {
-			prop.load(new FileInputStream(propfile));
+		try(InputStream is = context.getIOAgent().openInputStream(Tools.javaString(current))) {
+			prop.load(is);
 		} catch (IOException e) {
 			context.getIOAgent().printError(e.getMessage());
 			return null;
 		}
-
+		
 		String propval = prop.getProperty(Tools.javaString(tpropname));
 
 		if (propval == null) {

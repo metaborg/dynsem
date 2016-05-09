@@ -7,7 +7,7 @@ imports
   
 rules
 
-  ds-to-interp-init-options(|path, project-path) =
+  ds-to-interp-init-options(|path, project-path) = 
     rules(
       CurrentFilePath: _ -> path
       ProjectPath: _ -> project-path
@@ -20,7 +20,7 @@ rules
       SourceMimeType: _ -> <PropertiesFile; read-property(|"source.mimetype", "application/x-somelanguage")>
       ReductionStartConstrName: _ -> <PropertiesFile; read-property(|"source.initconstructor.name", "MISSING")>
       ReductionStartConstrArity: _ -> <PropertiesFile; read-property(|"source.initconstructor.arity", "MISSING")>
-      GenProject: _ -> <PropertiesFile; read-property(|"target.project", project-path); make-absolute-path(|project-path)>
+      GenProject: _ -> $[[project-path][<PropertiesFile; read-property(|"target.project", project-path)>]]
       JavaGenDir: _ -> $[[<GenProject>]/[<PropertiesFile; read-property(|"target.java", "/editor/java")>]]
       TopPackageName: _ -> <PropertiesFile; read-property(|"target.package", $[[<language>].generated.interpreter])>
       RelativeSpecTargetFile: _ -> <PropertiesFile; read-property(|"target.specterm", path)>
