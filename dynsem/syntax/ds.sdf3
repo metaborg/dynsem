@@ -86,6 +86,7 @@ context-free syntax // rules
   ID = <fail> {reject}
   ID = <allkeys> {reject}
   ID = <allvalues> {reject}
+  ID = <otherwise> {reject}
 
 context-free syntax // formulas
 
