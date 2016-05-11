@@ -115,6 +115,25 @@ rules // premisses
         prem2'* := <explicate-premises> prem2*
       |}
   
+  explicate-premise:
+    CaseMatch(tb, case*) -> [CaseMatch(tb, case'*)]
+    with
+      case'* := <map(explicate-case)> case*
+  
+  explicate-case:
+    CaseOtherwise(prem*) -> CaseOtherwise(prem'*)
+    with
+      {| CompNum:
+        prem'* := <explicate-premises> prem*
+      |}
+
+  explicate-case:
+    CasePattern(pat, prem*) -> CasePattern(pat, prem'*)
+    with
+      {| CompNum:
+        prem'* := <explicate-premises> prem*
+      |}
+  
   inc-comp-num:
     comp -> comp
     with 
