@@ -30,7 +30,7 @@ context-free syntax // rules
   ]
   
   Premise.Formula = [[Formula]]
-  Premise.AllFail = <all-fail>
+  Premise.AllFail = <all-fail> {deprecated}
 
   PremisesBlock.PremiseBlock = <{
     <{Premise ";\n"}*>
@@ -40,12 +40,29 @@ context-free syntax // rules
     [Premise]
     < [PremisesBlock]
     + [PremisesBlock]
+  ] {deprecated}
+  
+  Premise.CaseMatch = [
+    case [Term] of {
+      [{Case "\n"}+]
+    }
+  ]
+  
+  Case.CasePattern = [
+    [Term] =>
+      [{Premise ";\n"}*]
+  ]
+  
+  Case.CaseOtherwise = [
+    otherwise =>
+      [{Premise ";\n"}*]
   ]
   
   Premise.TryOr = [
     try [PremisesBlock]
   	or  [PremisesBlock]
-  ]
+  ] {deprecated}
+
   ID = <_> {reject}
   ID = <imports> {reject}
   ID = <signature> {reject}
