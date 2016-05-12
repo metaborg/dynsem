@@ -40,7 +40,7 @@ context-free syntax // rules
     [Premise]
     < [PremisesBlock]
     + [PremisesBlock]
-  ] {deprecated}
+  ] {deprecated("Use a case pattern match instead")}
   
   Premise.CaseMatch = [
     case [Term] of {
