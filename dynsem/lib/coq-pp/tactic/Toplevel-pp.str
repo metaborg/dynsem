@@ -1,4 +1,4 @@
-module pp/tactic/Toplevel-pp
+module coq-pp/tactic/Toplevel-pp
 
 imports
   libstratego-gpp
@@ -16,10 +16,10 @@ imports
 
 
 imports
-  pp/Qid-pp
-  pp/Lexical-pp
-  pp/tactic/Expr-pp
-  pp/Vernacular-pp
+  coq-pp/Qid-pp
+  coq-pp/Lexical-pp
+  coq-pp/tactic/Expr-pp
+  coq-pp/Vernacular-pp
 
 
 strategies

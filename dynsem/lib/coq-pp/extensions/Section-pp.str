@@ -1,4 +1,4 @@
-module pp/extensions/Section-pp
+module coq-pp/extensions/Section-pp
 
 imports
   libstratego-gpp
@@ -14,8 +14,8 @@ imports
 
 
 imports
-  pp/Lexical-pp
-  pp/Vernacular-pp
+  coq-pp/Lexical-pp
+  coq-pp/Vernacular-pp
 
 
 strategies

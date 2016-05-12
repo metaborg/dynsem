@@ -1,4 +1,4 @@
-module pp/tactic/AtomicTactic-pp
+module coq-pp/tactic/AtomicTactic-pp
 
 imports
   libstratego-gpp
@@ -14,8 +14,8 @@ imports
 
 
 imports
-  pp/Lexical-pp
-  pp/Qid-pp
+  coq-pp/Lexical-pp
+  coq-pp/Qid-pp
 
 
 strategies

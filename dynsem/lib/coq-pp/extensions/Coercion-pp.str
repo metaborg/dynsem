@@ -1,4 +1,4 @@
-module pp/extensions/Coercion-pp
+module coq-pp/extensions/Coercion-pp
 
 imports
   libstratego-gpp
@@ -14,8 +14,8 @@ imports
 
 
 imports
-  pp/Qid-pp
-  pp/Gallina-pp
+  coq-pp/Qid-pp
+  coq-pp/Gallina-pp
 
 
 strategies

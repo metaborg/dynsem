@@ -1,4 +1,4 @@
-module pp/Qid-pp
+module coq-pp/Qid-pp
 
 imports
   libstratego-gpp
@@ -13,7 +13,7 @@ imports
 
 
 imports
-  pp/Lexical-pp
+  coq-pp/Lexical-pp
 
 
 strategies

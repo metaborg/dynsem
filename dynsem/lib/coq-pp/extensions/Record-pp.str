@@ -1,4 +1,4 @@
-module pp/extensions/Record-pp
+module coq-pp/extensions/Record-pp
 
 imports
   libstratego-gpp
@@ -16,10 +16,10 @@ imports
 
 
 imports
-  pp/Lexical-pp
-  pp/Gallina-pp
-  pp/Options-pp
-  pp/Qid-pp
+  coq-pp/Lexical-pp
+  coq-pp/Gallina-pp
+  coq-pp/Options-pp
+  coq-pp/Qid-pp
 
 
 strategies
