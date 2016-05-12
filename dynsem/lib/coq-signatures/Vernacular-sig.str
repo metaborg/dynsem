@@ -1,14 +1,14 @@
-module signatures/Vernacular-sig
+module coq-signatures/Vernacular-sig
 
 imports
-  signatures/Lexical-sig
-  signatures/Gallina-sig
-  signatures/Options-sig
-  signatures/extensions/Record-sig
-  signatures/extensions/Section-sig
-  signatures/extensions/Module-sig
-  signatures/extensions/Coercion-sig
-  signatures/tactic/Toplevel-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/Options-sig
+  coq-signatures/extensions/Record-sig
+  coq-signatures/extensions/Section-sig
+  coq-signatures/extensions/Module-sig
+  coq-signatures/extensions/Coercion-sig
+  coq-signatures/tactic/Toplevel-sig
 
 
 signature

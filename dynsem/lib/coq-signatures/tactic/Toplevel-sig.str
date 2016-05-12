@@ -1,10 +1,10 @@
 module signatures/tactic/Toplevel-sig
 
 imports
-  signatures/Qid-sig
-  signatures/Lexical-sig
-  signatures/tactic/Expr-sig
-  signatures/Vernacular-sig
+  coq-signatures/Qid-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/tactic/Expr-sig
+  coq-signatures/Vernacular-sig
 
 
 signature

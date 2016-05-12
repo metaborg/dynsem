@@ -1,10 +1,10 @@
 module signatures/extensions/Record-sig
 
 imports
-  signatures/Lexical-sig
-  signatures/Gallina-sig
-  signatures/Options-sig
-  signatures/Qid-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/Options-sig
+  coq-signatures/Qid-sig
 
 
 signature

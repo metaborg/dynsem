@@ -1,8 +1,8 @@
 module signatures/extensions/Coercion-sig
 
 imports
-  signatures/Qid-sig
-  signatures/Gallina-sig
+  coq-signatures/Qid-sig
+  coq-signatures/Gallina-sig
 
 
 signature

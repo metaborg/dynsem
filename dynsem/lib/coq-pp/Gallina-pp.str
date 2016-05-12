@@ -30,6 +30,9 @@ strategies
 strategies
   prettyprint-SDF-start-symbols =
     prettyprint-Coq-start-symbols
+  
+  prettyprint-Coq-start-symbols =
+    fail
 
 
 strategies

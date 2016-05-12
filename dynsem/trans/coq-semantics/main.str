@@ -3,25 +3,24 @@ module coq-semantics/main
 imports
   libstratego-gpp
   coq-semantics/-
-  names/-
   stratego/metaborg
   ds
   signatures/-
   coq-signatures/-
   coq-signatures/extensions/-
   coq-signatures/tactic/-
+  coq-pp/-
 
 rules
   
   generate-coq:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
-      task-setup(|project-path)
-    ; filename := <guarantee-extension(|"v")> path
-    ; coq-file := <strip-annos; module-to-coq> ast
+      filename := <guarantee-extension(|"v")> path
+      ; coq-file := <strip-annos; module-to-coq> ast
     with
-       result := <parenthesize-Coq; prettyprintCoq-Start; box2text-string(|100)> coq-file
-    <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprintCoq-example) ; debug(!"cannot pp ")))> coq-file
+       result := <parenthesize-Coq; prettyprint-Coq; box2text-string(|100)> coq-file
+    <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
     ;  result := ""
 
 rules

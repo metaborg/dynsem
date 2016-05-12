@@ -1,11 +1,11 @@
 module signatures/tactic/Expr-sig
 
 imports
-  signatures/Lexical-sig
-  signatures/Gallina-sig
-  signatures/Qid-sig
-  signatures/Options-sig
-  signatures/tactic/AtomicTactic-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/Qid-sig
+  coq-signatures/Options-sig
+  coq-signatures/tactic/AtomicTactic-sig
 
 
 signature

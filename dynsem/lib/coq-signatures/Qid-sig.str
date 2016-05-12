@@ -1,7 +1,7 @@
 module signatures/Qid-sig
 
 imports
-  signatures/Lexical-sig
+  coq-signatures/Lexical-sig
 
 
 signature

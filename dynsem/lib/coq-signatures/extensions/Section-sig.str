@@ -1,8 +1,8 @@
 module signatures/extensions/Section-sig
 
 imports
-  signatures/Lexical-sig
-  signatures/Vernacular-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/Vernacular-sig
 
 
 signature

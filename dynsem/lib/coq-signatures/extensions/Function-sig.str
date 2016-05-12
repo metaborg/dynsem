@@ -1,9 +1,9 @@
 module signatures/extensions/Function-sig
 
 imports
-  signatures/Gallina-sig
-  signatures/Options-sig
-  signatures/Lexical-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/Options-sig
+  coq-signatures/Lexical-sig
 
 
 signature

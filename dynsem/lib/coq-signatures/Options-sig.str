@@ -1,8 +1,8 @@
 module signatures/Options-sig
 
 imports
-  signatures/Lexical-sig
-  signatures/Gallina-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/Gallina-sig
 
 
 signature

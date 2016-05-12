@@ -1,13 +1,7 @@
 module coq-semantics/formula
 
 imports
-  libstratego-gpp
   coq-semantics/-
-  runtime/index/-
-  runtime/nabl/-
-  runtime/properties/-
-  runtime/task/-
-  names/-
   stratego/metaborg
   signatures/-
   coq-signatures/-

@@ -1,12 +1,12 @@
 module signatures/extensions/Module-sig
 
 imports
-  signatures/Vernacular-sig
-  signatures/Gallina-sig
-  signatures/Lexical-sig
-  signatures/Options-sig
-  signatures/Qid-sig
-  signatures/extensions/Section-sig
+  coq-signatures/Vernacular-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/Options-sig
+  coq-signatures/Qid-sig
+  coq-signatures/extensions/Section-sig
 
 
 signature

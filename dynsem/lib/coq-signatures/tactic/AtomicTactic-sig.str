@@ -1,8 +1,8 @@
 module signatures/tactic/AtomicTactic-sig
 
 imports
-  signatures/Lexical-sig
-  signatures/Qid-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/Qid-sig
 
 
 signature

@@ -1,11 +1,11 @@
 module signatures/Coq-sig
 
 imports
-  signatures/Vernacular-sig
-  signatures/Gallina-sig
-  signatures/extensions/Module-sig
-  signatures/extensions/Section-sig
-  signatures/tactic/Toplevel-sig
+  coq-signatures/Vernacular-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/extensions/Module-sig
+  coq-signatures/extensions/Section-sig
+  coq-signatures/tactic/Toplevel-sig
 
 
 signature

@@ -1,0 +1,890 @@
+module pp/Coq-parenthesize
+
+imports
+  libstratego-lib
+  coq-signatures/-
+
+
+strategies
+  io-Coq-parenthesize =
+    io-wrap(parenthesize-Coq)
+
+  parenthesize-Coq =
+    innermost(CoqParenthesize)
+
+
+rules
+
+  CoqParenthesize :
+    Apply(t_0, t_1) -> Apply(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Apply(t_0, t_1) -> Apply(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    UnHide(t_0, t_1) -> UnHide(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    UnHide(t_0, t_1) -> UnHide(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    ScopeRef(t_0, t_1) -> ScopeRef(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + ?UnHide(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    ScopeRef(t_0, t_1) -> ScopeRef(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + ?UnHide(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Match(t_0, t_1, t_2) -> Match(Parenthetical(t_0), t_1, t_2)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + ?UnHide(_, _)
+            + ?ScopeRef(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Match(t_0, t_1, t_2) -> Match(t_0, Parenthetical(t_1), t_2)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + ?UnHide(_, _)
+            + ?ScopeRef(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Match(t_0, t_1, t_2) -> Match(t_0, t_1, Parenthetical(t_2))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + ?Apply(_, _)
+            + ?UnHide(_, _)
+            + ?ScopeRef(_, _)
+            + fail)> t_2
+
+  CoqParenthesize :
+    LetCoFix(t_0, t_1) -> LetCoFix(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    LetCoFix(t_0, t_1) -> LetCoFix(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    LetTuple(t_0, t_1, t_2, t_3) -> LetTuple(Parenthetical(t_0), t_1, t_2, t_3)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    LetTuple(t_0, t_1, t_2, t_3) -> LetTuple(t_0, Parenthetical(t_1), t_2, t_3)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    LetTuple(t_0, t_1, t_2, t_3) -> LetTuple(t_0, t_1, Parenthetical(t_2), t_3)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + fail)> t_2
+
+  CoqParenthesize :
+    LetTuple(t_0, t_1, t_2, t_3) -> LetTuple(t_0, t_1, t_2, Parenthetical(t_3))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + fail)> t_3
+
+  CoqParenthesize :
+    LetPat(t_0, t_1, t_2, t_3, t_4, t_5) -> LetPat(
+                                              Parenthetical(t_0)
+                                            , t_1
+                                            , t_2
+                                            , t_3
+                                            , t_4
+                                            , t_5
+                                            )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    LetPat(t_0, t_1, t_2, t_3, t_4, t_5) -> LetPat(
+                                              t_0
+                                            , Parenthetical(t_1)
+                                            , t_2
+                                            , t_3
+                                            , t_4
+                                            , t_5
+                                            )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    LetPat(t_0, t_1, t_2, t_3, t_4, t_5) -> LetPat(
+                                              t_0
+                                            , t_1
+                                            , Parenthetical(t_2)
+                                            , t_3
+                                            , t_4
+                                            , t_5
+                                            )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + fail)> t_2
+
+  CoqParenthesize :
+    LetPat(t_0, t_1, t_2, t_3, t_4, t_5) -> LetPat(
+                                              t_0
+                                            , t_1
+                                            , t_2
+                                            , Parenthetical(t_3)
+                                            , t_4
+                                            , t_5
+                                            )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + fail)> t_3
+
+  CoqParenthesize :
+    LetPat(t_0, t_1, t_2, t_3, t_4, t_5) -> LetPat(
+                                              t_0
+                                            , t_1
+                                            , t_2
+                                            , t_3
+                                            , Parenthetical(t_4)
+                                            , t_5
+                                            )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + fail)> t_4
+
+  CoqParenthesize :
+    LetPat(t_0, t_1, t_2, t_3, t_4, t_5) -> LetPat(
+                                              t_0
+                                            , t_1
+                                            , t_2
+                                            , t_3
+                                            , t_4
+                                            , Parenthetical(t_5)
+                                            )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + fail)> t_5
+
+  CoqParenthesize :
+    If(t_0, t_1, t_2, t_3) -> If(Parenthetical(t_0), t_1, t_2, t_3)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    If(t_0, t_1, t_2, t_3) -> If(t_0, Parenthetical(t_1), t_2, t_3)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    If(t_0, t_1, t_2, t_3) -> If(t_0, t_1, Parenthetical(t_2), t_3)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + fail)> t_2
+
+  CoqParenthesize :
+    If(t_0, t_1, t_2, t_3) -> If(t_0, t_1, t_2, Parenthetical(t_3))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + fail)> t_3
+
+  CoqParenthesize :
+    Cast(t_0, t_1) -> Cast(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Cast(t_0, t_1) -> Cast(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Check(t_0, t_1) -> Check(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Check(t_0, t_1) -> Check(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Coerce(t_0) -> Coerce(Parenthetical(t_0))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Arrow(t_0, t_1) -> Arrow(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + ?Arrow(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Arrow(t_0, t_1) -> Arrow(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + ?LetFix(_, _)
+            + ?LetCoFix(_, _)
+            + ?LetTuple(_, _, _, _)
+            + ?LetPat(_, _, _, _, _, _)
+            + ?If(_, _, _, _)
+            + ?Cast(_, _)
+            + ?Check(_, _)
+            + ?Coerce(_)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Fix(t_0) -> Fix(Parenthetical(t_0))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    CoFix(t_0) -> CoFix(Parenthetical(t_0))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Let(t_0, t_1, t_2, t_3, t_4) -> Let(
+                                      Parenthetical(t_0)
+                                    , t_1
+                                    , t_2
+                                    , t_3
+                                    , t_4
+                                    )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Let(t_0, t_1, t_2, t_3, t_4) -> Let(
+                                      t_0
+                                    , Parenthetical(t_1)
+                                    , t_2
+                                    , t_3
+                                    , t_4
+                                    )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Let(t_0, t_1, t_2, t_3, t_4) -> Let(
+                                      t_0
+                                    , t_1
+                                    , Parenthetical(t_2)
+                                    , t_3
+                                    , t_4
+                                    )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + fail)> t_2
+
+  CoqParenthesize :
+    Let(t_0, t_1, t_2, t_3, t_4) -> Let(
+                                      t_0
+                                    , t_1
+                                    , t_2
+                                    , Parenthetical(t_3)
+                                    , t_4
+                                    )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + fail)> t_3
+
+  CoqParenthesize :
+    Let(t_0, t_1, t_2, t_3, t_4) -> Let(
+                                      t_0
+                                    , t_1
+                                    , t_2
+                                    , t_3
+                                    , Parenthetical(t_4)
+                                    )
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + fail)> t_4
+
+  CoqParenthesize :
+    LetFix(t_0, t_1) -> LetFix(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    LetFix(t_0, t_1) -> LetFix(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + ?Fun(_, _)
+            + ?Fix(_)
+            + ?CoFix(_)
+            + ?Let(_, _, _, _, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    ForAll(t_0, t_1) -> ForAll(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    ForAll(t_0, t_1) -> ForAll(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Fun(t_0, t_1) -> Fun(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Fun(t_0, t_1) -> Fun(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + ?ForAll(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Prod(t_0, t_1) -> Prod(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Prod(t_0, t_1) -> Prod(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + ?Prod(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    NotE(t_0, t_1) -> NotE(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    NotE(t_0, t_1) -> NotE(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?NotE(_, _)
+            + ?Eq(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    Eq(t_0, t_1) -> Eq(Parenthetical(t_0), t_1)
+    where <(?And(_, _)
+            + ?Eq(_, _)
+            + ?NotE(_, _)
+            + fail)> t_0
+
+  CoqParenthesize :
+    Eq(t_0, t_1) -> Eq(t_0, Parenthetical(t_1))
+    where <(?And(_, _)
+            + ?Eq(_, _)
+            + ?NotE(_, _)
+            + fail)> t_1
+
+  CoqParenthesize :
+    ExprSeq(t_0, t_1) -> ExprSeq(t_0, Parenthetical(t_1))
+    where <(?ExprSeq(_, _) + fail)> t_1
+
+
+signature
+  constructors
+    Parenthetical : Unknown -> Unknown
+

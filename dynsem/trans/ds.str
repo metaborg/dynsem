@@ -30,7 +30,10 @@ imports
 	backend/java-backend/main
 	backend/java-backend/utils
 	backend/interpreter/main
-	
+
+imports
+  coq-semantics/-
+
 signature
   constructors
     Var : LID -> Term
