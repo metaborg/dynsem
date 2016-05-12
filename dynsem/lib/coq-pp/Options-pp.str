@@ -1,0 +1,1159 @@
+module pp/Options-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  libstratego-sglr
+  trans/pp
+  coq-signatures/Options-sig
+
+
+imports
+  coq-signatures/Lexical-sig
+  coq-signatures/Gallina-sig
+
+
+imports
+  pp/Lexical-pp
+  pp/Gallina-pp
+
+
+strategies
+  prettyprint-example =
+    prettyprint-Coq
+
+
+strategies
+  prettyprint-SDF-start-symbols =
+    prettyprint-Coq-start-symbols
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-OptType
+
+  prettyprint-Coq =
+    prettyprint-OptInTerm
+
+  prettyprint-Coq =
+    prettyprint-OptDepRetType
+
+  prettyprint-Coq =
+    prettyprint-OptAlias
+
+  prettyprint-Coq =
+    prettyprint-OptReturnType
+
+  prettyprint-Coq =
+    prettyprint-OptBinders
+
+  prettyprint-Coq =
+    prettyprint-OptTerms
+
+  prettyprint-Coq =
+    prettyprint-OptSort
+
+  prettyprint-Coq =
+    prettyprint-OptAnnotation
+
+  prettyprint-OptType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptType =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptType :
+    OptType(t1__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S(" : "), t1__']
+                       )
+                     ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t1__
+
+  is-OptType =
+    ?OptType(_)
+
+  get-indent :
+    (OptType(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (OptType(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (OptType(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptInTerm :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptInTerm =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptInTerm :
+    OptInTerm(t1__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S(" in "), t1__']
+                         )
+                       ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t1__
+
+  is-OptInTerm =
+    ?OptInTerm(_)
+
+  get-indent :
+    (OptInTerm(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (OptInTerm(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (OptInTerm(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptDepRetType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptDepRetType =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptDepRetType :
+    DepRet(t1__, t2__) -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [t1__', S(" "), t2__']
+                            )
+                          ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptAlias)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-ReturnType)> t2__
+
+  is-OptDepRetType =
+    ?DepRet(_, _)
+
+  get-indent :
+    (DepRet(t1__, t2__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (DepRet(t1__, t2__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (DepRet(t1__, t2__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptAlias :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptAlias =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptAlias :
+    As(t1__) -> [ H(
+                    [SOpt(HS(), "0")]
+                  , [S(" as "), t1__']
+                  )
+                ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Name)> t1__
+
+  is-OptAlias =
+    ?As(_)
+
+  get-indent :
+    (As(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (As(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (As(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptReturnType :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptReturnType =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptReturnType :
+    OptReturnType(t1__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S(" "), t1__']
+                             )
+                           ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-ReturnType)> t1__
+
+  is-OptReturnType =
+    ?OptReturnType(_)
+
+  get-indent :
+    (OptReturnType(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (OptReturnType(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (OptReturnType(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptBinders :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptBinders =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptBinders :
+    OptBinders(t1__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S(" "), t1__']
+                          )
+                        ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Binder|" ")> t1__
+
+  is-OptBinders =
+    ?OptBinders(_)
+
+  get-indent :
+    (OptBinders(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (OptBinders(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := " "
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (OptBinders(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptTerms :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptTerms =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptTerms :
+    OptTerms(t1__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S(" "), t1__']
+                        )
+                      ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Term|" ")> t1__
+
+  is-OptTerms =
+    ?OptTerms(_)
+
+  get-indent :
+    (OptTerms(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (OptTerms(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := " "
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (OptTerms(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptSort :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptSort =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptSort :
+    OptSort(t1__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S(" : "), t1__']
+                       )
+                     ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Sort)> t1__
+
+  is-OptSort =
+    ?OptSort(_)
+
+  get-indent :
+    (OptSort(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (OptSort(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (OptSort(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptAnnotation :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptAnnotation =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptAnnotation :
+    Anno(t1__) -> [ H(
+                      [SOpt(HS(), "0")]
+                    , [ S(" { struct ")
+                      , t1__'
+                      , S(" }")
+                      ]
+                    )
+                  ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t1__
+
+  is-OptAnnotation =
+    ?Anno(_)
+
+  get-indent :
+    (Anno(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Anno(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Anno(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-OptType =
+    fail
+
+  is-OptInTerm =
+    fail
+
+  is-OptDepRetType =
+    fail
+
+  is-OptAlias =
+    fail
+
+  is-OptReturnType =
+    fail
+
+  is-OptBinders =
+    fail
+
+  is-OptTerms =
+    fail
+
+  is-OptSort =
+    fail
+
+  is-OptAnnotation =
+    fail
+
+  prettyprint-OptType :
+    amb([h|hs]) -> <prettyprint-OptType> h
+
+  prettyprint-OptInTerm :
+    amb([h|hs]) -> <prettyprint-OptInTerm> h
+
+  prettyprint-OptDepRetType :
+    amb([h|hs]) -> <prettyprint-OptDepRetType> h
+
+  prettyprint-OptAlias :
+    amb([h|hs]) -> <prettyprint-OptAlias> h
+
+  prettyprint-OptReturnType :
+    amb([h|hs]) -> <prettyprint-OptReturnType> h
+
+  prettyprint-OptBinders :
+    amb([h|hs]) -> <prettyprint-OptBinders> h
+
+  prettyprint-OptTerms :
+    amb([h|hs]) -> <prettyprint-OptTerms> h
+
+  prettyprint-OptSort :
+    amb([h|hs]) -> <prettyprint-OptSort> h
+
+  prettyprint-OptAnnotation :
+    amb([h|hs]) -> <prettyprint-OptAnnotation> h
+
+  prettyprint-OptType :
+    OptType-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[OptType]]")]
+                         )
+                       ]
+
+  is-OptType =
+    ?OptType-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptType-Plhdr()
+
+  prettyprint-OptInTerm :
+    OptInTerm-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[OptInTerm]]")]
+                           )
+                         ]
+
+  is-OptInTerm =
+    ?OptInTerm-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptInTerm-Plhdr()
+
+  prettyprint-OptDepRetType :
+    OptDepRetType-Plhdr() -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("[[OptDepRetType]]")]
+                               )
+                             ]
+
+  is-OptDepRetType =
+    ?OptDepRetType-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptDepRetType-Plhdr()
+
+  prettyprint-OptAlias :
+    OptAlias-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[OptAlias]]")]
+                          )
+                        ]
+
+  is-OptAlias =
+    ?OptAlias-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptAlias-Plhdr()
+
+  prettyprint-Name :
+    Name-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Name]]")]
+                      )
+                    ]
+
+  is-Name =
+    ?Name-Plhdr()
+
+  is-SDF-placeholder =
+    ?Name-Plhdr()
+
+  prettyprint-OptReturnType :
+    OptReturnType-Plhdr() -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("[[OptReturnType]]")]
+                               )
+                             ]
+
+  is-OptReturnType =
+    ?OptReturnType-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptReturnType-Plhdr()
+
+  prettyprint-ReturnType :
+    ReturnType-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[ReturnType]]")]
+                            )
+                          ]
+
+  is-ReturnType =
+    ?ReturnType-Plhdr()
+
+  is-SDF-placeholder =
+    ?ReturnType-Plhdr()
+
+  prettyprint-OptBinders :
+    OptBinders-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[OptBinders]]")]
+                            )
+                          ]
+
+  is-OptBinders =
+    ?OptBinders-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptBinders-Plhdr()
+
+  prettyprint-Binder :
+    Binder-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[Binder]]")]
+                        )
+                      ]
+
+  is-Binder =
+    ?Binder-Plhdr()
+
+  is-SDF-placeholder =
+    ?Binder-Plhdr()
+
+  prettyprint-OptTerms :
+    OptTerms-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[OptTerms]]")]
+                          )
+                        ]
+
+  is-OptTerms =
+    ?OptTerms-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptTerms-Plhdr()
+
+  prettyprint-Term :
+    Term-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Term]]")]
+                      )
+                    ]
+
+  is-Term =
+    ?Term-Plhdr()
+
+  is-SDF-placeholder =
+    ?Term-Plhdr()
+
+  prettyprint-OptSort :
+    OptSort-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[OptSort]]")]
+                         )
+                       ]
+
+  is-OptSort =
+    ?OptSort-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptSort-Plhdr()
+
+  prettyprint-Sort :
+    Sort-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Sort]]")]
+                      )
+                    ]
+
+  is-Sort =
+    ?Sort-Plhdr()
+
+  is-SDF-placeholder =
+    ?Sort-Plhdr()
+
+  prettyprint-OptAnnotation :
+    OptAnnotation-Plhdr() -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("[[OptAnnotation]]")]
+                               )
+                             ]
+
+  is-OptAnnotation =
+    ?OptAnnotation-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptAnnotation-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-OptIdents
+
+  prettyprint-Coq =
+    prettyprint-OptWhereNotation
+
+  prettyprint-OptIdents :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptIdents =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptIdents :
+    OptIdents(t1__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S(" "), t1__']
+                         )
+                       ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Ident|" ")> t1__
+
+  is-OptIdents =
+    ?OptIdents(_)
+
+  get-indent :
+    (OptIdents(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (OptIdents(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := " "
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (OptIdents(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptWhereNotation :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptWhereNotation =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptWhereNotation :
+    OptWhereNotation(t1__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S(" where "), t1__']
+                                )
+                              ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Notation|" where")> t1__
+
+  is-OptWhereNotation =
+    ?OptWhereNotation(_)
+
+  get-indent :
+    (OptWhereNotation(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (OptWhereNotation(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := " where"
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (OptWhereNotation(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-OptIdents =
+    fail
+
+  is-OptWhereNotation =
+    fail
+
+  prettyprint-OptIdents :
+    amb([h|hs]) -> <prettyprint-OptIdents> h
+
+  prettyprint-OptWhereNotation :
+    amb([h|hs]) -> <prettyprint-OptWhereNotation> h
+
+  prettyprint-OptIdents :
+    OptIdents-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[OptIdents]]")]
+                           )
+                         ]
+
+  is-OptIdents =
+    ?OptIdents-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptIdents-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+  prettyprint-OptWhereNotation :
+    OptWhereNotation-Plhdr() -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [S("[[OptWhereNotation]]")]
+                                  )
+                                ]
+
+  is-OptWhereNotation =
+    ?OptWhereNotation-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptWhereNotation-Plhdr()
+
+  prettyprint-Notation :
+    Notation-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Notation]]")]
+                          )
+                        ]
+
+  is-Notation =
+    ?Notation-Plhdr()
+
+  is-SDF-placeholder =
+    ?Notation-Plhdr()

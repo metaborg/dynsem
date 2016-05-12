@@ -1,0 +1,166 @@
+module pp/Lexical-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  libstratego-sglr
+  trans/pp
+  coq-signatures/Lexical-sig
+
+
+strategies
+  prettyprint-example =
+    prettyprint-Coq
+
+
+strategies
+  prettyprint-SDF-start-symbols =
+    prettyprint-Coq-start-symbols
+
+
+strategies
+  prettyprint-CommentChar =
+    ![S(<is-string>)]
+
+  prettyprint-FirstLetter =
+    ![S(<is-string>)]
+
+  prettyprint-SubsequentLetter =
+    ![S(<is-string>)]
+
+  prettyprint-Ident =
+    ![S(<is-string>)]
+
+  prettyprint-Digit =
+    ![S(<is-string>)]
+
+  prettyprint-Num =
+    ![S(<is-string>)]
+
+  prettyprint-Integer =
+    ![S(<is-string>)]
+
+  prettyprint-String =
+    ![S(<is-string>)]
+
+  prettyprint-StringChar =
+    ![S(<is-string>)]
+
+  prettyprint-Reserved =
+    ![S(<is-string>)]
+
+  prettyprint-SingleQuote =
+    ![S(<is-string>)]
+
+  prettyprint-Coq =
+    prettyprint-CommentChar
+
+  prettyprint-Coq =
+    prettyprint-FirstLetter
+
+  prettyprint-Coq =
+    prettyprint-SubsequentLetter
+
+  prettyprint-Coq =
+    prettyprint-Ident
+
+  prettyprint-Coq =
+    prettyprint-Digit
+
+  prettyprint-Coq =
+    prettyprint-Num
+
+  prettyprint-Coq =
+    prettyprint-Integer
+
+  prettyprint-Coq =
+    prettyprint-String
+
+  prettyprint-Coq =
+    prettyprint-StringChar
+
+  prettyprint-Coq =
+    prettyprint-Reserved
+
+  prettyprint-Coq =
+    prettyprint-SingleQuote
+
+  prettyprint-CommentChar :
+    amb([h|hs]) -> <prettyprint-CommentChar> h
+
+  prettyprint-FirstLetter :
+    amb([h|hs]) -> <prettyprint-FirstLetter> h
+
+  prettyprint-SubsequentLetter :
+    amb([h|hs]) -> <prettyprint-SubsequentLetter> h
+
+  prettyprint-Ident :
+    amb([h|hs]) -> <prettyprint-Ident> h
+
+  prettyprint-Digit :
+    amb([h|hs]) -> <prettyprint-Digit> h
+
+  prettyprint-Num :
+    amb([h|hs]) -> <prettyprint-Num> h
+
+  prettyprint-Integer :
+    amb([h|hs]) -> <prettyprint-Integer> h
+
+  prettyprint-String :
+    amb([h|hs]) -> <prettyprint-String> h
+
+  prettyprint-StringChar :
+    amb([h|hs]) -> <prettyprint-StringChar> h
+
+  prettyprint-Reserved :
+    amb([h|hs]) -> <prettyprint-Reserved> h
+
+  prettyprint-SingleQuote :
+    amb([h|hs]) -> <prettyprint-SingleQuote> h
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Notation
+
+  prettyprint-Notation :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Notation)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-one-Z(prettyprint-Ident)> t1__
+
+  is-Notation =
+    fail
+
+  prettyprint-Notation :
+    amb([h|hs]) -> <prettyprint-Notation> h
+
+  prettyprint-Notation :
+    Notation-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Notation]]")]
+                          )
+                        ]
+
+  is-Notation =
+    ?Notation-Plhdr()
+
+  is-SDF-placeholder =
+    ?Notation-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()

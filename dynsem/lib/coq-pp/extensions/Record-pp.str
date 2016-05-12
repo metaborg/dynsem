@@ -1,0 +1,888 @@
+module pp/extensions/Record-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  libstratego-sglr
+  trans/pp
+  coq-signatures/extensions/Record-sig
+
+
+imports
+  coq-signatures/Lexical-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/Options-sig
+  coq-signatures/Qid-sig
+
+
+imports
+  pp/Lexical-pp
+  pp/Gallina-pp
+  pp/Options-pp
+  pp/Qid-pp
+
+
+strategies
+  prettyprint-example =
+    prettyprint-Coq
+
+
+strategies
+  prettyprint-SDF-start-symbols =
+    prettyprint-Coq-start-symbols
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-RecordKeyword
+
+  prettyprint-RecordKeyword :
+    RecordRecord() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("Record")]
+                        )
+                      ]
+
+  is-RecordKeyword =
+    ?RecordRecord()
+
+  get-indent :
+    (RecordRecord(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (RecordRecord(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (RecordRecord(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-RecordKeyword :
+    RecordStructure() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Structure")]
+                           )
+                         ]
+
+  is-RecordKeyword =
+    ?RecordStructure()
+
+  get-indent :
+    (RecordStructure(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (RecordStructure(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (RecordStructure(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-RecordKeyword :
+    RecordInductive() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Inductive")]
+                           )
+                         ]
+
+  is-RecordKeyword =
+    ?RecordInductive()
+
+  get-indent :
+    (RecordInductive(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (RecordInductive(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (RecordInductive(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-RecordKeyword :
+    RecordCoInductive() -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S("CoInductive")]
+                             )
+                           ]
+
+  is-RecordKeyword =
+    ?RecordCoInductive()
+
+  get-indent :
+    (RecordCoInductive(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (RecordCoInductive(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (RecordCoInductive(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  is-RecordKeyword =
+    fail
+
+  prettyprint-RecordKeyword :
+    amb([h|hs]) -> <prettyprint-RecordKeyword> h
+
+  prettyprint-RecordKeyword :
+    RecordKeyword-Plhdr() -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("[[RecordKeyword]]")]
+                               )
+                             ]
+
+  is-RecordKeyword =
+    ?RecordKeyword-Plhdr()
+
+  is-SDF-placeholder =
+    ?RecordKeyword-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Sentence
+
+  prettyprint-Sentence :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Sentence)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-one-Z(prettyprint-Record)> t1__
+
+  is-Sentence =
+    fail
+
+  prettyprint-Sentence :
+    amb([h|hs]) -> <prettyprint-Sentence> h
+
+  prettyprint-Sentence :
+    Sentence-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Sentence]]")]
+                          )
+                        ]
+
+  is-Sentence =
+    ?Sentence-Plhdr()
+
+  is-SDF-placeholder =
+    ?Sentence-Plhdr()
+
+  prettyprint-Record :
+    Record-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[Record]]")]
+                        )
+                      ]
+
+  is-Record =
+    ?Record-Plhdr()
+
+  is-SDF-placeholder =
+    ?Record-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Record
+
+  prettyprint-Record :
+    Record(t1__, t2__, t3__, t4__, t5__, t6__) -> [ H(
+                                                      [SOpt(HS(), "0")]
+                                                    , [ t1__'
+                                                      , S(" ")
+                                                      , t2__'
+                                                      , t3__'
+                                                      , t4__'
+                                                      , S(" :=")
+                                                      ]
+                                                    )
+                                                  , t5__'
+                                                  , t6__'
+                                                  , t7__'
+                                                  ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-RecordKeyword)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptBinders)> t3__
+    with t4__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptSort)> t4__
+    with t5__' := <pp-indent(|"1")> [ <is-string ; pp-one-Z(prettyprint-origin-term)
+                                       <+ pp-one-Z(prettyprint-OptIdents)> t5__
+                                    , S(" {")
+                                    ]
+    with t6__' := <pp-indent(|"4")> [ <is-string ; pp-one-Z(prettyprint-origin-term)
+                                       <+ pp-V-list(prettyprint-RecordField|"0", ";")> t6__
+                                    ]
+    with t7__' := <pp-indent(|"2")> [S("}.")]
+
+  is-Record =
+    ?Record(_, _, _, _, _, _)
+
+  get-indent :
+    ( Record(t1__, t2__, t3__, t4__, t5__, t6__)
+    , index
+    ) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           case ?4 :
+             indent := ""
+           case ?5 :
+             indent := " "
+           case ?6 :
+             indent := "    "
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    ( Record(t1__, t2__, t3__, t4__, t5__, t6__)
+    , index
+    ) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           case ?4 :
+             separator := ""
+           case ?5 :
+             separator := ""
+           case ?6 :
+             separator := ";\n"
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    ( Record(t1__, t2__, t3__, t4__, t5__, t6__)
+    , index
+    ) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           case ?3 :
+             ws := ""
+           case ?4 :
+             ws := ""
+           case ?5 :
+             ws := "\n "
+           case ?6 :
+             ws := "\n    "
+           otherwise :
+             ws := ""
+         end
+
+  is-Record =
+    fail
+
+  prettyprint-Record :
+    amb([h|hs]) -> <prettyprint-Record> h
+
+  prettyprint-Record :
+    Record-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[Record]]")]
+                        )
+                      ]
+
+  is-Record =
+    ?Record-Plhdr()
+
+  is-SDF-placeholder =
+    ?Record-Plhdr()
+
+  prettyprint-RecordKeyword :
+    RecordKeyword-Plhdr() -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("[[RecordKeyword]]")]
+                               )
+                             ]
+
+  is-RecordKeyword =
+    ?RecordKeyword-Plhdr()
+
+  is-SDF-placeholder =
+    ?RecordKeyword-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+  prettyprint-OptBinders :
+    OptBinders-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[OptBinders]]")]
+                            )
+                          ]
+
+  is-OptBinders =
+    ?OptBinders-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptBinders-Plhdr()
+
+  prettyprint-OptSort :
+    OptSort-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[OptSort]]")]
+                         )
+                       ]
+
+  is-OptSort =
+    ?OptSort-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptSort-Plhdr()
+
+  prettyprint-OptIdents :
+    OptIdents-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[OptIdents]]")]
+                           )
+                         ]
+
+  is-OptIdents =
+    ?OptIdents-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptIdents-Plhdr()
+
+  prettyprint-RecordField :
+    RecordField-Plhdr() -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S("[[RecordField]]")]
+                             )
+                           ]
+
+  is-RecordField =
+    ?RecordField-Plhdr()
+
+  is-SDF-placeholder =
+    ?RecordField-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-RecordField
+
+  prettyprint-RecordField :
+    RecFld(t1__, t2__, t3__, t4__) -> [ H(
+                                          [SOpt(HS(), "0")]
+                                        , [ t1__'
+                                          , t2__'
+                                          , S(" : ")
+                                          , t3__'
+                                          , t4__'
+                                          ]
+                                        )
+                                      ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptBinders)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Type)> t3__
+    with t4__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptWhereNotation)> t4__
+
+  is-RecordField =
+    ?RecFld(_, _, _, _)
+
+  get-indent :
+    (RecFld(t1__, t2__, t3__, t4__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           case ?4 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (RecFld(t1__, t2__, t3__, t4__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           case ?4 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (RecFld(t1__, t2__, t3__, t4__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := ""
+           case ?3 :
+             ws := " "
+           case ?4 :
+             ws := ""
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-RecordField :
+    RecExplicitFld(t1__, t2__, t3__, t4__) -> [ H(
+                                                  [SOpt(HS(), "0")]
+                                                , [ t1__'
+                                                  , t2__'
+                                                  , t3__'
+                                                  , S(" := ")
+                                                  , t4__'
+                                                  ]
+                                                )
+                                              ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptBinders)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptType)> t3__
+    with t4__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t4__
+
+  is-RecordField =
+    ?RecExplicitFld(_, _, _, _)
+
+  get-indent :
+    (RecExplicitFld(t1__, t2__, t3__, t4__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           case ?4 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (RecExplicitFld(t1__, t2__, t3__, t4__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           case ?4 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (RecExplicitFld(t1__, t2__, t3__, t4__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := ""
+           case ?3 :
+             ws := ""
+           case ?4 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-RecordField =
+    fail
+
+  prettyprint-RecordField :
+    amb([h|hs]) -> <prettyprint-RecordField> h
+
+  prettyprint-Type :
+    Type-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Type]]")]
+                      )
+                    ]
+
+  is-Type =
+    ?Type-Plhdr()
+
+  is-SDF-placeholder =
+    ?Type-Plhdr()
+
+  prettyprint-OptWhereNotation :
+    OptWhereNotation-Plhdr() -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [S("[[OptWhereNotation]]")]
+                                  )
+                                ]
+
+  is-OptWhereNotation =
+    ?OptWhereNotation-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptWhereNotation-Plhdr()
+
+  prettyprint-RecordField :
+    RecordField-Plhdr() -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [S("[[RecordField]]")]
+                             )
+                           ]
+
+  is-RecordField =
+    ?RecordField-Plhdr()
+
+  is-SDF-placeholder =
+    ?RecordField-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+  prettyprint-OptBinders :
+    OptBinders-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[OptBinders]]")]
+                            )
+                          ]
+
+  is-OptBinders =
+    ?OptBinders-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptBinders-Plhdr()
+
+  prettyprint-OptType :
+    OptType-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[OptType]]")]
+                         )
+                       ]
+
+  is-OptType =
+    ?OptType-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptType-Plhdr()
+
+  prettyprint-Term :
+    Term-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Term]]")]
+                      )
+                    ]
+
+  is-Term =
+    ?Term-Plhdr()
+
+  is-SDF-placeholder =
+    ?Term-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Term
+
+  prettyprint-Term :
+    Projection(t1__, t2__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [ t1__'
+                                  , S(".(")
+                                  , t2__'
+                                  , S(")")
+                                  ]
+                                )
+                              ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-QualId)> t2__
+
+  is-Term =
+    ?Projection(_, _)
+
+  get-indent :
+    (Projection(t1__, t2__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Projection(t1__, t2__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Projection(t1__, t2__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := ""
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Term :
+    ProjArgs(t1__, t2__, t3__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [ t1__'
+                                      , S(".(")
+                                      , t2__'
+                                      , S(" ")
+                                      , t3__'
+                                      , S(")")
+                                      ]
+                                    )
+                                  ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-QualId)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Arg)> t3__
+
+  is-Term =
+    ?ProjArgs(_, _, _)
+
+  get-indent :
+    (ProjArgs(t1__, t2__, t3__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (ProjArgs(t1__, t2__, t3__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (ProjArgs(t1__, t2__, t3__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := ""
+           case ?3 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Term :
+    ProjQualArgs(t1__, t2__, t3__) -> [ H(
+                                          [SOpt(HS(), "0")]
+                                        , [ t1__'
+                                          , S(".(@")
+                                          , t2__'
+                                          , S(" ")
+                                          , t3__'
+                                          , S(")")
+                                          ]
+                                        )
+                                      ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-QualId)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Term)> t3__
+
+  is-Term =
+    ?ProjQualArgs(_, _, _)
+
+  get-indent :
+    (ProjQualArgs(t1__, t2__, t3__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (ProjQualArgs(t1__, t2__, t3__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (ProjQualArgs(t1__, t2__, t3__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := ""
+           case ?3 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-Term =
+    fail
+
+  prettyprint-Term :
+    amb([h|hs]) -> <prettyprint-Term> h
+
+  prettyprint-Arg :
+    Arg-Plhdr() -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [S("[[Arg]]")]
+                     )
+                   ]
+
+  is-Arg =
+    ?Arg-Plhdr()
+
+  is-SDF-placeholder =
+    ?Arg-Plhdr()
+
+  prettyprint-QualId :
+    QualId-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[QualId]]")]
+                        )
+                      ]
+
+  is-QualId =
+    ?QualId-Plhdr()
+
+  is-SDF-placeholder =
+    ?QualId-Plhdr()
+
+  prettyprint-Term :
+    Term-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Term]]")]
+                      )
+                    ]
+
+  is-Term =
+    ?Term-Plhdr()
+
+  is-SDF-placeholder =
+    ?Term-Plhdr()

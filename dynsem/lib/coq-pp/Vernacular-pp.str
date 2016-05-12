@@ -1,0 +1,2193 @@
+module pp/Vernacular-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  libstratego-sglr
+  trans/pp
+  coq-signatures/Vernacular-sig
+
+
+imports
+  coq-signatures/Lexical-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/Options-sig
+  coq-signatures/extensions/Record-sig
+  coq-signatures/extensions/Section-sig
+  coq-signatures/extensions/Module-sig
+  coq-signatures/extensions/Coercion-sig
+  coq-signatures/tactic/Toplevel-sig
+
+
+imports
+  pp/Lexical-pp
+  pp/Gallina-pp
+  pp/Options-pp
+  pp/extensions/Record-pp
+  pp/extensions/Section-pp
+  pp/extensions/Module-pp
+  pp/extensions/Coercion-pp
+  pp/tactic/Toplevel-pp
+
+
+strategies
+  prettyprint-example =
+    prettyprint-Coq
+
+
+strategies
+  prettyprint-SDF-start-symbols =
+    prettyprint-Coq-start-symbols
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-AssumptionKeyword
+
+  prettyprint-AssumptionKeyword :
+    AssumptionAxiom() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Axiom")]
+                           )
+                         ]
+
+  is-AssumptionKeyword =
+    ?AssumptionAxiom()
+
+  get-indent :
+    (AssumptionAxiom(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssumptionAxiom(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssumptionAxiom(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssumptionKeyword :
+    AssumptionConjecture() -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S("Conjecture")]
+                                )
+                              ]
+
+  is-AssumptionKeyword =
+    ?AssumptionConjecture()
+
+  get-indent :
+    (AssumptionConjecture(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssumptionConjecture(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssumptionConjecture(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssumptionKeyword :
+    AssumptionParameter() -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("Parameter")]
+                               )
+                             ]
+
+  is-AssumptionKeyword =
+    ?AssumptionParameter()
+
+  get-indent :
+    (AssumptionParameter(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssumptionParameter(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssumptionParameter(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssumptionKeyword :
+    AssumptionParameters() -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S("Parameters")]
+                                )
+                              ]
+
+  is-AssumptionKeyword =
+    ?AssumptionParameters()
+
+  get-indent :
+    (AssumptionParameters(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssumptionParameters(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssumptionParameters(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssumptionKeyword :
+    AssumptionVariable() -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [S("Variable")]
+                              )
+                            ]
+
+  is-AssumptionKeyword =
+    ?AssumptionVariable()
+
+  get-indent :
+    (AssumptionVariable(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssumptionVariable(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssumptionVariable(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssumptionKeyword :
+    AssumptionVariables() -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("Variables")]
+                               )
+                             ]
+
+  is-AssumptionKeyword =
+    ?AssumptionVariables()
+
+  get-indent :
+    (AssumptionVariables(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssumptionVariables(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssumptionVariables(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssumptionKeyword :
+    AssumptionHypothesis() -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S("Hypothesis")]
+                                )
+                              ]
+
+  is-AssumptionKeyword =
+    ?AssumptionHypothesis()
+
+  get-indent :
+    (AssumptionHypothesis(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssumptionHypothesis(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssumptionHypothesis(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssumptionKeyword :
+    AssumptionHypotheses() -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S("Hypotheses")]
+                                )
+                              ]
+
+  is-AssumptionKeyword =
+    ?AssumptionHypotheses()
+
+  get-indent :
+    (AssumptionHypotheses(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssumptionHypotheses(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssumptionHypotheses(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  is-AssumptionKeyword =
+    fail
+
+  prettyprint-AssumptionKeyword :
+    amb([h|hs]) -> <prettyprint-AssumptionKeyword> h
+
+  prettyprint-AssumptionKeyword :
+    AssumptionKeyword-Plhdr() -> [ H(
+                                     [SOpt(HS(), "0")]
+                                   , [S("[[AssumptionKeyword]]")]
+                                   )
+                                 ]
+
+  is-AssumptionKeyword =
+    ?AssumptionKeyword-Plhdr()
+
+  is-SDF-placeholder =
+    ?AssumptionKeyword-Plhdr()
+
+
+strategies
+  prettyprint-Reserved =
+    ![S(<is-string>)]
+
+  prettyprint-Coq =
+    prettyprint-Reserved
+
+  prettyprint-Reserved :
+    amb([h|hs]) -> <prettyprint-Reserved> h
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-AssertionKeyword
+
+  prettyprint-AssertionKeyword :
+    AssertionTheorem() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("Theorem")]
+                            )
+                          ]
+
+  is-AssertionKeyword =
+    ?AssertionTheorem()
+
+  get-indent :
+    (AssertionTheorem(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionTheorem(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionTheorem(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssertionKeyword :
+    AssertionLemma() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("Lemma")]
+                          )
+                        ]
+
+  is-AssertionKeyword =
+    ?AssertionLemma()
+
+  get-indent :
+    (AssertionLemma(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionLemma(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionLemma(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssertionKeyword :
+    AssertionRemark() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("Remark")]
+                           )
+                         ]
+
+  is-AssertionKeyword =
+    ?AssertionRemark()
+
+  get-indent :
+    (AssertionRemark(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionRemark(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionRemark(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssertionKeyword :
+    AssertionFact() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("Fact")]
+                         )
+                       ]
+
+  is-AssertionKeyword =
+    ?AssertionFact()
+
+  get-indent :
+    (AssertionFact(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionFact(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionFact(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssertionKeyword :
+    AssertionCorollary() -> [ H(
+                                [SOpt(HS(), "0")]
+                              , [S("Corollary")]
+                              )
+                            ]
+
+  is-AssertionKeyword =
+    ?AssertionCorollary()
+
+  get-indent :
+    (AssertionCorollary(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionCorollary(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionCorollary(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssertionKeyword :
+    AssertionProposition() -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S("Proposition")]
+                                )
+                              ]
+
+  is-AssertionKeyword =
+    ?AssertionProposition()
+
+  get-indent :
+    (AssertionProposition(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionProposition(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionProposition(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssertionKeyword :
+    AssertionDefinition() -> [ H(
+                                 [SOpt(HS(), "0")]
+                               , [S("Definition")]
+                               )
+                             ]
+
+  is-AssertionKeyword =
+    ?AssertionDefinition()
+
+  get-indent :
+    (AssertionDefinition(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionDefinition(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionDefinition(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssertionKeyword :
+    AssertionExample() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("Example")]
+                            )
+                          ]
+
+  is-AssertionKeyword =
+    ?AssertionExample()
+
+  get-indent :
+    (AssertionExample(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionExample(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionExample(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  is-AssertionKeyword =
+    fail
+
+  prettyprint-AssertionKeyword :
+    amb([h|hs]) -> <prettyprint-AssertionKeyword> h
+
+  prettyprint-AssertionKeyword :
+    AssertionKeyword-Plhdr() -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [S("[[AssertionKeyword]]")]
+                                  )
+                                ]
+
+  is-AssertionKeyword =
+    ?AssertionKeyword-Plhdr()
+
+  is-SDF-placeholder =
+    ?AssertionKeyword-Plhdr()
+
+
+strategies
+  prettyprint-Reserved =
+    ![S(<is-string>)]
+
+  prettyprint-Coq =
+    prettyprint-Reserved
+
+  prettyprint-Reserved :
+    amb([h|hs]) -> <prettyprint-Reserved> h
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Sentence
+
+  prettyprint-Sentence :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Sentence)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-one-Z(prettyprint-Assumption)> t1__
+
+  prettyprint-Sentence :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Sentence)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-one-Z(prettyprint-Definition)> t1__
+
+  prettyprint-Sentence :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Sentence)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-one-Z(prettyprint-Inductive)> t1__
+
+  prettyprint-Sentence :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-Sentence)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-one-Z(prettyprint-Fixpoint)> t1__
+
+  prettyprint-Sentence :
+    AssertionProof(t1__, t2__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [t1__', S(" "), t2__']
+                                    )
+                                  ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Assertion)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Proof)> t2__
+
+  is-Sentence =
+    ?AssertionProof(_, _)
+
+  get-indent :
+    (AssertionProof(t1__, t2__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (AssertionProof(t1__, t2__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (AssertionProof(t1__, t2__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-Sentence =
+    fail
+
+  prettyprint-Sentence :
+    amb([h|hs]) -> <prettyprint-Sentence> h
+
+  prettyprint-Assumption :
+    Assumption-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[Assumption]]")]
+                            )
+                          ]
+
+  is-Assumption =
+    ?Assumption-Plhdr()
+
+  is-SDF-placeholder =
+    ?Assumption-Plhdr()
+
+  prettyprint-Definition :
+    Definition-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[Definition]]")]
+                            )
+                          ]
+
+  is-Definition =
+    ?Definition-Plhdr()
+
+  is-SDF-placeholder =
+    ?Definition-Plhdr()
+
+  prettyprint-Inductive :
+    Inductive-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[Inductive]]")]
+                           )
+                         ]
+
+  is-Inductive =
+    ?Inductive-Plhdr()
+
+  is-SDF-placeholder =
+    ?Inductive-Plhdr()
+
+  prettyprint-Fixpoint :
+    Fixpoint-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Fixpoint]]")]
+                          )
+                        ]
+
+  is-Fixpoint =
+    ?Fixpoint-Plhdr()
+
+  is-SDF-placeholder =
+    ?Fixpoint-Plhdr()
+
+  prettyprint-Sentence :
+    Sentence-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Sentence]]")]
+                          )
+                        ]
+
+  is-Sentence =
+    ?Sentence-Plhdr()
+
+  is-SDF-placeholder =
+    ?Sentence-Plhdr()
+
+  prettyprint-Assertion :
+    Assertion-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[Assertion]]")]
+                           )
+                         ]
+
+  is-Assertion =
+    ?Assertion-Plhdr()
+
+  is-SDF-placeholder =
+    ?Assertion-Plhdr()
+
+  prettyprint-Proof :
+    Proof-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Proof]]")]
+                       )
+                     ]
+
+  is-Proof =
+    ?Proof-Plhdr()
+
+  is-SDF-placeholder =
+    ?Proof-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Assumption
+
+  prettyprint-Coq =
+    prettyprint-Assums
+
+  prettyprint-Coq =
+    prettyprint-AssumsPar
+
+  prettyprint-Assumption :
+    Assumption(t1__, t2__) -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [ t1__'
+                                  , S(" ")
+                                  , t2__'
+                                  , S(".")
+                                  ]
+                                )
+                              ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-AssumptionKeyword)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Assums)> t2__
+
+  is-Assumption =
+    ?Assumption(_, _)
+
+  get-indent :
+    (Assumption(t1__, t2__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Assumption(t1__, t2__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Assumption(t1__, t2__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Assums :
+    Term(t1__, t2__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [t1__', S(" : "), t2__']
+                          )
+                        ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t2__
+
+  is-Assums =
+    ?Term(_, _)
+
+  get-indent :
+    (Term(t1__, t2__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Term(t1__, t2__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Term(t1__, t2__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Assums :
+    Terms(t1__) -> [ H(
+                       [SOpt(HS(), "0")]
+                     , [t1__']
+                     )
+                   ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-AssumsPar)> t1__
+
+  is-Assums =
+    ?Terms(_)
+
+  get-indent :
+    (Terms(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Terms(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Terms(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-AssumsPar :
+    Pars(t1__, t2__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [ S("(")
+                            , t1__'
+                            , S(" : ")
+                            , t2__'
+                            , S(")")
+                            ]
+                          )
+                        ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t2__
+
+  is-AssumsPar =
+    ?Pars(_, _)
+
+  get-indent :
+    (Pars(t1__, t2__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Pars(t1__, t2__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Pars(t1__, t2__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-Assumption =
+    fail
+
+  is-Assums =
+    fail
+
+  is-AssumsPar =
+    fail
+
+  prettyprint-Assumption :
+    amb([h|hs]) -> <prettyprint-Assumption> h
+
+  prettyprint-Assums :
+    amb([h|hs]) -> <prettyprint-Assums> h
+
+  prettyprint-AssumsPar :
+    amb([h|hs]) -> <prettyprint-AssumsPar> h
+
+  prettyprint-Assumption :
+    Assumption-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[Assumption]]")]
+                            )
+                          ]
+
+  is-Assumption =
+    ?Assumption-Plhdr()
+
+  is-SDF-placeholder =
+    ?Assumption-Plhdr()
+
+  prettyprint-AssumptionKeyword :
+    AssumptionKeyword-Plhdr() -> [ H(
+                                     [SOpt(HS(), "0")]
+                                   , [S("[[AssumptionKeyword]]")]
+                                   )
+                                 ]
+
+  is-AssumptionKeyword =
+    ?AssumptionKeyword-Plhdr()
+
+  is-SDF-placeholder =
+    ?AssumptionKeyword-Plhdr()
+
+  prettyprint-Assums :
+    Assums-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[Assums]]")]
+                        )
+                      ]
+
+  is-Assums =
+    ?Assums-Plhdr()
+
+  is-SDF-placeholder =
+    ?Assums-Plhdr()
+
+  prettyprint-AssumsPar :
+    AssumsPar-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[AssumsPar]]")]
+                           )
+                         ]
+
+  is-AssumsPar =
+    ?AssumsPar-Plhdr()
+
+  is-SDF-placeholder =
+    ?AssumsPar-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+  prettyprint-Term :
+    Term-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Term]]")]
+                      )
+                    ]
+
+  is-Term =
+    ?Term-Plhdr()
+
+  is-SDF-placeholder =
+    ?Term-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Definition
+
+  prettyprint-Definition :
+    Definition(t1__, t2__, t3__, t4__) -> [ H(
+                                              [SOpt(HS(), "0")]
+                                            , [ S("Definition ")
+                                              , t1__'
+                                              , t2__'
+                                              , t3__'
+                                              , S(" :=")
+                                              ]
+                                            )
+                                          , H(
+                                              [SOpt(HS(), "0")]
+                                            , [t4__']
+                                            )
+                                          , H(
+                                              [SOpt(HS(), "0")]
+                                            , [S(".")]
+                                            )
+                                          ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptBinders)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptType)> t3__
+    with t4__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t4__
+
+  is-Definition =
+    ?Definition(_, _, _, _)
+
+  get-indent :
+    (Definition(t1__, t2__, t3__, t4__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           case ?4 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Definition(t1__, t2__, t3__, t4__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           case ?4 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Definition(t1__, t2__, t3__, t4__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           case ?2 :
+             ws := ""
+           case ?3 :
+             ws := ""
+           case ?4 :
+             ws := "\n"
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Definition :
+    Let(t1__, t2__, t3__, t4__) -> [ H(
+                                       [SOpt(HS(), "0")]
+                                     , [ S("Let ")
+                                       , t1__'
+                                       , t2__'
+                                       , t3__'
+                                       , S(" :=")
+                                       ]
+                                     )
+                                   , H(
+                                       [SOpt(HS(), "0")]
+                                     , [t4__', S(".")]
+                                     )
+                                   ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptBinders)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptType)> t3__
+    with t4__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t4__
+
+  is-Definition =
+    ?Let(_, _, _, _)
+
+  get-indent :
+    (Let(t1__, t2__, t3__, t4__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           case ?4 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Let(t1__, t2__, t3__, t4__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           case ?4 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Let(t1__, t2__, t3__, t4__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           case ?2 :
+             ws := ""
+           case ?3 :
+             ws := ""
+           case ?4 :
+             ws := "\n"
+           otherwise :
+             ws := ""
+         end
+
+  is-Definition =
+    fail
+
+  prettyprint-Definition :
+    amb([h|hs]) -> <prettyprint-Definition> h
+
+  prettyprint-Definition :
+    Definition-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[Definition]]")]
+                            )
+                          ]
+
+  is-Definition =
+    ?Definition-Plhdr()
+
+  is-SDF-placeholder =
+    ?Definition-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+  prettyprint-OptBinders :
+    OptBinders-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[OptBinders]]")]
+                            )
+                          ]
+
+  is-OptBinders =
+    ?OptBinders-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptBinders-Plhdr()
+
+  prettyprint-OptType :
+    OptType-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[OptType]]")]
+                         )
+                       ]
+
+  is-OptType =
+    ?OptType-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptType-Plhdr()
+
+  prettyprint-Term :
+    Term-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Term]]")]
+                      )
+                    ]
+
+  is-Term =
+    ?Term-Plhdr()
+
+  is-SDF-placeholder =
+    ?Term-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Inductive
+
+  prettyprint-Coq =
+    prettyprint-IndBody
+
+  prettyprint-Coq =
+    prettyprint-ConsDecls
+
+  prettyprint-Coq =
+    prettyprint-ConsDecl
+
+  prettyprint-Inductive :
+    Inductive(t1__) -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [ S("Inductive ")
+                           , t1__'
+                           , S(".")
+                           ]
+                         )
+                       ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-IndBody|"with ")> t1__
+
+  is-Inductive =
+    ?Inductive(_)
+
+  get-indent :
+    (Inductive(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Inductive(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := "with "
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Inductive(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Inductive :
+    CoInductive(t1__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [ S("CoInductive ")
+                             , t1__'
+                             , S(".")
+                             ]
+                           )
+                         ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-IndBody|"with ")> t1__
+
+  is-Inductive =
+    ?CoInductive(_)
+
+  get-indent :
+    (CoInductive(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (CoInductive(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := "with "
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (CoInductive(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-IndBody :
+    Induc(t1__, t2__, t3__, t4__) -> [ H(
+                                         [SOpt(HS(), "0")]
+                                       , [ t1__'
+                                         , t2__'
+                                         , S(" : ")
+                                         , t3__'
+                                         , S(" :=")
+                                         ]
+                                       )
+                                     , H(
+                                         [SOpt(HS(), "0")]
+                                       , [t4__']
+                                       )
+                                     ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptBinders)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t3__
+    with t4__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-ConsDecls)> t4__
+
+  is-IndBody =
+    ?Induc(_, _, _, _)
+
+  get-indent :
+    (Induc(t1__, t2__, t3__, t4__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           case ?4 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Induc(t1__, t2__, t3__, t4__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           case ?4 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Induc(t1__, t2__, t3__, t4__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := ""
+           case ?3 :
+             ws := " "
+           case ?4 :
+             ws := "\n"
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-ConsDecls :
+    ListDeclBar(t1__) -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("| "), t1__']
+                           )
+                         ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-ConsDecl|"| ")> t1__
+
+  is-ConsDecls =
+    ?ListDeclBar(_)
+
+  get-indent :
+    (ListDeclBar(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (ListDeclBar(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := "| "
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (ListDeclBar(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-ConsDecls :
+    ListDecl(t1__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [t1__']
+                        )
+                      ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-ConsDecl|"| ")> t1__
+
+  is-ConsDecls =
+    ?ListDecl(_)
+
+  get-indent :
+    (ListDecl(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (ListDecl(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := "| "
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (ListDecl(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-ConsDecl :
+    ConsDecl(t1__, t2__, t3__) -> [ H(
+                                      [SOpt(HS(), "0")]
+                                    , [t1__', t2__', t3__']
+                                    )
+                                  , H(
+                                      []
+                                    , [S("")]
+                                    )
+                                  ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptBinders)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptType)> t3__
+
+  is-ConsDecl =
+    ?ConsDecl(_, _, _)
+
+  get-indent :
+    (ConsDecl(t1__, t2__, t3__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (ConsDecl(t1__, t2__, t3__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (ConsDecl(t1__, t2__, t3__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := ""
+           case ?3 :
+             ws := ""
+           otherwise :
+             ws := ""
+         end
+
+  is-Inductive =
+    fail
+
+  is-IndBody =
+    fail
+
+  is-ConsDecls =
+    fail
+
+  is-ConsDecl =
+    fail
+
+  prettyprint-Inductive :
+    amb([h|hs]) -> <prettyprint-Inductive> h
+
+  prettyprint-IndBody :
+    amb([h|hs]) -> <prettyprint-IndBody> h
+
+  prettyprint-ConsDecls :
+    amb([h|hs]) -> <prettyprint-ConsDecls> h
+
+  prettyprint-ConsDecl :
+    amb([h|hs]) -> <prettyprint-ConsDecl> h
+
+  prettyprint-Inductive :
+    Inductive-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[Inductive]]")]
+                           )
+                         ]
+
+  is-Inductive =
+    ?Inductive-Plhdr()
+
+  is-SDF-placeholder =
+    ?Inductive-Plhdr()
+
+  prettyprint-IndBody :
+    IndBody-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[IndBody]]")]
+                         )
+                       ]
+
+  is-IndBody =
+    ?IndBody-Plhdr()
+
+  is-SDF-placeholder =
+    ?IndBody-Plhdr()
+
+  prettyprint-Term :
+    Term-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Term]]")]
+                      )
+                    ]
+
+  is-Term =
+    ?Term-Plhdr()
+
+  is-SDF-placeholder =
+    ?Term-Plhdr()
+
+  prettyprint-ConsDecls :
+    ConsDecls-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[ConsDecls]]")]
+                           )
+                         ]
+
+  is-ConsDecls =
+    ?ConsDecls-Plhdr()
+
+  is-SDF-placeholder =
+    ?ConsDecls-Plhdr()
+
+  prettyprint-ConsDecl :
+    ConsDecl-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[ConsDecl]]")]
+                          )
+                        ]
+
+  is-ConsDecl =
+    ?ConsDecl-Plhdr()
+
+  is-SDF-placeholder =
+    ?ConsDecl-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+  prettyprint-OptBinders :
+    OptBinders-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[OptBinders]]")]
+                            )
+                          ]
+
+  is-OptBinders =
+    ?OptBinders-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptBinders-Plhdr()
+
+  prettyprint-OptType :
+    OptType-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[OptType]]")]
+                         )
+                       ]
+
+  is-OptType =
+    ?OptType-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptType-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Fixpoint
+
+  prettyprint-Fixpoint :
+    Fixpoint(t1__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("Fixpoint")]
+                        )
+                      , t1__'
+                      ]
+    with t1__' := <pp-indent(|"2")> [ <is-string ; pp-one-Z(prettyprint-origin-term)
+                                       <+ pp-V-list(prettyprint-FixBody|"0", " with")> t1__
+                                    , S(".")
+                                    ]
+
+  is-Fixpoint =
+    ?Fixpoint(_)
+
+  get-indent :
+    (Fixpoint(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := "  "
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Fixpoint(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := "\n with"
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Fixpoint(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := "\n  "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Fixpoint :
+    CoFixpoint(t1__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("CoFixpoint")]
+                          )
+                        , t1__'
+                        ]
+    with t1__' := <pp-indent(|"2")> [ <is-string ; pp-one-Z(prettyprint-origin-term)
+                                       <+ pp-V-list(prettyprint-CoFixBody|"0", " with")> t1__
+                                    , S(".")
+                                    ]
+
+  is-Fixpoint =
+    ?CoFixpoint(_)
+
+  get-indent :
+    (CoFixpoint(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := "  "
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (CoFixpoint(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := "\n with"
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (CoFixpoint(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := "\n  "
+           otherwise :
+             ws := ""
+         end
+
+  is-Fixpoint =
+    fail
+
+  prettyprint-Fixpoint :
+    amb([h|hs]) -> <prettyprint-Fixpoint> h
+
+  prettyprint-FixBody :
+    FixBody-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[FixBody]]")]
+                         )
+                       ]
+
+  is-FixBody =
+    ?FixBody-Plhdr()
+
+  is-SDF-placeholder =
+    ?FixBody-Plhdr()
+
+  prettyprint-Fixpoint :
+    Fixpoint-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Fixpoint]]")]
+                          )
+                        ]
+
+  is-Fixpoint =
+    ?Fixpoint-Plhdr()
+
+  is-SDF-placeholder =
+    ?Fixpoint-Plhdr()
+
+  prettyprint-CoFixBody :
+    CoFixBody-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[CoFixBody]]")]
+                           )
+                         ]
+
+  is-CoFixBody =
+    ?CoFixBody-Plhdr()
+
+  is-SDF-placeholder =
+    ?CoFixBody-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Assertion
+
+  prettyprint-Assertion :
+    Assertion(t1__, t2__, t3__, t4__) -> [ H(
+                                             [SOpt(HS(), "0")]
+                                           , [ t1__'
+                                             , S(" ")
+                                             , t2__'
+                                             , t3__'
+                                             , S(" : ")
+                                             , t4__'
+                                             , S(".")
+                                             ]
+                                           )
+                                         ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-AssertionKeyword)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptBinders)> t3__
+    with t4__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t4__
+
+  is-Assertion =
+    ?Assertion(_, _, _, _)
+
+  get-indent :
+    (Assertion(t1__, t2__, t3__, t4__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           case ?4 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Assertion(t1__, t2__, t3__, t4__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           case ?4 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Assertion(t1__, t2__, t3__, t4__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           case ?3 :
+             ws := ""
+           case ?4 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-Assertion =
+    fail
+
+  prettyprint-Assertion :
+    amb([h|hs]) -> <prettyprint-Assertion> h
+
+  prettyprint-Assertion :
+    Assertion-Plhdr() -> [ H(
+                             [SOpt(HS(), "0")]
+                           , [S("[[Assertion]]")]
+                           )
+                         ]
+
+  is-Assertion =
+    ?Assertion-Plhdr()
+
+  is-SDF-placeholder =
+    ?Assertion-Plhdr()
+
+  prettyprint-AssertionKeyword :
+    AssertionKeyword-Plhdr() -> [ H(
+                                    [SOpt(HS(), "0")]
+                                  , [S("[[AssertionKeyword]]")]
+                                  )
+                                ]
+
+  is-AssertionKeyword =
+    ?AssertionKeyword-Plhdr()
+
+  is-SDF-placeholder =
+    ?AssertionKeyword-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+  prettyprint-OptBinders :
+    OptBinders-Plhdr() -> [ H(
+                              [SOpt(HS(), "0")]
+                            , [S("[[OptBinders]]")]
+                            )
+                          ]
+
+  is-OptBinders =
+    ?OptBinders-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptBinders-Plhdr()
+
+  prettyprint-Term :
+    Term-Plhdr() -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [S("[[Term]]")]
+                      )
+                    ]
+
+  is-Term =
+    ?Term-Plhdr()
+
+  is-SDF-placeholder =
+    ?Term-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Proof
+
+  prettyprint-Proof :
+    Qed(t1__) -> [ H(
+                     [SOpt(HS(), "0")]
+                   , [ S("Proof. ")
+                     , t1__'
+                     , S(" Qed.")
+                     ]
+                   )
+                 ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Tactic)> t1__
+
+  is-Proof =
+    ?Qed(_)
+
+  get-indent :
+    (Qed(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Qed(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Qed(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Proof :
+    Defined(t1__) -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [ S("Proof. ")
+                         , t1__'
+                         , S(" Defined.")
+                         ]
+                       )
+                     ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Tactic)> t1__
+
+  is-Proof =
+    ?Defined(_)
+
+  get-indent :
+    (Defined(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Defined(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Defined(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Proof :
+    Admitted(t1__) -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [ S("Proof. ")
+                          , t1__'
+                          , S(" Admitted.")
+                          ]
+                        )
+                      ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Tactic)> t1__
+
+  is-Proof =
+    ?Admitted(_)
+
+  get-indent :
+    (Admitted(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Admitted(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Admitted(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-Proof =
+    fail
+
+  prettyprint-Proof :
+    amb([h|hs]) -> <prettyprint-Proof> h
+
+  prettyprint-Proof :
+    Proof-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Proof]]")]
+                       )
+                     ]
+
+  is-Proof =
+    ?Proof-Plhdr()
+
+  is-SDF-placeholder =
+    ?Proof-Plhdr()
+
+  prettyprint-Tactic :
+    Tactic-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[Tactic]]")]
+                        )
+                      ]
+
+  is-Tactic =
+    ?Tactic-Plhdr()
+
+  is-SDF-placeholder =
+    ?Tactic-Plhdr()

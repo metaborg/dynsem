@@ -1,0 +1,423 @@
+module pp/tactic/Toplevel-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  libstratego-sglr
+  trans/pp
+  coq-signatures/tactic/Toplevel-sig
+
+
+imports
+  coq-signatures/Qid-sig
+  coq-signatures/Lexical-sig
+  coq-signatures/tactic/Expr-sig
+  coq-signatures/Vernacular-sig
+
+
+imports
+  pp/Qid-pp
+  pp/Lexical-pp
+  pp/tactic/Expr-pp
+  pp/Vernacular-pp
+
+
+strategies
+  prettyprint-example =
+    prettyprint-Coq
+
+
+strategies
+  prettyprint-SDF-start-symbols =
+    prettyprint-Coq-start-symbols
+
+
+strategies
+  prettyprint-Reserved =
+    ![S(<is-string>)]
+
+  prettyprint-Coq =
+    prettyprint-Reserved
+
+  prettyprint-Reserved :
+    amb([h|hs]) -> <prettyprint-Reserved> h
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Sentence
+
+  prettyprint-Coq =
+    prettyprint-Tactic
+
+  prettyprint-Sentence :
+    Ltac(t1__, t2__) -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [t1__', S("Ltac "), t2__']
+                          )
+                        ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-OptLocalPrefix)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-LtacDef|" with")> t2__
+
+  is-Sentence =
+    ?Ltac(_, _)
+
+  get-indent :
+    (Ltac(t1__, t2__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Ltac(t1__, t2__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := " with"
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Ltac(t1__, t2__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Tactic :
+    Tactic(t1__) -> [ H(
+                        [SOpt(HS(), "0")]
+                      , [t1__', S(".")]
+                      )
+                    ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-TExpr)> t1__
+
+  is-Tactic =
+    ?Tactic(_)
+
+  get-indent :
+    (Tactic(t1__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Tactic(t1__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Tactic(t1__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           otherwise :
+             ws := ""
+         end
+
+  is-Sentence =
+    fail
+
+  is-Tactic =
+    fail
+
+  prettyprint-Sentence :
+    amb([h|hs]) -> <prettyprint-Sentence> h
+
+  prettyprint-Tactic :
+    amb([h|hs]) -> <prettyprint-Tactic> h
+
+  prettyprint-Sentence :
+    Sentence-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Sentence]]")]
+                          )
+                        ]
+
+  is-Sentence =
+    ?Sentence-Plhdr()
+
+  is-SDF-placeholder =
+    ?Sentence-Plhdr()
+
+  prettyprint-OptLocalPrefix :
+    OptLocalPrefix-Plhdr() -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S("[[OptLocalPrefix]]")]
+                                )
+                              ]
+
+  is-OptLocalPrefix =
+    ?OptLocalPrefix-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptLocalPrefix-Plhdr()
+
+  prettyprint-LtacDef :
+    LtacDef-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[LtacDef]]")]
+                         )
+                       ]
+
+  is-LtacDef =
+    ?LtacDef-Plhdr()
+
+  is-SDF-placeholder =
+    ?LtacDef-Plhdr()
+
+  prettyprint-Tactic :
+    Tactic-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[Tactic]]")]
+                        )
+                      ]
+
+  is-Tactic =
+    ?Tactic-Plhdr()
+
+  is-SDF-placeholder =
+    ?Tactic-Plhdr()
+
+  prettyprint-TExpr :
+    TExpr-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[TExpr]]")]
+                       )
+                     ]
+
+  is-TExpr =
+    ?TExpr-Plhdr()
+
+  is-SDF-placeholder =
+    ?TExpr-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-OptLocalPrefix
+
+  prettyprint-OptLocalPrefix :
+    None() -> [ H(
+                  []
+                , [S("")]
+                )
+              ]
+
+  is-OptLocalPrefix =
+    ?None()
+
+  get-indent :
+    (None(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (None(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (None(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-OptLocalPrefix :
+    LocalTactic() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("Local ")]
+                       )
+                     ]
+
+  is-OptLocalPrefix =
+    ?LocalTactic()
+
+  get-indent :
+    (LocalTactic(), index) -> indent
+    with switch !index
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (LocalTactic(), index) -> separator
+    with switch !index
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (LocalTactic(), index) -> ws
+    with switch !index
+           otherwise :
+             ws := ""
+         end
+
+  is-OptLocalPrefix =
+    fail
+
+  prettyprint-OptLocalPrefix :
+    amb([h|hs]) -> <prettyprint-OptLocalPrefix> h
+
+  prettyprint-OptLocalPrefix :
+    OptLocalPrefix-Plhdr() -> [ H(
+                                  [SOpt(HS(), "0")]
+                                , [S("[[OptLocalPrefix]]")]
+                                )
+                              ]
+
+  is-OptLocalPrefix =
+    ?OptLocalPrefix-Plhdr()
+
+  is-SDF-placeholder =
+    ?OptLocalPrefix-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-LtacDef
+
+  prettyprint-LtacDef :
+    LtacDef(t1__, t2__, t3__) -> [ H(
+                                     [SOpt(HS(), "0")]
+                                   , [ t1__'
+                                     , S(" ")
+                                     , t2__'
+                                     , S(" := ")
+                                     , t3__'
+                                     ]
+                                   )
+                                 ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-QualId)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-H-list(prettyprint-Ident)> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-TExpr)> t3__
+
+  is-LtacDef =
+    ?LtacDef(_, _, _)
+
+  get-indent :
+    (LtacDef(t1__, t2__, t3__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (LtacDef(t1__, t2__, t3__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           case ?3 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (LtacDef(t1__, t2__, t3__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := " "
+           case ?3 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-LtacDef =
+    fail
+
+  prettyprint-LtacDef :
+    amb([h|hs]) -> <prettyprint-LtacDef> h
+
+  prettyprint-LtacDef :
+    LtacDef-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[LtacDef]]")]
+                         )
+                       ]
+
+  is-LtacDef =
+    ?LtacDef-Plhdr()
+
+  is-SDF-placeholder =
+    ?LtacDef-Plhdr()
+
+  prettyprint-QualId :
+    QualId-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[QualId]]")]
+                        )
+                      ]
+
+  is-QualId =
+    ?QualId-Plhdr()
+
+  is-SDF-placeholder =
+    ?QualId-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+  prettyprint-TExpr :
+    TExpr-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[TExpr]]")]
+                       )
+                     ]
+
+  is-TExpr =
+    ?TExpr-Plhdr()
+
+  is-SDF-placeholder =
+    ?TExpr-Plhdr()

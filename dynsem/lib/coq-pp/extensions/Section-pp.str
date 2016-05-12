@@ -1,0 +1,145 @@
+module pp/extensions/Section-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  libstratego-sglr
+  trans/pp
+  coq-signatures/extensions/Section-sig
+
+
+imports
+  coq-signatures/Lexical-sig
+  coq-signatures/Vernacular-sig
+
+
+imports
+  pp/Lexical-pp
+  pp/Vernacular-pp
+
+
+strategies
+  prettyprint-example =
+    prettyprint-Coq
+
+
+strategies
+  prettyprint-SDF-start-symbols =
+    prettyprint-Coq-start-symbols
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-Sentence
+
+  prettyprint-Sentence :
+    Section(t1__, t2__, t3__) -> [ H(
+                                     [SOpt(HS(), "0")]
+                                   , [ S("Section ")
+                                     , t1__'
+                                     , S(".")
+                                     ]
+                                   )
+                                 , H(
+                                     [SOpt(HS(), "0")]
+                                   , [t2__']
+                                   )
+                                 , H(
+                                     [SOpt(HS(), "0")]
+                                   , [ S("End ")
+                                     , t3__'
+                                     , S(".")
+                                     ]
+                                   )
+                                 ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-V-list(prettyprint-Sentence|"1")> t2__
+    with t3__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Ident)> t3__
+
+  is-Sentence =
+    ?Section(_, _, _)
+
+  get-indent :
+    (Section(t1__, t2__, t3__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           case ?3 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (Section(t1__, t2__, t3__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := "\n\n"
+           case ?3 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (Section(t1__, t2__, t3__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := " "
+           case ?2 :
+             ws := "\n"
+           case ?3 :
+             ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  is-Sentence =
+    fail
+
+  prettyprint-Sentence :
+    amb([h|hs]) -> <prettyprint-Sentence> h
+
+  prettyprint-Sentence :
+    Sentence-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Sentence]]")]
+                          )
+                        ]
+
+  is-Sentence =
+    ?Sentence-Plhdr()
+
+  is-SDF-placeholder =
+    ?Sentence-Plhdr()
+
+  prettyprint-Ident :
+    Ident-Plhdr() -> [ H(
+                         [SOpt(HS(), "0")]
+                       , [S("[[Ident]]")]
+                       )
+                     ]
+
+  is-Ident =
+    ?Ident-Plhdr()
+
+  is-SDF-placeholder =
+    ?Ident-Plhdr()
+
+
+strategies
+  prettyprint-Reserved =
+    ![S(<is-string>)]
+
+  prettyprint-Coq =
+    prettyprint-Reserved
+
+  prettyprint-Reserved :
+    amb([h|hs]) -> <prettyprint-Reserved> h

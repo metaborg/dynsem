@@ -1,0 +1,156 @@
+module pp/Coq-pp
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  libstratego-sglr
+  trans/pp
+  coq-signatures/Coq-sig
+
+
+imports
+  coq-signatures/Vernacular-sig
+  coq-signatures/Gallina-sig
+  coq-signatures/extensions/Module-sig
+  coq-signatures/extensions/Section-sig
+  coq-signatures/tactic/Toplevel-sig
+
+
+imports
+  pp/Vernacular-pp
+  pp/Gallina-pp
+  pp/extensions/Module-pp
+  pp/extensions/Section-pp
+  pp/tactic/Toplevel-pp
+
+
+strategies
+  prettyprint-example =
+    prettyprint-Coq
+
+
+strategies
+  prettyprint-SDF-start-symbols =
+    prettyprint-Coq-start-symbols
+
+
+strategies
+  prettyprint-Coq-start-symbols =
+    prettyprint-CoqFile
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-CoqFile
+
+  prettyprint-CoqFile :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-CoqFile)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-V-list(prettyprint-TopLevel|"1")> t1__
+
+  is-CoqFile =
+    fail
+
+  prettyprint-CoqFile :
+    amb([h|hs]) -> <prettyprint-CoqFile> h
+
+  prettyprint-CoqFile :
+    CoqFile-Plhdr() -> [ H(
+                           [SOpt(HS(), "0")]
+                         , [S("[[CoqFile]]")]
+                         )
+                       ]
+
+  is-CoqFile =
+    ?CoqFile-Plhdr()
+
+  is-SDF-placeholder =
+    ?CoqFile-Plhdr()
+
+  prettyprint-TopLevel :
+    TopLevel-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[TopLevel]]")]
+                          )
+                        ]
+
+  is-TopLevel =
+    ?TopLevel-Plhdr()
+
+  is-SDF-placeholder =
+    ?TopLevel-Plhdr()
+
+
+strategies
+  prettyprint-Coq =
+    prettyprint-TopLevel
+
+  prettyprint-TopLevel :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-TopLevel)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-one-Z(prettyprint-Sentence)> t1__
+
+  prettyprint-TopLevel :
+    t1__ -> [ H(
+                [SOpt(HS(), "0")]
+              , [t1__']
+              )
+            ]
+    where not(is-TopLevel)
+    where t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                    <+ pp-one-Z(prettyprint-Module)> t1__
+
+  is-TopLevel =
+    fail
+
+  prettyprint-TopLevel :
+    amb([h|hs]) -> <prettyprint-TopLevel> h
+
+  prettyprint-Sentence :
+    Sentence-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[Sentence]]")]
+                          )
+                        ]
+
+  is-Sentence =
+    ?Sentence-Plhdr()
+
+  is-SDF-placeholder =
+    ?Sentence-Plhdr()
+
+  prettyprint-TopLevel :
+    TopLevel-Plhdr() -> [ H(
+                            [SOpt(HS(), "0")]
+                          , [S("[[TopLevel]]")]
+                          )
+                        ]
+
+  is-TopLevel =
+    ?TopLevel-Plhdr()
+
+  is-SDF-placeholder =
+    ?TopLevel-Plhdr()
+
+  prettyprint-Module :
+    Module-Plhdr() -> [ H(
+                          [SOpt(HS(), "0")]
+                        , [S("[[Module]]")]
+                        )
+                      ]
+
+  is-Module =
+    ?Module-Plhdr()
+
+  is-SDF-placeholder =
+    ?Module-Plhdr()
