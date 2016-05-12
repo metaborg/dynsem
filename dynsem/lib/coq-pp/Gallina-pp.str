@@ -1,4 +1,4 @@
-module pp/Gallina-pp
+module coq-pp/Gallina-pp
 
 imports
   libstratego-gpp
@@ -16,10 +16,10 @@ imports
 
 
 imports
-  pp/Lexical-pp
-  pp/Qid-pp
-  pp/Options-pp
-  pp/extensions/Function-pp
+  coq-pp/Lexical-pp
+  coq-pp/Qid-pp
+  coq-pp/Options-pp
+  coq-pp/extensions/Function-pp
 
 
 strategies

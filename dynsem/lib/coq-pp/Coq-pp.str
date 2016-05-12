@@ -1,4 +1,4 @@
-module pp/Coq-pp
+module coq-pp/Coq-pp
 
 imports
   libstratego-gpp
@@ -17,11 +17,11 @@ imports
 
 
 imports
-  pp/Vernacular-pp
-  pp/Gallina-pp
-  pp/extensions/Module-pp
-  pp/extensions/Section-pp
-  pp/tactic/Toplevel-pp
+  coq-pp/Vernacular-pp
+  coq-pp/Gallina-pp
+  coq-pp/extensions/Module-pp
+  coq-pp/extensions/Section-pp
+  coq-pp/tactic/Toplevel-pp
 
 
 strategies
