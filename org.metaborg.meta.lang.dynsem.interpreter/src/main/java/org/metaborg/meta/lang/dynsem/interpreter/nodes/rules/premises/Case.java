@@ -71,7 +71,7 @@ public abstract class Case extends DynSemNode {
 	public static class CasePattern extends Case {
 
 		@Child private MatchPattern pattern;
-		@Children private Premise[] premises;
+		@Children private final Premise[] premises;
 
 		public CasePattern(SourceSection source, MatchPattern pattern, Premise[] premises) {
 			super(source);
