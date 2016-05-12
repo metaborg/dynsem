@@ -1,0 +1,27 @@
+module signatures/tactic/Toplevel-sig
+
+imports
+  signatures/Qid-sig
+  signatures/Lexical-sig
+  signatures/tactic/Expr-sig
+  signatures/Vernacular-sig
+
+
+signature
+  constructors
+                         : String -> Reserved
+    Ltac                 : OptLocalPrefix * List(LtacDef) -> Sentence
+    Tactic               : TExpr -> Tactic
+    Sentence-Plhdr       : Sentence
+    OptLocalPrefix-Plhdr : OptLocalPrefix
+    LtacDef-Plhdr        : LtacDef
+    Tactic-Plhdr         : Tactic
+    TExpr-Plhdr          : TExpr
+    None                 : OptLocalPrefix
+    LocalTactic          : OptLocalPrefix
+    OptLocalPrefix-Plhdr : OptLocalPrefix
+    LtacDef              : QualId * List(Ident) * TExpr -> LtacDef
+    LtacDef-Plhdr        : LtacDef
+    QualId-Plhdr         : QualId
+    Ident-Plhdr          : Ident
+    TExpr-Plhdr          : TExpr

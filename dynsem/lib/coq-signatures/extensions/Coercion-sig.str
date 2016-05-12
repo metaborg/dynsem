@@ -1,0 +1,17 @@
+module signatures/extensions/Coercion-sig
+
+imports
+  signatures/Qid-sig
+  signatures/Gallina-sig
+
+
+signature
+  constructors
+    Coercion       : QualId * Class * Class -> Sentence
+    Sentence-Plhdr : Sentence
+    QualId-Plhdr   : QualId
+    Class-Plhdr    : Class
+                   : String -> Reserved
+                   : Term -> Class
+    Class-Plhdr    : Class
+    Term-Plhdr     : Term

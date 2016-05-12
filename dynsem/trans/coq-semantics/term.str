@@ -3,14 +3,19 @@ module coq-semantics/term
 imports
   libstratego-gpp
   coq-semantics/-
-  coq-semantics/syntax/-
-  lib/runtime/index/-
-  lib/runtime/nabl/-
-  lib/runtime/properties/-
-  lib/runtime/task/-
-  names
-  lib/editor-common.generated
-  include/ds
+  runtime/index/-
+  runtime/nabl/-
+  runtime/properties/-
+  runtime/task/-
+  names/-
+  stratego/metaborg
+  signatures/-
+  coq-signatures/-
+  coq-signatures/extensions/-
+  coq-signatures/tactic/-
+  
+imports
+  src-gen/signatures/-
   
 rules // Sources and targets
 	
@@ -29,7 +34,7 @@ rules // Terms
 		with
 		  k             := $[k[i]]
 	  ;	(t', bt*, i') := <foldr(!(List([]), [], <inc> i), fold-con)> t*
-	  ; b*            := <union> (bt*, <union> (<filter(?Var(<id>); !Bind(<id>))> t*, [Bind(k)]))
+	  ; b*            := <union> (bt*, <union> (<filter(?VarRef(<id>); !Bind(<id>))> t*, [Bind(k)]))
 	  ; x             := $[[ident]C]
 	
 	term-to-coq(|i):
@@ -48,10 +53,10 @@ rules // Terms
     ; b*              := <union> (b1*, <union> (b2*, be*))
 	
 	term-to-coq(|i):
-	  Var(x) -> (Ref(x), [Bind(x)], i)
+	  VarRef(x) -> (Ref(x), [Bind(x)], i)
 	  
 	term-to-coq(|i): // Ugly, but the only one supported by Coq for now, anyways
-	  Map([Bind(e1, e2), MapEntry(Var(env))]) -> (T|[env_extend x1 x2 env]|, b*, i2)
+	  Map([Bind(e1, e2), MapEntry(VarRef(env))]) -> (T|[env_extend x1 x2 env]|, b*, i2)
 	  where
 	    (x1, b1*, i1) := <term-to-coq(|i)> e1
 	  ; (x2, b2*, i2) := <term-to-coq(|i1)> e2
@@ -59,11 +64,11 @@ rules // Terms
 	    
 	
 rules // Static definitions, hardcoded for now
-	term-to-coq(|i): Con("I", [Var(x)])                          -> (T|[Natval x]| , [Bind(x)], i)
+	term-to-coq(|i): Con("I", [VarRef(x)])                          -> (T|[Natval x]| , [Bind(x)], i)
 	term-to-coq(|i): Int(n)                                      -> (n, [], i)
-	term-to-coq(|i): Con("I", [Con("addInt", [Var(x), Var(y)])]) -> (T|[plus x y]| , <union> ([Bind(x)], [Bind(y)]), i)
-  term-to-coq(|i): Con("I", [Con("subInt", [Var(x), Var(y)])]) -> (T|[minus x y]|, <union> ([Bind(x)], [Bind(y)]), i)
-  term-to-coq(|i): Con("I", [Con("mulInt", [Var(x), Var(y)])]) -> (T|[mult x y]| , <union> ([Bind(x)], [Bind(y)]), i)
+	term-to-coq(|i): Con("I", [Con("addInt", [VarRef(x), VarRef(y)])]) -> (T|[plus x y]| , <union> ([Bind(x)], [Bind(y)]), i)
+  term-to-coq(|i): Con("I", [Con("subInt", [VarRef(x), VarRef(y)])]) -> (T|[minus x y]|, <union> ([Bind(x)], [Bind(y)]), i)
+  term-to-coq(|i): Con("I", [Con("mulInt", [VarRef(x), VarRef(y)])]) -> (T|[mult x y]| , <union> ([Bind(x)], [Bind(y)]), i)
   
 rules // Fold rules
   fold-con:

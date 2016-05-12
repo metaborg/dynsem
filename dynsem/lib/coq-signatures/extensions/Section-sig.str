@@ -1,0 +1,13 @@
+module signatures/extensions/Section-sig
+
+imports
+  signatures/Lexical-sig
+  signatures/Vernacular-sig
+
+
+signature
+  constructors
+    Section        : Ident * List(Sentence) * Ident -> Sentence
+    Sentence-Plhdr : Sentence
+    Ident-Plhdr    : Ident
+                   : String -> Reserved

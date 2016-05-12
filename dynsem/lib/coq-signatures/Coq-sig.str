@@ -1,0 +1,20 @@
+module signatures/Coq-sig
+
+imports
+  signatures/Vernacular-sig
+  signatures/Gallina-sig
+  signatures/extensions/Module-sig
+  signatures/extensions/Section-sig
+  signatures/tactic/Toplevel-sig
+
+
+signature
+  constructors
+                   : List(TopLevel) -> CoqFile
+    CoqFile-Plhdr  : CoqFile
+    TopLevel-Plhdr : TopLevel
+                   : Sentence -> TopLevel
+                   : Module -> TopLevel
+    Sentence-Plhdr : Sentence
+    TopLevel-Plhdr : TopLevel
+    Module-Plhdr   : Module

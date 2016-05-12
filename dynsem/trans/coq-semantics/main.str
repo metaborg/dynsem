@@ -3,10 +3,13 @@ module coq-semantics/main
 imports
   libstratego-gpp
   coq-semantics/-
-  names
-  lib/editor-common.generated
-  include/ds
+  names/-
+  stratego/metaborg
   ds
+  signatures/-
+  coq-signatures/-
+  coq-signatures/extensions/-
+  coq-signatures/tactic/-
 
 rules
   
@@ -24,7 +27,7 @@ rules
 rules
   
   module-to-coq:
-  	Module(name, rule*) -> C|[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
+  	Module(name, rule*) -> |[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
 		where
 		  rule'* := <filter(?Rules(<id>)); concat> rule*
 		; decls  := <foldl(fold-rule); Fst; reverse; !ListDeclBar(<id>)> (rule'*, ([], []))

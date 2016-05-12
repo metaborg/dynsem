@@ -3,14 +3,16 @@ module coq-semantics/formula
 imports
   libstratego-gpp
   coq-semantics/-
-  coq-semantics/syntax/-
-  lib/runtime/index/-
-  lib/runtime/nabl/-
-  lib/runtime/properties/-
-  lib/runtime/task/-
-  names
-  lib/editor-common.generated
-  include/ds
+  runtime/index/-
+  runtime/nabl/-
+  runtime/properties/-
+  runtime/task/-
+  names/-
+  stratego/metaborg
+  signatures/-
+  coq-signatures/-
+  coq-signatures/extensions/-
+  coq-signatures/tactic/-
 
 rules // Formula
   
@@ -23,19 +25,19 @@ rules // Formula
     ; bind*                 := <union> (b-env*, <union> (b-src*, b-dst*))
 
   formula-to-coq(|i):
-    TermEq(MapSelect(Var(env), Var(x)), rhs) -> (T|[get_env x env t env']|, bind*, i)
+    TermEq(MapSelect(VarRef(env), VarRef(x)), rhs) -> (T|[get_env x env t env']|, bind*, i)
     where
-      Con("T", [Var(t), Var(env')]) := rhs
+      Con("T", [VarRef(t), VarRef(env')]) := rhs
     ; bind* := <map(!Bind(<id>))> [env, x, t, env']
 
   formula-to-coq(|i):
-    TermEq(Var(x), t) -> (T|[x = t']|, bind*, i')
+    TermEq(VarRef(x), t) -> (T|[x = t']|, bind*, i')
     where
       (t', b*, i') := <term-to-coq(|i)> t
     ; bind*        := <union> ([Bind("env")], <union> ([Bind(x)], b*))
   
   formula-to-coq(|i):
-    TermNeq(Var(x), t) -> (T|[x <> t']|, bind*, i')
+    TermNeq(VarRef(x), t) -> (T|[x <> t']|, bind*, i')
     where
       (t', b*, i') := <term-to-coq(|i)> t
     ; bind*        := <union> ([Bind("env")], <union> ([Bind(x)], b*))
@@ -57,3 +59,4 @@ rules // Folding rules
     where
       (e', b'*, i') := <term-to-coq(|i)> e
     ; n             := <?() < !e' + !Arrow(e', p)> p
+  

@@ -1,0 +1,31 @@
+module signatures/tactic/AtomicTactic-sig
+
+imports
+  signatures/Lexical-sig
+  signatures/Qid-sig
+
+
+signature
+  constructors
+                       : String -> Reserved
+    AtomicTactic       : OptNumPrefix * ATactic -> AtomicTactic
+    None               : OptNumPrefix
+                       : Num -> OptNumPrefix
+    AtomicTactic-Plhdr : AtomicTactic
+    ATactic-Plhdr      : ATactic
+    OptNumPrefix-Plhdr : OptNumPrefix
+    Num-Plhdr          : Num
+    Intros             : ATactic
+    Auto               : ATactic
+    EAuto              : ATactic
+    Assumption         : ATactic
+    Inversion          : QualId -> ATactic
+    Subst              : ATactic
+    Induction          : QualId -> ATactic
+    Destruct           : QualId -> ATactic
+    Left               : ATactic
+    Right              : ATactic
+    Reflexivity        : ATactic
+    Discriminate       : ATactic
+    QualId-Plhdr       : QualId
+    ATactic-Plhdr      : ATactic

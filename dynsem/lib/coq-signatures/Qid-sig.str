@@ -1,0 +1,12 @@
+module signatures/Qid-sig
+
+imports
+  signatures/Lexical-sig
+
+
+signature
+  constructors
+                 : Ident -> QualId
+    QId          : QualId * Ident -> QualId
+    QualId-Plhdr : QualId
+    Ident-Plhdr  : Ident

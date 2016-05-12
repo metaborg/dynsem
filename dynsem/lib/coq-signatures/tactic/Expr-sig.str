@@ -1,0 +1,167 @@
+module signatures/tactic/Expr-sig
+
+imports
+  signatures/Lexical-sig
+  signatures/Gallina-sig
+  signatures/Qid-sig
+  signatures/Options-sig
+  signatures/tactic/AtomicTactic-sig
+
+
+signature
+  constructors
+    ExprSeq              : TExpr * TExpr -> TExpr
+    ExprSeqAlts          : TExpr * List(TExpr) -> TExpr
+                         : TacExpr3 -> TExpr
+    TExpr-Plhdr          : TExpr
+    TacExpr3-Plhdr       : TacExpr3
+    DoTac                : OptTime * TacExpr3 -> TacExpr3
+    Progress             : TacExpr3 -> TacExpr3
+    Repeat               : TacExpr3 -> TacExpr3
+    Try                  : TacExpr3 -> TacExpr3
+    Timeout              : OptTime * TacExpr3 -> TacExpr3
+                         : TacExpr2 -> TacExpr3
+    OptTime-Plhdr        : OptTime
+    TacExpr3-Plhdr       : TacExpr3
+    TacExpr2-Plhdr       : TacExpr2
+    None                 : OptTime
+    Natural              : Num -> OptTime
+                         : Ident -> OptTime
+    Num-Plhdr            : Num
+    OptTime-Plhdr        : OptTime
+    Ident-Plhdr          : Ident
+    Alts                 : TacExpr1 * TacExpr3 -> TacExpr2
+                         : TacExpr1 -> TacExpr2
+    TacExpr3-Plhdr       : TacExpr3
+    TacExpr2-Plhdr       : TacExpr2
+    TacExpr1-Plhdr       : TacExpr1
+    Fun                  : List(Ident) * TAtom -> TacExpr1
+    LetTac               : OptRec * List(LetClause) * TAtom -> TacExpr1
+    MatchGoal            : List(ContextRule) -> TacExpr1
+    MatchRevGoal         : List(ContextRule) -> TacExpr1
+    MatchExpr            : TExpr * List(MatchRule) -> TacExpr1
+    LMatchGoal           : List(ContextRule) -> TacExpr1
+    LMatchRevGoal        : List(ContextRule) -> TacExpr1
+    LMatchExpr           : TExpr * List(MatchRule) -> TacExpr1
+    Abstract             : TAtom -> TacExpr1
+    AbstractUsing        : TAtom * Ident -> TacExpr1
+    First                : List(TExpr) -> TacExpr1
+    Solve                : List(TExpr) -> TacExpr1
+    IdTac                : List(MsgToken) -> TacExpr1
+    Fail                 : OptNatural * OptMsgTokens -> TacExpr1
+    Fresh                : OptString -> TacExpr1
+    Context              : Ident * OptTerm -> TacExpr1
+    Eval                 : RedExpr * Term -> TacExpr1
+    TypeOf               : Term -> TacExpr1
+    External             : String * String * List(TacArg) -> TacExpr1
+    ConstrTerm           : Term -> TacExpr1
+                         : AtomicTactic -> TacExpr1
+    QualTactic           : QualId * List(TacArg) -> TacExpr1
+                         : TAtom -> TacExpr1
+    OptRec-Plhdr         : OptRec
+    LetClause-Plhdr      : LetClause
+    ContextRule-Plhdr    : ContextRule
+    MatchRule-Plhdr      : MatchRule
+    MsgToken-Plhdr       : MsgToken
+    OptNatural-Plhdr     : OptNatural
+    OptMsgTokens-Plhdr   : OptMsgTokens
+    OptString-Plhdr      : OptString
+    Ident-Plhdr          : Ident
+    OptTerm-Plhdr        : OptTerm
+    RedExpr-Plhdr        : RedExpr
+    String-Plhdr         : String
+    Term-Plhdr           : Term
+    AtomicTactic-Plhdr   : AtomicTactic
+    QualId-Plhdr         : QualId
+    TacArg-Plhdr         : TacArg
+    TAtom-Plhdr          : TAtom
+    TacExpr1-Plhdr       : TacExpr1
+    TExpr-Plhdr          : TExpr
+    None                 : OptRec
+    Rec                  : OptRec
+    None                 : OptMsgTokens
+                         : List(MsgToken) -> OptMsgTokens
+    None                 : OptNatural
+                         : Num -> OptNatural
+    None                 : OptString
+                         : Num -> OptString
+    None                 : OptTerm
+                         : Term -> OptTerm
+    OptRec-Plhdr         : OptRec
+    OptMsgTokens-Plhdr   : OptMsgTokens
+    MsgToken-Plhdr       : MsgToken
+    OptNatural-Plhdr     : OptNatural
+    OptString-Plhdr      : OptString
+    Num-Plhdr            : Num
+    OptTerm-Plhdr        : OptTerm
+    Term-Plhdr           : Term
+                         : QualId -> TAtom
+                         : Num -> TAtom
+    Unit                 : TAtom
+    QualId-Plhdr         : QualId
+    Num-Plhdr            : Num
+    TAtom-Plhdr          : TAtom
+                         : String -> MsgToken
+                         : Ident -> MsgToken
+                         : Num -> MsgToken
+    String-Plhdr         : String
+    Ident-Plhdr          : Ident
+    MsgToken-Plhdr       : MsgToken
+    Num-Plhdr            : Num
+                         : QualId -> TacArg
+    Unit                 : TacArg
+    AtomArg              : TAtom -> TacArg
+                         : Term -> TacArg
+    QualId-Plhdr         : QualId
+    TAtom-Plhdr          : TAtom
+    TacArg-Plhdr         : TacArg
+    Term-Plhdr           : Term
+    LetClause            : Ident * OptNames * TExpr -> LetClause
+    None                 : OptNames
+                         : List(Name) -> OptNames
+    LetClause-Plhdr      : LetClause
+    Ident-Plhdr          : Ident
+    TExpr-Plhdr          : TExpr
+    OptNames-Plhdr       : OptNames
+    Name-Plhdr           : Name
+    PatContext           : OptContextHyps * Pattern * TExpr -> ContextRule
+    WldContext           : TExpr -> ContextRule
+    None                 : OptContextHyps
+                         : List(ContextHyp) -> OptContextHyps
+    Pattern-Plhdr        : Pattern
+    ContextRule-Plhdr    : ContextRule
+    TExpr-Plhdr          : TExpr
+    OptContextHyps-Plhdr : OptContextHyps
+    ContextHyp-Plhdr     : ContextHyp
+    ContextHyp           : Name * Pattern -> ContextHyp
+    ContextHypAssign     : Name * Pattern * OptCPattern -> ContextHyp
+    None                 : OptCPattern
+    OptCPattern          : Pattern -> OptCPattern
+    ContextHyp-Plhdr     : ContextHyp
+    Name-Plhdr           : Name
+    OptCPattern-Plhdr    : OptCPattern
+    Pattern-Plhdr        : Pattern
+    MatchPattern         : Pattern * TExpr -> MatchRule
+    MatchContext         : OptIdent * OptPattern * TExpr -> MatchRule
+    MatchAppContext      : OptIdent * OptPattern * TExpr -> MatchRule
+    MatchWld             : TExpr -> MatchRule
+    None                 : OptIdent
+                         : Ident -> OptIdent
+    None                 : OptPattern
+                         : Pattern -> OptPattern
+    MatchRule-Plhdr      : MatchRule
+    TExpr-Plhdr          : TExpr
+    OptIdent-Plhdr       : OptIdent
+    Ident-Plhdr          : Ident
+    OptPattern-Plhdr     : OptPattern
+    Pattern-Plhdr        : Pattern
+    RedRed               : RedExpr
+    RedHnf               : RedExpr
+    RedCompute           : RedExpr
+    RedSimpl             : RedExpr
+    RedCbv               : RedExpr
+    RedLazy              : RedExpr
+    RedUnfold            : RedExpr
+    RedFold              : RedExpr
+    RedPattern           : RedExpr
+    RedExpr-Plhdr        : RedExpr

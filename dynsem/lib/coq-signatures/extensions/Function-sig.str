@@ -1,0 +1,25 @@
+module signatures/extensions/Function-sig
+
+imports
+  signatures/Gallina-sig
+  signatures/Options-sig
+  signatures/Lexical-sig
+
+
+signature
+  constructors
+    Function               : Ident * List(Binder) * OptDecreaseAnnot * Type * Term -> Term
+    Ident-Plhdr            : Ident
+    Binder-Plhdr           : Binder
+    OptDecreaseAnnot-Plhdr : OptDecreaseAnnot
+    Type-Plhdr             : Type
+    Term-Plhdr             : Term
+    None                   : OptDecreaseAnnot
+    DecreaseAnnot          : DecreaseAnnot -> OptDecreaseAnnot
+    DecreaseStruct         : Ident -> DecreaseAnnot
+    DecreaseMeasure        : Term * Ident -> DecreaseAnnot
+    DecreaseWF             : Term * Ident -> DecreaseAnnot
+    OptDecreaseAnnot-Plhdr : OptDecreaseAnnot
+    DecreaseAnnot-Plhdr    : DecreaseAnnot
+    Term-Plhdr             : Term
+    Ident-Plhdr            : Ident
