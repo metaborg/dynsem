@@ -1,6 +1,7 @@
 module ds2ds/defactorize
 
 imports
+  ds
   signatures/-
   lib-ds
   analysis/mark-references
