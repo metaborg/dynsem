@@ -43,6 +43,21 @@ rules
       new-scope-renames(
         r' := <rename-all-vars> r
       )
+
+  rename-var:
+    CasePattern(pat, p*) -> CasePattern(pat', p'*)
+    where
+      new-scope-renames(
+        pat' := <rename-all-vars> pat;
+        p'* := <rename-all-vars> p*
+      )
+  
+  rename-var:
+    CaseOtherwise(p*) -> CaseOtherwise(p'*)
+    where
+      new-scope-renames(
+        p'* := <rename-all-vars> p*
+      )
   
   rename-var:
   	VarRef(v) -> VarRef(<rename(|Vars())> v)
