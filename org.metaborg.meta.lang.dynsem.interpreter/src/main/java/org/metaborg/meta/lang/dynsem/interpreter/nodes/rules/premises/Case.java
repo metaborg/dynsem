@@ -21,7 +21,7 @@ public abstract class Case extends DynSemNode {
 		super(source);
 	}
 
-	public abstract void execute(VirtualFrame frame, Object t);
+	public abstract boolean execute(VirtualFrame frame, Object t);
 
 	@Override
 	@TruffleBoundary
@@ -50,10 +50,11 @@ public abstract class Case extends DynSemNode {
 
 		@ExplodeLoop
 		@Override
-		public void execute(VirtualFrame frame, Object t) {
+		public boolean execute(VirtualFrame frame, Object t) {
 			for (int i = 0; i < premises.length; i++) {
 				premises[i].execute(frame);
 			}
+			return true;
 		}
 
 		public static CaseOtherwise create(IStrategoAppl t, FrameDescriptor fd) {
@@ -81,13 +82,14 @@ public abstract class Case extends DynSemNode {
 
 		@ExplodeLoop
 		@Override
-		public void execute(VirtualFrame frame, Object t) {
+		public boolean execute(VirtualFrame frame, Object t) {
 			if (pattern.execute(t, frame)) {
 				for (int i = 0; i < premises.length; i++) {
 					premises[i].execute(frame);
 				}
+				return true;
 			} else {
-				throw CaseFailure.INSTANCE;
+				return false;
 			}
 		}
 

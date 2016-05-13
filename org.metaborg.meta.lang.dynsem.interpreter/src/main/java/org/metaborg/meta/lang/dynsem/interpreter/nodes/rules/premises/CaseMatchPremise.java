@@ -11,6 +11,7 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -26,21 +27,18 @@ public class CaseMatchPremise extends Premise {
 	}
 
 	@Override
+	@ExplodeLoop
 	public void execute(VirtualFrame frame) {
 		Object t = termNode.executeGeneric(frame);
-		// FIXME: this is not efficient because branch prediction is not trivial.
-		int i = 0;
-		boolean repeat = true;
-		while (i < cases.length && repeat) {
-			try {
-				cases[i].execute(frame, t);
-				repeat = false;
-			} catch (CaseFailure cf) {
-				repeat = true;
-				i++;
+
+		boolean success = false;
+		for (int i = 0; i < cases.length; i++) {
+			success = cases[i].execute(frame, t);
+			if (success) {
+				break;
 			}
 		}
-		if (i >= cases.length) {
+		if (!success) {
 			throw PremiseFailure.INSTANCE;
 		}
 	}
