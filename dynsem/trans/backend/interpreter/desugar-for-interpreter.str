@@ -123,7 +123,10 @@ rules /* TCO */
   
   desugar-prem-rec-tco(s) =
     MergePoint(id, PremiseBlock(desugar-prems-rec-tco(s)), PremiseBlock(desugar-prems-rec-tco(s)))
-
+  
+  desugar-prem-rec-tco(s) =
+    CaseMatch(id, map(try(CaseOtherwise(desugar-prems-rec-tco(s)) + CasePattern(id, desugar-prems-rec-tco(s)))))
+  
   desugar-prem-rec-tco(s):
     Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name), tgt)) ->
       Formula(RecRelation(src, rel, tgt))
