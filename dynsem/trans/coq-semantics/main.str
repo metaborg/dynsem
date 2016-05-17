@@ -10,7 +10,6 @@ imports
   coq-signatures/extensions/-
   coq-signatures/tactic/-
   coq-pp/-
-  coq-signatures/Lexical-sig
 
 rules
   
@@ -30,21 +29,46 @@ rules
     Module(name, [sigs, Rules(rs)]) -> |[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
     where
       decls0 := <map(say(id); rs-to-coq)> rs;
-      decls := ListDeclBar(decls0)
+      decls := ListDeclBar(decls0);
+      say(id)
   
   rs-to-coq:
     Rule(prems, _, 
          Relation(Reads(_), 
                   Source(sterm, _),
                   _,
-                  Target(tterm, _))) -> D|[idents]|
+                  Target(tterm, _))) -> ConsDecl(ident_name, OptBinders(idents), None())
     where
+      say(id);
       name := <extract-name-from-term> sterm;
       rname := <concat-strings> ["Eval_", name];
-      idents := <newname> rname
+      ident_name := <newname> rname;
+      svars := <extract-variables> sterm;
+//      tvars := <extract-variables> tterm;
+//      vars := <concat> [svars];
+      idents := <map(coqbind-helper)> svars
   
+  coqbind-helper:
+    s -> Bind(s)
+    where
+      say(id)
+    
   extract-name-from-term:
     Con(name, _) -> name
+    
+  extract-variables:
+    Var(x) -> [x]
+  
+  extract-variables:
+    Con(_, ts) -> vs
+    where
+      vs := <foldr(![], extract-variables-fold-helper)> ts
+
+  extract-variables-fold-helper:
+    (t, vs_so_far) -> vs0 
+    where
+      tvars := <extract-variables> t;
+      vs0 := <concat> [tvars, vs_so_far]
 
 //rules
 //  
