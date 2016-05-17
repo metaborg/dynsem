@@ -1,4 +1,4 @@
-module signatures/tactic/AtomicTactic-sig
+module coq-signatures/tactic/AtomicTactic-sig
 
 imports
   coq-signatures/Lexical-sig

@@ -1,4 +1,4 @@
-module signatures/Coq-sig
+module coq-signatures/Coq-sig
 
 imports
   coq-signatures/Vernacular-sig

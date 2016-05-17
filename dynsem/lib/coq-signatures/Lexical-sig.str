@@ -1,4 +1,4 @@
-module signatures/Lexical-sig
+module coq-signatures/Lexical-sig
 
 signature
   constructors

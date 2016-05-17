@@ -1,4 +1,4 @@
-module signatures/Options-sig
+module coq-signatures/Options-sig
 
 imports
   coq-signatures/Lexical-sig

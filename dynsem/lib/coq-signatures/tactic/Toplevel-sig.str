@@ -1,4 +1,4 @@
-module signatures/tactic/Toplevel-sig
+module coq-signatures/tactic/Toplevel-sig
 
 imports
   coq-signatures/Qid-sig

@@ -1,4 +1,4 @@
-module signatures/Gallina-sig
+module coq-signatures/Gallina-sig
 
 imports
   coq-signatures/Lexical-sig

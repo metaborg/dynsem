@@ -1,4 +1,4 @@
-module signatures/extensions/Coercion-sig
+module coq-signatures/extensions/Coercion-sig
 
 imports
   coq-signatures/Qid-sig

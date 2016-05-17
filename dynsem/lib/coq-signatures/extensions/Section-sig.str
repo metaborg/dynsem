@@ -1,4 +1,4 @@
-module signatures/extensions/Section-sig
+module coq-signatures/extensions/Section-sig
 
 imports
   coq-signatures/Lexical-sig

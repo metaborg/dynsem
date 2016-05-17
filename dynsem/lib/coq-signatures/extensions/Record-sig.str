@@ -1,4 +1,4 @@
-module signatures/extensions/Record-sig
+module coq-signatures/extensions/Record-sig
 
 imports
   coq-signatures/Lexical-sig

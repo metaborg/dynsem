@@ -1,4 +1,4 @@
-module signatures/tactic/Expr-sig
+module coq-signatures/tactic/Expr-sig
 
 imports
   coq-signatures/Lexical-sig

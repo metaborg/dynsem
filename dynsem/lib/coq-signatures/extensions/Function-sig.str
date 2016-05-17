@@ -1,4 +1,4 @@
-module signatures/extensions/Function-sig
+module coq-signatures/extensions/Function-sig
 
 imports
   coq-signatures/Gallina-sig

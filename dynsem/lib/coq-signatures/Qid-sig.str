@@ -1,4 +1,4 @@
-module signatures/Qid-sig
+module coq-signatures/Qid-sig
 
 imports
   coq-signatures/Lexical-sig
