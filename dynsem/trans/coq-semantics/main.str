@@ -10,6 +10,7 @@ imports
   coq-signatures/extensions/-
   coq-signatures/tactic/-
   coq-pp/-
+  coq-signatures/Lexical-sig
 
 rules
   
@@ -24,42 +25,56 @@ rules
     ;  result := ""
 
 rules
-  
+
   module-to-coq:
-  	Module(name, rule*) -> |[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
-		where
-		  rule'* := <filter(?Rules(<id>)); concat> rule*
-		; decls  := <foldl(fold-rule); Fst; reverse; !ListDeclBar(<id>)> (rule'*, ([], []))
+    Module(name, [sigs, Rules(rs)]) -> |[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
+    where
+      decls0 := <map(say(id); rs-to-coq)> rs;
+      decls := ListDeclBar(decls0)
+  
+  rs-to-coq:
+    Rule(prems, _, 
+         Relation(Reads(_), 
+                  Source(sterm, _),
+                  _,
+                  Target(tterm, _))) -> D|[idents]|
+    where
+      name := <extract-name-from-term> sterm;
+      rname := <concat-strings> ["Eval_", name];
+      idents := <newname> rname
+  
+  extract-name-from-term:
+    Con(name, _) -> name
 
-rules
-  
-  rule-to-coq(|n*):
-    RuleW(formula, prem*) -> (ConsDecl(name', <union> (p-bind*, f-bind*), type), [(name, count), n*])
-    where
-      (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
-    ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
-    ; type                 := <foldl(fold-type)> (prem'*, t')
-    ; name                 := <formula-to-name> formula
-    ; count                := <lookup; inc <+ !0> (name, n*)
-    ; name'                := $[[name][count]C_sem]
-  
-  rule-to-coq(|n*):
-  	Rule(prem*,_,formula) -> <rule-to-coq(|n*)> RuleW(formula, prem*)
-  	
-  rule-to-coq(|n*):
-    Axiom(formula) -> <rule-to-coq(|n*)> RuleW(formula, [])
-
-rules // Fold rules
-  
-  fold-rule:
-    (r, (p*, n*)) -> (p'*, n'*)
-    where
-      (p'*, n'*) := <rule-to-coq(|n*) < !([<Fst> | p*], <Snd>) + !(p*, n*)> r
-  
-  fold-prem:
-    (Formula(p), (p*, b*, i)) -> ([p' | p*], <union> (b*, b'*), i')
-    where
-      (p', b'*, i') := <formula-to-coq(|i)> p
-  
-  fold-type: // Composes parts of a type
-    (x, y) -> T|[x -> y]|
+//rules
+//  
+//  rule-to-coq(|n*):
+//    RuleW(formula, prem*) -> (ConsDecl(name', <union> (p-bind*, f-bind*), type), [(name, count), n*])
+//    where
+//      (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
+//    ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
+//    ; type                 := <foldl(fold-type)> (prem'*, t')
+//    ; name                 := <formula-to-name> formula
+//    ; count                := <lookup; inc <+ !0> (name, n*)
+//    ; name'                := $[[name][count]C_sem]
+//  
+//  rule-to-coq(|n*):
+//  	Rule(prem*,_,formula) -> <rule-to-coq(|n*)> RuleW(formula, prem*)
+//  	
+//  rule-to-coq(|n*):
+//    Axiom(formula) -> <rule-to-coq(|n*)> RuleW(formula, [])
+//
+//rules // Fold rules
+//  
+//  fold-rule:
+//    (r, (p*, n*)) -> (p'*, n'*)
+//    where
+//      (p'*, n'*) := <rule-to-coq(|n*) < !([<Fst> | p*], <Snd>) + !(p*, n*)> r
+//  
+//  fold-prem:
+//    (Formula(p), (p*, b*, i)) -> ([p' | p*], <union> (b*, b'*), i')
+//    where
+//      (p', b'*, i') := <formula-to-coq(|i)> p
+//  
+//  fold-type: // Composes parts of a type
+//    (x, y) -> T|[x -> y]|
