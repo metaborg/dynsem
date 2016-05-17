@@ -270,9 +270,9 @@ rules // Builders
           expand-implicits-module;
           factorize-module;
           explicate-module;
-//          copy-propagation-module;
-//          constant-propagation-module;
-//          defactorize-module;
+          copy-propagation-module;
+          constant-propagation-module;
+          defactorize-module;
           sugar-all;
           pp-debug
         |project-path)> ast;
