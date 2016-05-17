@@ -1,7 +1,7 @@
 module ds2ds/explicate
 
 imports
-  signatures/ds-sig
+  signatures/-
   lib-ds
   
 strategies
@@ -27,21 +27,34 @@ rules
     where
       <not(?"init")> arrow
     with { CompNum:
-      rules( CompNum: LabelComp(name, _) -> <CompNum> name ); // auto-unbox
+//      rules( CompNum: LabelComp(name, _) -> <CompNum> name ); // auto-unbox
+      debug(!"a ");
       <CompList; map({?comp; rules( CompNum: comp -> 1 )})> arrow;
+      debug(!"b ");
     	r2*    := <ReadableComps; map(\ comp -> <mk-label-comp(|<CompNum> comp)> comp \)> arrow;
+      debug(!"c ");
       sc2*   := <ChangeableComps; map(\ comp -> <mk-label-comp(|<CompNum> comp)> comp \)> arrow;
-      init*  := <map(\ comp -> <exp-label-comp-init(|<CompNum> comp)> comp \)> [r1*, sc1*];
+      debug(!"d ");
+//      init*  := <map(?LabelComp(<id>, _); \ comp -> <exp-label-comp-init(|<CompNum> comp)> comp \)> [r1*, sc1*];
+      init* := <map(exp-label-comp-init)> [r1*, sc1*];
+      debug(!"e ");
       prem2* := <explicate-premises> prem1*;
+      debug(!"f ");
       tc2*   := <ChangeableComps; map(\ comp -> <mk-label-comp(copy-comp(|tc1*)|<CompNum> comp)> comp \)> arrow;
+      debug(!"g ");
       e2*    := <WritableComps; map(\ comp -> <copy-comp(|e1*) <+ concat-changeables(|<CompNum> comp)> comp \)> arrow;
+      debug(!"h ");
       prem3* := [init* | prem2*]
+      ;debug(!"i ")
     }
   
 rules // components from lhs
 
-  exp-label-comp-init(|num):
-    LabelComp(name, t) -> Formula(Match(VarRef(<get-sort-name; comp-var(|num)> name), t))
+//  exp-label-comp-init(|num):
+//    LabelComp(name, t) -> Formula(Match(VarRef(<get-sort-name; comp-var(|num)> name), t))
+    
+  exp-label-comp-init:
+    LabelComp(name, t) -> Formula(Match(VarRef(<get-sort-name; comp-var(|<CompNum> name)> name), t))
  
 rules // components in rhs
            
@@ -53,7 +66,7 @@ rules // components in rhs
     where <gt> (num, 2)
 
   concat-changeables(|num) :
-    comp-name -> LabelComp(comp-name, VarRef(<comp-var(|2)>comp-name))
+    comp-name -> LabelComp(comp-name, VarRef(<comp-var(|2)> comp-name))
     where <eq> (num, 2)
 
   concat-changeables(|num) :
@@ -61,7 +74,7 @@ rules // components in rhs
     where <eq> (num, 1)
     
 rules // premisses
-                        
+
   explicate-premises:
     [] -> []
         
@@ -103,7 +116,8 @@ rules // premisses
       if <?([], [_|_])> (e2*, e1*) then
         fatal-err-msg(|$[Arrow [arrow] does NOT emit writables, but they are explicitly expected in premises reducing over [arrow]])
       end;
-      init* := <map(\ comp -> <exp-label-comp-init(|<CompNum> comp)> comp \)> [e1*, tc1*]
+      init* := <map(exp-label-comp-init)> [e1*, tc1*]
+  
   
   explicate-premise:
     MergePoint(cform, PremiseBlock(prem1*), PremiseBlock(prem2*)) -> [MergePoint(cform, PremiseBlock(prem1'*), PremiseBlock(prem2'*))]
@@ -115,24 +129,78 @@ rules // premisses
         prem2'* := <explicate-premises> prem2*
       |}
   
+  
   explicate-premise:
     CaseMatch(tb, case*) -> [CaseMatch(tb, case'*)]
     with
-      case'* := <map(explicate-case)> case*
+      debug(!1);
+      case-w-comps* := <map(explicate-case)> case*;
+      debug(!2);
+      max-comp* := <map(Snd); compute-max-compnums; map(update-CompNum-entry)> case-w-comps*;
+      debug(!3);
+      case'* := <map(insert-comp-synonyms)> case-w-comps*
+      ;debug(!4)
   
   explicate-case:
-    CaseOtherwise(prem*) -> CaseOtherwise(prem'*)
-    with
-      {| CompNum:
-        prem'* := <explicate-premises> prem*
-      |}
-
+    CaseOtherwise(prem*) -> (CaseOtherwise(prem'*), comp*)
+    with {| CompNum:
+      debug(!5);
+        prem'* := <explicate-premises> prem*;
+      debug(!6);
+        comp* := <all-entries-CompNum>
+      ;debug(!7)
+    |}
+  
   explicate-case:
-    CasePattern(pat, prem*) -> CasePattern(pat, prem'*)
+    CasePattern(pat, prem*) -> (CasePattern(pat, prem'*), comp*)
+    with {| CompNum:
+      debug(!8);
+        prem'* := <explicate-premises> prem*;
+      debug(!9);
+        comp* := <all-entries-CompNum>
+      ;debug(!10)
+    |}
+  
+  insert-comp-synonyms:
+    (case, comp*) -> <insert-comp-synonyms-in-case(|required-comp*)> case
+    where
+      debug(!13);
+      required-comp* := <debug(!14); zip; debug(!15); filter(where((Snd, Snd); gt)); debug(!16)> (<all-entries-CompNum>, comp*);
+      debug(!17)
+  
+  insert-comp-synonyms-in-case(|required-comp*):
+    CaseOtherwise(prem*) -> CaseOtherwise([prem*, syno*])
+    where
+      syno* := <map(make-comp-synonym)> required-comp*
+
+  insert-comp-synonyms-in-case(|required-comp*):
+    CasePattern(pat, prem*) -> CasePattern(pat, [prem*, syno*])
+    where
+      debug(!18);
+      syno* := <map(make-comp-synonym)> required-comp*
+      ;debug(!19)
+  
+  
+  
+  make-comp-synonym:
+    ( (comp, new-num), (comp, old-num) ) -> Formula(Match(VarRef(<comp-var(|old-num)> comp-str), VarRef(<comp-var(|new-num)> comp-str)))
     with
-      {| CompNum:
-        prem'* := <explicate-premises> prem*
-      |}
+      comp-str := <get-sort-name> comp
+  
+  all-entries-CompNum = debug(!11); all-keys-CompNum; debug(!12); map(\ comp -> (comp, <CompNum> comp) \); debug(!"12-- ")
+//  all-entries-CompNum = debug(!11); bagof-CompNum; debug(!12)
+
+  update-CompNum = is-list; map(update-CompNum-entry)
+
+  update-CompNum-entry = ?(comp, num); rules(CompNum : comp -> num)
+
+  compute-max-compnums = foldr(all-entries-CompNum, calc-max-compnum)
+  
+  calc-max-compnum:
+    (new-comp*, current-max-comp*) -> <zip(max-comp)> (new-comp*, current-max-comp*)
+  
+  max-comp:
+    ((comp, num1), (comp, num2)) -> (comp, <max> (num1, num2))
   
   inc-comp-num:
     comp -> comp
