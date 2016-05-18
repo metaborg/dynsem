@@ -105,16 +105,15 @@ rules // premisses
       init* := <map(exp-label-comp-init)> [e1*, tc1*]
   
   
-  explicate-premise:
-    MergePoint(cform, PremiseBlock(prem1*), PremiseBlock(prem2*)) -> [MergePoint(cform, PremiseBlock(prem1'*), PremiseBlock(prem2'*))]
-    with
-    	{| CompNum:
-        prem1'* := <explicate-premises> prem1*
-      |};
-      {| CompNum:
-        prem2'* := <explicate-premises> prem2*
-      |}
-  
+//  explicate-premise:
+//    MergePoint(cform, PremiseBlock(prem1*), PremiseBlock(prem2*)) -> [MergePoint(cform, PremiseBlock(prem1'*), PremiseBlock(prem2'*))]
+//    with
+//    	{| CompNum:
+//        prem1'* := <explicate-premises> prem1*
+//      |};
+//      {| CompNum:
+//        prem2'* := <explicate-premises> prem2*
+//      |}
   
   explicate-premise:
     CaseMatch(tb, case*) -> [CaseMatch(tb, case'*)]
@@ -157,7 +156,7 @@ rules // premisses
     with
       comp-str := <get-sort-name> comp
   
-  all-entries-CompNum = all-keys-CompNum; map(\ comp -> (comp, <CompNum> comp) \)
+  all-entries-CompNum = all-keys-CompNum; sort-comps; map(\ comp -> (comp, <CompNum> comp) \)
 
   update-CompNum = is-list; map(update-CompNum-entry)
 
