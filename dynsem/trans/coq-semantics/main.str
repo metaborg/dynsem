@@ -27,29 +27,60 @@ rules // Module generation
 
   module-to-coq:
     Module(name, [Signatures(sigs), Rules(rs)]) -> coq_rs
-    where
+    with
       m := <new-hashtable>;
+      arrowdecs := <filter(?ArrowDeclarations(_))> sigs;
+      <instantiate-sigs> (m, arrowdecs);
       // create map from relation names to rules of relation
       <foldr(!m, push-named-rule)> rs;
-      keys := <hashtable-keys> m; 
+      keys := <hashtable-keys> m;
       // generate rules for all relations
       coq_rs := <map(generate-rules(|m))> keys
   
+  // instantiate-sigs iterates through the declared arrow signatures
+  // and instantiates the hashmap mapping a relation to its set of
+  // rules and its type signature. 
+  
+  instantiate-sigs:
+    (m, []) -> 1
+  
+  instantiate-sigs:
+    (m, [ArrowDeclarations(arrdecs)]) -> o
+    with
+      o := <instantiate-sig> (m, arrdecs)
+  
+  instantiate-sig:
+    (m, []) -> 1
+  
+  instantiate-sig:
+    (m, [ArrowDecl(from_sort, rel_name, to_sort)|arrowdecs]) -> o
+    with
+      <hashtable-put(|rel_name, ([], (from_sort, to_sort)))> m;
+      o := <instantiate-sig> (m, arrowdecs)
+  
   push-named-rule:
     (rule, m) -> m
-    where
+    with
       name := <get-rel-name> rule;
-      <hashtable-push(|name, rule)> m
+      (rs, (from_sort, to_sort)) := <hashtable-get(|name)> m;
+      <hashtable-put(|name, ([rule|rs], (from_sort, to_sort)))> m
   
   get-rel-name:
     Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, name), _)) -> name
   
   generate-rules(|m):
-    ident_key -> S|[Inductive ident_key : X -> Prop := decls.]|
-    where
-      rs := <hashtable-get(|ident_key)> m;
+    ident_key -> S|[Inductive ident_key : ident_from -> ident_to -> Prop := decls.]|
+    with
+      <hashtable-get(|ident_key)> m; ?(rs, (from_sort, to_sort));
+      ident_from := <sort-to-coq> from_sort;
+      ident_to := <sort-to-coq> to_sort;
       cs := <map(rs-to-coq(|ident_key))> rs;
       decls := ListDeclBar(cs)
+
+rules // Sort-to-type generation
+
+  sort-to-coq:
+    SimpleSort(x) -> x
 
 rules // Rule generation
 
@@ -58,7 +89,7 @@ rules // Rule generation
     ConsDecl(ident_name,
              OptBinders(idents),
              OptType(rl))
-    where
+    with
       name := <extract-name-from-formula> conc;
       rname := <concat-strings> [rel_name, "_", name];
       ident_name := <newname> rname;
@@ -80,7 +111,7 @@ rules // Rule generation
       
   formula-to-coq:
     Formula(r) -> r'
-    where
+    with
       r' := <formula-to-coq> r
       
   formula-to-coq:
@@ -89,7 +120,7 @@ rules // Rule generation
              NamedDynamicEmitted(_, rel_name), 
              Target(tterm, _)) ->
       Apply(Apply(rel_name, st), tt)
-    where
+    with
       st := <term-to-coq> sterm;
       tt := <term-to-coq> tterm
       
@@ -97,7 +128,7 @@ rules // Term generation
 
   term-to-coq:
     Con(c, ts) -> app
-    where
+    with
       ts' := <map(term-to-coq)> ts;
       app := <foldl(mk-app-rev)> (ts', c) // application nested to the left
 
@@ -115,7 +146,7 @@ rules // extracting the root constructor name from a given formula
 
   extract-name-from-formula:
     Relation(_, Source(c, _), _, _) -> name
-    where
+    with
       name := <extract-name-from-term> c
 
   extract-name-from-term:
@@ -128,19 +159,19 @@ rules // extracting variables (for forall-quantification)
   
   extract-variables:
     [t|ts] -> zs
-    where
+    with
       xs := <extract-variables> t;
       ys := <extract-variables> ts;
       zs := <concat> [xs, ys]
   
   extract-variables:
     Formula(r) -> xs
-    where
+    with
       xs := <extract-variables> r
       
   extract-variables:
     Relation(Reads(reads), Source(s, writes), NamedDynamicEmitted(emitted, _), Target(t, writes')) -> xs
-    where
+    with
       xs0 := <extract-variables> reads;
       xs1 := <extract-variables> s;
       xs2 := <extract-variables> writes;
@@ -154,7 +185,7 @@ rules // extracting variables (for forall-quantification)
   
   extract-variables:
     Con(_, ts) -> xs
-    where
+    with
       xs := <extract-variables> ts
 
   extract-variables:
