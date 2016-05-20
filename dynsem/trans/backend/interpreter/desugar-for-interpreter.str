@@ -19,6 +19,7 @@ rules
     ; desugar-natives
     ; desugar-list-reductions
     ; desugar-rec-tco
+    ; desugar-nmatch-neq
 
 rules /* rename arguments */
 
@@ -123,7 +124,10 @@ rules /* TCO */
   
   desugar-prem-rec-tco(s) =
     MergePoint(id, PremiseBlock(desugar-prems-rec-tco(s)), PremiseBlock(desugar-prems-rec-tco(s)))
-
+  
+  desugar-prem-rec-tco(s) =
+    CaseMatch(id, map(try(CaseOtherwise(desugar-prems-rec-tco(s)) + CasePattern(id, desugar-prems-rec-tco(s)))))
+  
   desugar-prem-rec-tco(s):
     Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name), tgt)) ->
       Formula(RecRelation(src, rel, tgt))
@@ -144,4 +148,13 @@ rules /* TCO */
     where
       (lty, -1, arrow-name) := <CurrentRelation>; 
       s
+
+rules /* desugar not-match and not equal premises */
+
+  desugar-nmatch-neq = alltd(desugar-premise-nmatch-neq)
   
+  desugar-premise-nmatch-neq:
+    Formula(NMatch(tb, pat)) -> Formula(Fails(Formula(Match(tb, pat))))
+  
+  desugar-premise-nmatch-neq:
+    Formula(TermNeq(tb1, tb2)) -> Formula(Fails(Formula(TermEq(tb1, tb2))))

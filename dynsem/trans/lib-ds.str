@@ -1,7 +1,7 @@
 module lib-ds
 
 imports
-  signatures/ds-sig
+  signatures/-
   ds
   
 // utilities for DynSem analysis
@@ -206,7 +206,15 @@ rules // extract components
   
   comp-gt =
     ?(ListSort(l), ListSort(r)); <string-gt> (l, r)
-    
+
+  comp-gt =
+    ?(MapSort(_, _), <not(?MapSort(_, _))>)
+
+  comp-gt = 
+    ?(MapSort(lkey, _), MapSort(rkey, _)); <not(eq); comp-gt> (lkey, rkey)
+  
+  comp-gt =
+    ?(MapSort(key, lvalue), MapSort(key, rvalue)); <comp-gt> (lvalue, rvalue)
       
 rules // component operations
   

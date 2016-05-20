@@ -15,3 +15,4 @@ signature
     Relation : Source * Rel * Target -> Relation
     RecRule : List(Premise) * INFER * Relation -> Rule
     RecRelation: Source * Rel * Target -> Relation
+    Fails : Premise -> Premise

@@ -15,6 +15,7 @@ import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
+@Deprecated
 public class MergePointPremise extends Premise {
 
 	@Child protected Premise condition;

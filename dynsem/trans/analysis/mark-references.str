@@ -42,6 +42,8 @@ rules
   	<+ Match(id, make-vars)
   	<+ NMatch(id, make-vars)
   	<+ As(make-vars, make-vars)
+  	<+ CasePattern(make-vars, mark-vardefs-in-premise)
+  	<+ CaseOtherwise(mark-vardefs-in-premise)
 
   make-vars =
   	alltd( \ VarRef(x) -> Var(x) \)

@@ -458,7 +458,25 @@ rules
       <map(type-check-premise-top)> l*;
       <map(type-check-premise-top)> r*
   
+  type-check-premise:
+    f@CaseMatch(tb, case*) -> f
+    with
+      in-ty := <type-check-build> tb;
+      <map(type-check-case(|in-ty))> case*
+      
+  
   type-check-premise = ?AllFail()
+
+  type-check-case(|in-ty):
+    c@CaseOtherwise(prem*) -> c
+    with
+      <map(type-check-premise-top)> prem*
+  
+  type-check-case(|in-ty):
+    c@CasePattern(pat, prem*) -> c
+    with
+      <type-check-match(|in-ty)> pat;
+      <map(type-check-premise-top)> prem*
 
 signature
   sorts

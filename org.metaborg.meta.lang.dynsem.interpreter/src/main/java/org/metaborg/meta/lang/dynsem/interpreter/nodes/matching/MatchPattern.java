@@ -5,7 +5,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatch.ConsLi
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatch.NilListMatch;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -48,7 +47,10 @@ public abstract class MatchPattern extends DynSemNode {
 			// TODO we should use the type information from the cast instead of skipping over it
 			return MatchPattern.create(Tools.applAt(t, 0), fd);
 		}
-		throw new NotImplementedException("Unsupported match pattern: " + t);
+
+		return LiteralMatchPattern.create(t, fd);
+		
+//		throw new NotImplementedException("Unsupported match pattern: " + t);
 	}
 
 	public static MatchPattern createFromLabelComp(IStrategoAppl t, FrameDescriptor fd) {
