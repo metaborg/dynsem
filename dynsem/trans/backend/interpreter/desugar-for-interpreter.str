@@ -19,6 +19,7 @@ rules
     ; desugar-natives
     ; desugar-list-reductions
     ; desugar-rec-tco
+    ; desugar-nmatch-neq
 
 rules /* rename arguments */
 
@@ -147,4 +148,13 @@ rules /* TCO */
     where
       (lty, -1, arrow-name) := <CurrentRelation>; 
       s
+
+rules /* desugar not-match and not equal premises */
+
+  desugar-nmatch-neq = alltd(desugar-premise-nmatch-neq)
   
+  desugar-premise-nmatch-neq:
+    Formula(NMatch(tb, pat)) -> Formula(Fails(Formula(Match(tb, pat))))
+  
+  desugar-premise-nmatch-neq:
+    Formula(TermNeq(tb1, tb2)) -> Formula(Fails(Formula(TermEq(tb1, tb2))))

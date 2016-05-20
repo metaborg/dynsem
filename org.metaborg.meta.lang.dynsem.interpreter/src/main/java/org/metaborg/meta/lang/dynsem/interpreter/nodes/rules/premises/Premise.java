@@ -25,7 +25,7 @@ public abstract class Premise extends DynSemNode {
 		if (Tools.hasConstructor(t, "MergePoint", 3)) {
 			return MergePointPremise.create(t, fd);
 		}
-		if(Tools.hasConstructor(t, "CaseMatch", 2)) {
+		if (Tools.hasConstructor(t, "CaseMatch", 2)) {
 			return CaseMatchPremise.create(t, fd);
 		}
 		IStrategoAppl premT = Tools.applAt(t, 0);
@@ -40,6 +40,9 @@ public abstract class Premise extends DynSemNode {
 		}
 		if (Tools.hasConstructor(premT, "TermEq", 2)) {
 			return TermEqPremise.create(premT, fd);
+		}
+		if (Tools.hasConstructor(premT, "Fails", 1)) {
+			return FailsPremise.create(premT, fd);
 		}
 
 		throw new NotImplementedException("Unsupported premise: " + t);
