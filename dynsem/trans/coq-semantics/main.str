@@ -23,52 +23,142 @@ rules
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
     ;  result := ""
 
-rules
+rules // Module generation
 
   module-to-coq:
-    Module(name, [sigs, Rules(rs)]) -> |[Inductive semantics_cbn : Env -> term -> value -> Prop := decls.]|
+    Module(name, [Signatures(sigs), Rules(rs)]) -> coq_rs
     where
-      decls0 := <map(say(id); rs-to-coq)> rs;
-      decls := ListDeclBar(decls0);
-      say(id)
+      m := <new-hashtable>;
+      // create map from relation names to rules of relation
+      <foldr(!m, push-named-rule)> rs;
+      keys := <hashtable-keys> m; 
+      // generate rules for all relations
+      coq_rs := <map(generate-rules(|m))> keys
   
-  rs-to-coq:
-    Rule(prems, _, 
-         Relation(Reads(_), 
-                  Source(sterm, _),
-                  _,
-                  Target(tterm, _))) -> ConsDecl(ident_name, OptBinders(idents), None())
+  push-named-rule:
+    (rule, m) -> m
     where
-      say(id);
-      name := <extract-name-from-term> sterm;
-      rname := <concat-strings> ["Eval_", name];
+      name := <get-rel-name> rule;
+      <hashtable-push(|name, rule)> m
+  
+  get-rel-name:
+    Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, name), _)) -> name
+  
+  generate-rules(|m):
+    ident_key -> S|[Inductive ident_key : X -> Prop := decls.]|
+    where
+      rs := <hashtable-get(|ident_key)> m;
+      cs := <map(rs-to-coq(|ident_key))> rs;
+      decls := ListDeclBar(cs)
+
+rules // Rule generation
+
+  rs-to-coq(|rel_name):
+    Rule(prems, _, conc) ->
+    ConsDecl(ident_name,
+             OptBinders(idents),
+             OptType(rl))
+    where
+      name := <extract-name-from-formula> conc;
+      rname := <concat-strings> [rel_name, "_", name];
       ident_name := <newname> rname;
-      svars := <extract-variables> sterm;
-//      tvars := <extract-variables> tterm;
-//      vars := <concat> [svars];
-      idents := <map(coqbind-helper)> svars
+      pvars := <extract-variables> prems;
+      svars := <extract-variables> conc;
+      vars := <concat> [pvars, svars];
+      idents := <map(mk-bind)> vars;
+      c := <formula-to-coq> conc;
+      ps := <map(formula-to-coq)> prems;
+      rl := <foldr(!c, mk-arrow)> ps // arrows nested to the right, with the conclusion as final element
   
-  coqbind-helper:
+  // Is there a way to just pass the constructor instead of creating these wrappers?
+  // Can we create a lambda? 
+  mk-arrow:
+    (x, y) -> Arrow(x, y)
+      
+  mk-bind:
     s -> Bind(s)
+      
+  formula-to-coq:
+    Formula(r) -> r'
     where
-      say(id)
-    
+      r' := <formula-to-coq> r
+      
+  formula-to-coq:
+    Relation(r,
+             Source(sterm, _),
+             NamedDynamicEmitted(_, rel_name), 
+             Target(tterm, _)) ->
+      Apply(Apply(rel_name, st), tt)
+    where
+      st := <term-to-coq> sterm;
+      tt := <term-to-coq> tterm
+      
+rules // Term generation
+
+  term-to-coq:
+    Con(c, ts) -> app
+    where
+      ts' := <map(term-to-coq)> ts;
+      app := <foldl(mk-app-rev)> (ts', c) // application nested to the left
+
+  // Can this be turned into a lambda?
+  mk-app-rev:
+    (x, y) -> Apply(y, x)
+
+  term-to-coq:
+    VarRef(x) -> x
+
+  term-to-coq:
+    Var(x) -> x
+
+rules // extracting the root constructor name from a given formula 
+
+  extract-name-from-formula:
+    Relation(_, Source(c, _), _, _) -> name
+    where
+      name := <extract-name-from-term> c
+
   extract-name-from-term:
     Con(name, _) -> name
-    
+
+rules // extracting variables (for forall-quantification)
+
+  extract-variables:
+    [] -> []
+  
+  extract-variables:
+    [t|ts] -> zs
+    where
+      xs := <extract-variables> t;
+      ys := <extract-variables> ts;
+      zs := <concat> [xs, ys]
+  
+  extract-variables:
+    Formula(r) -> xs
+    where
+      xs := <extract-variables> r
+      
+  extract-variables:
+    Relation(Reads(reads), Source(s, writes), NamedDynamicEmitted(emitted, _), Target(t, writes')) -> xs
+    where
+      xs0 := <extract-variables> reads;
+      xs1 := <extract-variables> s;
+      xs2 := <extract-variables> writes;
+      xs3 := <extract-variables> emitted;
+      xs4 := <extract-variables> t;
+      xs5 := <extract-variables> writes';
+      xs := <concat> [xs0, xs1, xs2, xs3, xs4, xs5]
+  
   extract-variables:
     Var(x) -> [x]
   
   extract-variables:
-    Con(_, ts) -> vs
+    Con(_, ts) -> xs
     where
-      vs := <foldr(![], extract-variables-fold-helper)> ts
+      xs := <extract-variables> ts
 
-  extract-variables-fold-helper:
-    (t, vs_so_far) -> vs0 
-    where
-      tvars := <extract-variables> t;
-      vs0 := <concat> [tvars, vs_so_far]
+  extract-variables:
+    VarRef(_) -> []
 
 //rules
 //  
