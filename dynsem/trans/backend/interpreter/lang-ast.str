@@ -71,7 +71,7 @@ rules /* Sort & Constructor classes */
       bstm |[
         try {
           return new x_class(e_create);
-        } catch (IllegalStateException ilsex) {
+        } catch (IllegalStateException ~x:<newname>) {
           bstm0
         }
       ]|
