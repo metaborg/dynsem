@@ -159,36 +159,3 @@ rules // extracting variables (for forall-quantification)
 
   extract-variables:
     VarRef(_) -> []
-
-//rules
-//  
-//  rule-to-coq(|n*):
-//    RuleW(formula, prem*) -> (ConsDecl(name', <union> (p-bind*, f-bind*), type), [(name, count), n*])
-//    where
-//      (prem'*, p-bind*, i) := <foldl(fold-prem)> (prem*, ([], [], 0))
-//    ; (t', f-bind*, _)     := <formula-to-coq(|i)> formula
-//    ; type                 := <foldl(fold-type)> (prem'*, t')
-//    ; name                 := <formula-to-name> formula
-//    ; count                := <lookup; inc <+ !0> (name, n*)
-//    ; name'                := $[[name][count]C_sem]
-//  
-//  rule-to-coq(|n*):
-//  	Rule(prem*,_,formula) -> <rule-to-coq(|n*)> RuleW(formula, prem*)
-//  	
-//  rule-to-coq(|n*):
-//    Axiom(formula) -> <rule-to-coq(|n*)> RuleW(formula, [])
-//
-//rules // Fold rules
-//  
-//  fold-rule:
-//    (r, (p*, n*)) -> (p'*, n'*)
-//    where
-//      (p'*, n'*) := <rule-to-coq(|n*) < !([<Fst> | p*], <Snd>) + !(p*, n*)> r
-//  
-//  fold-prem:
-//    (Formula(p), (p*, b*, i)) -> ([p' | p*], <union> (b*, b'*), i')
-//    where
-//      (p', b'*, i') := <formula-to-coq(|i)> p
-//  
-//  fold-type: // Composes parts of a type
-//    (x, y) -> T|[x -> y]|
