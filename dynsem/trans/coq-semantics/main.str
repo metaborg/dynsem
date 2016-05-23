@@ -10,14 +10,37 @@ imports
   coq-signatures/extensions/-
   coq-signatures/tactic/-
   coq-pp/-
+  ds2ds/-
+  analysis/-
+  outline
+  lib-ds
 
 rules
+  
+  
+  explicate-for-coq(|project-path) =
+    in-project-path(
+      include-imports;
+      strip-annos;
+      desugar-top;
+      fuse-sections;
+      desugar-varschemes-module;
+      desugar-aliases-module;
+      factorize-module;
+      expand-implicits-module;
+      factorize-module;
+      explicate-module;
+      copy-propagation-module;
+      constant-propagation-module;
+      defactorize-module;
+      sugar-all
+      |project-path)
   
   generate-coq:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"v")> path
-      ; coq-file := <strip-annos; module-to-coq> ast
+      ; coq-file := <explicate-for-coq(|project-path); debug(!0); module-to-coq; debug(!"done")> ast
     with
        result := <parenthesize-Coq; prettyprint-Coq; box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
@@ -26,57 +49,55 @@ rules
 rules // Module generation
 
   module-to-coq:
-    Module(name, [Signatures(sigs), Rules(rs)]) -> coq_rs
+    Module(name, contents) -> coq_rs
     with
+      sigs := <filter(?Signatures(<id>))> contents;
+      sigs0 := <concat> sigs;
+      ads0 := <filter(?ArrowDeclarations(<id>))> sigs0;
+      ads := <concat> ads0;
       m := <new-hashtable>;
-      arrowdecs := <filter(?ArrowDeclarations(_))> sigs;
-      <instantiate-sigs> (m, arrowdecs);
+      <map(instantiate-sig(|m))> ads;
+      rs0 := <filter(?Rules(<id>))> contents;
+      rs := <concat> rs0;
       // create map from relation names to rules of relation
       <foldr(!m, push-named-rule)> rs;
       keys := <hashtable-keys> m;
       // generate rules for all relations
-      coq_rs := <map(generate-rules(|m))> keys
-  
-  // instantiate-sigs iterates through the declared arrow signatures
-  // and instantiates the hashmap mapping a relation to its set of
-  // rules and its type signature. 
-  
-  instantiate-sigs:
-    (m, []) -> 1
-  
-  instantiate-sigs:
-    (m, [ArrowDeclarations(arrdecs)]) -> o
+      coq_rs := <map(rules-to-coq(|m))> keys
+
+  instantiate-sig(|m):
+    ArrowDecl(from_sort, rel_name, to_sort) -> 1
     with
-      o := <instantiate-sig> (m, arrdecs)
-  
-  instantiate-sig:
-    (m, []) -> 1
-  
-  instantiate-sig:
-    (m, [ArrowDecl(from_sort, rel_name, to_sort)|arrowdecs]) -> o
-    with
-      <hashtable-put(|rel_name, ([], (from_sort, to_sort)))> m;
-      o := <instantiate-sig> (m, arrowdecs)
+      <hashtable-put(|rel_name, ([], (from_sort, to_sort)))> m
   
   push-named-rule:
     (rule, m) -> m
     with
-      name := <get-rel-name> rule;
+      (conc, prems) := <get-premises-and-conclusion> rule;
+      name := <get-rel-name> conc;
       (rs, (from_sort, to_sort)) := <hashtable-get(|name)> m;
       <hashtable-put(|name, ([rule|rs], (from_sort, to_sort)))> m
   
   get-rel-name:
-    Rule(_, _, Relation(_, _, NamedDynamicEmitted(_, name), _)) -> name
-  
-  generate-rules(|m):
-    ident_key -> S|[Inductive ident_key : ident_from -> ident_to -> Prop := decls.]|
+    Relation(_, _, arrow, _) -> name
     with
-      <hashtable-get(|ident_key)> m; ?(rs, (from_sort, to_sort));
-      ident_from := <sort-to-coq> from_sort;
-      ident_to := <sort-to-coq> to_sort;
-      cs := <map(rs-to-coq(|ident_key))> rs;
-      decls := ListDeclBar(cs)
+      name := <get-arrow-name> arrow
+    
+  get-arrow-name:
+    NamedDynamicEmitted(_, name) -> name
 
+  get-arrow-name:
+    NamedDynamic(name) -> name
+
+  get-premises-and-conclusion:
+    Rule(prems, _, conc) -> (conc, prems)
+    
+  get-premises-and-conclusion:
+    RuleW(conc, prems) -> (conc, prems)
+    
+  get-premises-and-conclusion:
+    Axiom(conc) -> (conc, [])
+  
 rules // Sort-to-type generation
 
   sort-to-coq:
@@ -84,21 +105,49 @@ rules // Sort-to-type generation
 
 rules // Rule generation
 
-  rs-to-coq(|rel_name):
-    Rule(prems, _, conc) ->
+  rules-to-coq(|m):
+    ident_key -> S|[Inductive ident_key : ident_from -> ident_to -> Prop := decls.]|
+    with
+      debug(!1);
+      <hashtable-get(|ident_key)> m; ?(rs, (from_sort, to_sort));
+      debug(!2);
+      ident_from := <sort-to-coq> from_sort;
+      debug(!3);
+      ident_to := <sort-to-coq> to_sort;
+      debug(!4);
+      cs := <map(rule-to-coq(|ident_key))> rs;
+      debug(!5);
+      decls := ListDeclBar(cs)
+
+  rule-to-coq(|rel_name):
+    rule ->
     ConsDecl(ident_name,
              OptBinders(idents),
              OptType(rl))
     with
+      debug(!6);
+      (conc, prems) := <get-premises-and-conclusion> rule;
+      debug(!7);
+      // Rule name
       name := <extract-name-from-formula> conc;
+      debug(!8);
       rname := <concat-strings> [rel_name, "_", name];
       ident_name := <newname> rname;
+      // Variables
       pvars := <extract-variables> prems;
+      debug(!9);
       svars := <extract-variables> conc;
+      debug(!10);
       vars := <concat> [pvars, svars];
+      debug(!11);
       idents := <map(mk-bind)> vars;
+      debug(!12);
+      // Conclusion
       c := <formula-to-coq> conc;
+      debug(!13);
+      // Premises
       ps := <map(formula-to-coq)> prems;
+      debug(!14);
       rl := <foldr(!c, mk-arrow)> ps // arrows nested to the right, with the conclusion as final element
   
   // Is there a way to just pass the constructor instead of creating these wrappers?
@@ -108,19 +157,33 @@ rules // Rule generation
       
   mk-bind:
     s -> Bind(s)
-      
+
+rules // Formulae generation
+
   formula-to-coq:
     Formula(r) -> r'
     with
       r' := <formula-to-coq> r
-      
+
   formula-to-coq:
     Relation(r,
              Source(sterm, _),
-             NamedDynamicEmitted(_, rel_name), 
+             arrow, 
              Target(tterm, _)) ->
       Apply(Apply(rel_name, st), tt)
     with
+      rel_name := <get-arrow-name> arrow;
+      st := <term-to-coq> sterm;
+      tt := <term-to-coq> tterm
+
+  formula-to-coq:
+    Relation(r,
+             Source(sterm),
+             arrow, 
+             Target(tterm)) ->
+      Apply(Apply(rel_name, st), tt)
+    with
+      rel_name := <get-arrow-name> arrow;
       st := <term-to-coq> sterm;
       tt := <term-to-coq> tterm
       
@@ -142,18 +205,28 @@ rules // Term generation
   term-to-coq:
     Var(x) -> x
 
-rules // extracting the root constructor name from a given formula 
+rules // Extracting the source constructor name
 
   extract-name-from-formula:
     Relation(_, Source(c, _), _, _) -> name
     with
+      debug(!100);
+      name := <extract-name-from-term> c
+
+  extract-name-from-formula:
+    Relation(_, Source(c), _, _) -> name
+    with
+      debug(!100);
       name := <extract-name-from-term> c
 
   extract-name-from-term:
     Con(name, _) -> name
+    with
+      debug(!200)
 
-rules // extracting variables (for forall-quantification)
+rules // Extracting variables
 
+  // Lists
   extract-variables:
     [] -> []
   
@@ -164,22 +237,51 @@ rules // extracting variables (for forall-quantification)
       ys := <extract-variables> ts;
       zs := <concat> [xs, ys]
   
+  // Formulas and relations
   extract-variables:
     Formula(r) -> xs
     with
       xs := <extract-variables> r
       
   extract-variables:
-    Relation(Reads(reads), Source(s, writes), NamedDynamicEmitted(emitted, _), Target(t, writes')) -> xs
+    Relation(reads, Source(s, writes), arrow, Target(t, writes')) -> xs
     with
       xs0 := <extract-variables> reads;
       xs1 := <extract-variables> s;
       xs2 := <extract-variables> writes;
-      xs3 := <extract-variables> emitted;
+      xs3 := <extract-variables> arrow;
       xs4 := <extract-variables> t;
       xs5 := <extract-variables> writes';
       xs := <concat> [xs0, xs1, xs2, xs3, xs4, xs5]
   
+  extract-variables:
+    Relation(reads, Source(s), arrow, Target(t)) -> xs
+    with
+      xs0 := <extract-variables> reads;
+      xs1 := <extract-variables> s;
+      xs3 := <extract-variables> arrow;
+      xs4 := <extract-variables> t;
+      xs := <concat> [xs0, xs1, xs3, xs4]
+  
+  // Reads
+  extract-variables:
+    Reads(rs) -> xs
+    with
+      xs := <extract-variables> rs
+      
+  extract-variables:
+    NoReads() -> []
+
+  // Arrows
+  extract-variables:
+    NamedDynamicEmitted(emitted, _) -> xs
+    with
+      xs := <extract-variables> emitted 
+  
+  extract-variables:
+    NamedDynamic(_) -> []
+  
+  // Terms
   extract-variables:
     Var(x) -> [x]
   
