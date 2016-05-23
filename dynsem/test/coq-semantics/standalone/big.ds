@@ -21,7 +21,8 @@ signature
   
   variables
     r : Env
-  
+    v : Val
+
   // Native ops
   native operators
     plusI  : Int * Int -> Int
@@ -29,11 +30,10 @@ signature
   // Evaluation
   arrows
     Expr -big-> Val
-    
+
 rules
   
   // Arithmetic fragment
-  
   Num(i) -big-> NumV(i).
 
   Plus(NumV(i1), NumV(i2)) -big-> NumV(plusI(i1, i2)).
