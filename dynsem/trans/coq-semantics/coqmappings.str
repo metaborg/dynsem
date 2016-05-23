@@ -1,0 +1,6 @@
+module coq-semantics/coqmappings
+
+rules
+  
+  map-lookup = !"map_lookup"
+  map-update = !"map_update"

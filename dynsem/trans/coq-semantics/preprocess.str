@@ -1,0 +1,12 @@
+module coq-semantics/preprocess
+
+imports
+  coq-semantics/main
+  signatures/-
+  ds
+  
+rules
+
+  P: Wld() -> Var(x) where x := <newname> "wld"
+  
+  preprocess = bottomup(try(P))

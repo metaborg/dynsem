@@ -17,7 +17,6 @@ imports
 
 rules
   
-  
   explicate-for-coq(|project-path) =
     in-project-path(
       include-imports;
@@ -40,7 +39,7 @@ rules
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"v")> path
-      ; coq-file := <explicate-for-coq(|project-path); debug(!0); module-to-coq; debug(!"done")> ast
+      ; coq-file := <explicate-for-coq(|project-path); preprocess; debug(!0); module-to-coq; debug(!"done")> ast
     with
        result := <parenthesize-Coq; prettyprint-Coq; box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
@@ -108,15 +107,10 @@ rules // Rule generation
   rules-to-coq(|m):
     ident_key -> S|[Inductive ident_key : ident_from -> ident_to -> Prop := decls.]|
     with
-      debug(!1);
       <hashtable-get(|ident_key)> m; ?(rs, (from_sort, to_sort));
-      debug(!2);
       ident_from := <sort-to-coq> from_sort;
-      debug(!3);
       ident_to := <sort-to-coq> to_sort;
-      debug(!4);
       cs := <map(rule-to-coq(|ident_key))> rs;
-      debug(!5);
       decls := ListDeclBar(cs)
 
   rule-to-coq(|rel_name):
@@ -125,29 +119,20 @@ rules // Rule generation
              OptBinders(idents),
              OptType(rl))
     with
-      debug(!6);
       (conc, prems) := <get-premises-and-conclusion> rule;
-      debug(!7);
       // Rule name
       name := <extract-name-from-formula> conc;
-      debug(!8);
       rname := <concat-strings> [rel_name, "_", name];
       ident_name := <newname> rname;
       // Variables
       pvars := <extract-variables> prems;
-      debug(!9);
       svars := <extract-variables> conc;
-      debug(!10);
       vars := <concat> [pvars, svars];
-      debug(!11);
       idents := <map(mk-bind)> vars;
-      debug(!12);
       // Conclusion
       c := <formula-to-coq> conc;
-      debug(!13);
       // Premises
       ps := <map(formula-to-coq)> prems;
-      debug(!14);
       rl := <foldr(!c, mk-arrow)> ps // arrows nested to the right, with the conclusion as final element
   
   // Is there a way to just pass the constructor instead of creating these wrappers?
@@ -195,6 +180,13 @@ rules // Term generation
       ts' := <map(term-to-coq)> ts;
       app := <foldl(mk-app-rev)> (ts', c) // application nested to the left
 
+  term-to-coq:
+    MapSelect(m, t) -> Apply(Apply(ml, m'), t')
+    with
+      ml := <map-lookup>;
+      m' := <term-to-coq> m;
+      t' := <term-to-coq> t
+
   // Can this be turned into a lambda?
   mk-app-rev:
     (x, y) -> Apply(y, x)
@@ -210,19 +202,15 @@ rules // Extracting the source constructor name
   extract-name-from-formula:
     Relation(_, Source(c, _), _, _) -> name
     with
-      debug(!100);
       name := <extract-name-from-term> c
 
   extract-name-from-formula:
     Relation(_, Source(c), _, _) -> name
     with
-      debug(!100);
       name := <extract-name-from-term> c
 
   extract-name-from-term:
     Con(name, _) -> name
-    with
-      debug(!200)
 
 rules // Extracting variables
 
@@ -292,3 +280,41 @@ rules // Extracting variables
 
   extract-variables:
     VarRef(_) -> []
+  
+  // Labelled components
+  extract-variables:
+    LabelComp(_, c) -> xs
+    with
+      xs := <extract-variables> c
+  
+  // Maps
+  extract-variables:
+    Map(r) -> xs
+    with
+      xs := <extract-variables> r
+  
+//  extract-variables:
+//    MapSort(m) -> xs
+//    with
+//      xs := <extract-variables> m
+  
+  extract-variables:
+    MapSelect(t1, t2) -> xs
+    with
+      xs1 := <extract-variables> t1;
+      xs2 := <extract-variables> t2;
+      xs := <concat> [xs1, xs2]
+      
+  extract-variables:
+    MapExtend(m, t) -> xs
+    with
+      xs1 := <extract-variables> m;
+      xs2 := <extract-variables> t;
+      xs := <concat> [xs1, xs2]
+      
+  extract-variables:
+    Bind(x, y) -> zs
+    with
+      xs := <extract-variables> x;
+      ys := <extract-variables> y;
+      zs := <concat> [xs, ys]
