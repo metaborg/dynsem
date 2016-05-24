@@ -1,7 +1,7 @@
 module analysis/lib-analysis
 
 imports
-  signatures/ds-sig
+  signatures/-
   analysis/constructors
   stratego/metaborg
 

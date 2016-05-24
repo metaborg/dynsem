@@ -9,13 +9,20 @@ strategies
   explicate-module :
     mod@Module(name, section*) -> Module($[[name]_explicated], section'*)
     where
-      section'* := <m-in-extracted-components(explicate-rules)> section*
+      section'* := <m-in-extracted-components(explicate-rules; explicate-arrow-decls)> section*
       
   explicate-rules :
     rs -> <alltd(explicate-rule)> rs
-
-rules // group rules by name
   
+  explicate-arrow-decls:
+    arrow-decls -> <alltd(explicate-arrow-decl)> arrow-decls
+  
+  explicate-arrow-decl:
+    ArrowDecl(_, s, _, arrow, t, _) -> ArrowDecl(ArrowROs(ros), s, ArrowRWs(rws), arrow, t, ArrowRWs(rws))
+    where
+      ros := <ReadableComps> arrow;
+      rws := <ChangeableComps> arrow
+
 rules
   
   explicate-rule :
