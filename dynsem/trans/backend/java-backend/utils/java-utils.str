@@ -139,7 +139,7 @@ rules /* merging of two Java ASTs */
 
 rules /* id escaping */
 
-  escape-java-id = string-replace(|"'", "_")
+  escape-java-id = string-replace(|"'", "_"); string-replace(|"-", "_")
   
 rules /* Java pp with crash details */
   

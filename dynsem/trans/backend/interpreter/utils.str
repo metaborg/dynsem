@@ -12,7 +12,7 @@ rules
       CurrentFilePath: _ -> path
       ProjectPath: _ -> project-path
       PropertiesFile: _ -> $[[project-path]/dynsem.properties]
-      LanguageName: _ -> <PropertiesFile; read-property(|"source.langname", "MISSING")>
+      LanguageName: _ -> <PropertiesFile; read-property(|"source.langname", "MISSING"); escape-java-id>
     );
     rules(
       TableSourceFile: _ -> $[[project-path][<PropertiesFile; read-property(|"source.table", $[include/[<LanguageName>].tbl])>]]

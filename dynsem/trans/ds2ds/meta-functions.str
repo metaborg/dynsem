@@ -37,9 +37,9 @@ rules
   	  ([ArrowDeclarations(arrow-decl*)], non-arrow*) := <partition(?ArrowDeclarations(_))> non-sort*;
   	  ([Constructors(cons-decl*)], non-cons*) := <partition(?Constructors(_))> non-arrow*;
   	  sort-decl'* := <filter(not(?SortDecl(ty)))> sort-decl*;
-  	  arrow-decl'* := <filter(not(?ArrowDecl(SimpleSort(ty), "default", res-ty)))> arrow-decl*;
+  	  arrow-decl'* := <filter(not(?ArrowDecl(_, SimpleSort(ty), _, "default", res-ty, _)))> arrow-decl*;
   		cons-decl'* := <filter(not(is-consdecl(|cons-def)))> cons-decl*;
-  		arrow-decl''* := [ArrowDecl(<derw-type> c-ty, c-name, res-ty), arrow-decl'*]
+  		arrow-decl''* := [ArrowDecl(NoArrowROs(), <derw-type> c-ty, NoArrowRWs(), c-name, res-ty, NoArrowROs()), arrow-decl'*]
 
   is-consdecl(|cons-def):
   	c@ConsDecl(name, child*, _, _) -> c

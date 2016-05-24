@@ -101,6 +101,8 @@ rules /* Sort & Constructor classes */
         import ~x:<TopPackageName>.TypesGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import com.oracle.truffle.api.CompilerAsserts;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        import java.lang.reflect.Field;
         
         public class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
 
@@ -148,6 +150,23 @@ rules /* Sort & Constructor classes */
             x_classname other = (x_classname) obj;
             bstm2*
             return true;
+          }
+          
+          @TruffleBoundary
+          @Override
+          public String toString() {
+              String fs = "";
+              try{
+                  for (Field f : getClass().getDeclaredFields()) {
+                      if (f.getName().startsWith("_")) {
+                          fs += f.get(this) + ","; 
+                      }
+                  }
+                  if (fs.endsWith(",")) fs = fs.substring(0, fs.length()-1);
+              } catch (IllegalAccessException iaex) {
+                  System.err.println("<unreadalbe field>");
+              }
+              return CONSTRUCTOR + "_" + ARITY + "(" + fs + ")@" + Integer.toHexString(hashCode());
           }
           
           @Override

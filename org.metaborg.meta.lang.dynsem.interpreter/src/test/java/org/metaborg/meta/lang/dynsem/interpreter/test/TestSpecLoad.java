@@ -26,7 +26,7 @@ public class TestSpecLoad {
 		
 		assert (DummyDynSemLanguage.INSTANCE != null);
 		
-		RuleRegistry rreg = new RuleRegistry(specFile);
+		RuleRegistry rreg = new RuleRegistry(specFile.toPath());
 
 
 		assertEquals(5, rreg.ruleCount());
