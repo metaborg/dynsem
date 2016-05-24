@@ -5,8 +5,28 @@ imports
   signatures/-
   ds
   
-rules
+rules // Term pre-processing
 
+  // Replace wildcards by named variables
   P: Wld() -> Var(x) where x := <newname> "wld"
+
+strategies
+
+  pre-process = bottomup(try(P))
   
-  preprocess = bottomup(try(P))
+rules // Accumulate information about AST sorts
+
+  // FIXME: this is fairly inefficient
+  pre-analyze-module:
+    Module(name, contents) -> (sort_decls, sort_constrs, arrow_decls, ruls)
+    with
+      // Signatures 
+      sigs* := <filter(?Signatures(<id>)); concat> contents;
+      // Rules
+      ruls := <filter(?Rules(<id>)); concat> contents;
+      // Sort declarations
+      sort_decls := <filter(?Sorts(<id>)); concat; filter(?SortDecl(<id>))> sigs*;
+      // Sort constructors
+      sort_constrs := <filter(?Constructors(<id>))> sigs*;
+      // Arrow declarations
+      arrow_decls := <filter(?ArrowDeclarations(<id>)); concat> sigs*

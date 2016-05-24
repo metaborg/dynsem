@@ -45,4 +45,4 @@ rules
   where
     Env {id |--> v2, r'} |- e -big-> v.
 
-  r |- Var(id) -big-> r[id]. 
+  r |- Var(id) -big-> r[id].
