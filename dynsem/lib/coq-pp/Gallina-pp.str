@@ -4,7 +4,6 @@ imports
   libstratego-gpp
   runtime/tmpl/pp
   libstratego-sglr
-  trans/pp
   coq-signatures/Gallina-sig
 
 
@@ -26,11 +25,14 @@ strategies
   prettyprint-example =
     prettyprint-Coq
 
+  prettyprint-Coq =
+    fail
+
 
 strategies
   prettyprint-SDF-start-symbols =
     prettyprint-Coq-start-symbols
-  
+
   prettyprint-Coq-start-symbols =
     fail
 
@@ -823,6 +825,57 @@ strategies
              ws := ""
            case ?2 :
              ws := " "
+           otherwise :
+             ws := ""
+         end
+
+  prettyprint-Term :
+    ArrowLn(t1__, t2__) -> [ H(
+                               [SOpt(HS(), "0")]
+                             , [t1__', S(" ->")]
+                             )
+                           , H(
+                               [SOpt(HS(), "0")]
+                             , [t2__']
+                             )
+                           ]
+    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t1__
+    with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
+                   <+ pp-one-Z(prettyprint-Term)> t2__
+
+  is-Term =
+    ?ArrowLn(_, _)
+
+  get-indent :
+    (ArrowLn(t1__, t2__), index) -> indent
+    with switch !index
+           case ?1 :
+             indent := ""
+           case ?2 :
+             indent := ""
+           otherwise :
+             indent := ""
+         end
+
+  get-separator :
+    (ArrowLn(t1__, t2__), index) -> separator
+    with switch !index
+           case ?1 :
+             separator := ""
+           case ?2 :
+             separator := ""
+           otherwise :
+             separator := ""
+         end
+
+  get-leading-ws :
+    (ArrowLn(t1__, t2__), index) -> ws
+    with switch !index
+           case ?1 :
+             ws := ""
+           case ?2 :
+             ws := "\n"
            otherwise :
              ws := ""
          end

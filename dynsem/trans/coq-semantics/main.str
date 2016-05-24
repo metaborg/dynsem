@@ -138,7 +138,7 @@ rules // Rule generation
   // Is there a way to just pass the constructor instead of creating these wrappers?
   // Can we create a lambda? 
   mk-arrow:
-    (x, y) -> Arrow(x, y)
+    (x, y) -> ArrowLn(x, y)
       
   mk-bind:
     s -> Bind(s)

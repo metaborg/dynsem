@@ -23,6 +23,7 @@ signature
     Check               : Term * Term -> Term
     Coerce              : Term -> Term
     Arrow               : Term * Term -> Term
+    ArrowLn             : Term * Term -> Term
     Apply               : Term * Term -> Term
     ApplyImplicit       : Term * Arg -> Term
     UnHide              : QualId * OptTerms -> Term

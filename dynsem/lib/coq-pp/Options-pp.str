@@ -4,7 +4,6 @@ imports
   libstratego-gpp
   runtime/tmpl/pp
   libstratego-sglr
-  trans/pp
   coq-signatures/Options-sig
 
 
@@ -22,10 +21,16 @@ strategies
   prettyprint-example =
     prettyprint-Coq
 
+  prettyprint-Coq =
+    fail
+
 
 strategies
   prettyprint-SDF-start-symbols =
     prettyprint-Coq-start-symbols
+
+  prettyprint-Coq-start-symbols =
+    fail
 
 
 strategies
@@ -90,11 +95,13 @@ strategies
   prettyprint-OptType :
     OptType(t1__) -> [ H(
                          [SOpt(HS(), "0")]
-                       , [S(" : "), t1__']
+                       , [S(":")]
                        )
+                     , t1__'
                      ]
-    with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
-                   <+ pp-one-Z(prettyprint-Term)> t1__
+    with t1__' := <pp-indent(|"4")> [ <is-string ; pp-one-Z(prettyprint-origin-term)
+                                       <+ pp-one-Z(prettyprint-Term)> t1__
+                                    ]
 
   is-OptType =
     ?OptType(_)
@@ -103,7 +110,7 @@ strategies
     (OptType(t1__), index) -> indent
     with switch !index
            case ?1 :
-             indent := ""
+             indent := "    "
            otherwise :
              indent := ""
          end
@@ -121,7 +128,7 @@ strategies
     (OptType(t1__), index) -> ws
     with switch !index
            case ?1 :
-             ws := " "
+             ws := "\n    "
            otherwise :
              ws := ""
          end
