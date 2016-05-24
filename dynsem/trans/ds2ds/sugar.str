@@ -27,7 +27,7 @@ rules // desugaring
   	  t_source := SimpleSort(t_name)
 
   extract-arrow :
-  	FunDecl(x, ts, t) -> (DefaultArrowDecl(t_source, t), SortDecl(t_name))
+  	FunDecl(x, ts, t) -> (DefaultArrowDecl(NoArrowROs(), t_source, NoArrowRWs(), t, NoArrowRWs()), SortDecl(t_name))
   	where 
   		t_name := $[[x]__Arrow];
   	  t_source := SimpleSort(t_name)
@@ -56,7 +56,7 @@ rules // desugaring
     RuleW(form, prem*) -> Rule(prem*, "---", form)
   
   desugar :
-    DefaultArrowDecl(l-ty, r-ty) -> ArrowDecl(NoArrowROs(), l-ty, NoArrowRWs(), "default", r-ty, NoArrowRWs())
+    DefaultArrowDecl(ros, l-ty, rwsin, r-ty, rwsout) -> ArrowDecl(ros, l-ty, rwsin, "default", r-ty, rwsout)
   
   desugar :
     Dynamic() -> NamedDynamic("default")
