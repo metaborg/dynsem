@@ -74,7 +74,7 @@ rules /* store signatures */
   store-arrows = ArrowDeclarations(map(store-arrow))
   
   store-arrow:
-    d@ArrowDecl(in-srt, arrow, out-srt) -> d
+    d@ArrowDecl(_, in-srt, _, arrow, out-srt, _) -> d
     with
       <store-def(|Arrows())> arrow => arrow-def;
       <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt)
@@ -224,7 +224,7 @@ rules
       add-msg(|Error(), d, $[Non-unary constructors may not be implicit])
 
   check-signature:
-    decl@ArrowDecl(in-srt, name, out-srt) -> <fail>
+    decl@ArrowDecl(_, in-srt, _, name, out-srt, _) -> <fail>
     where
 	    in-ty := <rw-type> in-srt;
 	    out-ty := <rw-type> out-srt;

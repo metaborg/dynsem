@@ -31,9 +31,9 @@ rules
     with
       arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> mod
   
-  get-module-arrow-declaration(|arrow-name) = collect-one(?ArrowDecl(_, arrow-name, _))
+  get-module-arrow-declaration(|arrow-name) = collect-one(?ArrowDecl(_, _, _, arrow-name, _, _))
   
-  get-module-arrow-declarations = collect-all(?ArrowDecl(_, _, _))
+  get-module-arrow-declarations = collect-all(?ArrowDecl(_, _, _, _, _, _))
 
   get-module-arrow-elements(|arrow-name):
     mod -> (arrow-name, nonwritable*, writable*)
@@ -90,7 +90,7 @@ rules
     Relation(_, _, arrow, _) -> <get-arrow-name> arrow
   
   get-arrow-name:
-    ArrowDecl(_, name, _) -> name
+    ArrowDecl(_, _, _, name, _, _) -> name
   
   get-arrow-name:
     NamedDynamicEmitted(_, name) -> name
