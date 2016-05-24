@@ -158,6 +158,7 @@ rules // Formulae generation
       Apply(Apply(rel_name, st), tt)
     with
       rel_name := <get-arrow-name> arrow;
+      rc := <aux-ent-to-coq> r;
       st := <term-to-coq> sterm;
       tt := <term-to-coq> tterm
 
@@ -166,12 +167,30 @@ rules // Formulae generation
              Source(sterm),
              arrow, 
              Target(tterm)) ->
-      Apply(Apply(rel_name, st), tt)
+      Apply(Apply(res0, st), tt)
     with
       rel_name := <get-arrow-name> arrow;
+      res0 := <aux-ent-to-coq> (rel_name, r);
       st := <term-to-coq> sterm;
       tt := <term-to-coq> tterm
-      
+
+rules // Auxiliary entity generation
+
+  aux-ent-to-coq:
+    (trm, NoReads()) -> trm
+
+  aux-ent-to-coq:
+    (trm, Reads(reads)) -> res
+    with
+      debug;
+      res := <foldl(labelcomp-pair-to-coq; mk-app-rev)> (reads, trm)
+
+  labelcomp-pair-to-coq:
+    (LabelComp(_, trm), rel_name) ->
+      (res, rel_name)
+    with
+      res := <term-to-coq> trm
+
 rules // Term generation
 
   term-to-coq:
@@ -186,6 +205,16 @@ rules // Term generation
       ml := <map-lookup>;
       m' := <term-to-coq> m;
       t' := <term-to-coq> t
+
+  term-to-coq:
+    MapExtend(m1, m2) ->
+      Apply(Apply(Apply(mu, m2'), x'), y')
+    with
+      ((Map([Bind(x, y)]) := m1) <+ debug(!"Please use bindings of the form {x |--> y, m}"));
+      mu := <map-update>;
+      m2' := <term-to-coq> m2;
+      x' := <term-to-coq> x;
+      y' := <term-to-coq> y
 
   // Can this be turned into a lambda?
   mk-app-rev:

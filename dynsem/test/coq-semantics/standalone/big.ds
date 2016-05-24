@@ -1,4 +1,4 @@
-module trans/semantics/big
+module test/coq-semantics/standalone/big
  
 signature
 
@@ -37,9 +37,8 @@ rules
   Num(i) -big-> NumV(i).
 
   Plus(NumV(i1), NumV(i2)) -big-> NumV(plusI(i1, i2)).
-    
+  
   // Functional fragment
-
   r |- Fun(id, e) -big-> ClosV(id, e, r).
   
   App(ClosV(id, e, r'), v2) -big-> v

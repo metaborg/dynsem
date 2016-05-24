@@ -1,4 +1,4 @@
-module features/multisorted_relation
+module test/coq-semantics/features/multisorted_relation
 
 signature
 
