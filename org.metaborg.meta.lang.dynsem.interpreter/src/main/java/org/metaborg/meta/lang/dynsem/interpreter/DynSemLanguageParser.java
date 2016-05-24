@@ -1,10 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -20,11 +17,11 @@ import org.spoofax.terms.io.binary.TermReader;
 import com.oracle.truffle.api.source.Source;
 
 public class DynSemLanguageParser {
-	private Path parsetable;
+	private InputStream parsetableInput;
 	private SGLR parser;
 
-	public DynSemLanguageParser(Path parsetable) {
-		this.parsetable = parsetable;
+	public DynSemLanguageParser(InputStream parsetableInput) {
+		this.parsetableInput = parsetableInput;
 	}
 
 	public IStrategoTerm parse(Source src, String startSymbol) {
@@ -53,10 +50,10 @@ public class DynSemLanguageParser {
 
 	private ParseTable loadPT() {
 		TermFactory factory = new TermFactory();
-		try (InputStream stream = new FileInputStream(new File(parsetable.toUri()));) {
+		try {
 			TermReader termReader = new TermReader(factory);
-			IStrategoTerm parseTableTerm = termReader.parseFromStream(stream);
-
+			IStrategoTerm parseTableTerm = termReader.parseFromStream(parsetableInput);
+			parsetableInput.close();
 			return new ParseTable(parseTableTerm, factory);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
