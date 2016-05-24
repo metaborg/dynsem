@@ -91,9 +91,9 @@ rules // Module generation
       <hashtable-put(|sort_name, [])> m
 
   instantiate-arrow(|m):
-    ArrowDecl(from_sort, rel_name, to_sort) -> 1
+    ArrowDecl(ro_ents, from_sort, from_rw_ents, rel_name, to_sort, to_rw_ents) -> 1
     with
-      <hashtable-put(|rel_name, ([], (from_sort, to_sort)))> m
+      <hashtable-put(|rel_name, ([], (ro_ents, from_sort, from_rw_ents, to_sort, to_rw_ents)))> m
   
   push-sort-constructor(|m):
     ConsDecl(name, from_sorts, SimpleSort(to_sort), annotations) -> 1
@@ -108,8 +108,8 @@ rules // Module generation
     with
       (conc, prems) := <get-premises-and-conclusion> rule;
       name := <get-rel-name> conc;
-      (rs, (from_sort, to_sort)) := <hashtable-get(|name)> m;
-      <hashtable-put(|name, ([rule|rs], (from_sort, to_sort)))> m
+      (rs, sig) := <hashtable-get(|name)> m;
+      <hashtable-put(|name, ([rule|rs], sig))> m
   
   get-rel-name:
     Relation(_, _, arrow, _) -> name
@@ -142,7 +142,7 @@ rules // Sort-to-type generation
       maptype := <map-type>;
       x' := <sort-to-coq> x;
       y' := <sort-to-coq> y
-    
+ 
 rules // AST/sort signature generation
 
   sortdecls-to-coq(|m):
@@ -164,11 +164,18 @@ rules // AST/sort signature generation
 rules // Rule generation
 
   rules-to-coq(|m):
-    ident_key -> S|[Inductive ident_key : ident_from -> ident_to -> Prop := decls.]|
+    ident_key -> Inductive([Induc(ident_key, None(), ident_type, decls)])
+    //    S|[Inductive ident_key : ident_type := decls.]|
     with
-      (rs, (from_sort, to_sort)) := <hashtable-get(|ident_key)> m;
-      ident_from := <sort-to-coq> from_sort;
-      ident_to := <sort-to-coq> to_sort;
+      (rs, (ro_ents, from_sort, from_rw_ents, to_sort, to_rw_ents)) := <hashtable-get(|ident_key)> m;
+      ((ArrowROs(ros) := ro_ents)
+        <+ ros := []); 
+      ((ArrowRWs(from_rws) := from_rw_ents)
+        <+ from_rws := []); 
+      ((ArrowRWs(to_rws) := to_rw_ents)
+        <+ to_rws := []);
+      pre_type := <concat> [ros, [from_sort], from_rws, [to_sort], to_rws];
+      ident_type := <map(sort-to-coq); foldr(!T|[Prop]|, mk-arrow)> pre_type;
       cs := <map(rule-to-coq(|ident_key))> rs;
       decls := ListDeclBar(cs)
 
