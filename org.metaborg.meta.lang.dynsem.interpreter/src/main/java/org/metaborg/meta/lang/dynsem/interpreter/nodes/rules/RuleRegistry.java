@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,8 +22,8 @@ public class RuleRegistry {
 
 	private final Map<String, RuleRoot> rules = new HashMap<>();
 
-	public RuleRegistry(File specFile) {
-		populate(this, specFile);
+	public RuleRegistry(Path specPath) {
+		populate(this, specPath);
 		init();
 	}
 
@@ -68,9 +69,9 @@ public class RuleRegistry {
 		return name + "/" + constr + "/" + arity;
 	}
 
-	private static void populate(RuleRegistry reg, File specificationFile) {
+	private static void populate(RuleRegistry reg, Path specificationPath) {
 		try {
-			Source source = Source.fromFileName(specificationFile.getAbsolutePath().toString());
+			Source source = Source.fromFileName(specificationPath.toAbsolutePath().toString());
 			TAFTermReader reader = new TAFTermReader(new TermFactory());
 
 			IStrategoTerm topSpecTerm;
