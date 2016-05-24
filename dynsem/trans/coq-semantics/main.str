@@ -48,29 +48,63 @@ rules
 rules // Module generation
 
   module-to-coq:
-    Module(name, contents) -> coq_rs
+    Module(name, contents) -> defs
     with
-      sigs := <filter(?Signatures(<id>))> contents;
-      sigs0 := <concat> sigs;
-      ads0 := <filter(?ArrowDeclarations(<id>))> sigs0;
+      // Accumulate list of all signatures in module 
+      sigs0 := <filter(?Signatures(<id>))> contents;
+      sigs := <concat> sigs0;
+      
+      // Accumulate list of all sort declarations and constructors in module
+      ss0 := <filter(?Sorts(<id>))> sigs;
+      ss := <concat> ss0;
+      sds := <filter(?SortDecl(<id>))> ss;
+      scs0 := <filter(?Constructors(<id>))> sigs;
+      scs := <concat> scs0;
+      
+      // Instantiate map for collecting information about declared simple sorts (constructor sort/type signatures)
+      sc_map := <new-hashtable>;
+      <map(instantiate-sortdecl(|sc_map))> sds;
+      <map(push-sort-constructor(|sc_map))> scs;
+      sc_keys := <hashtable-keys> sc_map;
+      coq_cs := <map(sortdecls-to-coq(|sc_map))> sc_keys;
+      
+      // Accumulate list of all arrow declarations in module
+      ads0 := <filter(?ArrowDeclarations(<id>))> sigs;
       ads := <concat> ads0;
-      m := <new-hashtable>;
-      <map(instantiate-sig(|m))> ads;
+      // Instantiate map collecting information about declared arrows (sort/type signature and a list of rules)
+      ad_map := <new-hashtable>;
+      <map(instantiate-arrow(|ad_map))> ads;
       rs0 := <filter(?Rules(<id>))> contents;
       rs := <concat> rs0;
       // create map from relation names to rules of relation
-      <foldr(!m, push-named-rule)> rs;
-      keys := <hashtable-keys> m;
+      <map(push-named-rule(|ad_map))> rs;
+      
+      ad_keys := <hashtable-keys> ad_map;
       // generate rules for all relations
-      coq_rs := <map(rules-to-coq(|m))> keys
+      coq_rs := <map(rules-to-coq(|ad_map))> ad_keys;
+      
+      defs := <concat> [coq_cs, coq_rs]
 
-  instantiate-sig(|m):
+  instantiate-sortdecl(|m):
+    sort_name -> 1
+    with
+      <hashtable-put(|sort_name, [])> m
+
+  instantiate-arrow(|m):
     ArrowDecl(from_sort, rel_name, to_sort) -> 1
     with
       <hashtable-put(|rel_name, ([], (from_sort, to_sort)))> m
   
-  push-named-rule:
-    (rule, m) -> m
+  push-sort-constructor(|m):
+    ConsDecl(name, from_sorts, SimpleSort(to_sort), annotations) -> 1
+    with
+      l := <length; int-to-string> from_sorts;
+      name' := <concat-strings> [name, l];
+      cs := <hashtable-get(|to_sort)> m;
+      <hashtable-put(|to_sort, [(name', from_sorts)|cs])> m
+  
+  push-named-rule(|m):
+    rule -> 1
     with
       (conc, prems) := <get-premises-and-conclusion> rule;
       name := <get-rel-name> conc;
@@ -102,12 +136,37 @@ rules // Sort-to-type generation
   sort-to-coq:
     SimpleSort(x) -> x
 
+  sort-to-coq:
+    MapSort(x, y) -> Apply(Apply(maptype, x'), y')
+    with
+      maptype := <map-type>;
+      x' := <sort-to-coq> x;
+      y' := <sort-to-coq> y
+    
+rules // AST/sort signature generation
+
+  sortdecls-to-coq(|m):
+    ident_key -> S|[Inductive ident_key : Type := decls.]|
+    with
+      cs := <hashtable-get(|ident_key)> m;
+      ccs := <map(sortdecl-to-coq(|ident_key))> cs;
+      decls := ListDeclBar(ccs)
+
+  sortdecl-to-coq(|sort_name):
+    (constructor_name, args) ->
+      ConsDecl(constructor_name,
+               None(),
+               OptType(c))
+    with
+      args' := <map(sort-to-coq)> args;
+      c := <foldr(!sort_name, mk-arrow)> args'
+
 rules // Rule generation
 
   rules-to-coq(|m):
     ident_key -> S|[Inductive ident_key : ident_from -> ident_to -> Prop := decls.]|
     with
-      <hashtable-get(|ident_key)> m; ?(rs, (from_sort, to_sort));
+      (rs, (from_sort, to_sort)) := <hashtable-get(|ident_key)> m;
       ident_from := <sort-to-coq> from_sort;
       ident_to := <sort-to-coq> to_sort;
       cs := <map(rule-to-coq(|ident_key))> rs;
@@ -115,9 +174,9 @@ rules // Rule generation
 
   rule-to-coq(|rel_name):
     rule ->
-    ConsDecl(ident_name,
-             OptBinders(idents),
-             OptType(rl))
+      ConsDecl(ident_name,
+               OptBinders(idents),
+               OptType(rl))
     with
       (conc, prems) := <get-premises-and-conclusion> rule;
       // Rule name
@@ -133,12 +192,15 @@ rules // Rule generation
       c := <formula-to-coq> conc;
       // Premises
       ps := <map(formula-to-coq)> prems;
-      rl := <foldr(!c, mk-arrow)> ps // arrows nested to the right, with the conclusion as final element
+      rl := <foldr(!c, mk-arrowln)> ps // arrows nested to the right, with the conclusion as final element
   
   // Is there a way to just pass the constructor instead of creating these wrappers?
   // Can we create a lambda? 
-  mk-arrow:
+  mk-arrowln:
     (x, y) -> ArrowLn(x, y)
+
+  mk-arrow:
+    (x, y) -> Arrow(x, y)
       
   mk-bind:
     s -> Bind(s)
@@ -182,9 +244,10 @@ rules // Auxiliary entity generation
   aux-ent-to-coq:
     (trm, Reads(reads)) -> res
     with
-      debug;
       res := <foldl(labelcomp-pair-to-coq; mk-app-rev)> (reads, trm)
 
+  // Is there a way to just pass the constructor instead of creating these wrappers?
+  // Can we create a lambda?
   labelcomp-pair-to-coq:
     (LabelComp(_, trm), rel_name) ->
       (res, rel_name)
@@ -210,7 +273,8 @@ rules // Term generation
     MapExtend(m1, m2) ->
       Apply(Apply(Apply(mu, m2'), x'), y')
     with
-      ((Map([Bind(x, y)]) := m1) <+ debug(!"Please use bindings of the form {x |--> y, m}"));
+      ((Map([Bind(x, y)]) := m1) 
+        <+ debug(!"Please use map updates of the form {x |--> y, m}. Other kinds of updates are not supported currently."));
       mu := <map-update>;
       m2' := <term-to-coq> m2;
       x' := <term-to-coq> x;

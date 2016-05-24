@@ -2,5 +2,6 @@ module coq-semantics/coqmappings
 
 rules
   
+  map-type = !"map"
   map-lookup = !"map_lookup"
   map-update = !"map_update"
