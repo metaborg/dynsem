@@ -12,23 +12,8 @@ imports
 
 imports
   lib-ds
-	ds2ds/sugar
-	ds2ds/factorize
-	ds2ds/explicate
-	analysis/resolve-includes
-	ds2ds/fuse-sections
-	ds2ds/copy-propagation
-	ds2ds/constant-propagation
-	ds2ds/expand-implicits
-	ds2ds/desugar-varschemes
-	ds2ds/extra-typeannos
-	ds2ds/desugar-aliases
-	ds2ds/meta-functions
 	analysis/main
-	analysis/lib-analysis
-	analysis/constructors
-	backend/java-backend/main
-	backend/java-backend/utils
+	ds2ds/core
 	backend/interpreter/main
 	
 signature
@@ -123,160 +108,6 @@ rules // Debugging
       result   := <desugar-top> ast
 			
 rules // Builders
-  
-  refocus-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"refocused.ds")> path;
-      result   := <refocus-module; pp-debug> selected
-
-  flatten-imports-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"imported.ds")> path;
-      in-project-path(
-        result := <include-imports; sugar-all; pp-debug> ast
-      |project-path)
-
-  add-extra-typeannos-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"typeannos.ds")> path;
-      in-project-path(
-        result := <include-imports; desugar-top; fuse-sections; add-extra-typeannos-module; sugar-all; pp-debug> ast
-      |project-path)
-  
-  rewrite-metafunctions-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"metafuncs.ds")> path;
-      in-project-path(
-        result := <include-imports; desugar-top; fuse-sections; unmetafunc-module; sugar-all; pp-debug> ast
-      |project-path)
-
-  desugar-aliases-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"noaliases.ds")> path;
-      in-project-path(
-        result := <include-imports; desugar-top; fuse-sections; desugar-aliases-module; sugar-all; pp-debug> ast
-      |project-path)
-
-  expand-implicits-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"explimpls.ds")> path;
-      in-project-path(
-        result := <include-imports; desugar-top; fuse-sections; expand-implicits-module; sugar-all; pp-debug> ast
-      |project-path)
-
-  desugar-varschemes-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"varschemes.ds")> path;
-      in-project-path(
-        result := <include-imports; desugar-top; fuse-sections; desugar-varschemes-module; sugar-all; pp-debug> ast
-      |project-path)
-
-  explicate-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"explicated.ds")> path;
-      in-project-path(
-        result   := <include-imports; desugar-top; fuse-sections; explicate-module; sugar-all; pp-debug> ast
-      |project-path)
-
-  factorize-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"factorized.ds")> path;
-      in-project-path(
-        result := <include-imports; desugar-top; fuse-sections; factorize-module; sugar-all; pp-debug> ast
-      |project-path)
-
-  copy-propagation-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"copyprop.ds")> path;
-      in-project-path(
-        result   := <include-imports; desugar-top; copy-propagation-module; sugar-all; pp-debug> ast
-      |project-path)
-
-  constant-propagation-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"constprop.ds")> path;
-      in-project-path(
-        result   := <include-imports; desugar-top; constant-propagation-module; sugar-all; pp-debug> ast
-      |project-path)
-
-  all-to-java-editor:
-    (_, _, ast, path, project-path) -> None()
-    with
-      in-project-path(
-        init-options(|path, project-path);
-	      <log-timed(
-	        log-timed(
-	          include-imports | "Import flattening"
-	        );
-	        log-timed(
-	          desugar-top; fuse-sections | "Desugaring"
-	        );
-	        log-timed(
-	          desugar-varschemes-module | "Desugaring variable schemes"
-	        );
-	        log-timed(
-	          add-extra-typeannos-module | "Adding extra typeannos"
-	        );
-	        log-timed(
-            desugar-aliases-module | "Desugaring aliases"
-          );
-	        log-timed(
-	          factorize-module | "Factorization 1/2"
-	        );
-	        log-timed(
-	          expand-implicits-module | "Implicits expansion"
-	        );
-	        log-timed(
-	          factorize-module | "Factorization 2/2"
-	        );
-	        log-timed(
-	          explicate-module | "Explication"
-	        );
-	        log-timed(
-            copy-propagation-module | "Copy propagation"
-          );
-          log-timed(
-            constant-propagation-module | "Constant propagation"
-          );
-	        log-timed(
-	          ds2java | "Interpreter generation"
-	        )
-	      | "Total")> ast
-	    |project-path)
-      
-  all-to-core-editor:
-    (_, position, ast, path, project-path) -> (filename, result)
-    with
-      result := <in-project-path(
-  	      init-options(|path, project-path);
-          include-imports;
-          desugar-top;
-          fuse-sections;
-          desugar-varschemes-module;
-          add-extra-typeannos-module;
-          desugar-aliases-module;
-          factorize-module;
-          expand-implicits-module;
-          factorize-module;
-          explicate-module;
-          copy-propagation-module;
-          constant-propagation-module;
-          defactorize-module;
-          sugar-all;
-          pp-debug
-        |project-path)> ast;
-      filename := <guarantee-extension(|"core.ds")> path
       
   // format rules
   format-editor:
@@ -285,8 +116,3 @@ rules // Builders
       filename := <guarantee-extension(|"pp.ds")> path;
       result   := <pp-debug> ast
 
-  unstrict-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"unstrict.ds")> path;
-      result   := <unstrict-rules; pp-debug> selected

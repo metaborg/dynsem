@@ -7,10 +7,17 @@ imports
   signatures/ds-sig
   stratego/metaborg
   ds2ds/sugar
+  pp
   ds
   
 strategies
-  
+
+  refocus-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"refocused.ds")> path;
+      result   := <refocus-module; pp-debug> selected
+
   refocus-module : 
     Module(name, section*) -> Module(name, section'*)
     where 

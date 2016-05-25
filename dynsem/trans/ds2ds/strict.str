@@ -7,8 +7,17 @@ imports
   signatures/ds-sig
   stratego/metaborg
   ds2ds/sugar
+  pp
   ds
-  
+
+rules
+
+  unstrict-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"unstrict.ds")> path;
+      result   := <unstrict-rules; pp-debug> selected
+
 rules
 	
 	unstrict-rules = desugar-top; extract-stricts; alltd(add-value-requirements); alltd(unstrict); sugar-all
