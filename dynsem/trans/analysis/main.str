@@ -53,7 +53,8 @@ rules
 	    desugar-top;
 	    log-timed(mark-vars| "Marking variable def sites");
 	    log-timed(rename-all| "Renaming variables");
-	    log-timed(store-all| "Storing all definitions")
+	    log-timed(store-all| "Storing all definitions");
+	    log-timed(unrename-all| "Unrenaming variables")
   
   store-all:
     m@Module(n, section*) -> m
@@ -83,8 +84,7 @@ rules /* helpers for import handling */
 
   resolve-path:
   	import-string -> <ds-source-and-include-locations; fetch-elem(!$[[<id>]/[import-string].ds]; file-exists)>
-  		
-  
+  		  
   parse-ds-import(mk-err) =
     parse-file(
       <mk-err> $[Imported module cannot be resolved],

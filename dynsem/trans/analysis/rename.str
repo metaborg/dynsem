@@ -70,6 +70,8 @@ rules
 
 rules
 
+  unrename-all = alltd(unrename-var)
+
   unrename-var:
   	v -> <invrename(|Vars())> v
   	where
