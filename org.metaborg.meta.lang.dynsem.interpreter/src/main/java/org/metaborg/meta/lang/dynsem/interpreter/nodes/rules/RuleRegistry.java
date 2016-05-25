@@ -1,8 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,14 +15,13 @@ import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-import com.oracle.truffle.api.source.Source;
 
 public class RuleRegistry {
 
 	private final Map<String, RuleRoot> rules = new HashMap<>();
 
-	public RuleRegistry(Path specPath) {
-		populate(this, specPath);
+	public RuleRegistry(InputStream specInput) {
+		populate(this, specInput);
 		init();
 	}
 
@@ -69,13 +67,13 @@ public class RuleRegistry {
 		return name + "/" + constr + "/" + arity;
 	}
 
-	private static void populate(RuleRegistry reg, Path specificationPath) {
+	private static void populate(RuleRegistry reg, InputStream specInput) {
 		try {
-			Source source = Source.fromFileName(specificationPath.toAbsolutePath().toString());
 			TAFTermReader reader = new TAFTermReader(new TermFactory());
 
 			IStrategoTerm topSpecTerm;
-			topSpecTerm = reader.parseFromStream(source.getInputStream());
+			topSpecTerm = reader.parseFromStream(specInput);
+			specInput.close();
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 			for (IStrategoTerm ruleTerm : rulesTerm) {

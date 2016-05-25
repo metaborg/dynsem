@@ -17,10 +17,10 @@ rules /* language file. interpreter entry point */
       
       import java.io.IOException;
       import java.io.InputStream;
+      import java.io.FileInputStream;
+      import java.io.FileNotFoundException;
       import java.io.OutputStream;
       import java.io.PrintStream;
-      import java.nio.file.Path;
-      import java.nio.file.Paths;
       import java.util.concurrent.Callable;
       
       import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
@@ -63,12 +63,18 @@ rules /* language file. interpreter entry point */
         
         @Override
         public DynSemContext createDynSemContext(InputStream in, PrintStream out) {
-          return createDynSemContext(in, out, Paths.get(SPEC_FILE), Paths.get(PARSE_TABLE));
+          try {
+            InputStream specInput = new FileInputStream(SPEC_FILE);
+            InputStream parseTableInput = new FileInputStream(PARSE_TABLE);
+            return createDynSemContext(in, out, specInput, parseTableInput);
+          } catch (FileNotFoundException fnfex) {
+            throw new RuntimeException(fnfex);
+          }
         }
 
-        public DynSemContext createDynSemContext(InputStream in, PrintStream out, Path specPath, Path tablePath) {
+        public DynSemContext createDynSemContext(InputStream in, PrintStream out, InputStream specInput, InputStream parseTableInput) {
           return new DynSemContext(new ~x:$[[<LanguageName>]TermRegistry](),
-                      new x_ruleregistry(specPath), tablePath, in, out);  
+                      new x_ruleregistry(specInput), parseTableInput, in, out);
         }
       
         public static void main(String[] args) throws Exception {

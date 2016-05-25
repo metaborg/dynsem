@@ -2,7 +2,6 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.file.Path;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
@@ -21,17 +20,17 @@ public class DynSemContext {
 
 	private DynSemPrimedRun primedRun;
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, Path parseTable) {
-		this(termRegistry, ruleRegistry, parseTable, System.in, System.out);
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream parseTableInput) {
+		this(termRegistry, ruleRegistry, parseTableInput, System.in, System.out);
 	}
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, Path parseTable, InputStream input,
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream parseTableInput, InputStream input,
 			PrintStream output) {
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
-		this.langParser = new DynSemLanguageParser(parseTable);
+		this.langParser = new DynSemLanguageParser(parseTableInput);
 	}
 
 	public DynSemLanguageParser getParser() {
