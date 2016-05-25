@@ -67,7 +67,7 @@ rules /* native operators */
       ty-str := <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
 
   desugar-native-types:
-    NativeSortFunCall(recv, name, arg*) -> NativeFunCall(<type-of> recv, name, recv, arg*)
+    SortFunCall(name, recv, arg*) -> NativeFunCall(<type-of> recv, name, recv, arg*)
   
   type-of:
     NativeOp(c, k*) -> ty

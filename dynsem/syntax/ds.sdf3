@@ -162,11 +162,14 @@ context-free syntax // terms
   Term.MapKeys = [allkeys([Term])]
   Term.MapValues = [allvalues([Term])]
 
-  Term.NativeSortFunCall = <<Term>.<ID>(<{Term ", "}*>)> {left}
-  
-  Term.SortFunCall = <<ID>[<Term>](<{Term ", "}*>)> {deprecated("Use receiver.fun(args*) instead")}
+  Term.SortFunCall = <<ID>[<Term>](<{Term ", "}*>)>
 
 context-free priorities
 
-  Term.MapKeys, Term.MapValues > Term.Con > Term.MapHas, Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
+  Rule.Axiom, Rule.Rule, Rule.RuleW
+  > Term.MapKeys, Term.MapValues
+  > Term.Con
+  > Term.MapHas, Term.MapSelect
+  > Term.MapExtend, Term.As
+  > Cast.Cast
   
