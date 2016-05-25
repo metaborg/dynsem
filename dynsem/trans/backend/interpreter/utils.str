@@ -34,6 +34,7 @@ rules
       SourceStartSymbol: _ -> <PropertiesFile; read-property(|"source.startsymbol", "MISSING")>
       RuleRegistry: _ -> <PropertiesFile; read-property(|"target.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")>
       DesugarTransform: _ -> <PropertiesFile; read-property(|"target.desugarer", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")>
+      CleanTarget: _ -> <PropertiesFile; read-property(|"target.clean", "false"); ?"true">
     )
 
   ds-to-interp-write-classes(|package) = emit-java-classes(overwrite-merge-strategy, id | package, <JavaGenDir>)

@@ -10,6 +10,7 @@ rules
   
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
+    where(ds-to-interp-clean-target);
     <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
     <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
     <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
@@ -19,6 +20,12 @@ rules
     <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
     ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>);
     ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)
+
+  ds-to-interp-clean-target =
+    CleanTarget <
+      <concat-strings> [<JavaGenDir>, "/", <string-replace(|".", "/")> <TopPackageName>];
+      ds-rmdir
+    + id
 
 rules /* Sort & Constructor classes */
 
