@@ -551,7 +551,7 @@ rules
       e* := <zip(\ (ex_ty', trm) -> <ds2java-term-build(|ex_ty')> trm \)> (c-c-ty*, child*)
   
   ds2java-term-build(|ex_ty):
-    SortFunCall(x_fname, par, arg*) -> e |[ e_on.x_fname(e*)]|
+    NativeSortFunCall(par, x_fname, arg*) -> e |[ e_on.x_fname(e*)]|
     where
     	e_on := <ds2java-term-build(|ALPHATYPE())> par;
     	par-ty := <type-of> par;

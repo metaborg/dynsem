@@ -241,7 +241,7 @@ rules
       cast-ty := <rw-type> ty-t
 
   type-check-build-nativefuncall:
-    SortFunCall(fun-name, parent-t, param-t*) -> fun-ty
+    NativeSortFunCall(parent-t, fun-name, param-t*) -> fun-ty
     where
       parent-ty := <type-check-build> parent-t;
       parent-def := <lookup-def(|Types())> parent-ty;
