@@ -10,7 +10,7 @@ rules // utils for deterministic variable name generation
   
   next-variable(|prefix) = <newname> prefix
  
-  next-variable = next-variable(|"lifted_")
+  next-variable = next-variable(|"_lifted_")
 
 
 rules // projections for sorts
