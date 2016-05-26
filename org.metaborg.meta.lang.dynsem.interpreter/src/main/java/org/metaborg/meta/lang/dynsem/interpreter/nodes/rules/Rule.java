@@ -11,9 +11,9 @@ import org.spoofax.terms.TermVisitor;
 import org.spoofax.terms.util.NotImplementedException;
 import org.strategoxt.lang.Context;
 
-import trans.pp_type_0_0;
-import trans.rw_type_0_0;
-import trans.trans;
+import dynsem.trans.pp_type_0_0;
+import dynsem.trans.rw_type_0_0;
+import dynsem.trans.trans;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;

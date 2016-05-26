@@ -9,8 +9,8 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 
-import trans.pp_type_0_0;
-import trans.trans;
+import dynsem.trans.pp_type_0_0;
+import dynsem.trans.trans;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
