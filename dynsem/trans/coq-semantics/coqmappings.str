@@ -1,6 +1,6 @@
 module coq-semantics/coqmappings
 
-rules
+rules // For maps
   
   map-type = !"map"
   map-lookup = !"map_lookup"
