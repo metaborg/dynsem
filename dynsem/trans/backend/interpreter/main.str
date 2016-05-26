@@ -9,7 +9,7 @@ imports
 
 imports
   backend/interpreter/-
-  ds2ds/-
+  ds2ds/core
   analysis/-
   
 rules
@@ -26,23 +26,8 @@ rules
       <copy-file> (<TableSourceFile>, <TableTargetFile>)
   
   ds-to-interp-main(|path, project-path) =
-    in-project-path(
-        ds-to-interp-init-options(|path, project-path)
-        ; include-imports
-        ; desugar-top
-        ; fuse-sections
-        ; desugar-varschemes-module
-        ; add-extra-typeannos-module
-        ; desugar-aliases-module
-        ; factorize-module
-        ; expand-implicits-module
-        ; factorize-module
-        ; explicate-module
-        ; copy-propagation-module
-        ; constant-propagation-module
-        ; defactorize-module
-        ; desugar-for-interpreter-module
-    |project-path)
+    module-to-core(|path, project-path);
+    in-project-path(desugar-for-interpreter-module|project-path)
   
   ds-to-interp-terms(|path, project-path) =
     in-project-path(
@@ -51,8 +36,4 @@ rules
           ds-to-interp-terms-module | "Language-specific terms"
         )
     |project-path)
-
-    
-    
-    
     

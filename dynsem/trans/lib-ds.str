@@ -379,5 +379,7 @@ rules // utils
   
   external make-absolute-path(|prefix)
   
+  external ds-rmdir(|)
+  
   
   

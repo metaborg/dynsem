@@ -1,0 +1,46 @@
+module ds2ds/core
+
+imports
+  analysis/resolve-includes
+  ds2ds/sugar
+  ds2ds/factorize
+  ds2ds/explicate
+  ds2ds/fuse-sections
+  ds2ds/copy-propagation
+  ds2ds/constant-propagation
+  ds2ds/expand-implicits
+  ds2ds/desugar-varschemes
+  ds2ds/extra-typeannos
+  ds2ds/desugar-aliases
+  ds2ds/meta-functions
+  ds2ds/defactorize
+  backend/interpreter/utils
+  pp
+
+rules
+
+  module-to-core-editor:
+    (_, position, ast, path, project-path) -> (filename, result)
+    with
+      result := <module-to-core(|path, project-path); sugar-all; pp-debug> ast;
+      filename := <guarantee-extension(|"core.ds")> path
+
+strategies
+
+  module-to-core(|path, project-path) =
+    in-project-path(
+      ds-to-interp-init-options(|path, project-path);
+      include-imports;
+      desugar-top;
+      fuse-sections;
+      desugar-varschemes-module;
+      add-extra-typeannos-module;
+      desugar-aliases-module;
+      factorize-module;
+      expand-implicits-module;
+      factorize-module;
+      explicate-module;
+      copy-propagation-module;
+      constant-propagation-module;
+      defactorize-module
+    |project-path)

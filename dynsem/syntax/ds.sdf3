@@ -166,5 +166,10 @@ context-free syntax // terms
 
 context-free priorities
 
-  Term.MapKeys, Term.MapValues > Term.Con > Term.MapHas, Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
+  Rule.Axiom, Rule.Rule, Rule.RuleW
+  > Term.MapKeys, Term.MapValues
+  > Term.Con
+  > Term.MapHas, Term.MapSelect
+  > Term.MapExtend, Term.As
+  > Cast.Cast
   

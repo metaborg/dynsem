@@ -21,7 +21,54 @@ imports
 	backend/java-backend/emit-listclasses
 	backend/java-backend/emit-genericnodes
 	backend/java-backend/emit-maputils
-  
+
+//rules
+//
+//  all-to-java-editor:
+//    (_, _, ast, path, project-path) -> None()
+//    with
+//      in-project-path(
+//        init-options(|path, project-path);
+//        <log-timed(
+//          log-timed(
+//            include-imports | "Import flattening"
+//          );
+//          log-timed(
+//            desugar-top; fuse-sections | "Desugaring"
+//          );
+//          log-timed(
+//            desugar-varschemes-module | "Desugaring variable schemes"
+//          );
+//          log-timed(
+//            add-extra-typeannos-module | "Adding extra typeannos"
+//          );
+//          log-timed(
+//            desugar-aliases-module | "Desugaring aliases"
+//          );
+//          log-timed(
+//            factorize-module | "Factorization 1/2"
+//          );
+//          log-timed(
+//            expand-implicits-module | "Implicits expansion"
+//          );
+//          log-timed(
+//            factorize-module | "Factorization 2/2"
+//          );
+//          log-timed(
+//            explicate-module | "Explication"
+//          );
+//          log-timed(
+//            copy-propagation-module | "Copy propagation"
+//          );
+//          log-timed(
+//            constant-propagation-module | "Constant propagation"
+//          );
+//          log-timed(
+//            ds2java | "Interpreter generation"
+//          )
+//        | "Total")> ast
+//      |project-path)
+
 rules
   
   ds2java-editor:

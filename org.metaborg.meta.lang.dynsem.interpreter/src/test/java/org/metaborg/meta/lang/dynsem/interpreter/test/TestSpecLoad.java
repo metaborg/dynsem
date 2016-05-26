@@ -1,8 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -26,9 +28,8 @@ public class TestSpecLoad {
 		
 		assert (DummyDynSemLanguage.INSTANCE != null);
 		
-		RuleRegistry rreg = new RuleRegistry(specFile.toPath());
-
-
+		InputStream specInput = new FileInputStream(specFile);
+		RuleRegistry rreg = new RuleRegistry(specInput);
 		assertEquals(5, rreg.ruleCount());
 	}
 

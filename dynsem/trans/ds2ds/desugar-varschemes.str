@@ -1,7 +1,7 @@
 module ds2ds/desugar-varschemes
 
 imports
-  signatures/ds-sig
+  signatures/-
   lib-ds
   analysis/main
   analysis/mark-references
@@ -16,7 +16,6 @@ rules
     mod@Module(_, _) -> Module($[[name]_varschemes], section'*)
     where
       <m-in-analysis(desugar-varschemes); unmark-vars> mod => Module(name, section'*)
-
 
   desugar-varschemes = alltd(desugar-varscheme)
   

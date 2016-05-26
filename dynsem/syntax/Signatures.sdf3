@@ -55,8 +55,9 @@ context-free syntax // constructor declarations
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
   Type = [[MapType]]
-  
-  MapType.MapSort = [Map<[Type],[Type]>]
+    
+  MapType.MapSort = [Map([Type],[Type])]
+  MapType.MapSort_Deprecated = [Map<[Type],[Type]>] {deprecated("Use Map(T1,T2) instead")}
 
 template options
 
