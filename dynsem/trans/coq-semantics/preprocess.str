@@ -4,6 +4,7 @@ imports
   coq-semantics/main
   signatures/-
   ds
+  analysis/rename
   
 rules // Term pre-processing
 
@@ -13,14 +14,15 @@ rules // Term pre-processing
 
 strategies
 
-  pre-process = bottomup(try(P))
+  pre-process = bottomup(try(P)); debug; unrename-all; debug
+//  bottomup(try(unrename-var))
 
 rules
   
   pre-process-module:
     mod -> (sort_decl_map, arrow_decl_map)
     with
-      (sort_decl_map, arrow_decl_map) := <collect-data-from-module; debug; data-to-hashmap; analyze-mutual-dependencies> mod
+      (sort_decl_map, arrow_decl_map) := <pre-process; collect-data-from-module; debug; data-to-hashmap; analyze-mutual-dependencies> mod
 
 rules // Accumulate information about declared arrows, rules, and AST constructors
 
