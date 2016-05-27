@@ -20,10 +20,10 @@ rules
   explicate-for-coq(|project-path) =
     in-project-path(
       include-imports;
-      strip-annos;
       desugar-top;
       fuse-sections;
       desugar-varschemes-module;
+      add-extra-typeannos-module;
       desugar-aliases-module;
       factorize-module;
       expand-implicits-module;
@@ -32,13 +32,13 @@ rules
       copy-propagation-module;
       constant-propagation-module;
       defactorize-module
-      |project-path)
+    |project-path)
   
   generate-coq:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"v")> path
-      ; coq-file := <explicate-for-coq(|project-path); m-in-analysis(debug(!0); module-to-coq; debug(!"done"))> ast
+      ; coq-file := <explicate-for-coq(|project-path); debug(!-1); m-in-analysis(debug(!0); module-to-coq; debug(!"done"))> ast
     with
        result := <parenthesize-Coq; prettyprint-Coq; box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
