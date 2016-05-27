@@ -54,8 +54,6 @@ rules
 	    log-timed(mark-vars| "Marking variable def sites");
 	    log-timed(rename-all| "Renaming variables");
 	    log-timed(store-all| "Storing all definitions")
-//	    ;
-//	    log-timed(unrename-all| "Unrenaming variables")
   
   store-all:
     m@Module(n, section*) -> m
