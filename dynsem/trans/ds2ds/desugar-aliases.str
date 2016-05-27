@@ -1,7 +1,7 @@
 module desugar-aliases
 
 imports
-  signatures/ds-sig
+  signatures/-
   ds
   analysis/-
 
@@ -10,7 +10,7 @@ rules
   desugar-aliases-module:
     m@Module(_, _) -> Module($[[name]_noaliases], section*)
     where
-      <m-in-analysis(desugar-aliases); unmark-vars> m => Module(name, section*)
+      <m-in-analysis(desugar-aliases; unrename-all); unmark-vars> m => Module(name, section*)
   
   desugar-aliases = alltd(desugar-alias); Module(id, remove-alias-decls)
   
