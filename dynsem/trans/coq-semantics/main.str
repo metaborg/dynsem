@@ -70,7 +70,7 @@ rules // Sort-to-type generation
   sort-to-coq:
     MapSort(x, y) -> Apply(Apply(maptype, x'), y')
     with
-      maptype := <map-type>;
+      maptype := <coq-map-type>;
       x' := <sort-to-coq> x;
       y' := <sort-to-coq> y
  
@@ -208,7 +208,7 @@ rules // Term generation
   term-to-coq:
     MapSelect(m, t) -> Apply(Apply(ml, m'), t')
     with
-      ml := <map-lookup>;
+      ml := <coq-map-lookup>;
       m' := <term-to-coq> m;
       t' := <term-to-coq> t
 
@@ -218,7 +218,7 @@ rules // Term generation
     with
       ((Map([Bind(x, y)]) := m1) 
         <+ debug(!"Please use map updates of the form {x |--> y, m}. Other kinds of updates are currently not supported."); fail);
-      mu := <map-update>;
+      mu := <coq-map-update>;
       m2' := <term-to-coq> m2;
       x' := <term-to-coq> x;
       y' := <term-to-coq> y
@@ -331,11 +331,6 @@ rules // Extracting variables
     Map(r) -> xs
     with
       xs := <extract-variables> r
-  
-//  extract-variables:
-//    MapSort(m) -> xs
-//    with
-//      xs := <extract-variables> m
   
   extract-variables:
     MapSelect(t1, t2) -> xs
