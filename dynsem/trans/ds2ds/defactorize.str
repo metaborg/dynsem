@@ -12,6 +12,11 @@ strategies
     Module(!$[[<id>]_unfactorized],
       alltd(defactorize-rule)
     )
+  
+  insert-wildcards-module =
+    Module(!$[[<id>]_unfactorized],
+      alltd(insert-wildcards-rule)
+    )
 
 rules
   
@@ -21,15 +26,29 @@ rules
       mark-var-defs-in-rule;
       repeat(
         count-varreads-rule;
-        defactorize-rule-w-progressed
+        defactorize-rule-w-progress
       )
     |}
-  
-  defactorize-rule-w-progressed =
-    insert-wildcards-rule(try(?progress));
+
+  defactorize-rule-w-progress =
     hoist-patternmatches-rule(try(?progress));
     lower-termbuilds-rule(try(?progress));
     where(!progress)
+  
+  insert-wildcards-rule =
+    ?Rule(_, _, _);
+    {| ReadCount:
+      mark-var-defs-in-rule;
+      repeat(
+        count-varreads-rule;
+        insert-wildcards-rule-w-progress
+      )
+    |}
+  
+  insert-wildcards-rule-w-progress =
+    insert-wildcards-rule(try(?progress));
+    where(!progress)
+  
   
   count-varreads-rule:
     r@Rule(_, _, _) -> r
