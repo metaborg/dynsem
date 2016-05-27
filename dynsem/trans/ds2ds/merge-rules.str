@@ -7,11 +7,7 @@ imports
   lib-ds
 
 imports
-  analysis/main
-  analysis/lib-analysis
-  analysis/mark-references
-  analysis/query
-  analysis/constructors
+  analysis/-
 
 imports
   ds2ds/sugar
@@ -25,10 +21,10 @@ rules /* merge overlapping rules */
       merge-rules-in-module | "Cons merging"
     );
     log-timed(
-      m-in-analysis(merge-listrules-in-module) |	"List merging"
+      m-in-analysis(merge-listrules-in-module; unrename-all) |	"List merging"
     );
     log-timed(
-      m-in-analysis(merge-varrules-in-module) | "Variable merging"
+      m-in-analysis(merge-varrules-in-module; unrename-all) | "Variable merging"
     )
 
 rules /* Merge rules by constructor */

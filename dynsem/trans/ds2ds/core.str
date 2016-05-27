@@ -2,6 +2,7 @@ module ds2ds/core
 
 imports
   analysis/resolve-includes
+  analysis/lib-analysis
   ds2ds/sugar
   ds2ds/factorize
   ds2ds/explicate

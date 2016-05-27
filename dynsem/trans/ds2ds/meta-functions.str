@@ -2,7 +2,7 @@ module ds2ds/meta-functions
 
 imports
   analysis/-
-  signatures/ds-sig
+  signatures/-
   ds
   lib-ds
 
@@ -11,7 +11,7 @@ rules
   unmetafunc-module:
   	m@Module(_, _) -> Module($[[name]_unmetafunc], section*)
   	where
-  		<m-in-analysis(unmetafunc); unmark-vars> m => Module(name, section*)
+  		<m-in-analysis(unmetafunc; unrename-all); unmark-vars> m => Module(name, section*)
   
   unmetafunc:
   	m@Module(name, section*) -> Module(name, [sig', Rules(rule''*), non-rules*])
