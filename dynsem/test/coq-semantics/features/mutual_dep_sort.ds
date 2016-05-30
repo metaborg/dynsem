@@ -1,0 +1,8 @@
+module test/coq-semantics/features/mutual_dep_sort
+
+signature
+
+  sorts A constructors
+    a : B -> A
+  sorts B constructors
+    b : A -> B
