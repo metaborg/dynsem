@@ -129,8 +129,8 @@ rules // AST sort constructors to inductive types in Coq
 rules // Rule generation
 
   // The (0|1) for this relation is used to indicate whether we are generating a new inductive type (1) or not (0). 
-  //   arrowdecls-to-coq \subseteq List(ArrowName) x List(SortName) x (0|1)
-  //                               x List(Induc) x List(SortName)
+  //   arrowdecls-to-coq \subseteq List(ArrowName) x List(ArrowName) x (0|1)
+  //                               x List(Induc) x List(ArrowName)
   arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map):
     (arrows, seen_arrows, w) -> (res, seen_arrows'')
     with
