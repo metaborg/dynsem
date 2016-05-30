@@ -10,12 +10,6 @@ imports
 
 strategies
 
-  defactorize-module-editor:
-    (_, _, ast, path, project-path) -> (filename, <pp-debug> ast')
-    with
-      filename := <guarantee-extension(|"defac.ds")> path;
-      ast' := <desugar-top; mark-vars; defactorize-module; sugar-all> ast
-
   defactorize-module =
     Module(!$[[<id>]_unfactorized],
       alltd(defactorize-rule)
@@ -135,7 +129,6 @@ rules
   eliminate-patternmatch-premise =
     ?f@Formula(Match(VarRef(v), rhs));
     <ReadCount> v => 1;
-    <debug(!"record elide match: ")> f;
     rules(PropagatePatternMatch: Var(v) -> rhs)
 
   replace-singletonwrite(record-progress):

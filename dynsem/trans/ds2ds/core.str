@@ -43,6 +43,6 @@ strategies
       ; explicate-module
       ; copy-propagation-module
       ; constant-propagation-module
-//      ; defactorize-module
-//      ; insert-wildcards-module
+      ; defactorize-module
+      ; insert-wildcards-module
     |project-path)
