@@ -153,7 +153,7 @@ rules // Arrow dependency analysis
     arrow_name -> 1
     with
       (ruls, rel_sig) := <hashtable-get(|arrow_name)> arrow_decl_map; 
-      deps := <map({prems: Rule(prems, _, _) := <id>; (<foldr(![], arrow-definee(|arrow_name))> prems)})> ruls;
+      deps := <map({prems: Rule(prems, _, _) := <id>; (<foldr(![], arrow-definee(|arrow_name))> prems)}); concat> ruls;
       <hashtable-put(|arrow_name, deps)> arrow_dep_map
 
   arrow-definee(|arrow_name):
@@ -184,4 +184,3 @@ rules // Utilities for querying rules
     
 //  get-premises-and-conclusion:
 //    Axiom(conc) -> (conc, [])
-  
