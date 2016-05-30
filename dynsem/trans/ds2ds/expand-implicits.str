@@ -1,7 +1,7 @@
 module expand-implicits
 
 imports
-  signatures/ds-sig
+  signatures/-
   ds
   analysis/-
   lib-ds
@@ -91,7 +91,7 @@ rules /* lift and expand subterms on build sides */
       (t', p*) := <lift-where-indirect> (ty, t)
 
   lift-where-indirect:
-    (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, MatchedVar(v-new)))])
+    (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, Var(v-new)))])
     where
       t-ty := <type-of> t;
       <not(type-coerce-direct(fail))> (t-ty, e-ty);

@@ -21,9 +21,6 @@ rules
     Cast(_, ty) -> <rw-type> ty
   
   type-of:
-    MatchedVar(v) -> <type-of> VarRef(v)
-  
-  type-of:
     Var(v) -> <type-of> VarRef(v)
 
   type-of:

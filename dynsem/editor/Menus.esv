@@ -13,3 +13,5 @@ menus
     action  : "Generate DynSem Core"   = module-to-core-editor (openeditor) (source)
     action  : "Generate Coq"           = generate-coq (openeditor) (meta)
     action  : "Generate Interpreter"   = ds-to-interp-editor
+    
+    action  : "Defactorize"            = defactorize-module-editor (openeditor) (source) (meta)
