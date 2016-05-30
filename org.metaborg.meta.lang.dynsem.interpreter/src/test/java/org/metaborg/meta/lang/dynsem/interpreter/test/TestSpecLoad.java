@@ -43,14 +43,12 @@ public class TestSpecLoad {
 		}
 
 		@Override
-		public DynSemContext createDynSemContext(InputStream input,
-				PrintStream output) {
+		protected DynSemContext createContext(com.oracle.truffle.api.TruffleLanguage.Env env) {
 			return new DynSemContext(null, null, null);
 		}
 
 		@Override
-		protected CallTarget parse(Source code, Node context,
-				String... argumentNames) throws IOException {
+		protected CallTarget parse(Source code, Node context, String... argumentNames) throws IOException {
 			return null;
 		}
 

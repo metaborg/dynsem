@@ -3,7 +3,9 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Map;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.TruffleLanguage;
@@ -14,16 +16,23 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
+	// Keys for configuration parameters for a DynSemContext.
+	public static final String TERM_REGISTRY = "TERM_REGISTRY";
+	public static final String PARSER = "PARSER";
+	public static final String SPECIFICATION_TERM = "SPECIFICATION_TERM";
 
 	public DynSemLanguage() {
 	}
 
 	@Override
 	protected DynSemContext createContext(Env env) {
-		return createDynSemContext(env.in(), new PrintStream(env.out()));
+		Map<String, Object> config = env.getConfig();
+		ITermRegistry termRegistry = (ITermRegistry) config.get(TERM_REGISTRY);
+		IDynSemLanguageParser parser = (IDynSemLanguageParser) config.get(PARSER);
+		InputStream specificationTermInput = (InputStream) config.get(SPECIFICATION_TERM);
+		return new DynSemContext(termRegistry, new RuleRegistry(specificationTermInput), parser, env.in(),
+				new PrintStream(env.out()));
 	}
-
-	public abstract DynSemContext createDynSemContext(InputStream input, PrintStream output);
 
 	public Node createFindContextNode0() {
 		return createFindContextNode();

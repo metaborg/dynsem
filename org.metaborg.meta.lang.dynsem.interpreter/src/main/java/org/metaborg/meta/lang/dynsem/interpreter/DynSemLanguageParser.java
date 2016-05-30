@@ -16,15 +16,22 @@ import org.spoofax.terms.io.binary.TermReader;
 
 import com.oracle.truffle.api.source.Source;
 
-public class DynSemLanguageParser {
+/**
+ * Default {@link IDynSemLanguageParser} implementation which parses a program in its textual representation to an
+ * {@link IStrategoTerm}, using the {@link SGLR} parser.
+ */
+public class DynSemLanguageParser implements IDynSemLanguageParser {
 	private InputStream parsetableInput;
+	private String startSymbol;
 	private SGLR parser;
 
-	public DynSemLanguageParser(InputStream parsetableInput) {
+	public DynSemLanguageParser(InputStream parsetableInput, String startSymbol) {
 		this.parsetableInput = parsetableInput;
+		this.startSymbol = startSymbol;
 	}
 
-	public IStrategoTerm parse(Source src, String startSymbol) {
+	@Override
+	public IStrategoTerm parse(Source src) {
 		if (parser == null) {
 			createParser();
 		}
