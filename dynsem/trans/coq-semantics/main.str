@@ -54,7 +54,9 @@ rules // Module generation
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) := <pre-process-module> mod;
       
       sort_decl_names := <hashtable-keys> sort_decl_map;
-      coq_cs := <map(sortdecl-to-coq(|sort_decl_map, sort_dep_map))> sort_decl_names;
+//      coq_cs := <map(sortdecl-to-coq(|sort_decl_map, sort_dep_map))> sort_decl_names;
+      (coq_cs, _) := <sortdecls-to-coq(|sort_decl_map, sort_dep_map)> (sort_decl_names, [], 1);
+      debug(!"SORTDECLS:");
       
       arrow_decl_names := <hashtable-keys> arrow_decl_map;
       // generate rules for all relations
@@ -76,11 +78,42 @@ rules // Sort-to-type generation
  
 rules // AST sort constructors to inductive types in Coq
 
+  // The (0|1) for this relation is used to indicate whether we are generating a new inductive type (1) or not (0). 
+  //   sort-decls-to-coq \subseteq List(SortName) x List(SortName) x (0|1)
+  //                               x List(Induc) x List(SortName) 
+  sortdecls-to-coq(|sort_decl_map, sort_dep_map):
+    (srts, seen_sorts, w) -> (res, seen_sorts')
+    // S|[Inductive ident_key : Type := decls.]|
+    with
+      // If the list of sort names is empty, we are done generating sort constructors 
+      ( [] := srts; res := []; seen_sorts' := seen_sorts )
+        <+ 
+      [sort_name|sort_names] := srts;
+      // If the constructors for the current sort has already been generated, don't generate it again.
+      ( (<elem> (sort_name, seen_sorts); res := []; seen_sorts' := seen_sorts )
+        <+
+      // Otherwise, generate it
+      ( constrctors := <hashtable-get(|sort_name)> sort_decl_map;
+        // Generate its constructors
+        coq_constrctors := <map(sort-constructor-to-coq(|sort_name))> constrctors;
+        deps := <hashtable-get(|sort_name)> sort_dep_map;
+        // Generate the constructors for the sorts on which the sort depends
+        (coq_deps, seen_sorts') := <sortdecls-to-coq(|sort_decl_map, sort_dep_map)> (deps, [sort_name|seen_sorts], 0);
+        // Only make a `| ` if the list of constructors is non-empty:
+        (([] := coq_constrctors; decls := ListDecl(coq_constrctors))
+          <+ decls := ListDeclBar(coq_constrctors));
+        (coq_inductives, seen_sorts'') := <sortdecls-to-coq(|sort_decl_map, sort_dep_map)> (sort_names, seen_sorts', w);
+        (!w; ?0 < (res := <concat> [[Induc(sort_name, None(), Type(), decls)], coq_deps, coq_inductives])
+                + (res := [Inductive([Induc(sort_name, None(), Type(), decls)|coq_deps])|coq_inductives])
+        )
+      ) )
+
   sortdecl-to-coq(|sort_decl_map, sort_dep_map):
-    ident_key -> Inductive([Induc(ident_key, None(), Type(), decls)])//S|[Inductive ident_key : Type := decls.]|
+    ident_key -> Inductive([Induc(ident_key, None(), Type(), decls)])
+    // S|[Inductive ident_key : Type := decls.]|
     with
       constrctors := <hashtable-get(|ident_key)> sort_decl_map;
-      deps := <hashtable-get(|ident_key)> sort_dep_map; debug(!"SORTDEPS:");
+      deps := <hashtable-get(|ident_key)> sort_dep_map;
       coq_constrctors := <map(sort-constructor-to-coq(|ident_key))> constrctors;
       // Only make a `| ` if the sort is non-empty:
       (([] := coq_constrctors; decls := ListDecl(coq_constrctors))
@@ -102,10 +135,13 @@ rules // Rule generation
     //    S|[Inductive ident_key : ident_type := decls.]|
     with
       (rs, (ro_ents, from_sort, from_rw_ents, to_sort, to_rw_ents)) := <hashtable-get(|ident_key)> m;
+      // Collect read-only entities, if there are any
       ((ArrowROs(ros) := ro_ents)
-        <+ ros := []); 
+        <+ ros := []);
+      // Collect readable read-write entities, if there are any
       ((ArrowRWs(from_rws) := from_rw_ents)
         <+ from_rws := []); 
+      // Collect written read-write entities, if there are any
       ((ArrowRWs(to_rws) := to_rw_ents)
         <+ to_rws := []);
       pre_type := <concat> [ros, [from_sort], from_rws, [to_sort], to_rws];
