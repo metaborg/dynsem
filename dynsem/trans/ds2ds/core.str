@@ -30,19 +30,19 @@ strategies
 
   module-to-core(|path, project-path) =
     in-project-path(
-      ds-to-interp-init-options(|path, project-path);
-      include-imports;
-      desugar-top;
-      fuse-sections;
-      desugar-varschemes-module;
-      add-extra-typeannos-module;
-      desugar-aliases-module;
-      factorize-module;
-      expand-implicits-module;
-      factorize-module;
-      explicate-module;
-      copy-propagation-module;
-      constant-propagation-module;
-      defactorize-module;
-      insert-wildcards-module
+      ds-to-interp-init-options(|path, project-path)
+      ; include-imports
+      ; desugar-top
+      ; fuse-sections
+      ; desugar-varschemes-module
+      ; add-extra-typeannos-module
+      ; desugar-aliases-module
+      ; factorize-module
+      ; expand-implicits-module
+      ; factorize-module
+      ; explicate-module
+      ; copy-propagation-module
+      ; constant-propagation-module
+      ; defactorize-module
+      ; insert-wildcards-module
     |project-path)

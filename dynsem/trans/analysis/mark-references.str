@@ -6,9 +6,9 @@ imports
 
 rules
   
-  mark-vars = mark-var-defs-in-rules; mark-match-vars
+  mark-vars = mark-var-defs-in-rules
   
-  unmark-vars = alltd(\ Var(x) -> VarRef(x) \ + \ MatchedVar(x) -> VarRef(x) \)
+  unmark-vars = alltd(\ Var(x) -> VarRef(x) \)
 
 rules
 	
@@ -50,13 +50,3 @@ rules
 
 rules
   
-  mark-match-vars =
-    alltd(mark-match-var)
-  
-  mark-match-var:
-    Match(lhs, Var(v)) -> Match(lhs, MatchedVar(v))
-    
-  mark-match-var:
-    NMatch(lhs, Var(v)) -> NMatch(lhs, MatchedVar(v))
-
-
