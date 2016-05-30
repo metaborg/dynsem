@@ -22,10 +22,9 @@ strategies
 rules
   
   pre-process-module:
-    mod -> (sort_decl_map, arrow_decl_map)
+    mod -> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map)
     with
-      // (sort_decl_map, arrow_decl_map) := <pre-process; collect-data-from-module; debug; data-to-hashmap; analyze-mutual-dependencies> mod
-      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) := <pre-process; collect-data-from-module; debug; data-to-hashmap; analyze-mutual-dependencies> mod
+      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) := <pre-process; collect-data-from-module; data-to-hashmap; analyze-mutual-dependencies> mod
       
 rules // Accumulate information about declared arrows, rules, and AST constructors
 
@@ -120,7 +119,10 @@ rules // Analyze mutual dependencies
     with
       sort_dep_map := <new-hashtable>;
       arrow_dep_map := <new-hashtable>;
-      <hashtable-keys; map(sort-analyze-dependency(|sort_decl_map, sort_dep_map))> sort_decl_map
+      <hashtable-keys; map(sort-analyze-dependency(|sort_decl_map, sort_dep_map))> sort_decl_map;
+      <hashtable-keys; map(arrow-analyze-dependency(|arrow_decl_map, arrow_dep_map))> arrow_decl_map
+
+// Should these dependencies compute isets instead?
 
 rules // Sort dependency analysis
 
@@ -129,7 +131,6 @@ rules // Sort dependency analysis
     with
       constrctors := <hashtable-get(|sort_name)> sort_decl_map;
       deps := <map({c_name, c_args: ?(c_name, c_args); (<foldr(![], sort-predefined-or-definee(|sort_name))> c_args) }); concat> constrctors;
-      debug;
       <hashtable-put(|sort_name, deps)> sort_dep_map
 
   sort-predefined-or-definee(|c_name1):
@@ -143,18 +144,25 @@ rules // Sort dependency analysis
   sort-predefined-or-definee(|c_name1):
     (MapSort(from_sort, to_sort), deps) -> deps'
     with
-      from_deps := <sort-predefined-or-definee(|c_name1)> (from_sort, deps); debug;
-      deps' := <sort-predefined-or-definee(|c_name1)> (to_sort, from_deps); debug
+      from_deps := <sort-predefined-or-definee(|c_name1)> (from_sort, deps);
+      deps' := <sort-predefined-or-definee(|c_name1)> (to_sort, from_deps)
 
-//rules // Arrow dependency analysis
-//
-//  arrow-analyze-dependency(|arrow_decl_map, arrow_dep_map):
-//    arrow_name -> 1
-//    with
-//      (ruls, rel_sig) := <hashtable-get(|arrow_name)> arrow_decl_map;
-//      deps := <hashtable-keys; map({prems: (_, prems) := <hashtable-get(|<id>)>; (<foldr(![], arrow-definee(|arrow_name))> prems})> ruls 
+rules // Arrow dependency analysis
 
+  arrow-analyze-dependency(|arrow_decl_map, arrow_dep_map):
+    arrow_name -> 1
+    with
+      (ruls, rel_sig) := <hashtable-get(|arrow_name)> arrow_decl_map; 
+      deps := <map({prems: Rule(prems, _, _) := <id>; (<foldr(![], arrow-definee(|arrow_name))> prems)})> ruls;
+      <hashtable-put(|arrow_name, deps)> arrow_dep_map
 
+  arrow-definee(|arrow_name):
+    (Formula(rel), deps) -> deps'
+    with
+      arrow_name' := <get-rel-name> rel;
+      ((?arrow_name; deps' := deps)
+        <+ deps' := [arrow_name'|deps])
+  
 rules // Utilities for querying rules
 
   get-rel-name:
@@ -171,9 +179,9 @@ rules // Utilities for querying rules
   get-arrow-name:
     NamedDynamic(name) -> name
 
-  get-premises-and-conclusion:
-    RuleW(conc, prems) -> (conc, prems)
+//  get-premises-and-conclusion:
+//    RuleW(conc, prems) -> (conc, prems)
     
-  get-premises-and-conclusion:
-    Axiom(conc) -> (conc, [])
+//  get-premises-and-conclusion:
+//    Axiom(conc) -> (conc, [])
   

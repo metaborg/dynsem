@@ -40,7 +40,7 @@ rules
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"v")> path
-      ; coq-file := <explicate-for-coq(|path, project-path); debug(!-1); m-in-analysis(debug(!0); module-to-coq; debug(!"done"))> ast
+      ; coq-file := <explicate-for-coq(|path, project-path); m-in-analysis(debug(!0); module-to-coq; debug(!"done"))> ast
     with
        result := <parenthesize-Coq; prettyprint-Coq; box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
@@ -51,10 +51,10 @@ rules // Module generation
   module-to-coq:
     mod -> defs
     with
-      (sort_decl_map, arrow_decl_map) := <pre-process-module> mod;
-
+      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) := <pre-process-module> mod;
+      
       sort_decl_names := <hashtable-keys> sort_decl_map;
-      coq_cs := <map(sortdecl-to-coq(|sort_decl_map))> sort_decl_names;
+      coq_cs := <map(sortdecl-to-coq(|sort_decl_map, sort_dep_map))> sort_decl_names;
       
       arrow_decl_names := <hashtable-keys> arrow_decl_map;
       // generate rules for all relations
@@ -76,13 +76,15 @@ rules // Sort-to-type generation
  
 rules // AST sort constructors to inductive types in Coq
 
-  sortdecl-to-coq(|m):
-    ident_key -> S|[Inductive ident_key : Type := decls.]|
+  sortdecl-to-coq(|sort_decl_map, sort_dep_map):
+    ident_key -> Inductive([Induc(ident_key, None(), Type(), decls)])//S|[Inductive ident_key : Type := decls.]|
     with
-      cs := <hashtable-get(|ident_key)> m;
-      ccs := <map(sort-constructor-to-coq(|ident_key))> cs;
-      (([] := ccs; decls := ListDecl(ccs))
-       <+ decls := ListDeclBar(ccs))
+      constrctors := <hashtable-get(|ident_key)> sort_decl_map;
+      deps := <hashtable-get(|ident_key)> sort_dep_map; debug(!"SORTDEPS:");
+      coq_constrctors := <map(sort-constructor-to-coq(|ident_key))> constrctors;
+      // Only make a `| ` if the sort is non-empty:
+      (([] := coq_constrctors; decls := ListDecl(coq_constrctors))
+       <+ decls := ListDeclBar(coq_constrctors))
   
   sort-constructor-to-coq(|sort_name):
     (constructor_name, args) ->
