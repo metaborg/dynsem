@@ -15,26 +15,29 @@ rules
       LanguageName: _ -> <PropertiesFile; read-property(|"source.langname", "MISSING"); escape-java-id>
     );
     rules(
-      TableSourceFile: _ -> $[[project-path][<PropertiesFile; read-property(|"source.table", $[include/[<LanguageName>].tbl])>]]
+      TableSourceFile: _ -> $[[project-path][<PropertiesFile; read-property(|"source.table", "/target/metaborg/sdf.tbl")>]]
       SourceVersion: _ -> <PropertiesFile; read-property(|"source.version", "0.1")>
-      SourceMimeType: _ -> <PropertiesFile; read-property(|"source.mimetype", "application/x-somelanguage")>
+      SourceMimeType: _ -> <PropertiesFile; read-property(|"source.mimetype", $[application/x-[<LanguageName>]])>
+      SourceStartSymbol: _ -> <PropertiesFile; read-property(|"source.startsymbol", "MISSING")>
       ReductionStartConstrName: _ -> <PropertiesFile; read-property(|"source.initconstructor.name", "MISSING")>
       ReductionStartConstrArity: _ -> <PropertiesFile; read-property(|"source.initconstructor.arity", "MISSING")>
-      GenProject: _ -> $[[project-path][<PropertiesFile; read-property(|"target.project", project-path)>]]
-      JavaGenDir: _ -> $[[<GenProject>]/[<PropertiesFile; read-property(|"target.java", "/editor/java")>]]
-      TopPackageName: _ -> <PropertiesFile; read-property(|"target.package", $[[<language>].generated.interpreter])>
-      RelativeSpecTargetFile: _ -> <PropertiesFile; read-property(|"target.specterm", path)>
+      
+      GenProject: _ -> $[[project-path][<PropertiesFile; read-property(|"project.path", project-path)>]]
+      CleanTarget: _ -> <PropertiesFile; read-property(|"project.clean", "false"); ?"true">
+      
+      JavaGenDir: _ -> $[[<GenProject>]/[<PropertiesFile; read-property(|"project.javapath", "src/main/java")>]]
+      TopPackageName: _ -> <PropertiesFile; read-property(|"project.javapackage", $[[<LanguageName>].interpreter.generated])>
+      RelativeSpecTargetFile: _ -> <PropertiesFile; read-property(|"project.specpath", "/src/main/resources/specification.aterm")>
       SpecTargetFile: _ -> $[[<GenProject>]/[<RelativeSpecTargetFile>]]
-      RelativeTableTargetFile: _ -> <PropertiesFile; read-property(|"target.table", path)>
+      RelativeTableTargetFile: _ -> <PropertiesFile; read-property(|"project.tablepath", "/src/main/resources/parsetable.tbl")>      
       TableTargetFile: _ -> $[[<GenProject>]/[<RelativeTableTargetFile>]]
+      NativePackageName: _ -> <PropertiesFile; read-property(|"project.nativepackage", $[[<LanguageName>].interpreter.natives])>
+      RuleRegistry: _ -> <PropertiesFile; read-property(|"project.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")>
+      DesugarTransform: _ -> <PropertiesFile; read-property(|"project.preprocessor", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")>
+      
       TermsPackageName: _ -> $[[<TopPackageName>].terms]
       TermBuildPackageName: _ -> $[[<TermsPackageName>].build]
       TermMatchPackageName: _ -> $[[<TermsPackageName>].match]
-      NativePackageName: _ -> <PropertiesFile; read-property(|"target.nativepackage", $[[<language>].natives])>
-      SourceStartSymbol: _ -> <PropertiesFile; read-property(|"source.startsymbol", "MISSING")>
-      RuleRegistry: _ -> <PropertiesFile; read-property(|"target.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")>
-      DesugarTransform: _ -> <PropertiesFile; read-property(|"target.desugarer", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")>
-      CleanTarget: _ -> <PropertiesFile; read-property(|"target.clean", "false"); ?"true">
     )
 
   ds-to-interp-write-classes(|package) = emit-java-classes(overwrite-merge-strategy, id | package, <JavaGenDir>)
