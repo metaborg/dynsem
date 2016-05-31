@@ -18,12 +18,12 @@ rules
     (_, position, ast, path, project-path) -> None()
     with
       local-project-path := $[[<prim("local_path")> project-path]/];
-      result := <ds-to-interp-main(|path, local-project-path)> ast;
-      <ds-to-interp-terms(|path, local-project-path)> result;
-      fout := <fopen> (<SpecTargetFile>, "w");
+      result := <debug(!1); ds-to-interp-main(|path, local-project-path); debug(!2)> ast;
+      <debug(!3); ds-to-interp-terms(|path, local-project-path); debug(!4)> result;
+      fout := <fopen> (<OptTargetSpecFile>, "w");
       <pp-aterm-stream(|fout)> result;
       <fclose> fout;
-      <copy-file> (<TableSourceFile>, <TableTargetFile>)
+      <copy-file> (<OptTableSourceFile>, <OptTargetTableFile>)
   
   ds-to-interp-main(|path, project-path) =
     module-to-core(|path, project-path);

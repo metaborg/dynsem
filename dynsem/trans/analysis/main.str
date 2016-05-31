@@ -51,6 +51,7 @@ rules
 
   analyze-module-local =
 	    desugar-top;
+	    debug(!"FOO ");
 	    log-timed(mark-vars| "Marking variable def sites");
 	    log-timed(rename-all| "Renaming variables");
 	    log-timed(store-all| "Storing all definitions")
