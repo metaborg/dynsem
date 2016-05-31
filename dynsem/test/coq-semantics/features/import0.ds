@@ -1,0 +1,7 @@
+module test/coq-semantics/features/import0
+
+signature
+
+  sorts X constructors
+    a : X
+    b : X -> X

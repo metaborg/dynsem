@@ -1,0 +1,3 @@
+module test/coq-semantics/features/import1
+
+imports test/coq-semantics/features/import0
