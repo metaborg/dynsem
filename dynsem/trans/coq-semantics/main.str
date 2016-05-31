@@ -218,28 +218,31 @@ rules // Formulae generation
 
   formula-to-coq:
     Relation(r,
-             Source(sterm, _),
+             Source(sterm, rws),
              arrow, 
-             Target(tterm, _)) ->
-      Apply(Apply(res0, st), tt)
+             Target(tterm, rws')) ->
+      tt'
     with
       rel_name := <get-arrow-name> arrow;
       res0 := <aux-ent-to-coq> (rel_name, r);
       st := <term-to-coq> sterm;
-      tt := <term-to-coq> tterm
+      st' := <foldl(labelcomp-pair-to-coq; mk-app-rev)> (rws, Apply(res0, st));
+      tt := <term-to-coq> tterm;
+      tt' := <foldl(labelcomp-pair-to-coq; mk-app-rev)> (rws', Apply(st', tt))
+      
 
   // does not occur needed in desugared dynsem
-  formula-to-coq:
-    Relation(r,
-             Source(sterm),
-             arrow, 
-             Target(tterm)) ->
-      Apply(Apply(res0, st), tt)
-    with
-      rel_name := <get-arrow-name> arrow;
-      res0 := <aux-ent-to-coq> (rel_name, r);
-      st := <term-to-coq> sterm;
-      tt := <term-to-coq> tterm
+//  formula-to-coq:
+//    Relation(r,
+//             Source(sterm),
+//             arrow, 
+//             Target(tterm)) ->
+//      Apply(Apply(res0, st), tt)
+//    with
+//      rel_name := <get-arrow-name> arrow;
+//      res0 := <aux-ent-to-coq> (rel_name, r);
+//      st := <term-to-coq> sterm;
+//      tt := <term-to-coq> tterm
 
 rules // Auxiliary entity generation
 
@@ -297,8 +300,8 @@ rules // Term generation
   term-to-coq:
     Var(x) -> x
   
-  term-to-coq:
-    MatchedVar(x) -> x
+//  term-to-coq:
+//    MatchedVar(x) -> x
 
 rules // Extracting the source constructor name
 
