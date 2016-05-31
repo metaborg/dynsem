@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
 import com.oracle.truffle.api.source.Source;
@@ -24,6 +25,7 @@ public abstract class DynSemEntryPoint {
 	}
 
 	public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
+		assert DynSemContext.LANGUAGE != null : "DynSemContext.LANGUAGE must be set for creating the RuleRegistry";
 		PolyglotEngine vm = buildPolyglotEngine(input, output, error);
 		assert vm.getLanguages().containsKey(getMimeType());
 		try {
@@ -57,15 +59,15 @@ public abstract class DynSemEntryPoint {
 		IDynSemLanguageParser parser = getParser();
 		return PolyglotEngine.newBuilder().setIn(input).setOut(output).setErr(error)
 				.config(getMimeType(), DynSemLanguage.PARSER, parser)
-				.config(getMimeType(), DynSemLanguage.SPECIFICATION_TERM, getSpecificationTerm())
-				.config(getMimeType(), DynSemLanguage.TERM_REGISTRY, getTermRegistry()).build();
+				.config(getMimeType(), DynSemLanguage.TERM_REGISTRY, getTermRegistry())
+				.config(getMimeType(), DynSemLanguage.RULE_REGISTRY, getRuleRegistry()).build();
 	}
-
-	protected abstract InputStream getSpecificationTerm();
 
 	protected abstract String getMimeType();
 
 	protected abstract IDynSemLanguageParser getParser();
 
 	protected abstract ITermRegistry getTermRegistry();
+
+	protected abstract RuleRegistry getRuleRegistry();
 }

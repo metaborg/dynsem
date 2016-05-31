@@ -10,7 +10,6 @@ rules /* language file. interpreter entry point */
   ds-to-interp-language =
     x_language := $[[<LanguageName>]Language];
     x_transformer := <DesugarTransform>;
-    x_ruleregistry := <RuleRegistry>;
     !compilation-unit |[
       package ~x:<TopPackageName>;
       
@@ -38,11 +37,6 @@ rules /* language file. interpreter entry point */
         
         public final static x_language INSTANCE = new x_language();
       
-        public x_language() {
-          super();
-          DynSemContext.LANGUAGE = this;
-        }
-
         @Override
         protected CallTarget parse(Source code, Node context, String... argumentNames) throws IOException {
           DynSemContext ctx = getContext();
@@ -85,11 +79,15 @@ rules /* language file. interpreter entry point */
       import java.io.FileInputStream;
       import java.io.FileNotFoundException;
       import java.io.InputStream;
+      import java.io.OutputStream;
+      import java.util.concurrent.Callable;
 
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemEntryPoint;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
       import org.metaborg.meta.lang.dynsem.interpreter.IDynSemLanguageParser;
       import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
       public class x_entryPoint extends DynSemEntryPoint {
@@ -102,6 +100,13 @@ rules /* language file. interpreter entry point */
           DynSemEntryPoint entryPoint = new x_entryPoint();
           RuleResult res = entryPoint.evaluate(args[0], System.in, System.out, System.err);
           System.out.println(res.result);
+        }
+
+        @Override
+        public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output,
+                                                OutputStream error) {
+          DynSemContext.LANGUAGE = simplLanguage.INSTANCE;
+          return super.getCallable(file, input, output, error);
         }
 
         @Override
@@ -124,6 +129,10 @@ rules /* language file. interpreter entry point */
         }
 
         @Override
+        protected RuleRegistry getRuleRegistry() {
+          return new x_ruleregistry(getSpecificationTerm());
+        }
+
         protected InputStream getSpecificationTerm() {
           try {
             return new FileInputStream(SPEC_FILE);
