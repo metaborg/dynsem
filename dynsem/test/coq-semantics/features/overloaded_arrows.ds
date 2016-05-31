@@ -1,0 +1,13 @@
+module test/coq-semantics/features/overloaded_arrows
+
+signature
+  sorts A B
+  constructors
+    a : A
+    b : B
+  arrows
+    A --> A
+    B --> B
+rules
+  a() --> a().
+  b() --> b().
