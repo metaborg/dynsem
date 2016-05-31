@@ -17,13 +17,12 @@ signature
 
   // Environments
   sort aliases
-    Env = Map<String, Val>
+    Env = Map(String, Val)
   
   variables
     r : Env
     v : Val
 
-  // Native ops
   native operators
     plusI  : Int * Int -> Int
 
