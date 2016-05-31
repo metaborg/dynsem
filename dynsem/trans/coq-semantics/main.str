@@ -86,7 +86,9 @@ rules // AST sort constructors to inductive types in Coq
         <+ 
       [sort_name|sort_names] := srts;
       // If the constructors for the current sort has already been generated, don't generate it again.
-      ( (<elem> (sort_name, seen_sorts); res := []; seen_sorts'' := seen_sorts )
+      ( ( <elem> (sort_name, seen_sorts);
+         // Generate the constructors for the rest of the sort names
+         (res, seen_sorts'') := <sortdecls-to-coq(|sort_decl_map, sort_dep_map)> (sort_names, seen_sorts, w) )
         <+
       // Otherwise, generate it
       ( constrctors := <hashtable-get(|sort_name)> sort_decl_map;
@@ -139,7 +141,9 @@ rules // Rule generation
         <+ 
       [arrow_name|arrow_names] := arrows;
       // If the constructors for the current arrow has already been generated, don't generate it again.
-      ( (<elem> (arrow_name, seen_arrows); res := []; seen_arrows'' := seen_arrows )
+      ( (<elem> (arrow_name, seen_arrows); 
+        // Generate the constructors for the rest of the sort names
+        (res, seen_arrows'') := <arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map)> (arrow_names, seen_arrows, w) )
         <+
       // Otherwise, generate it
       ( (ruls, sig) := <hashtable-get(|arrow_name)> arrow_decl_map;
