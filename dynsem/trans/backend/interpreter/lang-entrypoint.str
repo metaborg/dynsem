@@ -110,7 +110,7 @@ rules /* language file. interpreter entry point */
         }
 
         @Override
-        protected IDynSemLanguageParser getParser() {
+        public IDynSemLanguageParser getParser() {
           try {
             return new DynSemLanguageParser(new FileInputStream(PARSE_TABLE), START_SYMBOL);
           } catch (FileNotFoundException fnfex) {
@@ -119,17 +119,17 @@ rules /* language file. interpreter entry point */
         }
 
         @Override
-        protected String getMimeType() {
+        public String getMimeType() {
           return MIME_TYPE;
         }
 
         @Override
-        protected ITermRegistry getTermRegistry() {
+        public ITermRegistry getTermRegistry() {
           return new ~x:$[[<LanguageName>]TermRegistry]();
         }
 
         @Override
-        protected RuleRegistry getRuleRegistry() {
+        public RuleRegistry getRuleRegistry() {
           return new x_ruleregistry(getSpecificationTerm());
         }
 
