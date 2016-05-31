@@ -76,12 +76,11 @@ rules /* language file. interpreter entry point */
     !compilation-unit |[
       package ~x:<TopPackageName>;
 
-      import java.io.FileInputStream;
-      import java.io.FileNotFoundException;
       import java.io.InputStream;
       import java.io.OutputStream;
       import java.util.concurrent.Callable;
 
+      import org.apache.commons.io.FilenameUtils;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemEntryPoint;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
@@ -111,11 +110,8 @@ rules /* language file. interpreter entry point */
 
         @Override
         public IDynSemLanguageParser getParser() {
-          try {
-            return new DynSemLanguageParser(new FileInputStream(PARSE_TABLE), START_SYMBOL);
-          } catch (FileNotFoundException fnfex) {
-            throw new RuntimeException(fnfex);
-          }
+          return new DynSemLanguageParser(getClass().getClassLoader()
+            .getResourceAsStream(FilenameUtils.getName(PARSE_TABLE)), START_SYMBOL);
         }
 
         @Override
@@ -134,11 +130,7 @@ rules /* language file. interpreter entry point */
         }
 
         protected InputStream getSpecificationTerm() {
-          try {
-            return new FileInputStream(SPEC_FILE);
-          } catch (FileNotFoundException fnfex) {
-            throw new RuntimeException(fnfex);
-          }
+          return getClass().getClassLoader().getResourceAsStream(FilenameUtils.getName(SPEC_FILE));
         }
       }
     ]|
