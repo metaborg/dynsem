@@ -1,13 +1,29 @@
 module test/coq-semantics/features/overloaded_arrows
 
 signature
-  sorts A B
+
+  
+  sorts A B AorB
+  
   constructors
     a : A
     b : B
+    oa : A -> AorB {implicit}
+    ob : B -> AorB {implicit}
+
   arrows
+    AorB --> B
     A --> A
-    B --> B
+    
 rules
+
+  a() --> b
+  where
+    a() --> a;
+    a --> b.
+
   a() --> a().
+
   b() --> b().
+
+  //a() --> b().

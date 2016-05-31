@@ -1,0 +1,78 @@
+module test/coq-semantics/langs/L1
+
+// FIXMEs:
+// - Make pathofRef built-in
+
+signature // Scope graphs
+
+  sorts Ref Decl ScopeId FrameId H
+  
+  sorts Label constructors
+    Parent : Label
+    Import : Label
+  
+  sorts Path constructors
+    E : Label * ScopeId * Path -> Path
+    D : Decl -> Path
+  
+  sorts Addr constructors
+    Addr : FrameId * Decl -> Addr
+    
+  sorts lookup constructors lookup : FrameId * H * Path -> lookup
+  sorts get constructors get : FrameId * H * Decl -> get
+  sorts pathofRef constructors pathofRef : Ref -> pathofRef
+  sorts slookup constructors slookup : Path * ScopeId -> slookup
+
+  variables
+    s : ScopeId
+    f : FrameId
+    h : H
+
+  sorts SD constructors SD : ScopeId * Decl -> SD
+
+  arrows
+    pathofRef -pathofRef-> Path
+    // (Path * ScopeId) -slookup-> (ScopeId * Decl) // :(
+    slookup -slookup-> SD
+    lookup -lookup-> Addr
+    get -get-> Val
+
+  native operators
+    plusI  : Int * Int -> Int
+
+signature
+  
+  sorts Typ constructors
+    Tint : Typ
+    Tarrow : Typ * Typ -> Typ
+  
+  sorts Exp constructors
+    Num : Int -> Exp
+    Var : Ref -> Exp
+    Binop : Exp * Exp -> Exp
+    Fun : Decl * Typ * Exp -> Exp
+    App : Exp * Exp -> Exp
+    
+signature
+  
+  sorts Val constructors
+    NumV : Int -> Val
+    ClosV : Decl * Exp * FrameId -> Val
+      
+  arrows
+    Exp -eval-> Val
+
+rules
+  
+  Num(i) -eval-> NumV(i).
+  
+  f |- Var(r) :: h -eval-> v :: h
+  where
+    pathofRef(r) -pathofRef-> p;
+    lookup(f, h, p) -lookup-> Addr(f', d);
+    get(f', h, d) -get-> v.
+    
+  Binop(e1, e2) -eval-> NumV(plusI(z1, z2))
+  where
+    e1 -eval-> NumV(z1);
+    e2 -eval-> NumV(z2).
