@@ -277,6 +277,21 @@ rules // Term generation
       app := <foldl(mk-app-rev)> (ts', name) // application nested to the left
 
   term-to-coq:
+    Map(bindings) -> map
+    with
+      bindings' := <map(term-to-coq)> bindings;
+      nil := <coq-map-nil>;
+      cons := <coq-map-cons>;
+      map := <foldr(!nil, \ (x, y) -> Apply(Apply(cons, x), y) \ )> bindings'  
+  
+  term-to-coq:
+    Bind(x, y) -> cons
+    with
+      x' := <term-to-coq> x;
+      y' := <term-to-coq> y;
+      cons := <coq-map-bind> (x', y')
+
+  term-to-coq:
     MapSelect(m, t) -> Apply(Apply(ml, m'), t')
     with
       ml := <coq-map-lookup>;

@@ -1,10 +1,18 @@
 module coq-semantics/coqmappings
 
+imports
+  lib/coq-signatures/-
+
 rules // For maps
   
   coq-map-type = !"map"
   coq-map-lookup = !"map_lookup"
   coq-map-update = !"map_update"
+
+  coq-map-nil = !"nil"
+  coq-map-cons = !"cons"
+  coq-map-bind:
+    (x, y) -> Tuple(x, [y])
 
 rules // For distinguishing types assumed to be built-in
 
