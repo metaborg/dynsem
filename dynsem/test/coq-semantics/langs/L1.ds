@@ -33,6 +33,7 @@ signature // Scope graphs
 
   sorts SD constructors SD : ScopeId * Decl -> SD
 
+  // Most of these should/could be defined using products and/or default arrows
   arrows
     pathofRef -pathofRef-> Path
     // (Path * ScopeId) -slookup-> (ScopeId * Decl) // :(

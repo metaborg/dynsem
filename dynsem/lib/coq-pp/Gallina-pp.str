@@ -3210,7 +3210,7 @@ strategies
                     )
                   ]
     with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
-                   <+ pp-H-list(prettyprint-Term|";")> t1__
+                   <+ pp-H-list(prettyprint-Term|"; ")> t1__
 
   is-Term =
     ?List(_)
@@ -3228,7 +3228,7 @@ strategies
     (List(t1__), index) -> separator
     with switch !index
            case ?1 :
-             separator := ";"
+             separator := "; "
            otherwise :
              separator := ""
          end
@@ -3247,7 +3247,7 @@ strategies
                              [SOpt(HS(), "0")]
                            , [ S("(")
                              , t1__'
-                             , S(",")
+                             , S(", ")
                              , t2__'
                              , S(")")
                              ]
@@ -3256,7 +3256,7 @@ strategies
     with t1__' := <is-string ; pp-one-Z(prettyprint-origin-term)
                    <+ pp-one-Z(prettyprint-Term)> t1__
     with t2__' := <is-string ; pp-one-Z(prettyprint-origin-term)
-                   <+ pp-H-list(prettyprint-Term|",")> t2__
+                   <+ pp-H-list(prettyprint-Term|", ")> t2__
 
   is-Term =
     ?Tuple(_, _)
@@ -3278,7 +3278,7 @@ strategies
            case ?1 :
              separator := ""
            case ?2 :
-             separator := ","
+             separator := ", "
            otherwise :
              separator := ""
          end
@@ -3289,7 +3289,7 @@ strategies
            case ?1 :
              ws := ""
            case ?2 :
-             ws := ""
+             ws := " "
            otherwise :
              ws := ""
          end
