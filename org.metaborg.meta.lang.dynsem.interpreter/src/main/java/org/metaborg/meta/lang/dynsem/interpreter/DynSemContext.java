@@ -15,25 +15,16 @@ public class DynSemContext {
 
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
-	private final IDynSemLanguageParser langParser;
 
-	private DynSemPrimedRun primedRun;
-
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, IDynSemLanguageParser langParser) {
-		this(termRegistry, ruleRegistry, langParser, System.in, System.out);
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
+		this(termRegistry, ruleRegistry, System.in, System.out);
 	}
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, IDynSemLanguageParser langParser,
-			InputStream input, PrintStream output) {
+	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream input, PrintStream output) {
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
-		this.langParser = langParser;
-	}
-
-	public IDynSemLanguageParser getParser() {
-		return langParser;
 	}
 
 	public RuleRegistry getRuleRegistry() {
@@ -42,14 +33,6 @@ public class DynSemContext {
 
 	public ITermRegistry getTermRegistry() {
 		return termRegistry;
-	}
-
-	public DynSemPrimedRun getRun() {
-		return primedRun;
-	}
-
-	public void setRun(DynSemPrimedRun run) {
-		this.primedRun = run;
 	}
 
 	public ITermBuildFactory lookupTermBuilder(String name, int arity) {

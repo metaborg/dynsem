@@ -1,7 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
@@ -12,13 +10,13 @@ import com.oracle.truffle.api.interop.Message;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.nodes.RootNode;
 
-public class DynSemRunForeignAccess implements Factory {
+public class DynSemRuleForeignAccess implements Factory {
 
-	public static final ForeignAccess INSTANCE = ForeignAccess.create(new DynSemRunForeignAccess());
+	public static final ForeignAccess INSTANCE = ForeignAccess.create(new DynSemRuleForeignAccess());
 
 	@Override
 	public boolean canHandle(TruffleObject o) {
-		return o instanceof DynSemPrimedRun;
+		return o instanceof DynSemRule;
 	}
 
 	@Override
@@ -50,10 +48,8 @@ public class DynSemRunForeignAccess implements Factory {
 
 		@Override
 		public Object execute(VirtualFrame frame) {
-			DynSemPrimedRun run = (DynSemPrimedRun) ForeignAccess.getReceiver(frame);
-			ITerm program = run.getProgram();
-
-			return run.getCallTarget().call(new Object[] { program });
+			DynSemRule rule = (DynSemRule) ForeignAccess.getReceiver(frame);
+			return rule.getRuleTarget().getCallTarget().call(ForeignAccess.getArguments(frame).toArray());
 		}
 
 	}
@@ -66,7 +62,7 @@ public class DynSemRunForeignAccess implements Factory {
 		@Override
 		public Object execute(VirtualFrame frame) {
 			Object receiver = ForeignAccess.getReceiver(frame);
-			return receiver instanceof DynSemPrimedRun;
+			return receiver instanceof DynSemRule;
 		}
 	}
 

@@ -44,7 +44,7 @@ public class TestSpecLoad {
 
 		@Override
 		protected DynSemContext createContext(com.oracle.truffle.api.TruffleLanguage.Env env) {
-			return new DynSemContext(null, null, null);
+			return new DynSemContext(null, null);
 		}
 
 		@Override

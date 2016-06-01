@@ -17,7 +17,6 @@ import com.oracle.truffle.api.source.Source;
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	// Keys for configuration parameters for a DynSemContext.
 	public static final String TERM_REGISTRY = "TERM_REGISTRY";
-	public static final String PARSER = "PARSER";
 	public static final String RULE_REGISTRY = "RULE_REGISTRY";
 
 	public DynSemLanguage() {
@@ -27,9 +26,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	protected DynSemContext createContext(Env env) {
 		Map<String, Object> config = env.getConfig();
 		ITermRegistry termRegistry = (ITermRegistry) config.get(TERM_REGISTRY);
-		IDynSemLanguageParser parser = (IDynSemLanguageParser) config.get(PARSER);
 		RuleRegistry ruleRegistry = (RuleRegistry) config.get(RULE_REGISTRY);
-		return new DynSemContext(termRegistry, ruleRegistry, parser, env.in(), new PrintStream(env.out()));
+		return new DynSemContext(termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()));
 	}
 
 	public Node createFindContextNode0() {
@@ -56,15 +54,23 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 	@Override
 	protected Object findExportedSymbol(DynSemContext context, String globalName, boolean onlyExplicit) {
-		if (globalName.equals("INIT")) {
-			return context.getRun();
+		try {
+			String[] splitName = globalName.split("/", 3);
+			if (splitName.length != 3) {
+				return null;
+			}
+			String name = splitName[0];
+			String constr = splitName[1];
+			int arity = Integer.parseInt(splitName[2]);
+			return context.getRuleRegistry().lookupRule(name, constr, arity);
+		} catch (Exception e) {
+			return null;
 		}
-		return null;
 	}
 
 	@Override
 	protected boolean isObjectOfLanguage(Object obj) {
-		return obj instanceof DynSemPrimedRun;
+		return obj instanceof DynSemRule;
 	}
 
 	@Override

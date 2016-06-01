@@ -14,12 +14,12 @@ rules /* language file. interpreter entry point */
       package ~x:<TopPackageName>;
       
       import java.io.IOException;
-      import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+      import java.io.InputStream;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-      import org.metaborg.meta.lang.dynsem.interpreter.DynSemPrimedRun;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemRule;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
-      import org.spoofax.interpreter.terms.IStrategoTerm;
 
       import com.oracle.truffle.api.CallTarget;
       import com.oracle.truffle.api.nodes.Node;
@@ -36,33 +36,20 @@ rules /* language file. interpreter entry point */
         public final static int START_CONSTR_ARITY = ~i:<ReductionStartConstrArity>;
         
         public final static x_language INSTANCE = new x_language();
-      
-        @Override
-        protected CallTarget parse(Source code, Node context, String... argumentNames) throws IOException {
+
+        @Override protected CallTarget parse(Source code, Node context, String ... argumentNames) throws IOException
+        {
           DynSemContext ctx = getContext();
-          IStrategoTerm programT = new x_transformer().transform(ctx.getParser().parse(code));
-          ITerm program = ctx.getTermRegistry().parseProgramTerm(programT);
-          RootNode rootNode = new RootNode(x_language.class, null, null) {
-            @Override
-            public Object execute(VirtualFrame frame) {
+          InputStream specInput = code.getInputStream();
+          RuleRegistry.populate(ctx.getRuleRegistry(), specInput);
+
+          RootNode rootNode = new RootNode(simplLanguage.class, null, null) {
+            @Override public Object execute(VirtualFrame frame)
+            {
               CompilerDirectives.transferToInterpreter();
-              RuleRoot initRuleRoot = ctx.getRuleRegistry().lookupRule(
-                  "init", START_CONSTR_NAME, START_CONSTR_ARITY);
-              if (initRuleRoot == null) {
-                throw new IllegalStateException("Rule not found");
-              }
-              if (program instanceof ITerm) {
-                ITerm programCon = (ITerm) program;
-                if (programCon.constructor().equals(START_CONSTR_NAME)
-                    && programCon.arity() == START_CONSTR_ARITY) {
-                  DynSemPrimedRun run = new DynSemPrimedRun();
-                  run.setCallTarget(initRuleRoot.getCallTarget());
-                  run.setProgram(programCon);
-                  ctx.setRun(run);
-                  return null;
-                }
-              }
-              throw new IllegalStateException("Malformed program term");
+              // Return the init rule by default.
+              RuleRoot initRuleRoot = ctx.getRuleRegistry().lookupRule("init", START_CONSTR_NAME, START_CONSTR_ARITY);
+              return new DynSemRule(initRuleRoot);
             }
           };
           return Truffle.getRuntime().createCallTarget(rootNode);
@@ -129,7 +116,8 @@ rules /* language file. interpreter entry point */
           return new x_ruleregistry(getSpecificationTerm());
         }
 
-        protected InputStream getSpecificationTerm() {
+        @Override
+        public InputStream getSpecificationTerm() {
           return getClass().getClassLoader().getResourceAsStream(FilenameUtils.getName(SPEC_FILE));
         }
       }

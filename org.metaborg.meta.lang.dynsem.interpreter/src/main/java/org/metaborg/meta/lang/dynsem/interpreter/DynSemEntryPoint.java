@@ -2,11 +2,14 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.vm.PolyglotEngine;
@@ -28,17 +31,20 @@ public abstract class DynSemEntryPoint {
 		PolyglotEngine vm = buildPolyglotEngine(input, output, error);
 		assert vm.getLanguages().containsKey(getMimeType());
 		try {
-			vm.eval(Source.fromFileName(file).withMimeType(getMimeType()));
+			Value interpreter = vm
+					.eval(Source.fromReader(new InputStreamReader(getSpecificationTerm()), "Evaluate to interpreter")
+							.withMimeType(getMimeType()));
+			IStrategoTerm term = getParser().parse(Source.fromFileName(file));
+			ITerm programTerm = getTermRegistry().parseProgramTerm(term);
+			return new Callable<RuleResult>() {
+				@Override
+				public RuleResult call() throws Exception {
+					return interpreter.execute(programTerm).as(RuleResult.class);
+				}
+			};
 		} catch (IOException ioex) {
 			throw new RuntimeException("Eval failed", ioex);
 		}
-		Value prog = vm.findGlobalSymbol("INIT");
-		return new Callable<RuleResult>() {
-			@Override
-			public RuleResult call() throws Exception {
-				return prog.execute().as(RuleResult.class);
-			}
-		};
 	}
 
 	/**
@@ -57,7 +63,6 @@ public abstract class DynSemEntryPoint {
 	public PolyglotEngine buildPolyglotEngine(InputStream input, OutputStream output, OutputStream error) {
 		assert DynSemContext.LANGUAGE != null : "DynSemContext.LANGUAGE must be set for creating the RuleRegistry";
 		return PolyglotEngine.newBuilder().setIn(input).setOut(output).setErr(error)
-				.config(getMimeType(), DynSemLanguage.PARSER, getParser())
 				.config(getMimeType(), DynSemLanguage.TERM_REGISTRY, getTermRegistry())
 				.config(getMimeType(), DynSemLanguage.RULE_REGISTRY, getRuleRegistry()).build();
 	}
@@ -69,4 +74,6 @@ public abstract class DynSemEntryPoint {
 	public abstract ITermRegistry getTermRegistry();
 
 	public abstract RuleRegistry getRuleRegistry();
+
+	public abstract InputStream getSpecificationTerm();
 }
