@@ -3,6 +3,22 @@ module test/coq-semantics/langs/L1
 // FIXMEs:
 // - Make pathofRef built-in
 
+signature
+  
+  sorts Typ constructors
+    Tint : Typ
+    Tarrow : Typ * Typ -> Typ
+  
+  sorts PreExp constructors
+    Num : Int -> PreExp
+    Var : Ref -> PreExp
+    Binop : Exp * Exp -> PreExp
+    Fun : Decl * Typ * Exp -> PreExp
+    App : Exp * Exp -> PreExp
+    
+  sorts Exp constructors
+    E_ : ScopeId * Typ * PreExp -> Exp
+    
 signature // Scope graphs
 
   sorts Ref Decl ScopeId FrameId H
@@ -35,31 +51,18 @@ signature // Scope graphs
 
   // Most of these should/could be defined using products and/or default arrows
   arrows
-    pathofRef -pathofRef-> Path
+    pathofRef -pathofRef'-> Path
     // (Path * ScopeId) -slookup-> (ScopeId * Decl) // :(
-    slookup -slookup-> SD
-    lookup -lookup-> Addr
-    get -get-> Val
-    scopeofExp -scopeofExp-> ScopeId
-    scopeofFrame -scopeofFrame-> ScopeId
-    initFrame -initFrame-> FrameId
+    slookup -slookup'-> SD
+    lookup -lookup'-> Addr
+    get -get'-> Val
+    scopeofExp -scopeofExp'-> ScopeId
+    scopeofFrame -scopeofFrame'-> ScopeId
+    initFrame -initFrame'-> FrameId
 
   native operators
     plusI  : Int * Int -> Int
 
-signature
-  
-  sorts Typ constructors
-    Tint : Typ
-    Tarrow : Typ * Typ -> Typ
-  
-  sorts Exp constructors
-    Num : Int -> Exp
-    Var : Ref -> Exp
-    Binop : Exp * Exp -> Exp
-    Fun : Decl * Typ * Exp -> Exp
-    App : Exp * Exp -> Exp
-    
 signature
   
   sorts Val constructors
@@ -71,26 +74,25 @@ signature
 
 rules
   
-  Num(i) -eval-> NumV(i).
+  E_(_ , _, Num(i)) -eval-> NumV(i).
   
-  f |- Var(r) :: h -eval-> v :: h
+  f |- E_(_, _, Var(r)) :: h -eval-> v :: h
   where
-    pathofRef(r) -pathofRef-> p;
-    lookup(f, h, p) -lookup-> Addr(f', d);
-    get(f', h, d) -get-> v.
+    pathofRef(r) -pathofRef'-> p;
+    lookup(f, h, p) -lookup'-> Addr(f', d);
+    get(f', h, d) -get'-> v.
     
-  Binop(e1, e2) -eval-> NumV(plusI(z1, z2))
+  E_(_, _, Binop(e1, e2)) -eval-> NumV(plusI(z1, z2))
   where
     e1 -eval-> NumV(z1);
     e2 -eval-> NumV(z2).
   
-  f |- Fun(d, _, e) -eval-> ClosV(d, e, f).
+  f |- E_(_, _, Fun(d, _, e)) -eval-> ClosV(d, e, f).
   
-  f |- App(e1, e2) -eval-> v'
+  f |- E_(s, _, App(e1, e2)) -eval-> v'
   where
     f |- e1 -eval-> ClosV(d, e, f');
     f |- e2 -eval-> v :: h;
-    scopeofExp(e) -scopeofExp-> s;
-    scopeofFrame(h, f') -scopeofFrame-> s';
-    initFrame(s, {P() |--> {s' |--> f'}}, {d |--> v}) -initFrame-> f'';
+    scopeofFrame(h, f') -scopeofFrame'-> s';
+    initFrame(s, {P() |--> {s' |--> f'}}, {d |--> v}) -initFrame'-> f'';
     f'' |- e -eval-> v'.
