@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.Map;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.TruffleLanguage;
@@ -62,7 +63,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 			String name = splitName[0];
 			String constr = splitName[1];
 			int arity = Integer.parseInt(splitName[2]);
-			return context.getRuleRegistry().lookupRule(name, constr, arity);
+			RuleRoot ruleRoot = context.getRuleRegistry().lookupRule(name, constr, arity);
+			return new DynSemRule(ruleRoot);
 		} catch (Exception e) {
 			return null;
 		}
