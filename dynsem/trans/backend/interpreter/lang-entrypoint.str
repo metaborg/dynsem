@@ -82,7 +82,7 @@ rules /* language file. interpreter entry point */
         public final static String SPEC_FILE = ~e:Lit(String([Chars(<RelativeSpecTargetFile>)]));
         public final static String MIME_TYPE = ~e:Lit(String([Chars(<SourceMimeType>)]));
 
-        simplEntryPoint() {
+        public simplEntryPoint() {
           super(createParser(), createTermRegistry(), createRuleRegistry());
         }
 
