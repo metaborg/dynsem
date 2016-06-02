@@ -10,27 +10,16 @@ rules
   
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
-    debug(!5);
     where(ds-to-interp-clean-target);
-    debug(!6);
     <ds-to-interp-terms-signatures-top; debug(!"6a "); ds-to-interp-write-classes(|<OptTermsPackageName>); debug(!"6b ")> sig*;
-    debug(!7);
     <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)> sig*;
-    debug(!8);
     <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
-    debug(!9);
     <ds-to-interp-terms-building; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
-    debug(!10);
     <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<OptTermMatchPackageName>)> sig*;
-    debug(!11);
     <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
-    debug(!12);
     <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)> sig*;
-    debug(!13);
     ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>);
-    debug(!14);
     ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)
-    ;debug(!5)
 
   ds-to-interp-clean-target =
     OptCleanTarget <

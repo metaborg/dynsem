@@ -7,6 +7,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.github.krukow.clj_lang.PersistentHashMap;
+import com.github.krukow.clj_lang.PersistentTreeMap;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
