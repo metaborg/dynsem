@@ -21,6 +21,15 @@ import com.oracle.truffle.api.vm.PolyglotEngine.Value;
  * properly and provides an interface for evaluating source code in that language.
  */
 public abstract class DynSemEntryPoint {
+	private final IDynSemLanguageParser parser;
+	private final RuleRegistry ruleRegistry;
+	private final ITermRegistry termRegistry;
+
+	public DynSemEntryPoint(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
+		this.parser = parser;
+		this.termRegistry = termRegistry;
+		this.ruleRegistry = ruleRegistry;
+	}
 
 	public RuleResult evaluate(String file, InputStream input, OutputStream output, OutputStream error)
 			throws Exception {
@@ -67,13 +76,19 @@ public abstract class DynSemEntryPoint {
 				.config(getMimeType(), DynSemLanguage.RULE_REGISTRY, getRuleRegistry()).build();
 	}
 
+	public IDynSemLanguageParser getParser() {
+		return parser;
+	}
+
+	public ITermRegistry getTermRegistry() {
+		return termRegistry;
+	}
+
+	public RuleRegistry getRuleRegistry() {
+		return ruleRegistry;
+	}
+
 	public abstract String getMimeType();
-
-	public abstract IDynSemLanguageParser getParser();
-
-	public abstract ITermRegistry getTermRegistry();
-
-	public abstract RuleRegistry getRuleRegistry();
 
 	public abstract InputStream getSpecificationTerm();
 }

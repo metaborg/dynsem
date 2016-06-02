@@ -24,11 +24,6 @@ public class RuleRegistry {
 		init();
 	}
 
-	public RuleRegistry(InputStream specInput) {
-		populate(this, specInput);
-		init();
-	}
-
 	protected void init() {
 
 	}

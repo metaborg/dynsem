@@ -29,7 +29,8 @@ public class TestSpecLoad {
 		assert (DummyDynSemLanguage.INSTANCE != null);
 		
 		InputStream specInput = new FileInputStream(specFile);
-		RuleRegistry rreg = new RuleRegistry(specInput);
+		RuleRegistry rreg = new RuleRegistry();
+		RuleRegistry.populate(rreg, specInput);
 		assertEquals(5, rreg.ruleCount());
 	}
 
