@@ -7,17 +7,14 @@ imports
   analysis/rename
   coq-semantics/coqmappings
   
-  
 rules // Term pre-processing
 
-  // Replace wildcards by named variables
-  // FIXME: should name based on the type of the variable.
-  P: Wld() -> Var(x) where x := <newname> "wld"
+  // FIXME: P should augment arrow signatures to record their sort information.
+  P = id
 
 strategies
 
-  pre-process = bottomup(try(P))//; unrename-all
-//  bottomup(try(unrename-var))
+  pre-process = bottomup(try(P))
 
 rules
   
@@ -179,8 +176,3 @@ rules // Utilities for querying rules
   get-arrow-name:
     NamedDynamic(name) -> name
 
-//  get-premises-and-conclusion:
-//    RuleW(conc, prems) -> (conc, prems)
-    
-//  get-premises-and-conclusion:
-//    Axiom(conc) -> (conc, [])
