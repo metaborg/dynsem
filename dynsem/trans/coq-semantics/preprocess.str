@@ -6,11 +6,30 @@ imports
   ds
   analysis/rename
   coq-semantics/coqmappings
-  
+  analysis/-
+
+signature // Augment relation constructor with more informative relation name recording the source sort (type)
+
+  constructors
+    NamedDynamicEmitted : List(LabelComp) * IDNOHYPH * Type -> Rel
+
 rules // Term pre-processing
 
-  // FIXME: P should augment arrow signatures to record their sort information.
-  P = id
+  P:
+    Relation(reads, Source(Con(c, args), rws), NamedDynamicEmitted(ems, a), target) ->
+    Relation(reads, Source(Con(c, args), rws), NamedDynamicEmitted(ems, a, sort), target)
+    where
+      i := <length> args;
+      ConstructorType(_, sort) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, i)
+
+  P:
+    Relation(reads, Source(VarRef(v), rws), NamedDynamicEmitted(ems, a), target) ->
+    Relation(reads, Source(VarRef(v), rws), NamedDynamicEmitted(ems, a, sort), target)
+    where
+      v-def := <lookup-def(|Vars())> v;
+      sort := <lookup-prop(|Type())> v-def
+  
+  // FIXME: Missing case for rules that dispatch on lists, I think?
 
 strategies
 
@@ -22,7 +41,7 @@ rules
     mod -> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map)
     with
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) := <pre-process; collect-data-from-module; data-to-hashmap; analyze-mutual-dependencies> mod
-      
+
 rules // Accumulate information about declared arrows, rules, and AST constructors
 
   // FIXME: this is fairly inefficient
@@ -110,7 +129,6 @@ rules // Store accumulated information in maps for easy dereferencing
 
 rules // Analyze mutual dependencies
 
-  // FIXME
   analyze-mutual-dependencies:
     (sort_decl_map, arrow_decl_map) -> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map)
     with
@@ -168,7 +186,7 @@ rules // Utilities for querying rules
       name := <get-arrow-name> arrow
     
   get-arrow-name:
-    NamedDynamicEmitted(_, name) -> name
+    NamedDynamicEmitted(_, name, _) -> name
 
   get-premises-and-conclusion:
     Rule(prems, _, conc) -> (conc, prems)

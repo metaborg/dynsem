@@ -304,7 +304,7 @@ rules // Extracting variables
 
   // Arrows
   extract-variables:
-    NamedDynamicEmitted(emitted, _) -> xs
+    NamedDynamicEmitted(emitted, _, _) -> xs
     with
       xs := <extract-variables> emitted 
   
