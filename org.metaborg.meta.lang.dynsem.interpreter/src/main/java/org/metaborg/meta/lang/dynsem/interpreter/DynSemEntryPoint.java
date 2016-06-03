@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.source.Source;
@@ -22,11 +23,13 @@ import com.oracle.truffle.api.vm.PolyglotEngine.Value;
  */
 public abstract class DynSemEntryPoint {
 	private final IDynSemLanguageParser parser;
+	private final ITermTransformer transformer;
 	private final RuleRegistry ruleRegistry;
 	private final ITermRegistry termRegistry;
 
-	public DynSemEntryPoint(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
+	public DynSemEntryPoint(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
 		this.parser = parser;
+		this.transformer = transformer;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 	}
@@ -43,7 +46,7 @@ public abstract class DynSemEntryPoint {
 			Value interpreter = vm
 					.eval(Source.fromReader(new InputStreamReader(getSpecificationTerm()), "Evaluate to interpreter")
 							.withMimeType(getMimeType()));
-			IStrategoTerm term = getParser().parse(Source.fromFileName(file));
+			IStrategoTerm term = getTransformer().transform(getParser().parse(Source.fromFileName(file)));
 			ITerm programTerm = getTermRegistry().parseProgramTerm(term);
 			return new Callable<RuleResult>() {
 				@Override
@@ -79,6 +82,10 @@ public abstract class DynSemEntryPoint {
 
 	public IDynSemLanguageParser getParser() {
 		return parser;
+	}
+
+	private ITermTransformer getTransformer() {
+		return transformer;
 	}
 
 	public ITermRegistry getTermRegistry() {

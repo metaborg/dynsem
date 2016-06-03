@@ -9,7 +9,6 @@ rules /* language file. interpreter entry point */
 
   ds-to-interp-language =
     x_language := $[[<LanguageName>]Language];
-    x_transformer := <DesugarTransform>;
     !compilation-unit |[
       package ~x:<TopPackageName>;
       
@@ -61,6 +60,7 @@ rules /* language file. interpreter entry point */
     x_language := $[[<LanguageName>]Language];
     x_entryPoint := $[[<LanguageName>]EntryPoint];
     x_ruleregistry := <RuleRegistry>;
+    x_transformer := <DesugarTransform>;
     !compilation-unit |[
       package ~x:<TopPackageName>;
 
@@ -76,6 +76,7 @@ rules /* language file. interpreter entry point */
       import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+      import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 
       public class x_entryPoint extends DynSemEntryPoint {
         public final static String PARSE_TABLE = ~e:Lit(String([Chars(<RelativeTableTargetFile>)]));
@@ -84,7 +85,7 @@ rules /* language file. interpreter entry point */
         public final static String MIME_TYPE = ~e:Lit(String([Chars(<SourceMimeType>)]));
 
         public x_entryPoint() {
-          super(createParser(), createTermRegistry(), createRuleRegistry());
+          super(createParser(), createTransformer(), createTermRegistry(), createRuleRegistry());
         }
 
         public static void main(String[] args) throws Exception {
@@ -103,6 +104,10 @@ rules /* language file. interpreter entry point */
         public static IDynSemLanguageParser createParser() {
           return new DynSemLanguageParser(x_entryPoint.class.getClassLoader()
             .getResourceAsStream(FilenameUtils.getName(PARSE_TABLE)), START_SYMBOL);
+        }
+
+        public static ITermTransformer createTransformer() {
+          return new x_transformer();
         }
 
         public static ITermRegistry createTermRegistry() {
