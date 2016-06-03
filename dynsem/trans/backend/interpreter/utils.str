@@ -52,8 +52,12 @@ rules
         OptMavenArtifactId: _ -> genproject-artifactid
       );
   
-      java-gendir := $[[genproject-path]/[<read-property(|"project.javapath", "src/main/java")> prop-file]];
-      rules(OptJavaGenDir: _ -> java-gendir);
+      java-gendir-rel := <read-property(|"project.javapath", "src/main/java")> prop-file;
+      java-gendir-abs := $[[genproject-path]/[java-gendir-rel]];
+      rules(
+        OptJavaGenDirRel: _ -> java-gendir-rel
+        OptJavaGenDir: _ -> java-gendir-abs
+      );
       
       gen-pkg := <read-property(|"project.javapackage", $[[langname].interpreter.generated])> prop-file;
       terms-pkg := $[[gen-pkg].terms];

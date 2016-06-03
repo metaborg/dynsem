@@ -66,21 +66,24 @@ rules
     <fclose> pom-file
   
   ds-to-interp-gen-project-launchconfig =
-    !$[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    launch-file := <fopen> (<concat-strings> [<OptGenProject>, "/", <OptLanguageName>, ".launch"], "w");
+    <fputs> (
+    $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/simpl.interpreter/src/main/java/simpl/interpreter/generated/simplLanguage.java"/>
+        <listEntry value="/[<OptMavenArtifactId>]/[<OptJavaGenDirRel>]/[<OptTopPackageName; string-replace(|".", "/")>]/[<OptLanguageName>]Language.java"/>
         </listAttribute>
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="1"/>
         </listAttribute>
         <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
         <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
-        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="simpl.interpreter.generated.simplLanguage"/>
+        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<OptTopPackageName>].[<OptLanguageName>]Language"/>
         <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${resource_loc}"/>
-        <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="simpl.interpreter"/>
+        <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<OptMavenArtifactId>]"/>
         <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
       </launchConfiguration>
-    ]
+    ], launch-file);
+    <fclose> launch-file
 
     
