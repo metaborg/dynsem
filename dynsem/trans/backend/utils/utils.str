@@ -5,6 +5,14 @@ imports
   backend/utils/mkdir
 
 rules
+  
+  external read-property(|propname, defaultval)
+  
+  external make-absolute-path(|prefix)
+  
+  external ds-rmdir(|)
+
+rules
 
   ds-utils-java-emit-classes(createdir|outputpkg, basedir) =
     map(ds-utils-java-emit-class(createdir|outputpkg, basedir))

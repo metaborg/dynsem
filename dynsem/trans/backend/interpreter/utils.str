@@ -39,8 +39,18 @@ rules
       genproject-path := <ds-to-interp-read-prop-required(|"project.path"); make-absolute-path(|project-path)> prop-file;
       rules(OptGenProject: _ -> genproject-path);
       
+      do-create-genproject := <read-property(|"project.create", "false")> prop-file;
+      rules(OptCreateProject: _ -> <?"true"> do-create-genproject);
+      
       do-clean-genproject := <read-property(|"project.clean", "false")> prop-file;
       rules(OptCleanTarget: _ -> <?"true"> do-clean-genproject);
+  
+      genproject-groupid := <ds-to-interp-read-prop-required(|"project.groupid")> prop-file;
+      genproject-artifactid := <ds-to-interp-read-prop-required(|"project.artifactid")> prop-file;
+      rules(
+        OptMavenGroupId: _ -> genproject-groupid
+        OptMavenArtifactId: _ -> genproject-artifactid
+      );
   
       java-gendir := $[[genproject-path]/[<read-property(|"project.javapath", "src/main/java")> prop-file]];
       rules(OptJavaGenDir: _ -> java-gendir);
@@ -65,14 +75,14 @@ rules
       preprocess-class := <read-property(|"project.preprocessor", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")> prop-file;
       rules(OptPreprocessor: _ -> preprocess-class);
   
-      target-specfile-rel := <read-property(|"project.specpath", "/src/main/resources/specification.aterm")> prop-file;
+      target-specfile-rel := <read-property(|"project.specpath", "src/main/resources/specification.aterm")> prop-file;
       target-specfile-abs := $[[genproject-path]/[target-specfile-rel]];
       rules(
         OptTargetSpecRelFile: _ -> target-specfile-rel
         OptTargetSpecFile: _ -> target-specfile-abs
       );
       
-      target-tblfile-rel := <read-property(|"project.tablepath", "/src/main/resources/parsetable.tbl")> prop-file;
+      target-tblfile-rel := <read-property(|"project.tablepath", "src/main/resources/parsetable.tbl")> prop-file;
       target-tblfile-abs := $[[genproject-path]/[target-tblfile-rel]];
       rules(
         OptTargetTableRelFile: _ -> target-tblfile-rel

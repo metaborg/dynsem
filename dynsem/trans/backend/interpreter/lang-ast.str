@@ -3,6 +3,7 @@ module backend/interpreter/lang-ast
 imports
   signatures/ds-sig
   backend/interpreter/-
+  backend/utils/-
   libjava-front
   stratego/metaborg
 
@@ -10,8 +11,8 @@ rules
   
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
-    where(ds-to-interp-clean-target);
-    <ds-to-interp-terms-signatures-top; debug(!"6a "); ds-to-interp-write-classes(|<OptTermsPackageName>); debug(!"6b ")> sig*;
+    where(ds-to-interp-clean-target; ds-to-interp-gen-project);
+    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<OptTermsPackageName>); debug(!"6b ")> sig*;
     <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)> sig*;
     <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
     <ds-to-interp-terms-building; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
