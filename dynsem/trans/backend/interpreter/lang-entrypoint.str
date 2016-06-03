@@ -43,7 +43,7 @@ rules /* language file. interpreter entry point */
           InputStream specInput = code.getInputStream();
           RuleRegistry.populate(ctx.getRuleRegistry(), specInput);
 
-          RootNode rootNode = new RootNode(simplLanguage.class, null, null) {
+          RootNode rootNode = new RootNode(x_language.class, null, null) {
             @Override public Object execute(VirtualFrame frame)
             {
               CompilerDirectives.transferToInterpreter();
@@ -58,6 +58,7 @@ rules /* language file. interpreter entry point */
     ]|
 
   ds-to-interp-language-entrypoint =
+    x_language := $[[<LanguageName>]Language];
     x_entryPoint := $[[<LanguageName>]EntryPoint];
     x_ruleregistry := <RuleRegistry>;
     !compilation-unit |[
@@ -82,7 +83,7 @@ rules /* language file. interpreter entry point */
         public final static String SPEC_FILE = ~e:Lit(String([Chars(<RelativeSpecTargetFile>)]));
         public final static String MIME_TYPE = ~e:Lit(String([Chars(<SourceMimeType>)]));
 
-        public simplEntryPoint() {
+        public x_entryPoint() {
           super(createParser(), createTermRegistry(), createRuleRegistry());
         }
 
@@ -95,7 +96,7 @@ rules /* language file. interpreter entry point */
         @Override
         public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output,
                                                 OutputStream error) {
-          DynSemContext.LANGUAGE = simplLanguage.INSTANCE;
+          DynSemContext.LANGUAGE = x_language.INSTANCE;
           return super.getCallable(file, input, output, error);
         }
 
