@@ -66,7 +66,6 @@ rules /* language file. interpreter entry point */
 
       import java.io.InputStream;
       import java.io.OutputStream;
-      import java.util.concurrent.Callable;
 
       import org.apache.commons.io.FilenameUtils;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
@@ -84,6 +83,10 @@ rules /* language file. interpreter entry point */
         public final static String SPEC_FILE = ~e:Lit(String([Chars(<RelativeSpecTargetFile>)]));
         public final static String MIME_TYPE = ~e:Lit(String([Chars(<SourceMimeType>)]));
 
+        static {
+          DynSemContext.LANGUAGE = x_language.INSTANCE;
+        }
+
         public x_entryPoint() {
           super(createParser(), createTransformer(), createTermRegistry(), createRuleRegistry());
         }
@@ -92,13 +95,6 @@ rules /* language file. interpreter entry point */
           DynSemEntryPoint entryPoint = new x_entryPoint();
           RuleResult res = entryPoint.evaluate(args[0], System.in, System.out, System.err);
           System.out.println(res.result);
-        }
-
-        @Override
-        public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output,
-                                                OutputStream error) {
-          DynSemContext.LANGUAGE = x_language.INSTANCE;
-          return super.getCallable(file, input, output, error);
         }
 
         public static IDynSemLanguageParser createParser() {
