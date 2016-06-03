@@ -92,9 +92,15 @@ rules /* language file. interpreter entry point */
         }
 
         public static void main(String[] args) throws Exception {
-          DynSemEntryPoint entryPoint = new x_entryPoint();
-          RuleResult res = entryPoint.evaluate(args[0], System.in, System.out, System.err);
+          RuleResult res = evaluateStatic(args[0], System.in, System.out, System.err);
           System.out.println(res.result);
+        }
+
+        public static RuleResult evaluateStatic(String programFile,
+            InputStream inputStream, OutputStream outputStream,
+            OutputStream errorStream) throws Exception {
+          return new x_entryPoint().evaluate(programFile, inputStream,
+                outputStream, errorStream);
         }
 
         public static IDynSemLanguageParser createParser() {
