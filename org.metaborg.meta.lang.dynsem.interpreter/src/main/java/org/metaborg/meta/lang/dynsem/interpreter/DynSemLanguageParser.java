@@ -3,6 +3,8 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.io.IOUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.ParseTable;
@@ -31,9 +33,13 @@ public class DynSemLanguageParser implements IDynSemLanguageParser {
 	}
 
 	@Override
-	public IStrategoTerm parse(Source src) {
+	public IStrategoTerm parse(Source src, @Nullable String overridingStartSymbol) {
 		if (parser == null) {
 			createParser();
+		}
+		String startSymbol = this.startSymbol;
+		if (overridingStartSymbol != null) {
+			startSymbol = overridingStartSymbol;
 		}
 
 		try {

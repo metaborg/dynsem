@@ -72,6 +72,7 @@ public abstract class DynSemEntryPoint {
 	public PolyglotEngine buildPolyglotEngine(InputStream input, OutputStream output, OutputStream error) {
 		assert DynSemContext.LANGUAGE != null : "DynSemContext.LANGUAGE must be set for creating the RuleRegistry";
 		return PolyglotEngine.newBuilder().setIn(input).setOut(output).setErr(error)
+				.config(getMimeType(), DynSemLanguage.PARSER, getParser())
 				.config(getMimeType(), DynSemLanguage.TERM_REGISTRY, getTermRegistry())
 				.config(getMimeType(), DynSemLanguage.RULE_REGISTRY, getRuleRegistry()).build();
 	}

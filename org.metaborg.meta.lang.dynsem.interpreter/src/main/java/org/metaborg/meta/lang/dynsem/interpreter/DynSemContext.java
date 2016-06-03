@@ -13,18 +13,24 @@ public class DynSemContext {
 	private final InputStream input;
 	private final PrintStream output;
 
+	private final IDynSemLanguageParser parser;
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
-		this(termRegistry, ruleRegistry, System.in, System.out);
+	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
+		this(parser, termRegistry, ruleRegistry, System.in, System.out);
 	}
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream input, PrintStream output) {
+	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream input, PrintStream output) {
+		this.parser = parser;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
+	}
+
+	public IDynSemLanguageParser getParser() {
+		return parser;
 	}
 
 	public RuleRegistry getRuleRegistry() {

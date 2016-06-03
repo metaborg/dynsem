@@ -17,6 +17,7 @@ import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	// Keys for configuration parameters for a DynSemContext.
+	public static final String PARSER = "PARSER";
 	public static final String TERM_REGISTRY = "TERM_REGISTRY";
 	public static final String RULE_REGISTRY = "RULE_REGISTRY";
 
@@ -26,9 +27,10 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	@Override
 	protected DynSemContext createContext(Env env) {
 		Map<String, Object> config = env.getConfig();
+		IDynSemLanguageParser parser  = (IDynSemLanguageParser) config.get(PARSER);
 		ITermRegistry termRegistry = (ITermRegistry) config.get(TERM_REGISTRY);
 		RuleRegistry ruleRegistry = (RuleRegistry) config.get(RULE_REGISTRY);
-		return new DynSemContext(termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()));
+		return new DynSemContext(parser, termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()));
 	}
 
 	public Node createFindContextNode0() {
