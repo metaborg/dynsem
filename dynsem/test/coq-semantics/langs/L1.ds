@@ -56,7 +56,6 @@ signature // Scope graphs
     slookup -slookup'-> SD
     lookup -lookup'-> Addr
     get -get'-> Val
-    scopeofExp -scopeofExp'-> ScopeId
     scopeofFrame -scopeofFrame'-> ScopeId
     initFrame -initFrame'-> FrameId
 
