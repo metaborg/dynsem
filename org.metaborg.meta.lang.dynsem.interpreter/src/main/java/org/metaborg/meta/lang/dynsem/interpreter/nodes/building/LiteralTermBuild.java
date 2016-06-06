@@ -24,6 +24,13 @@ public abstract class LiteralTermBuild extends TermBuild {
 			this.val = val;
 		}
 
+		public static StringLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
+			CompilerAsserts.neverPartOfCompilation();
+			String quotedString = Tools.javaStringAt(t, 0);
+			String unquotedString = quotedString.substring(1, quotedString.length() - 1);
+			return new StringLiteralTermBuild(unquotedString, SourceSectionUtil.fromStrategoTerm(t));
+		}
+
 		@Override
 		public Object executeGeneric(VirtualFrame frame) {
 			return val;
@@ -46,7 +53,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 
 		public static IntLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			CompilerAsserts.neverPartOfCompilation();
-			return new IntLiteralTermBuild(Integer.parseInt(Tools.stringAt(t, 0).stringValue()),
+			return new IntLiteralTermBuild(Integer.parseInt(Tools.javaStringAt(t, 0)),
 					SourceSectionUtil.fromStrategoTerm(t));
 		}
 
