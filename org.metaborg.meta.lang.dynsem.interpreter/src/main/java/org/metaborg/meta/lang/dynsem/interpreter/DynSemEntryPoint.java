@@ -34,19 +34,23 @@ public abstract class DynSemEntryPoint {
 		this.ruleRegistry = ruleRegistry;
 	}
 
-	public RuleResult evaluate(String file, InputStream input, OutputStream output, OutputStream error)
-			throws Exception {
-		return getCallable(file, input, output, error).call();
+	public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
+		try {
+			IStrategoTerm term = getTransformer().transform(getParser().parse(Source.fromFileName(file)));
+			return getCallable(term, input, output, error);
+		} catch (IOException ioex) {
+			throw new RuntimeException("Eval failed", ioex);
+		}
 	}
 
-	public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
-		PolyglotEngine vm = buildPolyglotEngine(input, output, error);
-		assert vm.getLanguages().containsKey(getMimeType());
+	public Callable<RuleResult> getCallable(IStrategoTerm term, InputStream input, OutputStream output,
+			OutputStream error) {
 		try {
+			PolyglotEngine vm = buildPolyglotEngine(input, output, error);
+			assert vm.getLanguages().containsKey(getMimeType());
 			Value interpreter = vm
 					.eval(Source.fromReader(new InputStreamReader(getSpecificationTerm()), "Evaluate to interpreter")
 							.withMimeType(getMimeType()));
-			IStrategoTerm term = getTransformer().transform(getParser().parse(Source.fromFileName(file)));
 			ITerm programTerm = getTermRegistry().parseProgramTerm(term);
 			return new Callable<RuleResult>() {
 				@Override
