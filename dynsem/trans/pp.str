@@ -11,14 +11,6 @@ imports
   
 rules
   
-  prettyprint-Term :
-    MatchedVar(a) -> [ H(
-                       [SOpt(HS(), "0")]
-                     , [a813]
-                     )
-                   ]
-    where a813 := <pp-one-Z(prettyprint-ID)> a
-
   prettyprint-Var :
     Var(t1__) -> [ H(
                         [SOpt(HS(), "0")]

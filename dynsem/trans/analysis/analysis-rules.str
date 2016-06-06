@@ -23,9 +23,7 @@ rules /* syntactic checks */
       add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern, a list cast pattern, a wildcard cast pattern, or a variable cast pattern])
   
   post-analysis-check:
-    dec -> <fail>
-    where
-      <?Var(v) + ?MatchedVar(v)> dec
+    dec@Var(v) -> <fail>
     where
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
       add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
@@ -140,7 +138,7 @@ rules
   type-err-build-match-symbols:
     t -> NONETYPE()
     where 
-      ?Wld() + ?MatchedVar(_) + ?Var(_)
+      ?Wld() + ?Var(_)
     where 
       add-msg(|Error(), t, $[Match symbol in build pattern])
   
@@ -306,9 +304,7 @@ rules // type rules for match-sides
     Wld() -> in-ty
   
   type-check-match-var(|in-ty):
-    dec -> ty
-    where
-      ?Var(v) + ?MatchedVar(v)
+    Var(v) -> ty
     where
       <not(lookup-def(|Vars()))> v;
       if scheme-def := <get-unique-matching-varscheme> v
@@ -322,9 +318,7 @@ rules // type rules for match-sides
       <store-prop(|Type(), v-def)> ty
   
   type-check-match-var(|in-ty):
-    dec -> <fail>
-    where
-      ?Var(v) + ?MatchedVar(v)
+    dec@Var(v) -> <fail>
     where
       <lookup-def(|Vars())> v;
       add-msg(|Error(), dec, $[Duplicate variable [<unrename-var> v]])

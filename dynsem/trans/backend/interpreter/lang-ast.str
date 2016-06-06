@@ -3,6 +3,7 @@ module backend/interpreter/lang-ast
 imports
   signatures/ds-sig
   backend/interpreter/-
+  backend/utils/-
   libjava-front
   stratego/metaborg
 
@@ -10,22 +11,22 @@ rules
   
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
-    where(ds-to-interp-clean-target);
-    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<TermsPackageName>)> sig*;
-    <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
-    <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
-    <ds-to-interp-terms-building; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
-    <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<TermMatchPackageName>)> sig*;
-    <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<TermBuildPackageName>)> sig*;
-    <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)> sig*;
-    ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>);
-    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>);
-    ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<TopPackageName>)
+    where(ds-to-interp-clean-target; ds-to-interp-gen-project);
+    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<OptTermsPackageName>)> sig*;
+    <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)> sig*;
+    <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
+    <ds-to-interp-terms-building; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
+    <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<OptTermMatchPackageName>)> sig*;
+    <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
+    <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)> sig*;
+    ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>);
+    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>);
+    ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)
 
   ds-to-interp-clean-target =
-    CleanTarget <
-      <concat-strings> [<JavaGenDir>, "/", <string-replace(|".", "/")> <TopPackageName>];
-      ds-rmdir
+    OptCleanTarget <
+      <concat-strings> [<OptJavaGenDir>, "/", <string-replace(|".", "/")> <OptTopPackageName>];
+      try(ds-rmdir)
     + id
 
 rules /* Sort & Constructor classes */
@@ -41,7 +42,7 @@ rules /* Sort & Constructor classes */
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
       compilation-unit |[
-        package ~x:<TermsPackageName>;
+        package ~x:<OptTermsPackageName>;
         
         import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
@@ -101,12 +102,12 @@ rules /* Sort & Constructor classes */
   ds-to-interp-terms-consdecl:
     dec@ConsDecl(name, kid*, s, _) ->
       compilation-unit |[
-        package ~x:<TermsPackageName>;
+        package ~x:<OptTermsPackageName>;
         
         import org.spoofax.interpreter.core.Tools;
         import org.spoofax.interpreter.terms.*;
-        import ~x:<NativePackageName>.*;
-        import ~x:<TopPackageName>.TypesGen;
+        import ~x:<OptNativePackageName>.*;
+        import ~x:<OptTopPackageName>.TypesGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import com.oracle.truffle.api.CompilerAsserts;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -361,11 +362,11 @@ rules /* type system class */
   ds-to-interp-terms-types-signatures:
     sig-sec* ->
       compilation-unit |[
-        package ~x:<TopPackageName>;
+        package ~x:<OptTopPackageName>;
 
         import com.oracle.truffle.api.dsl.TypeSystem;
-        import ~x:<TermsPackageName>.*;
-        import ~x:<NativePackageName>.*;
+        import ~x:<OptTermsPackageName>.*;
+        import ~x:<OptNativePackageName>.*;
         @TypeSystem({ ~type* })
         public class Types {
           
@@ -385,10 +386,10 @@ rules /* term building */
   ds-to-interp-terms-sortbuilding:
     dec@SortDecl(s) -> 
       compilation-unit |[
-        package ~x:<TermBuildPackageName>;
+        package ~x:<OptTermBuildPackageName>;
   
-        import ~x:$[[<TermsPackageName>].[<ds-to-interp-terms-types-name> dec]];
-        import ~x:$[[<TopPackageName>].TypesGen];
+        import ~x:$[[<OptTermsPackageName>].[<ds-to-interp-terms-types-name> dec]];
+        import ~x:$[[<OptTopPackageName>].TypesGen];
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
         import com.oracle.truffle.api.frame.VirtualFrame;
@@ -419,10 +420,10 @@ rules /* term building */
   ds-to-interp-terms-building:
     dec@ConsDecl(_, kid*, s, _) ->
       compilation-unit |[
-        package ~x:<TermBuildPackageName>;
+        package ~x:<OptTermBuildPackageName>;
       
-        import ~x:$[[<TermsPackageName>].*];
-        import ~x:<NativePackageName>.*;
+        import ~x:$[[<OptTermsPackageName>].*];
+        import ~x:<OptNativePackageName>.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         import com.oracle.truffle.api.dsl.NodeChild;
         import com.oracle.truffle.api.dsl.NodeChildren;
@@ -479,10 +480,10 @@ rules /* term matching */
   ds-to-interp-terms-matching:
     dec@ConsDecl(_, kid*, _, _) -> 
       compilation-unit |[
-        package ~x:<TermMatchPackageName>;
+        package ~x:<OptTermMatchPackageName>;
         
-        import ~x:<TermsPackageName>.x_termclass;
-        import ~x:<NativePackageName>.*;
+        import ~x:<OptTermsPackageName>.x_termclass;
+        import ~x:<OptNativePackageName>.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         
         import com.oracle.truffle.api.dsl.Fallback;

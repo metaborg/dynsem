@@ -16,14 +16,14 @@ rules /* term registry */
   ds-to-interp-terms-registry:
     decl* ->
       compilation-unit |[
-        package ~x:<TopPackageName>;
+        package ~x:<OptTopPackageName>;
         
         import java.util.HashMap;
         import java.util.Map;
         
-        import ~x:<TermsPackageName>.*;
-        import ~x:<TermBuildPackageName>.*;
-        import ~x:<TermMatchPackageName>.*;
+        import ~x:<OptTermsPackageName>.*;
+        import ~x:<OptTermBuildPackageName>.*;
+        import ~x:<OptTermMatchPackageName>.*;
         
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
         import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -33,14 +33,14 @@ rules /* term registry */
         
         import com.oracle.truffle.api.source.SourceSection;
         
-        public class ~x:$[[<LanguageName>]TermRegistry] implements ITermRegistry {
+        public class ~x:$[[<OptLanguageName>]TermRegistry] implements ITermRegistry {
         
           private final Map<String, ITermBuildFactory> builderFactories = new HashMap<String, ITermBuildFactory>();
           private final Map<String, ITermMatchPatternFactory> matcherFactories = new HashMap<String, ITermMatchPatternFactory>();
           private final Map<String, ITermBuildFactory> nativeFactories = new HashMap<String, ITermBuildFactory>();
           private final Map<String, ITermBuildFactory> nativeAdapterFactories = new HashMap<String, ITermBuildFactory>();
           
-          public ~x:$[[<LanguageName>]TermRegistry]() {
+          public ~x:$[[<OptLanguageName>]TermRegistry]() {
             init();
           }
         
@@ -52,7 +52,7 @@ rules /* term registry */
           
           @Override
           public ITerm parseProgramTerm(IStrategoTerm p) {
-            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<SourceStartSymbol>).create(p);
+            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<OptSourceStartSymbol>).create(p);
           }
           
           @Override
@@ -125,7 +125,7 @@ rules /* term registry */
           @Override
           public TermBuild apply(SourceSection source,
               TermBuild... children) {
-            return ~x:<NativePackageName>.x_natop.create(source, e1*);
+            return ~x:<OptNativePackageName>.x_natop.create(source, e1*);
           }
         });
       ]|

@@ -1,7 +1,7 @@
 module backend/java-backend/analysis-extra
 
 imports
-  signatures/ds-sig
+  signatures/-
   ds  
   lib-ds
   analysis/constructors
@@ -71,20 +71,20 @@ rules // mark constant variables
       <store-prop(|VarConstant(), vdef)> True()
 
   mark-constant-vars-premise =
-    ?Formula(Match(VarRef(vin), MatchedVar(vout)));
+    ?Formula(Match(VarRef(vin), Var(vout)));
     vindef := <lookup-def(|Vars())> vin;
     True() := <lookup-prop(|VarConstant())> vindef;
     voutdef := <lookup-def(|Vars())> vout;
     <store-prop(|VarConstant(), voutdef)> True()
   
   mark-constant-vars-premise = 
-    ?Formula(Match(tconst, MatchedVar(vout)));
+    ?Formula(Match(tconst, Var(vout)));
     <?Int(_) <+ ?True() <+ ?False()> tconst;
     voutdef := <lookup-def(|Vars())> vout;
     <store-prop(|VarConstant(), voutdef)> True()
   
   mark-constant-vars-premise =
-    ?Formula(Match(Con(c, carg*), MatchedVar(vout)));
+    ?Formula(Match(Con(c, carg*),Var(vout)));
     <lookup-def(|Constructors()); lookup-prop(|ConsKind()); not(?NativeOpCons())> (c, <length> carg*);
     <collect-all(?VarRef(<id>)); map(lookup-def(|Vars()); lookup-prop(|VarConstant()); ?True())> carg*;
     voutdef := <lookup-def(|Vars())> vout;
@@ -108,20 +108,6 @@ rules // mark pattern-bound variables
     <store-prop(|PattBoundVar(), vdef)> idx
 
 rules
-
-  lookup-applicable-arrow-def:
-    type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
-
-  is-applicable-arrow-def(|type-name) =
-    ?ArrowType(type-name, _)
-    <+
-    ?ArrowType(ltype-name, _);
-    <type-coerce-direct(fail)> (type-name, ltype-name)
-
-  lookup-arrow-def:
-    (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
-    where
-      <lookup-applicable-arrow-def> c-ty => arrow*
 
   type-is-adoptable = where(lookup-def(|Types()); lookup-prop(|SortKind()) => LanguageSort())
 

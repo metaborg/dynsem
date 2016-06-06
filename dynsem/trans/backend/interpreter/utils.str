@@ -3,40 +3,100 @@ module backend/interpreter/utils
 imports
   stratego/metaborg
   lib-ds
-  backend/java-backend/utils/java-utils
+  backend/utils/utils
   
 rules
 
-  ds-to-interp-init-options(|path, project-path) = 
-    rules(
-      CurrentFilePath: _ -> path
-      ProjectPath: _ -> project-path
-      PropertiesFile: _ -> $[[project-path]/dynsem.properties]
-      LanguageName: _ -> <PropertiesFile; read-property(|"source.langname", "MISSING"); escape-java-id>
-    );
-    rules(
-      TableSourceFile: _ -> $[[project-path][<PropertiesFile; read-property(|"source.table", $[include/[<LanguageName>].tbl])>]]
-      SourceVersion: _ -> <PropertiesFile; read-property(|"source.version", "0.1")>
-      SourceMimeType: _ -> <PropertiesFile; read-property(|"source.mimetype", "application/x-somelanguage")>
-      ReductionStartConstrName: _ -> <PropertiesFile; read-property(|"source.initconstructor.name", "MISSING")>
-      ReductionStartConstrArity: _ -> <PropertiesFile; read-property(|"source.initconstructor.arity", "MISSING")>
-      GenProject: _ -> $[[project-path][<PropertiesFile; read-property(|"target.project", project-path)>]]
-      JavaGenDir: _ -> $[[<GenProject>]/[<PropertiesFile; read-property(|"target.java", "/editor/java")>]]
-      TopPackageName: _ -> <PropertiesFile; read-property(|"target.package", $[[<language>].generated.interpreter])>
-      RelativeSpecTargetFile: _ -> <PropertiesFile; read-property(|"target.specterm", path)>
-      SpecTargetFile: _ -> $[[<GenProject>]/[<RelativeSpecTargetFile>]]
-      RelativeTableTargetFile: _ -> <PropertiesFile; read-property(|"target.table", path)>
-      TableTargetFile: _ -> $[[<GenProject>]/[<RelativeTableTargetFile>]]
-      TermsPackageName: _ -> $[[<TopPackageName>].terms]
-      TermBuildPackageName: _ -> $[[<TermsPackageName>].build]
-      TermMatchPackageName: _ -> $[[<TermsPackageName>].match]
-      NativePackageName: _ -> <PropertiesFile; read-property(|"target.nativepackage", $[[<language>].natives])>
-      SourceStartSymbol: _ -> <PropertiesFile; read-property(|"source.startsymbol", "MISSING")>
-      RuleRegistry: _ -> <PropertiesFile; read-property(|"target.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")>
-      DesugarTransform: _ -> <PropertiesFile; read-property(|"target.desugarer", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")>
-      CleanTarget: _ -> <PropertiesFile; read-property(|"target.clean", "false"); ?"true">
-    )
-
-  ds-to-interp-write-classes(|package) = emit-java-classes(overwrite-merge-strategy, id | package, <JavaGenDir>)
+  ds-to-interp-init-options(|path, project-path) =
+    where(
+      prop-file := $[[project-path]/dynsem.properties];
+      rules(
+        OptFilePath: _ -> path
+        OptProjectPath: _ -> project-path
+      );
+      
+      langname := <ds-to-interp-read-prop-required(|"source.langname"); ds-utils-java-escape-id> prop-file;
+      rules(OptLanguageName: _ -> langname);
+      
+      tbl-source := <read-property(|"source.table", "target/metaborg/sdf.tbl"); make-absolute-path(|project-path)> prop-file;
+      rules(OptTableSourceFile: _ -> tbl-source);
+      
+      lang-ver := <ds-to-interp-read-prop-required(|"source.version")> prop-file;
+      rules(OptSourceVersion: _ -> lang-ver);
+    
+      lang-mime := <read-property(|"source.mimetype", $[application/x-[langname]])> prop-file;
+      rules(OptSourceMimeType: _ -> lang-mime);
+      
+      start-symb := <ds-to-interp-read-prop-required(|"source.startsymbol")> prop-file;
+      rules(OptSourceStartSymbol: _ -> start-symb);
+      
+      initcon-name := <ds-to-interp-read-prop-required(|"source.initconstructor.name")> prop-file;
+      rules(OptReductionStartConstrName: _ -> initcon-name);
   
-  ds-to-interp-write-aterm = fail
+      initcon-arity := <ds-to-interp-read-prop-required(|"source.initconstructor.arity")> prop-file;
+      rules(OptReductionStartConstrArity: _ -> initcon-arity);
+      
+      genproject-path := <ds-to-interp-read-prop-required(|"project.path"); make-absolute-path(|project-path)> prop-file;
+      rules(OptGenProject: _ -> genproject-path);
+      
+      do-create-genproject := <read-property(|"project.create", "false")> prop-file;
+      rules(OptCreateProject: _ -> <?"true"> do-create-genproject);
+      
+      do-clean-genproject := <read-property(|"project.clean", "false")> prop-file;
+      rules(OptCleanTarget: _ -> <?"true"> do-clean-genproject);
+  
+      genproject-groupid := <ds-to-interp-read-prop-required(|"project.groupid")> prop-file;
+      genproject-artifactid := <ds-to-interp-read-prop-required(|"project.artifactid")> prop-file;
+      rules(
+        OptMavenGroupId: _ -> genproject-groupid
+        OptMavenArtifactId: _ -> genproject-artifactid
+      );
+  
+      java-gendir-rel := <read-property(|"project.javapath", "src/main/java")> prop-file;
+      java-gendir-abs := $[[genproject-path]/[java-gendir-rel]];
+      rules(
+        OptJavaGenDirRel: _ -> java-gendir-rel
+        OptJavaGenDir: _ -> java-gendir-abs
+      );
+      
+      gen-pkg := <read-property(|"project.javapackage", $[[langname].interpreter.generated])> prop-file;
+      terms-pkg := $[[gen-pkg].terms];
+      tbuild-pkg := $[[terms-pkg].build];
+      tmatch-pkg := $[[terms-pkg].match];
+      rules(
+        OptTopPackageName: _ -> gen-pkg
+        OptTermsPackageName: _ -> terms-pkg
+        OptTermBuildPackageName: _ -> tbuild-pkg
+        OptTermMatchPackageName: _ -> tmatch-pkg
+      );
+  
+      native-pkg := <read-property(|"project.nativepackage", $[[langname].interpreter.natives])> prop-file;
+      rules(OptNativePackageName: _ -> native-pkg);
+  
+      rulereg-class := <read-property(|"project.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")> prop-file;
+      rules(OptRuleRegistry: _ -> rulereg-class);
+      
+      preprocess-class := <read-property(|"project.preprocessor", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")> prop-file;
+      rules(OptPreprocessor: _ -> preprocess-class);
+  
+      target-specfile-rel := <read-property(|"project.specpath", "src/main/resources/specification.aterm")> prop-file;
+      target-specfile-abs := $[[genproject-path]/[target-specfile-rel]];
+      rules(
+        OptTargetSpecRelFile: _ -> target-specfile-rel
+        OptTargetSpecFile: _ -> target-specfile-abs
+      );
+      
+      target-tblfile-rel := <read-property(|"project.tablepath", "src/main/resources/parsetable.tbl")> prop-file;
+      target-tblfile-abs := $[[genproject-path]/[target-tblfile-rel]];
+      rules(
+        OptTargetTableRelFile: _ -> target-tblfile-rel
+        OptTargetTableFile: _ -> target-tblfile-abs
+      )
+    )
+    
+  ds-to-interp-read-prop-required(|prop) =
+    read-property(|prop, "N/A"); not(?"N/A" + ?"")
+    <+ with(fail|$[Cannot read [prop] property])
+
+  ds-to-interp-write-classes(|package) = ds-utils-java-emit-classes(id | package, <OptJavaGenDir>)
+  

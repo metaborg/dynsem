@@ -3,8 +3,10 @@ module ds2ds/defactorize
 imports
   ds
   signatures/-
-  lib-ds
+  ds2ds/sugar
   analysis/mark-references
+  lib-ds
+  pp
 
 strategies
 
@@ -80,7 +82,7 @@ rules
     Rule(p*, infer, rel) -> r'
     where {| PropagatePatternMatch:
       p'* := <eliminate-patternmatch-premises> p*;
-      r' := <alltd(replace-singletonwrite(record-progress))> Rule(p'*, infer, rel)
+      r' := <innermost(replace-singletonwrite(record-progress))> Rule(p'*, infer, rel)
     |}
 
   eliminate-patternmatch-premises =
@@ -101,7 +103,7 @@ rules
     where {| ReadCount, PropagatePatternMatch:
       <count-varreads-premises> p*;
       p'* := <eliminate-patternmatch-premises> p*;
-      p''* := <alltd(replace-singletonwrite(record-progress))> p'*
+      p''* := <innermost(replace-singletonwrite(record-progress))> p'*
     |}
 
   hoist-patternmatches-casematch:
@@ -121,12 +123,11 @@ rules
     {| ReadCount, PropagatePatternMatch:
       where(count-varreads-premises);
       eliminate-patternmatch-premises;
-      alltd(replace-singletonwrite(record-progress))
+      innermost(replace-singletonwrite(record-progress))
     |}
     
-
   eliminate-patternmatch-premise =
-    ?Formula(Match(VarRef(v), rhs));
+    ?f@Formula(Match(VarRef(v), rhs));
     <ReadCount> v => 1;
     rules(PropagatePatternMatch: Var(v) -> rhs)
 

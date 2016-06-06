@@ -41,13 +41,13 @@ rules
       ConstructorType(_, c-ty) := <lookup-prop(|Type())> c-def;
       applicable-arrow* := <lookup-applicable-arrow-def> c-ty;
       let
-        prep-rule = unmark-vars; copy-propagation-rule; constant-propagation-rule; mark-var-defs-in-rule; mark-match-vars
+        prep-rule = unmark-vars; copy-propagation-rule; constant-propagation-rule; mark-var-defs-in-rule
       in
         rule'* := <map(prep-rule)> rule*
       end
 
   lift-constant-premise:
-    f@Formula(Match(_, MatchedVar(v))) -> f
+    f@Formula(Match(_, Var(v))) -> f
     where
       v-def := <lookup-def(|Vars())> v;
       True() := <lookup-prop(|VarConstant())> v-def
@@ -333,7 +333,7 @@ rules
       x_inputtmp := <newname> "$tmp";
       vin-ty := <type-of> vin;
       <store-prop(|Type(), <store-def(|Vars())> x_inputtmp)> vin-ty; 
-      prem* := <factorize-premises; map(mark-vardefs-in-premise); map(mark-match-vars); map(type-check-premise-top)> [Formula(Match(VarRef(x_inputtmp), pattern))];
+      prem* := <factorize-premises; map(mark-vardefs-in-premise); map(type-check-premise-top)> [Formula(Match(VarRef(x_inputtmp), pattern))];
       bstm0* := <ds2java-premise> (prem*, [JavaStm(bstm* |[ return false; ]|) ], []);
       rules(
         LiftedMethods:+ _ ->
@@ -348,7 +348,7 @@ rules
       bstm2* := <ds2java-premise> on-fail*
   
   ds2java-premise:
-    (Formula(Match(lhs@Con(cname, c*), dec@MatchedVar(v))), on-succ*, _) ->
+    (Formula(Match(lhs@Con(cname, c*), dec@Var(v))), on-succ*, _) ->
       bstm* |[
         final ~x:<ds2java-consdef-classname> c-def ~x:v = e_lhs;
         bstm*
@@ -363,7 +363,7 @@ rules
       bstm* := <ds2java-premise> on-succ*
   
   ds2java-premise:
-    (Formula(Match(lhs, dec@MatchedVar(v))), on-succ*, _) ->
+    (Formula(Match(lhs, dec@Var(v))), on-succ*, _) ->
       bstm* |[
         final ~x:<ds2java-type-to-unboxed-type> v-ty ~x:v = e_lhs;
         bstm*

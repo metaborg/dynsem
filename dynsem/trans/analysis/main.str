@@ -9,7 +9,7 @@ imports
 	analysis/mark-references
 	analysis/query
 	analysis/info-implicit-conversions
-	signatures/ds-sig
+	signatures/-
   lib-ds
 	stratego/metaborg
 	libstratego-sglr

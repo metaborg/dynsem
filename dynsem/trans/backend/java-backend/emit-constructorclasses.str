@@ -1,7 +1,7 @@
 module backend/java-backend/emit-constructorclasses
 
 imports
-  signatures/ds-sig
+  signatures/-
   ds
 
 imports
@@ -105,7 +105,7 @@ rules
     	exec* := <ds2java-execmethods(ds2java-supercall|dynamic-rule*)> c-def
     with
     	let
-    	  prep-premises = filter(lift-constant-premise); unmark-vars; copy-propagation-premises; constant-propagation-premises; mark-vardefs-in-premise; mark-match-vars
+    	  prep-premises = filter(lift-constant-premise); unmark-vars; copy-propagation-premises; constant-propagation-premises; mark-vardefs-in-premise
     	in
         lifted-constant-premise* := <mapconcat(?Rule(<id>, _, _)); prep-premises> cons-rule*
       end;
@@ -151,14 +151,14 @@ rules
       fdec* := <map(ds2java-emit-fielddecl-const-prem <+ debug(!"Failed for prem: "); fail)> prem*
       
   ds2java-emit-constant-field-init:
-  	Formula(Match(t, MatchedVar(v))) -> bstm* |[
+  	Formula(Match(t, Var(v))) -> bstm* |[
 	  		~x:v = ~e:<ds2java-term-build(|ex_ty)> t;
 	  	]|
   	where
   		ex_ty := <lookup-def(|Vars()); lookup-prop(|Type())> v
 
   ds2java-emit-fielddecl-const-prem:
-  	Formula(Match(Con(c, c*), MatchedVar(x))) -> class-body-dec |[ @Child private ~x:<ds2java-consdef-classname> c-def x; ]|
+  	Formula(Match(Con(c, c*), Var(x))) -> class-body-dec |[ @Child private ~x:<ds2java-consdef-classname> c-def x; ]|
   	where
   	  x-ty := <lookup-def(|Vars()); lookup-prop(|Type())> x;
       <type-is-adoptable + type-is-adoptable-list> x-ty
@@ -166,7 +166,7 @@ rules
   	  c-def := <lookup-def(|Constructors())> (c, <length> c*)
 
   ds2java-emit-fielddecl-const-prem:
-  	Formula(Match(Con(c, c*), MatchedVar(x))) -> class-body-dec |[ private ~x:<ds2java-consdef-classname> c-def x; ]|
+  	Formula(Match(Con(c, c*), Var(x))) -> class-body-dec |[ private ~x:<ds2java-consdef-classname> c-def x; ]|
   	where
   	  x-ty := <lookup-def(|Vars()); lookup-prop(|Type())> x;
       <not(type-is-adoptable + type-is-adoptable-list)> x-ty
