@@ -76,6 +76,7 @@ rules /* language file. interpreter entry point */
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
       import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
+      import org.spoofax.interpreter.terms.IStrategoTerm;
 
       import ~x:<OptTopPackageName>.~x:$[[<OptLanguageName>]TermRegistry];
 
@@ -94,15 +95,24 @@ rules /* language file. interpreter entry point */
         }
 
         public static void main(String[] args) throws Exception {
-          RuleResult res = evaluateStatic(args[0], System.in, System.out, System.err);
+          RuleResult res = evaluate(args[0], System.in, System.out, System.err);
           System.out.println(res.result);
         }
 
-        public static RuleResult evaluateStatic(String programFile,
+        public static RuleResult evaluate(String programFile,
             InputStream inputStream, OutputStream outputStream,
             OutputStream errorStream) throws Exception {
-          return new x_entryPoint().evaluate(programFile, inputStream,
-                outputStream, errorStream);
+          return new x_entryPoint()
+                .getCallable(programFile, inputStream, outputStream, errorStream)
+                .call();
+        }
+
+        public static RuleResult evaluate(IStrategoTerm term,
+            InputStream inputStream, OutputStream outputStream,
+            OutputStream errorStream) throws Exception {
+          return new x_entryPoint()
+                .getCallable(term, inputStream, outputStream, errorStream)
+                .call();
         }
 
         public static IDynSemLanguageParser createParser() {
