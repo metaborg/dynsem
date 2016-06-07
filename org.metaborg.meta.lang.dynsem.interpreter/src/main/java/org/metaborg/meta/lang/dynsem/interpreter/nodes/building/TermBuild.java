@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.ConsLi
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.NilListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.IntLiteralTermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.StringLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
@@ -99,6 +100,9 @@ public abstract class TermBuild extends DynSemNode {
 		}
 		if (Tools.hasConstructor(t, "Int", 1)) {
 			return IntLiteralTermBuild.create(t, fd);
+		}
+		if (Tools.hasConstructor(t, "String", 1)) {
+			return StringLiteralTermBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "ListSource", 2)) {
 			return create(Tools.applAt(t, 0), fd);
