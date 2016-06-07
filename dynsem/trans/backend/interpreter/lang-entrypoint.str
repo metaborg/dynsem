@@ -68,8 +68,11 @@ rules /* language file. interpreter entry point */
 
       import java.io.InputStream;
       import java.io.OutputStream;
-
+      
+      import org.spoofax.interpreter.terms.ITermFactory;
+      import org.spoofax.terms.io.TAFTermReader;
       import org.apache.commons.io.FilenameUtils;
+      
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemEntryPoint;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
