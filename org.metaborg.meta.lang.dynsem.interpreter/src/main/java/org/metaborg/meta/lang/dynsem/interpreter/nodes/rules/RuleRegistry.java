@@ -20,8 +20,7 @@ public class RuleRegistry {
 
 	private final Map<String, RuleRoot> rules = new HashMap<>();
 
-	public RuleRegistry(InputStream specInput) {
-		populate(this, specInput);
+	public RuleRegistry() {
 		init();
 	}
 
@@ -67,7 +66,7 @@ public class RuleRegistry {
 		return name + "/" + constr + "/" + arity;
 	}
 
-	private static void populate(RuleRegistry reg, InputStream specInput) {
+	public static void populate(RuleRegistry reg, InputStream specInput) {
 		try {
 			TAFTermReader reader = new TAFTermReader(new TermFactory());
 

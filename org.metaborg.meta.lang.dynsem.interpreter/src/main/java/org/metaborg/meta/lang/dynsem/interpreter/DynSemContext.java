@@ -8,33 +8,29 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatter
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 
 public class DynSemContext {
-
 	public static DynSemLanguage LANGUAGE;
 
 	private final InputStream input;
 	private final PrintStream output;
 
+	private final IDynSemLanguageParser parser;
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
-	private final DynSemLanguageParser langParser;
 
-	private DynSemPrimedRun primedRun;
-
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream parseTableInput) {
-		this(termRegistry, ruleRegistry, parseTableInput, System.in, System.out);
+	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
+		this(parser, termRegistry, ruleRegistry, System.in, System.out);
 	}
 
-	public DynSemContext(ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream parseTableInput, InputStream input,
-			PrintStream output) {
+	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream input, PrintStream output) {
+		this.parser = parser;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
-		this.langParser = new DynSemLanguageParser(parseTableInput);
 	}
 
-	public DynSemLanguageParser getParser() {
-		return langParser;
+	public IDynSemLanguageParser getParser() {
+		return parser;
 	}
 
 	public RuleRegistry getRuleRegistry() {
@@ -43,14 +39,6 @@ public class DynSemContext {
 
 	public ITermRegistry getTermRegistry() {
 		return termRegistry;
-	}
-
-	public DynSemPrimedRun getRun() {
-		return primedRun;
-	}
-
-	public void setRun(DynSemPrimedRun run) {
-		this.primedRun = run;
 	}
 
 	public ITermBuildFactory lookupTermBuilder(String name, int arity) {

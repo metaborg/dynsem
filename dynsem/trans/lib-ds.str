@@ -375,11 +375,6 @@ rules // utils
         <hashtable-put(|x, 1)> tbl
       end
 
-  external read-property(|propname, defaultval)
-  
-  external make-absolute-path(|prefix)
-  
-  external ds-rmdir(|)
   
   
   

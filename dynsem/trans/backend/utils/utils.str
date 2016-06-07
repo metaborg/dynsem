@@ -1,0 +1,44 @@
+module backend/utils/utils
+
+imports
+  libjava-front
+  backend/utils/mkdir
+
+rules
+  
+  external read-property(|propname, defaultval)
+  
+  external make-absolute-path(|prefix)
+  
+  external ds-rmdir(|)
+
+rules
+
+  ds-utils-java-emit-classes(createdir|outputpkg, basedir) =
+    map(ds-utils-java-emit-class(createdir|outputpkg, basedir))
+  
+  ds-utils-java-emit-class(createdir|outputpkg, basedir) =
+    ?ast;
+    filename := <ds-utils-java-extractname; guarantee-extension(|"java")> ast;
+    if createdir then
+      outputdir := <concat-strings> [basedir, "/", <string-replace(|".", "/")> outputpkg];
+      (<file-exists <+ mkdir(id)> outputdir)
+    else
+      outputdir := basedir
+    end;
+    filepath := <concat-strings> [outputdir, "/", filename];
+    pp-java := <ds-utils-debugged-java-pp> ast;
+    fout     := <fopen> (filepath, "w");
+    <fputs> (pp-java, fout);
+    <fclose> fout
+  
+  ds-utils-java-extractname:
+    compilation-unit -> name
+    with
+      <collect-one(?InterfaceDecHead(_, Id(name), _, _) + ?ClassDecHead(_, Id(name), _, _, _))> compilation-unit
+  
+  ds-utils-java-escape-id = string-replace(|"'", "_"); string-replace(|"-", "_")
+  
+  ds-utils-debugged-java-pp =
+    pp-java-string <+
+    bottomup(try(not(is-string) ; not(is-list) ; not(pp-java-string) ; debug(!"ERROR: cannot pp "))) ; fail

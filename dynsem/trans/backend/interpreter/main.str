@@ -20,10 +20,10 @@ rules
       local-project-path := $[[<prim("local_path")> project-path]/];
       result := <ds-to-interp-main(|path, local-project-path)> ast;
       <ds-to-interp-terms(|path, local-project-path)> result;
-      fout := <fopen> (<SpecTargetFile>, "w");
+      fout := <fopen> (<OptTargetSpecFile>, "w");
       <pp-aterm-stream(|fout)> result;
       <fclose> fout;
-      <copy-file> (<TableSourceFile>, <TableTargetFile>)
+      <copy-file> (<OptTableSourceFile>, <OptTargetTableFile>)
   
   ds-to-interp-main(|path, project-path) =
     module-to-core(|path, project-path);

@@ -3,18 +3,7 @@ module ds2ds/core
 imports
   analysis/resolve-includes
   analysis/lib-analysis
-  ds2ds/sugar
-  ds2ds/factorize
-  ds2ds/explicate
-  ds2ds/fuse-sections
-  ds2ds/copy-propagation
-  ds2ds/constant-propagation
-  ds2ds/expand-implicits
-  ds2ds/desugar-varschemes
-  ds2ds/extra-typeannos
-  ds2ds/desugar-aliases
-  ds2ds/meta-functions
-  ds2ds/defactorize
+  ds2ds/-
   backend/interpreter/utils
   pp
 

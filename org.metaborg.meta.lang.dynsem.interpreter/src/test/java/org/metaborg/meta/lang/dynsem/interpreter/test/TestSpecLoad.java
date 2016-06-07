@@ -29,7 +29,8 @@ public class TestSpecLoad {
 		assert (DummyDynSemLanguage.INSTANCE != null);
 		
 		InputStream specInput = new FileInputStream(specFile);
-		RuleRegistry rreg = new RuleRegistry(specInput);
+		RuleRegistry rreg = new RuleRegistry();
+		RuleRegistry.populate(rreg, specInput);
 		assertEquals(5, rreg.ruleCount());
 	}
 
@@ -43,14 +44,12 @@ public class TestSpecLoad {
 		}
 
 		@Override
-		public DynSemContext createDynSemContext(InputStream input,
-				PrintStream output) {
+		protected DynSemContext createContext(com.oracle.truffle.api.TruffleLanguage.Env env) {
 			return new DynSemContext(null, null, null);
 		}
 
 		@Override
-		protected CallTarget parse(Source code, Node context,
-				String... argumentNames) throws IOException {
+		protected CallTarget parse(Source code, Node context, String... argumentNames) throws IOException {
 			return null;
 		}
 

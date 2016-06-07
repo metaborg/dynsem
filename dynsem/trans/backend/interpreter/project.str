@@ -1,0 +1,89 @@
+module backend/interpreter/project
+
+imports
+  backend/interpreter/utils
+  backend/utils/-
+  
+rules
+
+  ds-to-interp-gen-project =
+    if OptCreateProject then
+      project := <OptGenProject>
+      ; <file-exists + mkdir(id)> project
+      ; ds-to-interp-gen-project-launchconfig
+      ; ds-to-interp-gen-project-pom
+      ; java-gendir := <OptJavaGenDir>
+      ; <file-exists + mkdir(id)> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <OptTopPackageName>]
+      ; <file-exists + mkdir(id)> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <OptNativePackageName>]
+    end
+
+  ds-to-interp-gen-project-pom =
+    pom-file := <fopen> (<concat-strings> [<OptGenProject>, "/pom.xml"], "w");
+    <fputs> (
+      $[<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
+          <name>[<OptLanguageName>] Interpreter</name>
+          <groupId>[<OptMavenGroupId>]</groupId>
+          <artifactId>[<OptMavenArtifactId>]</artifactId>
+          <version>[<OptSourceVersion>]</version>
+          <build>
+            <plugins>
+              <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                  <source>1.8</source>
+                  <target>1.8</target>
+                </configuration>
+              </plugin>
+            </plugins>
+          </build>
+          <dependencies>
+            <dependency>
+              <groupId>org.metaborg</groupId>
+              <artifactId>org.metaborg.meta.lang.dynsem.interpreter</artifactId>
+              <version>2.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+              <groupId>com.oracle.truffle</groupId>
+              <artifactId>truffle-api</artifactId>
+              <version>0.11</version>
+              <type>jar</type>
+            </dependency>
+            <dependency>
+              <groupId>com.oracle.truffle</groupId>
+              <artifactId>truffle-dsl-processor</artifactId>
+              <version>0.11</version>
+            </dependency>
+            <dependency>
+              <groupId>org.metaborg</groupId>
+              <artifactId>org.spoofax.terms</artifactId>
+              <version>2.0.0-SNAPSHOT</version>
+            </dependency>
+          </dependencies>
+      </project>], pom-file);
+    <fclose> pom-file
+  
+  ds-to-interp-gen-project-launchconfig =
+    launch-file := <fopen> (<concat-strings> [<OptGenProject>, "/", <OptLanguageName>, ".launch"], "w");
+    <fputs> (
+    $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+        <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/[<OptMavenArtifactId>]/[<OptJavaGenDirRel>]/[<OptTopPackageName; string-replace(|".", "/")>]/[<OptLanguageName>]Language.java"/>
+        </listAttribute>
+        <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="1"/>
+        </listAttribute>
+        <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+        <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
+        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<OptTopPackageName>].[<OptLanguageName>]EntryPoint"/>
+        <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${resource_loc}"/>
+        <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<OptMavenArtifactId>]"/>
+        <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
+      </launchConfiguration>
+    ], launch-file);
+    <fclose> launch-file
+
+    
