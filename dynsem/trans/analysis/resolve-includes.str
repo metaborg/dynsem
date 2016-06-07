@@ -23,7 +23,7 @@ rules
   include-imports(|include-dir, imported*):
     ([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [name, imported*])> ([ixs*, new-import*], [section* | imported-section-noimports*])
     with
-    	Module(name, imported-section*) := <resolve-path; parse-ds-import(fatal-err-missing-import(|i))> i;
+    	Module(name, imported-section*) := <resolve-path; parse-ds-file-report(fatal-err-missing-import(|i))> i;
       if <not(fetch-elem(?name))> imported*
       then
         (new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*
