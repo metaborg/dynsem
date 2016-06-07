@@ -106,6 +106,14 @@ rules /* language file. interpreter entry point */
                 .getCallable(programFile, inputStream, outputStream, errorStream)
                 .call();
         }
+        
+        public static RuleResult evaluate(String atermString,
+            ITermFactory factory, InputStream inputStream,
+            OutputStream outputStream, OutputStream errorStream) throws Exception {
+          return new x_entryPoint()
+                .getCallable(new TAFTermReader(factory).parseFromString(atermString), inputStream, outputStream, errorStream)
+                .call();
+        }
 
         public static RuleResult evaluate(IStrategoTerm term,
             InputStream inputStream, OutputStream outputStream,
