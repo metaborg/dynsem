@@ -13,15 +13,9 @@ public class MapUtils {
 
 	@TruffleBoundary
 	public static <K, V> PersistentMap<K, V> plus(PersistentMap<K, V> one, PersistentMap<K, V> other) {
-		// PersistentMap<K, V> nmap = one;
-		// for (K key : other.keySet()) {
-		// nmap = nmap.plus(key, other.get(key));
-		// }
-		// return nmap;
-
 		TransientMap<K, V> tmp = ((PersistentHashMap) one).asTransient();
 
-		Iterator<Map.Entry<K, V>> it = (Iterator<Entry<K, V>>) ((PersistentHashMap) other).entrySet();
+		Iterator<Map.Entry<K, V>> it = (Iterator<Entry<K, V>>) ((PersistentHashMap) other).entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<K, V> tuple = it.next();
 			tmp.plus(tuple.getKey(), tuple.getValue());
