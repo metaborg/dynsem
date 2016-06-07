@@ -14,6 +14,8 @@ rules /* language file. interpreter entry point */
       
       import java.io.IOException;
       import java.io.InputStream;
+      import org.spoofax.interpreter.terms.ITermFactory;
+      import org.spoofax.terms.io.TAFTermReader;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemRule;
