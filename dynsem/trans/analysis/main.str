@@ -39,13 +39,15 @@ rules
     analyze-module-local
   
   analyze-imports(analysis) =
-    Module(id, where(filter(Imports(map(analyze-import(analysis))))))
+    Module(id, where(filter(Imports(filter(analyze-import(analysis))))))
   
   analyze-import(analysis) = 
-  	?t@Import(<id>);
+  	?t@Import(import-string);
+  	!import-string;
   	open-import(
-  	  resolve-path, // TODO handle failure of resolve-path
-  	  parse-ds-import(\ msg -> <add-msg(|Error(), t, msg)> \); Module(id, filter(?Imports(_) <+ ?Signatures(_))),
+  	  resolve-path,
+      parse-ds-file-report(add-msg(|Error(), t, $[Import [import-string] cannot be be parsed]));
+  	  Module(id, filter(?Imports(_) <+ ?Signatures(_))),
   	  analyze-module
   	)
 
@@ -81,11 +83,16 @@ rules
   
 rules /* helpers for import handling */
 
-  resolve-path:
-  	import-string -> <ds-source-and-include-locations; fetch-elem(!$[[<id>]/[import-string].ds]; file-exists)>
-  		  
-  parse-ds-import(mk-err) =
-    parse-file(
-      <mk-err> $[Imported module cannot be resolved],
-      <mk-err> $[Imported module contains syntax errors]
-    | <import-term(target/metaborg/sdf.tbl)>)
+  resolve-path =
+  	?import-string;
+    (
+      ds-source-and-include-locations;
+      fetch-elem(!$[[<id>]/[import-string].ds]; file-exists)
+      <+
+      add-msg(|Error(), import-string, $[Import [import-string] cannot be resolved]);
+      fail
+    )
+  
+  parse-ds-file-report(report) = 
+    parse-ds-file
+    <+ debug(!"failed to parse: "); report; debug(!"reported error: "); fail

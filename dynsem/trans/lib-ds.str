@@ -21,7 +21,7 @@ rules // projections for sorts
     + ?ListSort(s); !$[L_[<get-sort-name> s]]
     + ?MapSort(k-s, v-s); !$[L_[<get-sort-name> k-s]_[<get-sort-name> v-s]]
   
-  get-listsort-elementname = ?ListSort(<get-sort-name>)
+//  get-listsort-elementname = ?ListSort(<get-sort-name>)
 
 rules
     
@@ -218,8 +218,8 @@ rules // extract components
       
 rules // component operations
   
-  comp-var(|num) :
-    name -> $[[<lower-case>name]_[num]]
+  comp-var(|num):
+    name -> $[_lifted_[<lower-case> name]_[num]]
   
   mk-label-comps(|num) = 
     map(mk-label-comp(|num))
