@@ -1,4 +1,4 @@
-module ds2ds/pretify-vars
+module ds2ds/prettify-vars
 
 imports
   signatures/-
@@ -6,25 +6,25 @@ imports
   
 strategies
     
-  pretify-vars-module =
+  prettify-vars-module =
     ?Module(_, _);
     m-in-analysis(
-      {| PretifyVar:
-        pretify-vars-all
+      {| PrettifyVar:
+        prettify-vars-all
       |};
       unrename-all);
     unmark-vars
   
-  pretify-vars-all = alltd(pretify-vars-rule)
+  prettify-vars-all = alltd(prettify-vars-rule)
   
-  pretify-vars-rule =
+  prettify-vars-rule =
     ?Rule(_, _, _);
-    {| PretifyVar, NextIdx:
-      alltd(pretify-var-def);
-      alltd(pretify-var-ref)
+    {| PrettifyVar, NextIdx:
+      alltd(prettify-var-def);
+      alltd(prettify-var-ref)
     |}
   
-  pretify-var-def:
+  prettify-var-def:
     Var(x) -> Var(x')
     where
       <string-starts-with(|"_lifted")> x;
@@ -38,9 +38,9 @@ strategies
         x-prefix := <derw-type; get-sort-name; lower-case> x-ty
       end;
       x' := <pesimistic-next-variable> x-prefix;
-      rules(PretifyVar: x -> x')
+      rules(PrettifyVar: x -> x')
 
-  pretify-var-ref = VarRef(PretifyVar)
+  prettify-var-ref = VarRef(PrettifyVar)
   
   pesimistic-next-variable:
     prefix -> name
