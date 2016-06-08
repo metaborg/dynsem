@@ -30,7 +30,10 @@ strategies
       else
         x-prefix := <derw-type; get-sort-name; lower-case> x-ty
       end;
-      x' := <next-variable(|x-prefix)>;
+      x' := <pesimistic-next-variable(|x-prefix)>;
       rules(PretifyVar: x -> x')
 
   pretify-var-ref = VarRef(PretifyVar)
+  
+  pesimistic-next-variable(|prefix) =
+    repeat-until(next-variable(|prefix), not(lookup-def(|Vars())))
