@@ -14,8 +14,15 @@ strategies
       |};
       unrename-all);
     unmark-vars
-    
-  pretify-vars-all = alltd(pretify-var-def); alltd(pretify-var-ref)
+  
+  pretify-vars-all = alltd(pretify-vars-rule)
+  
+  pretify-vars-rule =
+    ?Rule(_, _, _);
+    {| PretifyVar, NextIdx:
+      alltd(pretify-var-def);
+      alltd(pretify-var-ref)
+    |}
   
   pretify-var-def:
     Var(x) -> Var(x')
@@ -36,4 +43,8 @@ strategies
   pretify-var-ref = VarRef(PretifyVar)
   
   pesimistic-next-variable(|prefix) =
-    repeat-until(next-variable(|prefix), not(lookup-def(|Vars())))
+    (<NextIdx> prefix <+ rules(NextIdx: prefix -> 0); !0);
+    repeat-until(inc, not(!$[[prefix]_[<id>]]; lookup-def(|Vars())));
+    ?idx;
+    rules(NextIdx: prefix -> idx);
+    !$[[prefix]_[idx]]
