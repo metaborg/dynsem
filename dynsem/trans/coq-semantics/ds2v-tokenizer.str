@@ -1,0 +1,17 @@
+module coq-semantics/ds2v-tokenizer
+
+rules
+
+  ds2v-tokenize:
+    path -> token_list
+    with
+      (ds2v_file := <guarantee-extension(|"ds2v")> path;
+       <file-exists> ds2v_file;
+       token_list := <read-text-file;
+                      string-tokenize(|['\n']);
+                      map(string-tokenize(|[':']);
+                          (  \ [a, b] -> (a, b) \
+                          <+ \ [x] -> (<read-from-string> x) \ )
+                         )> ds2v_file
+      ) <+
+      token_list := []

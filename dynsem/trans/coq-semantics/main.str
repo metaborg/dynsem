@@ -26,14 +26,16 @@ rules
       explicate-module;
       copy-propagation-module;
       constant-propagation-module;
-      defactorize-module
+      defactorize-module;
+      explicate-arrow-types
     |project-path)
   
   generate-coq:
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"v")> path
-      ; coq-file := <explicate-for-coq(|path, project-path); m-in-analysis(debug(!0); module-to-coq; debug(!"done"))> ast
+      ; ds2v_tokens := <ds2v-tokenize> path
+      ; coq-file := <explicate-for-coq(|path, project-path); m-in-analysis(debug(!0); module-to-coq(|ds2v_tokens); debug(!"done"))> ast
     with
        result := <parenthesize-Coq; prettyprint-Coq; box2text-string(|100)> coq-file
     <+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
@@ -41,7 +43,7 @@ rules
 
 rules // Module generation
 
-  module-to-coq:
+  module-to-coq(|ds2v_tokens):
     mod -> defs
     with
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) := <pre-process-module> mod;
@@ -50,6 +52,7 @@ rules // Module generation
       (coq_cs, _) := <sortdecls-to-coq(|sort_decl_map, sort_dep_map)> (sort_decl_names, [], 1);
       
       arrow_decl_names := <hashtable-keys> arrow_decl_map;
-      (coq_rs, _) := <arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map)> (arrow_decl_names, [], 1);
+      dup_arrow_names := <find-duplicate-arrow-names> arrow_decl_map;
+      (coq_rs, _) := <arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, dup_arrow_names)> (arrow_decl_names, [], 1);
       
       defs := <concat> [coq_cs, coq_rs]

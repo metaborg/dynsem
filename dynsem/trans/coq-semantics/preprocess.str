@@ -13,34 +13,20 @@ signature // Augment relation constructor with more informative relation name re
   constructors
     NamedDynamicEmitted : List(LabelComp) * IDNOHYPH * Type -> Rel
 
-rules // Term pre-processing
+rules // Post-processing analysis: returns a list of all overloaded arrow names
 
-  P:
-    Relation(reads, Source(Con(c, args), rws), NamedDynamicEmitted(ems, a), target) ->
-    Relation(reads, Source(Con(c, args), rws), NamedDynamicEmitted(ems, a, sort), target)
-    where
-      i := <length> args;
-      ConstructorType(_, sort) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, i)
-
-  P:
-    Relation(reads, Source(VarRef(v), rws), NamedDynamicEmitted(ems, a), target) ->
-    Relation(reads, Source(VarRef(v), rws), NamedDynamicEmitted(ems, a, sort), target)
-    where
-      v-def := <lookup-def(|Vars())> v;
-      sort := <lookup-prop(|Type())> v-def
-  
-  // FIXME: Missing case for rules that dispatch on lists, I think?
-
-strategies
-
-  pre-process = bottomup(try(P))
+  find-duplicate-arrow-names:
+    arrow_decl_map -> dups
+    with
+      dups := <hashtable-keys; map(\ (name, _) -> name \); duplicates> arrow_decl_map
 
 rules
   
   pre-process-module:
     mod -> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map)
     with
-      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) := <pre-process; collect-data-from-module; data-to-hashmap; analyze-mutual-dependencies> mod
+      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) :=
+        <collect-data-from-module; data-to-hashmap; analyze-mutual-dependencies> mod
 
 rules // Accumulate information about declared arrows, rules, and AST constructors
 
@@ -68,7 +54,7 @@ rules // Store accumulated information in maps for easy dereferencing
   //
   // Type of arrow_decl_map:
   //
-  //   RelName -fin-> (Rules, RelSignature)
+  //   (RelName, SortName) -fin-> (Rules, RelSignature)
   //   RelSignature := (List(Sorts_RO) x Sort_From x List(Sorts_RW) x Sort_To x List(Sorts_RW))
   //   Rules := RuleName -fin-> (Formula_Conclusion x List(Formula_Premise))
   //
@@ -101,7 +87,7 @@ rules // Store accumulated information in maps for easy dereferencing
   instantiate-arrow(|m):
     ArrowDecl(ro_ents, from_sort, from_rw_ents, rel_name, to_sort, to_rw_ents) -> 1
     with
-      <hashtable-put(|rel_name, ([], (ro_ents, from_sort, from_rw_ents, to_sort, to_rw_ents)))> m
+      <hashtable-put(|(rel_name, from_sort), ([], (ro_ents, from_sort, from_rw_ents, to_sort, to_rw_ents)))> m
   
   push-sort-constructor(|m):
     ConsDecl(name, from_sorts, SimpleSort(to_sort), annotations) -> 1
@@ -123,9 +109,9 @@ rules // Store accumulated information in maps for easy dereferencing
     rule -> 1
     with
       (conc, prems) := <get-premises-and-conclusion> rule;
-      name := <get-rel-name> conc;
-      (rs, sig) := <hashtable-get(|name)> m;
-      <hashtable-put(|name, ([rule|rs], sig))> m
+      (name, sort) := <get-rel-name-and-sort> conc;
+      (rs, sig) := <hashtable-get(|(name, sort))> m;
+      <hashtable-put(|(name, sort), ([rule|rs], sig))> m
 
 rules // Analyze mutual dependencies
 
@@ -165,18 +151,18 @@ rules // Sort dependency analysis
 rules // Arrow dependency analysis
 
   arrow-analyze-dependency(|arrow_decl_map, arrow_dep_map):
-    arrow_name -> 1
+    (arrow_name, sort) -> 1
     with
-      (ruls, rel_sig) := <hashtable-get(|arrow_name)> arrow_decl_map; 
-      deps := <map({prems: Rule(prems, _, _) := <id>; (<foldr(![], arrow-definee(|arrow_name))> prems)}); concat> ruls;
-      <hashtable-put(|arrow_name, deps)> arrow_dep_map
+      (ruls, rel_sig) := <hashtable-get(|(arrow_name, sort))> arrow_decl_map; 
+      deps := <map({prems: Rule(prems, _, _) := <id>; (<foldr(![], arrow-definee(|arrow_name, sort))> prems)}); concat> ruls;
+      <hashtable-put(|(arrow_name, sort), deps)> arrow_dep_map
 
-  arrow-definee(|arrow_name):
+  arrow-definee(|arrow_name, sort):
     (Formula(rel), deps) -> deps'
     with
-      arrow_name' := <get-rel-name> rel;
-      ((?arrow_name; deps' := deps)
-        <+ deps' := [arrow_name'|deps])
+      (arrow_name', sort') := <get-rel-name-and-sort> rel;
+      ((?(arrow_name, sort); deps' := deps)
+        <+ deps' := [(arrow_name', sort')|deps])
   
 rules // Utilities for querying rules
 
@@ -185,8 +171,17 @@ rules // Utilities for querying rules
     with
       name := <get-arrow-name> arrow
     
+  get-rel-name-and-sort:
+    Relation(_, _, arrow, _) -> (name, sort)
+    with
+      name := <get-arrow-name> arrow;
+      sort := <get-arrow-sort> arrow
+    
   get-arrow-name:
     NamedDynamicEmitted(_, name, _) -> name
+
+  get-arrow-sort:
+    NamedDynamicEmitted(_, _, sort) -> sort
 
   get-premises-and-conclusion:
     Rule(prems, _, conc) -> (conc, prems)
@@ -194,3 +189,24 @@ rules // Utilities for querying rules
   get-arrow-name:
     NamedDynamic(name) -> name
 
+rules // Utilities for querying sorts
+
+  get-sort-name:
+    SimpleSort(name) -> name
+    
+  get-sort-name:
+    MapSort(sort1, sort2) -> sort
+    with
+      sort := <concat-strings> ["map_", <get-sort-name> sort1, "_", <get-sort-name> sort2]
+
+rules // Utilities for lists
+
+  duplicates:
+    [] -> []
+  
+  duplicates:
+    [x|xs] -> dups
+    where
+        (<elem> (x, xs); dups := [x|<filter(not(?x)); duplicates> xs])
+      <+ dups := <duplicates> xs
+  

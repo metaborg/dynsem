@@ -33,22 +33,31 @@ signature // Scope graphs
   
   sorts Addr constructors
     Addr : FrameId * Decl -> Addr
-
-  sorts SD constructors
-    SD : ScopeId * Decl -> SD
     
-  constructors
-    lookup : FrameId * H * Path --> Addr
-    get : FrameId * H * Decl --> Val
-    pathofRef : Ref --> Path
-    slookup : Path * ScopeId --> SD // :(
-    scopeofFrame : H * FrameId --> ScopeId
-    initFrame : ScopeId * Map(Label, Map(ScopeId, FrameId)) * Map(Decl, Val) --> FrameId
+  sorts lookup constructors lookup : FrameId * H * Path -> lookup
+  sorts get constructors get : FrameId * H * Decl -> get
+  sorts pathofRef constructors pathofRef : Ref -> pathofRef
+  sorts slookup constructors slookup : Path * ScopeId -> slookup
+  sorts scopeofExp constructors scopeofExp : Exp -> scopeofExp
+  sorts scopeofFrame constructors scopeofFrame : H * FrameId -> scopeofFrame
+  sorts initFrame constructors initFrame : ScopeId * Map(Label, Map(ScopeId, FrameId)) * Map(Decl, Val) -> initFrame
 
   variables
     s : ScopeId
     f : FrameId
     h : H
+
+  sorts SD constructors SD : ScopeId * Decl -> SD
+
+  // Most of these should/could be defined using products and/or default arrows
+  arrows
+    pathofRef -pathofRef'-> Path
+    // (Path * ScopeId) -slookup-> (ScopeId * Decl) // :(
+    slookup -slookup'-> SD
+    lookup -lookup'-> Addr
+    get -get'-> Val
+    scopeofFrame -scopeofFrame'-> ScopeId
+    initFrame -initFrame'-> FrameId
 
   native operators
     plusI  : Int * Int -> Int
@@ -68,9 +77,9 @@ rules
   
   f |- E_(_, _, Var(r)) :: h -eval-> v :: h
   where
-    pathofRef(r) --> p;
-    lookup(f, h, p) --> Addr(f', d);
-    get(f', h, d) --> v.
+    pathofRef(r) -pathofRef'-> p;
+    lookup(f, h, p) -lookup'-> Addr(f', d);
+    get(f', h, d) -get'-> v.
     
   E_(_, _, Binop(e1, e2)) -eval-> NumV(plusI(z1, z2))
   where
@@ -83,6 +92,6 @@ rules
   where
     f |- e1 -eval-> ClosV(d, e, f');
     f |- e2 -eval-> v :: h;
-    scopeofFrame(h, f') --> s';
-    initFrame(s, {P() |--> {s' |--> f'}}, {d |--> v}) --> f'';
+    scopeofFrame(h, f') -scopeofFrame'-> s';
+    initFrame(s, {P() |--> {s' |--> f'}}, {d |--> v}) -initFrame'-> f'';
     f'' |- e -eval-> v'.
