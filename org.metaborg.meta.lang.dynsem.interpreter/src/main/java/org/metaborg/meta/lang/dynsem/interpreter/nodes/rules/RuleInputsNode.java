@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
+import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
@@ -31,7 +32,8 @@ public class RuleInputsNode extends DynSemNode {
 			evaluateComponentPatterns(args, frame);
 		} else {
 			CompilerAsserts.neverPartOfCompilation();
-			throw new RuntimeException("Incompatible rule selection");
+			throw PremiseFailure.INSTANCE;
+//			throw new RuntimeException("Incompatible rule selection");
 		}
 	}
 
