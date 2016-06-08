@@ -34,5 +34,5 @@ strategies
       ; constant-propagation-module
       ; defactorize-module
       ; insert-wildcards-module
-      ; pretify-vars-module
+      ; prettify-vars-module
     |project-path)
