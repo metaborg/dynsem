@@ -1,0 +1,36 @@
+module ds2ds/pretify-vars
+
+imports
+  signatures/-
+  analysis/-
+  
+strategies
+    
+  pretify-vars-module =
+    ?Module(_, _);
+    m-in-analysis(
+      {| PretifyVar:
+        pretify-vars-all
+      |};
+      unrename-all);
+    unmark-vars
+    
+  pretify-vars-all = alltd(pretify-var-def); alltd(pretify-var-ref)
+  
+  pretify-var-def:
+    Var(x) -> Var(x')
+    where
+      <string-starts-with(|"_lifted")> x;
+      x-def := <lookup-def(|Vars())> x;
+      x-ty := <lookup-prop(|Type())> x-def;
+      varscheme-def* := <get-reverse-matching-varschemes> x-ty;
+      if scheme-def := <Hd> varscheme-def*
+      then
+        x-prefix := <def-get-name> scheme-def
+      else
+        x-prefix := <derw-type; get-sort-name; lower-case> x-ty
+      end;
+      x' := <next-variable(|x-prefix)>;
+      rules(PretifyVar: x -> x')
+
+  pretify-var-ref = VarRef(PretifyVar)

@@ -68,9 +68,19 @@ rules // type properties
 
 rules /* variable scheme queries */
 
+  get-reverse-matching-varschemes =
+    ?type;
+    lookup-def-all(|VarSchemes()); filter(is-type-matches-varscheme(|type))
+
+  is-type-matches-varscheme(|type) =
+    where(
+      lookup-prop(|Type());
+      ?type    
+    )
+
   get-unique-matching-varscheme =
     get-matching-varschemes;
-    ?[<id>]
+    Hd
 
   get-matching-varschemes =
     not(is-string);

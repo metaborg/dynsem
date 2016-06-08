@@ -244,3 +244,7 @@ rules
   
   is-prime-factor = ?VarRef(_)
 
+rules
+
+  pretify-lifted-vars-all = id
+
