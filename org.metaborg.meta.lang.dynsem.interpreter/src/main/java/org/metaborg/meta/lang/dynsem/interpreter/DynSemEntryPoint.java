@@ -88,7 +88,7 @@ public abstract class DynSemEntryPoint {
 		return parser;
 	}
 
-	private ITermTransformer getTransformer() {
+	public ITermTransformer getTransformer() {
 		return transformer;
 	}
 
