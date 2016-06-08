@@ -37,14 +37,20 @@ strategies
       else
         x-prefix := <derw-type; get-sort-name; lower-case> x-ty
       end;
-      x' := <pesimistic-next-variable(|x-prefix)>;
+      x' := <pesimistic-next-variable> x-prefix;
       rules(PretifyVar: x -> x')
 
   pretify-var-ref = VarRef(PretifyVar)
   
-  pesimistic-next-variable(|prefix) =
-    (<NextIdx> prefix <+ rules(NextIdx: prefix -> 0); !0);
-    repeat-until(inc, not(!$[[prefix]_[<id>]]; lookup-def(|Vars())));
-    ?idx;
-    rules(NextIdx: prefix -> idx);
-    !$[[prefix]_[idx]]
+  pesimistic-next-variable:
+    prefix -> name
+    where
+      let
+        next-idx = <NextIdx> prefix <+ rules(NextIdx: prefix -> 0); !0
+        make-name = !$[[prefix]_[<id>]]
+      in
+        idx := <next-idx; repeat-until(inc, not(make-name; lookup-def(|Vars())))>;
+        rules(NextIdx: prefix -> idx);
+        name := <make-name> idx
+      end
+      
