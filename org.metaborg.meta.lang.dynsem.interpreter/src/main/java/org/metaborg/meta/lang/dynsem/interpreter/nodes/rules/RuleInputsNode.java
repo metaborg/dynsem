@@ -33,7 +33,6 @@ public class RuleInputsNode extends DynSemNode {
 		} else {
 			CompilerAsserts.neverPartOfCompilation();
 			throw PremiseFailure.INSTANCE;
-//			throw new RuntimeException("Incompatible rule selection");
 		}
 	}
 
