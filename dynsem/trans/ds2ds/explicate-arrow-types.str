@@ -9,7 +9,7 @@ imports
 
 signature
   constructors
-    NamedDynamicEmitted : List(LabelComp) * IDNOHYPH * Type -> Rel 
+    NamedDynamicEmitted : List(LabelComp) * IDNOHYPH * Type -> Rel
 
 strategies
 
@@ -24,7 +24,11 @@ strategies
     m-in-analysis(
       alltd(explicate-arrow-type-relation)
     ) 
-    
+  
+  explicate-arrow-types-noanalysis =
+    ?Module(_, _);
+    alltd(explicate-arrow-type-relation)
+  
 rules
 
   explicate-arrow-type-relation:
