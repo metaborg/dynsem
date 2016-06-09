@@ -1,3 +1,5 @@
-scopeofFrame:scopeofFrame
-imports("scopes.v")
-imports("frames.v")
+imports("scopes")
+imports("frames")
+arrow:default_scopeofFrame__Arrow:scopeofFrame
+sort:Decl:D
+sort:Ref:R

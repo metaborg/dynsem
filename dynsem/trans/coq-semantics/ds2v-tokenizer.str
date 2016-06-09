@@ -1,5 +1,10 @@
 module coq-semantics/ds2v-tokenizer
 
+signature
+
+  sorts DS2V constructors
+    imports : String -> DS2V
+
 rules
 
   ds2v-tokenize:
@@ -10,7 +15,7 @@ rules
        token_list := <read-text-file;
                       string-tokenize(|['\n']);
                       map(string-tokenize(|[':']);
-                          (  \ [a, b] -> (a, b) \
+                          (  \ [kind, a, b] -> (kind, a, b) \
                           <+ \ [x] -> (<read-from-string> x) \ )
                          )> ds2v_file
       ) <+
