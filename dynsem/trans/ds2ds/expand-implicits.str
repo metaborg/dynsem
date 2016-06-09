@@ -38,7 +38,7 @@ rules
     where
       (r'*, p1*) := <map(expand-implicits-termbuild <+ \ LabelComp(ty, t) -> (LabelComp(ty, t), []) \); unzip; (id, concat)> r*;
       arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      ArrowType(in-ty, _) :=  <type-of-applicable-arrow(flip(type-coerce-full(fail)))> (arrow-ty*, <type-of> lhs); 
+      ArrowType(in-ty, _) :=  <type-of-applicable-arrow(type-coerce-full(fail))> (arrow-ty*, <type-of> lhs); 
       (lhs', p2*) := <lift-where-indirect <+ \ (_, t) -> (t, []) \> (in-ty, lhs);
       (sc'*, p3*) := <map(expand-implicits-termbuild <+ \ LabelComp(ty, t) -> (LabelComp(ty, t), []) \); unzip; (id, concat)> sc*;
       p* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p1*, p2*, p3*]
