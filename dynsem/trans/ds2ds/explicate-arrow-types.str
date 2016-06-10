@@ -22,13 +22,14 @@ strategies
   explicate-arrow-types =
     ?Module(_, _);
     m-in-analysis(
-      alltd(explicate-arrow-type-relation)
-    ) 
-  
+      alltd(explicate-arrow-type-relation);
+      unrename-all
+    )
+
   explicate-arrow-types-noanalysis =
     ?Module(_, _);
     alltd(explicate-arrow-type-relation)
-  
+
 rules
 
   explicate-arrow-type-relation:
@@ -38,4 +39,3 @@ rules
       t-ty := <type-of> t;
       arrow-def* := <lookup-applicable-arrow-def> t-ty;
       (arrow-def, ArrowType(atype, _)) := <fetch-elem(where(Fst; def-get-name => aname))> arrow-def*
-
