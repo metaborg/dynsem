@@ -5,6 +5,7 @@ imports
   signatures/-
   backend/interpreter/signature
   analysis/-
+  ds2ds/explicate-arrow-types
 
 rules
 
@@ -14,7 +15,8 @@ rules
       <m-in-analysis(desugar-for-interpreter); unmark-vars> m => Module(name, section*)
 
   desugar-for-interpreter =
-    desugar-semantic-components
+    explicate-arrow-types-noanalysis
+    ; desugar-semantic-components
     ; mark-rule-arguments
     ; desugar-natives
     ; desugar-list-reductions
@@ -105,7 +107,7 @@ rules /* TCO */
   desugar-rec-tco = alltd(desugar-rule-rec-tco)
 
   desugar-rule-rec-tco:
-    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name), _)) -> RecRule(p'*, infer, rel)
+    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _)) -> RecRule(p'*, infer, rel)
     where {| CurrentRelation:
       rules(CurrentRelation: _ -> (c, <length> k*, arrow-name));
       p'* := <desugar-prems-rec-tco(try(?succ))> p*;
@@ -113,7 +115,7 @@ rules /* TCO */
     |}
   
   desugar-rule-rec-tco:
-    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name), _)) -> RecRule(p'*, infer, rel)
+    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name, _), _)) -> RecRule(p'*, infer, rel)
     where {| CurrentRelation:
       rules(CurrentRelation: _ -> (<rw-type> ty, -1, arrow-name));
       p'* := <desugar-prems-rec-tco(try(?succ))> p*;
@@ -129,21 +131,21 @@ rules /* TCO */
     CaseMatch(id, map(try(CaseOtherwise(desugar-prems-rec-tco(s)) + CasePattern(id, desugar-prems-rec-tco(s)))))
   
   desugar-prem-rec-tco(s):
-    Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name), tgt)) ->
+    Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
       Formula(RecRelation(src, rel, tgt))
     where
       (c, <length> k*, arrow-name) := <CurrentRelation>;
       s
 
   desugar-prem-rec-tco(s):
-    Formula(Relation(src@Source(ArgRead(0), _), rel@NamedDynamicEmitted(_, arrow-name), tgt)) ->
+    Formula(Relation(src@Source(ArgRead(0), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
       Formula(RecRelation(src, rel, tgt))
     where
       (_, _, arrow-name) := <CurrentRelation>;
       s
   
   desugar-prem-rec-tco(s):
-    Formula(Relation(src@Source(ListSource(_, lty), _), rel@NamedDynamicEmitted(_, arrow-name), tgt)) ->
+    Formula(Relation(src@Source(ListSource(_, lty), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
       Formula(RecRelation(src, rel, tgt))
     where
       (lty, -1, arrow-name) := <CurrentRelation>; 
