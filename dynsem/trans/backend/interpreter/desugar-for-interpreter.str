@@ -3,7 +3,7 @@ module backend/interpreter/desugar-for-interpreter
 imports
   stratego/metaborg
   signatures/-
-  backend/interpreter/signature
+  backend/interpreter/-
   analysis/-
   ds2ds/explicate-arrow-types
 
@@ -16,6 +16,7 @@ rules
 
   desugar-for-interpreter =
     explicate-arrow-types-noanalysis
+    ; add-rulekind-flags-module
     ; desugar-semantic-components
     ; mark-rule-arguments
     ; desugar-natives
@@ -23,13 +24,57 @@ rules
     ; desugar-rec-tco
     ; desugar-nmatch-neq
 
+rules
+
+  add-rulekind-flags-module =
+    m-in-analysis(add-rulekind-flags; unrename-all) 
+  
+  add-rulekind-flags = alltd(add-rulekind-flags-rule)
+  
+  add-rulekind-flags-rule:
+    Rule(p*, infer, relation) -> Rule(p*, infer, relation, kindflag, dispatchClass)
+    where
+      (kindflag, dispatchClass) := <get-relation-kind-class> relation
+  
+  get-relation-kind-class:
+    Relation(_, Source(srcpattern, _), arrow, _) -> <get-relation-kind-class> srcpattern
+  
+  get-relation-kind-class:
+    As(_, t) -> <get-relation-kind-class> t
+  
+  get-relation-kind-class:
+    con@Con(c, k*) -> (TermKind(), <ds-to-interp-terms-types-name; qualify-term-class> con)
+  
+  get-relation-kind-class:
+    Cast(_, srt@SimpleSort(s)) -> (SortKind(), <ds-to-interp-terms-types-name> srt)
+    where
+      <not(is-builtin-type)> s
+  
+  get-relation-kind-class:
+    Cast(_, SimpleSort("String")) -> (PrimitiveKind(), "java.lang.String")
+
+  get-relation-kind-class:
+    Cast(_, SimpleSort("Int")) -> (PrimitiveKind(), "java.lang.Integer")
+
+  get-relation-kind-class:
+    Cast(_, SimpleSort("Bool")) -> (PrimitiveKind(), "java.lang.Boolean")
+
+  get-relation-kind-class:
+    Cast(_, MapSort(_, _)) -> (MapKind(), "NOT SUPPORTED")
+  
+  get-relation-kind-class:
+    Cast(_, ListSort(_)) -> (ListKind(), "NOT SUPPORTED")
+
+  qualify-term-class:
+    class -> $[[<OptTermsPackageName>].[class]]
+
 rules /* rename arguments */
 
-  mark-rule-arguments = alltd(?Rule(_, _, _); mark-rule-arguments-rule)
+  mark-rule-arguments = alltd(?Rule(_, _, _, _, _); mark-rule-arguments-rule)
   
   mark-rule-arguments-rule:
-    Rule(prem*, infer, Relation(Source(lhs, rw*), arrow, target))
-      -> Rule(prem'*, infer, Relation(Source(lhs', rw*), arrow, target'))
+    Rule(prem*, infer, Relation(Source(lhs, rw*), arrow, target), kind, class)
+      -> Rule(prem'*, infer, Relation(Source(lhs', rw*), arrow, target'), kind, class)
     with {| RenameArgument, NextArgument:
       rules(NextArgument: _ -> 1);
       lhs' := <try(mark-rule-arguments-bind-source)> lhs;
@@ -88,7 +133,7 @@ rules /* desugar rule conclusion/premise source */
   desugar-semantic-components = alltd(desugar-rule-conclusion-source); alltd(desugar-relation-premise-source)
 
   desugar-rule-conclusion-source:
-    Rule(p*, infer, Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Rule(p*, infer, Relation(Source(t, [ro*, rw*]), rel, tgt)) 
+    Rule(p*, infer, Relation(Reads(ro*), Source(t, rw*), rel, tgt), kind, class) -> Rule(p*, infer, Relation(Source(t, [ro*, rw*]), rel, tgt), kind, class) 
 
   desugar-relation-premise-source:
     Formula(Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Formula(Relation(Source(t, [ro*, rw*]), rel, tgt))
@@ -107,7 +152,7 @@ rules /* TCO */
   desugar-rec-tco = alltd(desugar-rule-rec-tco)
 
   desugar-rule-rec-tco:
-    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _)) -> RecRule(p'*, infer, rel)
+    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> RecRule(p'*, infer, rel, kind, class)
     where {| CurrentRelation:
       rules(CurrentRelation: _ -> (c, <length> k*, arrow-name));
       p'* := <desugar-prems-rec-tco(try(?succ))> p*;
@@ -115,7 +160,7 @@ rules /* TCO */
     |}
   
   desugar-rule-rec-tco:
-    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name, _), _)) -> RecRule(p'*, infer, rel)
+    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> RecRule(p'*, infer, rel, kind, class)
     where {| CurrentRelation:
       rules(CurrentRelation: _ -> (<rw-type> ty, -1, arrow-name));
       p'* := <desugar-prems-rec-tco(try(?succ))> p*;

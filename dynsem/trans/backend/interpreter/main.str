@@ -18,6 +18,7 @@ rules
     (_, position, ast, path, project-path) -> None()
     with
       local-project-path := $[[<prim("local_path")> project-path]/];
+      ds-to-interp-init-options(|path, project-path);
       result := <ds-to-interp-main(|path, local-project-path)> ast;
       <ds-to-interp-terms(|path, local-project-path)> result;
       fout := <fopen> (<OptTargetSpecFile>, "w");
@@ -31,7 +32,6 @@ rules
   
   ds-to-interp-terms(|path, project-path) =
     in-project-path(
-        ds-to-interp-init-options(|path, project-path);
         log-timed(
           ds-to-interp-terms-module | "Language-specific terms"
         )

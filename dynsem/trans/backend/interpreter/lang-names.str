@@ -53,3 +53,6 @@ rules
   ds-to-interp-terms-types-name:
     ConsDecl(name, child*, _, _) -> $[[name]_[<length> child*]_Term]
   
+  ds-to-interp-terms-types-name:
+    Con(name, child*) -> $[[name]_[<length> child*]_Term]
+      
