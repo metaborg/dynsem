@@ -12,6 +12,8 @@ public interface ITerm {
 
 	@Deprecated
 	public Object[] allSubterms();
+	
+	public Class<? extends ITerm> getSortClass();
 
 	public ITermInstanceChecker getCheck();
 

@@ -51,6 +51,11 @@ rules /* Sort & Constructor classes */
         
         public abstract class x_class implements ITerm {
         
+          @Override
+          public Class<? extends ITerm> getSortClass() {
+            return x_class.class;
+          }
+        
           public static x_class create(IStrategoTerm term) {
             CompilerAsserts.neverPartOfCompilation();
             assert term != null;
