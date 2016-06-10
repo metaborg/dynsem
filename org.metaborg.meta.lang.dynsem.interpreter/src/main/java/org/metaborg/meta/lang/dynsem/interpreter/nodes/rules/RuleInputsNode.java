@@ -40,8 +40,10 @@ public class RuleInputsNode extends DynSemNode {
 	private void evaluateComponentPatterns(Object[] args, VirtualFrame frame) {
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
-			// FIXME check that the match actually suceeds
-			componentPatterns[i].execute(args[i + 1], frame);
+			boolean matchSuccess = componentPatterns[i].execute(args[i + 1], frame);
+			if (!matchSuccess) {
+				throw PremiseFailure.INSTANCE;
+			}
 		}
 	}
 
