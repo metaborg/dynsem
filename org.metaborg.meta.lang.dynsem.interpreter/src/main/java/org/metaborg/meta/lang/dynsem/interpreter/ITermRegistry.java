@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public interface ITermRegistry {
@@ -15,5 +15,5 @@ public interface ITermRegistry {
 
 	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort, String function, int arity);
 
-	public ITerm parseProgramTerm(IStrategoTerm t);
+	public IApplTerm parseProgramTerm(IStrategoTerm t);
 }

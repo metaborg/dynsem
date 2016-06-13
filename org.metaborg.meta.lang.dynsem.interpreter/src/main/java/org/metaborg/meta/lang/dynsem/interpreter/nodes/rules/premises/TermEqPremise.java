@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -64,15 +64,15 @@ public abstract class TermEqPremise extends Premise {
 	}
 
 	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" })
-	public void doITermDirect(ITerm left, ITerm right, @Cached("left") ITerm cachedLeft,
-			@Cached("right") ITerm cachedRight, @Cached("cachedLeft.equals(cachedRight)") boolean isEqual) {
+	public void doITermDirect(IApplTerm left, IApplTerm right, @Cached("left") IApplTerm cachedLeft,
+			@Cached("right") IApplTerm cachedRight, @Cached("cachedLeft.equals(cachedRight)") boolean isEqual) {
 		if (!isEqual) {
 			throw PremiseFailure.INSTANCE;
 		}
 	}
 
 	@Specialization(contains = "doITermDirect")
-	public void doITermIndirect(ITerm left, ITerm right, @Cached("getTypeProfile()") ValueProfile leftTypeProfile,
+	public void doITermIndirect(IApplTerm left, IApplTerm right, @Cached("getTypeProfile()") ValueProfile leftTypeProfile,
 			@Cached("getTypeProfile()") ValueProfile rightTypeProfile) {
 		if (!leftTypeProfile.profile(left).equals(rightTypeProfile.profile(right))) {
 			throw PremiseFailure.INSTANCE;

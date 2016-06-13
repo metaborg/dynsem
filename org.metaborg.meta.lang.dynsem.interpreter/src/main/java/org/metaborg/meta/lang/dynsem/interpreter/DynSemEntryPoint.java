@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -51,7 +51,7 @@ public abstract class DynSemEntryPoint {
 			Value interpreter = vm
 					.eval(Source.fromReader(new InputStreamReader(getSpecificationTerm()), "Evaluate to interpreter")
 							.withMimeType(getMimeType()));
-			ITerm programTerm = getTermRegistry().parseProgramTerm(term);
+			IApplTerm programTerm = getTermRegistry().parseProgramTerm(term);
 			return new Callable<RuleResult>() {
 				@Override
 				public RuleResult call() throws Exception {

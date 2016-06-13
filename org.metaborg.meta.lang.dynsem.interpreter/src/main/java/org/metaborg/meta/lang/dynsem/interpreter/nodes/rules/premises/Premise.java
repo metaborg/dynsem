@@ -1,8 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RecursiveRelationPremise;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationPremise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;

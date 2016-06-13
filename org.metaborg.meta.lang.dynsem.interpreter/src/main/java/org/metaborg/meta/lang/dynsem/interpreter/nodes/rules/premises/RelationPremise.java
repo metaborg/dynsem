@@ -1,9 +1,11 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.InvokeRelationNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationPremiseInputBuilder;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -25,16 +27,16 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public class RelationPremise extends Premise {
 
-	@Child protected RelationInvocationNode relationLhs;
+	@Child protected InvokeRelationNode relationLhs;
 
 	@Child protected MatchPattern rhsNode;
 
 	@Children protected final MatchPattern[] rhsRwNodes;
 
-	public RelationPremise(RelationPremiseInputBuilder inputBuilderNode, RelationDispatch dispatchNode,
+	public RelationPremise(RelationPremiseInputBuilder inputBuilderNode, DispatchNode dispatchNode,
 			MatchPattern rhsNode, MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
-		this.relationLhs = new RelationInvocationNode(inputBuilderNode, dispatchNode, source);
+		this.relationLhs = new InvokeRelationNode(source, inputBuilderNode, dispatchNode);
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}
@@ -82,8 +84,9 @@ public class RelationPremise extends Premise {
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
-		;
-		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd), RelationDispatch.create(
-				Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes, SourceSectionUtil.fromStrategoTerm(t));
+
+		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
+				DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
+				SourceSectionUtil.fromStrategoTerm(t));
 	}
 }
