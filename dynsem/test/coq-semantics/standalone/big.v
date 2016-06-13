@@ -19,19 +19,19 @@ Inductive Val : Type :=
 .
 
 Inductive big : map String Val -> Expr -> Val -> Prop :=
-| big_App0 id23 e32 _lifted_92 _lifted_160 _lifted_111 l_string_val_18 _lifted_71 _lifted_82:
-    big l_string_val_18 _lifted_71 (ClosV3 id23 e32 _lifted_92) ->
-    big l_string_val_18 _lifted_82 _lifted_160 ->
-    big (map_update _lifted_92 id23 _lifted_160) e32 _lifted_111 ->
-    big l_string_val_18 (App2 _lifted_71 _lifted_82) _lifted_111
-| big_Fun0 l_string_val_17 id22 e31:
-    big l_string_val_17 (Fun2 id22 e31) (ClosV3 id22 e31 l_string_val_17)
-| big_Num0 l_string_val_16 i28:
-    big l_string_val_16 (Num1 i28) (NumV1 i28)
-| big_Plus0 i17 i27 l_string_val_15 _lifted_18 _lifted_21:
-    big l_string_val_15 _lifted_18 (NumV1 i17) ->
-    big l_string_val_15 _lifted_21 (NumV1 i27) ->
-    big l_string_val_15 (Plus2 _lifted_18 _lifted_21) (NumV1 (plusI2 i17 i27))
-| big_Var0 l_string_val_10 id18:
-    big l_string_val_10 (Var1 id18) (map_lookup l_string_val_10 id18)
+| big_App0 id e r_1 v_1 v_2 r_2 expr_1 expr_2:
+    big r_2 expr_1 (ClosV3 id e r_1) ->
+    big r_2 expr_2 v_1 ->
+    big (map_update r_1 id v_1) e v_2 ->
+    big r_2 (App2 expr_1 expr_2) v_2
+| big_Fun0 r_1 id e:
+    big r_1 (Fun2 id e) (ClosV3 id e r_1)
+| big_Num0 r_1 i:
+    big r_1 (Num1 i) (NumV1 i)
+| big_Plus0 i1 i2 r_1 expr_1 expr_2:
+    big r_1 expr_1 (NumV1 i1) ->
+    big r_1 expr_2 (NumV1 i2) ->
+    big r_1 (Plus2 expr_1 expr_2) (NumV1 (plusI2 i1 i2))
+| big_Var0 r_1 id:
+    big r_1 (Var1 id) (map_lookup r_1 id)
 .

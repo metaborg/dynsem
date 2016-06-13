@@ -1,3 +1,7 @@
+Require Import scopes.
+
+Require Import frames.
+
 Inductive Typ : Type :=
 | Tarrow2:
     Typ -> Typ -> Typ
@@ -9,117 +13,102 @@ Inductive PreExp : Type :=
 | App2:
     Exp -> Exp -> PreExp
 | Fun3:
-    Decl -> Typ -> Exp -> PreExp
+    D -> Typ -> Exp -> PreExp
 | Binop2:
     Exp -> Exp -> PreExp
 | Var1:
-    Ref -> PreExp
+    R -> PreExp
 | Num1:
     Int -> PreExp
 with Exp : Type :=
 | E_3:
     ScopeId -> Typ -> PreExp -> Exp
-with ScopeId : Type :=with Decl : Type :=with Ref : Type :=.
+with ScopeId : Type :=.
 
-Inductive FrameId : Type :=.
-
-Inductive H : Type :=.
-
-Inductive Label : Type :=
+Inductive lookup__Arrow : Type :=
+| lookup3:
+    FrameId -> H -> Path -> lookup__Arrow
+with FrameId : Type :=with H : Type :=with Path : Type :=
+| D1:
+    D -> Path
+| E3:
+    Label -> ScopeId -> Path -> Path
+with Label : Type :=
 | I0:
     Label
 | P0:
     Label
 .
 
-Inductive Path : Type :=
-| D1:
-    Decl -> Path
-| E3:
-    Label -> ScopeId -> Path -> Path
-.
-
-Inductive Addr : Type :=
-| Addr2:
-    FrameId -> Decl -> Addr
-.
-
-Inductive lookup : Type :=
-| lookup3:
-    FrameId -> H -> Path -> lookup
-.
-
-Inductive get : Type :=
+Inductive get__Arrow : Type :=
 | get3:
-    FrameId -> H -> Decl -> get
+    FrameId -> H -> D -> get__Arrow
 .
 
-Inductive pathofRef : Type :=
+Inductive pathofRef__Arrow : Type :=
 | pathofRef1:
-    Ref -> pathofRef
+    R -> pathofRef__Arrow
 .
 
-Inductive slookup : Type :=
+Inductive slookup__Arrow : Type :=
 | slookup2:
-    Path -> ScopeId -> slookup
+    Path -> ScopeId -> slookup__Arrow
 .
 
-Inductive scopeofExp : Type :=
-| scopeofExp1:
-    Exp -> scopeofExp
-.
-
-Inductive scopeofFrame : Type :=
+Inductive scopeofFrame__Arrow : Type :=
 | scopeofFrame2:
-    H -> FrameId -> scopeofFrame
+    H -> FrameId -> scopeofFrame__Arrow
 .
 
-Inductive initFrame : Type :=
+Inductive initFrame__Arrow : Type :=
 | initFrame3:
-    ScopeId -> map Label (map ScopeId FrameId) -> map Decl Val -> initFrame
+    ScopeId -> map Label (map ScopeId FrameId) -> map D Val -> initFrame__Arrow
 with Val : Type :=
 | ClosV3:
-    Decl -> Exp -> FrameId -> Val
+    D -> Exp -> FrameId -> Val
 | NumV1:
     Int -> Val
 .
 
-Inductive SD : Type :=
-| SD2:
-    ScopeId -> Decl -> SD
+Inductive Addr : Type :=
+| Addr2:
+    FrameId -> D -> Addr
 .
 
-Inductive pathofRef' : pathofRef -> Path -> Prop :=.
+Inductive SD : Type :=
+| SD2:
+    ScopeId -> D -> SD
+.
 
-Inductive slookup' : slookup -> SD -> Prop :=.
+Inductive default_lookup__Arrow : lookup__Arrow -> Addr -> Prop :=.
 
-Inductive lookup' : lookup -> Addr -> Prop :=.
+Inductive default_get__Arrow : get__Arrow -> Val -> Prop :=.
 
-Inductive get' : get -> Val -> Prop :=.
+Inductive default_pathofRef__Arrow : pathofRef__Arrow -> Path -> Prop :=.
 
-Inductive scopeofFrame' : scopeofFrame -> ScopeId -> Prop :=.
+Inductive default_slookup__Arrow : slookup__Arrow -> SD -> Prop :=.
 
-Inductive initFrame' : initFrame -> FrameId -> Prop :=.
+Inductive default_initFrame__Arrow : initFrame__Arrow -> FrameId -> Prop :=.
 
 Inductive eval : FrameId -> Exp -> H -> Val -> H -> Prop :=
-| eval_E_0 d26 e40 _lifted_321 h_22 v19 h_32 _lifted_291 _lifted_311 v'7 h_40 frameid_17 _lifted_251 _lifted_92 e120 e218 h_18:
-    eval frameid_17 e120 h_18 (ClosV3 d26 e40 _lifted_321) h_22 ->
-    eval frameid_17 e218 h_22 v19 h_32 ->
-    scopeofFrame' (scopeofFrame2 h_32 _lifted_321) _lifted_291 ->
-    initFrame' (initFrame3 _lifted_251 (cons (P0, cons (_lifted_291, _lifted_321) nil) nil) (cons (d26, v19) nil)) _lifted_311 ->
-    eval _lifted_311 e40 h_32 v'7 h_40 ->
-    eval frameid_17 (E_3 _lifted_251 _lifted_92 (App2 e120 e218)) h_18 v'7 h_40
-| eval_E_1 frameid_15 _lifted_61 _lifted_71 d25 _lifted_82 e39 h_16:
-    eval frameid_15 (E_3 _lifted_61 _lifted_71 (Fun3 d25 _lifted_82 e39)) h_16 (ClosV3 d25 e39 frameid_15) h_16
-| eval_E_2 z18 h_20 z28 h_30 frameid_14 _lifted_42 _lifted_51 e119 e217 h_12:
-    eval frameid_14 e119 h_12 (NumV1 z18) h_20 ->
-    eval frameid_14 e217 h_20 (NumV1 z28) h_30 ->
-    eval frameid_14 (E_3 _lifted_42 _lifted_51 (Binop2 e119 e217)) h_12 (NumV1 (plusI2 z18 z28)) h_30
-| eval_E_3 p8 _lifted_171 d24 v18 frameid_11 _lifted_212 _lifted_38 r12 h_11:
-    pathofRef' (pathofRef1 r12) p8 ->
-    lookup' (lookup3 frameid_11 h_11 p8) (Addr2 _lifted_171 d24) ->
-    get' (get3 _lifted_171 h_11 d24) v18 ->
-    eval frameid_11 (E_3 _lifted_212 _lifted_38 (Var1 r12)) h_11 v18 h_11
-| eval_E_4 frameid_10 _lifted_01 _lifted_112 i14 h_10:
-    eval frameid_10 (E_3 _lifted_01 _lifted_112 (Num1 i14)) h_10 (NumV1 i14) h_10
+| eval_E_0 d e f_1 h_1 v h_2 s_1 f_2 v' h_3 f_3 s_2 typ_1 e1 e2 h_4:
+    eval f_3 e1 h_4 (ClosV3 d e f_1) h_1 ->
+    eval f_3 e2 h_1 v h_2 ->
+    scopeofFrame (scopeofFrame2 h_2 f_1) s_1 ->
+    default_initFrame__Arrow (initFrame3 s_2 (cons (P0, cons (s_1, f_1) nil) nil) (cons (d, v) nil)) f_2 ->
+    eval f_2 e h_2 v' h_3 ->
+    eval f_3 (E_3 s_2 typ_1 (App2 e1 e2)) h_4 v' h_3
+| eval_E_1 f_1 s_1 typ_1 d typ_2 e h_1:
+    eval f_1 (E_3 s_1 typ_1 (Fun3 d typ_2 e)) h_1 (ClosV3 d e f_1) h_1
+| eval_E_2 z1 h_1 z2 h_2 f_1 s_1 typ_1 e1 e2 h_3:
+    eval f_1 e1 h_3 (NumV1 z1) h_1 ->
+    eval f_1 e2 h_1 (NumV1 z2) h_2 ->
+    eval f_1 (E_3 s_1 typ_1 (Binop2 e1 e2)) h_3 (NumV1 (plusI2 z1 z2)) h_2
+| eval_E_3 p f_1 d v f_2 s_1 typ_1 r h_1:
+    default_pathofRef__Arrow (pathofRef1 r) p ->
+    default_lookup__Arrow (lookup3 f_2 h_1 p) (Addr2 f_1 d) ->
+    default_get__Arrow (get3 f_1 h_1 d) v ->
+    eval f_2 (E_3 s_1 typ_1 (Var1 r)) h_1 v h_1
+| eval_E_4 f_1 s_1 typ_1 i h_1:
+    eval f_1 (E_3 s_1 typ_1 (Num1 i)) h_1 (NumV1 i) h_1
 .

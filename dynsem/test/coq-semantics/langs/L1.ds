@@ -1,8 +1,5 @@
 module test/coq-semantics/langs/L1
 
-// FIXMEs:
-// - Make pathofRef built-in
-
 signature
   
   sorts Typ constructors

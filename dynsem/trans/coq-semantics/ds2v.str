@@ -1,0 +1,45 @@
+module coq-semantics/ds2v
+
+signature
+
+  sorts DS2V constructors
+    imports : String -> DS2V
+
+	sorts DS2V constructors
+		ArrowAlias : String * Sort * String -> DS2V
+		SortAlias : String * String -> DS2V
+		Imports : String -> DS2V
+
+rules
+
+	get-ds2v-aliases-and-imports:
+		path -> (ds2v_aliases, ds2v_imports)
+		with
+			ds2v := <get-ds2v> path;
+			ds2v_aliases := <filter(?ArrowAlias(_, _, _) <+ ?SortAlias(_, _))> ds2v;
+			ds2v_imports := <filter(?Imports(_))> ds2v
+			
+	get-ds2v:
+    path -> ds2v
+    with
+      (ds2v_file := <guarantee-extension(|"ds2v")> path;
+       <file-exists> ds2v_file;
+       ds2v := <read-text-file; read-from-string> ds2v_file
+      ) <+
+      ds2v := []
+
+
+
+//  ds2v-tokenize:
+//    path -> token_list
+//    with
+//      (ds2v_file := <guarantee-extension(|"ds2v")> path;
+//       <file-exists> ds2v_file;
+//       token_list := <read-text-file;
+//                      string-tokenize(|['\n']);
+//                      map(string-tokenize(|[':']);
+//                          (  \ [kind, a, b] -> (kind, a, b) \
+//                          <+ \ [x] -> (<read-from-string> x) \ )
+//                         )> ds2v_file
+//      ) <+
+//      token_list := []

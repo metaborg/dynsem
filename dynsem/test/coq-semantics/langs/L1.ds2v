@@ -1,5 +1,5 @@
-imports("scopes")
-imports("frames")
-arrow:default_scopeofFrame__Arrow:scopeofFrame
-sort:Decl:D
-sort:Ref:R
+[Imports("scopes"),
+ Imports("frames"),
+ ArrowAlias("default", "scopeofFrame__Arrow", "scopeofFrame"),
+ SortAlias("Decl", "D"),
+ SortAlias("Ref", "R")]
