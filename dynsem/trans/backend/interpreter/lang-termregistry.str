@@ -31,6 +31,7 @@ rules /* term registry */
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.*;
         
+        import com.oracle.truffle.api.CompilerAsserts;
         import com.oracle.truffle.api.source.SourceSection;
         
         public class ~x:$[[<OptLanguageName>]TermRegistry] implements ITermRegistry {
@@ -75,7 +76,28 @@ rules /* term registry */
               String function, int arity) {
             return nativeAdapterFactories.get(sort + "/" + function + "/" + arity);
           }
-        }
+          
+          @Override
+          public Class<?> getLanguageConstructorClass(String constr, int arity) {
+            CompilerAsserts.neverPartOfCompilation();
+            try {
+              return simplTermRegistry.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptTermsPackageName>].])])) + constr + "_" + arity + "_Term");
+            } catch (ClassNotFoundException cnfe) {
+              throw new RuntimeException("Failed to load constructor class", cnfe);
+            }
+          }
+  
+          @Override
+          public Class<?> getLanguageListClass(String elemSortName) {
+            throw new RuntimeException("Not implemented");
+          }
+
+          @Override  
+          public Class<?> getLanguageMapClass(String keySortName, String mapSortName) {
+            throw new RuntimeException("Not implemented");
+          }
+          
+      }
       ]|
     where
       (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _)))> decl*; 

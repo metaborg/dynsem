@@ -4,9 +4,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChe
 
 public interface ITerm {
 	
-	@Deprecated
-	public Object[] allSubterms();
-	
 	public int size();
 
 	public ITermInstanceChecker getCheck();

@@ -45,14 +45,14 @@ rules /* Sort & Constructor classes */
         package ~x:<OptTermsPackageName>;
         
         import org.spoofax.interpreter.core.Tools;
-        import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
         import org.spoofax.interpreter.terms.*;
         import com.oracle.truffle.api.CompilerAsserts;
         
-        public abstract class x_class implements ITerm {
+        public abstract class x_class implements IApplTerm {
         
           @Override
-          public Class<? extends ITerm> getSortClass() {
+          public Class<? extends IApplTerm> getSortClass() {
             return x_class.class;
           }
         
@@ -139,18 +139,8 @@ rules /* Sort & Constructor classes */
           }
           
           @Override
-          public String constructor() {
-            return CONSTRUCTOR;
-          }
-        
-          @Override
-          public int arity() {
+          public int size() {
             return ARITY;
-          }
-          
-          @Override
-          public Object[] allSubterms() {
-            return new Object[] { e0* };
           }
           
           @Override
@@ -201,7 +191,6 @@ rules /* Sort & Constructor classes */
       bstm0* := <ds-to-interp-sorts-to-finits> kid*;
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
-      e0* := <ds-to-interp-sorts-to-frefs> kid*;
       (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|"term")); unzip; (concat, id)> kid*;
       bstm2* := <map-with-index(ds2java-field-eq-check)> kid*
     where
@@ -353,13 +342,6 @@ rules /* Sort & Constructor classes */
     where
       x_sortclass := <ds-to-interp-terms-types-name> s;
       x_getname := $[get_[i]];
-      x_name := $[_[i]]
-
-  ds-to-interp-sorts-to-frefs = is-list; map-with-index(ds-to-interp-sort-to-fref)
-  
-  ds-to-interp-sort-to-fref:
-    (i, _) -> e |[ x_name ]|
-    where
       x_name := $[_[i]]
 
 rules /* type system class */
