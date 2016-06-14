@@ -46,7 +46,7 @@ rules
     con@Con(c, k*) -> (TermKind(), <ds-to-interp-terms-types-name; qualify-term-class> con)
   
   get-relation-kind-class:
-    Cast(_, srt@SimpleSort(s)) -> (SortKind(), <ds-to-interp-terms-types-name> srt)
+    Cast(_, srt@SimpleSort(s)) -> (SortKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
     where
       <not(is-builtin-type)> s
   
