@@ -17,10 +17,11 @@ import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.source.SourceSection;
 
 public class RuleRegistry {
 
-	private final Map<String, Map<Class<?>, RuleRoot[]>> rules = new HashMap<>();
+	private final Map<String, Map<Class<?>, RuleUnionRoot>> rules = new HashMap<>();
 
 	public RuleRegistry() {
 		init();
@@ -30,33 +31,33 @@ public class RuleRegistry {
 
 	}
 
-	public void registerRules(String arrowName, Class<?> dispatchClass, RuleRoot[] rs) {
-		Map<Class<?>, RuleRoot[]> rulesForName = rules.get(arrowName);
+	public void registerJointRule(String arrowName, Class<?> dispatchClass, RuleUnionRoot jointRuleRoot) {
+		Map<Class<?>, RuleUnionRoot> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			rulesForName = new HashMap<>();
 			rules.put(arrowName, rulesForName);
 		}
 
-		rulesForName.put(dispatchClass, rs);
+		rulesForName.put(dispatchClass, jointRuleRoot);
 	}
 
 	@TruffleBoundary
-	public RuleRoot[] lookupRules(String arrowName, Class<?> dispatchClass) {
-		RuleRoot[] rulesForClass = null;
+	public RuleUnionRoot lookupRules(String arrowName, Class<?> dispatchClass) {
+		RuleUnionRoot jointRuleForClass = null;
 
-		Map<Class<?>, RuleRoot[]> rulesForName = rules.get(arrowName);
+		Map<Class<?>, RuleUnionRoot> jointRulesForName = rules.get(arrowName);
 
-		if (rulesForName != null) {
-			rulesForClass = rulesForName.get(dispatchClass);
+		if (jointRulesForName != null) {
+			jointRuleForClass = jointRulesForName.get(dispatchClass);
 		}
 
-		if (rulesForClass == null) {
+		if (jointRuleForClass == null) {
 			throw new InterpreterException(
 					"No rules found for arrow <" + arrowName + "> on <" + dispatchClass.getName() + ">");
 		}
 
-		return rulesForClass;
+		return jointRuleForClass;
 	}
 
 	public final static void populate(RuleRegistry registry, InputStream specStream) {
@@ -69,32 +70,33 @@ public class RuleRegistry {
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 
-			Map<String, Map<Class<?>, List<RuleRoot>>> rules = new HashMap<>();
+			Map<String, Map<Class<?>, List<Rule>>> rules = new HashMap<>();
 
 			for (IStrategoTerm ruleTerm : rulesTerm) {
 				Rule r = Rule.create(ruleTerm);
 
-				Map<Class<?>, List<RuleRoot>> rulesForName = rules.get(r.getArrowName());
+				Map<Class<?>, List<Rule>> rulesForName = rules.get(r.getArrowName());
 				if (rulesForName == null) {
 					rulesForName = new HashMap<>();
 					rules.put(r.getArrowName(), rulesForName);
 				}
 
-				List<RuleRoot> rulesForClass = rulesForName.get(r.getDispatchClass());
+				List<Rule> rulesForClass = rulesForName.get(r.getDispatchClass());
 
 				if (rulesForClass == null) {
 					rulesForClass = new LinkedList<>();
 					rulesForName.put(r.getDispatchClass(), rulesForClass);
 				}
 
-				rulesForClass.add(new RuleRoot(r));
+				rulesForClass.add(r);
 			}
 
-			for (Entry<String, Map<Class<?>, List<RuleRoot>>> rulesForNameEntry : rules.entrySet()) {
+			for (Entry<String, Map<Class<?>, List<Rule>>> rulesForNameEntry : rules.entrySet()) {
 				final String arrowName = rulesForNameEntry.getKey();
-				for (Entry<Class<?>, List<RuleRoot>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
-					registry.registerRules(arrowName, rulesForClass.getKey(),
-							rulesForClass.getValue().toArray(new RuleRoot[] {}));
+				for (Entry<Class<?>, List<Rule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
+					registry.registerJointRule(arrowName, rulesForClass.getKey(),
+							new RuleUnionRoot(SourceSection.createUnavailable("rule", "unavailable"), arrowName,
+									rulesForClass.getValue().toArray(new Rule[] {})));
 				}
 			}
 

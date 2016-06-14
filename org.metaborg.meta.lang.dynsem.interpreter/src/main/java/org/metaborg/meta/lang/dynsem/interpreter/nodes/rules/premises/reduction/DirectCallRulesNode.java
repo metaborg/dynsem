@@ -2,8 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction
 
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -13,9 +13,9 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class DirectCallRulesNode extends DynSemNode {
 
-	@Children private final RuleRoot[] rules;
+	@Children private final Rule[] rules;
 
-	private DirectCallRulesNode(SourceSection source, RuleRoot[] rules) {
+	private DirectCallRulesNode(SourceSection source, Rule[] rules) {
 		super(source);
 		this.rules = rules;
 	}
@@ -32,9 +32,9 @@ public class DirectCallRulesNode extends DynSemNode {
 		throw PremiseFailure.INSTANCE;
 	}
 
-	public static DirectCallRulesNode create(SourceSection source, RuleRoot[] rules) {
+	public static DirectCallRulesNode create(SourceSection source, Rule[] rules) {
 		CompilerAsserts.neverPartOfCompilation();
-		RuleRoot[] clonedRules = new RuleRoot[rules.length];
+		Rule[] clonedRules = new Rule[rules.length];
 		for (int i = 0; i < clonedRules.length; i++) {
 			clonedRules[i] = NodeUtil.cloneNode(rules[i]);
 		}
