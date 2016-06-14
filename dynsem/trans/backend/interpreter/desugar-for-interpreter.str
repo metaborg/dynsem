@@ -60,10 +60,10 @@ rules
     Cast(_, SimpleSort("Bool")) -> (PrimitiveKind(), "java.lang.Boolean")
 
   get-relation-kind-class:
-    Cast(_, MapSort(_, _)) -> (MapKind(), "NOT SUPPORTED")
+    Cast(_, MapSort(_, _)) -> (MapKind(), "MAP REDUCTION NOT SUPPORTED")
   
   get-relation-kind-class:
-    Cast(_, ListSort(_)) -> (ListKind(), "NOT SUPPORTED")
+    Cast(_, ListSort(_)) -> (ListKind(), "LIST REDUCTION NOT SUPPORTED")
 
   qualify-term-class:
     class -> $[[<OptTermsPackageName>].[class]]
