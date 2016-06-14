@@ -7,6 +7,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
+// FIXME this is not the point where this should be implemented. it should be the responsibilty of the RuleUnionNode
 public class RecursiveReductionRule extends ReductionRule {
 
 	public RecursiveReductionRule(SourceSection source, FrameDescriptor fd, RuleKind kind, String arrowName,
