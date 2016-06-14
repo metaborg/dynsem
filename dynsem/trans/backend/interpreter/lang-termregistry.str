@@ -34,14 +34,14 @@ rules /* term registry */
         import com.oracle.truffle.api.CompilerAsserts;
         import com.oracle.truffle.api.source.SourceSection;
         
-        public class ~x:$[[<OptLanguageName>]TermRegistry] implements ITermRegistry {
+        public class x_classname implements ITermRegistry {
         
           private final Map<String, ITermBuildFactory> builderFactories = new HashMap<String, ITermBuildFactory>();
           private final Map<String, ITermMatchPatternFactory> matcherFactories = new HashMap<String, ITermMatchPatternFactory>();
           private final Map<String, ITermBuildFactory> nativeFactories = new HashMap<String, ITermBuildFactory>();
           private final Map<String, ITermBuildFactory> nativeAdapterFactories = new HashMap<String, ITermBuildFactory>();
           
-          public ~x:$[[<OptLanguageName>]TermRegistry]() {
+          public x_classname() {
             init();
           }
         
@@ -81,7 +81,7 @@ rules /* term registry */
           public Class<?> getLanguageConstructorClass(String constr, int arity) {
             CompilerAsserts.neverPartOfCompilation();
             try {
-              return simplTermRegistry.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptTermsPackageName>].])])) + constr + "_" + arity + "_Term");
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptTermsPackageName>].])])) + constr + "_" + arity + "_Term");
             } catch (ClassNotFoundException cnfe) {
               throw new RuntimeException("Failed to load constructor class", cnfe);
             }
@@ -100,6 +100,7 @@ rules /* term registry */
       }
       ]|
     where
+      x_classname := $[[<OptLanguageName>]TermRegistry]; 
       (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _)))> decl*; 
       bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
       bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
