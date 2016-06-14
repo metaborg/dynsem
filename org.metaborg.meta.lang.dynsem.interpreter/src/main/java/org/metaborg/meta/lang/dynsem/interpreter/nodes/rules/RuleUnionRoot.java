@@ -12,7 +12,7 @@ public class RuleUnionRoot extends RootNode {
 
 	@Child private RuleUnionNode unionNode;
 
-	protected RuleUnionRoot(SourceSection source, String arrowName, Rule[] rules) {
+	public RuleUnionRoot(SourceSection source, String arrowName, Rule[] rules) {
 		super(DynSemLanguage.class, source, new FrameDescriptor());
 		this.unionNode = new RuleUnionNode(source, arrowName, rules);
 		Truffle.getRuntime().createCallTarget(this);
