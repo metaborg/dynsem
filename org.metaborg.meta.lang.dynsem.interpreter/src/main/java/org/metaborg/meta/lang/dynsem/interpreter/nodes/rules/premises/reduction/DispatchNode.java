@@ -48,7 +48,7 @@ public abstract class DispatchNode extends DynSemNode {
 	}
 
 	public static DispatchNode create(IStrategoAppl source, IStrategoAppl arrow, FrameDescriptor fd) {
-		assert Tools.hasConstructor(arrow, "NamedDynamicEmitted", 2);
+		assert Tools.hasConstructor(arrow, "NamedDynamicEmitted", 3);
 		String arrowName = Tools.stringAt(arrow, 1).stringValue();
 
 		assert Tools.hasConstructor(source, "Source", 2);

@@ -108,11 +108,11 @@ public abstract class Rule extends DynSemNode {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
 
-		if (Tools.hasConstructor(ruleT, "Rule", 3)) {
+		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 
 			return new ReductionRule(SourceSectionUtil.fromStrategoTerm(ruleT), fd, kind, arrowName, dispatchClass,
 					RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
-		} else if (Tools.hasConstructor(ruleT, "RecRule", 3)) {
+		} else if (Tools.hasConstructor(ruleT, "RecRule", 5)) {
 			return new RecursiveReductionRule(SourceSectionUtil.fromStrategoTerm(ruleT), fd, kind, arrowName,
 					dispatchClass, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
 		}
