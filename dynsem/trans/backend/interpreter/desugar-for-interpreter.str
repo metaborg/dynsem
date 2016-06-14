@@ -22,6 +22,7 @@ rules
     ; desugar-list-reductions
     ; desugar-rec-tco
     ; desugar-nmatch-neq
+    ; desugar-unquote-strings
 
 rules /* rename arguments */
 
@@ -160,3 +161,7 @@ rules /* desugar not-match and not equal premises */
   
   desugar-premise-nmatch-neq:
     Formula(TermNeq(tb1, tb2)) -> Formula(Fails(Formula(TermEq(tb1, tb2))))
+
+rules /* unquote string literals */
+
+  desugar-unquote-strings = alltd(String(un-double-quote))

@@ -7,7 +7,6 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class FailsPremise extends Premise {
@@ -19,19 +18,23 @@ public class FailsPremise extends Premise {
 		this.premise = premise;
 	}
 
-	private final BranchProfile premiseFailsProfile = BranchProfile.create();
-
 	@Override
 	public void execute(VirtualFrame frame) {
+
+		boolean premiseSucceeds = true;
 		try {
 			premise.execute(frame);
-			throw PremiseFailure.INSTANCE;
 		} catch (PremiseFailure pf) {
-			premiseFailsProfile.enter();
+			premiseSucceeds = false;
 		}
+
+		if (premiseSucceeds) {
+			throw PremiseFailure.INSTANCE;
+		}
+
 	}
 
-	public static FailsPremise create(IStrategoAppl t, FrameDescriptor fd){
+	public static FailsPremise create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "Fails", 1);
 		return new FailsPremise(SourceSectionUtil.fromStrategoTerm(t), Premise.create(Tools.termAt(t, 0), fd));
 	}
