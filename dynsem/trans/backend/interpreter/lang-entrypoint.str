@@ -45,12 +45,12 @@ rules /* language file. interpreter entry point */
           RuleRegistry.populate(ctx.getRuleRegistry(), specInput);
 
           RootNode rootNode = new RootNode(x_language.class, null, null) {
-            @Override public Object execute(VirtualFrame frame)
-            {
+            @Override public Object execute(VirtualFrame frame) {
               CompilerDirectives.transferToInterpreter();
               // Return the init rule by default.
-              RuleRoot initRuleRoot = ctx.getRuleRegistry().lookupRule("init", START_CONSTR_NAME, START_CONSTR_ARITY);
-              return new DynSemRule(initRuleRoot);
+              Class<?> dispatchClass = ctx.getTermRegistry().getLanguageConstructorClass(START_CONSTR_NAME, START_CONSTR_ARITY);
+              RuleUnionRoot initRuleUnionRoot = ctx.getRuleRegistry().lookupRules("init", dispatchClass);
+              return new DynSemRule(initRuleUnionRoot);
             }
           };
           return Truffle.getRuntime().createCallTarget(rootNode);
