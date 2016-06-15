@@ -9,6 +9,7 @@ rules /* language file. interpreter entry point */
 
   ds-to-interp-language =
     x_language := $[[<OptLanguageName>]Language];
+    e_dobacktrack := <if OptEnableBacktracking then !e |[ true ]| else !e |[ false ]| end>;
     !compilation-unit |[
       package ~x:<OptTopPackageName>;
       
@@ -52,6 +53,11 @@ rules /* language file. interpreter entry point */
             }
           };
           return Truffle.getRuntime().createCallTarget(rootNode);
+        }
+        
+        @Override
+        public boolean isFullBacktrackingEnabled() {
+          return e_dobacktrack;
         }
       }
     ]|

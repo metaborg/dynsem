@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
@@ -34,7 +34,7 @@ public abstract class SortRulesUnionNode extends DynSemNode {
 
 	@Specialization
 	public RuleResult doNoFallback(Object o, Object[] arguments) {
-		if (DynSemLanguage.ENABLE_FULL_BACKTRACKING) {
+		if(DynSemContext.LANGUAGE.isFullBacktrackingEnabled()) {
 			throw PatternMatchFailure.INSTANCE;
 		} else {
 			throw ReductionFailure.INSTANCE;

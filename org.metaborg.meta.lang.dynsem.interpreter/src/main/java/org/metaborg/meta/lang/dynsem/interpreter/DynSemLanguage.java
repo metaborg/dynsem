@@ -16,9 +16,6 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
-	// flag indicating whether the interpreter will perform full backtracking or not
-	public static final boolean ENABLE_FULL_BACKTRACKING = false;
-	
 	
 	// Keys for configuration parameters for a DynSemContext.
 	public static final String PARSER = "PARSER";
@@ -28,6 +25,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	public DynSemLanguage() {
 	}
 
+	public abstract boolean isFullBacktrackingEnabled();
+	
 	@Override
 	protected DynSemContext createContext(Env env) {
 		Map<String, Object> config = env.getConfig();
