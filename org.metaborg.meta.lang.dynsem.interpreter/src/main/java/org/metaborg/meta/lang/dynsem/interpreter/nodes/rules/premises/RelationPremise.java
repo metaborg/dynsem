@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.InvokeRelationNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationPremiseInputBuilder;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.ComponentUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -53,7 +54,7 @@ public class RelationPremise extends Premise {
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			rhsRwNodes[i].executeMatch(frame, components[i]);
+			rhsRwNodes[i].executeMatch(frame, ComponentUtils.getComponent(components, i));
 		}
 	}
 
@@ -70,7 +71,6 @@ public class RelationPremise extends Premise {
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
-
 		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
 				DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
 				SourceSectionUtil.fromStrategoTerm(t));

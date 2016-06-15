@@ -10,6 +10,7 @@ rules /* language file. interpreter entry point */
   ds-to-interp-language =
     x_language := $[[<OptLanguageName>]Language];
     e_dobacktrack := <if OptEnableBacktracking then !e |[ true ]| else !e |[ false ]| end>;
+    e_safecomponents := <if OptSafeComponents then !e |[ true ]| else !e |[ false ]| end>;
     !compilation-unit |[
       package ~x:<OptTopPackageName>;
       
@@ -58,6 +59,11 @@ rules /* language file. interpreter entry point */
         @Override
         public boolean isFullBacktrackingEnabled() {
           return e_dobacktrack;
+        }
+
+        @Override
+        public boolean isSafeComponentsEnabled() {
+          return e_safecomponents;
         }
       }
     ]|

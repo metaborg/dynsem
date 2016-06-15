@@ -47,6 +47,9 @@ rules
   
       do-enable-backtracking := <read-property(|"fullbacktracking", "false")> prop-file;
       rules(OptEnableBacktracking: _ -> <?"true"> do-enable-backtracking);
+      
+      do-safe-components := <read-property(|"safecomponents", "false")> prop-file;
+      rules(OptSafeComponents: _ -> <?"true"> do-safe-components);
   
       genproject-groupid := <ds-to-interp-read-prop-required(|"project.groupid")> prop-file;
       genproject-artifactid := <ds-to-interp-read-prop-required(|"project.artifactid")> prop-file;

@@ -76,6 +76,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		}
 	}
 
+	public abstract boolean isSafeComponentsEnabled();
+
 	@Override
 	protected boolean isObjectOfLanguage(Object obj) {
 		return obj instanceof DynSemRule;
