@@ -53,10 +53,10 @@ public class RuleRegistry {
 		}
 
 		if (jointRuleForClass == null) {
-			throw new InterpreterException(
-					"No rules found for arrow <" + arrowName + "> on <" + dispatchClass.getName() + ">");
+			jointRuleForClass = new RuleUnionRoot(SourceSection.createUnavailable("rule", "adhoc"), arrowName,
+					new Rule[0]);
+			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}
-
 		return jointRuleForClass;
 	}
 
