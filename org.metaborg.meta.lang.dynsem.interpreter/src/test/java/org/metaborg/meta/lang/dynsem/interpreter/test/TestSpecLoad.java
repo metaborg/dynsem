@@ -25,9 +25,9 @@ public class TestSpecLoad {
 	public void testLoadSpec() throws Exception {
 		File testDir = new File("src/test/resources/");
 		File specFile = new File(testDir, "testSpec1.aterm");
-		
+
 		assert (DummyDynSemLanguage.INSTANCE != null);
-		
+
 		InputStream specInput = new FileInputStream(specFile);
 		RuleRegistry rreg = new RuleRegistry();
 		RuleRegistry.populate(rreg, specInput);
@@ -51,6 +51,11 @@ public class TestSpecLoad {
 		@Override
 		protected CallTarget parse(Source code, Node context, String... argumentNames) throws IOException {
 			return null;
+		}
+
+		@Override
+		public boolean isSafeComponentsEnabled() {
+			return false;
 		}
 
 	}

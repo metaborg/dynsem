@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.ComponentUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -41,7 +42,7 @@ public class RuleInputsNode extends DynSemNode {
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
 			// FIXME check that the match actually suceeds
-			componentPatterns[i].execute(args[i + 1], frame);
+			componentPatterns[i].execute(ComponentUtils.getComponent(args, i + 1), frame);
 		}
 	}
 

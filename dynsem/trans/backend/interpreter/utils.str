@@ -45,6 +45,9 @@ rules
       do-clean-genproject := <read-property(|"project.clean", "false")> prop-file;
       rules(OptCleanTarget: _ -> <?"true"> do-clean-genproject);
   
+      do-safe-components := <read-property(|"safecomponents", "false")> prop-file;
+      rules(OptSafeComponents: _ -> <?"true"> do-safe-components);
+  
       genproject-groupid := <ds-to-interp-read-prop-required(|"project.groupid")> prop-file;
       genproject-artifactid := <ds-to-interp-read-prop-required(|"project.artifactid")> prop-file;
       rules(
