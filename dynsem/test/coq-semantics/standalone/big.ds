@@ -9,6 +9,7 @@ signature
      Fun : String * Expr -> Expr
      App : Expr * Expr -> Expr
      Var : String -> Expr
+     Let : String * Expr * Expr -> Expr
 
   // Values
   sorts Val constructors
@@ -18,7 +19,7 @@ signature
   // Environments
   sort aliases
     Env = Map(String, Val)
-  
+
   variables
     r : Env
     v : Val
@@ -45,3 +46,7 @@ rules
     Env {id |--> v2, r'} |- e -big-> v.
 
   r |- Var(id) -big-> r[id].
+
+  r |- Let(id, v1, e2) -big-> v2
+  where
+  	Env {id |--> v1, r} |- e2 -big-> v2.

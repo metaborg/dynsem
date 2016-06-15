@@ -9,10 +9,10 @@ Inductive B : Type :=
 .
 
 Inductive x : A -> A -> Prop :=
-| x_a1 :
+| x_a0 :
     y b0 b0 ->
     x a0 a0
 with y : B -> B -> Prop :=
-| y_b1 :
+| y_b0 :
     y b0 b0
 .

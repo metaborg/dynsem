@@ -2,4 +2,5 @@
  Imports("frames"),
  ArrowAlias("default", "scopeofFrame__Arrow", "scopeofFrame"),
  SortAlias("Decl", "D"),
- SortAlias("Ref", "R")]
+ SortAlias("Ref", "R"),
+ SortAlias("ScopeId", "ScopeId")]

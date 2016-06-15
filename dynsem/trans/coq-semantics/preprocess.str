@@ -166,7 +166,7 @@ rules // Arrow dependency analysis
   arrow-analyze-dependency(|arrow_decl_map, arrow_dep_map, ds2v_aliases):
     (arrow_name, sort) -> 1
     with
-      (ruls, rel_sig) := <hashtable-get(|(arrow_name, sort))> arrow_decl_map; 
+      (ruls, rel_sig) := <hashtable-get(|(arrow_name, sort))> arrow_decl_map;
       deps := <map({prems: Rule(prems, _, _) := <id>; (<foldr(![], arrow-definee(|arrow_name, sort, ds2v_aliases))> prems)}); concat> ruls;
       <hashtable-put(|(arrow_name, sort), deps)> arrow_dep_map
 
