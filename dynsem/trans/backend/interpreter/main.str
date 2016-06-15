@@ -14,26 +14,33 @@ imports
   
 rules
 
-  ds-to-interp-editor:
+ds-to-interp-editor:
     (_, position, ast, path, project-path) -> None()
     with
       local-project-path := $[[<prim("local_path")> project-path]/];
-      ds-to-interp-init-options(|path, project-path);
-      result := <ds-to-interp-main(|path, local-project-path)> ast;
-      <ds-to-interp-terms(|path, local-project-path)> result;
+      <ds-to-interp(|path, project-path, local-project-path)> ast
+      
+  ds-to-interp(|path, project-path, local-project-path) =
+    ds-to-interp-init-options(|path, local-project-path);
+    ds-to-interp-table;
+    ds-to-interp-specification(|path, project-path);
+    ds-to-interp-terms(|path, local-project-path)
+  
+  ds-to-interp-specification(|path, project-path) =
+    module-to-core(|path, project-path);
+    in-project-path(desugar-for-interpreter-module|project-path);
+    where(
+      ?result;
       fout := <fopen> (<OptTargetSpecFile>, "w");
       <pp-aterm-stream(|fout)> result;
-      <fclose> fout;
+      <fclose> fout
+    )
+  
+  ds-to-interp-terms(|path, local-project-path) = 
+    in-project-path(ds-to-interp-terms-module|local-project-path)
+  
+  ds-to-interp-table =
+    where(
       <copy-file> (<OptTableSourceFile>, <OptTargetTableFile>)
-  
-  ds-to-interp-main(|path, project-path) =
-    module-to-core(|path, project-path);
-    in-project-path(desugar-for-interpreter-module|project-path)
-  
-  ds-to-interp-terms(|path, project-path) =
-    in-project-path(
-        log-timed(
-          ds-to-interp-terms-module | "Language-specific terms"
-        )
-    |project-path)
+    )
     
