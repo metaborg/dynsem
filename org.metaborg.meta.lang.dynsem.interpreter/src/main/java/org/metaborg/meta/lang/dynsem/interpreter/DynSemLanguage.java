@@ -16,6 +16,10 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
+	// flag indicating whether the interpreter will perform full backtracking or not
+	public static final boolean ENABLE_FULL_BACKTRACKING = false;
+	
+	
 	// Keys for configuration parameters for a DynSemContext.
 	public static final String PARSER = "PARSER";
 	public static final String TERM_REGISTRY = "TERM_REGISTRY";
