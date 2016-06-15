@@ -59,7 +59,7 @@ rules
         OptJavaGenDir: _ -> java-gendir-abs
       );
       
-      gen-pkg := <read-property(|"project.javapackage", $[[genproject-groupid].[genproject-artifactid].generated])> prop-file;
+      gen-pkg := <read-property(|"project.javapackage", $[[<ds-utils-java-escape-id> genproject-groupid].[<ds-utils-java-escape-id> genproject-artifactid].generated])> prop-file;
       terms-pkg := $[[gen-pkg].terms];
       tbuild-pkg := $[[terms-pkg].build];
       tmatch-pkg := $[[terms-pkg].match];
