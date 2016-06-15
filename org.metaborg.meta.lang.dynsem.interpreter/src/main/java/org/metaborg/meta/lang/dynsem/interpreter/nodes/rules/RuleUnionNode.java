@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.SortRulesUnionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.SortRulesUnionNodeGen;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
@@ -31,21 +32,22 @@ public class RuleUnionNode extends DynSemNode {
 	public Rule[] getRules() {
 		return rules;
 	}
-	
+
 	public SortRulesUnionNode getSortRulesNode() {
 		return fallbackRulesNode;
 	}
 
 	@ExplodeLoop
 	private RuleResult executeMainRules(final Object[] arguments) {
-		for (int i = 0; i < rules.length; i++) {
+		CompilerAsserts.compilationConstant(rules);
+		for (Rule r : rules) {
 			try {
-				return rules[i]
-						.execute(Truffle.getRuntime().createVirtualFrame(arguments, rules[i].getFrameDescriptor()));
+				return r.execute(Truffle.getRuntime().createVirtualFrame(arguments, r.getFrameDescriptor()));
 			} catch (PremiseFailure pfx) {
 				;
 			}
 		}
+
 		throw PremiseFailure.INSTANCE;
 	}
 }
