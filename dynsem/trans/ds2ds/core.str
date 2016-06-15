@@ -19,8 +19,7 @@ strategies
 
   module-to-core(|path, project-path) =
     in-project-path(
-      ds-to-interp-init-options(|path, project-path)
-      ; include-imports
+      include-imports
       ; desugar-top
       ; fuse-sections
       ; desugar-varschemes-module
