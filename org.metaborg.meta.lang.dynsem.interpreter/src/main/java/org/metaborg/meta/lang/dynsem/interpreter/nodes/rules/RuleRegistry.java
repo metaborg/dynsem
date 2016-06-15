@@ -16,6 +16,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -31,6 +32,18 @@ public class RuleRegistry {
 
 	}
 
+	@TruffleBoundary
+	public int ruleCount() {
+		int i = 0;
+		for (Map<?, RuleUnionRoot> val : rules.values()) {
+			for (RuleUnionRoot root : val.values()) {
+				i += root.getUnionNode().getRules().length;
+			}
+		}
+		return i;
+	}
+
+	@TruffleBoundary
 	public void registerJointRule(String arrowName, Class<?> dispatchClass, RuleUnionRoot jointRuleRoot) {
 		Map<Class<?>, RuleUnionRoot> rulesForName = rules.get(arrowName);
 
@@ -61,6 +74,7 @@ public class RuleRegistry {
 	}
 
 	public final static void populate(RuleRegistry registry, InputStream specStream) {
+		CompilerAsserts.neverPartOfCompilation();
 		try {
 			TAFTermReader reader = new TAFTermReader(new TermFactory());
 
