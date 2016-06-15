@@ -26,9 +26,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 
 		public static StringLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			CompilerAsserts.neverPartOfCompilation();
-			String quotedString = Tools.javaStringAt(t, 0);
-			String unquotedString = quotedString.substring(1, quotedString.length() - 1);
-			return new StringLiteralTermBuild(unquotedString, SourceSectionUtil.fromStrategoTerm(t));
+			return new StringLiteralTermBuild(Tools.javaStringAt(t, 0), SourceSectionUtil.fromStrategoTerm(t));
 		}
 
 		@Override
