@@ -1,10 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
-import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionRoot;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 
 import com.oracle.truffle.api.dsl.Cached;

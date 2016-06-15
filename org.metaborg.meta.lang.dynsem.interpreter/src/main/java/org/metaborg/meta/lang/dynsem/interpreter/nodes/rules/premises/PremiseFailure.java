@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import com.oracle.truffle.api.nodes.ControlFlowException;
 
