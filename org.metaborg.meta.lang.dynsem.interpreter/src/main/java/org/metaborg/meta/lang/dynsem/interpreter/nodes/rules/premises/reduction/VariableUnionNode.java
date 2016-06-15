@@ -1,11 +1,12 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.PremiseFailure;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeUtil;
@@ -60,23 +61,28 @@ public abstract class VariableUnionNode extends DynSemNode {
 
 		protected RuleResult executeEvaluated(Object[] arguments, Rule[] rules) {
 			try {
-				return executeRules(arguments, rules);
-			} catch (PremiseFailure pfx) {
+				return executeMainRules(arguments, rules);
+			} catch (PatternMatchFailure pmfx) {
 				return sortUnionNode.execute(arguments[0], arguments);
 			}
 		}
 
-		@ExplodeLoop
-		private RuleResult executeRules(final Object[] arguments, Rule[] rules) {
+		private RuleResult executeMainRules(final Object[] arguments, Rule[] rules) {
+			CompilerAsserts.compilationConstant(rules);
+
 			for (int i = 0; i < rules.length; i++) {
 				try {
-					return rules[i]
-							.execute(Truffle.getRuntime().createVirtualFrame(arguments, rules[i].getFrameDescriptor()));
-				} catch (PremiseFailure pfx) {
-					;
+					final Rule r = rules[i];
+					return r.execute(Truffle.getRuntime().createVirtualFrame(arguments, r.getFrameDescriptor()));
+				} catch (PatternMatchFailure pmfx) {
+					if (i == rules.length) {
+						throw pmfx;
+					}
 				}
 			}
-			throw PremiseFailure.INSTANCE;
+
+			// there are no rules. we throw a soft exception to allow sort-based rules to be tried
+			throw PatternMatchFailure.INSTANCE;
 		}
 
 	}

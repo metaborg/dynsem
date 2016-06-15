@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatchFactory.ConsListMatchNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatchFactory.NilListMatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -12,7 +12,6 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class ListMatch extends MatchPattern {
@@ -36,7 +35,7 @@ public abstract class ListMatch extends MatchPattern {
 		return s.pop();
 	}
 
-	public static final class NilListMatch extends ListMatch {
+	public static abstract class NilListMatch extends ListMatch {
 
 		public NilListMatch(SourceSection source) {
 			super(source);
@@ -45,18 +44,19 @@ public abstract class ListMatch extends MatchPattern {
 		public static NilListMatch create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "List", 1);
 			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
-			return new NilListMatch(SourceSectionUtil.fromStrategoTerm(t));
+			return NilListMatchNodeGen.create(SourceSectionUtil.fromStrategoTerm(t));
 		}
 
-		private final ConditionProfile condProfile = ConditionProfile.createBinaryProfile();
+		@Specialization(guards = "stackCount(t) == 0")
+		public void doSuccess(VirtualFrame frame, IPersistentStack<?> t) {
 
-		@Override
-		public boolean execute(Object term, VirtualFrame frame) {
-			if (condProfile.profile(BuiltinTypesGen.isIPersistentStack(term))) {
-				return stackCount(BuiltinTypesGen.asIPersistentStack(term)) == 0;
-			}
-			return false;
 		}
+
+		@Specialization
+		public void doFailure(VirtualFrame frame, IPersistentStack<?> t) {
+			throw PatternMatchFailure.INSTANCE;
+		}
+
 	}
 
 	public static abstract class ConsListMatch extends ListMatch {
@@ -80,9 +80,13 @@ public abstract class ListMatch extends MatchPattern {
 		}
 
 		@Specialization
-		public boolean execute(@SuppressWarnings("rawtypes") IPersistentStack term, VirtualFrame frame) {
-			return stackCount(term) > 0 && headPattern.execute(stackPeek(term), frame)
-					&& tailPattern.execute(stackPop(term), frame);
+		public void doList(VirtualFrame frame, IPersistentStack<?> list) {
+			if (stackCount(list) > 0) {
+				headPattern.executeMatch(frame, stackPeek(list));
+				tailPattern.executeMatch(frame, stackPop(list));
+			} else {
+				throw PatternMatchFailure.INSTANCE;
+			}
 		}
 
 	}

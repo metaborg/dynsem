@@ -22,10 +22,11 @@ public class ConMatch extends MatchPattern {
 	}
 
 	@Override
-	public boolean execute(Object term, VirtualFrame frame) {
+	public void executeMatch(VirtualFrame frame, Object t) {
 		ITermMatchPatternFactory matchFactory = getContext().lookupMatchPattern(name, children.length);
 		MatchPattern matcher = matchFactory.apply(getSourceSection(), children);
-		return replace(matcher).execute(term, frame);
+
+		replace(matcher).executeMatch(frame, t);
 	}
 
 	public static ConMatch create(IStrategoAppl t, FrameDescriptor fd) {

@@ -472,8 +472,8 @@ rules /* term matching */
         import ~x:<OptTermsPackageName>.x_termclass;
         import ~x:<OptNativePackageName>.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
         
-        import com.oracle.truffle.api.dsl.Fallback;
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.frame.VirtualFrame;
         import com.oracle.truffle.api.source.SourceSection;
@@ -488,13 +488,13 @@ rules /* term matching */
           }
         
           @Specialization
-          public boolean doMatch(x_termclass term, VirtualFrame frame) {
-            return e1;
+          public void doMatch(VirtualFrame frame, x_termclass term) {
+            bstm1*;
           }
 
           @Specialization
-          public boolean doMatchFailed(Object term, VirtualFrame frame) {
-            return false;
+          public void doMatchFailed(VirtualFrame frame, Object term) {
+            throw PatternMatchFailure.INSTANCE;
           }
           
         }
@@ -505,7 +505,7 @@ rules /* term matching */
       fdec* := <ds-to-interp-terms-matching-fdecs> kid*; 
       param0* := <ds-to-interp-terms-matching-initparams> kid*;
       bstm0* := <ds-to-interp-terms-matching-finits> kid*;
-      e1 := <foldr(!e |[ true ]|, ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> kid*)
+      bstm1* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> kid*)
       
   ds-to-interp-terms-matching-initparams = map-with-index(ds-to-interp-terms-matching-initparam)
   
@@ -523,7 +523,10 @@ rules /* term matching */
     (i, s) -> bstm |[ this.~x:$[p_[i]] = ~x:$[p_[i]]; ]|
 
   ds-to-interp-terms-matching-matchdescend:
-    (i, e) -> e |[ e && ~x:$[p_[i]].execute(term.~x:$[get_[i]](), frame) ]|
+    (i, bstm0*) -> bstm* |[
+      bstm0*
+      (~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()));
+    ]|
 
 rules /* utils */
 

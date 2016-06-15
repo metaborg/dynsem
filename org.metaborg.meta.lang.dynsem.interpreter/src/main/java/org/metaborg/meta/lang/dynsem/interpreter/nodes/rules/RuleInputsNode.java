@@ -2,7 +2,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -26,24 +25,20 @@ public class RuleInputsNode extends DynSemNode {
 	}
 
 	public void execute(VirtualFrame frame) {
-		Object[] args = frame.getArguments();
-		if (inPattern.execute(args[0], frame)) {
-			/* evaluate the semantic component pattern matches */
-			evaluateComponentPatterns(args, frame);
-		} else {
-			CompilerAsserts.neverPartOfCompilation();
-			throw PremiseFailure.INSTANCE;
-		}
+		final Object[] args = frame.getArguments();
+
+		// evaluate the source pattern
+		inPattern.executeMatch(frame, args[0]);
+
+		// evaluate the component patterns
+		evaluateComponentPatterns(frame, args);
 	}
 
 	@ExplodeLoop
-	private void evaluateComponentPatterns(Object[] args, VirtualFrame frame) {
+	private void evaluateComponentPatterns(VirtualFrame frame, Object[] args) {
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
-			boolean matchSuccess = componentPatterns[i].execute(args[i + 1], frame);
-			if (!matchSuccess) {
-				throw PremiseFailure.INSTANCE;
-			}
+			componentPatterns[i].executeMatch(frame, args[i + 1]);
 		}
 	}
 

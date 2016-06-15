@@ -1,29 +1,25 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
-
-import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class IntLiteralTermMatchPattern extends LiteralMatchPattern {
+public abstract class IntLiteralTermMatchPattern extends LiteralMatchPattern {
 
-	private final int lit;
+	protected final int lit;
 
 	public IntLiteralTermMatchPattern(int lit, SourceSection source) {
 		super(source);
 		this.lit = lit;
 	}
 
-	private final ConditionProfile conditionProfile = ConditionProfile.createBinaryProfile();
+	@Specialization(guards = "i == lit")
+	public void doSuccess(int i) {
 
-	@Override
-	public boolean execute(Object term, VirtualFrame frame) {
-		if (conditionProfile.profile(BuiltinTypesGen.isInteger(term))) {
-			int i = BuiltinTypesGen.asInteger(term);
-			return lit == i;
-		}
-		return false;
+	}
+
+	@Specialization
+	public void doFailure(int i) {
+		throw PatternMatchFailure.INSTANCE;
 	}
 
 }

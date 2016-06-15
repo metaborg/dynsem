@@ -17,7 +17,7 @@ public abstract class MatchPattern extends DynSemNode {
 		super(source);
 	}
 
-	public abstract boolean execute(Object term, VirtualFrame frame);
+	public abstract void executeMatch(VirtualFrame frame, Object term);
 
 	public static MatchPattern create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();

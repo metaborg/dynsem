@@ -17,16 +17,19 @@ public abstract class LiteralMatchPattern extends MatchPattern {
 	public static LiteralMatchPattern create(IStrategoAppl t, FrameDescriptor fd) {
 		SourceSection source = SourceSectionUtil.fromStrategoTerm(t);
 		if (Tools.hasConstructor(t, "True", 0)) {
-			return new TrueLiteralTermMatchPattern(source);
+			return TrueLiteralTermMatchPatternNodeGen.create(source);
 		}
 		if (Tools.hasConstructor(t, "False", 0)) {
-			return new FalseLiteralTermMatchPattern(source);
+			return FalseLiteralTermMatchPatternNodeGen.create(source);
 		}
 		if (Tools.hasConstructor(t, "Int", 1)) {
-			return new IntLiteralTermMatchPattern(Integer.parseInt(Tools.stringAt(t, 0).stringValue()), source);
+
+			return IntLiteralTermMatchPatternNodeGen.create(Integer.parseInt(Tools.stringAt(t, 0).stringValue()),
+					source);
 		}
 		if (Tools.hasConstructor(t, "String", 1)) {
-			return new StringLiteralTermMatchPattern(Tools.stringAt(t, 0).stringValue(), source);
+
+			return StringLiteralTermMatchPatternNodeGen.create(Tools.stringAt(t, 0).stringValue(), source);
 		}
 
 		throw new NotImplementedException("Unsupported literal: " + t);

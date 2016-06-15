@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -28,17 +29,21 @@ public class CaseMatchPremise extends Premise {
 	@Override
 	@ExplodeLoop
 	public void execute(VirtualFrame frame) {
-		Object t = termNode.executeGeneric(frame);
+		final Object t = termNode.executeGeneric(frame);
 
-		boolean success = false;
+		CompilerAsserts.compilationConstant(cases.length);
+
+		// execute each of the cases until the first succeeds
 		for (int i = 0; i < cases.length; i++) {
-			success = cases[i].execute(frame, t);
-			if (success) {
+			try {
+				cases[i].execute(frame, t);
 				break;
+			} catch (PatternMatchFailure pmfx) {
+				// the current case has failed, if it was the last case re-throw the exception
+				if (i == cases.length) {
+					throw pmfx;
+				}
 			}
-		}
-		if (!success) {
-			throw PremiseFailure.INSTANCE;
 		}
 	}
 

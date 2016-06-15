@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.PremiseFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.SortRulesUnionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.SortRulesUnionNodeGen;
 
@@ -24,9 +24,29 @@ public class RuleUnionNode extends DynSemNode {
 	public RuleResult execute(final Object[] arguments) {
 		try {
 			return executeMainRules(arguments);
-		} catch (PremiseFailure pfx) {
+		} catch (PatternMatchFailure pmfx) {
 			return fallbackRulesNode.execute(arguments[0], arguments);
 		}
+	}
+
+	@ExplodeLoop
+	private RuleResult executeMainRules(final Object[] arguments) {
+		CompilerAsserts.compilationConstant(rules);
+
+		for (int i = 0; i < rules.length; i++) {
+			try {
+				final Rule r = rules[i];
+				return r.execute(Truffle.getRuntime().createVirtualFrame(arguments, r.getFrameDescriptor()));
+			} catch (PatternMatchFailure pmfx) {
+				if (i == rules.length) {
+					throw pmfx;
+				}
+			}
+		}
+
+		// there are no rules. we throw a soft exception to allow sort-based rules to be tried
+		throw PatternMatchFailure.INSTANCE;
+
 	}
 
 	public Rule[] getRules() {
@@ -37,17 +57,4 @@ public class RuleUnionNode extends DynSemNode {
 		return fallbackRulesNode;
 	}
 
-	@ExplodeLoop
-	private RuleResult executeMainRules(final Object[] arguments) {
-		CompilerAsserts.compilationConstant(rules);
-		for (Rule r : rules) {
-			try {
-				return r.execute(Truffle.getRuntime().createVirtualFrame(arguments, r.getFrameDescriptor()));
-			} catch (PremiseFailure pfx) {
-				;
-			}
-		}
-
-		throw PremiseFailure.INSTANCE;
-	}
 }

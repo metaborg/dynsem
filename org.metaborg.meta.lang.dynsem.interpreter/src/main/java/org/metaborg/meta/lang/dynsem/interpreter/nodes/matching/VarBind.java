@@ -20,9 +20,8 @@ public class VarBind extends MatchPattern {
 	}
 
 	@Override
-	public boolean execute(Object term, VirtualFrame frame) {
-		frame.setObject(slot, term);
-		return true;
+	public void executeMatch(VirtualFrame frame, Object t) {
+		frame.setObject(slot, t);
 	}
 
 	public static VarBind create(IStrategoAppl t, FrameDescriptor fd) {
