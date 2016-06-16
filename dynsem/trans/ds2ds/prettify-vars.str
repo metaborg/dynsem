@@ -17,15 +17,22 @@ strategies
   
   prettify-vars-all = alltd(prettify-vars-rule)
   
-  prettify-vars-rule =
-    ?Rule(_, _, _);
-    {| PrettifyVar, NextIdx:
-      alltd(prettify-var-def);
-      alltd(prettify-var-ref)
+  prettify-vars-rule:
+    Rule(p*, infer, Relation(reads, src, arrow, tgt)) -> Rule(p'*, infer, Relation(reads', src', arrow, tgt'))
+    where {| PrettifyVar, NextIdx:
+      reads' := <alltd(prettify-var-def)> reads;
+      src' := <alltd(prettify-var-def)> src;
+      p'* := <alltd(prettify-var-def); alltd(prettify-var-ref)> p*;
+      tgt' := <alltd(prettify-var-ref)> tgt 
     |}
   
   prettify-var-def:
+    Var(x) -> Var(<PrettifyVar> x)
+  
+  prettify-var-def:
     Var(x) -> Var(x')
+    where
+      <not(PrettifyVar)> x
     where
       <string-starts-with(|"_lifted")> x;
       x-def := <lookup-def(|Vars())> x;
