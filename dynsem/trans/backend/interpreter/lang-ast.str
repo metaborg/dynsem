@@ -163,14 +163,14 @@ rules /* Sort & Constructor classes */
               try{
                   for (Field f : getClass().getDeclaredFields()) {
                       if (f.getName().startsWith("_")) {
-                          fs += f.get(this) + ","; 
+                          fs += f.get(this) + ", "; 
                       }
                   }
-                  if (fs.endsWith(",")) fs = fs.substring(0, fs.length()-1);
+                  if (fs.endsWith(", ")) fs = fs.substring(0, fs.length()-2);
               } catch (IllegalAccessException iaex) {
                   System.err.println("<unreadalbe field>");
               }
-              return CONSTRUCTOR + "_" + ARITY + "(" + fs + ")@" + Integer.toHexString(hashCode());
+              return CONSTRUCTOR + "_" + ARITY + "(" + fs + ")";
           }
           
           @Override
