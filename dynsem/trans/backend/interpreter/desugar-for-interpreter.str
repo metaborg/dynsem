@@ -12,7 +12,7 @@ rules
   desugar-for-interpreter-module:
     m@Module(_, _) -> Module($[[name]_interp], section*)
     where
-      <m-in-analysis(desugar-for-interpreter); unmark-vars> m => Module(name, section*)
+      <m-in-analysis(desugar-for-interpreter; unrename-all); unmark-vars> m => Module(name, section*)
 
   desugar-for-interpreter =
     explicate-arrow-types-noanalysis
