@@ -8,6 +8,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -34,10 +35,10 @@ public abstract class SortRulesUnionNode extends DynSemNode {
 
 	@Specialization
 	public RuleResult doNoFallback(Object o, Object[] arguments) {
-		if(DynSemContext.LANGUAGE.isFullBacktrackingEnabled()) {
+		if (DynSemContext.LANGUAGE.isFullBacktrackingEnabled()) {
 			throw PatternMatchFailure.INSTANCE;
 		} else {
-			throw ReductionFailure.INSTANCE;
+			throw new ReductionFailure("No rules left to try", InterpreterUtils.createStacktrace());
 		}
 	}
 

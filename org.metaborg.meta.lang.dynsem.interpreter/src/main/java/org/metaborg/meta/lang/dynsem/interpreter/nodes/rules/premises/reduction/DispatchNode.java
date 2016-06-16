@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -10,7 +10,8 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class DispatchNode extends DynSemNode {
@@ -24,13 +25,13 @@ public abstract class DispatchNode extends DynSemNode {
 		this.arrowName = arrowName;
 	}
 
-	public abstract RuleResult execute(Class<?> dispatchClass, Object[] args);
+	public abstract RuleResult execute(VirtualFrame frame, Class<?> dispatchClass, Object[] args);
 
 	@Specialization(limit = "INLINE_CACHE_SIZE", guards = "dispatchClass == cachedDispatchClass")
-	public RuleResult doDirect(Class<?> dispatchClass, Object[] args,
+	public RuleResult doDirect(VirtualFrame frame, Class<?> dispatchClass, Object[] args,
 			@Cached("dispatchClass") Class<?> cachedDispatchClass,
-			@Cached("getRuleUnionNode(cachedDispatchClass)") RuleUnionNode dispatchNode) {
-		return dispatchNode.execute(args);
+			@Cached("create(getUnionRootNode(cachedDispatchClass).getCallTarget())") DirectCallNode callNode) {
+		return (RuleResult) callNode.call(frame, args);
 	}
 
 	@Specialization(contains = "doDirect")
@@ -39,8 +40,8 @@ public abstract class DispatchNode extends DynSemNode {
 		return dispatchNode.execute(args);
 	}
 
-	protected final RuleUnionNode getRuleUnionNode(Class<?> dispatchClass) {
-		return NodeUtil.cloneNode(getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass).getUnionNode());
+	protected final RuleUnionRoot getUnionRootNode(Class<?> dispatchClass) {
+		return getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
 	}
 
 	protected final VariableUnionNode createVariableUnionNode() {

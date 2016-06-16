@@ -11,11 +11,14 @@ import com.oracle.truffle.api.nodes.ControlFlowException;
  * @author vladvergu
  *
  */
-public class ReductionFailure extends ControlFlowException {
+public class ReductionFailure extends RuntimeException {
 
-	public static final ReductionFailure INSTANCE = new ReductionFailure();
+	public ReductionFailure(String trace, Throwable t) {
+		super(trace, t);
+	}
 
-	private ReductionFailure() {
+	public ReductionFailure(String message, String trace) {
+		super(message + "\n" + trace);
 	}
 
 	/**

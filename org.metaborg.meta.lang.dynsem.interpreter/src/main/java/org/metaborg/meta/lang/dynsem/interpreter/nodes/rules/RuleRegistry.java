@@ -66,7 +66,7 @@ public class RuleRegistry {
 		}
 
 		if (jointRuleForClass == null) {
-			jointRuleForClass = new RuleUnionRoot(SourceSection.createUnavailable("rule", "adhoc"), arrowName,
+			jointRuleForClass = new RuleUnionRoot(SourceSection.createUnavailable("rule", "adhoc"), arrowName, dispatchClass,
 					new Rule[0]);
 			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}
@@ -108,8 +108,9 @@ public class RuleRegistry {
 			for (Entry<String, Map<Class<?>, List<Rule>>> rulesForNameEntry : rules.entrySet()) {
 				final String arrowName = rulesForNameEntry.getKey();
 				for (Entry<Class<?>, List<Rule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
-					registry.registerJointRule(arrowName, rulesForClass.getKey(),
-							new RuleUnionRoot(SourceSection.createUnavailable("rule", "unavailable"), arrowName,
+					Class<?> dispatchClass = rulesForClass.getKey();
+					registry.registerJointRule(arrowName, dispatchClass,
+							new RuleUnionRoot(SourceSection.createUnavailable("rule", "unavailable"), arrowName, dispatchClass,
 									rulesForClass.getValue().toArray(new Rule[] {})));
 				}
 			}

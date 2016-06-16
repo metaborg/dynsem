@@ -7,6 +7,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -15,8 +16,13 @@ public class RuleUnionNode extends DynSemNode {
 	@Children private final Rule[] rules;
 	@Child private SortRulesUnionNode fallbackRulesNode;
 
-	public RuleUnionNode(SourceSection source, String arrowName, Rule[] rules) {
+	private final String arrowName;
+	private final Class<?> dispatchClass;
+
+	public RuleUnionNode(SourceSection source, String arrowName, Class<?> dispatchClass, Rule[] rules) {
 		super(source);
+		this.arrowName = arrowName;
+		this.dispatchClass = dispatchClass;
 		this.rules = rules;
 		this.fallbackRulesNode = SortRulesUnionNodeGen.create(source, arrowName);
 	}
@@ -55,6 +61,12 @@ public class RuleUnionNode extends DynSemNode {
 
 	public SortRulesUnionNode getSortRulesNode() {
 		return fallbackRulesNode;
+	}
+
+	@Override
+	@TruffleBoundary
+	public String toString() {
+		return dispatchClass.getSimpleName() + " -" + arrowName + "->";
 	}
 
 }
