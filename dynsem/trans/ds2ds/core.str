@@ -30,7 +30,6 @@ strategies
       ; factorize-module
       ; explicate-module
       ; copy-propagation-module
-      ; constant-propagation-module
       ; defactorize-module
       ; insert-wildcards-module
       ; prettify-vars-module
