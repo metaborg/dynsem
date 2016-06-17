@@ -13,9 +13,6 @@ rules
     SortDecl(s) -> $[I[<ds-utils-java-escape-id> s]Term]
 
   ds-to-interp-terms-types-name:
-    ListSort(s) -> $[com.github.krukow.clj_lang.IPersistentStack]
-
-  ds-to-interp-terms-types-name:
     MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap]
     where
       key := <ds-to-interp-terms-types-name> skey;

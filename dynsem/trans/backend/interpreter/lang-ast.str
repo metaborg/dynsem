@@ -32,12 +32,14 @@ rules
 rules /* Sort & Constructor classes */
 
   ds-to-interp-terms-signatures-top:
-    sig* -> [sort-class*, cons-class*]
+    sig* -> [sort-class*, cons-class*, list-class*]
     where
       sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
+      list-dec* := <collect-all(?ListSort(_)); nub> sig*;
       sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
-      cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*
+      cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*;
+      list-class* := <map(ds-to-interp-terms-listdecl)> list-dec*
     
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
@@ -191,7 +193,7 @@ rules /* Sort & Constructor classes */
       bstm0* := <ds-to-interp-sorts-to-finits> kid*;
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
-      (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|"term")); unzip; (concat, id)> kid*;
+      (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|e |[ term ]|)); unzip; (concat, id)> kid*;
       bstm2* := <map-with-index(ds2java-field-eq-check)> kid*
     where
       if [] := kid*
@@ -203,43 +205,129 @@ rules /* Sort & Constructor classes */
       else
         finit* := class-body-dec* |[ public x_classname(param0*) { bstm0* } ]|
       end
-        
   
-  ds-to-interp-sorts-to-create-arg(|x_term):
-    (e, sref@SimpleSort(s)) -> ([], e |[ ~x:<ds-to-interp-terms-types-name> sref.create(x_term.getSubterm(e)) ]|)
+  ds-to-interp-terms-listdecl:
+    s@ListSort(es) ->
+      compilation-unit |[
+        package ~x:<OptTermsPackageName>;
+
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+        import com.github.krukow.clj_lang.IPersistentStack;
+        import com.github.krukow.clj_lang.PersistentList;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        import ~x:<OptNativePackageName>.*;
+        
+        public final class x_listclass implements IListTerm<x_elemclass> {
+
+          private final IPersistentStack<x_elemclass> backend;
+        
+          @SuppressWarnings("unchecked")
+          public x_listclass(x_elemclass[] elems) {
+            this.backend = (IPersistentStack<x_elemclass>) PersistentList.create(elems);
+          }
+        
+          private x_listclass(IPersistentStack<x_elemclass> backend) {
+            this.backend = backend;
+          }
+        
+          @Override
+          public int size() {
+            return backend.count();
+          }
+        
+          @Override
+          public ITermInstanceChecker getCheck() {
+            return new ITermInstanceChecker() {
+        
+              @Override
+              public boolean isInstance(Object obj) {
+                return obj instanceof x_listclass;
+              }
+            };
+          }
+        
+          @Override
+          @TruffleBoundary
+          public x_elemclass head() {
+            return backend.peek();
+          }
+        
+          @Override
+          public x_listclass tail() {
+            return new x_listclass(backend.pop());
+          }
+        
+          @Override
+          @TruffleBoundary
+          public x_listclass add(x_elemclass elem) {
+            return new x_listclass((IPersistentStack<x_elemclass>) backend.cons(elem));
+          }
+        
+          @Override
+          public x_listclass addAll(x_elemclass[] elems) {
+            IPersistentStack<x_elemclass> backend = this.backend;
+        
+            for (int idx = elems.length - 1; idx >= 0; idx--) {
+              backend = (IPersistentStack<x_elemclass>) backend.cons(elems[idx]);
+            }
+            return new x_listclass(backend);
+          }
+          
+          @Override
+          public String toString() {
+            return backend.toString();
+          }
+        
+        }
+      ]|
+    where
+      x_listclass := <ds-to-interp-terms-types-name> s;
+      x_elemclass := <ds-to-interp-terms-types-name> es
+  
+  ds-to-interp-sorts-to-create-arg(|e_term):
+    (e, sref@SimpleSort(s)) -> ([], e |[ ~x:<ds-to-interp-terms-types-name> sref.create(e_term.getSubterm(e)) ]|)
     where
       <not(is-builtin-type)> s
 
-  ds-to-interp-sorts-to-create-arg(|x_term):
-    (e, ListSort(s)) -> (
+  ds-to-interp-sorts-to-create-arg(|e_term):
+    (e, ls@ListSort(s)) -> (
       bstm* |[
-        java.util.List<x_elemclass> x_tmpres = new java.util.LinkedList<x_elemclass>();
-        for (IStrategoTerm x_tmpelem : Tools.listAt(x_term, e)) {
-          x_tmpres.add(e_elem);
+        IStrategoList x_tmplist = Tools.listAt(e_term, e);
+        x_elemclass[] x_tmpres = new x_elemclass[x_tmplist.size()];
+        for (int x_idx = 0; x_idx < x_tmpres.length; x_idx++) {
+          x_tmpres[x_idx] = e_elem;
         }
-      ]|, e |[ com.github.krukow.clj_lang.PersistentList.create(x_tmpres) ]|)
+//        java.util.List<x_elemclass> x_tmpres = new java.util.LinkedList<x_elemclass>();
+//        for (IStrategoTerm x_tmpelem : Tools.listAt(x_term, e)) {
+//          x_tmpres.add(e_elem);
+//        }
+      ]|, e |[ new x_listclass(x_tmpres) ]|)
     where
+      x_tmplist := $[_[<newname>]];
+      x_listclass := <ds-to-interp-terms-types-name> ls;
       x_elemclass := <ds-to-interp-terms-types-name> s;
       x_tmpres := $[_[<newname>]];
       x_tmpelem := $[_[<newname>]];
-      e_elem := <ds-to-interp-sortelem-to-create-arg(|x_tmpelem)> s
+      x_idx := $[_[<newname>]];
+      e_elem := <ds-to-interp-sortelem-to-create-arg(|e |[ x_tmplist.getSubterm(x_idx) ]|)> s
 
-  ds-to-interp-sortelem-to-create-arg(|x_tmpelem):
-    s@SimpleSort(_) -> e |[ x_elemclass.create(x_tmpelem) ]|
+  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+    s@SimpleSort(_) -> e |[ x_elemclass.create(e_tmpelem) ]|
     where
       <not(is-builtin-type)> s;
       x_elemclass := <ds-to-interp-terms-types-name> s
       
-  ds-to-interp-sortelem-to-create-arg(|x_tmpelem):
-    SimpleSort("String") -> e |[ Tools.asJavaString(x_tmpelem) ]|
+  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+    SimpleSort("String") -> e |[ Tools.asJavaString(e_tmpelem) ]|
 
-  ds-to-interp-sortelem-to-create-arg(|x_tmpelem):
-    SimpleSort("Int") -> e |[ Tools.asJavInt(x_tmpelem) ]|
+  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+    SimpleSort("Int") -> e |[ Tools.asJavInt(e_tmpelem) ]|
 
-  ds-to-interp-sorts-to-create-arg(|x_term):
+  ds-to-interp-sorts-to-create-arg(|e_term):
     (e, MapSort(skey, sval)) -> (
       bstm* |[
-        IStrategoAppl x_mapT = Tools.applAt(x_term, e);
+        IStrategoAppl x_mapT = Tools.applAt(e_term, e);
         assert Tools.hasConstructor(x_mapT, "Map", 1);
       
         IStrategoList x_bindsT = Tools.listAt(x_mapT, 0);
@@ -258,22 +346,22 @@ rules /* Sort & Constructor classes */
       x_bindT := $[_[<newname>]];
       x_keyclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> skey;
       x_valclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> sval;
-      (bstm0*, e_keycreate) := <ds-to-interp-sorts-to-create-arg(|x_bindT)> (e |[ 0 ]|, skey);
-      (bstm1*, e_valcreate) := <ds-to-interp-sorts-to-create-arg(|x_bindT)> (e |[ 1 ]|, sval)
+      (bstm0*, e_keycreate) := <ds-to-interp-sorts-to-create-arg(|e |[ x_bindT ]|)> (e |[ 0 ]|, skey);
+      (bstm1*, e_valcreate) := <ds-to-interp-sorts-to-create-arg(|e |[ x_bindT ]|)> (e |[ 1 ]|, sval)
 
-  ds-to-interp-sorts-to-create-arg(|x_term):
+  ds-to-interp-sorts-to-create-arg(|e_term):
     (e, sref@NativeType(_, _)) -> (bstm* |[ if(true) throw new IllegalStateException("Term cannot be created from native type"); ]|, e |[ null ]| )
 
-  ds-to-interp-sorts-to-create-arg(|x_term):
-    (e, sref@SimpleSort("String")) -> ([], e |[ Tools.stringAt(x_term, e).stringValue() ]|)
+  ds-to-interp-sorts-to-create-arg(|e_term):
+    (e, sref@SimpleSort("String")) -> ([], e |[ Tools.stringAt(e_term, e).stringValue() ]|)
 
-  ds-to-interp-sorts-to-create-arg(|x_term):
-    (e, sref@SimpleSort("Int")) -> ([], e |[ Tools.intAt(x_term, e).intValue() ]|)
+  ds-to-interp-sorts-to-create-arg(|e_term):
+    (e, sref@SimpleSort("Int")) -> ([], e |[ Tools.intAt(e_term, e).intValue() ]|)
 
-  ds-to-interp-sorts-to-create-arg(|x_term):
+  ds-to-interp-sorts-to-create-arg(|e_term):
     (e, sref@SimpleSort("Bool")) -> (
       bstm* |[
-        IStrategoAppl x_tmp1 = Tools.applAt(x_term, e);
+        IStrategoAppl x_tmp1 = Tools.applAt(e_term, e);
         assert Tools.hasConstructor(x_tmp1, "True", 0) || Tools.hasConstructor(x_tmp1, "False", 0);
       ]|, e |[ Tools.hasConstructor(x_tmp1, "True", 0) ? true : false ]|)
     where
