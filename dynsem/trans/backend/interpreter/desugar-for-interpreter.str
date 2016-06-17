@@ -214,7 +214,26 @@ rules /* unquote string literals */
   
 rules /* resugar list construction */
 
-  resugar-lists = innermost(resugar-list)
+  resugar-lists = innermost(resugar-list); alltd(add-typeanno-to-list)
+
+  resugar-list:
+    Cast(Wld(), _) -> Wld()
 
   resugar-list:
     ListTail(h1*, ListTail(h2*, tl)) -> ListTail([h1*, h2*], tl)
+  
+  resugar-list:
+    ListTail(h1*, List(h2*)) -> List([h1*, h2*])
+  
+  resugar-list:
+    ListTail(h*, Cast(List([]), _)) -> List(h*)
+  
+  add-typeanno-to-list:
+    l@List([h|_]) -> Cast(l, ListSort(elemsort))
+    where
+      elemsort := <type-of; derw-type> h 
+
+  add-typeanno-to-list:
+    l@ListTail([h], _) -> Cast(l, ListSort(elemsort))
+    where
+      elemsort := <type-of; derw-type> h 
