@@ -38,6 +38,11 @@ rules
       c'* := <zip(add-extra-typeannos-term <+ Snd)> (c-ty*, c*)
   
   add-extra-typeannos-term:
+    ListTail([h], t@List([])) -> ListTail([h], Cast(t, ListSort(elemsort)))
+    where
+      elemsort := <type-of; derw-type> h 
+  
+  add-extra-typeannos-term:
     (_, c@Con(_, _)) -> <try(add-extra-typeannos-term)> c
   
   add-extra-typeannos-term:
