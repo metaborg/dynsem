@@ -24,6 +24,7 @@ rules
     ; desugar-rec-tco
     ; desugar-nmatch-neq
     ; desugar-unquote-strings
+    ; resugar-lists
 
 rules
 
@@ -210,3 +211,14 @@ rules /* desugar not-match and not equal premises */
 rules /* unquote string literals */
 
   desugar-unquote-strings = alltd(String(un-double-quote))
+  
+rules /* resugar list construction */
+
+  resugar-lists = id
+
+//  resugar-lists = innermost(resugar-list)
+//
+//  resugar-list:
+//    ListTail(h1*, ListTail(h2*, tl)) -> ListTail([h1*, h2*], tl)
+
+
