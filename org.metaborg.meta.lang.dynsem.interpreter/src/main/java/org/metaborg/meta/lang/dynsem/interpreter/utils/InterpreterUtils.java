@@ -50,6 +50,13 @@ public final class InterpreterUtils {
 		frame.setObject(slot, val);
 	}
 
+	public static <T> T notNull(T val) {
+		if (DynSemContext.LANGUAGE.isSafeComponentsEnabled() && val == null) {
+			throw new ReductionFailure("Null value encountered", createStacktrace());
+		}
+		return val;
+	}
+
 	@TruffleBoundary
 	public static String createStacktrace() {
 		final StringBuilder str = new StringBuilder();

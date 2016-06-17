@@ -489,7 +489,7 @@ rules /* term matching */
         
           @Specialization
           public void doMatch(VirtualFrame frame, x_termclass term) {
-            bstm1*;
+            bstm1*
           }
 
           @Specialization

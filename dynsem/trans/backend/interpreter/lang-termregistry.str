@@ -36,9 +36,9 @@ rules /* term registry */
         
         public class x_classname implements ITermRegistry {
         
-          private final Map<String, ITermBuildFactory> builderFactories = new HashMap<String, ITermBuildFactory>();
-          private final Map<String, ITermMatchPatternFactory> matcherFactories = new HashMap<String, ITermMatchPatternFactory>();
-          private final Map<String, ITermBuildFactory> nativeFactories = new HashMap<String, ITermBuildFactory>();
+          private final Map<Class<?>, ITermBuildFactory> builderFactories = new HashMap<Class<?>, ITermBuildFactory>();
+          private final Map<Class<?>, ITermMatchPatternFactory> matcherFactories = new HashMap<Class<?>, ITermMatchPatternFactory>();
+          private final Map<Class<?>, ITermBuildFactory> nativeFactories = new HashMap<Class<?>, ITermBuildFactory>();
           private final Map<String, ITermBuildFactory> nativeAdapterFactories = new HashMap<String, ITermBuildFactory>();
           
           public x_classname() {
@@ -57,28 +57,32 @@ rules /* term registry */
           }
           
           @Override
-          public ITermBuildFactory lookupBuildFactory(String constr, int arity) {
-            return builderFactories.get(constr + "/" + arity);
+          public ITermBuildFactory lookupBuildFactory(Class<?> termClass) {
+            CompilerAsserts.neverPartOfCompilation();
+            return builderFactories.get(termClass);
           }
         
           @Override
-          public ITermMatchPatternFactory lookupMatchFactory(String constr, int arity) {
-            return matcherFactories.get(constr + "/" + arity);
+          public ITermMatchPatternFactory lookupMatchFactory(Class<?> termClass) {
+            CompilerAsserts.neverPartOfCompilation();
+            return matcherFactories.get(termClass);
           }
           
           @Override
-          public ITermBuildFactory lookupNativeOpBuildFactory(String constr, int arity) {
-            return nativeFactories.get(constr + "/" + arity);
+          public ITermBuildFactory lookupNativeOpBuildFactory(Class<?> termClass) {
+            CompilerAsserts.neverPartOfCompilation();
+            return nativeFactories.get(termClass);
           }
           
           @Override
           public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort,
               String function, int arity) {
+            CompilerAsserts.neverPartOfCompilation();
             return nativeAdapterFactories.get(sort + "/" + function + "/" + arity);
           }
           
           @Override
-          public Class<?> getLanguageConstructorClass(String constr, int arity) {
+          public Class<?> getConstructorClass(String constr, int arity) {
             CompilerAsserts.neverPartOfCompilation();
             try {
               return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptTermsPackageName>].])])) + constr + "_" + arity + "_Term");
@@ -86,14 +90,24 @@ rules /* term registry */
               throw new RuntimeException("Failed to load constructor class", cnfe);
             }
           }
+
+          @Override
+          public Class<?> getNativeOperatorClass(String constr, int arity) {
+            CompilerAsserts.neverPartOfCompilation();
+            try {
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptNativePackageName>].])])) + constr + "_" + arity);
+            } catch (ClassNotFoundException cnfe) {
+              throw new RuntimeException("Failed to load native operator class", cnfe);
+            }
+          }
   
           @Override
-          public Class<?> getLanguageListClass(String elemSortName) {
+          public Class<?> getListClass(String elemSortName) {
             throw new RuntimeException("Not implemented");
           }
 
           @Override  
-          public Class<?> getLanguageMapClass(String keySortName, String mapSortName) {
+          public Class<?> getMapClass(String keySortName, String mapSortName) {
             throw new RuntimeException("Not implemented");
           }
           
@@ -130,7 +144,7 @@ rules /* term registry */
         });
       ]|
     with
-      e_conkey := Lit(String([Chars($[[name]/[<length> kid*]])]));
+      e_conkey := e |[ getConstructorClass(~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*) ]|;
       x_termbuildclass := $[[<ds-to-interp-terms-types-name> dec]Build];
       x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
       x_termclass := <ds-to-interp-terms-types-name> dec;
@@ -143,7 +157,7 @@ rules /* term registry */
   ds-to-interp-natopterms-registry-init:
     NativeOpDecl(name, kid*, _) -> 
       bstm* |[
-        nativeFactories.put(e_conkey, new ITermBuildFactory() {
+        nativeFactories.put(getNativeOperatorClass(~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*), new ITermBuildFactory() {
     
           @Override
           public TermBuild apply(SourceSection source,
@@ -153,7 +167,6 @@ rules /* term registry */
         });
       ]|
     where
-      e_conkey := Lit(String([Chars(<concat-strings> [name, "/", <length; int-to-string> kid*])]));
       x_natop := <concat-strings> [name, "_", <length; int-to-string> kid*];
       e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
 

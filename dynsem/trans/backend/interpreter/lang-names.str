@@ -16,7 +16,7 @@ rules
     ListSort(s) -> $[com.github.krukow.clj_lang.IPersistentStack]
 
   ds-to-interp-terms-types-name:
-    MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap] // $[com.github.krukow.clj_lang.IPersistentMap<[key],[val]>]
+    MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap]
     where
       key := <ds-to-interp-terms-types-name> skey;
       val := <ds-to-interp-terms-types-name> sval
@@ -52,8 +52,15 @@ rules
   is-builtin-type = try(?SimpleSort(<id>)); (?"String" + ?"Int" + ?"Bool")
   
   ds-to-interp-terms-types-name:
-    Con(name, child*) -> $[[<ds-utils-java-escape-id> name]_[<length> child*]_Term]
+    Con(name, child*) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
       
   ds-to-interp-terms-types-name:
-    ConsDecl(name, child*, _, _) -> $[[<ds-utils-java-escape-id> name]_[<length> child*]_Term]
+    ConsDecl(name, child*, _, _) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
+
+  ds-to-interp-terms-types-con-name:
+    (name, arity) -> $[[<ds-utils-java-escape-id> name]_[arity]_Term]
   
+  ds-to-interp-terms-types-name:
+    ListSort(s) -> $[List_[<ds-to-interp-terms-types-name> s]]
+
+

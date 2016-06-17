@@ -68,7 +68,7 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 			String name = splitName[0];
 			String constr = splitName[1];
 			int arity = Integer.parseInt(splitName[2]);
-			Class<?> dispatchClass = context.getTermRegistry().getLanguageConstructorClass(constr, arity);
+			Class<?> dispatchClass = context.getTermRegistry().getConstructorClass(constr, arity);
 			RuleUnionRoot ruleUnionRoot = context.getRuleRegistry().lookupRules(name, dispatchClass);
 			return new DynSemRule(ruleUnionRoot);
 		} catch (Exception e) {

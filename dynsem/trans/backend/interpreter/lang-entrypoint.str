@@ -48,7 +48,7 @@ rules /* language file. interpreter entry point */
             @Override public Object execute(VirtualFrame frame) {
               CompilerDirectives.transferToInterpreter();
               // Return the init rule by default.
-              Class<?> dispatchClass = ctx.getTermRegistry().getLanguageConstructorClass(START_CONSTR_NAME, START_CONSTR_ARITY);
+              Class<?> dispatchClass = ctx.getTermRegistry().getConstructorClass(START_CONSTR_NAME, START_CONSTR_ARITY);
               RuleUnionRoot initRuleUnionRoot = ctx.getRuleRegistry().lookupRules("init", dispatchClass);
               return new DynSemRule(initRuleUnionRoot);
             }
