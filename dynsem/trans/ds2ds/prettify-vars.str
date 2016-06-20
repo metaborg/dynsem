@@ -47,7 +47,7 @@ strategies
     where
       let
         next-idx = <NextIdx> prefix <+ rules(NextIdx: prefix -> 0); !0
-        make-name = !$[[prefix]_[<id>]]
+        make-name = !$[[prefix][<id>]]
       in
         idx := <next-idx; repeat-until(inc, not(make-name; lookup-def(|Vars())))>;
         rules(NextIdx: prefix -> idx);
