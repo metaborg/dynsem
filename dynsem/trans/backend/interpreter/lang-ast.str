@@ -618,9 +618,15 @@ rules /* term building */
 
 rules /* term matching */
 
-  ds-to-interp-terms-matching = is-list; fetch-elem(?Constructors(<id>)); map(ds-to-interp-terms-matching)
-  
   ds-to-interp-terms-matching:
+    sig* -> [con-match*, list-match*]
+    where
+      con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
+      list-dec* := <collect-all(?ListSort(_)); nub> sig*;
+      con-match* := <map(ds-to-interp-terms-matching-con)> con-dec*;
+      list-match* := <map(ds-to-interp-terms-matching-list)> list-dec*
+
+  ds-to-interp-terms-matching-con:
     dec@ConsDecl(_, kid*, _, _) -> 
       compilation-unit |[
         package ~x:<OptTermMatchPackageName>;
@@ -683,6 +689,82 @@ rules /* term matching */
       bstm0*
       (~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()));
     ]|
+
+  ds-to-interp-terms-matching-list:
+    ls@ListSort(es) -> 
+      compilation-unit |[
+        package ~x:<OptTermMatchPackageName>;
+  
+        import ~x:$[[<OptTermsPackageName>].[<ds-to-interp-terms-types-name> ls]];
+        import ~x:$[[<OptTermsPackageName>].[<ds-to-interp-terms-types-name> es]];
+        
+        import java.util.Iterator;
+        
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
+        
+        import com.oracle.truffle.api.dsl.Fallback;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.nodes.ExplodeLoop;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_listmatchclass extends MatchPattern {
+        
+          @Children
+          protected final MatchPattern[] elemPatterns;
+        
+          @Child
+          protected MatchPattern tailPattern;
+        
+          public x_listmatchclass(SourceSection source, MatchPattern[] patterns, MatchPattern tailPattern) {
+            super(source);
+            this.elemPatterns = patterns;
+            this.tailPattern = tailPattern;
+          }
+        
+          @Specialization(guards = { "tailPattern == null", "elemPatterns.length != other.size()" })
+          public void doWithoutTailDiffLength(VirtualFrame frame, x_listclass other) {
+            throw PatternMatchFailure.INSTANCE;
+          }
+        
+          @Specialization(guards = "tailPattern == null", contains = "doWithoutTailDiffLength")
+          @ExplodeLoop
+          public void doWithoutTailEqualLength(VirtualFrame frame, x_listclass other) {
+            final Iterator<x_elemclass> iter = other.iterator();
+            for (MatchPattern matchPattern : elemPatterns) {
+              matchPattern.executeMatch(frame, iter.next());
+            }
+          }
+        
+          @Specialization(guards = "elemPatterns.length <= other.size()", contains = "doWithoutTailEqualLength")
+          public void doWithTailTooShort(VirtualFrame frame, x_listclass other) {
+            throw PatternMatchFailure.INSTANCE;
+          }
+        
+          @Specialization(contains = "doWithTailTooShort")
+          @ExplodeLoop
+          public void doWithTail(VirtualFrame frame, x_listclass other) {
+            x_listclass tail = other;
+            for (MatchPattern matchPattern : elemPatterns) {
+              matchPattern.executeMatch(frame, tail.head());
+              tail = tail.tail();
+            }
+        
+            tailPattern.executeMatch(frame, tail);
+          }
+        
+          @Fallback
+          public void doNotAList(VirtualFrame frame, Object other) {
+            throw PatternMatchFailure.INSTANCE;
+          }
+        
+        }
+      ]|
+    where
+      x_listclass := <ds-to-interp-terms-types-name> ls;
+      x_listmatchclass := $[[x_listclass]Match];
+      x_elemclass := <ds-to-interp-terms-types-name> es
 
 rules /* utils */
 
