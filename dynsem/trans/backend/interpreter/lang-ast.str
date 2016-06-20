@@ -763,7 +763,7 @@ rules /* term matching */
       ]|
     where
       x_listclass := <ds-to-interp-terms-types-name> ls;
-      x_listmatchclass := $[[x_listclass]Match];
+      x_listmatchclass := $[[x_listclass]MatchPattern];
       x_elemclass := <ds-to-interp-terms-types-name> es
 
 rules /* utils */
