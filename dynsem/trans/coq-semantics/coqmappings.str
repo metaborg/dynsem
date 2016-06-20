@@ -13,6 +13,10 @@ rules // For maps
   coq-map-cons = !"cons"
   coq-map-bind:
     (x, y) -> Tuple(x, [y])
+	
+rules // Nonces -- assumed to map onto an axiomatization, for now
+	
+	coq-fresh = !"fresh"
 
 rules // For distinguishing types assumed to be built-in
 

@@ -174,7 +174,21 @@ rules // Formulae generation
       st' := <foldl(labelcomp-pair-to-coq; mk-app-rev)> (rws, Apply(res0, st));
       tt := <term-to-coq> tterm;
       tt' := <foldl(labelcomp-pair-to-coq; mk-app-rev)> (rws', Apply(st', tt))
-      
+  
+  formula-to-coq(|alias_map):
+  	Match(x, y) -> Eq(tx, ty)
+  	with
+  		tx := <term-to-coq> x;
+  		ty := <term-to-coq> y
+   
+  formula-to-coq(|alias_map):
+  	NMatch(x, y) -> NotE(tx, ty)
+  	with
+  		tx := <term-to-coq> x;
+  		ty := <term-to-coq> y
+  
+  // FIXME: missing generation of ordinary DynSem equality
+  
 rules // Auxiliary entity generation
 
   aux-ent-to-coq:
@@ -243,6 +257,17 @@ rules // Term generation
   term-to-coq:
     Var(x) -> x
 
+	term-to-coq:
+		Fresh() -> Apply(<coq-fresh>, "tt") // Unit function application
+
+	term-to-coq:
+		Int(n) -> n
+		
+	term-to-coq:
+		Cast(x, _) -> t // FIXME: what is the semantics of casts?
+		with
+			t := <term-to-coq> x
+
 rules // Imports 
 
   import-to-coq:
@@ -301,6 +326,31 @@ rules // Extracting variables
       xs3 := <extract-variables> arrow;
       xs4 := <extract-variables> t;
       xs := <concat> [xs0, xs1, xs3, xs4]
+  
+  extract-variables:
+  	Match(x, y) -> zs
+  	with
+  		xs := <extract-variables> x;
+  		ys := <extract-variables> y;
+  		zs := <concat> [xs, ys]
+  
+  extract-variables:
+  	NMatch(x, y) -> zs
+  	with
+  		xs := <extract-variables> x;
+  		ys := <extract-variables> y;
+  		zs := <concat> [xs, ys]
+  
+  extract-variables:
+  	Cast(x, y) -> xs // FIXME: what is the semantics of casts?
+  	with
+  		xs := <extract-variables> x
+  
+  extract-variables:
+  	Int(_) -> []
+  
+  extract-variables:
+  	Fresh() -> []
   
   // Reads
   extract-variables:
