@@ -129,7 +129,7 @@ rules /* term registry */
   ds-to-interp-terms-registry-init:
     dec@ConsDecl(name, kid*, _, _) ->
       bstm* |[
-       builderFactories.put(e_conkey, new ITermBuildFactory() {
+       builderFactories.put(x_conclass.class, new ITermBuildFactory() {
     
           @Override
           public x_termbuildclass apply(SourceSection source,
@@ -138,7 +138,7 @@ rules /* term registry */
           }
         });
 
-        matcherFactories.put(e_conkey, new ITermMatchPatternFactory() {
+        matcherFactories.put(x_conclass.class, new ITermMatchPatternFactory() {
     
           @Override
           public MatchPattern apply(SourceSection source,
@@ -148,8 +148,8 @@ rules /* term registry */
         });
       ]|
     with
-      e_conkey := e |[ getConstructorClass(~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*) ]|;
-      x_termbuildclass := $[[<ds-to-interp-terms-types-name> dec]Build];
+      x_conclass := <ds-to-interp-terms-types-name> dec;
+      x_termbuildclass := $[[x_conclass]Build];
       x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
       x_termclass := <ds-to-interp-terms-types-name> dec;
       x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
@@ -182,19 +182,19 @@ rules /* term registry */
   ds-to-interp-natopterms-registry-inits = mapconcat(ds-to-interp-natopterms-registry-init)
 
   ds-to-interp-natopterms-registry-init:
-    NativeOpDecl(name, kid*, _) -> 
+    dec@NativeOpDecl(name, kid*, _) -> 
       bstm* |[
-        nativeFactories.put(getNativeOperatorClass(~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*), new ITermBuildFactory() {
+        nativeFactories.put(~x:<OptNativePackageName>.x_conbuildclass.class, new ITermBuildFactory() {
     
           @Override
           public TermBuild apply(SourceSection source,
               TermBuild... children) {
-            return ~x:<OptNativePackageName>.x_natop.create(source, e1*);
+            return ~x:<OptNativePackageName>.x_conbuildclass.create(source, e1*);
           }
         });
       ]|
     where
-      x_natop := <concat-strings> [name, "_", <length; int-to-string> kid*];
+      x_conbuildclass := $[[name]_[<length> kid*]];
       e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
 
   ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
