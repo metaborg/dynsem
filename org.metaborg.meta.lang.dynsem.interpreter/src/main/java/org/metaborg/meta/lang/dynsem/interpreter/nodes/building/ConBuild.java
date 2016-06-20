@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
@@ -45,9 +44,9 @@ public class ConBuild extends TermBuild {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
 		final ITermRegistry termReg = getContext().getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
-		
+
 		final TermBuild build = InterpreterUtils.notNull(termReg.lookupBuildFactory(termClass))
-				.apply(getSourceSection(), children);
+				.apply(getSourceSection(), cloneNodes(children));
 		return replace(build).executeGeneric(frame);
 	}
 

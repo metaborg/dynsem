@@ -17,12 +17,12 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
-import com.github.krukow.clj_lang.IPersistentStack;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -128,6 +128,18 @@ public abstract class TermBuild extends DynSemNode {
 		}
 
 		throw new NotImplementedException("Unsupported term build: " + t);
+	}
+
+	public static TermBuild[] cloneNodes(TermBuild[] nodes) {
+		final TermBuild[] clone = new TermBuild[nodes.length];
+		for (int i = 0; i < clone.length; i++) {
+			clone[i] = cloneNode(nodes[i]);
+		}
+		return clone;
+	}
+
+	public static TermBuild cloneNode(TermBuild node) {
+		return null == node ? null : NodeUtil.cloneNode(node);
 	}
 
 	public static TermBuild createFromLabelComp(IStrategoAppl t, FrameDescriptor fd) {

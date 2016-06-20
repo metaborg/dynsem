@@ -9,6 +9,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class MatchPattern extends DynSemNode {
@@ -49,8 +50,20 @@ public abstract class MatchPattern extends DynSemNode {
 		}
 
 		return LiteralMatchPattern.create(t, fd);
-		
-//		throw new NotImplementedException("Unsupported match pattern: " + t);
+
+		// throw new NotImplementedException("Unsupported match pattern: " + t);
+	}
+
+	public static MatchPattern[] cloneNodes(MatchPattern[] nodes) {
+		final MatchPattern[] clone = new MatchPattern[nodes.length];
+		for (int i = 0; i < clone.length; i++) {
+			clone[i] = cloneNode(nodes[i]);
+		}
+		return clone;
+	}
+
+	public static MatchPattern cloneNode(MatchPattern node) {
+		return null == node ? null : NodeUtil.cloneNode(node);
 	}
 
 	public static MatchPattern createFromLabelComp(IStrategoAppl t, FrameDescriptor fd) {
