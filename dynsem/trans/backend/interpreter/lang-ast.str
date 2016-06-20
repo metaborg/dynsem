@@ -277,8 +277,8 @@ rules /* Sort & Constructor classes */
           
           @Override
           @SuppressWarnings("unchecked")
-          public Iterator<IExpTerm> iterator() {
-            return ((com.github.krukow.clj_ds.PersistentList<IExpTerm>) backend).iterator();
+          public Iterator<x_elemclass> iterator() {
+            return ((com.github.krukow.clj_ds.PersistentList<x_elemclass>) backend).iterator();
           }
           
           @Override
