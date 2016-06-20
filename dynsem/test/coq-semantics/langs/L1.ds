@@ -14,7 +14,7 @@ signature
     App : Exp * Exp -> PreExp
     
   sorts Exp constructors
-    E_ : ScopeId * Typ * PreExp -> Exp
+    Exp : ScopeId * Typ * PreExp -> Exp
     
 signature // Scope graphs
 
@@ -61,22 +61,22 @@ signature
 
 rules
   
-  E_(_ , _, Num(i)) -eval-> NumV(i).
+  Exp(_ , _, Num(i)) -eval-> NumV(i).
   
-  f |- E_(_, _, Var(r)) :: h -eval-> v :: h
+  f |- Exp(_, _, Var(r)) :: h -eval-> v :: h
   where
     pathofRef(r) --> p;
     lookup(f, h, p) --> Addr(f', d);
     get(f', h, d) --> v.
     
-  E_(_, _, Binop(e1, e2)) -eval-> NumV(plusI(z1, z2))
+  Exp(_, _, Binop(e1, e2)) -eval-> NumV(plusI(z1, z2))
   where
     e1 -eval-> NumV(z1);
     e2 -eval-> NumV(z2).
   
-  f |- E_(_, _, Fun(d, _, e)) -eval-> ClosV(d, e, f).
+  f |- Exp(_, _, Fun(d, _, e)) -eval-> ClosV(d, e, f).
   
-  f |- E_(s, _, App(e1, e2)) -eval-> v'
+  f |- Exp(s, _, App(e1, e2)) -eval-> v'
   where
     f |- e1 -eval-> ClosV(d, e, f');
     f |- e2 -eval-> v :: h;
