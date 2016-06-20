@@ -102,8 +102,13 @@ rules /* term registry */
           }
   
           @Override
-          public Class<?> getListClass(String elemSortName) {
-            throw new RuntimeException("Not implemented");
+          public Class<?> getListClass(Class<?> elemClass) {
+            CompilerAsserts.neverPartOfCompilation();
+            try {
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptTermsPackageName>].List_])])) + elemClass.getName());
+            } catch (ClassNotFoundException cnfe) {
+              throw new RuntimeException("Failed to load constructor class", cnfe);
+            }
           }
 
           @Override  

@@ -275,6 +275,12 @@ rules /* Sort & Constructor classes */
           }
           
           @Override
+          @SuppressWarnings("unchecked")
+          public Iterator<IExpTerm> iterator() {
+            return ((com.github.krukow.clj_ds.PersistentList<IExpTerm>) backend).iterator();
+          }
+          
+          @Override
           public String toString() {
             return backend.toString();
           }
@@ -298,10 +304,6 @@ rules /* Sort & Constructor classes */
         for (int x_idx = 0; x_idx < x_tmpres.length; x_idx++) {
           x_tmpres[x_idx] = e_elem;
         }
-//        java.util.List<x_elemclass> x_tmpres = new java.util.LinkedList<x_elemclass>();
-//        for (IStrategoTerm x_tmpelem : Tools.listAt(x_term, e)) {
-//          x_tmpres.add(e_elem);
-//        }
       ]|, e |[ new x_listclass(x_tmpres) ]|)
     where
       x_tmplist := $[_[<newname>]];
@@ -448,9 +450,10 @@ rules /* type system class */
         }
       ]|
     where 
-      filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>));
-      concat;
-      qsort(?(ConsDecl(_, _, _, _), SortDecl(_)) + ?(SortDecl(_), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)));
+      decl* := <filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>)); concat;
+        qsort(?(ConsDecl(_, _, _, _), SortDecl(_)) + ?(SortDecl(_), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
+      list* := <collect-all(?ListSort(_)); nub> sig-sec*;
+      ![decl*, list*];
       map(ds-to-interp-terms-types-name);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
 

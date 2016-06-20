@@ -16,8 +16,11 @@ public interface ITermRegistry {
 	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort, String function, int arity);
 
 	public Class<?> getConstructorClass(String constr, int arity);
+
 	public Class<?> getNativeOperatorClass(String constr, int arity);
-	public Class<?> getListClass(String elemSortName);
+
+	public Class<?> getListClass(Class<?> elemClass);
+
 	public Class<?> getMapClass(String keySortName, String mapSortName);
 
 	public ITerm parseProgramTerm(IStrategoTerm t);
