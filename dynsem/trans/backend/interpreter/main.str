@@ -14,7 +14,7 @@ imports
   
 rules
 
-ds-to-interp-editor:
+  ds-to-interp-editor:
     (_, position, ast, path, project-path) -> None()
     with
       local-project-path := $[[<prim("local_path")> project-path]/];

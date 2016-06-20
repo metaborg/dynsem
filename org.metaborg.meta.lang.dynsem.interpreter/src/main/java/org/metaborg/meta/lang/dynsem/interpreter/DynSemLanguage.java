@@ -27,7 +27,7 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	@Override
 	protected DynSemContext createContext(Env env) {
 		Map<String, Object> config = env.getConfig();
-		IDynSemLanguageParser parser  = (IDynSemLanguageParser) config.get(PARSER);
+		IDynSemLanguageParser parser = (IDynSemLanguageParser) config.get(PARSER);
 		ITermRegistry termRegistry = (ITermRegistry) config.get(TERM_REGISTRY);
 		RuleRegistry ruleRegistry = (RuleRegistry) config.get(RULE_REGISTRY);
 		return new DynSemContext(parser, termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()));
@@ -71,6 +71,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 			return null;
 		}
 	}
+
+	public abstract boolean isSafeComponentsEnabled();
 
 	@Override
 	protected boolean isObjectOfLanguage(Object obj) {
