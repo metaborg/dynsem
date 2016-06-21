@@ -722,13 +722,38 @@ rules /* term matching */
             this.elemPatterns = patterns;
             this.tailPattern = tailPattern;
           }
-        
+          
+//          @Specialization
+//          public void doSlowMatch(VirtualFrame frame, x_listclass other){
+//            if(tailPattern == null){
+//              if(elemPatterns.length != other.size()){
+//                throw PatternMatchFailure.INSTANCE;
+//              }else{
+//                final Iterator<x_elemclass> iter = other.iterator();
+//                for (MatchPattern matchPattern : elemPatterns) {
+//                  matchPattern.executeMatch(frame, iter.next());
+//                }
+//              }
+//            } else {
+//              if(elemPatterns.length > other.size()){
+//                throw PatternMatchFailure.INSTANCE;
+//              } else {
+//                x_listclass tail = other;
+//                for (MatchPattern matchPattern : elemPatterns) {
+//                  matchPattern.executeMatch(frame, tail.head());
+//                  tail = tail.tail();
+//                }
+//                tailPattern.executeMatch(frame, tail);
+//              }
+//            }
+//          }
+          
           @Specialization(guards = { "tailPattern == null", "elemPatterns.length != other.size()" })
           public void doWithoutTailDiffLength(VirtualFrame frame, x_listclass other) {
             throw PatternMatchFailure.INSTANCE;
           }
         
-          @Specialization(guards = "tailPattern == null", contains = "doWithoutTailDiffLength")
+          @Specialization(guards = "tailPattern == null")
           @ExplodeLoop
           public void doWithoutTailEqualLength(VirtualFrame frame, x_listclass other) {
             final Iterator<x_elemclass> iter = other.iterator();
@@ -737,12 +762,12 @@ rules /* term matching */
             }
           }
         
-          @Specialization(guards = "elemPatterns.length > other.size()", contains = "doWithoutTailEqualLength")
+          @Specialization(guards = "elemPatterns.length > other.size()")
           public void doWithTailTooShort(VirtualFrame frame, x_listclass other) {
             throw PatternMatchFailure.INSTANCE;
           }
         
-          @Specialization(contains = "doWithTailTooShort")
+          @Specialization
           @ExplodeLoop
           public void doWithTail(VirtualFrame frame, x_listclass other) {
             x_listclass tail = other;
