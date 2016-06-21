@@ -41,7 +41,7 @@ rules /* Sort & Constructor classes */
       cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*;
       list-class* := <map(ds-to-interp-terms-listdecl)> list-dec*
   
-  get-languagelist-usage-in-signatures = collect-all(?ListSort(_); not(is-builtin-type)); nub
+  get-languagelist-usage-in-signatures = collect-all(?ListSort(_) /* ; not(is-builtin-type) */); nub
   
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
