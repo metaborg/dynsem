@@ -737,7 +737,7 @@ rules /* term matching */
             }
           }
         
-          @Specialization(guards = "elemPatterns.length <= other.size()", contains = "doWithoutTailEqualLength")
+          @Specialization(guards = "elemPatterns.length > other.size()", contains = "doWithoutTailEqualLength")
           public void doWithTailTooShort(VirtualFrame frame, x_listclass other) {
             throw PatternMatchFailure.INSTANCE;
           }
