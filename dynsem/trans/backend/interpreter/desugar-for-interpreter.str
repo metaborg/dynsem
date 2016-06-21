@@ -214,7 +214,7 @@ rules /* unquote string literals */
   
 rules /* resugar list construction */
 
-  resugar-lists = innermost(resugar-list); alltd(debug(!1); add-typeanno-to-list; debug(!2))
+  resugar-lists = innermost(resugar-list); alltd(add-typeanno-to-list)
 
   resugar-list:
     Cast(Wld(), _) -> Wld()
@@ -231,11 +231,8 @@ rules /* resugar list construction */
   add-typeanno-to-list:
     l@List(elems) -> TypedList(elems, list-class)
     where
-      debug(!3);
-      list-sort := <type-of; debug(!4); derw-type> l;
-      debug(!5);
-      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort;
-      debug(!6)
+      list-sort := <type-of; derw-type> l;
+      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
 
   add-typeanno-to-list:
     l@ListTail(elems, tail) -> TypedListTail(elems, tail, list-class)
