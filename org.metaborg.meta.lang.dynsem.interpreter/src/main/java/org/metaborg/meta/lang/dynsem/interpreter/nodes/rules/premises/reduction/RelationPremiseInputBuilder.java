@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheNode;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
@@ -22,9 +23,9 @@ public class RelationPremiseInputBuilder extends TermBuild {
 
 	public RelationPremiseInputBuilder(TermBuild termNode, TermBuild[] componentNodes, SourceSection source) {
 		super(source);
-		this.termNode = TermBuildCacheNode.create(termNode);
+		this.termNode = DynSemLanguage.ENABLED_CACHED_TERMS ? TermBuildCacheNode.create(termNode) : termNode;
 		for (int i = 0; i < componentNodes.length; i++) {
-			componentNodes[i] = TermBuildCacheNode.create(componentNodes[i]);
+			componentNodes[i] = DynSemLanguage.ENABLED_CACHED_TERMS ? TermBuildCacheNode.create(componentNodes[i]) : componentNodes[i];
 		}
 		this.componentNodes = componentNodes;
 	}

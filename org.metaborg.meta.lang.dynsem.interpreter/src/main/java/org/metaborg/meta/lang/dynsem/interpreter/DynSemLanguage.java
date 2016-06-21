@@ -22,6 +22,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	public static final String TERM_REGISTRY = "TERM_REGISTRY";
 	public static final String RULE_REGISTRY = "RULE_REGISTRY";
 
+	public static final boolean ENABLED_CACHED_TERMS = false;
+	
 	public DynSemLanguage() {
 	}
 
