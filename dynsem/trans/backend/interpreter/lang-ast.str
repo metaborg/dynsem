@@ -568,8 +568,7 @@ rules /* term building */
       compilation-unit |[
         package ~x:<OptTermBuildPackageName>;
   
-        import ~x:$[[<OptTermsPackageName>].[<ds-to-interp-terms-types-name> ls]];
-        import ~x:$[[<OptTermsPackageName>].[<ds-to-interp-terms-types-name> es]];
+        import ~x:$[[<OptTermsPackageName>].*];
         import ~x:$[[<OptTopPackageName>].TypesGen];
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -700,8 +699,7 @@ rules /* term matching */
       compilation-unit |[
         package ~x:<OptTermMatchPackageName>;
   
-        import ~x:$[[<OptTermsPackageName>].[<ds-to-interp-terms-types-name> ls]];
-        import ~x:$[[<OptTermsPackageName>].[<ds-to-interp-terms-types-name> es]];
+        import ~x:$[[<OptTermsPackageName>].*];
         
         import java.util.Iterator;
         
