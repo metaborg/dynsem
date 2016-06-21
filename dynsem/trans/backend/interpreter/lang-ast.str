@@ -791,7 +791,3 @@ rules /* term matching */
       x_listmatchclass := $[[x_listclass]MatchPattern];
       x_elemclass := <ds-to-interp-terms-types-name> es
 
-rules /* utils */
-
-  ds-to-interp-terms-report-unsupported = debug(!"Unsupported signature section "); ![]
-
