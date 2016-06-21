@@ -27,7 +27,7 @@ rules
     ListTail([h], _) -> ListType(<type-of> h)
   
   type-of:
-    List([h|_]) -> ListType(<type-of> h)
+    List(elems) -> ListType(<fetch-elem(type-of)> elems)
   
   type-of:
     Con(name, c*) -> c-ty
