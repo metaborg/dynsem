@@ -1,8 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.ConsListBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.NilListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.IntLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.StringLiteralTermBuild;
@@ -109,11 +107,8 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "ListSource", 2)) {
 			return create(Tools.applAt(t, 0), fd);
 		}
-		if (Tools.hasConstructor(t, "List", 1)) {
-			return NilListBuild.create(t, fd);
-		}
-		if (Tools.hasConstructor(t, "ListTail", 2)) {
-			return ConsListBuild.create(t, fd);
+		if(Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3)){
+			return ListBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "NativeFunCall", 4)) {
 			return SortFunCallBuild.create(t, fd);
