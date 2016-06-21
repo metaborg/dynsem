@@ -24,10 +24,14 @@ rules
     Var(v) -> <type-of> VarRef(v)
 
   type-of:
-    ListTail([h], _) -> ListType(<type-of> h)
+    ListTail(elems, tl) -> l-ty
+    where
+      l-ty := ListType(<fetch-elem(not(?Wld()); type-of)> elems)
+      <+
+      l-ty := <type-of> tl
   
   type-of:
-    List(elems) -> ListType(<fetch-elem(type-of)> elems)
+    List(elems) -> ListType(<fetch-elem(not(?Wld()); type-of)> elems)
   
   type-of:
     Con(name, c*) -> c-ty
