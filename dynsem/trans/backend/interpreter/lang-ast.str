@@ -36,11 +36,13 @@ rules /* Sort & Constructor classes */
     where
       sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
-      list-dec* := <collect-all(?ListSort(_)); nub> sig*;
+      list-dec* := <get-languagelist-usage-in-signatures> sig*;
       sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
       cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*;
       list-class* := <map(ds-to-interp-terms-listdecl)> list-dec*
-    
+  
+  get-languagelist-usage-in-signatures = collect-all(?ListSort(_); not(is-builtin-type)); nub
+  
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
       compilation-unit |[
@@ -445,7 +447,10 @@ rules /* type system class */
         import com.oracle.truffle.api.dsl.TypeSystem;
         import ~x:<OptTermsPackageName>.*;
         import ~x:<OptNativePackageName>.*;
-        @TypeSystem({ ~type* })
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.*;
+        import com.github.krukow.clj_ds.PersistentMap;
+        
+        @TypeSystem({ ~type*, IApplTerm.class, ITerm.class, PersistentMap.class, String.class, int.class, boolean.class, Object[].class })
         public class Types {
           
         }
@@ -453,7 +458,7 @@ rules /* type system class */
     where 
       decl* := <filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>)); concat;
         qsort(?(ConsDecl(_, _, _, _), SortDecl(_)) + ?(SortDecl(_), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
-      list* := <collect-all(?ListSort(_)); nub> sig-sec*;
+      list* := <get-languagelist-usage-in-signatures> sig-sec*;
       ![decl*, list*];
       map(ds-to-interp-terms-types-name);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
@@ -498,7 +503,7 @@ rules /* term building */
     sig* -> [con-build*, list-build*]
     where
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
-      list-dec* := <collect-all(?ListSort(_)); nub> sig*;
+      list-dec* := <get-languagelist-usage-in-signatures> sig*;
       con-build* := <map(ds-to-interp-terms-building-con)> con-dec*;
       list-build* := <map(ds-to-interp-terms-building-list)> list-dec*
 
@@ -622,7 +627,7 @@ rules /* term matching */
     sig* -> [con-match*, list-match*]
     where
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
-      list-dec* := <collect-all(?ListSort(_)); nub> sig*;
+      list-dec* := <get-languagelist-usage-in-signatures> sig*;
       con-match* := <map(ds-to-interp-terms-matching-con)> con-dec*;
       list-match* := <map(ds-to-interp-terms-matching-list)> list-dec*
 

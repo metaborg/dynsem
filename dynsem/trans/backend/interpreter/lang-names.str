@@ -48,6 +48,8 @@ rules
   
   is-builtin-type = try(?SimpleSort(<id>)); (?"String" + ?"Int" + ?"Bool")
   
+  is-builtin-type = ?ListSort(<is-builtin-type>)
+  
   ds-to-interp-terms-types-name:
     Con(name, child*) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
       
