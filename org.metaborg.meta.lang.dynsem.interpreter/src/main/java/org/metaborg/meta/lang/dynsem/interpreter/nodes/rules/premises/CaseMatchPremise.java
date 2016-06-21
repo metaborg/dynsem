@@ -40,7 +40,7 @@ public class CaseMatchPremise extends Premise {
 				break;
 			} catch (PatternMatchFailure pmfx) {
 				// the current case has failed, if it was the last case re-throw the exception
-				if (i == cases.length) {
+				if (i == cases.length - 1) {
 					throw pmfx;
 				}
 			}
