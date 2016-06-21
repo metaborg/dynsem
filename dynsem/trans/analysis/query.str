@@ -27,6 +27,9 @@ rules
     ListTail([h], _) -> ListType(<type-of> h)
   
   type-of:
+    List([h|_]) -> ListType(<type-of> h)
+  
+  type-of:
     Con(name, c*) -> c-ty
     where
       ConstructorType(_, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, <length> c*) 
