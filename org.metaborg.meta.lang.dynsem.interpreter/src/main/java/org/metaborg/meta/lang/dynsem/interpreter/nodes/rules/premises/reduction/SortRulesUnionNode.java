@@ -26,7 +26,7 @@ public abstract class SortRulesUnionNode extends DynSemNode {
 
 	public abstract RuleResult execute(Object o, Object[] arguments);
 
-	@Specialization(limit = "1", guards = "o.getClass() != sortDispatchClass")
+	@Specialization(limit = "1", guards = "o.getSortClass() != sortDispatchClass")
 	public RuleResult doFallback(IApplTerm o, Object[] arguments,
 			@Cached("o.getSortClass()") Class<?> sortDispatchClass,
 			@Cached("createSortUnionNode(o, sortDispatchClass)") RuleUnionNode sortRuleUnion) {
