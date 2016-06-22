@@ -213,7 +213,6 @@ rules /* Sort & Constructor classes */
       compilation-unit |[
         package ~x:<OptTermsPackageName>;
 
-        import java.util.Iterator;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
         import com.github.krukow.clj_lang.IPersistentStack;
@@ -257,35 +256,32 @@ rules /* Sort & Constructor classes */
           }
           
           @Override
-          @TruffleBoundary
           public x_elemclass[] take(int numElems) {
             final x_elemclass[] store = new x_elemclass[numElems];
             final Iterator<x_elemclass> iter = iterator();
             for (int idx = 0; idx < numElems; idx++) {
-              store[idx] = iter.next();
+              store[idx] = _next(iter);
             }
             return store;
           }
 
           @Override
           public x_listclass tail() {
-            return new x_listclass(backend.pop());
+            return new x_listclass(_pop(backend));
           }
         
           @Override
-          @TruffleBoundary
           public x_listclass drop(int numElems) {
             IPersistentStack<x_elemclass> tail = backend;
             for (int idx = 0; idx < numElems; idx++) {
-              tail = tail.pop();
+              tail = _pop(tail);
             }
             return new x_listclass(tail);
           }
         
           @Override
-          @TruffleBoundary
           public x_listclass add(x_elemclass elem) {
-            return new x_listclass((IPersistentStack<x_elemclass>) backend.cons(elem));
+            return new x_listclass(_cons(backend, elem));
           }
         
           @Override
@@ -293,20 +289,39 @@ rules /* Sort & Constructor classes */
             IPersistentStack<x_elemclass> backend = this.backend;
         
             for (int idx = elems.length - 1; idx >= 0; idx--) {
-              backend = (IPersistentStack<x_elemclass>) backend.cons(elems[idx]);
+              backend = _cons(backend, elems[idx]);
             }
             return new x_listclass(backend);
           }
           
           @Override
           @SuppressWarnings("unchecked")
+          @TruffleBoundary
           public Iterator<x_elemclass> iterator() {
             return ((com.github.krukow.clj_ds.PersistentList<x_elemclass>) backend).iterator();
           }
           
           @Override
+          @TruffleBoundary
           public String toString() {
             return backend.toString();
+          }
+          
+          @TruffleBoundary
+          private static IPersistentStack<x_elemclass> _pop(
+              IPersistentStack<x_elemclass> backend) {
+            return backend.pop();
+          }
+          
+          @TruffleBoundary
+          private static IPersistentStack<x_elemclass> _cons(
+              IPersistentStack<x_elemclass> backend, x_elemclass elem) {
+            return (IPersistentStack<x_elemclass>) backend.cons(elem);
+          }
+          
+          @TruffleBoundary
+          private static x_elemclass _next(Iterator<x_elemclass> iter){
+            return iter.next();
           }
         
         }
@@ -747,60 +762,36 @@ rules /* term matching */
             this.tailPattern = tailPattern;
           }
           
-//          @Specialization
-//          public void doSlowMatch(VirtualFrame frame, x_listclass other){
-//            if(tailPattern == null){
-//              if(elemPatterns.length != other.size()){
-//                throw PatternMatchFailure.INSTANCE;
-//              }else{
-//                final Iterator<x_elemclass> iter = other.iterator();
-//                for (MatchPattern matchPattern : elemPatterns) {
-//                  matchPattern.executeMatch(frame, iter.next());
-//                }
-//              }
-//            } else {
-//              if(elemPatterns.length > other.size()){
-//                throw PatternMatchFailure.INSTANCE;
-//              } else {
-//                x_listclass tail = other;
-//                for (MatchPattern matchPattern : elemPatterns) {
-//                  matchPattern.executeMatch(frame, tail.head());
-//                  tail = tail.tail();
-//                }
-//                tailPattern.executeMatch(frame, tail);
-//              }
-//            }
-//          }
-          
-          @Specialization(guards = { "tailPattern == null", "elemPatterns.length != other.size()" })
-          public void doWithoutTailDiffLength(VirtualFrame frame, x_listclass other) {
-            throw PatternMatchFailure.INSTANCE;
-          }
-        
           @Specialization(guards = "tailPattern == null")
-          @ExplodeLoop
-          public void doWithoutTailEqualLength(VirtualFrame frame, x_listclass other) {
-            final Iterator<x_elemclass> iter = other.iterator();
-            for (MatchPattern matchPattern : elemPatterns) {
-              matchPattern.executeMatch(frame, iter.next());
-            }
-          }
-        
-          @Specialization(guards = "elemPatterns.length > other.size()")
-          public void doWithTailTooShort(VirtualFrame frame, x_listclass other) {
-            throw PatternMatchFailure.INSTANCE;
-          }
-        
-          @Specialization
-          @ExplodeLoop
-          public void doWithTail(VirtualFrame frame, x_listclass other) {
-            x_listclass tail = other;
-            for (MatchPattern matchPattern : elemPatterns) {
-              matchPattern.executeMatch(frame, tail.head());
-              tail = tail.tail();
+          public void doGenericNoTail(VirtualFrame frame, x_listclass list) {
+            assert tailPattern == null;
+            if (elemPatterns.length != list.size()) {
+              throw PatternMatchFailure.INSTANCE;
             }
         
-            tailPattern.executeMatch(frame, tail);
+            matchElemPatterns(frame, list);
+          }
+        
+          @Specialization(guards = "tailPattern != null")
+          public void doGenericWithTail(VirtualFrame frame, x_listclass list) {
+            assert tailPattern != null;
+        
+            if (elemPatterns.length > list.size()) {
+              throw PatternMatchFailure.INSTANCE;
+            }
+        
+            matchElemPatterns(frame, list);
+        
+            tailPattern.executeMatch(frame, list.drop(elemPatterns.length));
+          }
+        
+          @ExplodeLoop
+          private final void matchElemPatterns(VirtualFrame frame,
+              x_listclass list) {
+            final x_elemclass[] elems = list.take(elemPatterns.length);
+            for (int idx = 0; idx < elemPatterns.length; idx++) {
+              elemPatterns[idx].executeMatch(frame, elems[idx]);
+            }
           }
         
           @Fallback
