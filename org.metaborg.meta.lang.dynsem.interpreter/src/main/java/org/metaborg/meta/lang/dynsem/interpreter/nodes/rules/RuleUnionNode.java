@@ -37,20 +37,17 @@ public class RuleUnionNode extends DynSemNode {
 
 	@ExplodeLoop
 	private RuleResult executeMainRules(final Object[] arguments) {
-		CompilerAsserts.compilationConstant(rules);
+		CompilerAsserts.compilationConstant(rules.length);
 
 		for (int i = 0; i < rules.length; i++) {
 			try {
 				final Rule r = rules[i];
 				return r.execute(Truffle.getRuntime().createVirtualFrame(arguments, r.getFrameDescriptor()));
 			} catch (PatternMatchFailure pmfx) {
-				if (i == rules.length) {
-					throw pmfx;
-				}
+				;
 			}
 		}
-
-		// there are no rules. we throw a soft exception to allow sort-based rules to be tried
+		// there are no rules or all rules failed. we throw a soft exception to allow sort-based rules to be tried
 		throw PatternMatchFailure.INSTANCE;
 
 	}

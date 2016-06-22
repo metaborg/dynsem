@@ -9,14 +9,11 @@ public abstract class TrueLiteralTermMatchPattern extends LiteralMatchPattern {
 		super(source);
 	}
 
-	@Specialization(guards = "b")
-	public void doSuccess(boolean b) {
-
-	}
-
 	@Specialization
-	public void doFailure(boolean b) {
-		throw PatternMatchFailure.INSTANCE;
+	public void doSuccess(boolean b) {
+		if(!b){
+			throw PatternMatchFailure.INSTANCE;	
+		}
 	}
 
 }
