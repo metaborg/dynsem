@@ -9,7 +9,6 @@ import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class GenericListMatch extends MatchPattern {
@@ -23,29 +22,23 @@ public abstract class GenericListMatch extends MatchPattern {
 		this.tailPattern = tailPattern;
 	}
 
-	@Specialization(guards = { "tailPattern == null", "numHeadElems != other.size()" })
-	public void matchNoTailEqual(VirtualFrame frame, IListTerm<?> other) {
-		;
-	}
-
 	@Specialization(guards = "tailPattern == null")
-	public void matchNoTailNotEqual(VirtualFrame frame, IListTerm<?> other) {
-		throw PatternMatchFailure.INSTANCE;
-	}
-
-	@Specialization(guards = "numHeadElems > other.size()")
-	public void matchTailNotEqual(VirtualFrame frame, IListTerm<?> other) {
-		throw PatternMatchFailure.INSTANCE;
-	}
-
-	@Specialization
-	@ExplodeLoop
-	public void matchTail(VirtualFrame frame, IListTerm<?> other) {
-		IListTerm<?> tail = other;
-		for (int i = 0; i < numHeadElems; i++) {
-			tail = other.tail();
+	public void doNoTail(VirtualFrame frame, IListTerm<?> list) {
+		assert tailPattern == null;
+		if (numHeadElems != list.size()) {
+			throw PatternMatchFailure.INSTANCE;
 		}
-		tailPattern.executeMatch(frame, tail);
+	}
+
+	@Specialization(guards = "tailPattern != null")
+	public void doWithTail(VirtualFrame frame, IListTerm<?> list) {
+		assert tailPattern != null;
+
+		if (numHeadElems > list.size()) {
+			throw PatternMatchFailure.INSTANCE;
+		}
+
+		tailPattern.executeMatch(frame, list.drop(numHeadElems));
 	}
 
 	@Fallback
