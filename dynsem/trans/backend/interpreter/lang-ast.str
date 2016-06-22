@@ -255,10 +255,31 @@ rules /* Sort & Constructor classes */
           public x_elemclass head() {
             return backend.peek();
           }
-        
+          
+          @Override
+          @TruffleBoundary
+          public x_elemclass[] take(int numElems) {
+            final x_elemclass[] store = new x_elemclass[numElems];
+            final Iterator<x_elemclass> iter = iterator();
+            for (int idx = 0; idx < numElems; idx++) {
+              store[idx] = iter.next();
+            }
+            return store;
+          }
+
           @Override
           public x_listclass tail() {
             return new x_listclass(backend.pop());
+          }
+        
+          @Override
+          @TruffleBoundary
+          public x_listclass drop(int numElems) {
+            IPersistentStack<x_elemclass> tail = backend;
+            for (int idx = 0; idx < numElems; idx++) {
+              tail = tail.pop();
+            }
+            return new x_listclass(tail);
           }
         
           @Override
