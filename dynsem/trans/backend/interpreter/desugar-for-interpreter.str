@@ -6,6 +6,7 @@ imports
   backend/interpreter/-
   analysis/-
   ds2ds/explicate-arrow-types
+  ds
 
 rules
 
@@ -239,3 +240,7 @@ rules /* resugar list construction */
     where
       list-sort := <type-of; derw-type> l;
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort 
+  
+  add-typeanno-to-list:
+    Cast(List([]), list-sort) -> TypedList([], <ds-to-interp-terms-types-name; qualify-term-class> list-sort)
+
