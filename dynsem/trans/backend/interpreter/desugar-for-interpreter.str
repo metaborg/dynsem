@@ -243,4 +243,10 @@ rules /* resugar list construction */
   
   add-typeanno-to-list:
     Cast(List([]), list-sort) -> TypedList([], <ds-to-interp-terms-types-name; qualify-term-class> list-sort)
+  
+  add-typeanno-to-list:
+    Formula(Match(List([]), rhs)) -> Formula(Match(TypedList([], list-class), rhs))
+    where
+      list-sort := <type-of; derw-type> rhs;
+      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
 
