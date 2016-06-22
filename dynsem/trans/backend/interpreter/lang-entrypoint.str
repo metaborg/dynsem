@@ -11,6 +11,7 @@ rules /* language file. interpreter entry point */
     x_language := $[[<OptLanguageName>]Language];
     e_dobacktrack := <if OptEnableBacktracking then !e |[ true ]| else !e |[ false ]| end>;
     e_safecomponents := <if OptSafeComponents then !e |[ true ]| else !e |[ false ]| end>;
+    e_termcaching := <if OptTermCaching then !e |[ true ]| else !e |[ false ]| end>;
     !compilation-unit |[
       package ~x:<OptTopPackageName>;
       
@@ -56,15 +57,26 @@ rules /* language file. interpreter entry point */
           return Truffle.getRuntime().createCallTarget(rootNode);
         }
         
+        public static final boolean ENABLE_BACKTRACKING = e_dobacktrack;
+        public static final boolean ENABLE_SAFECOMPONENTS = e_safecomponents;
+        public static final boolean ENABLE_TERMCACHING = e_termcaching;
+        
         @Override
         public boolean isFullBacktrackingEnabled() {
-          return e_dobacktrack;
+          return ENABLE_BACKTRACKING;
         }
 
         @Override
         public boolean isSafeComponentsEnabled() {
-          return e_safecomponents;
+          return ENABLE_SAFECOMPONENTS;
         }
+
+        @Override
+        public boolean isTermCachingEnabled() {
+          return ENABLE_TERMCACHING;
+        }
+        
+        
       }
     ]|
 

@@ -22,12 +22,14 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	public static final String TERM_REGISTRY = "TERM_REGISTRY";
 	public static final String RULE_REGISTRY = "RULE_REGISTRY";
 
-	public static final boolean ENABLED_CACHED_TERMS = false;
-	
 	public DynSemLanguage() {
 	}
 
 	public abstract boolean isFullBacktrackingEnabled();
+	
+	public abstract boolean isSafeComponentsEnabled();
+	
+	public abstract boolean isTermCachingEnabled();
 	
 	@Override
 	protected DynSemContext createContext(Env env) {
@@ -77,8 +79,6 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 			return null;
 		}
 	}
-
-	public abstract boolean isSafeComponentsEnabled();
 
 	@Override
 	protected boolean isObjectOfLanguage(Object obj) {
