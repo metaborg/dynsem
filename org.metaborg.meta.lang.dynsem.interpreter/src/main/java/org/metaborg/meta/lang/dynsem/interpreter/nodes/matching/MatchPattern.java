@@ -35,6 +35,11 @@ public abstract class MatchPattern extends DynSemNode {
 		if (Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3)) {
 			return ListMatch.create(t, fd);
 		}
+
+		if (Tools.hasConstructor(t, "List", 1) || Tools.hasConstructor(t, "ListTail", 2)) {
+			return GenericListMatch.create(t, fd);
+		}
+		
 		if (Tools.hasConstructor(t, "LabelComp", 2)) {
 			// TODO we should use the type information from the labelcomp instead of skipping over it
 			return MatchPattern.create(Tools.applAt(t, 1), fd);
