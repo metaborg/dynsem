@@ -17,7 +17,7 @@ public class SingleRuleUnionNode extends RuleUnionNode {
 	}
 
 	@Override
-	protected RuleResult executeMainRule(Object[] arguments) {
+	public RuleResult execute(Object[] arguments) {
 		return rule.execute(Truffle.getRuntime().createVirtualFrame(arguments, rule.getFrameDescriptor()));
 	}
 

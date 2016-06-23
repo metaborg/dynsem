@@ -21,7 +21,7 @@ rules /* language file. interpreter entry point */
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemRule;
       import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
-      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionRoot;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.JointRuleRoot;
 
       import com.oracle.truffle.api.CallTarget;
       import com.oracle.truffle.api.nodes.Node;
@@ -50,8 +50,8 @@ rules /* language file. interpreter entry point */
               CompilerDirectives.transferToInterpreter();
               // Return the init rule by default.
               Class<?> dispatchClass = ctx.getTermRegistry().getConstructorClass(START_CONSTR_NAME, START_CONSTR_ARITY);
-              RuleUnionRoot initRuleUnionRoot = ctx.getRuleRegistry().lookupRules("init", dispatchClass);
-              return new DynSemRule(initRuleUnionRoot);
+              JointRuleRoot initJointRoot = ctx.getRuleRegistry().lookupRules("init", dispatchClass);
+              return new DynSemRule(initJointRoot);
             }
           };
           return Truffle.getRuntime().createCallTarget(rootNode);

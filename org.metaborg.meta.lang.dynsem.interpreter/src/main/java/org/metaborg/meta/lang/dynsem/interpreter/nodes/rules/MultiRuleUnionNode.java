@@ -21,7 +21,7 @@ public class MultiRuleUnionNode extends RuleUnionNode {
 	}
 
 	@ExplodeLoop
-	protected RuleResult executeMainRule(final Object[] arguments) {
+	public RuleResult execute(final Object[] arguments) {
 		CompilerAsserts.compilationConstant(rules.length);
 
 		for (int i = 0; i < rules.length; i++) {

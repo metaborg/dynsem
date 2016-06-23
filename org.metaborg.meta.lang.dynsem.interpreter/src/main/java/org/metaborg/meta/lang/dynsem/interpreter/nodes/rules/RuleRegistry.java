@@ -22,7 +22,7 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class RuleRegistry {
 
-	private final Map<String, Map<Class<?>, RuleUnionRoot>> rules = new HashMap<>();
+	private final Map<String, Map<Class<?>, JointRuleRoot>> rules = new HashMap<>();
 
 	public RuleRegistry() {
 		init();
@@ -35,39 +35,38 @@ public class RuleRegistry {
 	@TruffleBoundary
 	public int ruleCount() {
 		int i = 0;
-		for (Map<?, RuleUnionRoot> val : rules.values()) {
-			for (RuleUnionRoot root : val.values()) {
-				i += root.getUnionNode().getRules().size();
+		for (Map<?, JointRuleRoot> val : rules.values()) {
+			for (JointRuleRoot root : val.values()) {
+				i += root.getJointNode().getUnionNode().getRules().size();
 			}
 		}
 		return i;
 	}
 
 	@TruffleBoundary
-	public void registerJointRule(String arrowName, Class<?> dispatchClass, RuleUnionRoot jointRuleRoot) {
-		Map<Class<?>, RuleUnionRoot> rulesForName = rules.get(arrowName);
+	public void registerJointRule(String arrowName, Class<?> dispatchClass, JointRuleRoot jointRuleRoot) {
+		Map<Class<?>, JointRuleRoot> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			rulesForName = new HashMap<>();
 			rules.put(arrowName, rulesForName);
 		}
-
 		rulesForName.put(dispatchClass, jointRuleRoot);
 	}
 
 	@TruffleBoundary
-	public RuleUnionRoot lookupRules(String arrowName, Class<?> dispatchClass) {
-		RuleUnionRoot jointRuleForClass = null;
+	public JointRuleRoot lookupRules(String arrowName, Class<?> dispatchClass) {
+		JointRuleRoot jointRuleForClass = null;
 
-		Map<Class<?>, RuleUnionRoot> jointRulesForName = rules.get(arrowName);
+		Map<Class<?>, JointRuleRoot> jointRulesForName = rules.get(arrowName);
 
 		if (jointRulesForName != null) {
 			jointRuleForClass = jointRulesForName.get(dispatchClass);
 		}
 
 		if (jointRuleForClass == null) {
-			jointRuleForClass = new RuleUnionRoot(SourceSection.createUnavailable("rule", "adhoc"), arrowName,
-					dispatchClass, new Rule[0]);
+			jointRuleForClass = new JointRuleRoot(SourceSection.createUnavailable("rule", "adhoc"), RuleKind.ADHOC,
+					arrowName, dispatchClass, new Rule[0]);
 			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}
 		return jointRuleForClass;
@@ -109,9 +108,10 @@ public class RuleRegistry {
 				final String arrowName = rulesForNameEntry.getKey();
 				for (Entry<Class<?>, List<Rule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
+					RuleKind kind = rulesForClass.getValue().get(0).getKind();
 					registry.registerJointRule(arrowName, dispatchClass,
-							new RuleUnionRoot(SourceSection.createUnavailable("rule", "unavailable"), arrowName,
-									dispatchClass, rulesForClass.getValue().toArray(new Rule[] {})));
+							new JointRuleRoot(SourceSection.createUnavailable("rule", "multiple locations"), kind,
+									arrowName, dispatchClass, rulesForClass.getValue().toArray(new Rule[] {})));
 				}
 			}
 

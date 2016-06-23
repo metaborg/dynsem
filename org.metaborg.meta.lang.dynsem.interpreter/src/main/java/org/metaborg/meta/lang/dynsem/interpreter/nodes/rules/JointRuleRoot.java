@@ -9,35 +9,29 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class RuleUnionRoot extends RootNode {
+public class JointRuleRoot extends RootNode {
 
-	@Child private RuleUnionNode unionNode;
+	@Child private JointRuleNode jointNode;
 
-	public RuleUnionRoot(SourceSection source, String arrowName, Class<?> dispatchClass, Rule[] rules) {
+	public JointRuleRoot(SourceSection source, RuleKind kind, String arrowName, Class<?> dispatchClass, Rule[] rules) {
 		super(DynSemLanguage.class, source, new FrameDescriptor());
-		assert rules.length > 0;
-
-		if (rules.length == 1) {
-			this.unionNode = new SingleRuleUnionNode(source, arrowName, dispatchClass, rules[0]);
-		} else {
-			this.unionNode = new MultiRuleUnionNode(source, arrowName, dispatchClass, rules);
-		}
+		this.jointNode = new JointRuleNode(source, kind, arrowName, dispatchClass, rules);
 
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
-	public RuleUnionNode getUnionNode() {
-		return unionNode;
+	public JointRuleNode getJointNode() {
+		return jointNode;
 	}
 
 	@Override
 	public Object execute(VirtualFrame frame) {
-		return unionNode.execute(frame.getArguments());
+		return jointNode.execute(frame.getArguments());
 	}
 
 	@TruffleBoundary
 	public String toString() {
-		return unionNode.toString();
+		return jointNode.toString();
 	}
 
 }

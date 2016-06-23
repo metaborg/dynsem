@@ -1,8 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.JointRuleRoot;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PolymorphicUnionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -36,16 +37,16 @@ public abstract class DispatchNode extends DynSemNode {
 
 	@Specialization(contains = "doDirect")
 	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args,
-			@Cached("createVariableUnionNode()") VariableUnionNode dispatchNode) {
+			@Cached("createVariableUnionNode()") PolymorphicUnionNode dispatchNode) {
 		return dispatchNode.execute(args);
 	}
 
-	protected final RuleUnionRoot getUnionRootNode(Class<?> dispatchClass) {
+	protected final JointRuleRoot getUnionRootNode(Class<?> dispatchClass) {
 		return getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
 	}
 
-	protected final VariableUnionNode createVariableUnionNode() {
-		return VariableUnionNode.create(getSourceSection(), arrowName);
+	protected final PolymorphicUnionNode createVariableUnionNode() {
+		return new PolymorphicUnionNode(getSourceSection(), arrowName);
 	}
 
 	public static DispatchNode create(IStrategoAppl source, IStrategoAppl arrow, FrameDescriptor fd) {

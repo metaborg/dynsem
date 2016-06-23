@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.JointRuleRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionRoot;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.TruffleLanguage;
@@ -73,7 +73,7 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 			String constr = splitName[1];
 			int arity = Integer.parseInt(splitName[2]);
 			Class<?> dispatchClass = context.getTermRegistry().getConstructorClass(constr, arity);
-			RuleUnionRoot ruleUnionRoot = context.getRuleRegistry().lookupRules(name, dispatchClass);
+			JointRuleRoot ruleUnionRoot = context.getRuleRegistry().lookupRules(name, dispatchClass);
 			return new DynSemRule(ruleUnionRoot);
 		} catch (Exception e) {
 			return null;
