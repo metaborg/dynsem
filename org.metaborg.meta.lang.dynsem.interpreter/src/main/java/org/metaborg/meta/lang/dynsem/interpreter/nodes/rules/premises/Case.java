@@ -13,6 +13,7 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class Case extends DynSemNode {
@@ -21,7 +22,7 @@ public abstract class Case extends DynSemNode {
 		super(source);
 	}
 
-	public abstract boolean execute(VirtualFrame frame, Object t);
+	public abstract void execute(VirtualFrame frame, Object t);
 
 	@Override
 	@TruffleBoundary
@@ -50,11 +51,10 @@ public abstract class Case extends DynSemNode {
 
 		@ExplodeLoop
 		@Override
-		public boolean execute(VirtualFrame frame, Object t) {
-			for (int i = 0; i < premises.length; i++) {
-				premises[i].execute(frame);
+		public void execute(VirtualFrame frame, Object t) {
+			for (Premise p : premises) {
+				p.execute(frame);
 			}
-			return true;
 		}
 
 		public static CaseOtherwise create(IStrategoAppl t, FrameDescriptor fd) {
@@ -80,16 +80,19 @@ public abstract class Case extends DynSemNode {
 			this.premises = premises;
 		}
 
+		private final BranchProfile patternSucceeded = BranchProfile.create();
+
 		@ExplodeLoop
 		@Override
-		public boolean execute(VirtualFrame frame, Object t) {
-			if (pattern.execute(t, frame)) {
-				for (int i = 0; i < premises.length; i++) {
-					premises[i].execute(frame);
-				}
-				return true;
-			} else {
-				return false;
+		public void execute(VirtualFrame frame, Object t) {
+			// execute the match
+			pattern.executeMatch(frame, t);
+
+			// signal that the match has actually succeeded
+			patternSucceeded.enter();
+
+			for (Premise p : premises) {
+				p.execute(frame);
 			}
 		}
 

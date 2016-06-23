@@ -1,5 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -22,10 +24,14 @@ public class ConMatch extends MatchPattern {
 	}
 
 	@Override
-	public boolean execute(Object term, VirtualFrame frame) {
-		ITermMatchPatternFactory matchFactory = getContext().lookupMatchPattern(name, children.length);
-		MatchPattern matcher = matchFactory.apply(getSourceSection(), children);
-		return replace(matcher).execute(term, frame);
+	public void executeMatch(VirtualFrame frame, Object t) {
+		final ITermRegistry termReg = getContext().getTermRegistry();
+		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
+
+		MatchPattern matcher = InterpreterUtils.notNull(termReg.lookupMatchFactory(termClass)).apply(getSourceSection(),
+				cloneNodes(children));
+
+		replace(matcher).executeMatch(frame, t);
 	}
 
 	public static ConMatch create(IStrategoAppl t, FrameDescriptor fd) {

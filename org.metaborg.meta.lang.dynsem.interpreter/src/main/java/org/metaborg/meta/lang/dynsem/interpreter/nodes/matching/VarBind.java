@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -20,9 +21,8 @@ public class VarBind extends MatchPattern {
 	}
 
 	@Override
-	public boolean execute(Object term, VirtualFrame frame) {
-		frame.setObject(slot, term);
-		return true;
+	public void executeMatch(VirtualFrame frame, Object t) {
+		InterpreterUtils.writeSlot(frame, slot, t);
 	}
 
 	public static VarBind create(IStrategoAppl t, FrameDescriptor fd) {

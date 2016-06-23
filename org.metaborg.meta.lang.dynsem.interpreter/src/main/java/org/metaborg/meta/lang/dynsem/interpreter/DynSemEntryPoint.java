@@ -27,7 +27,8 @@ public abstract class DynSemEntryPoint {
 	private final RuleRegistry ruleRegistry;
 	private final ITermRegistry termRegistry;
 
-	public DynSemEntryPoint(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
+	public DynSemEntryPoint(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry,
+			RuleRegistry ruleRegistry) {
 		this.parser = parser;
 		this.transformer = transformer;
 		this.termRegistry = termRegistry;

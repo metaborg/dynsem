@@ -1,89 +1,64 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ListMatchFactory.ConsListMatchNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
 
-import com.github.krukow.clj_lang.IPersistentStack;
-import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class ListMatch extends MatchPattern {
+public class ListMatch extends MatchPattern {
 
-	public ListMatch(SourceSection source) {
+	@Children private final MatchPattern[] elemPatterns;
+	@Child private MatchPattern tailPattern;
+	private final Class<?> listClass;
+
+	public ListMatch(SourceSection source, MatchPattern[] elemPatterns, MatchPattern tailPattern, Class<?> listClass) {
 		super(source);
+		this.elemPatterns = elemPatterns;
+		this.tailPattern = tailPattern;
+		this.listClass = listClass;
 	}
 
-	@TruffleBoundary
-	protected int stackCount(@SuppressWarnings("rawtypes") IPersistentStack s) {
-		return s.count();
+	@Override
+	public void executeMatch(VirtualFrame frame, Object term) {
+		CompilerDirectives.transferToInterpreterAndInvalidate();
+		final MatchPattern concreteMatch = InterpreterUtils
+				.notNull(getContext().getTermRegistry().lookupMatchFactory(listClass))
+				.apply(getSourceSection(), cloneNodes(elemPatterns), cloneNode(tailPattern));
+
+		replace(concreteMatch).executeMatch(frame, term);
 	}
 
-	@TruffleBoundary
-	protected Object stackPeek(@SuppressWarnings("rawtypes") IPersistentStack s) {
-		return s.peek();
+	public static ListMatch create(IStrategoAppl t, FrameDescriptor fd) {
+		assert Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3);
+
+		IStrategoList elemTs = Tools.listAt(t, 0);
+		final MatchPattern[] elemPatterns = new MatchPattern[elemTs.size()];
+		for (int i = 0; i < elemPatterns.length; i++) {
+			elemPatterns[i] = MatchPattern.create(Tools.applAt(elemTs, i), fd);
+		}
+
+		MatchPattern tailPattern = null;
+		if (Tools.hasConstructor(t, "TypedListTail", 3)) {
+			tailPattern = MatchPattern.create(Tools.applAt(t, 1), fd);
+		}
+
+		final String dispatchClassName = Tools.javaStringAt(t, Tools.hasConstructor(t, "TypedList", 2) ? 1 : 2);
+		Class<?> dispatchClass;
+
+		try {
+			dispatchClass = Rule.class.getClassLoader().loadClass(dispatchClassName);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
+		}
+
+		return new ListMatch(SourceSectionUtil.fromStrategoTerm(t), elemPatterns, tailPattern, dispatchClass);
 	}
 
-	@TruffleBoundary
-	protected Object stackPop(@SuppressWarnings("rawtypes") IPersistentStack s) {
-		return s.pop();
-	}
-
-	public static final class NilListMatch extends ListMatch {
-
-		public NilListMatch(SourceSection source) {
-			super(source);
-		}
-
-		public static NilListMatch create(IStrategoAppl t, FrameDescriptor fd) {
-			assert Tools.hasConstructor(t, "List", 1);
-			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
-			return new NilListMatch(SourceSectionUtil.fromStrategoTerm(t));
-		}
-
-		private final ConditionProfile condProfile = ConditionProfile.createBinaryProfile();
-
-		@Override
-		public boolean execute(Object term, VirtualFrame frame) {
-			if (condProfile.profile(BuiltinTypesGen.isIPersistentStack(term))) {
-				return stackCount(BuiltinTypesGen.asIPersistentStack(term)) == 0;
-			}
-			return false;
-		}
-	}
-
-	public static abstract class ConsListMatch extends ListMatch {
-
-		@Child protected MatchPattern headPattern;
-		@Child protected MatchPattern tailPattern;
-
-		public ConsListMatch(MatchPattern headPattern, MatchPattern tailPattern, SourceSection source) {
-			super(source);
-			this.headPattern = headPattern;
-			this.tailPattern = tailPattern;
-		}
-
-		public static ConsListMatch create(IStrategoAppl t, FrameDescriptor fd) {
-			CompilerAsserts.neverPartOfCompilation();
-			assert Tools.hasConstructor(t, "ListTail", 2);
-			MatchPattern headPattern = MatchPattern.create(Tools.applAt(Tools.listAt(t, 0), 0), fd);
-			MatchPattern tailPattern = MatchPattern.create(Tools.applAt(t, 1), fd);
-
-			return ConsListMatchNodeGen.create(headPattern, tailPattern, SourceSectionUtil.fromStrategoTerm(t));
-		}
-
-		@Specialization
-		public boolean execute(@SuppressWarnings("rawtypes") IPersistentStack term, VirtualFrame frame) {
-			return stackCount(term) > 0 && headPattern.execute(stackPeek(term), frame)
-					&& tailPattern.execute(stackPop(term), frame);
-		}
-
-	}
 }

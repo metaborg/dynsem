@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -9,6 +9,7 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
+@Deprecated
 public class FailsPremise extends Premise {
 
 	@Child protected Premise premise;
@@ -24,12 +25,12 @@ public class FailsPremise extends Premise {
 		boolean premiseSucceeds = true;
 		try {
 			premise.execute(frame);
-		} catch (PremiseFailure pf) {
+		} catch (PatternMatchFailure pf) {
 			premiseSucceeds = false;
 		}
 
 		if (premiseSucceeds) {
-			throw PremiseFailure.INSTANCE;
+			throw PatternMatchFailure.INSTANCE;
 		}
 
 	}

@@ -7,13 +7,21 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public interface ITermRegistry {
 
-	public ITermBuildFactory lookupBuildFactory(String constr, int arity);
+	public ITermBuildFactory lookupBuildFactory(Class<?> termClass);
 
-	public ITermMatchPatternFactory lookupMatchFactory(String name, int arity);
+	public ITermMatchPatternFactory lookupMatchFactory(Class<?> termClass);
 
-	public ITermBuildFactory lookupNativeOpBuildFactory(String constr, int arity);
+	public ITermBuildFactory lookupNativeOpBuildFactory(Class<?> termClass);
 
 	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort, String function, int arity);
+
+	public Class<?> getConstructorClass(String constr, int arity);
+
+	public Class<?> getNativeOperatorClass(String constr, int arity);
+
+	public Class<?> getListClass(Class<?> elemClass);
+
+	public Class<?> getMapClass(String keySortName, String mapSortName);
 
 	public ITerm parseProgramTerm(IStrategoTerm t);
 }

@@ -7,26 +7,26 @@ imports
 rules
 
   ds-to-interp-gen-project =
-    if OptCreateProject then
-      project := <OptGenProject>
+    if get-opt(|CreateProject()) then
+      project := <get-opt> GenProject()
       ; <file-exists + mkdir(id)> project
       ; ds-to-interp-gen-project-launchconfig
       ; ds-to-interp-gen-project-pom
-      ; java-gendir := <OptJavaGenDir>
-      ; <file-exists + mkdir(id)> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <OptTopPackageName>]
-      ; <file-exists + mkdir(id)> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <OptNativePackageName>]
+      ; java-gendir := <get-opt> JavaGenDirAbs()
+      ; <file-exists + mkdir(id)> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> TopPkg()]
+      ; <file-exists + mkdir(id)> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> NativePkg()]
     end
 
   ds-to-interp-gen-project-pom =
-    pom-file := <fopen> (<concat-strings> [<OptGenProject>, "/pom.xml"], "w");
+    pom-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/pom.xml"], "w");
     <fputs> (
       $[<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
           <modelVersion>4.0.0</modelVersion>
-          <name>[<OptLanguageName>] Interpreter</name>
-          <groupId>[<OptMavenGroupId>]</groupId>
-          <artifactId>[<OptMavenArtifactId>]</artifactId>
-          <version>[<OptSourceVersion>]</version>
+          <name>[<get-opt> LangName()] Interpreter</name>
+          <groupId>[<get-opt> MavenGroupId()]</groupId>
+          <artifactId>[<get-opt> MavenArtifactId()]</artifactId>
+          <version>[<get-opt> LangVersion()]</version>
           <build>
             <plugins>
               <plugin>
@@ -88,21 +88,21 @@ rules
     <fclose> pom-file
   
   ds-to-interp-gen-project-launchconfig =
-    launch-file := <fopen> (<concat-strings> [<OptGenProject>, "/", <OptLanguageName>, ".launch"], "w");
+    launch-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), ".launch"], "w");
     <fputs> (
     $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/[<OptMavenArtifactId>]/[<OptJavaGenDirRel>]/[<OptTopPackageName; string-replace(|".", "/")>]/[<OptLanguageName>]Language.java"/>
+        <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]Language.java"/>
         </listAttribute>
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="1"/>
         </listAttribute>
         <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
         <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
-        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<OptTopPackageName>].[<OptLanguageName>]EntryPoint"/>
+        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<get-opt> TopPkg()].[<get-opt> LangName()]EntryPoint"/>
         <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${resource_loc}"/>
-        <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<OptMavenArtifactId>]"/>
+        <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<get-opt> MavenArtifactId()]"/>
         <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
       </launchConfiguration>
     ], launch-file);

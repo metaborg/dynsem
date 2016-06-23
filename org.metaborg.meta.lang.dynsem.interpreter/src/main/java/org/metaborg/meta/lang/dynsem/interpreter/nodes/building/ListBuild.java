@@ -1,75 +1,63 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuildFactory.ConsListBuildNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
 
-import com.github.krukow.clj_lang.IPersistentStack;
-import com.github.krukow.clj_lang.PersistentList;
-import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-import com.oracle.truffle.api.dsl.NodeChild;
-import com.oracle.truffle.api.dsl.NodeChildren;
-import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class ListBuild extends TermBuild {
+public class ListBuild extends TermBuild {
 
-	public ListBuild(SourceSection source) {
+	@Children private final TermBuild[] elemNodes;
+	@Child private TermBuild tailNode;
+	private final Class<?> listClass;
+
+	public ListBuild(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode, Class<?> listClass) {
 		super(source);
+		this.elemNodes = elemNodes;
+		this.tailNode = tailNode;
+		this.listClass = listClass;
 	}
 
-	public static final class NilListBuild extends ListBuild {
-
-		public NilListBuild(SourceSection source) {
-			super(source);
-		}
-
-		public static NilListBuild create(IStrategoAppl t, FrameDescriptor fd) {
-			assert Tools.hasConstructor(t, "List", 1);
-			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
-
-			return new NilListBuild(SourceSectionUtil.fromStrategoTerm(t));
-		}
-
-		@Override
-		public Object executeGeneric(VirtualFrame frame) {
-			return executeList(frame);
-		}
-
-		@Override
-		public IPersistentStack<?> executeList(VirtualFrame frame) {
-			return PersistentList.EMPTY;
-		}
+	@Override
+	public Object executeGeneric(VirtualFrame frame) {
+		CompilerDirectives.transferToInterpreterAndInvalidate();
+		final TermBuild concreteListBuild = InterpreterUtils
+				.notNull(getContext().getTermRegistry().lookupBuildFactory(listClass))
+				.apply(getSourceSection(), cloneNodes(elemNodes), cloneNode(tailNode));
+		return replace(concreteListBuild).executeGeneric(frame);
 	}
 
-	@NodeChildren({ @NodeChild(value = "headNode", type = TermBuild.class),
-			@NodeChild(value = "tailNode", type = TermBuild.class) })
-	public abstract static class ConsListBuild extends ListBuild {
+	public static ListBuild create(IStrategoAppl t, FrameDescriptor fd) {
+		assert Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3);
 
-		public ConsListBuild(SourceSection source) {
-			super(source);
+		IStrategoList elemTs = Tools.listAt(t, 0);
+		final TermBuild[] elemNodes = new TermBuild[elemTs.size()];
+		for (int i = 0; i < elemNodes.length; i++) {
+			elemNodes[i] = TermBuild.create(Tools.applAt(elemTs, i), fd);
 		}
 
-		public static ConsListBuild create(IStrategoAppl t, FrameDescriptor fd) {
-			CompilerAsserts.neverPartOfCompilation();
-			assert Tools.hasConstructor(t, "ListTail", 2);
-			TermBuild headNode = TermBuild.create(Tools.applAt(Tools.termAt(t, 0), 0), fd);
-			TermBuild tailNode = TermBuild.create(Tools.applAt(t, 1), fd);
-
-			return ConsListBuildNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), headNode, tailNode);
+		TermBuild tailNodes = null;
+		if (Tools.hasConstructor(t, "TypedListTail", 3)) {
+			tailNodes = TermBuild.create(Tools.applAt(t, 1), fd);
 		}
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Specialization
-		@TruffleBoundary
-		public IPersistentStack execute(Object head, IPersistentStack tail) {
-			return (IPersistentStack) tail.cons(head);
+		final String dispatchClassName = Tools.javaStringAt(t, Tools.hasConstructor(t, "TypedList", 2) ? 1 : 2);
+		Class<?> dispatchClass;
+
+		try {
+			dispatchClass = Rule.class.getClassLoader().loadClass(dispatchClassName);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
 
+		return new ListBuild(SourceSectionUtil.fromStrategoTerm(t), elemNodes, tailNodes, dispatchClass);
 	}
 
 }

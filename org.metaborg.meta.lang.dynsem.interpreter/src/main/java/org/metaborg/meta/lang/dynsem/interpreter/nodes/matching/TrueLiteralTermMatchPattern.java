@@ -1,24 +1,19 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
-
-import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class TrueLiteralTermMatchPattern extends LiteralMatchPattern {
+public abstract class TrueLiteralTermMatchPattern extends LiteralMatchPattern {
 
 	public TrueLiteralTermMatchPattern(SourceSection source) {
 		super(source);
 	}
 
-	private final ConditionProfile conditionProfile = ConditionProfile.createBinaryProfile();
-
-	@Override
-	public boolean execute(Object term, VirtualFrame frame) {
-		if (conditionProfile.profile(BuiltinTypesGen.isBoolean(term))) {
-			return BuiltinTypesGen.asBoolean(term);
+	@Specialization
+	public void doSuccess(boolean b) {
+		if (!b) {
+			throw PatternMatchFailure.INSTANCE;
 		}
-		return false;
 	}
+
 }

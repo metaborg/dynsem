@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
@@ -13,32 +13,26 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeUtil;
-import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class MatchPremise extends Premise {
 
 	@Child protected TermBuild term;
-	@Child protected MatchPattern pat;
+	@Child protected MatchPattern patt;
 
 	public MatchPremise(TermBuild term, MatchPattern pattern, SourceSection source) {
 		super(source);
-		this.term = TermBuildCacheNode.create(term);
-		this.pat = pattern;
+		this.term = DynSemContext.LANGUAGE.isTermCachingEnabled() ? TermBuildCacheNode.create(term) : term;
+		this.patt = pattern;
 	}
-
-	private final BranchProfile matchFailProfile = BranchProfile.create();
 
 	@Override
 	public void execute(VirtualFrame frame) {
-		Object res = term.executeGeneric(frame);
+		// evaluate LHS
+		final Object t = term.executeGeneric(frame);
 
-		boolean matchsuccess = pat.execute(res, frame);
-
-		if (!matchsuccess) {
-			matchFailProfile.enter();
-			throw PremiseFailure.INSTANCE;
-		}
+		// evaluate match
+		patt.executeMatch(frame, t);
 
 	}
 

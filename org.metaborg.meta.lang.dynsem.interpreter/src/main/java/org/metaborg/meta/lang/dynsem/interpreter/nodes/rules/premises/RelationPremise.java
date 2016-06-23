@@ -1,13 +1,11 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import java.util.Objects;
-
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
-import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.ComponentUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.InvokeRelationNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationPremiseInputBuilder;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -17,7 +15,6 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 /**
@@ -29,48 +26,35 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public class RelationPremise extends Premise {
 
-	@Child protected RelationInvocationNode relationLhs;
+	@Child protected InvokeRelationNode relationLhs;
 
 	@Child protected MatchPattern rhsNode;
 
 	@Children protected final MatchPattern[] rhsRwNodes;
 
-	public RelationPremise(RelationPremiseInputBuilder inputBuilderNode, RelationDispatch dispatchNode,
+	public RelationPremise(RelationPremiseInputBuilder inputBuilderNode, DispatchNode dispatchNode,
 			MatchPattern rhsNode, MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
-		this.relationLhs = new RelationInvocationNode(inputBuilderNode, dispatchNode, source);
+		this.relationLhs = new InvokeRelationNode(source, inputBuilderNode, dispatchNode);
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}
 
-	private final BranchProfile rhsMatchFailure = BranchProfile.create();
-	private final BranchProfile rhsCompFailure = BranchProfile.create();
-
 	@Override
-	public void execute(VirtualFrame frame) {
-
-		RuleResult ruleRes = relationLhs.execute(frame);
-
-		if (!rhsNode.execute(ruleRes.result, frame)) {
-			rhsMatchFailure.enter();
-			throw PremiseFailure.INSTANCE;
-		}
-		if (!evalRhsComponents(ruleRes.components, frame)) {
-			rhsCompFailure.enter();
-			throw PremiseFailure.INSTANCE;
-		}
-
-	}
-
 	@ExplodeLoop
-	private boolean evalRhsComponents(Object[] components, VirtualFrame frame) {
+	public void execute(VirtualFrame frame) {
+		// execute the reduction
+		final RuleResult res = relationLhs.execute(frame);
+
+		// evaluate the RHS pattern match
+		rhsNode.executeMatch(frame, res.result);
+
+		// evaluate the RHS component pattern matches
+		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			if (!rhsRwNodes[i].execute(ComponentUtils.getComponent(components, i), frame)) {
-				return false;
-			}
+			rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(components, i));
 		}
-		return true;
 	}
 
 	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
@@ -86,9 +70,8 @@ public class RelationPremise extends Premise {
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
-		;
 		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
-				RelationDispatch.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
+				DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
 				SourceSectionUtil.fromStrategoTerm(t));
 	}
 }

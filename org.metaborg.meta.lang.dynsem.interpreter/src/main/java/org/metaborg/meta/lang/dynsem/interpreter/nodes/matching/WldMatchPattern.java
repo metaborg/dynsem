@@ -14,8 +14,8 @@ public class WldMatchPattern extends MatchPattern {
 	}
 
 	@Override
-	public boolean execute(Object term, VirtualFrame frame) {
-		return true;
+	public void executeMatch(VirtualFrame frame, Object term) {
+
 	}
 
 	public static WldMatchPattern create(IStrategoAppl t) {

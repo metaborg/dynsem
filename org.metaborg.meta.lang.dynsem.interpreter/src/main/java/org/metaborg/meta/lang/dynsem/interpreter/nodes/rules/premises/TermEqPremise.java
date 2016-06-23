@@ -1,8 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -21,7 +21,8 @@ import com.oracle.truffle.api.profiles.ValueProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 @Deprecated
-@NodeChildren({ @NodeChild(value = "left", type = TermBuild.class), @NodeChild(value = "right", type = TermBuild.class) })
+@NodeChildren({ @NodeChild(value = "left", type = TermBuild.class),
+		@NodeChild(value = "right", type = TermBuild.class) })
 public abstract class TermEqPremise extends Premise {
 
 	public TermEqPremise(SourceSection source) {
@@ -39,14 +40,14 @@ public abstract class TermEqPremise extends Premise {
 	@Specialization
 	public void doBoolean(boolean left, boolean right) {
 		if (left != right) {
-			throw PremiseFailure.INSTANCE;
+			throw PatternMatchFailure.INSTANCE;
 		}
 	}
 
 	@Specialization
 	public void doInt(int right, int left) {
 		if (left != right) {
-			throw PremiseFailure.INSTANCE;
+			throw PatternMatchFailure.INSTANCE;
 		}
 	}
 
@@ -54,7 +55,7 @@ public abstract class TermEqPremise extends Premise {
 	public void doString(String left, String right, @Cached("left") String cachedLeft,
 			@Cached("right") String cachedRight, @Cached("doStringEq(cachedLeft, cachedRight)") boolean isEqual) {
 		if (!isEqual) {
-			throw PremiseFailure.INSTANCE;
+			throw PatternMatchFailure.INSTANCE;
 		}
 	}
 
@@ -64,18 +65,19 @@ public abstract class TermEqPremise extends Premise {
 	}
 
 	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" })
-	public void doITermDirect(ITerm left, ITerm right, @Cached("left") ITerm cachedLeft,
-			@Cached("right") ITerm cachedRight, @Cached("cachedLeft.equals(cachedRight)") boolean isEqual) {
+	public void doITermDirect(IApplTerm left, IApplTerm right, @Cached("left") IApplTerm cachedLeft,
+			@Cached("right") IApplTerm cachedRight, @Cached("cachedLeft.equals(cachedRight)") boolean isEqual) {
 		if (!isEqual) {
-			throw PremiseFailure.INSTANCE;
+			throw PatternMatchFailure.INSTANCE;
 		}
 	}
 
 	@Specialization(contains = "doITermDirect")
-	public void doITermIndirect(ITerm left, ITerm right, @Cached("getTypeProfile()") ValueProfile leftTypeProfile,
+	public void doITermIndirect(IApplTerm left, IApplTerm right,
+			@Cached("getTypeProfile()") ValueProfile leftTypeProfile,
 			@Cached("getTypeProfile()") ValueProfile rightTypeProfile) {
 		if (!leftTypeProfile.profile(left).equals(rightTypeProfile.profile(right))) {
-			throw PremiseFailure.INSTANCE;
+			throw PatternMatchFailure.INSTANCE;
 		}
 	}
 
@@ -84,7 +86,7 @@ public abstract class TermEqPremise extends Premise {
 	public void doListDirect(PersistentList left, PersistentList right, @Cached("left") PersistentList cachedLeft,
 			@Cached("right") PersistentList cachedRight, @Cached("doListEq(cachedLeft, cachedRight)") boolean isEqual) {
 		if (!isEqual) {
-			throw PremiseFailure.INSTANCE;
+			throw PatternMatchFailure.INSTANCE;
 		}
 	}
 
@@ -102,7 +104,7 @@ public abstract class TermEqPremise extends Premise {
 	@TruffleBoundary
 	public void doObject(Object left, Object right) {
 		if (!left.equals(right)) {
-			throw PremiseFailure.INSTANCE;
+			throw PatternMatchFailure.INSTANCE;
 		}
 	}
 
