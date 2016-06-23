@@ -364,7 +364,7 @@ rules /* Sort & Constructor classes */
     SimpleSort("String") -> e |[ Tools.asJavaString(e_tmpelem) ]|
 
   ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
-    SimpleSort("Int") -> e |[ Tools.asJavInt(e_tmpelem) ]|
+    SimpleSort("Int") -> e |[ Tools.asJavaInt(e_tmpelem) ]|
 
   ds-to-interp-sorts-to-create-arg(|e_term):
     (e, MapSort(skey, sval)) -> (
