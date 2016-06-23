@@ -37,7 +37,7 @@ public class RuleRegistry {
 		int i = 0;
 		for (Map<?, RuleUnionRoot> val : rules.values()) {
 			for (RuleUnionRoot root : val.values()) {
-				i += root.getUnionNode().getRules().length;
+				i += root.getUnionNode().getRules().size();
 			}
 		}
 		return i;

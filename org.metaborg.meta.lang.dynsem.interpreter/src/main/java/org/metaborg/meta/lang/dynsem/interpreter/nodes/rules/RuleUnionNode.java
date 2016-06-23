@@ -1,29 +1,25 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
+import java.util.List;
+
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.SortRulesUnionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.SortRulesUnionNodeGen;
 
-import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class RuleUnionNode extends DynSemNode {
+public abstract class RuleUnionNode extends DynSemNode {
 
-	@Children private final Rule[] rules;
 	@Child private SortRulesUnionNode fallbackRulesNode;
+	protected final String arrowName;
+	protected final Class<?> dispatchClass;
 
-	private final String arrowName;
-	private final Class<?> dispatchClass;
-
-	public RuleUnionNode(SourceSection source, String arrowName, Class<?> dispatchClass, Rule[] rules) {
+	public RuleUnionNode(SourceSection source, String arrowName, Class<?> dispatchClass) {
 		super(source);
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;
-		this.rules = rules;
 		this.fallbackRulesNode = SortRulesUnionNodeGen.create(source, arrowName);
 	}
 
@@ -33,9 +29,9 @@ public class RuleUnionNode extends DynSemNode {
 		while (repeat) {
 			try {
 				try {
-					res = executeMainRules(arguments);
+					res = executeMainRule(arguments);
 				} catch (PatternMatchFailure pmfx) {
-					res = fallbackRulesNode.execute(arguments[0], arguments);
+					res = executeFallback(arguments);
 				}
 				repeat = false;
 			} catch (RecurException recex) {
@@ -46,31 +42,18 @@ public class RuleUnionNode extends DynSemNode {
 		return res;
 	}
 
-	@ExplodeLoop
-	private RuleResult executeMainRules(final Object[] arguments) {
-		CompilerAsserts.compilationConstant(rules.length);
+	protected abstract RuleResult executeMainRule(Object[] arguments);
 
-		for (int i = 0; i < rules.length; i++) {
-			try {
-				final Rule r = rules[i];
-				return r.execute(Truffle.getRuntime().createVirtualFrame(arguments, r.getFrameDescriptor()));
-			} catch (PatternMatchFailure pmfx) {
-				;
-			}
-		}
-		// there are no rules or all rules failed. we throw a soft exception to allow sort-based rules to be tried
-		throw PatternMatchFailure.INSTANCE;
-
+	private final RuleResult executeFallback(Object[] arguments) {
+		return fallbackRulesNode.execute(arguments[0], arguments);
 	}
-
-	public Rule[] getRules() {
-		return rules;
-	}
-
-	public SortRulesUnionNode getSortRulesNode() {
+	
+	public abstract List<Rule> getRules();
+	
+	public SortRulesUnionNode getFallbackRulesNode() {
 		return fallbackRulesNode;
 	}
-
+	
 	@Override
 	@TruffleBoundary
 	public String toString() {

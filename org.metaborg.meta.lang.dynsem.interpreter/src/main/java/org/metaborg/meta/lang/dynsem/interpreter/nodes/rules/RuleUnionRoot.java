@@ -15,7 +15,14 @@ public class RuleUnionRoot extends RootNode {
 
 	public RuleUnionRoot(SourceSection source, String arrowName, Class<?> dispatchClass, Rule[] rules) {
 		super(DynSemLanguage.class, source, new FrameDescriptor());
-		this.unionNode = new RuleUnionNode(source, arrowName, dispatchClass, rules);
+		assert rules.length > 0;
+
+		if (rules.length == 1) {
+			this.unionNode = new SingeRuleUnionNode(source, arrowName, dispatchClass, rules[0]);
+		} else {
+			this.unionNode = new MultiRuleUnionNode(source, arrowName, dispatchClass, rules);
+		}
+
 		Truffle.getRuntime().createCallTarget(this);
 	}
 

@@ -1,5 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
@@ -8,7 +11,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleUnionNode;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -37,9 +39,9 @@ public abstract class VariableUnionNode extends DynSemNode {
 		public RuleResult execute(Object[] arguments) {
 			RuleUnionNode ruleUnion = getContext().getRuleRegistry().lookupRules(arrowName, arguments[0].getClass())
 					.getUnionNode();
-			return replace(
-					new _Initialized(getSourceSection(), arrowName, NodeUtil.cloneNode(ruleUnion.getSortRulesNode())))
-							.executeEvaluated(arguments, ruleUnion.getRules());
+			return replace(new _Initialized(getSourceSection(), arrowName,
+					NodeUtil.cloneNode(ruleUnion.getFallbackRulesNode()))).executeEvaluated(arguments,
+							ruleUnion.getRules());
 		}
 	}
 
@@ -54,12 +56,12 @@ public abstract class VariableUnionNode extends DynSemNode {
 
 		@Override
 		public RuleResult execute(Object[] arguments) {
-			RuleUnionNode ruleUnion = getContext().getRuleRegistry().lookupRules(arrowName, arguments[0].getClass())
-					.getUnionNode();
-			return executeEvaluated(arguments, ruleUnion.getRules());
+			final List<Rule> rules = getContext().getRuleRegistry().lookupRules(arrowName, arguments[0].getClass())
+					.getUnionNode().getRules();
+			return executeEvaluated(arguments, rules);
 		}
 
-		protected RuleResult executeEvaluated(Object[] arguments, Rule[] rules) {
+		protected RuleResult executeEvaluated(Object[] arguments, List<Rule> rules) {
 			try {
 				return executeMainRules(arguments, rules);
 			} catch (PatternMatchFailure pmfx) {
@@ -67,17 +69,16 @@ public abstract class VariableUnionNode extends DynSemNode {
 			}
 		}
 
-		private RuleResult executeMainRules(final Object[] arguments, Rule[] rules) {
+		private RuleResult executeMainRules(final Object[] arguments, List<Rule> rules) {
 			CompilerAsserts.compilationConstant(rules);
+			Iterator<Rule> ruleIter = rules.iterator();
 
-			for (int i = 0; i < rules.length; i++) {
+			while (ruleIter.hasNext()) {
 				try {
-					final Rule r = rules[i];
+					final Rule r = ruleIter.next();
 					return r.execute(Truffle.getRuntime().createVirtualFrame(arguments, r.getFrameDescriptor()));
 				} catch (PatternMatchFailure pmfx) {
-					if (i == rules.length) {
-						throw pmfx;
-					}
+					;
 				}
 			}
 
