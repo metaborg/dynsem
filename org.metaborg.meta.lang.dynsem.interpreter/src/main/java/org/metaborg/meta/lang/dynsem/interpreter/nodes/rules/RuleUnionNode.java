@@ -28,11 +28,22 @@ public class RuleUnionNode extends DynSemNode {
 	}
 
 	public RuleResult execute(final Object[] arguments) {
-		try {
-			return executeMainRules(arguments);
-		} catch (PatternMatchFailure pmfx) {
-			return fallbackRulesNode.execute(arguments[0], arguments);
+		RuleResult res = null;
+		boolean repeat = true;
+		while (repeat) {
+			try {
+				try {
+					res = executeMainRules(arguments);
+				} catch (PatternMatchFailure pmfx) {
+					res = fallbackRulesNode.execute(arguments[0], arguments);
+				}
+				repeat = false;
+			} catch (RecurException recex) {
+				repeat = true;
+			}
 		}
+		assert res != null;
+		return res;
 	}
 
 	@ExplodeLoop

@@ -67,8 +67,7 @@ public abstract class Rule extends DynSemNode {
 	public static Rule create(IStrategoAppl ruleT) {
 		CompilerAsserts.neverPartOfCompilation();
 
-		assert Tools.hasConstructor(ruleT, "Rule", 5)
-				|| Tools.hasConstructor(ruleT, "RecRule", 5) : "Unexpected constructor " + ruleT.getConstructor();
+		assert Tools.hasConstructor(ruleT, "Rule", 5) : "Unexpected constructor " + ruleT.getConstructor();
 
 		FrameDescriptor fd = createFrameDescriptor(ruleT);
 
@@ -112,9 +111,6 @@ public abstract class Rule extends DynSemNode {
 
 			return new ReductionRule(SourceSectionUtil.fromStrategoTerm(ruleT), fd, kind, arrowName, dispatchClass,
 					RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
-		} else if (Tools.hasConstructor(ruleT, "RecRule", 5)) {
-			return new RecursiveReductionRule(SourceSectionUtil.fromStrategoTerm(ruleT), fd, kind, arrowName,
-					dispatchClass, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
 		}
 
 		throw new NotImplementedException("Unsupported rule term: " + ruleT);

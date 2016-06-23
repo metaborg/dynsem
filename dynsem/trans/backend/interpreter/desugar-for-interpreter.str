@@ -22,7 +22,7 @@ rules
     ; mark-rule-arguments
     ; desugar-natives
     ; desugar-list-reductions
-//    ; desugar-rec-tco
+    ; desugar-rec-tco
     ; desugar-unquote-strings
     ; desugar-nmatch-neq
     ; resugar-lists
@@ -155,7 +155,7 @@ rules /* TCO */
   desugar-rec-tco = alltd(desugar-rule-rec-tco)
 
   desugar-rule-rec-tco:
-    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> RecRule(p'*, infer, rel, kind, class)
+    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
     where {| CurrentRelation:
       rules(CurrentRelation: _ -> (c, <length> k*, arrow-name));
       p'* := <desugar-prems-rec-tco(try(?succ))> p*;
@@ -163,7 +163,7 @@ rules /* TCO */
     |}
   
   desugar-rule-rec-tco:
-    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> RecRule(p'*, infer, rel, kind, class)
+    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
     where {| CurrentRelation:
       rules(CurrentRelation: _ -> (<rw-type> ty, -1, arrow-name));
       p'* := <desugar-prems-rec-tco(try(?succ))> p*;

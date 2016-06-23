@@ -43,7 +43,6 @@ public class RelationPremise extends Premise {
 	@Override
 	@ExplodeLoop
 	public void execute(VirtualFrame frame) {
-
 		// execute the reduction
 		final RuleResult res = relationLhs.execute(frame);
 
