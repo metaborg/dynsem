@@ -14,7 +14,8 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
 
-@NodeChildren({ @NodeChild(value = "lmap", type = TermBuild.class), @NodeChild(value = "rmap", type = TermBuild.class) })
+@NodeChildren({ @NodeChild(value = "lmap", type = TermBuild.class),
+		@NodeChild(value = "rmap", type = TermBuild.class) })
 public abstract class MapExtendBuild extends TermBuild {
 
 	public MapExtendBuild(SourceSection source) {

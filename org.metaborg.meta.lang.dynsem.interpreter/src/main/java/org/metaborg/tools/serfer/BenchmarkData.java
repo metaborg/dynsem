@@ -25,9 +25,8 @@ public class BenchmarkData {
 	}
 
 	private String toCSVRow(BenchmarkDatapoint dp) {
-		return dp.getPhase().name() + "," + dp.getStartTime() + ","
-				+ dp.getEndTime() + "," + (dp.getEndTime() - dp.getStartTime())
-				+ ", " + (dp.isSuccessful() ? 1 : 0) + ","
+		return dp.getPhase().name() + "," + dp.getStartTime() + "," + dp.getEndTime() + ","
+				+ (dp.getEndTime() - dp.getStartTime()) + ", " + (dp.isSuccessful() ? 1 : 0) + ","
 				+ (dp.isSuccessful() ? "N/A" : dp.getFailReason()) + "\n";
 	}
 }

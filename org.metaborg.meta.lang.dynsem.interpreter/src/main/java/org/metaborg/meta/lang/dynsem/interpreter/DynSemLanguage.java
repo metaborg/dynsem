@@ -16,7 +16,7 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
-	
+
 	// Keys for configuration parameters for a DynSemContext.
 	public static final String PARSER = "PARSER";
 	public static final String TERM_REGISTRY = "TERM_REGISTRY";
@@ -26,11 +26,11 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	}
 
 	public abstract boolean isFullBacktrackingEnabled();
-	
+
 	public abstract boolean isSafeComponentsEnabled();
-	
+
 	public abstract boolean isTermCachingEnabled();
-	
+
 	@Override
 	protected DynSemContext createContext(Env env) {
 		Map<String, Object> config = env.getConfig();

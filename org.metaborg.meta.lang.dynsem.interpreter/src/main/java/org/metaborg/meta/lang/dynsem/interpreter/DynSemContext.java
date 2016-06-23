@@ -19,7 +19,8 @@ public class DynSemContext {
 		this(parser, termRegistry, ruleRegistry, System.in, System.out);
 	}
 
-	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry, InputStream input, PrintStream output) {
+	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry,
+			InputStream input, PrintStream output) {
 		this.parser = parser;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
@@ -39,29 +40,29 @@ public class DynSemContext {
 		return termRegistry;
 	}
 
-//	public ITermBuildFactory lookupTermBuilder(String name, int arity) {
-//		ITermBuildFactory f = termRegistry.lookupBuildFactory(name, arity);
-//		assert f != null;
-//		return f;
-//	}
-//
-//	public ITermBuildFactory lookupNativeOpBuilder(String name, int arity) {
-//		ITermBuildFactory f = termRegistry.lookupNativeOpBuildFactory(name, arity);
-//		assert f != null;
-//		return f;
-//	}
-//
-//	public ITermMatchPatternFactory lookupMatchPattern(String name, int arity) {
-//		ITermMatchPatternFactory f = termRegistry.lookupMatchFactory(name, arity);
-//		assert f != null;
-//		return f;
-//	}
-//
-//	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort, String function, int arity) {
-//		ITermBuildFactory f = termRegistry.lookupNativeTypeAdapterBuildFactory(sort, function, arity);
-//		assert f != null;
-//		return f;
-//	}
+	// public ITermBuildFactory lookupTermBuilder(String name, int arity) {
+	// ITermBuildFactory f = termRegistry.lookupBuildFactory(name, arity);
+	// assert f != null;
+	// return f;
+	// }
+	//
+	// public ITermBuildFactory lookupNativeOpBuilder(String name, int arity) {
+	// ITermBuildFactory f = termRegistry.lookupNativeOpBuildFactory(name, arity);
+	// assert f != null;
+	// return f;
+	// }
+	//
+	// public ITermMatchPatternFactory lookupMatchPattern(String name, int arity) {
+	// ITermMatchPatternFactory f = termRegistry.lookupMatchFactory(name, arity);
+	// assert f != null;
+	// return f;
+	// }
+	//
+	// public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort, String function, int arity) {
+	// ITermBuildFactory f = termRegistry.lookupNativeTypeAdapterBuildFactory(sort, function, arity);
+	// assert f != null;
+	// return f;
+	// }
 
 	public InputStream getInput() {
 		return input;

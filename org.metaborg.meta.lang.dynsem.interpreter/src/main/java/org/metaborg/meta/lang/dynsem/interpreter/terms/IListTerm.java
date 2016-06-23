@@ -9,7 +9,7 @@ public interface IListTerm<T> extends ITerm {
 	public T[] take(int numElems);
 
 	public IListTerm<T> tail();
-	
+
 	public IListTerm<T> drop(int numElems);
 
 	public IListTerm<T> add(T elem);

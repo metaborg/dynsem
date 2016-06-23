@@ -37,7 +37,7 @@ public class ListMatch extends MatchPattern {
 
 	public static ListMatch create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3);
-		
+
 		IStrategoList elemTs = Tools.listAt(t, 0);
 		final MatchPattern[] elemPatterns = new MatchPattern[elemTs.size()];
 		for (int i = 0; i < elemPatterns.length; i++) {

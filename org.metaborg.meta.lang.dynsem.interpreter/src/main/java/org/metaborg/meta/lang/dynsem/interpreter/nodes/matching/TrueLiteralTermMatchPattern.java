@@ -11,8 +11,8 @@ public abstract class TrueLiteralTermMatchPattern extends LiteralMatchPattern {
 
 	@Specialization
 	public void doSuccess(boolean b) {
-		if(!b){
-			throw PatternMatchFailure.INSTANCE;	
+		if (!b) {
+			throw PatternMatchFailure.INSTANCE;
 		}
 	}
 

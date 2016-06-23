@@ -44,16 +44,16 @@ public abstract class RuleUnionNode extends DynSemNode {
 
 	protected abstract RuleResult executeMainRule(Object[] arguments);
 
-	private final RuleResult executeFallback(Object[] arguments) {
+	protected final RuleResult executeFallback(Object[] arguments) {
 		return fallbackRulesNode.execute(arguments[0], arguments);
 	}
-	
+
 	public abstract List<Rule> getRules();
-	
+
 	public SortRulesUnionNode getFallbackRulesNode() {
 		return fallbackRulesNode;
 	}
-	
+
 	@Override
 	@TruffleBoundary
 	public String toString() {

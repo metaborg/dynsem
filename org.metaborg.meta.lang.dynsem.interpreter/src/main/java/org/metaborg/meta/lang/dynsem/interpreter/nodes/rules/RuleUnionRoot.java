@@ -2,8 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 
-import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.RootNode;
@@ -18,7 +18,7 @@ public class RuleUnionRoot extends RootNode {
 		assert rules.length > 0;
 
 		if (rules.length == 1) {
-			this.unionNode = new SingeRuleUnionNode(source, arrowName, dispatchClass, rules[0]);
+			this.unionNode = new SingleRuleUnionNode(source, arrowName, dispatchClass, rules[0]);
 		} else {
 			this.unionNode = new MultiRuleUnionNode(source, arrowName, dispatchClass, rules);
 		}
