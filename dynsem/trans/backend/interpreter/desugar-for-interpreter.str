@@ -69,7 +69,7 @@ rules
     Cast(_, srt@ListSort(_)) -> (ListKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
 
   qualify-term-class:
-    class -> $[[<OptTermsPackageName>].[class]]
+    class -> $[[<get-opt> TermPkg()].[class]]
 
 rules /* rename arguments */
 

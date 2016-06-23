@@ -12,14 +12,14 @@ rules /* term registry */
   ds-to-interp-terms-registry-top:
     sig* ->
       compilation-unit |[
-        package ~x:<OptTopPackageName>;
+        package ~x:<get-opt> TopPkg();
         
         import java.util.HashMap;
         import java.util.Map;
         
-        import ~x:<OptTermsPackageName>.*;
-        import ~x:<OptTermBuildPackageName>.*;
-        import ~x:<OptTermMatchPackageName>.*;
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> BuildPkg().*;
+        import ~x:<get-opt> MatchPkg().*;
         
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
         import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -50,7 +50,7 @@ rules /* term registry */
           
           @Override
           public ITerm parseProgramTerm(IStrategoTerm p) {
-            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<OptSourceStartSymbol>).create(p);
+            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<get-opt> StartSymbol()).create(p);
           }
           
           @Override
@@ -82,7 +82,7 @@ rules /* term registry */
           public Class<?> getConstructorClass(String constr, int arity) {
             CompilerAsserts.neverPartOfCompilation();
             try {
-              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptTermsPackageName>].])])) + constr + "_" + arity + "_Term");
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> TermPkg()].])])) + constr + "_" + arity + "_Term");
             } catch (ClassNotFoundException cnfe) {
               throw new RuntimeException("Failed to load constructor class", cnfe);
             }
@@ -92,7 +92,7 @@ rules /* term registry */
           public Class<?> getNativeOperatorClass(String constr, int arity) {
             CompilerAsserts.neverPartOfCompilation();
             try {
-              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptNativePackageName>].])])) + constr + "_" + arity);
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> NativePkg()].])])) + constr + "_" + arity);
             } catch (ClassNotFoundException cnfe) {
               throw new RuntimeException("Failed to load native operator class", cnfe);
             }
@@ -102,7 +102,7 @@ rules /* term registry */
           public Class<?> getListClass(Class<?> elemClass) {
             CompilerAsserts.neverPartOfCompilation();
             try {
-              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<OptTermsPackageName>].List_])])) + elemClass.getName());
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> TermPkg()].List_])])) + elemClass.getName());
             } catch (ClassNotFoundException cnfe) {
               throw new RuntimeException("Failed to load constructor class", cnfe);
             }
@@ -119,7 +119,7 @@ rules /* term registry */
       decl* := <filter(?Constructors(<id>) + ?NativeOperators(<id>) + ?NativeDataTypes(<id>)); concat> sig*;
       (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _)))> decl*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
-      x_classname := $[[<OptLanguageName>]TermRegistry]; 
+      x_classname := $[[<get-opt> LangName()]TermRegistry]; 
       bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
       bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
       bstm2* := <ds-to-interp-nattyterms-registry-inits> nattydecl*;
@@ -185,12 +185,12 @@ rules /* term registry */
   ds-to-interp-natopterms-registry-init:
     NativeOpDecl(name, kid*, _) -> 
       bstm* |[
-        nativeFactories.put(~x:<OptNativePackageName>.x_natop.class, new ITermBuildFactory() {
+        nativeFactories.put(~x:<get-opt> NativePkg().x_natop.class, new ITermBuildFactory() {
     
           @Override
           public TermBuild apply(SourceSection source,
               TermBuild... children) {
-            return ~x:<OptNativePackageName>.x_natop.create(source, e1*);
+            return ~x:<get-opt> NativePkg().x_natop.create(source, e1*);
           }
         });
       ]|

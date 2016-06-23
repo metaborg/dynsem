@@ -12,20 +12,20 @@ rules
   ds-to-interp-terms-module =
     ?Module(_, <fetch-elem(?Signatures(sig*))>);
     where(ds-to-interp-clean-target; ds-to-interp-gen-project);
-    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<OptTermsPackageName>)> sig*;
-    <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)> sig*;
-    <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
-    <ds-to-interp-terms-building; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
-    <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<OptTermMatchPackageName>)> sig*;
-    <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<OptTermBuildPackageName>)> sig*;
-    <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)> sig*;
-    ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>);
-    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>);
-    ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<OptTopPackageName>)
+    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> sig*;
+    <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> sig*;
+    <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+    <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+    <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> sig*;
+    <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+    <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> sig*;
+    ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+    ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())
 
   ds-to-interp-clean-target =
-    OptCleanTarget <
-      <concat-strings> [<OptJavaGenDir>, "/", <string-replace(|".", "/")> <OptTopPackageName>];
+    get-opt(|CleanProject()) <
+      <concat-strings> [<get-opt> JavaGenDirAbs(), "/", <string-replace(|".", "/")> <get-opt> TopPkg()];
       try(ds-rmdir)
     + id
 
@@ -46,7 +46,7 @@ rules /* Sort & Constructor classes */
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
       compilation-unit |[
-        package ~x:<OptTermsPackageName>;
+        package ~x:<get-opt> TermPkg();
         
         import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
@@ -111,12 +111,12 @@ rules /* Sort & Constructor classes */
   ds-to-interp-terms-consdecl:
     dec@ConsDecl(name, kid*, s, _) ->
       compilation-unit |[
-        package ~x:<OptTermsPackageName>;
+        package ~x:<get-opt> TermPkg();
         
         import org.spoofax.interpreter.core.Tools;
         import org.spoofax.interpreter.terms.*;
-        import ~x:<OptNativePackageName>.*;
-        import ~x:<OptTopPackageName>.TypesGen;
+        import ~x:<get-opt> NativePkg().*;
+        import ~x:<get-opt> TopPkg().TypesGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import com.oracle.truffle.api.CompilerAsserts;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -211,7 +211,7 @@ rules /* Sort & Constructor classes */
   ds-to-interp-terms-listdecl:
     s@ListSort(es) ->
       compilation-unit |[
-        package ~x:<OptTermsPackageName>;
+        package ~x:<get-opt> TermPkg();
 
         import java.util.Iterator;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
@@ -219,7 +219,7 @@ rules /* Sort & Constructor classes */
         import com.github.krukow.clj_lang.IPersistentStack;
         import com.github.krukow.clj_lang.PersistentList;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-        import ~x:<OptNativePackageName>.*;
+        import ~x:<get-opt> NativePkg().*;
         
         public final class x_listclass implements IListTerm<x_elemclass> {
 
@@ -480,11 +480,11 @@ rules /* type system class */
   ds-to-interp-terms-types-signatures:
     sig-sec* ->
       compilation-unit |[
-        package ~x:<OptTopPackageName>;
+        package ~x:<get-opt> TopPkg();
 
         import com.oracle.truffle.api.dsl.TypeSystem;
-        import ~x:<OptTermsPackageName>.*;
-        import ~x:<OptNativePackageName>.*;
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> NativePkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.*;
         import com.github.krukow.clj_ds.PersistentMap;
         
@@ -508,10 +508,10 @@ rules /* term building */
   ds-to-interp-terms-sortbuilding:
     dec@SortDecl(s) -> 
       compilation-unit |[
-        package ~x:<OptTermBuildPackageName>;
+        package ~x:<get-opt> BuildPkg();
   
-        import ~x:$[[<OptTermsPackageName>].[<ds-to-interp-terms-types-name> dec]];
-        import ~x:$[[<OptTopPackageName>].TypesGen];
+        import ~x:$[[<get-opt> TermPkg()].[<ds-to-interp-terms-types-name> dec]];
+        import ~x:$[[<get-opt> TopPkg()].TypesGen];
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
         import com.oracle.truffle.api.frame.VirtualFrame;
@@ -548,10 +548,10 @@ rules /* term building */
   ds-to-interp-terms-building-con:
     dec@ConsDecl(_, kid*, s, _) ->
       compilation-unit |[
-        package ~x:<OptTermBuildPackageName>;
+        package ~x:<get-opt> BuildPkg();
       
-        import ~x:$[[<OptTermsPackageName>].*];
-        import ~x:<OptNativePackageName>.*;
+        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:<get-opt> NativePkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         import com.oracle.truffle.api.dsl.NodeChild;
         import com.oracle.truffle.api.dsl.NodeChildren;
@@ -604,10 +604,10 @@ rules /* term building */
   ds-to-interp-terms-building-list:
     ls@ListSort(es) ->
       compilation-unit |[
-        package ~x:<OptTermBuildPackageName>;
+        package ~x:<get-opt> BuildPkg();
   
-        import ~x:$[[<OptTermsPackageName>].*];
-        import ~x:$[[<OptTopPackageName>].TypesGen];
+        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:$[[<get-opt> TopPkg()].TypesGen];
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
         
@@ -671,10 +671,10 @@ rules /* term matching */
   ds-to-interp-terms-matching-con:
     dec@ConsDecl(_, kid*, _, _) -> 
       compilation-unit |[
-        package ~x:<OptTermMatchPackageName>;
+        package ~x:<get-opt> MatchPkg();
         
-        import ~x:<OptTermsPackageName>.x_termclass;
-        import ~x:<OptNativePackageName>.*;
+        import ~x:<get-opt> TermPkg().x_termclass;
+        import ~x:<get-opt> NativePkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
         
@@ -735,9 +735,9 @@ rules /* term matching */
   ds-to-interp-terms-matching-list:
     ls@ListSort(es) -> 
       compilation-unit |[
-        package ~x:<OptTermMatchPackageName>;
+        package ~x:<get-opt> MatchPkg();
   
-        import ~x:$[[<OptTermsPackageName>].*];
+        import ~x:$[[<get-opt> TermPkg()].*];
         
         import java.util.Iterator;
         

@@ -19,12 +19,12 @@ rules
   ds-to-interp-nattype-func-adapter(|jstring, sort_nat):
     NativeFunctionDecl(fun, kid*, sort_res) ->
       compilation-unit |[
-        package ~x:<OptTermBuildPackageName>;
+        package ~x:<get-opt> BuildPkg();
       
-        import ~x:$[[<OptTermsPackageName>].*];
+        import ~x:$[[<get-opt> TermPkg()].*];
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
-        import ~x:<OptNativePackageName>.*;
+        import ~x:<get-opt> NativePkg().*;
         import com.oracle.truffle.api.dsl.NodeChild;
         import com.oracle.truffle.api.dsl.NodeChildren;
         import com.oracle.truffle.api.dsl.Specialization;
