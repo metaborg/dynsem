@@ -329,7 +329,8 @@ rules /* Sort & Constructor classes */
       ]|
     where
       x_listclass := <ds-to-interp-terms-types-name> s;
-      x_elemclass := <ds-to-interp-terms-types-name> es
+      x_elemclassunboxed := <ds-to-interp-terms-types-name> es;
+      x_elemclass := <ds-box-java-type> x_elemclassunboxed
   
   ds-to-interp-sorts-to-create-arg(|e_term):
     (e, sref@SimpleSort(s)) -> ([], e |[ ~x:<ds-to-interp-terms-types-name> sref.create(e_term.getSubterm(e)) ]|)
@@ -348,7 +349,7 @@ rules /* Sort & Constructor classes */
     where
       x_tmplist := $[_[<newname>]];
       x_listclass := <ds-to-interp-terms-types-name> ls;
-      x_elemclass := <ds-to-interp-terms-types-name> s;
+      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> s;
       x_tmpres := $[_[<newname>]];
       x_tmpelem := $[_[<newname>]];
       x_idx := $[_[<newname>]];
@@ -652,7 +653,7 @@ rules /* term building */
     where
       x_listclass := <ds-to-interp-terms-types-name> ls;
       x_listbuildclass := $[[x_listclass]Build];
-      x_elemclass := <ds-to-interp-terms-types-name> es;
+      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es;
       x_aslistfun := $[as[x_listclass]];
       x_aselemfun := $[as[x_elemclass]]
       
@@ -805,5 +806,5 @@ rules /* term matching */
     where
       x_listclass := <ds-to-interp-terms-types-name> ls;
       x_listmatchclass := $[[x_listclass]MatchPattern];
-      x_elemclass := <ds-to-interp-terms-types-name> es
+      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es
 

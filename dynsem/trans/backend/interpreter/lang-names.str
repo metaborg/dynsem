@@ -38,10 +38,12 @@ rules
   ds-to-interp-terms-types-name:
     SimpleSort("Bool") -> $[boolean]
   
-  ds-box-java-type:
+  ds-box-java-type = try(internal-ds-box-java-type)
+  
+  internal-ds-box-java-type:
     "int" -> $[Integer]
 
-  ds-box-java-type:
+  internal-ds-box-java-type:
     "boolean" -> $[Boolean]
     
   is-primitive-type = try(?SimpleSort(<id>)); (?"Int" + ?"Bool")
