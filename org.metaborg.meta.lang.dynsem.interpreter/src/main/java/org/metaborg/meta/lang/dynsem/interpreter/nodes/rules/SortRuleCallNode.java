@@ -19,13 +19,13 @@ public abstract class SortRuleCallNode extends ASortRuleCallNode {
 	@Specialization(limit = "1", guards = "o.getSortClass() == sortDispatchClass")
 	public RuleResult doFallback(IApplTerm o, Object[] arguments,
 			@Cached("o.getSortClass()") Class<?> sortDispatchClass,
-			@Cached("createSortUnionNode(o, sortDispatchClass)") JointRuleNode sortJointRule) {
+			@Cached("createRuleUnionNode(o, sortDispatchClass)") RuleUnionNode sortJointRule) {
 		return sortJointRule.execute(arguments);
 	}
 
-	protected final JointRuleNode createSortUnionNode(IApplTerm o, Class<?> sortDispatchClass) {
+	protected final RuleUnionNode createRuleUnionNode(IApplTerm o, Class<?> sortDispatchClass) {
 		JointRuleRoot root = getContext().getRuleRegistry().lookupRules(arrowName, sortDispatchClass);
-		return NodeUtil.cloneNode(root.getJointNode());
+		return NodeUtil.cloneNode(root.getJointNode().getUnionNode());
 	}
 
 }
