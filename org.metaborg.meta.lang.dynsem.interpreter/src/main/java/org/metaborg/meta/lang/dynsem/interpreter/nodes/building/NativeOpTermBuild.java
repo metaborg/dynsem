@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -34,8 +35,11 @@ public class NativeOpTermBuild extends TermBuild {
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
-		ITermBuildFactory buildFactory = getContext().lookupNativeOpBuilder(constr, children.length);
-		TermBuild build = buildFactory.apply(getSourceSection(), children);
+		final ITermRegistry termReg = getContext().getTermRegistry();
+		final Class<?> termClass = termReg.getNativeOperatorClass(constr, children.length);
+
+		TermBuild build = InterpreterUtils.notNull(termReg.lookupNativeOpBuildFactory(termClass))
+				.apply(getSourceSection(), children);
 		return replace(build).executeGeneric(frame);
 	}
 

@@ -141,13 +141,13 @@ rules
     Rule(p*, infer, rel) -> r' 
     where {| PropagateTermBuild:
       p'* := <filter(not(eliminate-termbuild-premise))> p*;
-      r' := <alltd(replace-singletonread(record-progress))> Rule(p'*, infer, rel)
+      r' := <innermost(replace-singletonread(record-progress))> Rule(p'*, infer, rel)
     |}
   
   eliminate-termbuild-premise =
     ?Formula(Match(lhs, Var(v)));
     <ReadCount> v => 1;
-    rules(PropagateTermBuild: v -> lhs)
+    rules(PropagateTermBuild:+ v -> lhs)
   
   replace-singletonread(record-progress):
     VarRef(v) -> t

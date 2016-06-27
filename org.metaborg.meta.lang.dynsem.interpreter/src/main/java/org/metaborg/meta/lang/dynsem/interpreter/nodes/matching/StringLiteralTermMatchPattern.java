@@ -1,34 +1,35 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
-
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
+import com.oracle.truffle.api.dsl.Cached;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class StringLiteralTermMatchPattern extends LiteralMatchPattern {
+public abstract class StringLiteralTermMatchPattern extends LiteralMatchPattern {
 
-	private final String lit;
+	protected final String lit;
 
 	public StringLiteralTermMatchPattern(String lit, SourceSection source) {
 		super(source);
 		this.lit = lit;
 	}
 
-	private final ConditionProfile conditionProfile = ConditionProfile.createBinaryProfile();
-
-	@Override
-	public boolean execute(Object term, VirtualFrame frame) {
-		if (conditionProfile.profile(BuiltinTypesGen.isString(term))) {
-			String s = BuiltinTypesGen.asString(term);
-			return isStringEq(s);
+	@Specialization(guards = "s == cachedS")
+	public void doCachedString(String s, @Cached("s") String cachedS, @Cached("isStringEq(cachedS)") boolean isEq) {
+		if (!isEq) {
+			throw PatternMatchFailure.INSTANCE;
 		}
-		return false;
+	}
+
+	@Specialization(contains = "doCachedString")
+	public void doUncachedString(String s) {
+		if (!isStringEq(s)) {
+			throw PatternMatchFailure.INSTANCE;
+		}
 	}
 
 	@TruffleBoundary
-	private boolean isStringEq(String s) {
+	protected final boolean isStringEq(String s) {
 		return lit.equals(s);
 	}
 

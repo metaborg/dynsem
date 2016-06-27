@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -22,7 +23,7 @@ public class VarRead extends TermBuild {
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		return frame.getValue(slot);
+		return InterpreterUtils.readSlot(frame, slot);
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {

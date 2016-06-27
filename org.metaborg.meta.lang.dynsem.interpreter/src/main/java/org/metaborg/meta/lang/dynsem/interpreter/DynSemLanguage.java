@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.JointRuleRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRoot;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.TruffleLanguage;
@@ -16,6 +16,7 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
+
 	// Keys for configuration parameters for a DynSemContext.
 	public static final String PARSER = "PARSER";
 	public static final String TERM_REGISTRY = "TERM_REGISTRY";
@@ -23,6 +24,12 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 	public DynSemLanguage() {
 	}
+
+	public abstract boolean isFullBacktrackingEnabled();
+
+	public abstract boolean isSafeComponentsEnabled();
+
+	public abstract boolean isTermCachingEnabled();
 
 	@Override
 	protected DynSemContext createContext(Env env) {
@@ -65,14 +72,13 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 			String name = splitName[0];
 			String constr = splitName[1];
 			int arity = Integer.parseInt(splitName[2]);
-			RuleRoot ruleRoot = context.getRuleRegistry().lookupRule(name, constr, arity);
-			return new DynSemRule(ruleRoot);
+			Class<?> dispatchClass = context.getTermRegistry().getConstructorClass(constr, arity);
+			JointRuleRoot ruleUnionRoot = context.getRuleRegistry().lookupRules(name, dispatchClass);
+			return new DynSemRule(ruleUnionRoot);
 		} catch (Exception e) {
 			return null;
 		}
 	}
-
-	public abstract boolean isSafeComponentsEnabled();
 
 	@Override
 	protected boolean isObjectOfLanguage(Object obj) {

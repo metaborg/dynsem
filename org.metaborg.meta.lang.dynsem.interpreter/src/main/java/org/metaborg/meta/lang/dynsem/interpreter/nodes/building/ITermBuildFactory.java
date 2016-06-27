@@ -4,5 +4,12 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public interface ITermBuildFactory {
 
-	public TermBuild apply(SourceSection source, TermBuild... children);
+	default public TermBuild apply(SourceSection source, TermBuild... children) {
+		throw new RuntimeException("Operation is not supported");
+	}
+
+	default public TermBuild apply(SourceSection source, Object... objects) {
+		throw new RuntimeException("Operation is not supported");
+	}
+
 }

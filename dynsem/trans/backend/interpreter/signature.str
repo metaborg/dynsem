@@ -13,6 +13,18 @@ signature
     NativeFunCall: String * String * Term * List(Term) -> Term
     ListSource: Term * Type -> Term
     Relation : Source * Rel * Target -> Relation
-    RecRule : List(Premise) * INFER * Relation -> Rule
     RecRelation: Source * Rel * Target -> Relation
     Fails : Premise -> Premise
+    
+    TypedList : List(Term) * String -> List
+    TypedListTail : List(Term) * Term * String -> List
+    
+    Rule : List(Premise) * INFER * Relation * RuleKind * String -> Rule
+    
+    TermKind : RuleKind
+    SortKind : RuleKind
+    PrimitiveKind : RuleKind
+    NativeKind : RuleKind
+    ListKind : RuleKind
+    MapKind : RuleKind
+    

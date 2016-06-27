@@ -6,13 +6,13 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class RelationInvocationNode extends DynSemNode {
+public class InvokeRelationNode extends DynSemNode {
 	@Child protected RelationPremiseInputBuilder inputBuilder;
 
-	@Child protected RelationDispatch dispatchNode;
+	@Child protected DispatchNode dispatchNode;
 
-	public RelationInvocationNode(RelationPremiseInputBuilder inputBuilder, RelationDispatch dispatchNode,
-			SourceSection source) {
+	public InvokeRelationNode(SourceSection source, RelationPremiseInputBuilder inputBuilder,
+			DispatchNode dispatchNode) {
 		super(source);
 		this.inputBuilder = inputBuilder;
 		this.dispatchNode = dispatchNode;
@@ -20,6 +20,6 @@ public class RelationInvocationNode extends DynSemNode {
 
 	public RuleResult execute(VirtualFrame frame) {
 		Object[] args = inputBuilder.executeObjectArray(frame);
-		return dispatchNode.execute(frame, args);
+		return dispatchNode.execute(frame, args[0].getClass(), args);
 	}
 }

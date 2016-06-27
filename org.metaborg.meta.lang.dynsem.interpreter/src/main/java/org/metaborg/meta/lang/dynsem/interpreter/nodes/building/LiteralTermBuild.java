@@ -30,8 +30,8 @@ public abstract class LiteralTermBuild extends TermBuild {
 		}
 
 		@Override
-		public Object executeGeneric(VirtualFrame frame) {
-			return val;
+		public String executeGeneric(VirtualFrame frame) {
+			return executeString(frame);
 		}
 
 		@Override
@@ -56,8 +56,8 @@ public abstract class LiteralTermBuild extends TermBuild {
 		}
 
 		@Override
-		public Object executeGeneric(VirtualFrame frame) {
-			return val;
+		public Integer executeGeneric(VirtualFrame frame) {
+			return executeInteger(frame);
 		}
 
 		@Override

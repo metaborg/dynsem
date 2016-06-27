@@ -1,26 +1,26 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.ConsListBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ListBuild.NilListBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.IntLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.StringLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
-import com.github.krukow.clj_lang.IPersistentStack;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -46,8 +46,8 @@ public abstract class TermBuild extends DynSemNode {
 		return BuiltinTypesGen.expectITerm(executeGeneric(frame));
 	}
 
-	public ITerm executeIConTerm(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectITerm(executeGeneric(frame));
+	public IApplTerm executeIApplTerm(VirtualFrame frame) throws UnexpectedResultException {
+		return BuiltinTypesGen.expectIApplTerm(executeGeneric(frame));
 	}
 
 	public PersistentMap<?, ?> executeMap(VirtualFrame frame) throws UnexpectedResultException {
@@ -62,8 +62,8 @@ public abstract class TermBuild extends DynSemNode {
 		return BuiltinTypesGen.expectObjectArray(executeGeneric(frame));
 	}
 
-	public IPersistentStack<?> executeList(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectIPersistentStack(executeGeneric(frame));
+	public IListTerm<?> executeIList(VirtualFrame frame) throws UnexpectedResultException {
+		return BuiltinTypesGen.expectIListTerm(executeGeneric(frame));
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
@@ -107,11 +107,8 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "ListSource", 2)) {
 			return create(Tools.applAt(t, 0), fd);
 		}
-		if (Tools.hasConstructor(t, "List", 1)) {
-			return NilListBuild.create(t, fd);
-		}
-		if (Tools.hasConstructor(t, "ListTail", 2)) {
-			return ConsListBuild.create(t, fd);
+		if (Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3)) {
+			return ListBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "NativeFunCall", 4)) {
 			return SortFunCallBuild.create(t, fd);
@@ -126,6 +123,18 @@ public abstract class TermBuild extends DynSemNode {
 		}
 
 		throw new NotImplementedException("Unsupported term build: " + t);
+	}
+
+	public static TermBuild[] cloneNodes(TermBuild[] nodes) {
+		final TermBuild[] clone = new TermBuild[nodes.length];
+		for (int i = 0; i < clone.length; i++) {
+			clone[i] = cloneNode(nodes[i]);
+		}
+		return clone;
+	}
+
+	public static TermBuild cloneNode(TermBuild node) {
+		return null == node ? null : NodeUtil.cloneNode(node);
 	}
 
 	public static TermBuild createFromLabelComp(IStrategoAppl t, FrameDescriptor fd) {

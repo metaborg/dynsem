@@ -31,7 +31,7 @@ rules
     in-project-path(desugar-for-interpreter-module|project-path);
     where(
       ?result;
-      fout := <fopen> (<OptTargetSpecFile>, "w");
+      fout := <fopen> (<get-opt> TargetSpecAbs(), "w");
       <pp-aterm-stream(|fout)> result;
       <fclose> fout
     )
@@ -41,6 +41,6 @@ rules
   
   ds-to-interp-table =
     where(
-      <copy-file> (<OptTableSourceFile>, <OptTargetTableFile>)
+      <copy-file> (<get-opt> TableSource(), <get-opt> TargetTableAbs())
     )
     

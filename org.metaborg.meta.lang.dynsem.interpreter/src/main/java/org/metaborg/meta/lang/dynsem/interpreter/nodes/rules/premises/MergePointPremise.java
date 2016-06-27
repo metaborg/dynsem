@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.PremiseFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -53,9 +53,11 @@ public class MergePointPremise extends Premise {
 	@Override
 	public void execute(VirtualFrame frame) {
 		try {
+			// execute the condition
 			condition.execute(frame);
 			execBranch1(frame);
-		} catch (PremiseFailure f) {
+		} catch (PatternMatchFailure pmfx) {
+			// the condition has failed due to a failed pattern match so execute the alternative
 			alternativeTaken.enter();
 			execBranch2(frame);
 		}
