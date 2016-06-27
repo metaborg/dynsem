@@ -25,7 +25,7 @@ rules
       ; factorize-module
       ; explicate-module
       ; copy-propagation-module
-      ; constant-propagation-module
+//      ; constant-propagation-module
       ; defactorize-module
       ; prettify-vars-module
       ; explicate-arrow-types
