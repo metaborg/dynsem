@@ -152,7 +152,14 @@ rules /* list reductions */
 
 rules /* TCO */
 
-  desugar-rec-tco = alltd(desugar-rule-rec-tco)
+  desugar-rec-tco = alltd(try(desugar-rule-pushdown-target); desugar-rule-rec-tco)
+
+  desugar-rule-pushdown-target:
+    Rule(p*, infer, Relation(src, arrow, Target(tt, rws)), kind, class) ->
+      Rule([p*, Formula(Match(tt, Var(v)))], infer, Relation(src, arrow, Target(VarRef(v), rws)), kind, class)
+    where
+      <not(?VarRef(_))> tt;
+      v := <newname>
 
   desugar-rule-rec-tco:
     Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
@@ -171,9 +178,6 @@ rules /* TCO */
     |}
   
   desugar-prems-rec-tco(s) = is-list; try(at-last([desugar-prem-rec-tco(s)]))
-  
-  desugar-prem-rec-tco(s) =
-    MergePoint(id, PremiseBlock(desugar-prems-rec-tco(s)), PremiseBlock(desugar-prems-rec-tco(s)))
   
   desugar-prem-rec-tco(s) =
     CaseMatch(id, map(try(CaseOtherwise(desugar-prems-rec-tco(s)) + CasePattern(id, desugar-prems-rec-tco(s)))))
