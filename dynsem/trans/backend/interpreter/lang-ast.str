@@ -138,7 +138,6 @@ rules /* Sort & Constructor classes */
             assert term != null;
             assert Tools.isTermAppl(term);
             assert Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
-            bstm1*
             return new x_classname(e1*);
           }
           
@@ -195,7 +194,7 @@ rules /* Sort & Constructor classes */
       bstm0* := <ds-to-interp-sorts-to-finits> kid*;
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
-      (bstm1*, e1*) := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|e |[ term ]|)); unzip; (concat, id)> kid*;
+      e1* := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|e |[ term ]|))> kid*;
       bstm2* := <map-with-index(ds2java-field-eq-check)> kid*
     where
       if [] := kid*
@@ -333,19 +332,26 @@ rules /* Sort & Constructor classes */
       x_elemclass := <ds-box-java-type> x_elemclassunboxed
   
   ds-to-interp-sorts-to-create-arg(|e_term):
-    (e, sref@SimpleSort(s)) -> ([], e |[ ~x:<ds-to-interp-terms-types-name> sref.create(e_term.getSubterm(e)) ]|)
+    (e, sref@SimpleSort(s)) ->
+      e |[ new Object() { public x_ttype apply() { return x_ttype.create(e_term.getSubterm(e)); } }.apply() ]|
     where
-      <not(is-builtin-type)> s
+      <not(is-builtin-type)> s;
+      x_ttype := <ds-to-interp-terms-types-name> sref
 
   ds-to-interp-sorts-to-create-arg(|e_term):
-    (e, ls@ListSort(s)) -> (
-      bstm* |[
-        IStrategoList x_tmplist = Tools.listAt(e_term, e);
-        x_elemclass[] x_tmpres = new x_elemclass[x_tmplist.size()];
-        for (int x_idx = 0; x_idx < x_tmpres.length; x_idx++) {
-          x_tmpres[x_idx] = e_elem;
-        }
-      ]|, e |[ new x_listclass(x_tmpres) ]|)
+    (e, ls@ListSort(s)) ->
+      e |[
+        new Object() {
+          public x_listclass apply() {
+            IStrategoList x_tmplist = Tools.listAt(e_term, e);
+            x_elemclass[] x_tmpres = new x_elemclass[x_tmplist.size()];
+            for (int x_idx = 0; x_idx < x_tmpres.length; x_idx++) {
+              x_tmpres[x_idx] = e_elem;
+            }
+            return new x_listclass(x_tmpres);
+          }
+        }.apply()
+      ]|
     where
       x_tmplist := $[_[<newname>]];
       x_listclass := <ds-to-interp-terms-types-name> ls;
@@ -368,20 +374,25 @@ rules /* Sort & Constructor classes */
     SimpleSort("Int") -> e |[ Tools.asJavaInt(e_tmpelem) ]|
 
   ds-to-interp-sorts-to-create-arg(|e_term):
-    (e, MapSort(skey, sval)) -> (
-      bstm* |[
-        IStrategoAppl x_mapT = Tools.applAt(e_term, e);
-        assert Tools.hasConstructor(x_mapT, "Map", 1);
-      
-        IStrategoList x_bindsT = Tools.listAt(x_mapT, 0);
-      
-        java.util.Map<x_keyclass, x_valclass> x_map = new java.util.HashMap<x_keyclass, x_valclass>(
-            Math.round(x_bindsT.size() / 0.75f), 0.75f);
-        for (IStrategoTerm x_bindT : x_bindsT) {
-          assert Tools.isTermAppl(x_bindT) && Tools.hasConstructor((IStrategoAppl) x_bindT, "Bind", 2);
-          x_map.put(e_keycreate, e_valcreate);
-        }
-      ]|, e |[ com.github.krukow.clj_lang.PersistentHashMap.create(x_map) ]|)
+    (e, MapSort(skey, sval)) ->
+      e |[
+        new Object() {
+          public com.github.krukow.clj_lang.PersistentHashMap apply() {
+            IStrategoAppl x_mapT = Tools.applAt(e_term, e);
+            assert Tools.hasConstructor(x_mapT, "Map", 1);
+          
+            IStrategoList x_bindsT = Tools.listAt(x_mapT, 0);
+          
+            java.util.Map<x_keyclass, x_valclass> x_map = new java.util.HashMap<x_keyclass, x_valclass>(
+                Math.round(x_bindsT.size() / 0.75f), 0.75f);
+            for (IStrategoTerm x_bindT : x_bindsT) {
+              assert Tools.isTermAppl(x_bindT) && Tools.hasConstructor((IStrategoAppl) x_bindT, "Bind", 2);
+              x_map.put(e_keycreate, e_valcreate);
+            }
+            return com.github.krukow.clj_lang.PersistentHashMap.create(x_map);
+          }
+        }.apply()
+      ]|
     where
       x_mapT := $[_[<newname>]];
       x_bindsT := $[_[<newname>]];
@@ -389,24 +400,29 @@ rules /* Sort & Constructor classes */
       x_bindT := $[_[<newname>]];
       x_keyclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> skey;
       x_valclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> sval;
-      (bstm0*, e_keycreate) := <ds-to-interp-sorts-to-create-arg(|e |[ x_bindT ]|)> (e |[ 0 ]|, skey);
-      (bstm1*, e_valcreate) := <ds-to-interp-sorts-to-create-arg(|e |[ x_bindT ]|)> (e |[ 1 ]|, sval)
+      e_keycreate := <ds-to-interp-sorts-to-create-arg(|e |[ x_bindT ]|)> (e |[ 0 ]|, skey);
+      e_valcreate := <ds-to-interp-sorts-to-create-arg(|e |[ x_bindT ]|)> (e |[ 1 ]|, sval)
 
   ds-to-interp-sorts-to-create-arg(|e_term):
-    (e, sref@NativeType(_, _)) -> (bstm* |[ if(true) throw new IllegalStateException("Term cannot be created from native type"); ]|, e |[ null ]| )
+    (e, sref@NativeType(_, _)) -> e |[ null ]|
 
   ds-to-interp-sorts-to-create-arg(|e_term):
-    (e, sref@SimpleSort("String")) -> ([], e |[ Tools.stringAt(e_term, e).stringValue() ]|)
+    (e, sref@SimpleSort("String")) -> e |[ Tools.stringAt(e_term, e).stringValue() ]|
 
   ds-to-interp-sorts-to-create-arg(|e_term):
-    (e, sref@SimpleSort("Int")) -> ([], e |[ Tools.intAt(e_term, e).intValue() ]|)
+    (e, sref@SimpleSort("Int")) -> e |[ Tools.intAt(e_term, e).intValue() ]|
 
   ds-to-interp-sorts-to-create-arg(|e_term):
-    (e, sref@SimpleSort("Bool")) -> (
-      bstm* |[
-        IStrategoAppl x_tmp1 = Tools.applAt(e_term, e);
-        assert Tools.hasConstructor(x_tmp1, "True", 0) || Tools.hasConstructor(x_tmp1, "False", 0);
-      ]|, e |[ Tools.hasConstructor(x_tmp1, "True", 0) ? true : false ]|)
+    (e, sref@SimpleSort("Bool")) ->
+      e |[
+        new Object() {
+          public boolean apply() {
+            IStrategoAppl x_tmp1 = Tools.applAt(e_term, e);
+            assert Tools.hasConstructor(x_tmp1, "True", 0) || Tools.hasConstructor(x_tmp1, "False", 0);
+            return Tools.hasConstructor(x_tmp1, "True", 0) ? true : false;
+          }
+        }.apply()
+      ]|
     where
       x_tmp1 := $[_[<newname>]]
   
