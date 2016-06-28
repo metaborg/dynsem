@@ -121,6 +121,7 @@ rules /* Sort & Constructor classes */
         import com.oracle.truffle.api.CompilerAsserts;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         import java.lang.reflect.Field;
+        import org.apache.commons.lang3.builder.HashCodeBuilder;
         
         public final class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
 
@@ -177,6 +178,12 @@ rules /* Sort & Constructor classes */
           }
           
           @Override
+          @TruffleBoundary
+          public int hashCode() {
+            return e_hash.toHashCode();
+          }
+          
+          @Override
           public ITermInstanceChecker getCheck() {
             return new ITermInstanceChecker() {
         
@@ -195,7 +202,8 @@ rules /* Sort & Constructor classes */
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
       e1* := <map-with-index((\ i -> e |[ ~i:<dec; int-to-string> ]| \, id); ds-to-interp-sorts-to-create-arg(|e |[ term ]|))> kid*;
-      bstm2* := <map-with-index(ds2java-field-eq-check)> kid*
+      bstm2* := <map-with-index(ds2java-field-eq-check)> kid*;
+      e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds-to-interp-hashcode-append)> <range> (1, <length; inc> kid*)
     where
       if [] := kid*
       then
@@ -206,6 +214,9 @@ rules /* Sort & Constructor classes */
       else
         finit* := class-body-dec* |[ public x_classname(param0*) { bstm0* } ]|
       end
+      
+  ds-to-interp-hashcode-append:
+    (idx, e) -> e |[ e.append(~x:$[_[idx]]) ]|
   
   ds-to-interp-terms-listdecl:
     s@ListSort(es) ->
