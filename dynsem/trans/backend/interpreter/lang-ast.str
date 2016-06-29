@@ -706,6 +706,7 @@ rules /* term matching */
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
         
         import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.dsl.Fallback;
         import com.oracle.truffle.api.frame.VirtualFrame;
         import com.oracle.truffle.api.source.SourceSection;
         
@@ -719,13 +720,17 @@ rules /* term matching */
           }
         
           @Specialization
-          public void doMatch(VirtualFrame frame, x_termclass term) {
+          public void doTyped(VirtualFrame frame, x_termclass term) {
             bstm1*
           }
 
-          @Specialization
-          public void doMatchFailed(VirtualFrame frame, Object term) {
-            throw PatternMatchFailure.INSTANCE;
+          @Fallback
+          public void doGeneric(VirtualFrame frame, Object term) {
+            if (term instanceof x_termclass) {
+              doTyped(frame, (x_termclass) term);
+            } else {
+              throw PatternMatchFailure.INSTANCE;
+            }
           }
           
         }
