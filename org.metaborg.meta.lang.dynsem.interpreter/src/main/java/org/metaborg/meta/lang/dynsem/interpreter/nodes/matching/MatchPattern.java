@@ -48,6 +48,9 @@ public abstract class MatchPattern extends DynSemNode {
 			// TODO we should use the type information from the cast instead of skipping over it
 			return MatchPattern.create(Tools.applAt(t, 0), fd);
 		}
+		if(Tools.hasConstructor(t, "As", 2)){
+			return AsMatch.create(t, fd);
+		}
 
 		return LiteralMatchPattern.create(t, fd);
 

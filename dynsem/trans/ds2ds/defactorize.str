@@ -125,12 +125,12 @@ rules
       eliminate-patternmatch-premises;
       innermost(replace-singletonwrite(record-progress))
     |}
-    
+  
   eliminate-patternmatch-premise =
-    ?f@Formula(Match(VarRef(v), rhs));
+    (?Formula(Match(VarRef(v), rhs)) <+ ?Formula(Match(Cast(VarRef(v), _), rhs)));
     <ReadCount> v => 1;
     rules(PropagatePatternMatch: Var(v) -> rhs)
-
+  
   replace-singletonwrite(record-progress):
     var@Var(v) -> t
     where
