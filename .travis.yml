@@ -1,0 +1,10 @@
+language: java
+
+script: cd org.metaborg.meta.lang.dynsem.interpreter && mvn test
+
+cache:
+ directories:
+   - $HOME/.m2
+
+jdk:
+  - openjdk7
