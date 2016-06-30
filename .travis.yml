@@ -1,6 +1,6 @@
 language: java
 
-script: cd org.metaborg.meta.lang.dynsem.interpreter && mvn test
+script: cd org.metaborg.meta.lang.dynsem.interpreter && mvn -Pstandalone test
 
 cache:
  directories:
