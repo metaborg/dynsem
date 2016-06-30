@@ -1,10 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InvokeRelationNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RelationPremiseInputBuilder;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.InvokeRelationNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction.RelationPremiseInputBuilder;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;

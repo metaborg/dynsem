@@ -1,7 +1,6 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.reduction;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
