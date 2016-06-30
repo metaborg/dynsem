@@ -1,4 +1,6 @@
 
-# DynSem for operational Semantics
+[![Build Status](https://travis-ci.org/metaborg/dynsem.svg?branch=master)](https://travis-ci.org/metaborg/dynsem)
 
-For documentation on using DynSem see the [DynSem documentation page](http://metaborg.org/en/latest/source/langdev/meta/lang/dynsem/index.html).
+# DynSem
+
+DynSem is a DSL for declarative specification of dynamic semantics of languages. Read about using DynSem in the [DynSem documentation](http://metaborg.org/en/latest/source/langdev/meta/lang/dynsem/index.html).
