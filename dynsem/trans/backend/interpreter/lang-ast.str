@@ -346,6 +346,7 @@ rules /* Sort & Constructor classes */
             IStrategoList l = (IStrategoList) term;
             x_elemclass[] elems = new x_elemclass[l.size()];
             for(int idx = 0; idx < elems.length; idx++){
+              final int final_idx = idx; // FIXME this is only needed because e_elemcreate might be an anonymous object reading the idx
               elems[idx] = e_elemcreate;
             }
             return new x_listclass(elems);
@@ -357,11 +358,11 @@ rules /* Sort & Constructor classes */
       x_listclass := <ds-to-interp-terms-types-name> s;
       x_elemclassunboxed := <ds-to-interp-terms-types-name> es;
       x_elemclass := <ds-box-java-type> x_elemclassunboxed;
-      e_elemcreate := <ds-to-interp-sortelem-to-create-arg(|e |[ l.getSubterm(idx) ]|)> es
+      e_elemcreate := <ds-to-interp-sortelem-to-create-arg(|e |[ l.getSubterm(final_idx) ]|)> es
   
   ds-to-interp-sorts-to-create-arg:
     (e_term, sref@SimpleSort(s)) ->
-      e |[ new Object() { public x_ttype apply() { return x_ttype.create(e_term); } }.apply() ]|
+      e |[ x_ttype.create(e_term) ]|
     where
       <not(is-builtin-type)> s;
       x_ttype := <ds-to-interp-terms-types-name> sref
