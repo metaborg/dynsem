@@ -38,6 +38,18 @@ rules
   ds-to-interp-terms-types-name:
     SimpleSort("Bool") -> $[boolean]
   
+  ds-to-interp-terms-types-name:
+    Con(name, child*) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
+      
+  ds-to-interp-terms-types-name:
+    ConsDecl(name, child*, _, _) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
+
+  ds-to-interp-terms-types-con-name:
+    (name, arity) -> $[[<ds-utils-java-escape-id> name]_[arity]_Term]
+  
+  ds-to-interp-terms-types-name:
+    ListSort(s) -> $[List_[<ds-to-interp-terms-types-name; ds-utils-java-escape-id; string-replace(|".","_")> s]]
+
   ds-box-java-type = try(internal-ds-box-java-type)
   
   internal-ds-box-java-type:
@@ -52,16 +64,5 @@ rules
   
   is-builtin-type = ?ListSort(<is-builtin-type>)
   
-  ds-to-interp-terms-types-name:
-    Con(name, child*) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
-      
-  ds-to-interp-terms-types-name:
-    ConsDecl(name, child*, _, _) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
-
-  ds-to-interp-terms-types-con-name:
-    (name, arity) -> $[[<ds-utils-java-escape-id> name]_[arity]_Term]
-  
-  ds-to-interp-terms-types-name:
-    ListSort(s) -> $[List_[<ds-to-interp-terms-types-name> s]]
 
 
