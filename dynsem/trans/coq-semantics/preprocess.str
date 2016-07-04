@@ -6,11 +6,6 @@ imports
   ds
   analysis/-
 
-signature // Augment relation constructor with more informative relation name recording the source sort (type)
-
-  constructors
-    NamedDynamicEmitted : List(LabelComp) * IDNOHYPH * Type -> Rel
-
 rules
   
   pre-process-module:
@@ -22,6 +17,11 @@ rules
       aliases := <new-hashtable>;
       <collect-overloaded-arrow-aliases(|arrow_decl_map)> aliases;
       <collect-ds2v-aliases(|ds2v_aliases)> aliases
+//      ;
+//      // Augment constructors with wrong values
+//      <add-wrong-constructors> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases);
+//      // Add propagation rules
+//      <add-propagation-rules> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases)
 
 rules // Unfold case constructions
 
@@ -86,11 +86,11 @@ rules // Accumulate information about declared arrows, rules, and AST constructo
   collect-data-from-module:
     (Module(name, contents), ds2v_aliases) -> (sort_decls, sort_constrs, arrow_decls, ruls, ds2v_aliases)
     with
-      // Signatures 
+      // Signatures
       sigs* := <filter(?Signatures(<id>)); concat> contents;
       // Rules
       ruls := <filter(?Rules(<id>)); concat;
-      				 map(\ rule -> <unfold-rule-cases> ([], rule) \);
+      				 map(\ rule -> <unfold-rule-cases> ([], rule) \); // Unfolds case constructions into multiple rules
       				 concat> contents;
       // Sort declarations
       sort_decls := <filter(?Sorts(<id>)); concat; filter(?SortDecl(<id>))> sigs*;
@@ -104,7 +104,7 @@ rules // Store accumulated information in maps for easy dereferencing
   // Type of sort_decl_map:
   //
   //   SortName -fin-> Constructors
-  //   Constructors := (ConstructorName x List(Sort))
+  //   Constructors := List(ConstructorName x List(Sort))
   //
   // Type of arrow_decl_map:
   //
@@ -112,11 +112,11 @@ rules // Store accumulated information in maps for easy dereferencing
   //   RelSignature := (List(Sorts_RO) x Sort_From x List(Sorts_RW) x Sort_To x List(Sorts_RW))
   //   Rules := RuleName -fin-> (Formula_Conclusion x List(Formula_Premise))
   //
-  // Type of sort_dep_map
+  // Type of sort_dep_map:
   //
   //   SortName -fin-> SortName
   //
-  // Type of arrow_dep_map
+  // Type of arrow_dep_map:
   //
   //   RelName -fin-> RelName
 
@@ -193,8 +193,6 @@ rules // Analyze mutual dependencies
       arrow_dep_map := <new-hashtable>;
       <hashtable-keys; map(sort-analyze-dependency(|sort_decl_map, sort_dep_map, ds2v_aliases))> sort_decl_map;
       <hashtable-keys; map(arrow-analyze-dependency(|arrow_decl_map, arrow_dep_map, ds2v_aliases))> arrow_decl_map
-
-// Should these dependencies compute isets instead?
 
 rules // Sort dependency analysis
 

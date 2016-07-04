@@ -1,0 +1,80 @@
+module coq-semantics/wrong-rules
+
+imports
+  coq-semantics/-
+  signatures/-
+  ds
+  analysis/-
+
+rules // Introduce wrong value as a constructor for all sorts
+
+  add-wrong-constructors:
+    (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases) -> 1
+    with
+      arrow_decl_keys := <hashtable-keys> arrow_decl_map;
+      result_sorts := <map({ to_sort, key: ?key;
+                             (_, (_, _, _, to_sort, _)) := <hashtable-get(|key)> arrow_decl_map;
+                             !to_sort });
+                       nub> arrow_decl_keys;
+      <map({ sort_name, constructors_ : ?SimpleSort(sort_name);
+             constructors_ := <hashtable-get(|sort_name)> sort_decl_map;
+             <hashtable-put(|sort_name, [("WrongV", [])|constructors_])> sort_decl_map })> result_sorts
+   
+  // FIXME: Each sort needs a different constructor name
+  mk-wrong-val:
+    sort_name -> ConsDecl("WrongV", [], SimpleSort(sort_name), [])
+
+rules // Introduce rules for propagating exceptions
+
+  add-propagation-rules:
+    (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases) ->
+      1
+    with
+      arrow_decl_keys := <hashtable-keys> arrow_decl_map;
+      rules_ := <map({ rs', sig, rs'', key:
+                       ?key;
+                       (rs', sig) := <hashtable-get(|key)> arrow_decl_map;
+                       rs'' := <map(add-propagation-to-rule); concat> rs';
+                       <hashtable-put(|key, (rs'', sig))> arrow_decl_map })> arrow_decl_keys
+    
+  add-propagation-to-rule:
+    Rule(prems, d, conc@Relation(_, _, _, Target(target, _))) ->
+      rules'
+    with
+      rules' := <add-propagation-to-premises(|d, conc)> (prems, [], [])
+
+  add-propagation-to-premises(|d, conc):
+    ([], seen_prems, rs) -> [Rule(seen_prems, d, conc)|rs]
+  
+  // FIXME: Are rws always variables in premises? The following assumes they are
+  add-propagation-to-premises(|d, conc):
+    ([Formula(Relation(r, s, a, Target(target, rws)))|prems], seen_prems, rs) ->
+      rs'
+    where
+      // If target is a variable, and this variable occurs in a
+      // in tail position, wrong is automatically propagated.
+      ( [] := prems;
+        Var(x) := target;
+        Relation(_, _, _, Target(VarRef(x), _)) := conc; // FIXME: rws should match
+        rs' := rs )
+      <+
+      ( if ((VarRef(y) := target) <+ (Var(y) := target))
+        then seen_prems' := <concat> [seen_prems, [Formula(NMatch(VarRef(y), Con("WrongV", [])))]]
+        else seen_prems' := seen_prems
+        end;
+        prems' := <concat> [seen_prems', [Formula(Relation(r, s, a, Target(Con("WrongV", []), rws)))]];
+        seen_prems'' := <concat> [seen_prems', [Formula(Relation(r, s, a , Target(target, rws)))]];
+        Relation(cr, cs, ca, Target(_, crws)) := conc;
+        rs' := <add-propagation-to-premises(|d, conc)> (prems, seen_prems'', [Rule(prems', d, Relation(cr, cs, ca, Target(Con("WrongV", []), crws)))|rs]) )
+  
+  add-propagation-to-premises(|d, conc):
+    ([p|prems], seen_prems, rs) ->
+      rs'
+    where
+      not(!p; ?Formula(Relation(_, _, _, _)));
+      seen_prems' := <concat> [seen_prems, [p]]; 
+      rs' := <add-propagation-to-premises(|d, conc)> (prems, seen_prems', rs)
+
+rules // Analyze totality of premises
+
+rules // Introduce "wrong" transitions for non-total premises
