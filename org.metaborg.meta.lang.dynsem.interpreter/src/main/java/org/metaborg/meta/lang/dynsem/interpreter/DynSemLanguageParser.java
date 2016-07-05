@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import javax.annotation.Nullable;
 
@@ -43,7 +44,7 @@ public class DynSemLanguageParser implements IDynSemLanguageParser {
 		}
 
 		try {
-			SGLRParseResult parseResult = parser.parse(IOUtils.toString(src.getInputStream()), src.getName(),
+			SGLRParseResult parseResult = parser.parse(IOUtils.toString(src.getInputStream(), Charset.defaultCharset()), src.getName(),
 					startSymbol);
 			IStrategoTerm term = (IStrategoTerm) parseResult.output;
 			return term;
