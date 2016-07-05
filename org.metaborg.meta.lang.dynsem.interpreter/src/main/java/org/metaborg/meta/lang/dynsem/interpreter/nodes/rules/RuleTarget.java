@@ -17,11 +17,17 @@ public class RuleTarget extends Node {
 
 	@Child protected TermBuild rhsNode;
 	@Children protected final TermBuild[] componentNodes;
+	private final SourceSection sourceSection;
 
 	public RuleTarget(TermBuild rhsNode, TermBuild[] componentNodes, SourceSection source) {
-		super(source);
+		this.sourceSection = source;
 		this.rhsNode = rhsNode;
 		this.componentNodes = componentNodes;
+	}
+
+	@Override
+	public SourceSection getSourceSection() {
+		return sourceSection;
 	}
 
 	@ExplodeLoop

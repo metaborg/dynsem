@@ -6,12 +6,9 @@ import java.util.Map;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.JointRuleRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
-import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.frame.MaterializedFrame;
-import com.oracle.truffle.api.instrument.Visualizer;
-import com.oracle.truffle.api.instrument.WrapperNode;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 
@@ -53,11 +50,6 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	}
 
 	@Override
-	protected WrapperNode createWrapperNode(Node node) {
-		throw new NotImplementedException();
-	}
-
-	@Override
 	protected Object evalInContext(Source source, Node node, MaterializedFrame mFrame) throws IOException {
 		throw new IllegalStateException("evalInContext not supported");
 	}
@@ -90,10 +82,6 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		return context;
 	}
 
-	@Override
-	protected Visualizer getVisualizer() {
-		return null;
-	}
 
 	@Override
 	protected boolean isInstrumentable(Node node) {
