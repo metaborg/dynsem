@@ -12,6 +12,7 @@ public class JointRuleNode extends DynSemNode {
 	@Child private ASortRuleCallNode sortRuleNode;
 	private String arrowName;
 	private Class<?> dispatchClass;
+	private RuleKind kind;
 
 	public JointRuleNode(SourceSection source, RuleKind kind, String arrowName, Class<?> dispatchClass, Rule[] rules) {
 		super(source);
@@ -30,6 +31,7 @@ public class JointRuleNode extends DynSemNode {
 		
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;
+		this.kind = kind;
 	}
 
 	public RuleResult execute(Object[] arguments) {
@@ -58,6 +60,18 @@ public class JointRuleNode extends DynSemNode {
 		return sortRuleNode;
 	}
 	
+	public String getArrowName() {
+		return arrowName;
+	}
+	
+	public Object getDispatchClass() {
+		return dispatchClass;
+	}
+
+	public RuleKind getKind() {
+		return kind;
+	}
+
 	@Override
 	@TruffleBoundary
 	public String toString() {
