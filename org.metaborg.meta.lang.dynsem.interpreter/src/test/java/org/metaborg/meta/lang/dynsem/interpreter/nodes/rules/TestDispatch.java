@@ -173,66 +173,68 @@ public class TestDispatch {
 		assertEquals(1, r4.hitcount);
 	}
 
-//	@Test
-//	public void testExecuteFallbackToSortSuccess() throws Exception {
-//		RuleRegistry registry = new RuleRegistry();
-//		DynSemContext ctx = DynSemContext.LANGUAGE.getContext();
-//		assertNotNull(ctx);
-//		when(ctx.getRuleRegistry()).thenReturn(registry);
-//
-//		// an object for the sort class
-//		ITerm sortT = mock(ITerm.class);
-//		// an object
-//		IApplTerm t = mock(IApplTerm.class);
-//
-//		// it's sort class is the class of the term mocked above
-//		when(t.getSortClass()).thenReturn((Class) sortT.getClass());
-//
-//		// a few real dummy rules that we can spy on
-//		DummyRule r1 = new DummyRule(RuleKind.TERM, "freddie", t.getClass(), false, null);
-//
-//		JointRuleRoot rr1 = new JointRuleRoot(getDummySource(), r1.getKind(), r1.getArrowName(), r1.getDispatchClass(),
-//				new Rule[] { r1 });
-//		rr1.adoptChildren();
-//		registry.registerJointRule(r1.getArrowName(), r1.getDispatchClass(), rr1);
-//
-//		RuleUnionNode union = rr1.getJointNode().getUnionNode();
-//		assertEquals(1, union.getRules().size());
-//		assertEquals(union, r1.getParent());
-//
-//		DummyRule r2 = new DummyRule(RuleKind.TERM, "freddie", sortT.getClass(), true, null);
-//		JointRuleRoot rr2 = new JointRuleRoot(getDummySource(), r2.getKind(), r2.getArrowName(), r2.getDispatchClass(),
-//				new Rule[] { r2 });
-//		
-//		rr2.adoptChildren();
-//		registry.registerJointRule(r2.getArrowName(), r2.getDispatchClass(), rr2);
-//
-//		RuleUnionNode union2 = rr2.getJointNode().getUnionNode();
-//		assertEquals(1, union2.getRules().size());
-//		assertEquals(union2, r2.getParent());
-//
-//		assertEquals(2, registry.ruleCount());
-//		assertEquals(rr1, registry.lookupRules("freddie", t.getClass()));
-//		assertEquals(rr2, registry.lookupRules("freddie", t.getSortClass()));
-//
-//		rr1.getCallTarget().call(new Object[] { t });
-//
-//		// all rules should be called exactly once
-//		assertEquals(1, r1.hitcount);
-//		assertEquals(1, r2.hitcount);
-//
-//	}
+	@Test
+	public void testExecuteFallbackToSortSuccess() throws Exception {
+		RuleRegistry registry = new RuleRegistry();
+		DynSemContext ctx = DynSemContext.LANGUAGE.getContext();
+		assertNotNull(ctx);
+		when(ctx.getRuleRegistry()).thenReturn(registry);
+
+		// an object for the sort class
+		ITerm sortT = mock(ITerm.class);
+		// an object
+		IApplTerm t = mock(IApplTerm.class);
+
+		// it's sort class is the class of the term mocked above
+		when(t.getSortClass()).thenReturn((Class) sortT.getClass());
+
+		// a few real dummy rules that we can spy on
+		DummyRule r1 = new DummyRule(RuleKind.TERM, "freddie", t.getClass(), false, null);
+
+		JointRuleRoot rr1 = new JointRuleRoot(getDummySource(), r1.getKind(), r1.getArrowName(), r1.getDispatchClass(),
+				new Rule[] { r1 });
+		rr1.adoptChildren();
+		registry.registerJointRule(r1.getArrowName(), r1.getDispatchClass(), rr1);
+
+		RuleUnionNode union = rr1.getJointNode().getUnionNode();
+		assertEquals(1, union.getRules().size());
+		assertEquals(union, r1.getParent());
+
+		DummyRule r2 = new DummyRule(RuleKind.TERM, "freddie", sortT.getClass(), true, null);
+		JointRuleRoot rr2 = new JointRuleRoot(getDummySource(), r2.getKind(), r2.getArrowName(), r2.getDispatchClass(),
+				new Rule[] { r2 });
+
+		rr2.adoptChildren();
+		registry.registerJointRule(r2.getArrowName(), r2.getDispatchClass(), rr2);
+
+		RuleUnionNode union2 = rr2.getJointNode().getUnionNode();
+		assertEquals(1, union2.getRules().size());
+		assertEquals(union2, r2.getParent());
+
+		assertEquals(2, registry.ruleCount());
+		assertEquals(rr1, registry.lookupRules("freddie", t.getClass()));
+		assertEquals(rr2, registry.lookupRules("freddie", t.getSortClass()));
+
+		rr1.getCallTarget().call(new Object[] { t });
+
+		// the failing rule should be called exactly once
+		assertEquals(1, r1.getHitcount());
+	}
 
 	public static class DummyRule extends Rule {
 
 		private boolean succeed;
 		private RuleResult result;
-		public volatile int hitcount = 0;
+		private int hitcount = 0;
 
 		public DummyRule(RuleKind kind, String arrowName, Class<?> dispatchClass, boolean succeed, RuleResult result) {
 			super(getDummySource(), new FrameDescriptor(), kind, arrowName, dispatchClass);
 			this.succeed = succeed;
 			this.result = result;
+		}
+
+		public int getHitcount() {
+			return hitcount;
 		}
 
 		@Override
