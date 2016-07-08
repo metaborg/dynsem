@@ -21,6 +21,10 @@ rules
     	scheme-def := <get-unique-matching-varscheme> v;
     	scheme-ty := <lookup-prop(|Type())> scheme-def
   
+  // do not expand the variable schemes in as-bound variables
+  // expanding to a cast will lead to a malformed AST
+  desugar-varscheme = As(id, desugar-varschemes) 
+  
   desugar-varscheme:
     var@Var(v) -> Cast(var, <derw-type> scheme-ty)
     where
