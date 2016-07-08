@@ -39,8 +39,8 @@ public abstract class DynSemEntryPoint {
 
 	public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
 		try {
-			IStrategoTerm term = getTransformer()
-					.transform(getParser().parse(Source.newBuilder(new File(file)).build()));
+			IStrategoTerm term = getTransformer().transform(getParser().parse(
+					Source.newBuilder(new File(file)).name("Evaluate to interpreter").mimeType(getMimeType()).build()));
 			return getCallable(term, input, output, error);
 		} catch (IOException ioex) {
 			throw new RuntimeException("Eval failed", ioex);
@@ -52,8 +52,8 @@ public abstract class DynSemEntryPoint {
 		try {
 			PolyglotEngine vm = buildPolyglotEngine(input, output, error);
 			assert vm.getLanguages().containsKey(getMimeType());
-			Value interpreter = vm.eval(
-					Source.newBuilder(new InputStreamReader(getSpecificationTerm())).mimeType(getMimeType()).build());
+			Value interpreter = vm.eval(Source.newBuilder(new InputStreamReader(getSpecificationTerm()))
+					.name("Evaluate to interpreter").mimeType(getMimeType()).build());
 			ITerm programTerm = getTermRegistry().parseProgramTerm(term);
 			return new Callable<RuleResult>() {
 				@Override
@@ -62,8 +62,6 @@ public abstract class DynSemEntryPoint {
 				}
 			};
 		} catch (IOException e) {
-			throw new RuntimeException("Eval failed", e);
-		} catch (MissingNameException e) {
 			throw new RuntimeException("Eval failed", e);
 		}
 	}
