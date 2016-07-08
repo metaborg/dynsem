@@ -19,7 +19,7 @@ public class TermUtils {
 				return true;
 			}
 		}
-		throw new RewritingException("Malformed boolean: " + term);
+		throw new MalformedASTException("Malformed boolean: " + term);
 	}
 
 	public static IStrategoTerm termFromBool(boolean bV, ITermFactory factory) {
@@ -31,18 +31,22 @@ public class TermUtils {
 		if (Tools.isTermInt(term)) {
 			return Tools.asJavaInt(term);
 		}
-		throw new RewritingException("Malformed int: " + term);
+		throw new MalformedASTException("Malformed int: " + term);
 	}
 
 	public static IStrategoInt termFromInt(int i, ITermFactory factory) {
 		return factory.makeInt(i);
 	}
 
+	public static long longFromTerm(IStrategoTerm subterm) {
+		throw new RuntimeException("Unsupported number format");
+	}
+
 	public static double doubleFromTerm(IStrategoTerm term) {
 		if (Tools.isTermReal(term)) {
 			return Tools.asJavaDouble(term);
 		}
-		throw new RewritingException("Malformed double: " + term);
+		throw new MalformedASTException("Malformed double: " + term);
 	}
 
 	public static IStrategoReal termFromDouble(double d, ITermFactory factory) {
@@ -53,10 +57,15 @@ public class TermUtils {
 		if (Tools.isTermString(term)) {
 			return Tools.asJavaString(term);
 		}
-		throw new RewritingException("Malformed string: " + term);
+		throw new MalformedASTException("Malformed string: " + term);
 	}
 
 	public static IStrategoString termFromString(String s, ITermFactory factory) {
 		return factory.makeString(s);
 	}
+
+	public static IStrategoTerm termFromLong(long _1, ITermFactory factory) {
+		throw new RuntimeException("Unsupported number format");
+	}
+
 }

@@ -1,19 +1,27 @@
 module backend/java-backend/emit-constructorclasses
 
 imports
-  signatures/ds-sig
+  signatures/-
+  ds
 
 imports
   analysis/constructors
   analysis/lib-analysis
+  analysis/analysis-signatures
+  analysis/mark-references
 
 imports
+  lib-ds/lib-match
+  ds2ds/copy-propagation
+  ds2ds/constant-propagation
+
+imports
+	backend/java-backend/analysis-extra
   backend/java-backend/utils
   backend/java-backend/lib-ds2java
   backend/java-backend/emit-arrows
   backend/java-backend/emit-execmethods
   backend/java-backend/emit-atermconversion
-  backend/java-backend/emit-specializercode
 
 rules
   
@@ -30,42 +38,46 @@ rules
 	    compilation-unit |[
 	      package ~x:<AutoPackageName>;
 	      
-	      import org.metaborg.meta.interpreter.framework.*;
 	      import org.spoofax.interpreter.terms.*;
-	      import com.github.krukow.clj_lang.PersistentTreeMap;
+	      import com.oracle.truffle.api.frame.*;
+        import com.oracle.truffle.api.nodes.*;
+        import com.oracle.truffle.api.source.*;
+	      import com.github.krukow.clj_lang.*;
+	      import ds.manual.interpreter.*;
+	      import org.metaborg.meta.interpreter.framework.*;
+	      import java.util.*;
+	      import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-        @SuppressWarnings("unused")
 	      public class x_consname extends ~x:<ds2java-type-to-identifier> c-ty {
 	        
-
 	        ~fdec*
 	        
-	        public x_consname(INodeSource source, param0*) {
-            this.setSourceInfo(source);
+	        ~fdec_const*
+	        
+	        public x_consname(SourceSection src, param0*) {
+            super(src);
             bstm0*
+            bstm_const*
           }
 	        
 	        @Override
-	        public boolean equals(Object obj) {
-	          if (this == obj) {
-	            return true;
-	          }
-	          if (obj == null) {
-	            return false;
-	          }
-	          if (getClass() != obj.getClass()) {
-	            return false;
-	          }
-	          
-	          final x_consname other = (x_consname) obj;
-	          
-	          bstm1*
-	        
-	          return true;
-	        }
+          public boolean equals(Object obj) {
+            if (this == obj)
+              return true;
+            if (obj == null)
+              return false;
+            if (getClass() != obj.getClass())
+              return false;
+            x_consname other = (x_consname) obj;
+            bstm1*
+            return true;
+          }
 
-          ~specializer*
-          
+          @Override
+          public int hashCode() {
+            return e_hash.toHashCode();
+          }
+	        
 	        ~exec*
 
 	        ~fget*
@@ -78,14 +90,26 @@ rules
     	x_consname := <ds2java-consdef-classname> c-def;
       ConstructorType(c-c-ty*, c-ty) := <lookup-prop(|Type())> c-def
     where
-      fdec* := <map-with-index(ds2java-fielddecl)> c-c-ty*;
+      fdec* := <map-with-jindex(ds2java-fielddecl)> c-c-ty*;
     	param0* := <map-with-index(ds2java-method-paramdecl)> c-c-ty*;
-    	bstm0* := <map-with-index(ds2java-fieldinit)> c-c-ty*;
-    	fget* := <map-with-index(ds2java-getter)> c-c-ty*;
+    	bstm0* := <map-with-jindex(ds2java-fieldinit)> c-c-ty*;
+    	fget* := <map-with-jindex(ds2java-getter)> c-c-ty*;
     	bstm1* := <map-with-index(ds2java-field-eq-check)> c-c-ty*;
-    	specializer* := <ds2java-specializer-method> c-c-ty*;
-    	exec* := <ds2java-execmethods(ds2java-supercall|rule*)> c-def;
+    	e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds2java-field-hashcodecomp)> <range> (1, <length; inc> c-c-ty*);
     	atermconvert := <ds2java-atermconversion-constructor> c-def
+    where
+      c-name := <consdef-get-name> c-def;
+      c-arity := <consdef-get-arity> c-def;
+      cons-rule* := <filter(is-rule-matching-cons(|c-name, c-arity))> rule*;
+      dynamic-rule* := <map(Rule(map(not(lift-constant-premise) <+ !NoOpPremise()), id, id))> cons-rule*;
+    	exec* := <ds2java-execmethods(ds2java-supercall|dynamic-rule*)> c-def
+    with
+    	let
+    	  prep-premises = filter(lift-constant-premise); unmark-vars; copy-propagation-premises; constant-propagation-premises; mark-vardefs-in-premise
+    	in
+        lifted-constant-premise* := <mapconcat(?Rule(<id>, _, _)); prep-premises> cons-rule*
+      end;
+    	(bstm_const*, fdec_const*) := <ds2java-emit-constant-fields> lifted-constant-premise*
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:
@@ -115,4 +139,37 @@ rules
       <not(ds2java-type-is-primitive)> ty;
       x_idx := <mkidx> idx
 
+  ds2java-field-hashcodecomp:
+    (idx, e) -> e |[ e.append(x_idx) ]|
+    where
+      x_idx := <mkidx> idx
+
+  ds2java-emit-constant-fields:
+    prem* -> (finit*, fdec*)
+    where
+      finit* := <map(ds2java-emit-constant-field-init)> prem*;
+      fdec* := <map(ds2java-emit-fielddecl-const-prem <+ debug(!"Failed for prem: "); fail)> prem*
+      
+  ds2java-emit-constant-field-init:
+  	Formula(Match(t, Var(v))) -> bstm* |[
+	  		~x:v = ~e:<ds2java-term-build(|ex_ty)> t;
+	  	]|
+  	where
+  		ex_ty := <lookup-def(|Vars()); lookup-prop(|Type())> v
+
+  ds2java-emit-fielddecl-const-prem:
+  	Formula(Match(Con(c, c*), Var(x))) -> class-body-dec |[ @Child private ~x:<ds2java-consdef-classname> c-def x; ]|
+  	where
+  	  x-ty := <lookup-def(|Vars()); lookup-prop(|Type())> x;
+      <type-is-adoptable + type-is-adoptable-list> x-ty
+    where
+  	  c-def := <lookup-def(|Constructors())> (c, <length> c*)
+
+  ds2java-emit-fielddecl-const-prem:
+  	Formula(Match(Con(c, c*), Var(x))) -> class-body-dec |[ private ~x:<ds2java-consdef-classname> c-def x; ]|
+  	where
+  	  x-ty := <lookup-def(|Vars()); lookup-prop(|Type())> x;
+      <not(type-is-adoptable + type-is-adoptable-list)> x-ty
+    where
+  	  c-def := <lookup-def(|Constructors())> (c, <length> c*)
 

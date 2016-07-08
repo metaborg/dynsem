@@ -1,7 +1,7 @@
 module expand-implicits
 
 imports
-  signatures/ds-sig
+  signatures/-
   ds
   analysis/-
   lib-ds
@@ -11,7 +11,7 @@ rules
   expand-implicits-module:
     m@Module(_, _) -> Module($[[name]_explimpl], section*)
     where
-      <m-in-analysis(expand-implicits); unmark-vars> m => Module(name, section*)
+      <m-in-analysis(expand-implicits; unrename-all); unmark-vars> m => Module(name, section*)
 
   expand-implicits = alltd(expand-implicits-rule)
   
@@ -38,7 +38,7 @@ rules
     where
       (r'*, p1*) := <map(expand-implicits-termbuild <+ \ LabelComp(ty, t) -> (LabelComp(ty, t), []) \); unzip; (id, concat)> r*;
       arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      ArrowType(in-ty, _) :=  <type-of-applicable-arrow(flip(type-coerce-full(fail)))> (arrow-ty*, <type-of> lhs); 
+      ArrowType(in-ty, _) :=  <type-of-applicable-arrow(type-coerce-full(fail))> (arrow-ty*, <type-of> lhs); 
       (lhs', p2*) := <lift-where-indirect <+ \ (_, t) -> (t, []) \> (in-ty, lhs);
       (sc'*, p3*) := <map(expand-implicits-termbuild <+ \ LabelComp(ty, t) -> (LabelComp(ty, t), []) \); unzip; (id, concat)> sc*;
       p* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p1*, p2*, p3*]
@@ -91,7 +91,7 @@ rules /* lift and expand subterms on build sides */
       (t', p*) := <lift-where-indirect> (ty, t)
 
   lift-where-indirect:
-    (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, MatchedVar(v-new)))])
+    (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, Var(v-new)))])
     where
       t-ty := <type-of> t;
       <not(type-coerce-direct(fail))> (t-ty, e-ty);

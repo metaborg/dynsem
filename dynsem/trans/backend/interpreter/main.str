@@ -1,0 +1,46 @@
+module backend/interpreter/main
+
+imports
+  signatures/ds-sig
+  stratego/metaborg
+  lib-ds
+  ds
+  libstratego-aterm
+
+imports
+  backend/interpreter/-
+  ds2ds/core
+  analysis/-
+  
+rules
+
+  ds-to-interp-editor:
+    (_, position, ast, path, project-path) -> None()
+    with
+      local-project-path := $[[<prim("local_path")> project-path]/];
+      <ds-to-interp(|path, project-path, local-project-path)> ast
+      
+  ds-to-interp(|path, project-path, local-project-path) =
+    ds-to-interp-init-options(|path, local-project-path);
+    ds-to-interp-table;
+    ds-to-interp-specification(|path, project-path);
+    ds-to-interp-terms(|path, local-project-path)
+  
+  ds-to-interp-specification(|path, project-path) =
+    module-to-core(|path, project-path);
+    in-project-path(desugar-for-interpreter-module|project-path);
+    where(
+      ?result;
+      fout := <fopen> (<get-opt> TargetSpecAbs(), "w");
+      <pp-aterm-stream(|fout)> result;
+      <fclose> fout
+    )
+  
+  ds-to-interp-terms(|path, local-project-path) = 
+    in-project-path(ds-to-interp-terms-module|local-project-path)
+  
+  ds-to-interp-table =
+    where(
+      <copy-file> (<get-opt> TableSource(), <get-opt> TargetTableAbs())
+    )
+    

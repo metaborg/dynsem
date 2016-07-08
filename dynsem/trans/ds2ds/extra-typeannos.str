@@ -1,7 +1,7 @@
 module extra-typeannos
 
 imports
-  signatures/ds-sig
+  signatures/-
   ds
   analysis/-
 
@@ -10,7 +10,7 @@ rules
   add-extra-typeannos-module:
     m@Module(_, _) -> Module($[[name]_typeannos], section*)
     where
-      <m-in-analysis(add-extra-typeannos); unmark-vars> m => Module(name, section*)
+      <m-in-analysis(add-extra-typeannos; unrename-all); unmark-vars> m => Module(name, section*)
       
   add-extra-typeannos = alltd(add-extra-typeannos-rule); alltd(add-extra-typeannos-term)
   

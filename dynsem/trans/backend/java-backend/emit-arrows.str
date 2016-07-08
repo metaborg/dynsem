@@ -22,58 +22,40 @@ rules
   
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
+    (x, ty) -> class-body-dec |[ private ~x:<ds2java-type-to-unboxed-type> ty x; ]|
     where
       <not(type-is-adoptable + type-is-adoptable-list)> ty
 
   // generate indexed field declaration
   ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ @Child public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
+    (x, ty) -> class-body-dec |[ @Child private ~x:<ds2java-type-to-unboxed-type> ty x; ]|
     where
-      <type-is-adoptable> ty;
-      <not(type-is-adoptable-list)> ty
-
-  // generate indexed field declaration
-  ds2java-fielddecl:
-    (idx, ty) -> class-body-dec |[ @Children public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[_[idx]]; ]|
-    where
+      <type-is-adoptable> ty
+      <+
       <type-is-adoptable-list> ty
   
   // generate setter for indexed child adoption
   ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
-    where
-      <type-is-adoptable> ty;
-      x_idx := $[_[idx]]
+    (x, ty) -> stm |[ this.x = x; ]|
 
   // generate setter for indexed child adoption
   ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = adoptChild(x_idx); ]|
+    (x, ty) -> stm |[ this.x = adoptChildren(x); ]|
     where
-      <type-is-adoptable> ty;
-      <not(type-is-adoptable-list)> ty;
-      x_idx := $[_[idx]]
-
-  // generate setter for indexed child adoption
-  ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = adoptChildren(x_idx); ]|
-    where
-      <type-is-adoptable-list> ty;
-      x_idx := $[_[idx]]
+      <type-is-adoptable-list> ty
 
   // generate setter for indexed non-adoptable child
   ds2java-fieldinit:
-    (idx, ty) -> stm |[ this.x_idx = x_idx; ]|
+    (x, ty) -> stm |[ this.x = x; ]|
     where
-      <not(type-is-adoptable + type-is-adoptable-list)> ty;
-      x_idx := $[_[idx]]
+      <not(type-is-adoptable + type-is-adoptable-list)> ty
   
   // generate setter for indexed field
   ds2java-getter:
-    (idx, ty) ->
+    (x, ty) ->
       class-body-dec |[
-        public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[get_[idx]]() {
-          return this.~x:$[_[idx]];
+        public ~x:<ds2java-type-to-unboxed-type> ty ~x:$[get[x]]() {
+          return this.x;
         }
       ]|
   
@@ -89,12 +71,16 @@ rules
 			compilation-unit |[
 			  package ~x:<AutoPackageName>;
 			  
+			  import com.oracle.truffle.api.nodes.Node.Child;
 			  import org.metaborg.meta.interpreter.framework.*;
 			  import org.metaborg.meta.interpreter.framework.IConvertibleToStrategoTerm;
 			  import org.spoofax.interpreter.terms.IStrategoTerm;
 			  import org.spoofax.interpreter.terms.ITermFactory;
-			  
-			  public class x_classname implements IConvertibleToStrategoTerm {
+        import com.oracle.truffle.api.interop.ForeignAccess;
+        import com.oracle.truffle.api.interop.TruffleObject;
+        import ds.manual.interpreter.*;
+        
+			  public class x_classname implements IConvertibleToStrategoTerm, TruffleObject {
 			    public final x_valueclass value;
 
 			    ~fdec*
@@ -113,6 +99,11 @@ rules
 	                 );
 	        }
 
+					@Override
+					public ForeignAccess getForeignAccess() {
+					  return Natives.getForeignAccess();
+					}
+
 			    ~fget*
 			  }
 			]|
@@ -121,9 +112,9 @@ rules
      x_valueclass := <ds2java-type-to-unboxed-type> bu-ty;
      changeable* := <lookup-arrow-changeables> arrow-def;
      param* := <map-with-index(ds2java-method-paramdecl)> changeable*;
-     fdec* := <map-with-index(ds2java-fielddecl)> changeable*;
-     bstm* := <map-with-index(ds2java-fieldinit)> changeable*;
-     fget* := <map-with-index(ds2java-getter)> changeable*
+     fdec* := <map-with-jindex(ds2java-fielddecl)> changeable*;
+     bstm* := <map-with-jindex(ds2java-fieldinit)> changeable*;
+     fget* := <map-with-jindex(ds2java-getter)> changeable*
 	 where
 	   e_val := <ds2java-atermconversion-name(| e |[ value ]|)> bu-ty;
 	   e_child* := <map-with-index(ds2java-atermconversion-field)> changeable*

@@ -1,0 +1,36 @@
+module ds2ds/core
+
+imports
+  analysis/resolve-includes
+  analysis/lib-analysis
+  ds2ds/-
+  backend/interpreter/utils
+  pp
+
+rules
+
+  module-to-core-editor:
+    (_, position, ast, path, project-path) -> (filename, result)
+    with
+      result := <module-to-core(|path, project-path); sugar-all; pp-debug> ast;
+      filename := <guarantee-extension(|"core.ds")> path
+
+strategies
+
+  module-to-core(|path, project-path) =
+    in-project-path(
+      include-imports
+      ; desugar-top
+      ; fuse-sections
+      ; desugar-varschemes-module
+      ; add-extra-typeannos-module
+      ; desugar-aliases-module
+      ; factorize-module
+      ; expand-implicits-module
+      ; factorize-module
+      ; explicate-module
+      ; copy-propagation-module
+      ; defactorize-module
+      ; insert-wildcards-module
+      ; prettify-vars-module
+    |project-path)

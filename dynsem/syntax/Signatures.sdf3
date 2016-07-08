@@ -48,14 +48,16 @@ context-free syntax // constructor declarations
 
   ConsAnnos.Annos = [{[ { ConsAnno "," }* ]}]
   ConsAnno.ImplicitAnno = [implicit]
+  ConsAnno.MetafunAnno = [meta-function]
 
   ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
   Type = [[MapType]]
-  
-  MapType.MapSort = [Map<[Type],[Type]>]
+    
+  MapType.MapSort = [Map([Type],[Type])]
+  MapType.MapSort_Deprecated = [Map<[Type],[Type]>] {deprecated("Use Map(T1,T2) instead")}
 
 template options
 
@@ -97,6 +99,7 @@ context-free syntax // internal constructor declarations
       <{NativeConsDecl "\n"}*>>
 
   NativeConsDecl.NativeConsDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  
   NativeConsDecl.NullaryNativeConsDecl = [[ID] : [Type]]
 
 context-free syntax
@@ -107,6 +110,15 @@ context-free syntax
   
   DeclaredArrow = ArrowDeclaration
   
-  ArrowDeclaration.ArrowDecl = [[Type] -[IDNOHYPH]-> [Type]]
-  ArrowDeclaration.DefaultArrowDecl = [[Type] --> [Type]]
+  ArrowDeclaration.DefaultArrowDecl = [[ArrowROs] [Type] [ArrowRWs] --> [Type] [ArrowRWs]]
+
+  ArrowDeclaration.ArrowDecl = [[ArrowROs] [Type] [ArrowRWs] -[IDNOHYPH]-> [Type] [ArrowRWs]]
+  
+  ArrowROs.NoArrowROs = []
+  ArrowROs.ArrowROs = [[{Type ", "}+] |-]
+  
+  ArrowRWs.NoArrowRWs = []
+  ArrowRWs.ArrowRWs = [:: [{Type ", "}+]]
+   
+    
 

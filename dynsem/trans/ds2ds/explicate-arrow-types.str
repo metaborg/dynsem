@@ -1,0 +1,41 @@
+module ds2ds/explicate-arrow-types
+
+imports
+  ds
+  signatures/-
+  analysis/-
+  lib-ds
+  pp
+
+signature
+  constructors
+    NamedDynamicEmitted : List(LabelComp) * IDNOHYPH * Type -> Rel
+
+strategies
+
+  explicate-arrow-types-editor:
+    (_, position, ast, path, project-path) -> (filename, result)
+    with
+      result := <explicate-arrow-types> ast;
+      filename := <guarantee-extension(|".aterm")> path
+
+  explicate-arrow-types =
+    ?Module(_, _);
+    m-in-analysis(
+      alltd(explicate-arrow-type-relation);
+      unrename-all
+    )
+
+  explicate-arrow-types-noanalysis =
+    ?Module(_, _);
+    alltd(explicate-arrow-type-relation)
+
+rules
+
+  explicate-arrow-type-relation:
+    Relation(reads, src@Source(t, _), NamedDynamicEmitted(e, aname), tgt)
+      -> Relation(reads, src, NamedDynamicEmitted(e, aname, <derw-type> atype), tgt)
+    with
+      t-ty := <type-of> t;
+      arrow-def* := <lookup-applicable-arrow-def> t-ty;
+      (arrow-def, ArrowType(atype, _)) := <fetch-elem(where(Fst; def-get-name => aname))> arrow-def*

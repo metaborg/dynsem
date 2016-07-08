@@ -3,17 +3,20 @@ module utils
 imports
   stratego/metaborg
   backend/java-backend/utils/java-utils
-
+  lib-ds
+  
 rules
   
   init-options(|path, project-path) =
     rules(
-      AutoPackageName: _ -> $[[<language>].generated.interpreter]
-      ManuPackageName: _ -> $[[<language>].manual.interpreter]
-      CurrentFilePath: _ -> path
-      ProjectPath: _ -> project-path
-      GenDir: _ -> $[[project-path]/src-gen/ds-java]
+//      AutoPackageName: _ -> $[[<language>].generated.interpreter]
+//      ManuPackageName: _ -> $[[<language>].manual.interpreter]
+//      CurrentFilePath: _ -> path
+//      ProjectPath: _ -> project-path
+//      GenDir: _ -> <read-property(|"target.project", $[[project-path]/src-gen/ds-java]); make-absolute-path(|project-path)> $[[project-path]/dynsem.properties]
     )
 
-  write-classes = emit-java-classes(overwrite-merge-strategy, id | <AutoPackageName>, <GenDir>)
+  // get-gendir(|project-path) = <read-property(|"target.project", $[[project-path]/editor/java])> $[[project-path]/dynsem.properties]
+
+//  write-classes = emit-java-classes(overwrite-merge-strategy, id | <AutoPackageName>, <GenDir>)
 

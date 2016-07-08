@@ -1,7 +1,8 @@
 module backend/java-backend/analysis-extra
 
 imports
-  signatures/ds-sig
+  signatures/-
+  ds  
   lib-ds
   analysis/constructors
   analysis/lib-analysis
@@ -11,6 +12,8 @@ signature
   constructors
     ArrowReadables: Property
     ArrowChangeables: Property
+    VarConstant: Property
+    PattBoundVar: Property
 
 rules
   
@@ -19,17 +22,23 @@ rules
     s
   
   backend-extra-analyze =
-    log-timed( store-arrows-components | "Java backend extra analysis")
- 
+    log-timed(
+	    log-timed( store-arrows-components | "Store per-rule semantic components");
+	    log-timed( mark-constant-vars | "Mark constant variables");
+	    log-timed( mark-patternbound-vars | "Mark pattern-bound variables")
+	    | "Java backend extra analysis" )
+
+rules // store arrow components
+   
   lookup-arrow-readables = lookup-prop(|ArrowReadables())
   lookup-arrow-changeables = lookup-prop(|ArrowChangeables())
   lookup-arrow-inputs = ?a-def; <conc> (<lookup-arrow-readables> a-def, <lookup-arrow-changeables> a-def)
  
-  store-arrows-components =
-    ?m@Module(_, _);
-    
-    lookup-def-all(|Arrows());
-    map(store-arrow-components(|m))
+  store-arrows-components :
+    m@Module(_, _) -> m
+    where
+	    lookup-def-all(|Arrows());
+	    map(store-arrow-components(|m))
   
   store-arrow-components(|m) =
   	?arrow-def;
@@ -43,20 +52,62 @@ rules
 	    <store-prop(|ArrowChangeables(), arrow-def)> []
 	  end
 
-  lookup-applicable-arrow-def:
-    type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
-
-  is-applicable-arrow-def(|type-name) =
-    ?ArrowType(type-name, _)
-    <+
-    ?ArrowType(ltype-name, _);
-    <type-coerce-direct(fail)> (type-name, ltype-name)
-
-  lookup-arrow-def:
-    (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
+rules // mark constant variables
+  
+  mark-constant-vars :
+    m@Module(_, _) -> m
     where
-      <lookup-applicable-arrow-def> c-ty => arrow*
-      
+      <alltd(mark-constant-vars-rule)> m
+  
+  mark-constant-vars-rule =
+    ?Rule(p*, _, Relation(_, Source(src, _), _, _));
+    <alltd(mark-constant-var)> src;
+    <alltd(mark-constant-vars-premise)> p*
+  
+  mark-constant-var:
+    var@Var(v) -> var
+    where
+      vdef := <lookup-def(|Vars())> v;
+      <store-prop(|VarConstant(), vdef)> True()
+
+  mark-constant-vars-premise =
+    ?Formula(Match(VarRef(vin), Var(vout)));
+    vindef := <lookup-def(|Vars())> vin;
+    True() := <lookup-prop(|VarConstant())> vindef;
+    voutdef := <lookup-def(|Vars())> vout;
+    <store-prop(|VarConstant(), voutdef)> True()
+  
+  mark-constant-vars-premise = 
+    ?Formula(Match(tconst, Var(vout)));
+    <?Int(_) <+ ?True() <+ ?False()> tconst;
+    voutdef := <lookup-def(|Vars())> vout;
+    <store-prop(|VarConstant(), voutdef)> True()
+  
+  mark-constant-vars-premise =
+    ?Formula(Match(Con(c, carg*),Var(vout)));
+    <lookup-def(|Constructors()); lookup-prop(|ConsKind()); not(?NativeOpCons())> (c, <length> carg*);
+    <collect-all(?VarRef(<id>)); map(lookup-def(|Vars()); lookup-prop(|VarConstant()); ?True())> carg*;
+    voutdef := <lookup-def(|Vars())> vout;
+    <store-prop(|VarConstant(), voutdef)> True()
+
+rules // mark pattern-bound variables
+  
+  mark-patternbound-vars:
+    m@Module(_, sec*) -> m
+    where
+      <alltd(?Rule(_, _, Relation(_, Source(<mark-patternbound-vars-lhs>, _), _, _)))> m
+
+  mark-patternbound-vars-lhs = 
+    try(?As(_, <id>));
+    ?Con(_, <id>);
+    filter(?Var(<lookup-def(|Vars())>));
+    map-with-index(mark-patternbound-var)
+  
+  mark-patternbound-var =
+    ?(idx, vdef);
+    <store-prop(|PattBoundVar(), vdef)> idx
+
+rules
 
   type-is-adoptable = where(lookup-def(|Types()); lookup-prop(|SortKind()) => LanguageSort())
 

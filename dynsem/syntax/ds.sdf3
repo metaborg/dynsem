@@ -30,7 +30,7 @@ context-free syntax // rules
   ]
   
   Premise.Formula = [[Formula]]
-  Premise.AllFail = <all-fail>
+  Premise.AllFail = <all-fail> {deprecated}
 
   PremisesBlock.PremiseBlock = <{
     <{Premise ";\n"}*>
@@ -40,12 +40,29 @@ context-free syntax // rules
     [Premise]
     < [PremisesBlock]
     + [PremisesBlock]
+  ] {deprecated("Use a case pattern match instead")}
+  
+  Premise.CaseMatch = [
+    case [Term] of {
+      [{Case "\n"}+]
+    }
+  ]
+  
+  Case.CasePattern = [
+    [Term] =>
+      [{Premise ";\n"}*]
+  ]
+  
+  Case.CaseOtherwise = [
+    otherwise =>
+      [{Premise ";\n"}*]
   ]
   
   Premise.TryOr = [
     try [PremisesBlock]
   	or  [PremisesBlock]
-  ]
+  ] {deprecated}
+
   ID = <_> {reject}
   ID = <imports> {reject}
   ID = <signature> {reject}
@@ -67,6 +84,9 @@ context-free syntax // rules
   ID = <false> {reject}
   ID = <fresh> {reject}
   ID = <fail> {reject}
+  ID = <allkeys> {reject}
+  ID = <allvalues> {reject}
+  ID = <otherwise> {reject}
 
 context-free syntax // formulas
 
@@ -102,7 +122,7 @@ context-free syntax // formulas
 
 lexical syntax 
 
-  TermCon = ID 
+  // TermCon = ID 
   
 context-free syntax // terms
 
@@ -119,7 +139,7 @@ context-free syntax // terms
   Term.String   = [[STRING]]
   Term.Int      = [[INT]]
   Term.Real     = [[REAL]]
-  Term.Con      = [[TermCon]([{Term ", "}*])]
+  Term.Con      = [[ID]([{Term ", "}*])]
   
   List.List     = <[ <{Term ", "}*> ]>
   List.ListTail = <[ <{Term ", "}*> | <Term> ]>
@@ -130,17 +150,26 @@ context-free syntax // terms
   Term.False  = [false]
   
   Term.Map    = [{[{Entry  ", "}*]}]
-  Entry.Bind  = [[Term] |--> [Term]] 
+  Entry.Bind  = [[Term] |--> [Term]]
   Entry.Binds = [[Term] |*-> [Term]]
   Entry.MapEntry = [[Term]]
   
   Term.MapSelect = <<Term>[<Term>]>
+  Term.MapHas = <<Term>[<Term>?]>
   Term.MapExtend = [[Term] + [Term]] {assoc}
   Term.MapUnbind = [[Term] \ [Term]] {assoc}
+
+  Term.MapKeys = [allkeys([Term])]
+  Term.MapValues = [allvalues([Term])]
 
   Term.SortFunCall = <<ID>[<Term>](<{Term ", "}*>)>
 
 context-free priorities
 
-  Term.MapSelect > Term.MapExtend, Term.As > Cast.Cast
+  Rule.Axiom, Rule.Rule, Rule.RuleW
+  > Term.MapKeys, Term.MapValues
+  > Term.Con
+  > Term.MapHas, Term.MapSelect
+  > Term.MapExtend, Term.As
+  > Cast.Cast
   

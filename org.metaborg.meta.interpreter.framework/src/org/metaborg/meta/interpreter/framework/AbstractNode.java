@@ -1,17 +1,25 @@
 package org.metaborg.meta.interpreter.framework;
 
-import java.util.Objects;
+import org.spoofax.terms.TermFactory;
+
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.nodes.NodeInfo;
+import com.oracle.truffle.api.source.SourceSection;
 
 /**
  * 
  * @author vladvergu
  * 
  */
-public abstract class AbstractNode implements IMatchableNode {
+@NodeInfo(language = "Interpreter framework", description = "The abstract base node for all AST nodes")
+public abstract class AbstractNode extends Node implements InterpreterNode,
+		IMatchable {
 
-	private INode parent;
-	private INode replacedBy;
-	private INodeSource source;
+	@TruffleBoundary
+	public AbstractNode(SourceSection src) {
+		super(src);
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -24,82 +32,8 @@ public abstract class AbstractNode implements IMatchableNode {
 	}
 
 	@Override
-	public <T extends INode> INode setParent(T parent) {
-		Objects.requireNonNull(parent);
-		this.parent = parent;
-		return this;
-	}
-
-	@Override
-	public <T extends INode> T adoptChild(T child) {
-		child.setParent(this);
-		return child;
-	}
-
-	@Override
-	public <L extends INodeList> L adoptChildren(L children) {
-		INodeList list = children;
-		while (list.size() > 0) {
-			if (list.head() instanceof INode) {
-				adoptChild((INode) list.head());
-			}
-			list = list.tail();
-		}
-		return children;
-	}
-
-	@Override
-	public <T extends INode> T replace(T newNode) {
-		final INode parent = getParent();
-		if (parent != null) {
-			parent.replaceChild(this, newNode);
-		}
-		return newNode;
-	}
-
-	@Override
-	public <T extends INode> T replaceChild(INode oldChild, T newChild) {
-		return NodeUtils.replaceChild(this, oldChild, newChild);
-	}
-
-	@Override
-	public INode replacement() {
-		return replacedBy;
-	}
-
-	@Override
-	public void setReplacedBy(INode newNode) {
-		this.replacedBy = newNode;
-	}
-
-	@Override
-	public boolean replaced() {
-		return replacedBy != null;
-	}
-
-	@Override
-	public boolean isRoot() {
-		return parent != null;
-	}
-
-	@Override
-	public INode getParent() {
-		return parent;
-	}
-
-	@Override
-	public void setSourceInfo(INodeSource src) {
-		this.source = src;
-	}
-
-	@Override
-	public INodeSource getSourceInfo() {
-		return source;
-	}
-
-	@Override
 	public String toString() {
-		return NodeUtils.toString(this);
+		return toStrategoTerm(new TermFactory()).toString();
 	}
 
 }

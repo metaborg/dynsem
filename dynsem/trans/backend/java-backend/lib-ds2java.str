@@ -111,7 +111,7 @@ rules /* name generation */
     pp-type
 
   ds2java-methodname:
-    (a-def, bu-type) -> $[exec_[name]]
+    (a-def, bu-type) -> $[execute_[name]]
     where
       Arrows() := <def-get-namespace> a-def;
       name := <def-get-name; escape-javaid> a-def
@@ -132,9 +132,15 @@ rules /* name generation */
   	?IntType()
   	+ ?RealType()
   	+ ?BoolType()
+  	+ ?LongType()
   
   mkidx:
   	idx -> $[_[idx]]
+
+  map-with-jindex(s) =
+    let apply(|i) = <s> (<mkidx> i, <id>)
+     in nmap(apply | 1)
+    end
 
   escape-javaid = is-string; string-replace(|"'", "_"); string-replace(|"-", "$"); escape
 

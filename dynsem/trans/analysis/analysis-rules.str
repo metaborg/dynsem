@@ -23,9 +23,7 @@ rules /* syntactic checks */
       add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern, a list cast pattern, a wildcard cast pattern, or a variable cast pattern])
   
   post-analysis-check:
-    dec -> <fail>
-    where
-      <?Var(v) + ?MatchedVar(v)> dec
+    dec@Var(v) -> <fail>
     where
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
       add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
@@ -73,7 +71,10 @@ rules /* store variables */
   store-rule:
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
     where
-      <type-check-match(|ma-ty)> lhs;
+      {| InSource:
+        rules(InSource: t -> t);
+        <type-check-match(|ma-ty)> lhs
+      |};
       <map(labelcomp-to-type-term-pair; type-check-match-wrap)> [r*, sc*];
       <map(type-check-premise-top)> p*;
       <type-check-build-expect(|bu-ty)> rhs;
@@ -137,7 +138,7 @@ rules
   type-err-build-match-symbols:
     t -> NONETYPE()
     where 
-      ?Wld() + ?MatchedVar(_) + ?Var(_)
+      ?Wld() + ?Var(_)
     where 
       add-msg(|Error(), t, $[Match symbol in build pattern])
   
@@ -214,6 +215,23 @@ rules
       a-key-ty := <type-check-build> k-t;
       <type-coerce-full(fail)> (a-key-ty, f-key-ty)
 
+  type-check-build-map:
+    MapKeys(m-t) -> ListType(k-ty)
+    where
+      MapType(k-ty, _) := <type-check-build> m-t
+
+  type-check-build-map:
+    MapValues(m-t) -> ListType(v-ty)
+    where
+      MapType(_, v-ty) := <type-check-build> m-t
+
+  type-check-build-map:
+    MapHas(m-t, k-t) -> BoolType()
+    where
+      MapType(f-k-ty, _) := <type-check-build> m-t;
+      a-k-ty := <type-check-build> k-t;
+      <type-coerce-full(fail)> (a-k-ty, f-k-ty)
+
   type-check-build-cast:
     Cast(t, ty-t) -> cast-ty
     where
@@ -286,9 +304,7 @@ rules // type rules for match-sides
     Wld() -> in-ty
   
   type-check-match-var(|in-ty):
-    dec -> ty
-    where
-      ?Var(v) + ?MatchedVar(v)
+    Var(v) -> ty
     where
       <not(lookup-def(|Vars()))> v;
       if scheme-def := <get-unique-matching-varscheme> v
@@ -302,9 +318,7 @@ rules // type rules for match-sides
       <store-prop(|Type(), v-def)> ty
   
   type-check-match-var(|in-ty):
-    dec -> <fail>
-    where
-      ?Var(v) + ?MatchedVar(v)
+    dec@Var(v) -> <fail>
     where
       <lookup-def(|Vars())> v;
       add-msg(|Error(), dec, $[Duplicate variable [<unrename-var> v]])
@@ -322,10 +336,15 @@ rules // type rules for match-sides
   		t-ty := <type-check-match(|cast-ty)> t
   		
   type-check-match-con(|in-ty):
-    Con(c, aparam*) -> <type-coerce-full(id)> (in-ty, ty)
+    t@Con(c, aparam*) -> <type-coerce-full(id)> (in-ty, ty)
     where
-      ConstructorType(fparam-ty*, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> aparam*);
-      <zip(type-check-match-wrap)> (fparam-ty*, aparam*)
+      c-def := <lookup-def(|Constructors())> (c, <length> aparam*);
+      ConstructorType(fparam-ty*, ty) := <lookup-prop(|Type())> c-def;
+      <zip(type-check-match-wrap)> (fparam-ty*, aparam*);
+      if <not(InSource); lookup-prop(|ConsKind())> c-def => MetafunCons()
+      then
+        add-msg(|Error(), t, $[Cannot match against meta-function [c]])
+      end
   
   type-check-match-list(|in-ty):
   	List([]) -> <type-coerce-full(id)> (in-ty, ListType(ALPHATYPE()))
@@ -433,7 +452,25 @@ rules
       <map(type-check-premise-top)> l*;
       <map(type-check-premise-top)> r*
   
+  type-check-premise:
+    f@CaseMatch(tb, case*) -> f
+    with
+      in-ty := <type-check-build> tb;
+      <map(type-check-case(|in-ty))> case*
+      
+  
   type-check-premise = ?AllFail()
+
+  type-check-case(|in-ty):
+    c@CaseOtherwise(prem*) -> c
+    with
+      <map(type-check-premise-top)> prem*
+  
+  type-check-case(|in-ty):
+    c@CasePattern(pat, prem*) -> c
+    with
+      <type-check-match(|in-ty)> pat;
+      <map(type-check-premise-top)> prem*
 
 signature
   sorts

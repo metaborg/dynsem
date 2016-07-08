@@ -4,43 +4,9 @@ imports
   libstratego-lib
   libjava-front
   libstratego-sglr
-  backend/java-backend/utils/mkdir
 
 rules
   
-  emit-java-classes(merge-strategy, createdir|outputpkg, basedir) =
-    map(emit-java-class(merge-strategy, createdir|outputpkg, basedir))
-  
-  emit-java-class(merge-strategy, createdir|outputpkg, basedir) =
-    ?ast;
-    filename := <java-extractname; guarantee-extension(|"java")> ast;
-    if createdir then
-      outputdir := <concat-strings> [basedir, "/", <string-replace(|".", "/")> outputpkg];
-      (<file-exists <+ mkdir(id)> outputdir)
-    else
-      outputdir := basedir
-    end;
-    filepath := <concat-strings> [outputdir, "/", filename];
-    /* FIXME: temporary disable of merging due to http://yellowgrass.org/issue/SpoofaxWithCore/74 */
-//    
-//    (
-//      <file-exists> filepath;
-//      ast' := <parse-java-file> filepath;
-//      ast'' := <merge-strategy> (ast', ast)
-//      <+
-//      ast'' := ast
-//    );
-    ast'' := ast;
-    pp-java := <debugged-java-pp> ast'';
-    fout     := <fopen> (filepath, "w");
-    <fputs> (pp-java, fout);
-    <fclose> fout
-  
-  java-extractname:
-    compilation-unit -> name
-    with
-      <collect-one(?InterfaceDecHead(_, Id(name), _, _) + ?ClassDecHead(_, Id(name), _, _, _))> compilation-unit
-
   parse-java-file = parse-file(
         strsglr-perror, strsglr-report-parse-error
     | <import-term(lib/JavaCompilationUnit-15.tbl)>
@@ -147,13 +113,3 @@ rules /* merging of two Java ASTs */
 	        end
       end 
 
-rules /* id escaping */
-
-  escape-java-id = string-replace(|"'", "_")
-  
-rules /* Java pp with crash details */
-  
-  debugged-java-pp =
-    pp-java-string <+
-    bottomup(try(not(is-string) ; not(is-list) ; not(pp-java-string) ; debug(!"ERROR: cannot pp "))) ; fail
-  

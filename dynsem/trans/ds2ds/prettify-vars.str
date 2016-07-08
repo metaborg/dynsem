@@ -1,0 +1,63 @@
+module ds2ds/prettify-vars
+
+imports
+  signatures/-
+  analysis/-
+  
+strategies
+    
+  prettify-vars-module =
+    ?Module(_, _);
+    m-in-analysis(
+      {| PrettifyVar:
+        prettify-vars-all
+      |};
+      unrename-all);
+    unmark-vars
+  
+  prettify-vars-all = alltd(prettify-vars-rule)
+  
+  prettify-vars-rule:
+    Rule(p*, infer, Relation(reads, src, arrow, tgt)) -> Rule(p'*, infer, Relation(reads', src', arrow, tgt'))
+    where {| PrettifyVar, NextIdx:
+      reads' := <alltd(prettify-var-def)> reads;
+      src' := <alltd(prettify-var-def)> src;
+      p'* := <alltd(prettify-var-def); alltd(prettify-var-ref)> p*;
+      tgt' := <alltd(prettify-var-ref)> tgt 
+    |}
+  
+  prettify-var-def:
+    Var(x) -> Var(<PrettifyVar> x)
+  
+  prettify-var-def:
+    Var(x) -> Var(x')
+    where
+      <not(PrettifyVar)> x
+    where
+      <string-starts-with(|"_lifted")> x;
+      x-def := <lookup-def(|Vars())> x;
+      x-ty := <lookup-prop(|Type())> x-def;
+      varscheme-def* := <get-reverse-matching-varschemes> x-ty;
+      if scheme-def := <Hd> varscheme-def*
+      then
+        x-prefix := <def-get-name> scheme-def
+      else
+        x-prefix := <derw-type; get-sort-name; lower-case> x-ty
+      end;
+      x' := <pesimistic-next-variable> x-prefix;
+      rules(PrettifyVar: x -> x')
+
+  prettify-var-ref = VarRef(PrettifyVar)
+  
+  pesimistic-next-variable:
+    prefix -> name
+    where
+      let
+        next-idx = <NextIdx> prefix <+ rules(NextIdx: prefix -> 0); !0
+        make-name = !$[[prefix][<id>]]
+      in
+        idx := <next-idx; repeat-until(inc, not(make-name; lookup-def(|Vars())))>;
+        rules(NextIdx: prefix -> idx);
+        name := <make-name> idx
+      end
+      

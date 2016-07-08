@@ -1,0 +1,68 @@
+module backend/interpreter/lang-names
+
+imports
+  signatures/-
+  backend/utils/utils
+  backend/interpreter/utils
+  backend/interpreter/signature
+  libjava-front
+
+rules
+
+  ds-to-interp-terms-types-name:
+    SortDecl(s) -> $[I[<ds-utils-java-escape-id> s]Term]
+
+  ds-to-interp-terms-types-name:
+    MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap]
+    where
+      key := <ds-to-interp-terms-types-name> skey;
+      val := <ds-to-interp-terms-types-name> sval
+
+  ds-to-interp-terms-types-name:
+    NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
+  
+  ds-to-interp-terms-types-name:
+    NativeType(_, ty-str) -> ty-str
+
+  ds-to-interp-terms-types-name:
+    SimpleSort(s) -> $[I[<ds-utils-java-escape-id> s]Term]
+    where
+      <not(is-builtin-type)> s
+  
+  ds-to-interp-terms-types-name:
+    SimpleSort("String") -> $[String]
+
+  ds-to-interp-terms-types-name:
+    SimpleSort("Int") -> $[int]
+
+  ds-to-interp-terms-types-name:
+    SimpleSort("Bool") -> $[boolean]
+  
+  ds-to-interp-terms-types-name:
+    Con(name, child*) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
+      
+  ds-to-interp-terms-types-name:
+    ConsDecl(name, child*, _, _) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
+
+  ds-to-interp-terms-types-con-name:
+    (name, arity) -> $[[<ds-utils-java-escape-id> name]_[arity]_Term]
+  
+  ds-to-interp-terms-types-name:
+    ListSort(s) -> $[List_[<ds-to-interp-terms-types-name; ds-utils-java-escape-id; string-replace(|".","_")> s]]
+
+  ds-box-java-type = try(internal-ds-box-java-type)
+  
+  internal-ds-box-java-type:
+    "int" -> $[Integer]
+
+  internal-ds-box-java-type:
+    "boolean" -> $[Boolean]
+    
+  is-primitive-type = try(?SimpleSort(<id>)); (?"Int" + ?"Bool")
+  
+  is-builtin-type = try(?SimpleSort(<id>)); (?"String" + ?"Int" + ?"Bool")
+  
+  is-builtin-type = ?ListSort(<is-builtin-type>)
+  
+
+

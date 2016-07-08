@@ -28,49 +28,41 @@ rules
       compilation-unit |[ 
         package ~x:<AutoPackageName>;
         
+        import java.util.Objects;
         import org.metaborg.meta.interpreter.framework.*;
         import org.spoofax.interpreter.terms.*;
-        import org.spoofax.jsglr.client.imploder.ImploderAttachment;
-        import org.spoofax.interpreter.core.Tools;
-        import java.util.Objects;
+        import com.oracle.truffle.api.frame.*;
+        import com.oracle.truffle.api.nodes.*;
+        import com.oracle.truffle.api.source.*;
         
-        @SuppressWarnings("unused")
         public class ~x:gennodename extends ~x:sortname implements IGenericNode {
           
-          public IStrategoTerm aterm;
+          private IStrategoTerm aterm;
           
-          public ~x:gennodename(INodeSource source, IStrategoTerm term) {
+          public ~x:gennodename(SourceSection src, IStrategoTerm term) {
+            super(src);
             Objects.requireNonNull(term);
-            this.setSourceInfo(source);
             this.aterm = term;
           }
           
           @Override
           public <T> T match(Class<T> clazz) {
-            return specialize(1).match(clazz);
+            return specialize().match(clazz);
           }
           
           @Override
-          public void specializeChildren(int depth){
-            throw new InterpreterException("Operation not supported", "aterm specializer", this);
-          }
-          
-          @Override
-          public ~x:sortname specialize(int depth) {
-            if(replaced()) {
-              return (~x:sortname) replacement();
-            }
+          public ~x:sortname specialize() {
             if (aterm instanceof IStrategoAppl) {
               final IStrategoAppl term = (IStrategoAppl) aterm;
               final String name = term.getName();
-              final INodeSource source = NodeSource.fromStrategoTerm(term);
-
+              final SourceSection source = SourceSectionUtil.fromStrategoTerm(term);
+              
               ~bstm*:<mapconcat(ds2java-consdecl-specializer)> [c-def*, impl-c-def*]
             }
 
             ~bstm*:<foldr(![], ds2java-implcons-specializer)> impl-c-def*
             
-            throw new RewritingException(aterm.toString());
+            throw new MalformedASTException(aterm.toString());
             
           }
           
@@ -94,10 +86,7 @@ rules
   	c-def ->
 			bstm* |[
 			  if(name.equals(~e:Lit(String([Chars(<escape> c-name)]))) && term.getSubtermCount() == ~i:<int-to-string> c-arity) {
-			    ~x:sortname replacement = replace(new ~x:consname(source, e*));
-			    if (depth > 0) {
-			      replacement.specializeChildren(depth - 1);
-			    }
+			    ~x:sortname replacement = new ~x:consname(source, e*);
 			    return replacement;
 		    }
 			]|
@@ -113,7 +102,7 @@ rules
     idx -> e |[ term.getSubterm(~i:<int-to-string> idx) ]|
 
   ds2java-gennode-instantiation:
-    (e_trm, ty) -> e |[ new ~x:gennodename(NodeSource.fromStrategoTerm(e_trm), e_trm).specialize(1) ]|
+    (e_trm, ty) -> e |[ new ~x:gennodename(SourceSectionUtil.fromStrategoTerm(e_trm), e_trm).specialize() ]|
     where
       not(!ty => ListType(_));
       ty-def := <lookup-def(|Types())> ty;
@@ -122,7 +111,7 @@ rules
       gennodename := $[Generic_[<ds2java-type-to-identifier> ty]]
 
   ds2java-gennode-instantiation:
-    (e_trm, lty@ListType(e-ty)) -> e |[ new x_listname(NodeSource.fromStrategoTerm(e_trm)).fromStrategoTerm(e_trm) ]|
+    (e_trm, lty@ListType(e-ty)) -> e |[ x_listname.fromStrategoTerm(e_trm) ]|
     where
       x_listname := <ds2java-type-to-unboxed-type> lty
   
@@ -144,6 +133,9 @@ rules
     (e_trm, IntType()) -> e |[ TermUtils.intFromTerm(e_trm) ]|
 
   ds2java-gennode-instantiation:
+    (e_trm, LongType()) -> e |[ TermUtils.longFromTerm(e_trm) ]|
+
+  ds2java-gennode-instantiation:
     (e_trm, RealType()) -> e |[ TermUtils.doubleFromTerm(e_trm) ]|
   
   ds2java-gennode-instantiation:
@@ -152,8 +144,8 @@ rules
   ds2java-implcons-specializer:
   	(impl-c-def, bstm*) -> bstm* |[
   	  try {
-  	    return replace(new x_implconsname(getSourceInfo(), e_gennode));
-  	  } catch(RewritingException ~x:<newname>) {
+  	    return new x_implconsname(this.getSourceSection(), e_gennode);
+  	  } catch(MalformedASTException ~x:<newname>) {
   	    bstm*
   	  }
   	]|
@@ -165,8 +157,8 @@ rules
   ds2java-arrow-specializedispatch:
     (arrow-def, ArrowType(_, bu-ty)) ->
       class-body-dec |[
-        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(param*){
-        	return specialize(1).~x:execname(e*);
+        public ~x:<ds2java-returnclassname> (arrow-def, bu-ty) ~x:execname(VirtualFrame frame, param*){
+        	return specialize().~x:execname(frame, e*);
         }
       ]|
     where

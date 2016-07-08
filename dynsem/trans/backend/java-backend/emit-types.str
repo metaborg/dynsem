@@ -30,12 +30,22 @@ rules /* generate interfaces for sort declarations */
         package ~x:<AutoPackageName>;
         
         import org.metaborg.meta.interpreter.framework.*;
-        import com.github.krukow.clj_lang.PersistentTreeMap;
+        import com.oracle.truffle.api.frame.*;
+        import com.oracle.truffle.api.source.*;
+        import com.oracle.truffle.api.CompilerDirectives.*;
+        import com.github.krukow.clj_lang.*;
+        import ds.manual.interpreter.*;
         
-        public abstract class ~x:<def-get-name; ds2java-type-to-identifier> ty-def extends AbstractNode implements IMatchableNode {
+        public abstract class x_classname extends AbstractNode {
+          
+          public x_classname(SourceSection src) {
+            super(src);
+          }
+          
           ~exec*
         }
       ]|
     where
+      x_classname := <def-get-name; ds2java-type-to-identifier> ty-def;
       exec* := <ds2java-execmethods(ds2java-throw-statement|rule*)> ty-def
  

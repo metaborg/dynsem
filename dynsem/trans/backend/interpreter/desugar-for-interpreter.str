@@ -1,0 +1,261 @@
+module backend/interpreter/desugar-for-interpreter
+
+imports
+  stratego/metaborg
+  signatures/-
+  backend/interpreter/-
+  analysis/-
+  ds2ds/explicate-arrow-types
+  ds
+
+rules
+
+  desugar-for-interpreter-module:
+    m@Module(_, _) -> Module($[[name]_interp], section*)
+    where
+      <m-in-analysis(desugar-for-interpreter; unrename-all); unmark-vars> m => Module(name, section*)
+
+  desugar-for-interpreter =
+    explicate-arrow-types-noanalysis
+    ; add-rulekind-flags-module
+    ; desugar-semantic-components
+    ; mark-rule-arguments
+    ; desugar-natives
+    ; desugar-list-reductions
+    ; desugar-rec-tco
+    ; desugar-unquote-strings
+    ; desugar-nmatch-neq
+    ; resugar-lists
+
+rules
+
+  add-rulekind-flags-module =
+    m-in-analysis(add-rulekind-flags; unrename-all) 
+  
+  add-rulekind-flags = alltd(add-rulekind-flags-rule)
+  
+  add-rulekind-flags-rule:
+    Rule(p*, infer, relation) -> Rule(p*, infer, relation, kindflag, dispatchClass)
+    where
+      (kindflag, dispatchClass) := <get-relation-kind-class> relation
+  
+  get-relation-kind-class:
+    Relation(_, Source(srcpattern, _), arrow, _) -> <get-relation-kind-class> srcpattern
+  
+  get-relation-kind-class:
+    As(_, t) -> <get-relation-kind-class> t
+  
+  get-relation-kind-class:
+    con@Con(c, k*) -> (TermKind(), <ds-to-interp-terms-types-name; qualify-term-class> con)
+  
+  get-relation-kind-class:
+    Cast(_, srt@SimpleSort(s)) -> (SortKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
+    where
+      <not(is-builtin-type)> s
+  
+  get-relation-kind-class:
+    Cast(_, SimpleSort("String")) -> (PrimitiveKind(), "java.lang.String")
+
+  get-relation-kind-class:
+    Cast(_, SimpleSort("Int")) -> (PrimitiveKind(), "java.lang.Integer")
+
+  get-relation-kind-class:
+    Cast(_, SimpleSort("Bool")) -> (PrimitiveKind(), "java.lang.Boolean")
+
+  get-relation-kind-class:
+    Cast(_, MapSort(_, _)) -> (MapKind(), "MAP REDUCTION NOT SUPPORTED")
+  
+  get-relation-kind-class:
+    Cast(_, srt@ListSort(_)) -> (ListKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
+
+  qualify-term-class:
+    class -> $[[<get-opt> TermPkg()].[class]]
+
+rules /* rename arguments */
+
+  mark-rule-arguments = alltd(?Rule(_, _, _, _, _); mark-rule-arguments-rule)
+  
+  mark-rule-arguments-rule:
+    Rule(prem*, infer, Relation(Source(lhs, rw*), arrow, target), kind, class)
+      -> Rule(prem'*, infer, Relation(Source(lhs', rw*), arrow, target'), kind, class)
+    with {| RenameArgument, NextArgument:
+      rules(NextArgument: _ -> 1);
+      lhs' := <try(mark-rule-arguments-bind-source)> lhs;
+      prem'* := <alltd(mark-rule-arguments-read)> prem*;
+      target' := <alltd(mark-rule-arguments-read)> target
+    |}
+
+  mark-rule-arguments-bind-source:
+    Cast(var@Var(v), l@ListSort(_)) -> Cast(ArgBind(0), l)
+    where
+      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
+
+  mark-rule-arguments-bind-source:
+    As(var@Var(v), source) -> source
+    where
+      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
+
+  mark-rule-arguments-read = RenameArgument
+
+  type-of:
+    ArgRead(i){v} -> <type-of> v
+
+rules /* native operators */
+
+  desugar-natives = innermost(desugar-native-ops + desugar-native-types)
+
+  desugar-native-ops:
+    Con(c, k*) -> NativeOp(c, k*)
+    where
+      <lookup-def(|Constructors()); lookup-prop(|ConsKind())> (c, <length> k*) => NativeOpCons()
+
+  desugar-native-types:
+    SimpleSort(s) -> NativeType(s, ty-str)
+    where
+      ty-def := <lookup-def(|Types())> s;
+      NativeSort() := <lookup-prop(|SortKind())> ty-def;
+      ty-str := <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
+
+  desugar-native-types:
+    SortFunCall(name, recv, arg*) -> NativeFunCall(<type-of> recv, name, recv, arg*)
+  
+  type-of:
+    NativeOp(c, k*) -> ty
+    where
+      ConstructorType(_, ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> k*)
+  
+  type-of:
+    NativeFunCall(srecv, name, _, _) -> ty
+    where
+      s-def := <lookup-def(|Types())> srecv;
+      f-def := <lookup-native-fun-def(|name)> s-def;
+      FunctionType(_, ty) := <lookup-prop(|Type())> f-def
+
+rules /* desugar rule conclusion/premise source */
+
+  desugar-semantic-components = alltd(desugar-rule-conclusion-source); alltd(desugar-relation-premise-source)
+
+  desugar-rule-conclusion-source:
+    Rule(p*, infer, Relation(Reads(ro*), Source(t, rw*), rel, tgt), kind, class) -> Rule(p*, infer, Relation(Source(t, [ro*, rw*]), rel, tgt), kind, class) 
+
+  desugar-relation-premise-source:
+    Formula(Relation(Reads(ro*), Source(t, rw*), rel, tgt)) -> Formula(Relation(Source(t, [ro*, rw*]), rel, tgt))
+
+rules /* list reductions */
+
+  desugar-list-reductions = alltd(desugar-list-reduction)
+  
+  desugar-list-reduction:
+    Formula(Relation(Source(t, rws), rel, target)) -> Formula(Relation(Source(ListSource(t, ty), rws), rel, target))
+    where
+      <type-of> t => ty@ListType(_)
+
+rules /* TCO */
+
+  desugar-rec-tco = alltd(try(desugar-rule-pushdown-target); desugar-rule-rec-tco)
+
+  desugar-rule-pushdown-target:
+    Rule(p*, infer, Relation(src, arrow, Target(tt, rws)), kind, class) ->
+      Rule([p*, Formula(Match(tt, Var(v)))], infer, Relation(src, arrow, Target(VarRef(v), rws)), kind, class)
+    where
+      <not(?VarRef(_))> tt;
+      v := <newname>
+
+  desugar-rule-rec-tco:
+    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
+    where {| CurrentRelation:
+      rules(CurrentRelation: _ -> (c, <length> k*, arrow-name));
+      p'* := <desugar-prems-rec-tco(try(?succ))> p*;
+      !succ // ensure we have rewritten at least one call
+    |}
+  
+  desugar-rule-rec-tco:
+    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
+    where {| CurrentRelation:
+      rules(CurrentRelation: _ -> (<rw-type> ty, -1, arrow-name));
+      p'* := <desugar-prems-rec-tco(try(?succ))> p*;
+      !succ // ensure we have rewritten at least one call
+    |}
+  
+  desugar-prems-rec-tco(s) = is-list; try(at-last([desugar-prem-rec-tco(s)]))
+  
+  desugar-prem-rec-tco(s) =
+    CaseMatch(id, map(try(CaseOtherwise(desugar-prems-rec-tco(s)) + CasePattern(id, desugar-prems-rec-tco(s)))))
+  
+  desugar-prem-rec-tco(s):
+    Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
+      Formula(RecRelation(src, rel, tgt))
+    where
+      (c, <length> k*, arrow-name) := <CurrentRelation>;
+      s
+
+  desugar-prem-rec-tco(s):
+    Formula(Relation(src@Source(ArgRead(0), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
+      Formula(RecRelation(src, rel, tgt))
+    where
+      (_, _, arrow-name) := <CurrentRelation>;
+      s
+  
+  desugar-prem-rec-tco(s):
+    Formula(Relation(src@Source(ListSource(_, lty), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
+      Formula(RecRelation(src, rel, tgt))
+    where
+      (lty, -1, arrow-name) := <CurrentRelation>; 
+      s
+
+rules /* desugar not-match and not equal premises */
+
+  desugar-nmatch-neq = alltd(desugar-premise-nmatch-neq)
+  
+  desugar-premise-nmatch-neq:
+    Formula(NMatch(tb, pat)) -> Formula(Fails(Formula(Match(tb, pat))))
+  
+  desugar-premise-nmatch-neq:
+    Formula(TermNeq(tb1, tb2)) -> Formula(Fails(Formula(TermEq(tb1, tb2))))
+
+rules /* unquote string literals */
+
+  desugar-unquote-strings = alltd(String(un-double-quote))
+  
+rules /* resugar list construction */
+
+  resugar-lists = innermost(resugar-list); innermost(add-typeanno-to-list)
+
+  resugar-list:
+    Cast(Wld(), _) -> Wld()
+
+  resugar-list:
+    ListTail(h1*, ListTail(h2*, tl)) -> ListTail([h1*, h2*], tl)
+  
+  resugar-list:
+    ListTail(h1*, List(h2*)) -> List([h1*, h2*])
+  
+  resugar-list:
+    ListTail(h*, Cast(List([]), _)) -> List(h*)
+  
+  add-typeanno-to-list:
+    l@List(elems) -> TypedList(elems, list-class)
+    where
+      list-sort := <type-of; derw-type> l;
+      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+
+  add-typeanno-to-list:
+    l@ListTail(elems, tail) -> TypedListTail(elems, tail, list-class)
+    where
+      list-sort := <type-of; derw-type> l;
+      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort 
+  
+  add-typeanno-to-list:
+    Cast(List([]), list-sort) -> TypedList([], <ds-to-interp-terms-types-name; qualify-term-class> list-sort)
+  
+  add-typeanno-to-list:
+    Formula(Match(List([]), rhs)) -> Formula(Match(TypedList([], list-class), rhs))
+    where
+      list-sort := <type-of; derw-type> rhs;
+      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+  
+  add-typeanno-to-list:
+    LabelComp(list-sort, List([])) -> LabelComp(list-sort, TypedList([], list-class))
+    where
+      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort 
+

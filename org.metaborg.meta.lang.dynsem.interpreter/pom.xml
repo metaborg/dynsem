@@ -1,0 +1,316 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.metaborg</groupId>
+	<artifactId>org.metaborg.meta.lang.dynsem.interpreter</artifactId>
+	<version>2.0.0-SNAPSHOT</version>
+	<name>DynSem Interpreter</name>
+
+	<properties>
+		<forceContextQualifier>qualifier</forceContextQualifier>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<deployFileUrl>${project.distributionManagement.snapshotRepository.url}</deployFileUrl>
+		<deployRepositoryId>metaborg-nexus</deployRepositoryId>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.github.krukow</groupId>
+			<artifactId>clj-ds</artifactId>
+			<version>0.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle.truffle</groupId>
+			<artifactId>truffle-api</artifactId>
+			<version>0.15</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle.truffle</groupId>
+			<artifactId>truffle-dsl-processor</artifactId>
+			<version>0.15</version>
+		</dependency>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.strategoxt.strj</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>dynsem.lib.stratego.javastrat</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>dynsem.lib.stratego.jar</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.0.76-beta</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.7-SNAPSHOT</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.2</version>
+				<configuration>
+					<retryFailedDeploymentCount>10</retryFailedDeploymentCount>
+					<releaseProfiles>release</releaseProfiles>
+				</configuration>
+			</plugin>
+			<!-- Generate MANIFEST.MF, to make project available as an Eclipse plugin. -->
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>3.0.1</version>
+				<extensions>true</extensions>
+				<configuration>
+					<manifestLocation>META-INF</manifestLocation>
+					<instructions>
+						<!-- Fix names not to include the groupId. -->
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Name>${project.artifactId}</Bundle-Name>
+						<!-- Replace SNAPSHOT in the manifest version with given qualifier. -->
+						<Bundle-Version>$(replace;${project.version};-SNAPSHOT;.${forceContextQualifier})</Bundle-Version>
+						<!-- Also export packages that contain '.impl', because it would exclude 
+							'.imploder' in jsglr. -->
+						<Export-Package>*</Export-Package>
+						<!-- Don't declare dependency on Java library packages. -->
+						<!-- Allow dependencies to Metaborg artifacts without a provider. -->
+						<!-- Use Metaborg provider for rest of the packages, these are external 
+							dependencies that should not conflict with other Eclipse plugins. -->
+						<Import-Package>
+							!sun.misc,
+							!sun.nio.cs,
+							!org.junit,
+							!javax*,
+							!org.xml*,
+							org.spoofax*,
+							org.metaborg*,
+							org.strategoxt.*,
+							org.apache.tools.ant,
+							*;provider=metaborg;mandatory:=provider
+						</Import-Package>
+						<!-- Include transitive dependencies, so that classes of transitive 
+							dependencies are available. -->
+						<Embed-Transitive>true</Embed-Transitive>
+						<!-- Allow buddy loading -->
+						<Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
+						<!-- Don't generate uses declarations in exported packages. -->
+						<_nouses>true</_nouses>
+						<!-- Don't use version of this package if no version can be determined. -->
+						<_nodefaultversion>true</_nodefaultversion>
+					</instructions>
+				</configuration>
+				<!-- Hook manifest generation into the process-classes phase, because 
+					this is not automatically done for projects with 'jar' packaging. -->
+				<executions>
+					<execution>
+						<id>bundle-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Add the generated MANIFEST.MF to the resulting JAR file. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<archive>
+						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-http</artifactId>
+				<version>2.10</version>
+			</extension>
+		</extensions>
+	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.3</version>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<properties>
+				<deployFileUrl>${project.distributionManagement.repository.url}</deployFileUrl>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-enforcer-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>enforce-no-snapshots</id>
+								<goals>
+									<goal>enforce</goal>
+								</goals>
+								<configuration>
+									<rules>
+										<requireReleaseDeps>
+											<message>No snapshot dependencies are allowed in release
+												builds</message>
+										</requireReleaseDeps>
+									</rules>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>standalone</id>
+			<repositories>
+				<repository>
+					<id>metaborg-release-repo</id>
+					<url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>metaborg-snapshot-repo</id>
+					<url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>spoofax-eclipse-repo</id>
+					<url>http://download.spoofax.org/update/nightly/</url>
+					<layout>p2</layout>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>metaborg-release-repo</id>
+					<url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
+				<pluginRepository>
+					<id>metaborg-snapshot-repo</id>
+					<url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+	</profiles>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>${deployRepositoryId}</id>
+			<url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>${deployRepositoryId}</id>
+			<url>http://artifacts.metaborg.org/content/repositories/releases/</url>
+		</repository>
+	</distributionManagement>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+</project>

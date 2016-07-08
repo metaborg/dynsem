@@ -1,0 +1,85 @@
+module ds2ds/meta-functions
+
+imports
+  analysis/-
+  signatures/-
+  ds
+  lib-ds
+
+rules
+  
+  unmetafunc-module:
+  	m@Module(_, _) -> Module($[[name]_unmetafunc], section*)
+  	where
+  		<m-in-analysis(unmetafunc; unrename-all); unmark-vars> m => Module(name, section*)
+  
+  unmetafunc:
+  	m@Module(name, section*) -> Module(name, [sig', Rules(rule''*), non-rules*])
+  	where
+  	  cons-def* := <
+  	    lookup-def-all(|Constructors());
+  	    filter(
+  	      where(lookup-prop(|ConsKind()) => MetafunCons());
+  	      where(lookup-prop(|Type()) => ConstructorType([<not(is-systemsort)>], _))
+  	    )>;
+      ([sig], non-sig*) := <partition(?Signatures(_))> section*;
+      ([Rules(rule*)], non-rules*) := <partition(?Rules(_))> non-sig*; 
+      (_, sig') := <thread-map(unmetafunc-signature)> (cons-def*, sig);
+  		rule'* := <map(try(unmetafunc-rule(|cons-def*)))> rule*;
+  		rule''* := <alltd(unmetafunc-relprem(|cons-def*))> rule'*
+
+  unmetafunc-signature:
+  	(cons-def, Signatures(sig*)) -> (cons-def, Signatures([Sorts(sort-decl'*), ArrowDeclarations(arrow-decl''*), Constructors(cons-decl'*), non-cons*]))
+  	where
+  		(c-name, _) := <def-get-name> cons-def;
+  	  ConstructorType([c-ty], ty) := <lookup-prop(|Type())> cons-def;
+  	  ([Sorts(sort-decl*)], non-sort*) := <partition(?Sorts(_))> sig*;
+  	  ([ArrowDeclarations(arrow-decl*)], non-arrow*) := <partition(?ArrowDeclarations(_))> non-sort*;
+  	  ([Constructors(cons-decl*)], non-cons*) := <partition(?Constructors(_))> non-arrow*;
+  	  sort-decl'* := <filter(not(?SortDecl(ty)))> sort-decl*;
+  	  arrow-decl'* := <filter(not(?ArrowDecl(_, SimpleSort(ty), _, "default", res-ty, _)))> arrow-decl*;
+  		cons-decl'* := <filter(not(is-consdecl(|cons-def)))> cons-decl*;
+  		arrow-decl''* := [ArrowDecl(NoArrowROs(), <derw-type> c-ty, NoArrowRWs(), c-name, res-ty, NoArrowROs()), arrow-decl'*]
+
+  is-consdecl(|cons-def):
+  	c@ConsDecl(name, child*, _, _) -> c
+  	where
+  		c-def := <lookup-def(|Constructors())> (name, <length> child*);
+  		<eq> (cons-def, c-def)
+
+  unmetafunc-rule(|cons-def*):
+    Rule(p*, infer, Relation(Reads(r*), Source(Con(c-name, [c-t]), sc*), NamedDynamicEmitted(w*, arrow-name), Target(rhs, tc*))) ->
+      Rule(p*, infer, Relation(Reads(r*), Source(c-t', sc*), NamedDynamicEmitted(w*, c-name), Target(rhs, tc*)))
+    where
+      c-def := <lookup-def(|Constructors())> (c-name, 1);
+      ConstructorType([c-t-ty], _) := <lookup-prop(|Type())> c-def;
+      <fetch-elem(?c-def)> cons-def*
+    where
+      if
+        <?ListTail(_, _)> c-t
+        <+
+        <?List(_)> c-t
+        <+
+        <?Var(_)> c-t
+      then
+        c-t' := Cast(c-t, <derw-type> c-t-ty)
+      else
+        c-t' := c-t
+      end
+
+  unmetafunc-relprem(|cons-def*):
+  	Formula(Relation(Reads(r*), Source(Con(c-name, [c-t]), sc*), arr@NamedDynamicEmitted(w*, arrow-name), Target(rhs, tc*))) ->
+  	 Formula(Relation(Reads(r*), Source(c-t, sc*), NamedDynamicEmitted(w*, c-name), Target(rhs, tc*)))
+	  where
+	  	c-def := <lookup-def(|Constructors())> (c-name, 1);
+	  	ConstructorType([c-t-ty], _) := <lookup-prop(|Type())> c-def;
+	  	<fetch-elem(?c-def)> cons-def*
+
+
+
+
+
+
+
+
+

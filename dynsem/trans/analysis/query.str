@@ -21,13 +21,17 @@ rules
     Cast(_, ty) -> <rw-type> ty
   
   type-of:
-    MatchedVar(v) -> <type-of> VarRef(v)
-  
-  type-of:
     Var(v) -> <type-of> VarRef(v)
 
   type-of:
-    ListTail([h], _) -> ListType(<type-of> h)
+    ListTail(elems, tl) -> l-ty
+    where
+      l-ty := ListType(<fetch-elem(not(?Wld()); type-of)> elems)
+      <+
+      l-ty := <type-of> tl
+  
+  type-of:
+    List(elems) -> ListType(<fetch-elem(not(?Wld()); type-of)> elems)
   
   type-of:
     Con(name, c*) -> c-ty
@@ -40,17 +44,50 @@ rules
   type-of-applicable-arrow(coerce-s):
     (arrow-type*, term-ty) -> <fetch-elem(where(\ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-type*
 
+  lookup-applicable-arrow-def:
+    type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
+
+  is-applicable-arrow-def(|type-name) =
+    ?ArrowType(type-name, _)
+    <+
+    ?ArrowType(ltype-name, _);
+    <type-coerce-direct(fail)> (type-name, ltype-name)
+
+  lookup-arrow-def:
+    (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
+    where
+      <lookup-applicable-arrow-def> c-ty => arrow*
+
+rules // projections
+  
   get-arrow-source-type:
     ArrowType(src-ty, _) -> src-ty
   
   get-arrow-target-type:
     ArrowType(_, tgt-ty) -> tgt-ty
 
+rules // type properties
+  
+  is-systemsort:
+    sort -> sort
+    where
+      SystemSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> sort
+
 rules /* variable scheme queries */
+
+  get-reverse-matching-varschemes =
+    ?type;
+    lookup-def-all(|VarSchemes()); filter(is-type-matches-varscheme(|type))
+
+  is-type-matches-varscheme(|type) =
+    where(
+      lookup-prop(|Type());
+      ?type    
+    )
 
   get-unique-matching-varscheme =
     get-matching-varschemes;
-    ?[<id>]
+    Hd
 
   get-matching-varschemes =
     not(is-string);

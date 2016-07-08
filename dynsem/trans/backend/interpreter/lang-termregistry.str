@@ -1,0 +1,222 @@
+module backend/interpreter/lang-termregistry
+
+imports
+  signatures/-
+  libjava-front
+  backend/interpreter/utils
+  backend/interpreter/lang-ast
+  backend/interpreter/lang-names
+
+rules /* term registry */
+
+  ds-to-interp-terms-registry-top:
+    sig* ->
+      compilation-unit |[
+        package ~x:<get-opt> TopPkg();
+        
+        import java.util.HashMap;
+        import java.util.Map;
+        
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> BuildPkg().*;
+        import ~x:<get-opt> MatchPkg().*;
+        
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+        import org.spoofax.interpreter.terms.IStrategoTerm;
+        import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.*;
+        
+        import com.oracle.truffle.api.CompilerAsserts;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public class x_classname implements ITermRegistry {
+        
+          private final Map<Class<?>, ITermBuildFactory> builderFactories = new HashMap<Class<?>, ITermBuildFactory>();
+          private final Map<Class<?>, ITermMatchPatternFactory> matcherFactories = new HashMap<Class<?>, ITermMatchPatternFactory>();
+          private final Map<Class<?>, ITermBuildFactory> nativeFactories = new HashMap<Class<?>, ITermBuildFactory>();
+          private final Map<String, ITermBuildFactory> nativeAdapterFactories = new HashMap<String, ITermBuildFactory>();
+          
+          public x_classname() {
+            init();
+          }
+        
+          private void init() {
+            bstm0*
+            bstm1*
+            bstm2*
+            bstm3*
+          }
+          
+          @Override
+          public ITerm parseProgramTerm(IStrategoTerm p) {
+            return ~x:<ds-to-interp-terms-types-name> SimpleSort(<get-opt> StartSymbol()).create(p);
+          }
+          
+          @Override
+          public ITermBuildFactory lookupBuildFactory(Class<?> termClass) {
+            CompilerAsserts.neverPartOfCompilation();
+            return builderFactories.get(termClass);
+          }
+        
+          @Override
+          public ITermMatchPatternFactory lookupMatchFactory(Class<?> termClass) {
+            CompilerAsserts.neverPartOfCompilation();
+            return matcherFactories.get(termClass);
+          }
+          
+          @Override
+          public ITermBuildFactory lookupNativeOpBuildFactory(Class<?> termClass) {
+            CompilerAsserts.neverPartOfCompilation();
+            return nativeFactories.get(termClass);
+          }
+          
+          @Override
+          public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort,
+              String function, int arity) {
+            CompilerAsserts.neverPartOfCompilation();
+            return nativeAdapterFactories.get(sort + "/" + function + "/" + arity);
+          }
+          
+          @Override
+          public Class<?> getConstructorClass(String constr, int arity) {
+            CompilerAsserts.neverPartOfCompilation();
+            try {
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> TermPkg()].])])) + constr.replace("-", "_") + "_" + arity + "_Term");
+            } catch (ClassNotFoundException cnfe) {
+              throw new RuntimeException("Failed to load constructor class", cnfe);
+            }
+          }
+
+          @Override
+          public Class<?> getNativeOperatorClass(String constr, int arity) {
+            CompilerAsserts.neverPartOfCompilation();
+            try {
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> NativePkg()].])])) + constr.replace("-", "_") + "_" + arity);
+            } catch (ClassNotFoundException cnfe) {
+              throw new RuntimeException("Failed to load native operator class", cnfe);
+            }
+          }
+  
+          @Override
+          public Class<?> getListClass(Class<?> elemClass) {
+            CompilerAsserts.neverPartOfCompilation();
+            try {
+              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> TermPkg()].List_])])) + elemClass.getName());
+            } catch (ClassNotFoundException cnfe) {
+              throw new RuntimeException("Failed to load constructor class", cnfe);
+            }
+          }
+
+          @Override  
+          public Class<?> getMapClass(String keySortName, String mapSortName) {
+            throw new RuntimeException("Not implemented");
+          }
+          
+      }
+      ]|
+    where
+      decl* := <filter(?Constructors(<id>) + ?NativeOperators(<id>) + ?NativeDataTypes(<id>)); concat> sig*;
+      (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _)))> decl*;
+      list-dec* := <get-languagelist-usage-in-signatures> sig*;
+      x_classname := $[[<get-opt> LangName()]TermRegistry]; 
+      bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
+      bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
+      bstm2* := <ds-to-interp-nattyterms-registry-inits> nattydecl*;
+      bstm3* := <ds-to-interp-lists-registry-inits> list-dec*
+
+  ds-to-interp-terms-registry-inits = mapconcat(ds-to-interp-terms-registry-init)
+  
+  ds-to-interp-terms-registry-init:
+    dec@ConsDecl(name, kid*, _, _) ->
+      bstm* |[
+       builderFactories.put(x_conclass.class, new ITermBuildFactory() {
+    
+          @Override
+          public x_termbuildclass apply(SourceSection source,
+              TermBuild... children) {
+            return x_termbuildNODEGEN.create(source, e1*);
+          }
+        });
+
+        matcherFactories.put(x_conclass.class, new ITermMatchPatternFactory() {
+    
+          @Override
+          public MatchPattern apply(SourceSection source,
+              MatchPattern... children) {
+            return x_termmatchNODEGEN.create(source, e2*);
+          }
+        });
+      ]|
+    with
+      x_conclass := <ds-to-interp-terms-types-name> dec;
+      x_termbuildclass := $[[x_conclass]Build];
+      x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*;
+      e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+
+  ds-to-interp-lists-registry-inits = mapconcat(ds-to-interp-lists-registry-init)
+  
+  ds-to-interp-lists-registry-init:
+    ls@ListSort(es) ->
+      bstm* |[
+        builderFactories.put(x_listclass.class, new ITermBuildFactory() {
+          @Override
+          public TermBuild apply(SourceSection source, Object... objects) {
+            return x_listbuildgenclass.create(source, (TermBuild[]) objects[0], (TermBuild) objects[1]);
+          }
+        });
+        matcherFactories.put(x_listclass.class, new ITermMatchPatternFactory() {
+          @Override
+          public MatchPattern apply(SourceSection source, Object... objects) {
+            return x_listmatchgenclass.create(source, (MatchPattern[]) objects[0], (MatchPattern) objects[1]);
+          }
+        });
+      ]|
+    where
+      x_listclass := <ds-to-interp-terms-types-name> ls;
+      x_listbuildgenclass := $[[x_listclass]BuildNodeGen];
+      x_listmatchgenclass := $[[x_listclass]MatchPatternNodeGen]
+
+  ds-to-interp-natopterms-registry-inits = mapconcat(ds-to-interp-natopterms-registry-init)
+
+  ds-to-interp-natopterms-registry-init:
+    NativeOpDecl(name, kid*, _) -> 
+      bstm* |[
+        nativeFactories.put(~x:<get-opt> NativePkg().x_natop.class, new ITermBuildFactory() {
+    
+          @Override
+          public TermBuild apply(SourceSection source,
+              TermBuild... children) {
+            return ~x:<get-opt> NativePkg().x_natop.create(source, e1*);
+          }
+        });
+      ]|
+    where
+      x_natop := <concat-strings> [name, "_", <length; int-to-string> kid*];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+
+  ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
+  
+  ds-to-interp-nattyterms-registry-init:
+    NativeBaseTypeDecl(jstring, s, func*) -> <mapconcat(ds-to-interp-nattyterms-registry-init(|s))> func*
+  
+  ds-to-interp-nattyterms-registry-init(|s):
+    NativeFunctionDecl(fun, kid*, _) ->
+      bstm* |[
+        nativeAdapterFactories.put(e_adaptkey, new ITermBuildFactory() {
+    
+          @Override
+          public TermBuild apply(SourceSection source, TermBuild... children) {
+            return x_adapter.create(source, children[0], e1*);
+          }
+        });
+      ]|
+    where
+      e_adaptkey := Lit(String([Chars(<concat-strings> [s, "/", fun, "/", <length; int-to-string> kid*])]));
+      x_adapter := <concat-strings> ["_adapt_", s, "_", fun, "_", <length; int-to-string> kid*];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<int-to-string> i] ]| \)> kid*
+  
+    

@@ -1,0 +1,163 @@
+module ds2ds/defactorize
+
+imports
+  ds
+  signatures/-
+  ds2ds/sugar
+  analysis/mark-references
+  lib-ds
+  pp
+
+strategies
+
+  defactorize-module =
+    Module(!$[[<id>]_unfactorized],
+      alltd(defactorize-rule)
+    )
+  
+  insert-wildcards-module =
+    Module(!$[[<id>]_unfactorized],
+      alltd(insert-wildcards-rule)
+    )
+
+rules
+  
+  defactorize-rule =
+    ?Rule(_, _, _);
+    {| ReadCount:
+      mark-var-defs-in-rule;
+      repeat(
+        count-varreads-rule;
+        defactorize-rule-w-progress
+      )
+    |}
+
+  defactorize-rule-w-progress =
+    hoist-patternmatches-rule(try(?progress));
+    lower-termbuilds-rule(try(?progress));
+    where(!progress)
+  
+  insert-wildcards-rule =
+    ?Rule(_, _, _);
+    {| ReadCount:
+      mark-var-defs-in-rule;
+      repeat(
+        count-varreads-rule;
+        insert-wildcards-rule-w-progress
+      )
+    |}
+  
+  insert-wildcards-rule-w-progress =
+    insert-wildcards-rule(try(?progress));
+    where(!progress)
+  
+  
+  count-varreads-rule:
+    r@Rule(_, _, _) -> r
+    where
+      <collect-all(?Var(_)); nub; map(init-count-varread)> r;
+      <alltd(count-varread)> r
+  
+  count-varreads-premises =
+    is-list;
+    where(collect-all(?Var(_)); nub; map(init-count-varread));
+    alltd(count-varread)
+  
+  init-count-varread = ?Var(v); rules(ReadCount: v -> 0)
+  
+  count-varread = 
+    ?VarRef(v);
+    reads := <ReadCount; inc> v;
+    rules(ReadCount: v -> reads)
+
+  insert-wildcards-rule(record-progress) = alltd(insert-wildcards(record-progress))
+  
+  insert-wildcards(record-progress):
+    As(v, t) -> <alltd(insert-wildcards(record-progress))> t
+    where
+      Wld() := <insert-wildcards(record-progress)> v
+  
+  insert-wildcards(record-progress):
+    Var(v) -> Wld()
+    where
+      <ReadCount> v => 0;
+      record-progress
+  
+  hoist-patternmatches-rule(record-progress):
+    Rule(p*, infer, rel) -> r'
+    where {| PropagatePatternMatch:
+      p'* := <eliminate-patternmatch-premises> p*;
+      r' := <innermost(replace-singletonwrite(record-progress))> Rule(p'*, infer, rel)
+    |}
+
+  eliminate-patternmatch-premises =
+    filter(
+      hoist-patternmatches-mergepoint
+      <+ hoist-patternmatches-casematch
+      <+ not(eliminate-patternmatch-premise))
+
+  hoist-patternmatches-mergepoint:
+    MergePoint(c, PremiseBlock(p1*), PremiseBlock(p2*)) -> MergePoint(c, PremiseBlock(p1'*), PremiseBlock(p2'*))
+    where
+      p1'* := <hoist-patternmatches-in-premises-scoped(try(?succ))> p1*;
+      p2'* := <hoist-patternmatches-in-premises-scoped(try(?succ))> p2*;
+      !succ
+
+  hoist-patternmatches-mergepoint-branch(record-progress):
+    PremiseBlock(p*) -> PremiseBlock(<hoist-patternmatches-in-premises-scoped(record-progress)> p''*)
+    where {| ReadCount, PropagatePatternMatch:
+      <count-varreads-premises> p*;
+      p'* := <eliminate-patternmatch-premises> p*;
+      p''* := <innermost(replace-singletonwrite(record-progress))> p'*
+    |}
+
+  hoist-patternmatches-casematch:
+    CaseMatch(t, case*) -> CaseMatch(t, case'*)
+    where
+      case'* := <map(try(hoist-patternmatches-casematch-case(try(?succ))))> case*;
+      !succ
+
+  hoist-patternmatches-casematch-case(record-progress):
+    CasePattern(pat, p*) -> CasePattern(pat, <hoist-patternmatches-in-premises-scoped(record-progress)> p*)
+
+  hoist-patternmatches-casematch-case(record-progress):
+    CaseOtherwise(p*) -> CaseOtherwise(<hoist-patternmatches-in-premises-scoped(record-progress)> p*)
+
+  hoist-patternmatches-in-premises-scoped(record-progress) =
+    is-list;
+    {| ReadCount, PropagatePatternMatch:
+      where(count-varreads-premises);
+      eliminate-patternmatch-premises;
+      innermost(replace-singletonwrite(record-progress))
+    |}
+  
+  eliminate-patternmatch-premise =
+    (?Formula(Match(VarRef(v), rhs)) <+ ?Formula(Match(Cast(VarRef(v), _), rhs)));
+    <ReadCount> v => 1;
+    rules(PropagatePatternMatch: Var(v) -> rhs)
+  
+  replace-singletonwrite(record-progress):
+    var@Var(v) -> t
+    where
+      <repeat1(PropagatePatternMatch)> var => t;
+      record-progress
+
+  lower-termbuilds-rule(record-progress):
+    Rule(p*, infer, rel) -> r' 
+    where {| PropagateTermBuild:
+      p'* := <filter(not(eliminate-termbuild-premise))> p*;
+      r' := <innermost(replace-singletonread(record-progress))> Rule(p'*, infer, rel)
+    |}
+  
+  eliminate-termbuild-premise =
+    ?Formula(Match(lhs, Var(v)));
+    <ReadCount> v => 1;
+    rules(PropagateTermBuild:+ v -> lhs)
+  
+  replace-singletonread(record-progress):
+    VarRef(v) -> t
+    where
+      <PropagateTermBuild> v => t;
+      record-progress
+      
+

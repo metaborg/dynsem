@@ -1,12 +1,12 @@
 module ds2ds/factorize
 
 imports
-  signatures/ds-sig
+  signatures/-
   lib-ds
   
 strategies
     
-  factorize-module :
+  factorize-module:
     Module(name, section*) -> Module($[[name]_factorized], section'*)
     where
       section'* := <map(try(factorize-rules))> section*
@@ -118,12 +118,10 @@ rules // lift constructor sub-terms in match
     where
       (p-rhs*, rhs') := <factorize-match> rhs
   
-  factorize-match-in-premise:
-    Formula(Match(lhs, rhs)) -> [Formula(TermEq(lhs, rhs))]
+  factorize-termeq-in-premise:
+    Formula(TermEq(lhs, rhs)) -> [Formula(Match(lhs, rhs))]
     where
       <is-constant> rhs
-  
-  factorize-termeq-in-premise = fail
   
   factorize-relation-in-premise:
   	Formula(Relation(Reads(read*), Source(lhs,sc*), NamedDynamicEmitted(em1*, arrow), Target(rhs, tc*))) ->
@@ -245,4 +243,8 @@ rules
   is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List([])
   
   is-prime-factor = ?VarRef(_)
+
+rules
+
+  pretify-lifted-vars-all = id
 

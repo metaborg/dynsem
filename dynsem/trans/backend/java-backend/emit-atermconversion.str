@@ -24,9 +24,6 @@ rules
 	            factory.makeConstructor(~e:Lit(String([Chars(<escape> c-name)])), ~i:<int-to-string> c-arity), 
 	            e_child*
 	        );
-	        if ( getSourceInfo() != null ) {
-	          getSourceInfo().apply(term);
-	        }
 	        return term;
 	      }
 	    ]|
@@ -72,7 +69,7 @@ rules
   	IntType() -> e |[ TermUtils.termFromInt(e, factory) ]|
 
   ds2java-atermconversion-name(|e):
-  	LongType() -> e |[ TermUtils.termFromInt(e, factory) ]|
+  	LongType() -> e |[ TermUtils.termFromLong(e, factory) ]|
 
   ds2java-atermconversion-name(|e):
   	FloatType() -> e |[ TermUtils.termFromDouble(e, factory) ]|

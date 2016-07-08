@@ -1,0 +1,216 @@
+module backend/interpreter/lang-entrypoint
+
+imports
+  signatures/ds-sig
+  libjava-front
+  backend/interpreter/utils
+
+rules /* language file. interpreter entry point */
+
+  ds-to-interp-language =
+    x_language := $[[<get-opt> LangName()]Language];
+    e_dobacktrack := <if <get-opt> EnableBacktracking() then !e |[ true ]| else !e |[ false ]| end>;
+    e_safecomponents := <if get-opt(|EnableSafeComponents()) then !e |[ true ]| else !e |[ false ]| end>;
+    e_termcaching := <if get-opt(|EnableTermCaching()) then !e |[ true ]| else !e |[ false ]| end>;
+    !compilation-unit |[
+      package ~x:<get-opt> TopPkg();
+      
+      import java.io.IOException;
+      import java.io.InputStream;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemRule;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.JointRuleRoot;
+
+      import com.oracle.truffle.api.CallTarget;
+      import com.oracle.truffle.api.nodes.Node;
+      import com.oracle.truffle.api.nodes.RootNode;
+      import com.oracle.truffle.api.frame.VirtualFrame;
+      import com.oracle.truffle.api.CompilerDirectives;
+      import com.oracle.truffle.api.Truffle;
+      import com.oracle.truffle.api.source.Source;
+      import com.oracle.truffle.api.TruffleLanguage;
+
+      @TruffleLanguage.Registration(name = ~e:Lit(String([Chars(<get-opt> LangName())])), version = ~e:Lit(String([Chars(<get-opt> LangVersion())])), mimeType = ~e:Lit(String([Chars(<get-opt> MimeType())])))
+      public class x_language extends DynSemLanguage {
+        public final static String START_CONSTR_NAME = ~e:Lit(String([Chars(<get-opt> StartConstrName())]));
+        public final static int START_CONSTR_ARITY = ~i:<get-opt> StartConstrArity();
+        
+        public final static x_language INSTANCE = new x_language();
+
+        @Override protected CallTarget parse(Source code, Node context, String ... argumentNames) throws IOException
+        {
+          DynSemContext ctx = getContext();
+          InputStream specInput = code.getInputStream();
+          RuleRegistry.populate(ctx.getRuleRegistry(), specInput);
+
+          RootNode rootNode = new RootNode(x_language.class, null, null) {
+            @Override public Object execute(VirtualFrame frame) {
+              CompilerDirectives.transferToInterpreter();
+              // Return the init rule by default.
+              Class<?> dispatchClass = ctx.getTermRegistry().getConstructorClass(START_CONSTR_NAME, START_CONSTR_ARITY);
+              JointRuleRoot initJointRoot = ctx.getRuleRegistry().lookupRules("init", dispatchClass);
+              return new DynSemRule(initJointRoot);
+            }
+          };
+          return Truffle.getRuntime().createCallTarget(rootNode);
+        }
+        
+        public static final boolean ENABLE_BACKTRACKING = e_dobacktrack;
+        public static final boolean ENABLE_SAFECOMPONENTS = e_safecomponents;
+        public static final boolean ENABLE_TERMCACHING = e_termcaching;
+        
+        @Override
+        public boolean isFullBacktrackingEnabled() {
+          return ENABLE_BACKTRACKING;
+        }
+
+        @Override
+        public boolean isSafeComponentsEnabled() {
+          return ENABLE_SAFECOMPONENTS;
+        }
+
+        @Override
+        public boolean isTermCachingEnabled() {
+          return ENABLE_TERMCACHING;
+        }
+        
+        
+      }
+    ]|
+
+  ds-to-interp-language-entrypoint =
+    x_language := $[[<get-opt> LangName()]Language];
+    x_transformer := <get-opt> PreProcessor();
+    x_ruleregistry := <get-opt> RuleRegistry();
+    x_entryPoint := $[[<get-opt> LangName()]EntryPoint];
+    !compilation-unit |[
+      package ~x:<get-opt> TopPkg();
+
+      import java.io.InputStream;
+      import java.io.OutputStream;
+      
+      import org.spoofax.interpreter.terms.ITermFactory;
+      import org.spoofax.terms.io.TAFTermReader;
+      import org.apache.commons.io.FilenameUtils;
+      
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemEntryPoint;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
+      import org.metaborg.meta.lang.dynsem.interpreter.IDynSemLanguageParser;
+      import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+      import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
+      import org.spoofax.interpreter.terms.IStrategoTerm;
+
+      import ~x:<get-opt> TopPkg().~x:$[[<get-opt> LangName()]TermRegistry];
+
+      public class x_entryPoint extends DynSemEntryPoint {
+        public final static String PARSE_TABLE = ~e:Lit(String([Chars(<get-opt> TargetTableRel())]));
+        public final static String START_SYMBOL = ~e:Lit(String([Chars(<get-opt> StartSymbol())]));
+        public final static String SPEC_FILE = ~e:Lit(String([Chars(<get-opt> TargetSpecRel())]));
+        public final static String MIME_TYPE = ~e:Lit(String([Chars(<get-opt> MimeType())]));
+
+        static {
+          DynSemContext.LANGUAGE = x_language.INSTANCE;
+        }
+
+        public x_entryPoint() {
+          super(createParser(), createTransformer(), createTermRegistry(), createRuleRegistry());
+        }
+
+        public static void main(String[] args) throws Exception {
+          RuleResult res = evaluate(args[0], System.in, System.out, System.err);
+          System.out.println(res.result);
+        }
+
+        public static RuleResult evaluate(String programFile,
+            InputStream inputStream, OutputStream outputStream,
+            OutputStream errorStream) throws Exception {
+          return new x_entryPoint()
+                .getCallable(programFile, inputStream, outputStream, errorStream)
+                .call();
+        }
+        
+        public static RuleResult evaluate(String atermString,
+            ITermFactory factory, InputStream inputStream,
+            OutputStream outputStream, OutputStream errorStream) throws Exception {
+          return new x_entryPoint()
+                .getCallable(new TAFTermReader(factory).parseFromString(atermString), inputStream, outputStream, errorStream)
+                .call();
+        }
+
+        public static RuleResult evaluate(IStrategoTerm term,
+            InputStream inputStream, OutputStream outputStream,
+            OutputStream errorStream) throws Exception {
+          return new x_entryPoint()
+                .getCallable(term, inputStream, outputStream, errorStream)
+                .call();
+        }
+
+        public static IDynSemLanguageParser createParser() {
+          return new DynSemLanguageParser(x_entryPoint.class.getClassLoader()
+            .getResourceAsStream(FilenameUtils.getName(PARSE_TABLE)), START_SYMBOL);
+        }
+
+        public static ITermTransformer createTransformer() {
+          return new x_transformer();
+        }
+
+        public static ITermRegistry createTermRegistry() {
+          return new ~x:$[[<get-opt> LangName()]TermRegistry]();
+        }
+
+        public static RuleRegistry createRuleRegistry() {
+          return new x_ruleregistry();
+        }
+
+        @Override
+        public String getMimeType() {
+          return MIME_TYPE;
+        }
+
+        @Override
+        public InputStream getSpecificationTerm() {
+          return getClass().getClassLoader().getResourceAsStream(FilenameUtils.getName(SPEC_FILE));
+        }
+      }
+    ]|
+
+  ds-to-interp-language-benchmarkentry =
+    x_entryPoint := $[[<get-opt> LangName()]EntryPoint];
+    !compilation-unit |[
+      package ~x:<get-opt> TopPkg();
+            
+      import java.io.File;
+      import java.io.IOException;
+      import java.util.concurrent.Callable;
+      
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+      import org.metaborg.tools.serfer.Benchmark;
+      import org.metaborg.tools.serfer.BenchmarkConfiguration;
+      
+      public class BenchmarkRunner {
+      
+        public static void main(String[] args) throws IOException {
+          String file = args[0];
+      
+          Callable<RuleResult> callee = new x_entryPoint().getCallable(file, System.in,
+              System.out, System.err);
+      
+          BenchmarkConfiguration benchconfig = new BenchmarkConfiguration();
+          benchconfig.warmuprounds = Integer.parseInt(args[2]);
+          benchconfig.repetitions = Integer.parseInt(args[3]);
+          benchconfig.dataFile = new File(args[1]);
+      
+          Benchmark benchmark = new Benchmark(callee, benchconfig);
+          benchmark.execute();
+      
+          benchmark.writeToFile();
+        }
+      
+      }
+    ]|
+    

@@ -13,36 +13,36 @@ imports
 	backend/java-backend/lib-ds2java
 	backend/java-backend/emit-atermconversion
 	backend/java-backend/emit-genericnodes
-	
+
 rules
-  
+
   ds2java-maputils =
     collect-all(?MapSort(_, _); rw-type);
     make-set;
     ds2java-maputils-maps;
     MkSingleton
-  
+
   ds2java-maputils-maps:
     map-ty* ->
       compilation-unit |[
         package ~x:<AutoPackageName>;
-        
+
         import java.util.Map;
         import java.util.Map.Entry;
-				import java.util.TreeMap;
         import org.spoofax.interpreter.terms.*;
         import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.interpreter.framework.*;
         import com.github.krukow.clj_ds.PersistentMap;
-        import com.github.krukow.clj_lang.PersistentTreeMap;
-        
+        import com.github.krukow.clj_lang.PersistentHashMap;
+        import org.metaborg.meta.interpreter.framework.MapUtils;
+
         public class AutoMapUtils {
           ~conv*
         }
       ]|
     where
       conv* := <mapconcat(ds2java-maputils-map)> map-ty*
-  
+
   ds2java-maputils-map:
     m-ty@MapType(k-ty, v-ty) ->
       class-body-dec* |[
@@ -57,30 +57,41 @@ rules
                         e_keytrm, e_valtrm);
             idx++;
           }
-          
-          return factory.makeAppl(factory.makeConstructor("Map", 1), kids);
+
+          return factory.makeAppl(factory.makeConstructor("Map", 1), factory.makeList(kids));
         }
-        
-        public static x_maptype x_fromterm(IStrategoTerm term) {        
-			    final Map<x_kty, x_vty> result = new TreeMap<x_kty, x_vty>();
+
+        public static x_maptype x_fromterm(IStrategoTerm term) {
+          PersistentMap<x_kty, x_vty> result = PersistentHashMap.EMPTY;
 			    if (Tools.isTermAppl(term)) {
 			      IStrategoAppl appl = (IStrategoAppl) term;
 			      if (Tools.hasConstructor(appl, "Map", 1)) {
-		          for (int idx = 0; idx < term.getSubtermCount(); idx++) {
-		            IStrategoTerm kid = term.getSubterm(idx);
-		            if (Tools.isTermAppl(kid)) {
-		              IStrategoAppl bindAppl = (IStrategoAppl) kid;
-		              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
-		                result.put(e_key, e_value);
-		              }
-		            }
-		          }
-		          return PersistentTreeMap.create(result);
-			
-			      }
-			    }
-			
-			    throw new RewritingException("Malformed map");
+			        IStrategoTerm bindsTerm = appl.getSubterm(0);
+              if (Tools.isTermList(bindsTerm)) {
+	              IStrategoList binds = (IStrategoList) bindsTerm;
+			          for (int idx = 0; idx < binds.getSubtermCount(); idx++) {
+			            IStrategoTerm kid = binds.getSubterm(idx);
+			            if (Tools.isTermAppl(kid)) {
+			              IStrategoAppl bindAppl = (IStrategoAppl) kid;
+			              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
+			                result = MapUtils.add(result, e_key, e_value);
+			              } else {
+			                throw new MalformedASTException("Malformed map");
+		                }
+	                } else {
+	                  throw new MalformedASTException("Malformed map");
+	                }
+	              }
+	              return result;
+	            } else {
+	              throw new MalformedASTException("Malformed map");
+	            }
+            } else {
+              throw new MalformedASTException("Malformed map");
+            }
+          } else {
+            throw new MalformedASTException("Malformed map");
+          }
 			  }
       ]|
     where
