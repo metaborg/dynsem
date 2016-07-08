@@ -82,7 +82,6 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		return context;
 	}
 
-
 	@Override
 	protected boolean isInstrumentable(Node node) {
 		return false;

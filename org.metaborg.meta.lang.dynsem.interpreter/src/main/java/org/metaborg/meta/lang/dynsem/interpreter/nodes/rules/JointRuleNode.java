@@ -28,7 +28,7 @@ public class JointRuleNode extends DynSemNode {
 		} else {
 			this.sortRuleNode = new FailSortRuleCallNode(source);
 		}
-		
+
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;
 		this.kind = kind;
@@ -59,11 +59,11 @@ public class JointRuleNode extends DynSemNode {
 	public ASortRuleCallNode getSortRuleNode() {
 		return sortRuleNode;
 	}
-	
+
 	public String getArrowName() {
 		return arrowName;
 	}
-	
+
 	public Object getDispatchClass() {
 		return dispatchClass;
 	}
