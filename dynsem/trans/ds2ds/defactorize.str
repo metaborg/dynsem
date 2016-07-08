@@ -73,6 +73,11 @@ rules
   insert-wildcards-rule(record-progress) = alltd(insert-wildcards(record-progress))
   
   insert-wildcards(record-progress):
+    As(v, t) -> <alltd(insert-wildcards(record-progress))> t
+    where
+      Wld() := <insert-wildcards(record-progress)> v
+  
+  insert-wildcards(record-progress):
     Var(v) -> Wld()
     where
       <ReadCount> v => 0;

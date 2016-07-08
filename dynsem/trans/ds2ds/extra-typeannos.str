@@ -1,7 +1,7 @@
 module extra-typeannos
 
 imports
-  signatures/ds-sig
+  signatures/-
   ds
   analysis/-
 
