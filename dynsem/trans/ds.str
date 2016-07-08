@@ -9,6 +9,7 @@ imports
 	outline
 	ds2ds/refocus
 	ds2ds/strict
+	ds2ds/sugar
 
 imports
   lib-ds
@@ -113,5 +114,5 @@ rules // Builders
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"pp.ds")> path;
-      result   := <pp-debug> ast
+      result   := <sugar-all; pp-debug> ast
 
