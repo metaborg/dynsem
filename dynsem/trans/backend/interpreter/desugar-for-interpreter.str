@@ -219,7 +219,7 @@ rules /* unquote string literals */
   
 rules /* resugar list construction */
 
-  resugar-lists = innermost(resugar-list); alltd(add-typeanno-to-list)
+  resugar-lists = innermost(resugar-list); innermost(add-typeanno-to-list)
 
   resugar-list:
     Cast(Wld(), _) -> Wld()
