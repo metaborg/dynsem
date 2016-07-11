@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.source.MissingNameException;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.vm.PolyglotEngine;
 import com.oracle.truffle.api.vm.PolyglotEngine.Builder;
@@ -37,7 +39,8 @@ public abstract class DynSemEntryPoint {
 
 	public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
 		try {
-			IStrategoTerm term = getTransformer().transform(getParser().parse(Source.fromFileName(file)));
+			IStrategoTerm term = getTransformer().transform(getParser().parse(
+					Source.newBuilder(new File(file)).name("Evaluate to interpreter").mimeType(getMimeType()).build()));
 			return getCallable(term, input, output, error);
 		} catch (IOException ioex) {
 			throw new RuntimeException("Eval failed", ioex);
@@ -49,9 +52,8 @@ public abstract class DynSemEntryPoint {
 		try {
 			PolyglotEngine vm = buildPolyglotEngine(input, output, error);
 			assert vm.getLanguages().containsKey(getMimeType());
-			Value interpreter = vm
-					.eval(Source.fromReader(new InputStreamReader(getSpecificationTerm()), "Evaluate to interpreter")
-							.withMimeType(getMimeType()));
+			Value interpreter = vm.eval(Source.newBuilder(new InputStreamReader(getSpecificationTerm()))
+					.name("Evaluate to interpreter").mimeType(getMimeType()).build());
 			ITerm programTerm = getTermRegistry().parseProgramTerm(term);
 			return new Callable<RuleResult>() {
 				@Override
@@ -59,8 +61,8 @@ public abstract class DynSemEntryPoint {
 					return interpreter.execute(programTerm).as(RuleResult.class);
 				}
 			};
-		} catch (IOException ioex) {
-			throw new RuntimeException("Eval failed", ioex);
+		} catch (IOException e) {
+			throw new RuntimeException("Eval failed", e);
 		}
 	}
 

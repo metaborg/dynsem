@@ -3,12 +3,16 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class JointRuleNode extends DynSemNode {
 
 	@Child private RuleUnionNode mainRuleNode;
 	@Child private ASortRuleCallNode sortRuleNode;
+	private String arrowName;
+	private Class<?> dispatchClass;
+	private RuleKind kind;
 
 	public JointRuleNode(SourceSection source, RuleKind kind, String arrowName, Class<?> dispatchClass, Rule[] rules) {
 		super(source);
@@ -24,6 +28,10 @@ public class JointRuleNode extends DynSemNode {
 		} else {
 			this.sortRuleNode = new FailSortRuleCallNode(source);
 		}
+
+		this.arrowName = arrowName;
+		this.dispatchClass = dispatchClass;
+		this.kind = kind;
 	}
 
 	public RuleResult execute(Object[] arguments) {
@@ -50,6 +58,24 @@ public class JointRuleNode extends DynSemNode {
 
 	public ASortRuleCallNode getSortRuleNode() {
 		return sortRuleNode;
+	}
+
+	public String getArrowName() {
+		return arrowName;
+	}
+
+	public Object getDispatchClass() {
+		return dispatchClass;
+	}
+
+	public RuleKind getKind() {
+		return kind;
+	}
+
+	@Override
+	@TruffleBoundary
+	public String toString() {
+		return dispatchClass.getSimpleName() + "-" + arrowName + "->";
 	}
 
 }

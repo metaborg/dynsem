@@ -17,7 +17,7 @@ public class FailSortRuleCallNode extends ASortRuleCallNode {
 		if (DynSemContext.LANGUAGE.isFullBacktrackingEnabled()) {
 			throw PatternMatchFailure.INSTANCE;
 		} else {
-			throw new ReductionFailure("No rules left to try", InterpreterUtils.createStacktrace());
+			throw new ReductionFailure("No rules applicable for term " + o, InterpreterUtils.createStacktrace());
 		}
 	}
 

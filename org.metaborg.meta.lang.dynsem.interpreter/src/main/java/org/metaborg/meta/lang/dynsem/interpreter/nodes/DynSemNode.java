@@ -10,10 +10,17 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class DynSemNode extends Node {
 	private final Node contextNode;
 	@CompilationFinal private DynSemContext cachedContext;
+	private final SourceSection sourceSection;
 
 	public DynSemNode(SourceSection source) {
-		super(source);
+		super();
+		this.sourceSection = source;
 		this.contextNode = DynSemContext.LANGUAGE.createFindContextNode0();
+	}
+
+	@Override
+	public SourceSection getSourceSection() {
+		return sourceSection;
 	}
 
 	protected DynSemContext getContext() {

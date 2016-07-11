@@ -33,6 +33,10 @@ public class CaseMatchPremise extends Premise {
 
 		CompilerAsserts.compilationConstant(cases.length);
 
+		if (cases.length == 0) {
+			throw PatternMatchFailure.INSTANCE;
+		}
+
 		// execute each of the cases until the first succeeds
 		for (int i = 0; i < cases.length; i++) {
 			try {

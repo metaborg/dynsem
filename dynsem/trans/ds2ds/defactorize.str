@@ -73,6 +73,11 @@ rules
   insert-wildcards-rule(record-progress) = alltd(insert-wildcards(record-progress))
   
   insert-wildcards(record-progress):
+    As(v, t) -> <alltd(insert-wildcards(record-progress))> t
+    where
+      Wld() := <insert-wildcards(record-progress)> v
+  
+  insert-wildcards(record-progress):
     Var(v) -> Wld()
     where
       <ReadCount> v => 0;
@@ -125,12 +130,12 @@ rules
       eliminate-patternmatch-premises;
       innermost(replace-singletonwrite(record-progress))
     |}
-    
+  
   eliminate-patternmatch-premise =
-    ?f@Formula(Match(VarRef(v), rhs));
+    (?Formula(Match(VarRef(v), rhs)) <+ ?Formula(Match(Cast(VarRef(v), _), rhs)));
     <ReadCount> v => 1;
     rules(PropagatePatternMatch: Var(v) -> rhs)
-
+  
   replace-singletonwrite(record-progress):
     var@Var(v) -> t
     where
