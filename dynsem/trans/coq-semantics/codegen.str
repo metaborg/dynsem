@@ -8,6 +8,8 @@ imports
   coq-signatures/extensions/-
   coq-signatures/tactic/-
   analysis/-
+  ds2ds/explicate-arrow-types
+  lib-ds
   
 rules // Sort-to-type generation
 

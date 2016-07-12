@@ -5,6 +5,8 @@ imports
   signatures/-
   ds
   analysis/-
+  ds2ds/explicate-arrow-types
+  lib-ds
 
 rules
   
