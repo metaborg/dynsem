@@ -1,0 +1,65 @@
+module test/coq-semantics/langs/tricky_wrong
+
+// What the specifier writes:
+signature
+
+  sorts Expr constructors
+     Int : Int -> Expr
+   Float : Float -> Expr
+    Plus : Expr * Expr -> Expr
+
+  sorts Val constructors
+     IntV : Int -> Val
+   FloatV : Float -> Val
+   WrongV : Val
+  
+  variables
+    v : Val
+
+  native operators
+    plusI  : Int * Int -> Int
+    plusF  : Float * Float -> Float
+
+  arrows
+    Expr --> Val
+
+rules
+  
+  Plus(e1, e2) --> IntV(plusI(i1, i2))
+  where
+    e1 --> IntV(i1);
+    e2 --> IntV(i2).
+    
+  Plus(e1, e2) --> FloatV(plusF(f1, f2))
+  where
+    e1 --> FloatV(f1);
+    e2 --> FloatV(f2).
+
+
+
+// Left-factored, generated from what the specifier writes:
+rules
+
+  Plus(e1, e2) --> v
+  where
+    e1 --> v1;
+    case v1 of {
+      IntV(i1) =>
+        e2 --> v2;
+        case v2 of {
+          IntV(i2) =>
+            IntV(plusI(i1, i2)) => v
+          otherwise =>
+            WrongV() => v
+        }
+      FloatV(f1) =>
+        e2 --> v2;
+        case v2 of {
+          FloatV(f2) =>
+            FloatV(plusF(f1, f2)) => v
+          otherwise =>
+            WrongV() => v
+        }
+      otherwise =>
+        WrongV() => v
+    }.
