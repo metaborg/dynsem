@@ -1,6 +1,12 @@
 [Imports("scopes"),
  Imports("frames"),
  ArrowAlias("default", "scopeofFrame__Arrow", "scopeofFrame"),
+ ArrowAlias("default", "initFrame__Arrow", "initFrame"),
+ ArrowAlias("default", "lookup__Arrow", "lookup"),
+ ArrowAlias("default", "get__Arrow", "getSlot"),
+ ArrowAlias("default", "slookup__Arrow", "slookup"),
+ ArrowAlias("default", "pathofRef__Arrow", "pathofRef"),
  SortAlias("Decl", "D"),
  SortAlias("Ref", "R"),
- SortAlias("ScopeId", "ScopeId")]
+ SortAlias("ScopeId", "ScopeId"),
+ Timeouts([("eval", "Exp")])]

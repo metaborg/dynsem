@@ -212,8 +212,9 @@ rules // Term generation
   term-to-coq:
     Con(c, ts) -> app
     with
-      l := <length; int-to-string> ts;
-      name := <concat-strings> [c, l];
+//      l := <length; int-to-string> ts;
+//      name := <concat-strings> [c, l];
+      name := c;
       ts' := <map(term-to-coq)> ts;
       app := <foldl(mk-app-rev)> (ts', name) // application nested to the left
 

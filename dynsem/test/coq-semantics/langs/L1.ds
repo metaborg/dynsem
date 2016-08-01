@@ -15,7 +15,16 @@ signature
     
   sorts Exp constructors
     Exp : ScopeId * Typ * PreExp -> Exp
-    
+
+signature
+  
+  sorts Val constructors
+    NumV : Int -> Val
+    ClosV : Decl * Exp * FrameId -> Val
+  
+  arrows
+    Exp -eval-> Val
+
 signature // Scope graphs
 
   sorts Ref Decl ScopeId FrameId H
@@ -31,7 +40,7 @@ signature // Scope graphs
   sorts Addr constructors
     Addr : FrameId * Decl -> Addr
 
-  sorts SD constructors
+  sorts SD constructors // :(
     SD : ScopeId * Decl -> SD
     
   constructors
@@ -49,15 +58,6 @@ signature // Scope graphs
 
   native operators
     plusI  : Int * Int -> Int
-
-signature
-  
-  sorts Val constructors
-    NumV : Int -> Val
-    ClosV : Decl * Exp * FrameId -> Val
-  
-  arrows
-    Exp -eval-> Val
 
 rules
   

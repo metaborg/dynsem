@@ -2,22 +2,21 @@ module coq-semantics/ds2v
 
 signature
 
-  sorts DS2V constructors
-    imports : String -> DS2V
-
 	sorts DS2V constructors
 		ArrowAlias : String * Sort * String -> DS2V
 		SortAlias : String * String -> DS2V
 		Imports : String -> DS2V
+		Timeouts : List((String, String)) -> DS2V
 
 rules
 
-	get-ds2v-aliases-and-imports:
-		path -> (ds2v_aliases, ds2v_imports)
+	get-ds2v-data:
+		path -> (ds2v_aliases, ds2v_imports, ds2v_timeouts)
 		with
 			ds2v := <get-ds2v> path;
 			ds2v_aliases := <filter(?ArrowAlias(_, _, _) <+ ?SortAlias(_, _))> ds2v;
-			ds2v_imports := <filter(?Imports(_))> ds2v
+			ds2v_imports := <filter(?Imports(_))> ds2v;
+			ds2v_timeouts := <filter(?Timeouts(<id>)); concat> ds2v
 			
 	get-ds2v:
     path -> ds2v

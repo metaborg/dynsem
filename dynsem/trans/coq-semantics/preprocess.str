@@ -11,19 +11,25 @@ imports
 rules
   
   pre-process-module:
-    (mod, ds2v_aliases) -> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases)
+    (mod, ds2v_aliases, ds2v_timeouts) -> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases)
     with
+      // Augment with timeouts where applicable
+      mod'' := <foldr(!mod,
+                      \ ((arrow_name, src_sort), mod') -> mod''
+                        where
+                          mod'' := <bottomup(try(\ ArrowDecl(ArrowROs(ros), SimpleSort(src_sort), rws, arrow_name, tgt_sort, rws') ->
+                                                   ArrowDecl(ArrowROs([SimpleSort("nat")|ros]), SimpleSort(src_sort), rws, arrow_name, tgt_sort, rws') \));
+                                    bottomup(try(add-clocks-to-rule(|arrow_name, src_sort)))> mod' \)> ds2v_timeouts;
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) :=
-        <collect-data-from-module; data-to-hashmap; analyze-mutual-dependencies(|ds2v_aliases)> (mod, ds2v_aliases);
+        <collect-data-from-module; data-to-hashmap; analyze-mutual-dependencies(|ds2v_aliases)> (mod'', ds2v_aliases);
       // Construct alias map
       aliases := <new-hashtable>;
       <collect-overloaded-arrow-aliases(|arrow_decl_map)> aliases;
-      <collect-ds2v-aliases(|ds2v_aliases)> aliases
-//      ;
-//      // Augment constructors with wrong values
-//      <add-wrong-constructors> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases);
-//      // Add propagation rules
-//      <add-propagation-rules> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases)
+      <collect-ds2v-aliases(|ds2v_aliases)> aliases;
+      // Augment constructors with timeout values
+      <add-err-constructors(|"Timeout", ds2v_timeouts)> (sort_decl_map, arrow_decl_map);
+      // Add propagation rules
+      <add-propagation-rules(mk-timeout-val|ds2v_timeouts)> arrow_decl_map
 
 rules // Unfold case constructions
 
@@ -313,6 +319,29 @@ rules // Utilities for querying rules
   get-arrow-name:
     NamedDynamic(name) -> name
 
+rules // Adding timeouts with sensible clock variable names
+
+  add-clocks-to-rule(|arrow_name, src_sort):
+    rule@Rule(prems, d, Relation(Reads(ros), src, lbl, tgt)) ->
+      Rule(prems', d, Relation(Reads([LabelComp(SimpleSort("nat"), Con("S", [Var(i)]))|ros]), src, lbl, tgt))
+    with
+      // Generate fresh clock variable name
+      pvars := <extract-variables> prems;
+      svars := <extract-variables> Relation(Reads(ros), src, lbl, tgt);
+      vars := <concat> [pvars, svars];
+      !"i";
+      i := <repeat(\ vname -> <concat-strings> (vname, "'") where <elem> (vname, vars) \)>;
+      prems' := <map(add-clocks-to-premise(|i, arrow_name, src_sort))> prems
+
+  add-clocks-to-premise(|i, arrow_name, src_sort):
+    Formula(Relation(Reads(ros), s, a@NamedDynamicEmitted(lbl, arrow_name, SimpleSort(src_sort)), Target(target, rws))) ->
+      Formula(Relation(Reads([LabelComp(SimpleSort("nat"), VarRef(i))|ros]), s, a, Target(target, rws)))
+  
+  add-clocks-to-premise(|i, arrow_name, src_sort):
+    p -> p
+    where
+      not(!p; ?Formula(Relation(Reads(ros), s, a@NamedDynamicEmitted(lbl, arrow_name, SimpleSort(src_sort)), Target(target, rws))))
+
 rules // Utilities for lists
 
   duplicates:
@@ -329,5 +358,7 @@ rules // Naming conventions
   rename-overloaded-arrow:
     (arrow_name, sort_name) -> <concat-strings> [arrow_name, "_", sort_name]
 
+//  rename-constructor:
+//    (constructor_name, args) -> <concat-strings> [constructor_name, <length; int-to-string> args]
   rename-constructor:
-    (constructor_name, args) -> <concat-strings> [constructor_name, <length; int-to-string> args]
+    (constructor_name, args) -> constructor_name
