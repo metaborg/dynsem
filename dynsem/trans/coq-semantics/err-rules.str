@@ -30,10 +30,10 @@ rules // Introduce wrong value as a constructor for all sorts
       // For each sort that is used in a result position of an arrow in the arrow_sigs list 
       result_sorts := <filter({ name, sort :
                                   ?(name, SimpleSort(sort));
-                                  <elem> ((name, sort), arrow_sigs) }); concat; debug(!10);
+                                  <elem> ((name, sort), arrow_sigs) }); concat;
                        map({ to_sort, name, sort: ?(name, sort);
                              (_, (_, _, _, to_sort, _)) := <hashtable-get(|(name, SimpleSort(sort)))> arrow_decl_map;
-                             !to_sort }); debug(!11);
+                             !to_sort });
                        nub> arrow_decl_keys;
       // Add an error constructor for [errname]
       <map({ sort_name, constructors_ : ?SimpleSort(sort_name);
@@ -64,12 +64,12 @@ rules // Introduce rules for propagating exceptions
     arrow_decl_map -> 1
     with
       arrow_decl_keys := <hashtable-keys> arrow_decl_map;
-      rules_ := <map({ rs', sig, rs'', key:
+      rules_ := <map({ rs, rs', sig, key:
                        ?key;
-                       (rs', sig) := <hashtable-get(|key)> arrow_decl_map;
+                       (rs, sig) := <hashtable-get(|key)> arrow_decl_map;
                        err := <mkerr> ""; // FIXME
-                       rs'' := <map(add-propagation-to-rule(|err, arrow_sigs)); concat> rs';
-                       <hashtable-put(|key, (rs'', sig))> arrow_decl_map })> arrow_decl_keys
+                       rs' := <map(add-propagation-to-rule(|err, arrow_sigs)); concat> rs;
+                       <hashtable-put(|key, (rs', sig))> arrow_decl_map })> arrow_decl_keys
   
   add-propagation-to-rule(|err):
     Rule(prems, d, conc@Relation(_, _, _, Target(target, _))) ->
@@ -130,10 +130,11 @@ rules // Introduce rules for propagating exceptions
       ( [] := prems;
         Var(x) := target;
         Relation(_, _, _, Target(VarRef(x), _)) := conc; // FIXME: rws should match
-        rs' := rs )
+        rs' := [Rule(seen_prems, d, conc)|rs] )
       <+
       // Otherwise, if the relation signature is in arrow_sigs, add a rule for propagating error
-      ( <elem> ((arrow_name, src_sort), arrow_sigs);
+      ( !((arrow_name, src_sort), arrow_sigs);
+        <elem> ((arrow_name, src_sort), arrow_sigs);
         prems' := <concat> [seen_prems, [Formula(Relation(r, s, a, Target(err, rws)))]];
         seen_prems' := <concat> [seen_prems, [Formula(Relation(r, s, a , Target(target, rws)))]];
         // If target of formula is a variable, check that the variable is not an error (otherwise the error rule should match)
