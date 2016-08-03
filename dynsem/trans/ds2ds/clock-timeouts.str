@@ -1,4 +1,4 @@
-module ds2ds/timeout-rules
+module ds2ds/clock-timeouts
 
 imports
   coq-semantics/-
@@ -13,20 +13,34 @@ imports
 rules
 
   add-timeouts(|ds2v_timeouts):
-    mod -> mod''
+    mod -> mod'''
     with
-       // Augment relations with with timeouts where applicable
+      // Augment relations with with timeouts where applicable
       mod' := <foldr(!mod,
                       \ ((arrow_name, src_sort), mod) -> mod'
                         where
                           mod' := <bottomup(try(\ ArrowDecl(ArrowROs(ros), src_sort, rws, arrow_name, tgt_sort, rws') ->
                                                    ArrowDecl(ArrowROs([SimpleSort("nat")|ros]), src_sort, rws, arrow_name, tgt_sort, rws') \));
                                     bottomup(try(add-clocks-to-rule(|arrow_name, src_sort)))> mod \)> ds2v_timeouts;
-      // Add timeout rules
+      // Augment result sorts of timeoutable relations with special timeout value
+      // First, take the union of all result sorts of timeoutable relations:
+      srts := <map(\ (arrow_name, src_sort) -> to_sort
+                      where <oncetd(?ArrowDecl(_, src_sort, _, arrow_name, to_sort, _))> mod'
+       \); nub> ds2v_timeouts;
+      // Iterate over this union and add an appropriate constructor for each:
+      mod'' := <foldr(!mod',
+                      \ (srt, mod) -> mod''
+                        where
+                          t := <mk-timeout-name> srt; debug(!4);
+                          mod'' := <alltd(\ Constructors(cs) ->
+                                             Constructors([ConsDecl(t, [], srt, Annos([]))|cs]) \)> mod
+                      \)> srts;
+      
+      // Add a generic timeout rule for each timeoutable relation
       rs :=
         <map({ rs, sig, ros, rws, to_sort, rws', arrow_name, src_sort :
               ?(arrow_name, src_sort);
-              <alltd(?ArrowDecl(ArrowROs([SimpleSort("nat")|ros]), src_sort, ArrowRWs(rws), arrow_name, to_sort, ArrowRWs(rws')))> mod';
+              <alltd(?ArrowDecl(ArrowROs([SimpleSort("nat")|ros]), src_sort, ArrowRWs(rws), arrow_name, to_sort, ArrowRWs(rws')))> mod'';
               ro_vars := <map(\ sort -> LabelComp(sort, Var(<newname> "_lifted")) \)> ros;
               rw_vars := <map(\ sort -> LabelComp(sort, Var(<newname> "_lifted")) \)> rws;
               rw'_vars := <map(\ LabelComp(sort, Var(x)) -> LabelComp(sort, VarRef(x)) \)> rw_vars;
@@ -38,7 +52,7 @@ rules
               <store-rule> r; // Invoke DynSem analysis on rule
               !r
            })> ds2v_timeouts;
-      mod'' := <alltd(\ Rules(rs0) -> Rules(<concat> [rs0, rs])\)> mod'
+      mod''' := <alltd(\ Rules(rs0) -> Rules(<concat> [rs0, rs])\)> mod''
 
 rules // Adding timeouts with sensible clock variable names
 
@@ -62,3 +76,16 @@ rules // Adding timeouts with sensible clock variable names
     p -> p
     where
       not(!p; ?Formula(Relation(Reads(ros), s, a@NamedDynamicEmitted(lbl, arrow_name, src_sort), Target(target, rws))))
+
+rules // Timeout value generation
+
+  mk-timeout-val:
+    sort -> Con(<mk-timeout-name> sort, [])
+
+  mk-timeout-name:
+    sort -> timeout_name
+    with
+      sort_name := <get-sort-name> sort;
+      suffix := <string-as-chars(\ [x|_] -> x' where x' := <upper-case-chars> [x] \)> sort_name;
+      timeout_name := <conc-strings> ("Timeout", suffix)
+      

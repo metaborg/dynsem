@@ -20,8 +20,6 @@ rules
       aliases := <new-hashtable>;
       <collect-overloaded-arrow-aliases(|arrow_decl_map)> aliases;
       <collect-ds2v-aliases(|ds2v_aliases)> aliases;
-      // Augment constructors with timeout values
-      <add-err-constructors(|"Timeout", ds2v_timeouts)> (sort_decl_map, arrow_decl_map);
       // Add propagation rules
       <add-propagation-rules(mk-timeout-val(|sort_decl_map)|ds2v_timeouts)> arrow_decl_map
 
