@@ -33,21 +33,15 @@ signature // Scope graphs
     P : Label
     I : Label
   
-  sorts Path constructors
-    E : Label * ScopeId * Path -> Path
-    D : Decl -> Path
+  sorts Path
   
   sorts Addr constructors
     Addr : FrameId * Decl -> Addr
 
-  sorts SD constructors // :(
-    SD : ScopeId * Decl -> SD
-    
   constructors
     lookup : FrameId * H * Path --> Addr
     get : FrameId * H * Decl --> Val
     pathofRef : Ref --> Path
-    slookup : Path * ScopeId --> SD // :(
     scopeofFrame : H * FrameId --> ScopeId
     initFrame : ScopeId * Map(Label, Map(ScopeId, FrameId)) * Map(Decl, Val) --> FrameId
 

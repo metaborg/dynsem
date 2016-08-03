@@ -31,7 +31,7 @@ rules
       mod'' := <foldr(!mod',
                       \ (srt, mod) -> mod''
                         where
-                          t := <mk-timeout-name> srt; debug(!4);
+                          t := <mk-timeout-name> srt;
                           mod'' := <alltd(\ Constructors(cs) ->
                                              Constructors([ConsDecl(t, [], srt, Annos([]))|cs]) \)> mod
                       \)> srts;

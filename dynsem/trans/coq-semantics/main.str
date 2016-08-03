@@ -51,12 +51,12 @@ rules // Module generation
     with
       imports := <map(import-to-coq)> ds2v_imports;
       
-      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases) := <pre-process-module> (mod, ds2v_aliases, ds2v_timeouts);
+      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, t_aliases, c_aliases) := <pre-process-module> (mod, ds2v_aliases, ds2v_timeouts);
       
       sort_decl_names := <hashtable-keys> sort_decl_map;
-      (coq_cs, _) := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, aliases)> (sort_decl_names, [], 1);
+      (coq_cs, _) := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases)> (sort_decl_names, [], 1);
       
       arrow_decl_names := <hashtable-keys> arrow_decl_map;
-      (coq_rs, _) := <arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, aliases)> (arrow_decl_names, [], 1);
+      (coq_rs, _) := <arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, t_aliases, c_aliases)> (arrow_decl_names, [], 1);
       
       defs := <concat> [imports, coq_cs, coq_rs]

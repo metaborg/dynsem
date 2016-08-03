@@ -12,16 +12,25 @@ imports
 rules
            
   pre-process-module:
-    (mod, ds2v_aliases, ds2v_timeouts) -> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, aliases)
+    (mod, ds2v_aliases, ds2v_timeouts) ->
+      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, t_aliases, c_aliases)
     with
+      // Construct type (sort/arrow) alias map
+      t_aliases := <new-hashtable>;
+      // Construct constructor alias map
+      c_aliases := <new-hashtable>;
+      // Populate maps based on DS2V annotations
+      <collect-ds2v-aliases(|ds2v_aliases)> (t_aliases, c_aliases);
+      // Populate hashmaps with accumulated information about DynSem specification
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) :=
-        <collect-data-from-module; data-to-hashmap; analyze-mutual-dependencies(|ds2v_aliases)> (mod, ds2v_aliases);
-      // Construct alias map
-      aliases := <new-hashtable>;
-      <collect-overloaded-arrow-aliases(|arrow_decl_map)> aliases;
-      <collect-ds2v-aliases(|ds2v_aliases)> aliases;
-      // Add propagation rules
-      <add-propagation-rules(mk-timeout-val(|sort_decl_map)|ds2v_timeouts)> arrow_decl_map
+        <collect-data-from-module; data-to-hashmap(|c_aliases); analyze-mutual-dependencies(|ds2v_aliases)>
+          (mod, ds2v_aliases);
+      <collect-overloaded-arrow-aliases(|arrow_decl_map)> t_aliases;
+      // FIXME: Eventually, we should collect and rename overloaded DynSem term constructors, too.
+      //        DynSem supports arity overloading, and Coq does not.
+      // Add propagation rules for clocked relations
+      // NOTE: This could be moved into ds2ds/clock-timeouts
+      <add-propagation-rules(mk-timeout-val|ds2v_timeouts)> arrow_decl_map
 
 rules // Unfold case constructions
 
@@ -82,7 +91,7 @@ rules // Unfold case constructions
 
 rules // Accumulate information about declared arrows, rules, and AST constructors
 
-  // FIXME: this is fairly inefficient
+  // NOTE: This is fairly inefficient... 
   collect-data-from-module:
     (Module(name, contents), ds2v_aliases) -> (sort_decls, sort_constrs, arrow_decls, ruls, ds2v_aliases)
     with
@@ -120,13 +129,13 @@ rules // Store accumulated information in maps for easy dereferencing
   //
   //   RelName -fin-> RelName
 
-  data-to-hashmap:
+  data-to-hashmap(|c_aliases):
     (sort_decls, sort_constrs, arrow_decls, ruls, ds2v_aliases) -> (sort_decl_map, arrow_decl_map)
     with
       // Sort declarations
       sort_decl_map := <new-hashtable>;
       <map(instantiate-sortdecl(|sort_decl_map, ds2v_aliases))> sort_decls;
-      <map(push-sort-constructor(|sort_decl_map, ds2v_aliases))> sort_constrs;
+      <map(push-sort-constructor(|sort_decl_map, ds2v_aliases, c_aliases))> sort_constrs;
       
       // Arrow declarations
       arrow_decl_map := <new-hashtable>;
@@ -147,17 +156,23 @@ rules // Store accumulated information in maps for easy dereferencing
       then <hashtable-put(|(rel_name, from_sort), ([], (ro_ents, from_sort, from_rw_ents, to_sort, to_rw_ents)))> m
       end
   
-  push-sort-constructor(|m, ds2v_aliases):
+  push-sort-constructor(|m, t_aliases, c_aliases):
     ConsDecl(name, from_sorts, SimpleSort(to_sort), annotations) -> 1
     with
-      if <not(is-builtin-sort(|ds2v_aliases))> to_sort // If sort is not a Coq built-in
-      then 
-        name' := <rename-constructor> (name, from_sorts);
-        cs := <hashtable-get(|to_sort)> m;
-        <hashtable-put(|to_sort, [(name', from_sorts)|cs])> m
-      else
-        debug(! (<concat-strings> ["WARNING: The sort ", to_sort, " maps to a Coq built-in type, but has constructor: ", name]))
-      end 
+      // Check that constructor is not a tuple alias (if so, all occurrences of constructed terms get replaced by a tuple)
+      arity := <length> from_sorts;
+      if (not(<hashtable-get(|(name, arity))> c_aliases))
+      then
+        // Check that sort is not a Coq built-in
+        if <not(is-builtin-sort(|t_aliases))> to_sort 
+        then 
+          name' := <rename-constructor> (name, from_sorts);
+          cs := <hashtable-get(|to_sort)> m;
+          <hashtable-put(|to_sort, [(name', from_sorts)|cs])> m
+        else
+          debug(! (<concat-strings> ["WARNING: The sort ", to_sort, " maps to a Coq built-in type, but has constructor: ", name]))
+        end
+      end
   
   push-sort-constructor(|m, ds2v_aliases):
     NullaryConsDecl(name, SimpleSort(to_sort), annotations) -> 1
@@ -266,13 +281,16 @@ rules // Alias collection and querying
 			<+ (rename := name)
 	
 	collect-ds2v-aliases(|ds2v_aliases):
-		alias_map -> 1
+		(t_aliases, c_aliases) -> 1
 		with
-			<map(try({ name, sort, coq_name:
+			<map(try({ name, sort, coq_name, ctor_kind, arity:
 								 (?ArrowAlias(name, sort, coq_name);
-								   <hashtable-put(|(name, sort), (coq_name, sort))> alias_map)
+								  <hashtable-put(|(name, sort), (coq_name, sort))> t_aliases)
 								 <+ (?SortAlias(name, coq_name);
-								 		<hashtable-put(|name, coq_name)> alias_map) }))> ds2v_aliases
+								 		 <hashtable-put(|name, coq_name)> t_aliases)
+								 <+ (?ConstructorAlias(name, arity, ctor_kind);
+								     <hashtable-put(|(name, arity), ctor_kind)> c_aliases) }))> ds2v_aliases
+			
 
 	// Succeeds if sort_name has a defined ds2v alias
 	is-builtin-sort(|ds2v_aliases):
