@@ -9,4 +9,4 @@
  SortAlias("Decl", "D"),
  SortAlias("Ref", "R"),
  SortAlias("ScopeId", "ScopeId"),
- Timeouts([("eval", "Exp")])]
+ Timeouts([("eval", SimpleSort("Exp"))])]

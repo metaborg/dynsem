@@ -6,33 +6,35 @@ imports
   ds
   analysis/-
   ds2ds/explicate-arrow-types
+  lib-ds
 
 rules // Introduce wrong value as a constructor for all sorts
 
-  add-err-constructors(|errname):
-    (sort_decl_map, arrow_decl_map) -> 1
-    with
-      arrow_decl_keys := <hashtable-keys> arrow_decl_map;
-      // For each sort that is used in a result position,
-      result_sorts := <map({ to_sort, key: ?key;
-                             (_, (_, _, _, to_sort, _)) := <hashtable-get(|key)> arrow_decl_map;
-                             !to_sort });
-                       nub> arrow_decl_keys;
-      // Add an error constructor for [errname]
-      <map({ sort_name, constructors_ : ?SimpleSort(sort_name);
-             constructors_ := <hashtable-get(|sort_name)> sort_decl_map;
-             <hashtable-put(|sort_name, [(errname, [])|constructors_])> sort_decl_map })> result_sorts
-   
+//  add-err-constructors(|err_prefix):
+//    (sort_decl_map, arrow_decl_map) -> 1
+//    with
+//      arrow_decl_keys := <hashtable-keys> arrow_decl_map;
+//      // For each sort that is used in a result position,
+//      result_sorts := <map({ to_sort, key: ?key;
+//                             (_, (_, _, _, to_sort, _)) := <hashtable-get(|key)> arrow_decl_map;
+//                             !to_sort });
+//                       nub> arrow_decl_keys;
+//      // Add an error constructor for [errname]
+//      <map({ sort_name, constructors_ : ?SimpleSort(sort_name);
+//             constructors_ := <hashtable-get(|sort_name)> sort_decl_map;
+//             err_name := 
+//             <hashtable-put(|sort_name, [(errname, [])|constructors_])> sort_decl_map })> result_sorts
+//   
   add-err-constructors(|errname, arrow_sigs):
     (sort_decl_map, arrow_decl_map) -> 1
     with
       arrow_decl_keys := <hashtable-keys> arrow_decl_map;
       // For each sort that is used in a result position of an arrow in the arrow_sigs list 
       result_sorts := <filter({ name, sort :
-                                  ?(name, SimpleSort(sort));
+                                  ?(name, sort);
                                   <elem> ((name, sort), arrow_sigs) }); concat;
                        map({ to_sort, name, sort: ?(name, sort);
-                             (_, (_, _, _, to_sort, _)) := <hashtable-get(|(name, SimpleSort(sort)))> arrow_decl_map;
+                             (_, (_, _, _, to_sort, _)) := <hashtable-get(|(name, sort))> arrow_decl_map;
                              !to_sort });
                        nub> arrow_decl_keys;
       // Add an error constructor for [errname]
@@ -41,11 +43,43 @@ rules // Introduce wrong value as a constructor for all sorts
              <hashtable-put(|sort_name, [(errname, [])|constructors_])> sort_decl_map })> result_sorts
   
   // FIXME: Each sort needs a different constructor name
-  mk-wrong-val:
-    sort_name -> Con("Wrong", [])
+  mk-wrong-val(|sort_decls):
+    sort -> Con(wrong_name', [])
+    with
+      sort_name := <get-sort-name> sort;
+      suffix := <string-as-chars(\ [x|_] -> x' where [x'] := <upper-case-chars> [x] \)> sort_name;
+      wrong_name := <conc-strings> ("Wrong", suffix);
+      // Check if constructor name is already defined
+      cnames := <get-all-constructor-names> sort_decls;
+      if <elem> (wrong_name, cnames)
+      then
+        wrong_name' := <newname> wrong_name
+      else
+        wrong_name' := wrong_name
+      end
 
   mk-timeout-val:
-    sort_name -> Con("Timeout", [])
+    sort -> Con(timeout_name, [])
+    with
+      sort_name := <get-sort-name> sort;
+      suffix := <string-as-chars(\ [x|_] -> x' where x' := <upper-case-chars> [x] \)> sort_name;
+      timeout_name := <conc-strings> ("Timeout", suffix)
+    
+  mk-timeout-val(|sort_decls):
+    sort -> Con(timeout_name', [])
+    with
+      sort_name := <get-sort-name> sort;
+      suffix := <string-as-chars(\ [x|_] -> x' where x' := <upper-case-chars> [x] \)> sort_name;
+      timeout_name := <conc-strings> ("Timeout", suffix);
+      // Check if constructor name is already defined
+      cnames := <get-all-constructor-names> sort_decls;
+      if <elem> (timeout_name, cnames)
+      then
+        timeout_name' := <newname> timeout_name
+      else
+        timeout_name' := timeout_name
+      end
+  
     
 rules // Introduce rules for propagating exceptions
 
@@ -53,10 +87,10 @@ rules // Introduce rules for propagating exceptions
     arrow_decl_map -> 1
     with
       arrow_decl_keys := <hashtable-keys> arrow_decl_map;
-      rules_ := <map({ rs', sig, rs'', key:
+      rules_ := <map({ rs', sig, rs'', key, to_sort:
                        ?key;
-                       (rs', sig) := <hashtable-get(|key)> arrow_decl_map;
-                       err := <mkerr> ""; // FIXME
+                       (rs', sig@(_, _, _, to_sort, _)) := <hashtable-get(|key)> arrow_decl_map;
+                       err := <mkerr> to_sort;
                        rs'' := <map(add-propagation-to-rule(|err)); concat> rs';
                        <hashtable-put(|key, (rs'', sig))> arrow_decl_map })> arrow_decl_keys
   
@@ -64,10 +98,10 @@ rules // Introduce rules for propagating exceptions
     arrow_decl_map -> 1
     with
       arrow_decl_keys := <hashtable-keys> arrow_decl_map;
-      rules_ := <map({ rs, rs', sig, key:
+      rules_ := <map({ rs, rs', sig, key, to_sort:
                        ?key;
-                       (rs, sig) := <hashtable-get(|key)> arrow_decl_map;
-                       err := <mkerr> ""; // FIXME
+                       (rs, sig@(_, _, _, to_sort, _)) := <hashtable-get(|key)> arrow_decl_map;
+                       err := <mkerr> to_sort;
                        rs' := <map(add-propagation-to-rule(|err, arrow_sigs)); concat> rs;
                        <hashtable-put(|key, (rs', sig))> arrow_decl_map })> arrow_decl_keys
   
@@ -122,7 +156,7 @@ rules // Introduce rules for propagating exceptions
 
   // FIXME: Are rws always variables in premises? The following assumes they are
   add-propagation-to-premises(|err, arrow_sigs, d, conc):
-    ([Formula(Relation(r, s, a@NamedDynamicEmitted(_, arrow_name, SimpleSort(src_sort)), Target(target, rws)))|prems], seen_prems, rs) ->
+    ([Formula(Relation(r, s, a@NamedDynamicEmitted(_, arrow_name, src_sort), Target(target, rws)))|prems], seen_prems, rs) ->
       rs'
     where
       // If target is a variable, and this variable occurs in a
@@ -149,10 +183,19 @@ rules // Introduce rules for propagating exceptions
     ([p|prems], seen_prems, rs) ->
       rs'
     where
-      not(!p; ?Formula(Relation(r, s, a@NamedDynamicEmitted(_, arrow_name, SimpleSort(src_sort)), Target(target, rws))); <elem> ((arrow_name, src_sort), arrow_sigs));
+      not(!p; ?Formula(Relation(r, s, a@NamedDynamicEmitted(_, arrow_name, src_sort), Target(target, rws))); <elem> ((arrow_name, src_sort), arrow_sigs));
       seen_prems' := <concat> [seen_prems, [p]]; 
       rs' := <add-propagation-to-premises(|err, arrow_sigs, d, conc)> (prems, seen_prems', rs)
-      
+
+rules // Utilities for sort declarations
+
+  get-all-constructor-names:
+    sort_decls -> cnames
+    with
+      cnames := <hashtable-keys;
+                 map({ key : ?key; <hashtable-get(|key)> sort_decls; map(\ (cname, _) -> cname \) });
+                 concat> sort_decls
+
 rules // Analyze totality of premises
 
 rules // Introduce "wrong" transitions for non-total premises

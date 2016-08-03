@@ -3,6 +3,9 @@ module ds2ds/prettify-vars
 imports
   signatures/-
   analysis/-
+  ds2ds/-
+  ds
+  lib-ds
   
 strategies
     
@@ -12,8 +15,7 @@ strategies
       {| PrettifyVar:
         prettify-vars-all
       |};
-      unrename-all);
-    unmark-vars
+      unrename-all)
   
   prettify-vars-all = alltd(prettify-vars-rule)
   

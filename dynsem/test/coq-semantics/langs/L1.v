@@ -3,112 +3,121 @@ Require Import scopes.
 Require Import frames.
 
 Inductive Typ : Type :=
-| Tarrow2:
+| Tarrow:
     Typ -> Typ -> Typ
-| Tint0:
+| Tint:
     Typ
 .
 
 Inductive PreExp : Type :=
-| App2:
+| App:
     Exp -> Exp -> PreExp
-| Fun3:
+| Fun:
     D -> Typ -> Exp -> PreExp
-| Binop2:
+| Binop:
     Exp -> Exp -> PreExp
-| Var1:
+| Var:
     R -> PreExp
-| Num1:
+| Num:
     Int -> PreExp
 with Exp : Type :=
-| E_3:
+| Exp:
     ScopeId -> Typ -> PreExp -> Exp
-with ScopeId : Type :=.
+.
+
+Inductive Val : Type :=
+| Timeout:
+    Val
+| ClosV:
+    D -> Exp -> FrameId -> Val
+| NumV:
+    Int -> Val
+with FrameId : Type :=.
 
 Inductive lookup__Arrow : Type :=
-| lookup3:
+| lookup:
     FrameId -> H -> Path -> lookup__Arrow
-with FrameId : Type :=with H : Type :=with Path : Type :=
-| D1:
+with H : Type :=with Path : Type :=
+| D:
     D -> Path
-| E3:
+| E:
     Label -> ScopeId -> Path -> Path
 with Label : Type :=
-| I0:
+| I:
     Label
-| P0:
+| P:
     Label
 .
 
 Inductive get__Arrow : Type :=
-| get3:
+| get:
     FrameId -> H -> D -> get__Arrow
 .
 
 Inductive pathofRef__Arrow : Type :=
-| pathofRef1:
+| pathofRef:
     R -> pathofRef__Arrow
 .
 
 Inductive slookup__Arrow : Type :=
-| slookup2:
+| slookup:
     Path -> ScopeId -> slookup__Arrow
 .
 
 Inductive scopeofFrame__Arrow : Type :=
-| scopeofFrame2:
+| scopeofFrame:
     H -> FrameId -> scopeofFrame__Arrow
 .
 
 Inductive initFrame__Arrow : Type :=
-| initFrame3:
+| initFrame:
     ScopeId -> map Label (map ScopeId FrameId) -> map D Val -> initFrame__Arrow
-with Val : Type :=
-| ClosV3:
-    D -> Exp -> FrameId -> Val
-| NumV1:
-    Int -> Val
 .
 
 Inductive Addr : Type :=
-| Addr2:
+| Addr:
     FrameId -> D -> Addr
 .
 
 Inductive SD : Type :=
-| SD2:
+| SD:
     ScopeId -> D -> SD
 .
 
-Inductive default_lookup__Arrow : lookup__Arrow -> Addr -> Prop :=.
-
-Inductive default_get__Arrow : get__Arrow -> Val -> Prop :=.
-
-Inductive default_pathofRef__Arrow : pathofRef__Arrow -> Path -> Prop :=.
-
-Inductive default_slookup__Arrow : slookup__Arrow -> SD -> Prop :=.
-
-Inductive default_initFrame__Arrow : initFrame__Arrow -> FrameId -> Prop :=.
-
-Inductive eval : FrameId -> Exp -> H -> Val -> H -> Prop :=
-| eval_E_0 d e f_1 h_1 v h_2 s_1 f_2 v' h_3 f_3 s_2 typ_1 e1 e2 h_4:
-    eval f_3 e1 h_4 (ClosV3 d e f_1) h_1 ->
-    eval f_3 e2 h_1 v h_2 ->
-    scopeofFrame (scopeofFrame2 h_2 f_1) s_1 ->
-    default_initFrame__Arrow (initFrame3 s_2 (cons (P0, cons (s_1, f_1) nil) nil) (cons (d, v) nil)) f_2 ->
-    eval f_2 e h_2 v' h_3 ->
-    eval f_3 (E_3 s_2 typ_1 (App2 e1 e2)) h_4 v' h_3
-| eval_E_1 f_1 s_1 typ_1 d typ_2 e h_1:
-    eval f_1 (E_3 s_1 typ_1 (Fun3 d typ_2 e)) h_1 (ClosV3 d e f_1) h_1
-| eval_E_2 z1 h_1 z2 h_2 f_1 s_1 typ_1 e1 e2 h_3:
-    eval f_1 e1 h_3 (NumV1 z1) h_1 ->
-    eval f_1 e2 h_1 (NumV1 z2) h_2 ->
-    eval f_1 (E_3 s_1 typ_1 (Binop2 e1 e2)) h_3 (NumV1 (plusI2 z1 z2)) h_2
-| eval_E_3 p f_1 d v f_2 s_1 typ_1 r h_1:
-    default_pathofRef__Arrow (pathofRef1 r) p ->
-    default_lookup__Arrow (lookup3 f_2 h_1 p) (Addr2 f_1 d) ->
-    default_get__Arrow (get3 f_1 h_1 d) v ->
-    eval f_2 (E_3 s_1 typ_1 (Var1 r)) h_1 v h_1
-| eval_E_4 f_1 s_1 typ_1 i h_1:
-    eval f_1 (E_3 s_1 typ_1 (Num1 i)) h_1 (NumV1 i) h_1
+Inductive eval : nat -> FrameId -> Exp -> H -> Val -> H -> Prop :=
+| eval_exp10 f1 exp1 h1:
+    eval O f1 exp1 h1 TimeoutV h1
+| eval_Exp0 d e f2 h2 v h3 s2 f3 i f1 s1 typ1 e1 e2 h1:
+    eval i f1 e1 h1 (ClosV d e f2) h2 ->
+    eval i f1 e2 h2 v h3 ->
+    v <> TimeoutV ->
+    scopeofFrame (scopeofFrame h3 f2) s2 ->
+    initFrame (initFrame s1 (cons (P, cons (s2, f2) nil) nil) (cons (d, v) nil)) f3 ->
+    eval (S i) f1 (Exp s1 typ1 (App e1 e2)) h1 v' h4
+| eval_Exp1 d e f2 h2 h3 i f1 s1 typ1 e1 e2 h1:
+    eval i f1 e1 h1 (ClosV d e f2) h2 ->
+    eval i f1 e2 h2 TimeoutV h3 ->
+    eval (S i) f1 (Exp s1 typ1 (App e1 e2)) h1 TimeoutV h4
+| eval_Exp2 h2 i f1 s1 typ1 e1 e2 h1:
+    eval i f1 e1 h1 TimeoutV h2 ->
+    eval (S i) f1 (Exp s1 typ1 (App e1 e2)) h1 TimeoutV h4
+| eval_Exp3 i f1 s1 typ1 d typ2 e h1:
+    eval (S i) f1 (Exp s1 typ1 (Fun d typ2 e)) h1 (ClosV d e f1) h1
+| eval_Exp4 z1 h2 z2 h3 i f1 s1 typ1 e1 e2 h1:
+    eval i f1 e1 h1 (NumV z1) h2 ->
+    eval i f1 e2 h2 (NumV z2) h3 ->
+    eval (S i) f1 (Exp s1 typ1 (Binop e1 e2)) h1 (NumV (plusI z1 z2)) h3
+| eval_Exp5 z1 h2 h3 i f1 s1 typ1 e1 e2 h1:
+    eval i f1 e1 h1 (NumV z1) h2 ->
+    eval i f1 e2 h2 TimeoutV h3 ->
+    eval (S i) f1 (Exp s1 typ1 (Binop e1 e2)) h1 TimeoutV h3
+| eval_Exp6 h2 i f1 s1 typ1 e1 e2 h1:
+    eval i f1 e1 h1 TimeoutV h2 ->
+    eval (S i) f1 (Exp s1 typ1 (Binop e1 e2)) h1 TimeoutV h3
+| eval_Exp7 p f2 d i f1 s1 typ1 r h1:
+    pathofRef (pathofRef r) p ->
+    lookup (lookup f1 h1 p) (Addr f2 d) ->
+    eval (S i) f1 (Exp s1 typ1 (Var r)) h1 v h1
+| eval_Exp8 i f1 s1 typ1 i h1:
+    eval (S i) f1 (Exp s1 typ1 (Num i)) h1 (NumV i) h1
 .

@@ -1,11 +1,8 @@
 module ds2ds/explicate-arrow-types
 
 imports
-  ds
   signatures/-
   analysis/-
-  lib-ds
-  pp
 
 signature
   constructors
@@ -39,3 +36,9 @@ rules
       t-ty := <type-of> t;
       arrow-def* := <lookup-applicable-arrow-def> t-ty;
       (arrow-def, ArrowType(atype, _)) := <fetch-elem(where(Fst; def-get-name => aname))> arrow-def*
+
+rules // Utility predicate for new NamedDynamicEmitted ATerm
+
+  get-arrow-name:
+    NamedDynamicEmitted(_, name, _) -> name
+ 

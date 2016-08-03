@@ -291,6 +291,15 @@ rules // Extracting the source constructor name
   extract-name-from-term:
     Con(name, _) -> name
 
+  extract-name-from-term:
+    Var(x) -> x
+
+  extract-name-from-term:
+    VarRef(x) -> x
+
+  extract-name-from-term:
+    Cast(x, _) -> <extract-name-from-term> x      
+    
 rules // Extracting variables
 
   // Lists
