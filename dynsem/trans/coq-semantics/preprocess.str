@@ -170,7 +170,7 @@ rules // Store accumulated information in maps for easy dereferencing
           cs := <hashtable-get(|to_sort)> m;
           <hashtable-put(|to_sort, [(name', from_sorts)|cs])> m
         else
-          debug(! (<concat-strings> ["WARNING: The sort ", to_sort, " maps to a Coq built-in type, but has constructor: ", name]))
+          !name; debug(! (<concat-strings> ["WARNING: The sort ", to_sort, " maps to a Coq built-in type, but has constructor: "]))
         end
       end
   
@@ -183,7 +183,7 @@ rules // Store accumulated information in maps for easy dereferencing
         cs := <hashtable-get(|to_sort)> m;
         <hashtable-put(|to_sort, [(name', [])|cs])> m
       else
-        debug(! (<concat-strings> ["WARNING: The sort ", to_sort, " maps to a Coq built-in type, but has constructor: ", name]))
+        !name; debug(! (<concat-strings> ["WARNING: The sort ", to_sort, " maps to a Coq built-in type, but has constructor: "]))
       end
   
   push-named-rule(|m, ds2v_aliases):
@@ -196,7 +196,7 @@ rules // Store accumulated information in maps for easy dereferencing
         (rs, sig) := <hashtable-get(|(name, sort))> m;
         <hashtable-put(|(name, sort), ([rule|rs], sig))> m
       else
-        debug(! (<concat-strings> ["WARNING: The arrow ", <rename-overloaded-arrow> (name, sort), " maps to a Coq built-in type, but has rule(s)."]))
+        !""; debug(! (<concat-strings> ["WARNING: The arrow ", <rename-overloaded-arrow> (name, sort), " maps to a Coq built-in type, but has rule(s)."]))
       end
 
 rules // Analyze mutual dependencies

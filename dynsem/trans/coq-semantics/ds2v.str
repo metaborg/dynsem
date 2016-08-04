@@ -5,7 +5,8 @@ signature
 	sorts DS2V constructors
 		ArrowAlias : String * Sort * String -> DS2V
 		SortAlias : String * String -> DS2V
-		Imports : String -> DS2V
+		CoqImport : String -> DS2V
+    Import : String -> DS2V
 		Timeouts : List((String, String)) -> DS2V
 		ConstructorAlias : String * Int * CtorKind -> DS2V
     NativeOpAlias : String * Int * String -> DS2V
@@ -16,14 +17,25 @@ signature
 
 rules
 
-	get-ds2v-data:
-		path -> (ds2v_aliases, ds2v_imports, ds2v_timeouts)
+	get-ds2v-data(|seen_imports):
+		path -> r
 		with
 			ds2v := <get-ds2v> path;
-			ds2v_aliases := <filter(?ArrowAlias(_, _, _) <+ ?SortAlias(_, _) <+ ?ConstructorAlias(_, _, _) <+ ?NativeOpAlias(_, _, _))> ds2v;
-			ds2v_imports := <filter(?Imports(_))> ds2v;
-			ds2v_timeouts := <filter(?Timeouts(<id>)); concat> ds2v
+			as := <filter(?ArrowAlias(_, _, _) <+ ?SortAlias(_, _) <+ ?ConstructorAlias(_, _, _) <+ ?NativeOpAlias(_, _, _))> ds2v;
+			coq_ims := <filter(?CoqImport(_))> ds2v;
+			tos := <filter(?Timeouts(<id>)); concat> ds2v;
+			ims := <filter({ x : ?Import(x); not(<elem> (x, seen_imports)); !x })> ds2v;
+			r := <get-ds2vs(|[path|seen_imports])> (ims, as, coq_ims, tos)
 			
+  get-ds2vs(|seen_imports):
+    ([], as, ims, tos) -> (as, ims, tos) 
+  
+  get-ds2vs(|seen_imports):
+    ([path|xs], as, ims, tos) -> r
+    with
+      (as', ims', tos') := <get-ds2v-data(|[path|seen_imports])> path;
+      r := <get-ds2vs(|[path|seen_imports])> (xs, <conc> (as, as'), <conc> (ims, ims'), <conc> (tos, tos'))
+  
 	get-ds2v:
     path -> ds2v
     with
@@ -31,4 +43,5 @@ rules
        <file-exists> ds2v_file;
        ds2v := <read-text-file; read-from-string> ds2v_file
       ) <+
+      !path; debug(!"Could not read DS2V file: ");
       ds2v := []

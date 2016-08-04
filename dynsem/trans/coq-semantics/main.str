@@ -36,7 +36,7 @@ rules
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"v")> path
-      ; (ds2v_aliases, ds2v_imports, ds2v_timeouts) := <get-ds2v-data> path; debug(!"DS2V")
+      ; (ds2v_aliases, ds2v_imports, ds2v_timeouts) := <get-ds2v-data(|[])> path; debug(!"DS2V")
       ; coq-file := <explicate-for-coq(|path, project-path, ds2v_timeouts); debug(!0);
                      module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts); 
                      debug(!"done")> ast

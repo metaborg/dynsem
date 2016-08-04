@@ -300,7 +300,7 @@ rules // Term generation
 rules // Imports 
 
   import-to-coq:
-    Imports(name) -> Import(Require(), name)
+    CoqImport(name) -> Import(Require(), name)
 
 rules // Extracting the source constructor name
 
