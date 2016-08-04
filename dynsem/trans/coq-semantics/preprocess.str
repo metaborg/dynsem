@@ -289,7 +289,9 @@ rules // Alias collection and querying
 								 <+ (?SortAlias(name, coq_name);
 								 		 <hashtable-put(|name, coq_name)> t_aliases)
 								 <+ (?ConstructorAlias(name, arity, ctor_kind);
-								     <hashtable-put(|(name, arity), ctor_kind)> c_aliases) }))> ds2v_aliases
+								     <hashtable-put(|(name, arity), ctor_kind)> c_aliases)
+								 <+ (?NativeOpAlias(name, arity, coq_name);
+								     <hashtable-put(|(name, arity), Name(coq_name))> c_aliases) }))> ds2v_aliases
 			
 
 	// Succeeds if sort_name has a defined ds2v alias

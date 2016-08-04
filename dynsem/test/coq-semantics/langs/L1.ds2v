@@ -27,4 +27,5 @@
  ConstructorAlias("get", 3, Tuple()),
  ConstructorAlias("P", 0, Name("P")),
  ConstructorAlias("I", 0, Name("I")),
+ NativeOpAlias("plusI", 2, "plus"),
  Timeouts([("eval", SimpleSort("Exp"))])]

@@ -8,6 +8,7 @@ signature
 		Imports : String -> DS2V
 		Timeouts : List((String, String)) -> DS2V
 		ConstructorAlias : String * Int * CtorKind -> DS2V
+    NativeOpAlias : String * Int * String -> DS2V
 
   sorts CtorKind constructors
     Name : String -> CtorKind
@@ -19,7 +20,7 @@ rules
 		path -> (ds2v_aliases, ds2v_imports, ds2v_timeouts)
 		with
 			ds2v := <get-ds2v> path;
-			ds2v_aliases := <filter(?ArrowAlias(_, _, _) <+ ?SortAlias(_, _) <+ ?ConstructorAlias(_, _, _))> ds2v;
+			ds2v_aliases := <filter(?ArrowAlias(_, _, _) <+ ?SortAlias(_, _) <+ ?ConstructorAlias(_, _, _) <+ ?NativeOpAlias(_, _, _))> ds2v;
 			ds2v_imports := <filter(?Imports(_))> ds2v;
 			ds2v_timeouts := <filter(?Timeouts(<id>)); concat> ds2v
 			
