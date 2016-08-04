@@ -192,11 +192,14 @@ rules // Store accumulated information in maps for easy dereferencing
       (conc, prems) := <get-premises-and-conclusion> rule;
       (name, sort) := <get-rel-name-and-sort> conc;
       if <not(is-builtin-arrow(|ds2v_aliases))> (name, <get-sort-name> sort) // If arrow is not a Coq built-in
-      then 
+      then
         (rs, sig) := <hashtable-get(|(name, sort))> m;
         <hashtable-put(|(name, sort), ([rule|rs], sig))> m
       else
-        !""; debug(! (<concat-strings> ["WARNING: The arrow ", <rename-overloaded-arrow> (name, sort), " maps to a Coq built-in type, but has rule(s)."]))
+        sort_name := <get-sort-name> sort;
+        m0 := <rename-overloaded-arrow> (name, sort_name);
+        m1 := <concat-strings> ["WARNING: The arrow ", m0, " maps to a Coq built-in type, but has rule(s)."];
+        !""; debug(!m1)
       end
 
 rules // Analyze mutual dependencies
