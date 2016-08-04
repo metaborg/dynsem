@@ -12,9 +12,9 @@ signature
     Binop : Exp * Exp -> PreExp
     Fun : Decl * Typ * Exp -> PreExp
     App : Exp * Exp -> PreExp
-    
+
   sorts Exp constructors
-    Exp : ScopeId * Typ * PreExp -> Exp
+    E : ScopeId * Typ * PreExp -> Exp
 
 signature
   
@@ -55,25 +55,25 @@ signature // Scope graphs
 
 rules
   
-  Exp(_ , _, Num(i)) -eval-> NumV(i).
+  E(_ , _, Num(i)) -eval-> NumV(i).
   
-  f |- Exp(_, _, Var(r)) :: h -eval-> v :: h
+  f |- E(_, _, Var(r)) :: h -eval-> v :: h
   where
     pathofRef(r) --> p;
     lookup(f, h, p) --> Addr(f', d);
     get(f', h, d) --> v.
     
-  Exp(_, _, Binop(e1, e2)) -eval-> NumV(plusI(z1, z2))
+  E(_, _, Binop(e1, e2)) -eval-> NumV(plusI(z1, z2))
   where
     e1 -eval-> NumV(z1);
     e2 -eval-> NumV(z2).
   
-  f |- Exp(_, _, Fun(d, _, e)) -eval-> ClosV(d, e, f).
+  f |- E(_, _, Fun(d, _, e)) -eval-> ClosV(d, e, f).
   
-  f |- Exp(s, _, App(e1, e2)) -eval-> v'
+  f |- E(_, _, App(e1, e2)) -eval-> v'
   where
-    f |- e1 -eval-> ClosV(d, e, f');
+    f |- e1 -eval-> ClosV(d, e'@E(s, _, _), f');
     f |- e2 -eval-> v :: h;
     scopeofFrame(h, f') --> s';
     initFrame(s, {P() |--> {s' |--> f'}}, {d |--> v}) --> f'';
-    f'' |- e -eval-> v'.
+    f'' |- e' -eval-> v'.
