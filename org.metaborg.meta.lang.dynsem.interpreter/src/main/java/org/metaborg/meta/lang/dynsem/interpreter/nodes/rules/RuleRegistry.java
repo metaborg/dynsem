@@ -24,8 +24,9 @@ public class RuleRegistry {
 
 	private final Map<String, Map<Class<?>, JointRuleRoot>> rules = new HashMap<>();
 
+	private boolean isInit;
+
 	public RuleRegistry() {
-		init();
 	}
 
 	protected void init() {
@@ -56,6 +57,10 @@ public class RuleRegistry {
 
 	@TruffleBoundary
 	public JointRuleRoot lookupRules(String arrowName, Class<?> dispatchClass) {
+		if (!isInit) {
+			init();
+			isInit = true;
+		}
 		JointRuleRoot jointRuleForClass = null;
 
 		Map<Class<?>, JointRuleRoot> jointRulesForName = rules.get(arrowName);
