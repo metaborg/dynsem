@@ -2,6 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 
@@ -15,6 +17,8 @@ public class DynSemContext {
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
 
+	private final Map<String, Object> properties;
+
 	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
 		this(parser, termRegistry, ruleRegistry, System.in, System.out);
 	}
@@ -26,6 +30,7 @@ public class DynSemContext {
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
+		this.properties = new HashMap<>();
 	}
 
 	public IDynSemLanguageParser getParser() {
@@ -38,6 +43,19 @@ public class DynSemContext {
 
 	public ITermRegistry getTermRegistry() {
 		return termRegistry;
+	}
+
+	public Object readProperty(String prop, Object defaultValue) {
+		final Object val = properties.get(prop);
+		if (val != null) {
+			return val;
+		}
+		return defaultValue;
+	}
+
+	public DynSemContext writeProperty(String prop, Object val) {
+		properties.put(prop, val);
+		return this;
 	}
 
 	// public ITermBuildFactory lookupTermBuilder(String name, int arity) {
