@@ -127,7 +127,8 @@ rules /* Sort & Constructor classes */
 
           public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
           public final static int ARITY = ~i:<length; int-to-string> kid*;
-
+          private final IStrategoTerm strategoTerm;
+          
           ~finit*
 
           ~fdec0*
@@ -139,7 +140,7 @@ rules /* Sort & Constructor classes */
             assert term != null;
             assert Tools.isTermAppl(term);
             assert Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
-            return new x_classname(e1*);
+            return new x_classname(e1*, term);
           }
           
           @Override
@@ -158,6 +159,16 @@ rules /* Sort & Constructor classes */
             x_classname other = (x_classname) obj;
             bstm2*
             return true;
+          }
+          
+          @Override
+          public boolean hasStrategoTerm() {
+              return strategoTerm != null;
+          }
+          
+          @Override
+          public IStrategoTerm getStrategoTerm() {
+              return strategoTerm;
           }
           
           @TruffleBoundary
@@ -201,6 +212,7 @@ rules /* Sort & Constructor classes */
       bstm0* := <ds-to-interp-sorts-to-finits> kid*;
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
+      e0* := <range; map(\ i -> e |[ ~x:<int-to-string; mkidx> ]| \)> (1, <length; inc> kid*);
       e1* := <map-with-index((\ i -> e |[ term.getSubterm(~i:<dec; int-to-string>) ]| \, id); ds-to-interp-sorts-to-create-arg)> kid*;
       bstm2* := <map-with-index(ds2java-field-eq-check)> kid*;
       e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds-to-interp-hashcode-append)> <range> (1, <length; inc> kid*)
@@ -209,10 +221,25 @@ rules /* Sort & Constructor classes */
       then
         finit* := class-body-dec* |[
           public final static x_classname SINGLETON = new x_classname();
-          private x_classname() { }
+          private x_classname() {
+            this(null);
+          }
+          
+          private x_classname(IStrategoTerm strategoTerm){
+            this.strategoTerm = strategoTerm;
+          }
         ]|
       else
-        finit* := class-body-dec* |[ public x_classname(param0*) { bstm0* } ]|
+        finit* := class-body-dec* |[
+          public x_classname(param0*) {
+            this(e0*, null);
+          }
+          
+          private x_classname(param0*, IStrategoTerm strategoTerm) {
+            bstm0*
+            this.strategoTerm = strategoTerm;
+          }
+        ]|
       end
       
   ds-to-interp-hashcode-append:
@@ -237,16 +264,31 @@ rules /* Sort & Constructor classes */
         public final class x_listclass implements IListTerm<x_elemclass> {
 
           private final IPersistentStack<x_elemclass> backend;
+          private final IStrategoTerm strategoTerm;
+        
+          public x_listclass(x_elemclass[] elems) {
+            this(elems, null);
+          }
         
           @SuppressWarnings("unchecked")
-          public x_listclass(x_elemclass[] elems) {
-            this.backend = (IPersistentStack<x_elemclass>) PersistentList.create(elems);
+          private x_listclass(x_elemclass[] elems, IStrategoTerm strategoTerm) {
+            this((IPersistentStack<x_elemclass>) PersistentList.create(elems), strategoTerm);
           }
         
-          private x_listclass(IPersistentStack<x_elemclass> backend) {
+          private x_listclass(IPersistentStack<x_elemclass> backend, IStrategoTerm strategoTerm) {
             this.backend = backend;
+            this.strategoTerm = strategoTerm;
           }
-        
+
+          @Override
+          public IStrategoTerm getStrategoTerm() {
+            return strategoTerm;
+          }
+          
+          @Override
+          public boolean hasStrategoTerm() {
+            return strategoTerm != null;
+          }        
           @Override
           public int size() {
             return backend.count();
@@ -281,7 +323,7 @@ rules /* Sort & Constructor classes */
 
           @Override
           public x_listclass tail() {
-            return new x_listclass(_pop(backend));
+            return new x_listclass(_pop(backend), getStrategoTerm());
           }
         
           @Override
@@ -290,12 +332,12 @@ rules /* Sort & Constructor classes */
             for (int idx = 0; idx < numElems; idx++) {
               tail = _pop(tail);
             }
-            return new x_listclass(tail);
+            return new x_listclass(tail, getStrategoTerm());
           }
         
           @Override
           public x_listclass add(x_elemclass elem) {
-            return new x_listclass(_cons(backend, elem));
+            return new x_listclass(_cons(backend, elem), getStrategoTerm());
           }
         
           @Override
@@ -305,7 +347,7 @@ rules /* Sort & Constructor classes */
             for (int idx = elems.length - 1; idx >= 0; idx--) {
               backend = _cons(backend, elems[idx]);
             }
-            return new x_listclass(backend);
+            return new x_listclass(backend, getStrategoTerm());
           }
           
           @Override
@@ -349,7 +391,7 @@ rules /* Sort & Constructor classes */
               final int final_idx = idx; // FIXME this is only needed because e_elemcreate might be an anonymous object reading the idx
               elems[idx] = e_elemcreate;
             }
-            return new x_listclass(elems);
+            return new x_listclass(elems, term);
           }
         
         }
