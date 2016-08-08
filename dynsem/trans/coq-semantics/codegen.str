@@ -24,6 +24,12 @@ rules // Sort-to-type generation
       maptype := <coq-map-type>;
       x' := <sort-to-coq(|t_aliases)> x;
       y' := <sort-to-coq(|t_aliases)> y
+
+  sort-to-coq(|t_aliases):
+    ListSort(x) -> Apply(listtype, x')
+    with
+      listtype := <coq-list-type>;
+      x' := <sort-to-coq(|t_aliases)> x
  
 rules // AST sort constructors to inductive types in Coq
 
@@ -43,7 +49,7 @@ rules // AST sort constructors to inductive types in Coq
       
   sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases):
     ([sort_name|sort_names], seen_sorts, w) -> (res, seen_sorts'')
-    where    
+    where
       constrctors := <hashtable-get(|sort_name)> sort_decl_map;
       // Generate its constructors
       coq_constrctors := <map(sort-constructor-to-coq(|sort_name, t_aliases))> constrctors;

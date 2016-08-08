@@ -19,8 +19,10 @@ rules
       mod' := <foldr(!mod,
                       \ ((arrow_name, src_sort), mod) -> mod'
                         where
-                          mod' := <bottomup(try(\ ArrowDecl(ArrowROs(ros), src_sort, rws, arrow_name, tgt_sort, rws') ->
-                                                   ArrowDecl(ArrowROs([SimpleSort("nat")|ros]), src_sort, rws, arrow_name, tgt_sort, rws') \));
+                          mod' := <bottomup(try({ ros, rws, tgt_sort, rws' :
+                                                    ?ArrowDecl(ArrowROs(ros), src_sort, rws, arrow_name, tgt_sort, rws');
+                                                    !ArrowDecl(ArrowROs([SimpleSort("nat")|ros]), src_sort, rws, arrow_name, tgt_sort, rws')
+                                                }));
                                     bottomup(try(add-clocks-to-rule(|arrow_name, src_sort)))> mod \)> ds2v_timeouts;
       // Augment result sorts of timeoutable relations with special timeout value
       // First, take the union of all result sorts of timeoutable relations:
