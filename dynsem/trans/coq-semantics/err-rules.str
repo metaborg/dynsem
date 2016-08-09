@@ -79,7 +79,7 @@ rules // Introduce rules for propagating exceptions
       // in tail position, wrong is automatically propagated.
       ( [] := prems;
         Var(x) := target;
-        Relation(_, _, _, Target(VarRef(x), rws')) := conc; !(rws, rws');
+        Relation(_, _, _, Target(VarRef(x), rws')) := conc;
         // Check that read-write components are either equal terms, or the same variable
         ( <equal> (rws, rws') <+
           (rws := <bottomup(try(\ VarRef(x) -> Var(x) \))> rws') ); 
@@ -113,7 +113,7 @@ rules // Introduce rules for propagating exceptions
       // in tail position, error is automatically propagated.
       ( [] := prems;
         Var(x) := target;
-        Relation(_, _, _, Target(VarRef(x), rws')) := conc; !(rws, rws');
+        Relation(_, _, _, Target(VarRef(x), rws')) := conc;
         // Check that read-write components are either equal terms, or the same variable
         ( <equal> (rws, rws') <+
           (rws := <bottomup(try(\ VarRef(x) -> Var(x) \))> rws') );
