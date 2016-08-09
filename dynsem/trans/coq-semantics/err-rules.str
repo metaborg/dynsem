@@ -79,7 +79,7 @@ rules // Introduce rules for propagating exceptions
       // in tail position, wrong is automatically propagated.
       ( [] := prems;
         Var(x) := target;
-        Relation(_, _, _, Target(VarRef(x), _)) := conc; // FIXME: rws should match
+        Relation(_, _, _, Target(VarRef(x), rws)) := conc;
         rs' := rs )
       <+
       // Otherwise, add a rule for propagating error
@@ -110,7 +110,7 @@ rules // Introduce rules for propagating exceptions
       // in tail position, error is automatically propagated.
       ( [] := prems;
         Var(x) := target;
-        Relation(_, _, _, Target(VarRef(x), _)) := conc; // FIXME: rws should match
+        Relation(_, _, _, Target(VarRef(x), rws)) := conc;
         rs' := [Rule(seen_prems, d, conc)|rs] )
       <+
       // Otherwise, if the relation signature is in arrow_sigs, add a rule for propagating error
