@@ -42,3 +42,7 @@ rules
   ds-utils-debugged-java-pp =
     pp-java-string <+
     bottomup(try(not(is-string) ; not(is-list) ; not(pp-java-string) ; debug(!"ERROR: cannot pp "))) ; fail
+  
+  mkidx:
+    idx -> $[_[idx]]
+  

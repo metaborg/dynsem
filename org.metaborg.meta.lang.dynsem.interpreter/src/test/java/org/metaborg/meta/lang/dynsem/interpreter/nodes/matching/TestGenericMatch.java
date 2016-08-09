@@ -1,8 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -13,18 +12,14 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.TestGenericMatchFactory.Test_D_0_Term_MatchPatternNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
-import org.strategoxt.strj.match_decls_and_appl_test_0_0;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.RootNode;
-import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
-import static org.mockito.Mockito.*;
 
 public class TestGenericMatch {
 
@@ -199,6 +194,16 @@ public class TestGenericMatch {
 		@Override
 		public Class<?> getSortClass() {
 			return IApplTerm.class;
+		}
+
+		@Override
+		public boolean hasStrategoTerm() {
+			return false;
+		}
+
+		@Override
+		public IStrategoTerm getStrategoTerm() {
+			return null;
 		}
 	}
 
