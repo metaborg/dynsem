@@ -231,6 +231,9 @@ rules // Sort dependency analysis
         <+ deps' := [c_name2|deps])
   
   sort-predefined-or-definee(|c_name1, ds2v_aliases):
+  	(ListSort(x), deps) -> <sort-predefined-or-definee(|c_name1, ds2v_aliases)> (x, deps)
+  
+  sort-predefined-or-definee(|c_name1, ds2v_aliases):
     (MapSort(from_sort, to_sort), deps) -> deps'
     with
       from_deps := <sort-predefined-or-definee(|c_name1, ds2v_aliases)> (from_sort, deps);
