@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
@@ -13,7 +16,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import com.oracle.truffle.api.source.MissingNameException;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.vm.PolyglotEngine;
 import com.oracle.truffle.api.vm.PolyglotEngine.Builder;
@@ -49,8 +51,13 @@ public abstract class DynSemEntryPoint {
 
 	public Callable<RuleResult> getCallable(IStrategoTerm term, InputStream input, OutputStream output,
 			OutputStream error) {
+		return getCallable(term, input, output, error, new HashMap<>());
+	}
+
+	public Callable<RuleResult> getCallable(IStrategoTerm term, InputStream input, OutputStream output,
+			OutputStream error, Map<String, Object> config) {
 		try {
-			PolyglotEngine vm = buildPolyglotEngine(input, output, error);
+			PolyglotEngine vm = buildPolyglotEngine(input, output, error, config);
 			assert vm.getLanguages().containsKey(getMimeType());
 			Value interpreter = vm.eval(Source.newBuilder(new InputStreamReader(getSpecificationTerm()))
 					.name("Evaluate to interpreter").mimeType(getMimeType()).build());
@@ -77,14 +84,24 @@ public abstract class DynSemEntryPoint {
 	 *            The {@link OutputStream} of the VM for standard output.
 	 * @param error
 	 *            The {@link OutputStream} of the VM for errors.
+	 * @param config
+	 *            Additional key-value map for configuration of the VM
 	 * @return The configured {@link PolyglotEngine}.
 	 */
-	public PolyglotEngine buildPolyglotEngine(InputStream input, OutputStream output, OutputStream error) {
-		assert DynSemContext.LANGUAGE != null : "DynSemContext.LANGUAGE must be set for creating the RuleRegistry";
-		return PolyglotEngine.newBuilder().setIn(input).setOut(output).setErr(error)
+	public PolyglotEngine buildPolyglotEngine(InputStream input, OutputStream output, OutputStream error,
+			Map<String, Object> config) {
+		assert DynSemContext.LANGUAGE != null : "DynSemContext.LANGUAGE must be set for creatingxx the RuleRegistry";
+		final Builder builder = PolyglotEngine.newBuilder();
+
+		for (Entry<String, Object> cfgEntry : config.entrySet()) {
+			builder.config(getMimeType(), cfgEntry.getKey(), cfgEntry.getValue());
+		}
+
+		return builder.setIn(input).setOut(output).setErr(error)
 				.config(getMimeType(), DynSemLanguage.PARSER, getParser())
 				.config(getMimeType(), DynSemLanguage.TERM_REGISTRY, getTermRegistry())
 				.config(getMimeType(), DynSemLanguage.RULE_REGISTRY, getRuleRegistry()).build();
+
 	}
 
 	public IDynSemLanguageParser getParser() {
