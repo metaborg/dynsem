@@ -17,9 +17,6 @@ imports
 	ds2ds/core
 	backend/interpreter/main
 
-imports
-  coq-semantics/-
-
 signature
   constructors
     Var : LID -> Term

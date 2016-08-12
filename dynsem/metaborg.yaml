@@ -12,6 +12,13 @@ exports:
 - directory: ./
   includes:
   - lib/JavaCompilationUnit-15.tbl
+- language: Stratego-Sugar
+  directory: trans
+- language: Stratego-Sugar
+  directory: src-gen
+contributions:
+- name: ds
+  id: org.metaborg:dynsem:${metaborgVersion}
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar
