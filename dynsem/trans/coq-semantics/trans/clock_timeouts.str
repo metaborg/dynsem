@@ -1,4 +1,4 @@
-module ds2ds/clock-timeouts
+module coq-semantics/generation/clock_timeouts
 
 imports
   coq-semantics/-
