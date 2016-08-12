@@ -60,7 +60,7 @@ rules // AST sort constructors to inductive types in Coq
       (([] := coq_constrctors; decls := ListDecl(coq_constrctors))
         <+ decls := ListDeclBar(coq_constrctors));
       // Generate the constructors for the rest of the sort names
-      (coq_inductives, seen_sorts'') := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases)> (sort_names, seen_sorts', w);
+      (coq_inductives, seen_sorts'') := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases)> (sort_names, seen_sorts', w); 
       // Wrap the result appropriately based on the (0|1) flag
       (!w; ?0 < (res := <concat> [[Induc(sort_name, None(), Type(), decls)], coq_deps, coq_inductives])
               + (res := [Inductive([Induc(sort_name, None(), Type(), decls)|coq_deps])|coq_inductives])

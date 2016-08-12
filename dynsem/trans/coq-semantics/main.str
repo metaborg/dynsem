@@ -25,7 +25,6 @@ rules
       ; factorize-module
       ; explicate-module
       ; copy-propagation-module
-//      ; constant-propagation-module
       ; defactorize-module
       ; explicate-arrow-types
       ; add-timeouts(|ds2v_timeouts)
@@ -36,9 +35,9 @@ rules
     (selected, position, ast, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"v")> path
-      ; (ds2v_aliases, ds2v_imports, ds2v_timeouts) := <get-ds2v-data(|[])> path; debug(!"DS2V")
+      ; (ds2v_aliases, ds2v_imports, ds2v_timeouts, ds2v_nabl2sigs) := <get-ds2v-data(|[])> path; debug(!"DS2V")
       ; coq-file := <explicate-for-coq(|path, project-path, ds2v_timeouts); debug(!0);
-                     module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts); 
+                     module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts, ds2v_nabl2sigs);
                      debug(!"done")> ast
       ; (result := <parenthesize-Coq; prettyprint-Coq; box2text-string(|100)> coq-file
     	<+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
@@ -46,12 +45,13 @@ rules
 
 rules // Module generation
 
-  module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts):
+  module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts, ds2v_nabl2sigs):
     mod -> defs
     with
       imports := <map(import-to-coq)> ds2v_imports;
-      
-      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, t_aliases, c_aliases) := <pre-process-module> (mod, ds2v_aliases, ds2v_timeouts);
+       
+      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, t_aliases, c_aliases) :=
+      	<pre-process-module> (mod, ds2v_aliases, ds2v_timeouts, ds2v_nabl2sigs);
       
       sort_decl_names := <hashtable-keys> sort_decl_map;
       (coq_cs, _) := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases)> (sort_decl_names, [], 1);

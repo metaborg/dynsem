@@ -2,6 +2,7 @@ module coq-semantics/preprocess
 
 imports
   coq-semantics/-
+  coq-semantics/trans/-
   signatures/-
   ds
   analysis/-
@@ -12,86 +13,32 @@ imports
 rules
            
   pre-process-module:
-    (mod, ds2v_aliases, ds2v_timeouts) ->
+    (mod, ds2v_aliases, ds2v_timeouts, nabl2_sig) ->
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, t_aliases, c_aliases)
     with
+      // Process NaBL2 signature information to augment sort declarations
+      // with type constructionrs and term scope/type annotations
+      mod' := <explicate-nabl2-annotations(|nabl2_sig)> mod; debug(!mod');
       // Construct type (sort/arrow) alias map
       t_aliases := <new-hashtable>;
       // Construct constructor alias map
       c_aliases := <new-hashtable>;
       // Populate maps based on DS2V annotations
-      <collect-ds2v-aliases(|ds2v_aliases)> (t_aliases, c_aliases);
+      <collect-ds2v-aliases(|ds2v_aliases)> (t_aliases, c_aliases); debug(!101);
       // Populate hashmaps with accumulated information about DynSem specification
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) :=
         <collect-data-from-module; data-to-hashmap(|c_aliases); analyze-mutual-dependencies(|ds2v_aliases)>
-          (mod, ds2v_aliases);
-      <collect-overloaded-arrow-aliases(|arrow_decl_map)> t_aliases;
+          (mod', ds2v_aliases); debug(!102);
+      <collect-overloaded-arrow-aliases(|arrow_decl_map)> t_aliases; debug(!103);
       // FIXME: Eventually, we should collect and rename overloaded DynSem term constructors, too.
       //        DynSem supports arity overloading, and Coq does not.
       // Add propagation rules for clocked relations
       // NOTE: This could be moved into ds2ds/clock-timeouts
-      <add-propagation-rules(mk-timeout-val|ds2v_timeouts)> arrow_decl_map
-
-rules // Unfold case constructions
-
-	unfold-rule-cases:
-		(prems, Rule([], d, conc)) -> [Rule(prems, d, conc)]
-		
-  unfold-rule-cases:
-  	(prems0, Rule([Formula(f)|prems1], d, conc)) ->
-  		rs
-  	with
-  		rs :=
-  			<unfold-rule-cases> (<concat> [prems0, [Formula(f)]],
-  															Rule(prems1, d, conc)) 
-	
-	unfold-rule-cases:
-		(prems0, Rule([CaseMatch(VarRef(x), cs)|prems1], d, conc)) ->
-			rs
-		with
-  		case_patterns := <filter(\ CasePattern(x, _) -> x\)> cs;
-			rs := <unfold-case> (VarRef(x), cs, case_patterns, prems0,
-															 Rule(prems1, d, conc))
-			
-	unfold-case:
-		(x, [CasePattern(patt, prems2)|cs], case_patterns, prems0,
-		 Rule(prems1, d, conc)) ->
-			rs
-		with
-  		neg_case_patterns :=
-				<filter(?x);
-				 map(\ t -> Formula(NMatch(x, t)) \)> case_patterns;
-			prems0' := <concat> [prems0, [Formula(Match(x, patt))|neg_case_patterns]];
-			prems1' := <concat> [prems2, prems1];
-  		rs0 := <unfold-rule-cases> (prems0', Rule(prems1', d, conc));
-  		rs1 :=
-		  	<unfold-case> (x, cs, case_patterns, prems0,
-		  										 Rule(prems1, d, conc));
-			rs := <concat> [rs0, rs1]
-			
-	unfold-case:
-		(x, [CaseOtherwise(prems2)|cs], case_patterns, prems0,
-		 Rule(prems1, d, conc)) ->
-			rs
-		with
-  		neg_case_patterns :=
-				<map(\ t -> Formula(NMatch(x, t)) \)> case_patterns;
-			prems0' := <concat> [prems0, neg_case_patterns];
-			prems1' := <concat> [prems2, prems1];
-  		rs0 := <unfold-rule-cases> (prems0', Rule(prems1', d, conc));
-		  rs1 :=
-		  	<unfold-case> (x, cs, case_patterns, prems0,
-		  										 Rule(prems1, d, conc));
-			rs := <concat> [rs0, rs1]
-	
-	unfold-case:
-		(x, [], case_patterns, prems0,
-		 Rule(prems1, d, conc)) ->
-		 	[]
+      <add-propagation-rules(mk-timeout-val|ds2v_timeouts)> arrow_decl_map; debug(!104)
 
 rules // Accumulate information about declared arrows, rules, and AST constructors
 
-  // NOTE: This is fairly inefficient... 
+  // NOTE: This is inefficient... 
   collect-data-from-module:
     (Module(name, contents), ds2v_aliases) -> (sort_decls, sort_constrs, arrow_decls, ruls, ds2v_aliases)
     with
@@ -345,8 +292,8 @@ rules // Utilities for lists
   duplicates:
     [x|xs] -> dups
     where
-        (<elem> (x, xs); dups := [x|<filter(not(?x)); duplicates> xs])
-      <+ dups := <duplicates> xs
+      (<elem> (x, xs); dups := [x|<filter(not(?x)); duplicates> xs])
+      	<+ dups := <duplicates> xs
   
 rules // Naming conventions
 

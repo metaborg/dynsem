@@ -1,4 +1,4 @@
-module coq-semantics/err-rules
+module coq-semantics/trans/err_rules
 
 imports
   coq-semantics/-
