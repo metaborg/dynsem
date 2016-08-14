@@ -8,17 +8,18 @@ import java.util.concurrent.Callable;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgConstants;
 import org.metaborg.core.MetaborgException;
-import org.metaborg.core.analysis.IAnalyzeResult;
 import org.metaborg.core.context.IContext;
 import org.metaborg.core.language.ILanguage;
 import org.metaborg.core.language.ILanguageDiscoveryRequest;
 import org.metaborg.core.language.ILanguageImpl;
+import org.metaborg.core.messages.IMessage;
+import org.metaborg.core.messages.IMessagePrinter;
+import org.metaborg.core.messages.StreamMessagePrinter;
 import org.metaborg.core.project.IProject;
 import org.metaborg.core.project.IProjectService;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.spoofax.core.Spoofax;
 import org.metaborg.spoofax.core.unit.ISpoofaxAnalyzeUnit;
-import org.metaborg.spoofax.core.unit.ISpoofaxAnalyzeUnitUpdate;
 import org.metaborg.spoofax.core.unit.ISpoofaxInputUnit;
 import org.metaborg.spoofax.core.unit.ISpoofaxParseUnit;
 import org.metaborg.util.concurrent.IClosableLock;
@@ -79,13 +80,27 @@ public class DynSemRunner {
             String text = S.sourceTextService.text(file);
             ISpoofaxInputUnit input = S.unitService.inputUnit(file, text, language, null);
             ISpoofaxParseUnit parsed = S.syntaxService.parse(input);
+            if(!parsed.valid()) {
+            	throw new MetaborgException("Parsing failed.");
+            }
+            printMessages(err, parsed.messages());
+            if(!parsed.success()) {
+            	throw new MetaborgException("Parsing returned errors.");
+            }
 
             context = S.contextService.get(file, project, language);
-			IAnalyzeResult<ISpoofaxAnalyzeUnit, ISpoofaxAnalyzeUnitUpdate> analyzed;
+			ISpoofaxAnalyzeUnit analyzed;
             try(IClosableLock lock = context.write()) {
-            	analyzed = S.analysisService.analyze(parsed, context);
+            	analyzed = S.analysisService.analyze(parsed, context).result();
             }
-            program = analyzed.result().ast();
+            if(!analyzed.valid()) {
+            	throw new MetaborgException("Analysis failed.");
+            }
+            printMessages(err, analyzed.messages());
+            if(!analyzed.success()) {
+            	throw new MetaborgException("Analysis returned errors.");
+            }
+            program = analyzed.ast();
         } catch (IOException e) {
             throw new MetaborgException("Analysis failed.", e);
         }
@@ -98,5 +113,12 @@ public class DynSemRunner {
             throw new MetaborgException("Evaluation failed.", e);
         }
     }
+
+	private void printMessages(OutputStream out, Iterable<IMessage> messages) {
+		IMessagePrinter printer = new StreamMessagePrinter(S.sourceTextService, true, false, out, out, out);
+		for(IMessage message : messages) {
+			printer.print(message, false);
+		}
+	}
 
 }
