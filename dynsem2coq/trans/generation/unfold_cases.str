@@ -24,7 +24,7 @@ rules // Unfold case constructions
   		case_patterns := <filter(\ CasePattern(x, _) -> x\)> cs;
 			rs := <unfold-case> (VarRef(x), cs, case_patterns, prems0,
 															 Rule(prems1, d, conc))
-			
+	
 	unfold-case:
 		(x, [CasePattern(patt, prems2)|cs], case_patterns, prems0,
 		 Rule(prems1, d, conc)) ->
