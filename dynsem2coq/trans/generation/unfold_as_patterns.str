@@ -31,7 +31,7 @@ rules // Unfold case constructions
 		t -> (t', matches)
 		with
 			( // Find 'As' term, if it exists
-				t0 := <oncetd(\ As(x, y) -> x \)> t;
+				t0 := <oncetd(?As(x, y); !x)> t;
 				// Unfold as pattern, and search for more
 				(t', matches1) := <unfold-as-pattern-in-term> t0;
 				matches := [Match(x, y)|matches1]
