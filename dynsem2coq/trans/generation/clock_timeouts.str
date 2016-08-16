@@ -4,7 +4,7 @@ imports
 	codegen
   signatures/ds-sig
   signatures/Signatures-sig
-  analysis/-
+  analysis/analysis-rules
   lib-ds
   ds2ds/explicate-arrow-types
 
