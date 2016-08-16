@@ -2,6 +2,7 @@ module analysis/analysis-rules
 
 imports
   signatures/ds-sig
+  signatures/Signatures-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/rename

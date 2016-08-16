@@ -1,7 +1,6 @@
 module backend/interpreter/desugar-for-interpreter
 
 imports
-  stratego/metaborg
   signatures/-
   backend/interpreter/-
   analysis/-

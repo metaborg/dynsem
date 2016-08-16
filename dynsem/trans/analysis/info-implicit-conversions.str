@@ -2,6 +2,7 @@ module analysis/info-implicit-conversions
 
 imports
   signatures/ds-sig
+  signatures/Module-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/analysis-rules

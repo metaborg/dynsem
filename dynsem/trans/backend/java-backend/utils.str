@@ -1,7 +1,6 @@
 module utils
 
 imports
-  stratego/metaborg
   backend/java-backend/utils/java-utils
   lib-ds
   

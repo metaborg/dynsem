@@ -2,7 +2,6 @@ module backend/java-backend/main
 
 imports
   signatures/ds-sig
-  stratego/metaborg
   lib-ds
   ds
 

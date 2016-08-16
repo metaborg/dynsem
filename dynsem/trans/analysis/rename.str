@@ -5,7 +5,7 @@ imports
   ds
   analysis/lib-analysis
   analysis/constructors
-  stratego/metaborg
+  import-utils
   
 strategies
 	
