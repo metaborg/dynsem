@@ -28,20 +28,20 @@ public class DynSemContext {
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
 
-	private final Map<String, Object> properties;
+	private final Map<String, Object> config;
 
 	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
-		this(parser, termRegistry, ruleRegistry, System.in, System.out);
+		this(parser, termRegistry, ruleRegistry, System.in, System.out, new HashMap<String, Object>());
 	}
 
 	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry,
-			InputStream input, PrintStream output) {
+			InputStream input, PrintStream output, Map<String, Object> config) {
 		this.parser = parser;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
-		this.properties = new HashMap<>();
+		this.config = config;
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class DynSemContext {
 	 * @return The value associated with this property in the property store, or <code>defaultValue</code>.
 	 */
 	public Object readProperty(String prop, Object defaultValue) {
-		final Object val = properties.get(prop);
+		final Object val = config.get(prop);
 		if (val != null) {
 			return val;
 		}
@@ -99,7 +99,7 @@ public class DynSemContext {
 	 * @return A reference to this {@link DynSemContext}
 	 */
 	public DynSemContext writeProperty(String prop, Object val) {
-		properties.put(prop, val);
+		config.put(prop, val);
 		return this;
 	}
 
@@ -111,7 +111,7 @@ public class DynSemContext {
 	 * @return A reference to this {@link DynSemContext}
 	 */
 	public DynSemContext deleteProperty(String prop) {
-		properties.remove(prop);
+		config.remove(prop);
 		return this;
 	}
 

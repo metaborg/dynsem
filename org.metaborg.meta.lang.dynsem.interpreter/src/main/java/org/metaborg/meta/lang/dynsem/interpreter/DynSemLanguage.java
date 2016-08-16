@@ -34,7 +34,7 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		IDynSemLanguageParser parser = (IDynSemLanguageParser) config.get(PARSER);
 		ITermRegistry termRegistry = (ITermRegistry) config.get(TERM_REGISTRY);
 		RuleRegistry ruleRegistry = (RuleRegistry) config.get(RULE_REGISTRY);
-		return new DynSemContext(parser, termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()));
+		return new DynSemContext(parser, termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()), config);
 	}
 
 	public Node createFindContextNode0() {
