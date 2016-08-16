@@ -11,7 +11,7 @@ rules
     m@Module(_, _) -> Module($[[name]_typeannos], section*)
     where
       <m-in-analysis(add-extra-typeannos; unrename-all); unmark-vars> m => Module(name, section*)
-      
+  
   add-extra-typeannos = alltd(add-extra-typeannos-rule); alltd(add-extra-typeannos-term)
   
   add-extra-typeannos-rule:
@@ -37,8 +37,9 @@ rules
       ConstructorType(c-ty*, ty) := <lookup-prop(|Type())> c-def;
       c'* := <zip(add-extra-typeannos-term <+ Snd)> (c-ty*, c*)
   
-  add-extra-typeannos-term:
-    (_, c@Con(_, _)) -> <try(add-extra-typeannos-term)> c
+  // FIXME: This rule spuriously matches on terms of arity 2. Might be a Stratego bug? Will add back when I find out why this happens...
+//  add-extra-typeannos-term:
+//    (_, c@Con(_, _)) -> <try(add-extra-typeannos-term)> c
   
   add-extra-typeannos-term:
     (lty@ListType(ty), ListTail(h, t)) -> ListTail(h', t')
