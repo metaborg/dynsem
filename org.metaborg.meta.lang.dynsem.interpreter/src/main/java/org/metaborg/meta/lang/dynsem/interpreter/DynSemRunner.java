@@ -23,11 +23,14 @@ import org.metaborg.spoofax.core.unit.ISpoofaxAnalyzeUnit;
 import org.metaborg.spoofax.core.unit.ISpoofaxInputUnit;
 import org.metaborg.spoofax.core.unit.ISpoofaxParseUnit;
 import org.metaborg.util.concurrent.IClosableLock;
+import org.metaborg.util.log.ILogger;
+import org.metaborg.util.log.LoggerUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.google.common.collect.ImmutableMap;
 
 public class DynSemRunner {
+	private static final ILogger logger = LoggerUtils.logger(DynSemRunner.class);
 
 	private final Spoofax S;
 	private final ILanguageImpl language;
@@ -50,17 +53,21 @@ public class DynSemRunner {
 				}
 				FileObject spoofaxDir = S.resourceService.resolve(spoofaxDirName);
 				for(ILanguageDiscoveryRequest req : S.languageDiscoveryService.request(spoofaxDir)) {
-					S.languageDiscoveryService.discover(req);
+					try {
+						S.languageDiscoveryService.discover(req);
+					} catch(MetaborgException e) {
+						logger.warn("Failed to load language from {}.", spoofaxDir);
+					}
 				}
 			}
 		}
 		ILanguage lang = S.languageService.getLanguage(languageName);
 		if(lang == null) {
-			throw new MetaborgException("Cannot find language PCF.");
+			throw new MetaborgException("Cannot find language "+languageName+".");
 		}
 		ILanguageImpl langImpl = lang.activeImpl();
 		if(langImpl == null) {
-			throw new MetaborgException("Language PCF has no active implementation.");
+			throw new MetaborgException("Language "+languageName+" has no active implementation.");
 		}
 		return langImpl;
 	}
