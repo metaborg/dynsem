@@ -1,3 +1,0 @@
-[Import("test/coq-semantics/langs/frameAPI.ds2v"),
- NativeOpAlias("plusI", 2, "plus"),
- Timeouts([("eval", SimpleSort("Exp"))])]
