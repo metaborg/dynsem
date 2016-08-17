@@ -209,6 +209,18 @@ rules // Formulae generation
   		tx := <term-to-coq(|c_aliases)> x;
   		ty := <term-to-coq(|c_aliases)> y
   
+  formula-to-coq(|t_aliases, c_aliases):
+  	TermEq(x, y) -> Eq(tx, ty)
+  	with
+  		tx := <term-to-coq(|c_aliases)> x;
+  		ty := <term-to-coq(|c_aliases)> y
+   
+  formula-to-coq(|t_aliases, c_aliases):
+  	TermNeq(x, y) -> NotE(tx, ty)
+  	with
+  		tx := <term-to-coq(|c_aliases)> x;
+  		ty := <term-to-coq(|c_aliases)> y
+  
 rules // Auxiliary entity generation
 
   aux-ent-to-coq(|c_aliases):
@@ -415,9 +427,32 @@ rules // Extracting variables
   		zs := <conc> (xs, ys)
   
   extract-variables:
-  	Cast(x, y) -> xs // FIXME: what is the semantics of casts?
+  	TermNeq(x, y) -> zs
   	with
-  		xs := <extract-variables> x
+  		xs := <extract-variables> x;
+  		ys := <extract-variables> y;
+  		zs := <conc> (xs, ys)
+
+  extract-variables:
+  	TermNeq(x, y) -> zs
+  	with
+  		xs := <extract-variables> x;
+  		ys := <extract-variables> y;
+  		zs := <conc> (xs, ys)
+
+  extract-variables:
+  	TermEq(x, y) -> zs
+  	with
+  		xs := <extract-variables> x;
+  		ys := <extract-variables> y;
+  		zs := <conc> (xs, ys)
+  		  
+  extract-variables:
+  	Cast(x, y) -> zs
+  	with
+  		xs := <extract-variables> x;
+  		ys := <extract-variables> y;
+  		zs := <conc> (xs, ys)
   
   extract-variables:
   	Int(_) -> []

@@ -1,8 +1,6 @@
 module coq-semantics/preprocess
 
 imports
-//  coq-semantics/-
-//  coq-semantics/trans/-
   generation/explicate_nabl2_annotations
   signatures/-
   analysis/-
@@ -208,10 +206,9 @@ rules // Arrow dependency analysis
         <+ deps' := [(arrow_name', sort')|deps])
 
   arrow-definee(|arrow_name, sort, ds2v_aliases):
-    (Formula(Match(x, y)), deps) -> deps
-  
-  arrow-definee(|arrow_name, sort, ds2v_aliases):
-    (Formula(NMatch(x, y)), deps) -> deps
+    (x, deps) -> deps
+    where
+    	not(!x; ?Formula(rel@Relation(_, _, _, _)))
   
 rules // Alias collection and querying
 
