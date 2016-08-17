@@ -448,11 +448,9 @@ rules // Extracting variables
   		zs := <conc> (xs, ys)
   		  
   extract-variables:
-  	Cast(x, y) -> zs
+  	Cast(x, y) -> xs
   	with
-  		xs := <extract-variables> x;
-  		ys := <extract-variables> y;
-  		zs := <conc> (xs, ys)
+  		xs := <extract-variables> x
   
   extract-variables:
   	Int(_) -> []
