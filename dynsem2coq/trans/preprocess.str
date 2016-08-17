@@ -1,8 +1,6 @@
 module coq-semantics/preprocess
 
 imports
-//  coq-semantics/-
-//  coq-semantics/trans/-
   generation/explicate_nabl2_annotations
   signatures/-
   analysis/-
@@ -12,8 +10,7 @@ imports
   coqmappings
   ds2v
   generation/err_rules
-	generation/unfold_cases
-	generation/unfold_as_patterns
+	generation/unfold_cases // FIXME: should happen in main.
   signatures/ds-sig
   signatures/Module-sig
 	signatures/Signatures-sig
@@ -21,12 +18,9 @@ imports
 rules
            
   pre-process-module:
-    (mod, ds2v_aliases, ds2v_timeouts, nabl2_sig) ->
+    (mod, ds2v_aliases, ds2v_timeouts) ->
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, t_aliases, c_aliases)
     with
-      // Process NaBL2 signature information to augment sort declarations
-      // with type constructionrs and term scope/type annotations
-      mod' := <explicate-nabl2-annotations(|nabl2_sig)> mod;
       // Construct type (sort/arrow) alias map
       t_aliases := <new-hashtable>;
       // Construct constructor alias map
@@ -36,7 +30,7 @@ rules
       // Populate hashmaps with accumulated information about DynSem specification
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) :=
         <collect-data-from-module; data-to-hashmap(|c_aliases); analyze-mutual-dependencies(|ds2v_aliases)>
-          (mod', ds2v_aliases);
+          (mod, ds2v_aliases);
       <collect-overloaded-arrow-aliases(|arrow_decl_map)> t_aliases;
       // FIXME: Eventually, we should collect and rename overloaded DynSem term constructors, too.
       //        DynSem supports arity overloading, and Coq does not.
@@ -212,10 +206,9 @@ rules // Arrow dependency analysis
         <+ deps' := [(arrow_name', sort')|deps])
 
   arrow-definee(|arrow_name, sort, ds2v_aliases):
-    (Formula(Match(x, y)), deps) -> deps
-  
-  arrow-definee(|arrow_name, sort, ds2v_aliases):
-    (Formula(NMatch(x, y)), deps) -> deps
+    (x, deps) -> deps
+    where
+    	not(!x; ?Formula(rel@Relation(_, _, _, _)))
   
 rules // Alias collection and querying
 

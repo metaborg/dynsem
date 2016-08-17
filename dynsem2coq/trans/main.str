@@ -8,6 +8,7 @@ imports
 	pp/Coq-pp
 	generation/clock_timeouts
 	generation/unfold_as_patterns
+	generation/explicate_nabl2_annotations
 	ds2v
 	codegen
 	preprocess
@@ -15,7 +16,7 @@ imports
 
 rules
   
-  explicate-for-coq(|path, project-path, ds2v_timeouts) =
+  explicate-for-coq(|path, project-path, ds2v_timeouts, nabl2_sigs) =
     in-project-path(
       include-imports
       ; desugar-top
@@ -30,8 +31,10 @@ rules
       ; copy-propagation-module
       ; defactorize-module
       ; explicate-arrow-types
+      ; prettify-vars-module // FIXME: this shouldn't be necessary, but if we prettify vars after explicating NaBL2 annotations, some variables occasionally remain uneprettified
+      ; explicate-nabl2-annotations(|nabl2_sigs)
       ; add-timeouts(|ds2v_timeouts)
-      ; prettify-vars-module
+      ; prettify-vars-module // Again...
       ; unfold-as-patterns
     |project-path)
   
@@ -40,8 +43,8 @@ rules
     with
       filename := <guarantee-extension(|"v")> path
       ; (ds2v_aliases, ds2v_imports, ds2v_timeouts, ds2v_nabl2sigs) := <get-ds2v-data(|[])> path; debug(!"DS2V")
-      ; coq-file := <explicate-for-coq(|path, project-path, ds2v_timeouts); debug(!0);
-                     module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts, ds2v_nabl2sigs);
+      ; coq-file := <explicate-for-coq(|path, project-path, ds2v_timeouts, ds2v_nabl2sigs); debug(!0);
+                     module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts);
                      debug(!"done")> ast
       ; (result := <parenthesize-Coq; prettyprint-Coq; box2text-string(|100)> coq-file
     	<+ <bottomup(try(not(is-string) ; not(is-list) ; not(prettyprint-Coq) ; debug(!"cannot pp ")))> coq-file
@@ -49,13 +52,13 @@ rules
 
 rules // Module generation
 
-  module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts, ds2v_nabl2sigs):
+  module-to-coq(|ds2v_aliases, ds2v_imports, ds2v_timeouts):
     mod -> defs
     with
       imports := <map(import-to-coq)> ds2v_imports;
        
       (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, t_aliases, c_aliases) :=
-      	<pre-process-module> (mod, ds2v_aliases, ds2v_timeouts, ds2v_nabl2sigs);
+      	<pre-process-module> (mod, ds2v_aliases, ds2v_timeouts);
       
       sort_decl_names := <hashtable-keys> sort_decl_map;
       (coq_cs, _) := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases)> (sort_decl_names, [], 1);
