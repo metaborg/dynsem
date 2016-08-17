@@ -65,8 +65,7 @@ rules
       	path' := <fetch-elem(!$[[<id>]/[file]]; file-exists)>;
   			nabl2_sig := <read-text-file; read-from-string> path'
   	  ) <+
-  	  <conc; debug> ("Could not read NaBL2 signature file: ", path);
-  	  nabl2_sig := ([], [], [])
+  	  <conc-strings; debug> ("Could not read NaBL2 signature file: ", path); fail
 
 	union-triples:
 		(x, []) -> x
