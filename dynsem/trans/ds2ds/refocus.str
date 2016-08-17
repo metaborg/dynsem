@@ -5,7 +5,7 @@ imports
   libstratego-gpp
   libstratego-aterm
   signatures/ds-sig
-  stratego/metaborg
+  signatures/Module-sig
   ds2ds/sugar
   pp
   ds

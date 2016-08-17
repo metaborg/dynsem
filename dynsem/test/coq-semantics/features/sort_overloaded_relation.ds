@@ -1,0 +1,22 @@
+module test/coq-semantics/features/multisorted_relation
+
+signature
+
+  sorts A constructors
+    a : A
+    
+  sorts B constructors
+    b : B
+  
+  sorts C constructors
+    c : C
+  
+  arrows
+    A --> C
+    B --> C
+
+rules
+
+  a() --> c().
+  
+  b() --> c().

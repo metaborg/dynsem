@@ -2,11 +2,13 @@ module analysis/info-implicit-conversions
 
 imports
   signatures/ds-sig
+  signatures/Module-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/analysis-rules
   analysis/query
   analysis/analysis-signatures
+  lib-ds
 
 rules
   
@@ -46,16 +48,18 @@ rules
     )
   
   gen-implicit-info-conclusion:
-    Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), _)) -> <fail>
+    Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> <fail>
     where
+      arrow-name := <get-arrow-name> arr;
       arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
       lhs-ty := <gen-implicit-type-of(id)> lhs;
       ArrowType(dec-lhs-ty, _) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
       <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
 
   gen-implicit-info-conclusion:
-    Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), Target(rhs, _))) -> <fail>
+    Rule(_, _, Relation(_, Source(lhs, _), arr, Target(rhs, _))) -> <fail>
     where
+      arrow-name := <get-arrow-name> arr;
       arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
       lhs-ty := <rulelhs-get-type> lhs;
       ArrowType(_, dec-rhs-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);

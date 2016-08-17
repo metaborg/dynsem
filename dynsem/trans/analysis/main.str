@@ -11,9 +11,9 @@ imports
 	analysis/info-implicit-conversions
 	signatures/-
   lib-ds
-	stratego/metaborg
 	libstratego-sglr
 	ds
+	import-utils
 
 rules
 
@@ -86,13 +86,13 @@ rules /* helpers for import handling */
   resolve-path =
   	?import-string;
     (
-      ds-source-and-include-locations;
+      !"ds"; language-source-and-include-locations;
       fetch-elem(!$[[<id>]/[import-string].ds]; file-exists)
       <+
       add-msg(|Error(), import-string, $[Import [import-string] cannot be resolved]);
       fail
     )
-  
+
   parse-ds-file-report(report) = 
-    parse-ds-file
+    parse-ds
     <+ debug(!"failed to parse: "); report; debug(!"reported error: "); fail

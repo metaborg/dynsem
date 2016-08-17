@@ -1,0 +1,97 @@
+module test/coq-semantics/langs/L1
+
+// FIXMEs:
+// - Make pathofRef built-in
+
+signature
+  
+  sorts Typ constructors
+    Tint : Typ
+    Tarrow : Typ * Typ -> Typ
+  
+  sorts PreExp constructors
+    Num : Int -> PreExp
+    Var : Ref -> PreExp
+    Binop : Exp * Exp -> PreExp
+    Fun : Decl * Typ * Exp -> PreExp
+    App : Exp * Exp -> PreExp
+    
+  sorts Exp constructors
+    E_ : ScopeId * Typ * PreExp -> Exp
+    
+signature // Scope graphs
+
+  sorts Ref Decl ScopeId FrameId H
+  
+  sorts Label constructors
+    P : Label
+    I : Label
+  
+  sorts Path constructors
+    E : Label * ScopeId * Path -> Path
+    D : Decl -> Path
+  
+  sorts Addr constructors
+    Addr : FrameId * Decl -> Addr
+    
+  sorts lookup constructors lookup : FrameId * H * Path -> lookup
+  sorts get constructors get : FrameId * H * Decl -> get
+  sorts pathofRef constructors pathofRef : Ref -> pathofRef
+  sorts slookup constructors slookup : Path * ScopeId -> slookup
+  sorts scopeofExp constructors scopeofExp : Exp -> scopeofExp
+  sorts scopeofFrame constructors scopeofFrame : H * FrameId -> scopeofFrame
+  sorts initFrame constructors initFrame : ScopeId * Map(Label, Map(ScopeId, FrameId)) * Map(Decl, Val) -> initFrame
+
+  variables
+    s : ScopeId
+    f : FrameId
+    h : H
+
+  sorts SD constructors SD : ScopeId * Decl -> SD
+
+  // Most of these should/could be defined using products and/or default arrows
+  arrows
+    pathofRef -pathofRef'-> Path
+    // (Path * ScopeId) -slookup-> (ScopeId * Decl) // :(
+    slookup -slookup'-> SD
+    lookup -lookup'-> Addr
+    get -get'-> Val
+    scopeofFrame -scopeofFrame'-> ScopeId
+    initFrame -initFrame'-> FrameId
+
+  native operators
+    plusI  : Int * Int -> Int
+
+signature
+  
+  sorts Val constructors
+    NumV : Int -> Val
+    ClosV : Decl * Exp * FrameId -> Val
+  
+  arrows
+    Exp -eval-> Val
+
+rules
+  
+  E_(_ , _, Num(i)) -eval-> NumV(i).
+  
+  f |- E_(_, _, Var(r)) :: h -eval-> v :: h
+  where
+    pathofRef(r) -pathofRef'-> p;
+    lookup(f, h, p) -lookup'-> Addr(f', d);
+    get(f', h, d) -get'-> v.
+    
+  E_(_, _, Binop(e1, e2)) -eval-> NumV(plusI(z1, z2))
+  where
+    e1 -eval-> NumV(z1);
+    e2 -eval-> NumV(z2).
+  
+  f |- E_(_, _, Fun(d, _, e)) -eval-> ClosV(d, e, f).
+  
+  f |- E_(s, _, App(e1, e2)) -eval-> v'
+  where
+    f |- e1 -eval-> ClosV(d, e, f');
+    f |- e2 -eval-> v :: h;
+    scopeofFrame(h, f') -scopeofFrame'-> s';
+    initFrame(s, {P() |--> {s' |--> f'}}, {d |--> v}) -initFrame'-> f'';
+    f'' |- e -eval-> v'.

@@ -5,7 +5,6 @@ imports
   backend/interpreter/-
   backend/utils/-
   libjava-front
-  stratego/metaborg
 
 rules
   

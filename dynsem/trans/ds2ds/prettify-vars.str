@@ -3,6 +3,9 @@ module ds2ds/prettify-vars
 imports
   signatures/-
   analysis/-
+  ds2ds/-
+  ds
+  lib-ds
   
 strategies
     
@@ -12,8 +15,7 @@ strategies
       {| PrettifyVar:
         prettify-vars-all
       |};
-      unrename-all);
-    unmark-vars
+      unrename-all)
   
   prettify-vars-all = alltd(prettify-vars-rule)
   
@@ -42,7 +44,8 @@ strategies
       then
         x-prefix := <def-get-name> scheme-def
       else
-        x-prefix := <derw-type; get-sort-name; lower-case> x-ty
+        x-prefix :=
+          <derw-type; get-sort-name; lower-case; string-as-chars(\ [x|_] -> [x] \)> x-ty
       end;
       x' := <pesimistic-next-variable> x-prefix;
       rules(PrettifyVar: x -> x')

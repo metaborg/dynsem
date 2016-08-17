@@ -1,0 +1,21 @@
+module test/coq-semantics/features/mutual_dep_sort
+
+signature
+
+  sorts A constructors
+    a : A
+
+  sorts B constructors
+    b : B
+
+  arrows
+    A -x-> A
+    B -y-> B
+
+rules
+  
+  a() -x-> a()
+  where
+    b() -y-> b().
+    
+  b() -y-> b().

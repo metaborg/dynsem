@@ -1,0 +1,13 @@
+module dynsem2coq
+
+imports
+  
+	main
+	libstratego-sglr
+	
+rules // HACKS
+
+  parse-ds-file:
+    file -> str
+    where
+      str := <prim("STRSGLR_parse_string", id|file, (), (), file)>

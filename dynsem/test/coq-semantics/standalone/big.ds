@@ -1,0 +1,52 @@
+module test/coq-semantics/standalone/big
+ 
+signature
+
+  // Expressions
+  sorts Expr constructors
+     Num : Int -> Expr
+    Plus : Expr * Expr -> Expr
+     Fun : String * Expr -> Expr
+     App : Expr * Expr -> Expr
+     Var : String -> Expr
+     Let : String * Expr * Expr -> Expr
+
+  // Values
+  sorts Val constructors
+    ClosV : String * Expr * Env -> Val
+     NumV : Int -> Val
+
+  // Environments
+  sort aliases
+    Env = Map(String, Val)
+
+  variables
+    r : Env
+    v : Val
+
+  native operators
+    plusI  : Int * Int -> Int
+
+  // Evaluation
+  arrows
+    Expr -big-> Val
+
+rules
+  
+  // Arithmetic fragment
+  Num(i) -big-> NumV(i).
+
+  Plus(NumV(i1), NumV(i2)) -big-> NumV(plusI(i1, i2)).
+  
+  // Functional fragment
+  r |- Fun(id, e) -big-> ClosV(id, e, r).
+  
+  App(ClosV(id, e, r'), v2) -big-> v
+  where
+    Env {id |--> v2, r'} |- e -big-> v.
+
+  r |- Var(id) -big-> r[id].
+
+  r |- Let(id, v1, e2) -big-> v2
+  where
+  	Env {id |--> v1, r} |- e2 -big-> v2.
