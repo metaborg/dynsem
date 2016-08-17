@@ -13,6 +13,9 @@ imports
   ds2ds/explicate-arrow-types
   lib-ds
   
+signature constructors
+	NoTerm : Term // Used for terms that are mapped to 0-tuples in DS2V files
+  
 rules // Sort-to-type generation
 
   sort-to-coq(|t_aliases):
@@ -186,7 +189,11 @@ rules // Formulae generation
       // Coqify
       res0 := <aux-ent-to-coq(|c_aliases)> (arrow_rename, r);
       st := <term-to-coq(|c_aliases)> sterm;
-      st' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws, Apply(res0, st));
+      // If source term is a 0-tuple (by DS2V mapping)
+      ( (<equal> (st, NoTerm()); tl := res0)
+      <+ tl := Apply(res0, st)
+      );
+      st' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws, tl);
       tt := <term-to-coq(|c_aliases)> tterm;
       tt' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws', Apply(st', tt))
   
@@ -201,8 +208,6 @@ rules // Formulae generation
   	with
   		tx := <term-to-coq(|c_aliases)> x;
   		ty := <term-to-coq(|c_aliases)> y
-  
-  // FIXME: missing generation of ordinary DynSem equality
   
 rules // Auxiliary entity generation
 
@@ -232,7 +237,12 @@ rules // Term generation
       then
         if <equal> (ctor_kind, Tuple())
         then
-          app := <tuplify(|c_aliases)> ts
+        	if <equal> (arity, 0)
+        	then
+        		app := NoTerm()
+        	else
+          	app := <tuplify(|c_aliases)> ts
+          end
         else
           !ctor_kind; ?Name(name);
           ts' := <map(term-to-coq(|c_aliases))> ts;
@@ -250,7 +260,7 @@ rules // Term generation
       bindings' := <map(term-to-coq(|c_aliases))> bindings;
       nil := <coq-map-nil>;
       cons := <coq-map-cons>;
-      map := <foldr(!nil, \ (x, y) -> Apply(Apply(cons, x), y) \ )> bindings'  
+      map := <foldr(!nil, \ (x, y) -> Apply(Apply(cons, x), y) \ )> bindings'
   
   term-to-coq(|c_aliases):
     Bind(x, y) -> cons
@@ -284,7 +294,7 @@ rules // Term generation
 
   tuplify(|c_aliases):
     [x] -> <term-to-coq(|c_aliases)> x
-    
+  
   mk-app-rev:
     (x, y) -> Apply(y, x)
 
