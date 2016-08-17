@@ -4,7 +4,9 @@ imports
   signatures/ds-sig
   signatures/Signatures-sig
   lib-ds
-
+  analysis/analysis-signatures
+  ds2ds/explicate-arrow-types
+  
 signature
 	
 	sorts Nabl2Sorts constructors
@@ -32,6 +34,7 @@ rules
 			(type_sigs, cgen_sigs, subterm_sigs) := nabl2_sig;
 			type_constructors := <map(type-sig-to-consdecl)> type_sigs;
 			mod' := <foldr(!mod, add-cgen-sigs)> cgen_sigs;
+			// Remember the sorts of generators
 			cgen_sig_map := <new-hashtable>;
 			<map(\ CGenSig(Name(cgen_name), sort, _, _) ->
 						 <hashtable-put(|cgen_name, SimpleSort(<normalize-sort; postify> sort))> cgen_sig_map \)> cgen_sigs;
@@ -42,7 +45,7 @@ rules
 			// Update all derived sorts (all sorts that do not occur in an NaBL2 signature)
 			mod''' := <postify-derived-sorts-in-consdecls(|cgen_sorts)> mod'';
 			// Update arrow signatures and rules accordingly
-			mod'''' := mod'''
+			mod'''' := <postify-sorts-in-arrowdecls(|cgen_sorts)> mod'''
 
 rules // Translating NaBL2 signatures to DynSem
 
@@ -67,8 +70,8 @@ rules // Augmenting module with sort declarations and constructors for explicate
 				cons_decl :=
 					ConsDecl(<postify-constructor> sort', <concat> [scope_kind_list, type_kind_list, [sort']], SimpleSort(<postify> sort'), Annos([]));
 				mod' :=
-					<alltd(\ Sorts(ss) -> Sorts(<add-after(|SortDecl(<get-sort-name> sort'))> (SortDecl(<postify> sort'), ss)) \);
-					 alltd(\ Constructors(cs) -> Constructors([cons_decl|cs]) \)> mod
+					<alltd(\ Sorts(ss) -> Sorts(<add-after(|<store-sort> SortDecl(<get-sort-name> sort'))> (SortDecl(<postify> sort'), ss)) \);
+					 alltd(\ Constructors(cs) -> Constructors([<store-constructor> cons_decl|cs]) \)> mod
 			) <+
 			(
 				<concat-strings; debug> ["ERROR: Sort ", <normalize-sort; get-sort-name> sort, " is used in NaBL2 signature, but is ill-defined!"];
@@ -90,11 +93,9 @@ rules // Augmenting module with sort declarations and constructors for explicate
 		where
 			<check-sort-defined> (mod, x);
 			<check-sort-defined> (mod, y)
-			
 
 rules // Replace occurrences of non-explicated term sorts with explicated ones
 
-	// FIXME: should be applied to arrow declarations too
 	transform-subterm-sig(|cgen_sig_map):
 		(((constructor, arity), subterm_sig), mod) ->
 			mod'
@@ -104,7 +105,7 @@ rules // Replace occurrences of non-explicated term sorts with explicated ones
 						params, s, a, params:
 							?ConsDecl(constructor, params, s, a);
 							arity := <length> params;
-							!ConsDecl(constructor, <replace-ns(|cgen_sig_map, subterm_sig)> params, s, a)
+							! <store-constructor> ConsDecl(constructor, <replace-ns(|cgen_sig_map, subterm_sig)> params, s, a)
 					}))> mod
 
 rules // Replacing sub-term positions with explicated term sorts
@@ -187,17 +188,43 @@ rules // Postify derived sorts in ConsDecl's
 					(( // If sort is a derived sort (i.e., not a cgen sort)
 						not(<elem> (sort, cgen_sorts));
 						cons' :=
-							ConsDecl(cname,
-							<map(
-								alltd({ sort' :
-									?sort';
-									<elem> (sort', cgen_sorts);
-									!SimpleSort(<postify> sort')
-								}))> cparams, sort, annos)
+							<store-constructor>
+								ConsDecl(cname,
+								<map(
+									alltd({ sort' :
+										?sort';
+										<elem> (sort', cgen_sorts);
+										!SimpleSort(<postify> sort')
+									}))> cparams, sort, annos)
 					) <+
 					(cons' := cons)) \})> mod
 
-rules // Postify 
+
+rules // Replace sorts in arrow declarations with postified ones:
+
+	postify-sorts-in-arrowdecls(|cgen_sorts):
+		mod -> mod'
+		with
+			mod' :=
+				<bottomup(try({
+					ads, sort, x, y :
+						( // Replace sorts in arrow decls
+							?ArrowDeclarations(ads);
+							!ArrowDeclarations(<alltd({
+								sort :
+									?sort;
+									// If sort is a  cgen sort
+									<elem> (sort, cgen_sorts);
+									// Postify it
+									! SimpleSort(<postify> sort)
+								})> ads)
+						) <+
+						( // Replace sorts in named arrow relations
+							?NamedDynamicEmitted(x, y, sort);
+							<elem> (sort, cgen_sorts);
+							!NamedDynamicEmitted(x, y, SimpleSort(<postify> sort))
+						)
+					}))> mod 
 
 rules // Calculating constraint generation sorts (i.e., which sorts have a constraint generation function associated with them)
 
