@@ -11,7 +11,7 @@ rules
     m@Module(_, _) -> Module($[[name]_typeannos], section*)
     where
       <m-in-analysis(add-extra-typeannos; unrename-all); unmark-vars> m => Module(name, section*)
-      
+  
   add-extra-typeannos = alltd(add-extra-typeannos-rule); alltd(add-extra-typeannos-term)
   
   add-extra-typeannos-rule:
@@ -37,8 +37,11 @@ rules
       ConstructorType(c-ty*, ty) := <lookup-prop(|Type())> c-def;
       c'* := <zip(add-extra-typeannos-term <+ Snd)> (c-ty*, c*)
   
+  
   add-extra-typeannos-term:
-    (_, c@Con(_, _)) -> <try(add-extra-typeannos-term)> c
+    x@(_, c@Con(_, _)) -> <try(add-extra-typeannos-term)> c
+    where
+    	<TupleToList> x // FIXME: This works around a bug in the Stratego interpreter where terms of arity 2 are matched as if they were tuples
   
   add-extra-typeannos-term:
     (lty@ListType(ty), ListTail(h, t)) -> ListTail(h', t')
@@ -51,4 +54,3 @@ rules
   
   add-extra-typeannos-term:
     (ty, l@List([])) -> Cast(l, <derw-type> ty)
-

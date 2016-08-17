@@ -1,0 +1,514 @@
+module codegen
+
+imports
+  preprocess
+  coqmappings
+  ds2v
+  signatures/-
+  signatures/extensions/-
+  signatures/tactic/-
+  signatures/ds-sig
+  signatures/Signatures-sig
+  analysis/-
+  ds2ds/explicate-arrow-types
+  lib-ds
+  
+signature constructors
+	NoTerm : Term // Used for terms that are mapped to 0-tuples in DS2V files
+  
+rules // Sort-to-type generation
+
+  sort-to-coq(|t_aliases):
+    SimpleSort(x) -> name
+    with
+   		name := <apply-alias(|t_aliases)> x
+
+  sort-to-coq(|t_aliases):
+    MapSort(x, y) -> Apply(Apply(maptype, x'), y')
+    with
+      maptype := <coq-map-type>;
+      x' := <sort-to-coq(|t_aliases)> x;
+      y' := <sort-to-coq(|t_aliases)> y
+
+  sort-to-coq(|t_aliases):
+    ListSort(x) -> Apply(listtype, x')
+    with
+      listtype := <coq-list-type>;
+      x' := <sort-to-coq(|t_aliases)> x
+
+rules // AST sort constructors to inductive types in Coq
+
+  // The (0|1) for this relation is used to indicate whether we are generating a new inductive type (1) or not (0). 
+  //   sort-decls-to-coq \subseteq List(SortName) x List(SortName) x (0|1)
+  //                               x List(Induc) x List(SortName) 
+  sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases):
+    ([], seen_sorts, w) -> ([], seen_sorts)
+  
+  sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases):
+    ([sort_name|sort_names], seen_sorts, w) -> (res, seen_sorts'')
+    where
+      // If the constructors for the current sort have already been generated, don't generate them again.
+      <elem> (sort_name, seen_sorts);
+      // Generate the constructors for the rest of the sort names
+      (res, seen_sorts'') := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases)> (sort_names, seen_sorts, w)
+      
+  sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases):
+    ([sort_name|sort_names], seen_sorts, w) -> (res, seen_sorts'')
+    where
+      constrctors := <hashtable-get(|sort_name)> sort_decl_map;
+      // Generate its constructors
+      coq_constrctors := <map(sort-constructor-to-coq(|sort_name, t_aliases))> constrctors;
+      deps := <hashtable-get(|sort_name)> sort_dep_map;
+      // Generate the constructors for the sorts on which the sort depends
+      (coq_deps, seen_sorts') := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases)> (deps, [sort_name|seen_sorts], 0);
+      // Only make a `| ` if the list of constructors is non-empty:
+      (([] := coq_constrctors; decls := None())
+        <+ decls := ListDeclBar(coq_constrctors));
+      // Generate the constructors for the rest of the sort names
+      (coq_inductives, seen_sorts'') := <sortdecls-to-coq(|sort_decl_map, sort_dep_map, t_aliases)> (sort_names, seen_sorts', w); 
+      // Wrap the result appropriately based on the (0|1) flag
+      (!w; ?0 < (res := <concat> [[Induc(sort_name, None(), Type(), decls)], coq_deps, coq_inductives])
+              + (res := [Inductive([Induc(sort_name, None(), Type(), decls)|coq_deps])|coq_inductives])
+      )
+
+  sort-constructor-to-coq(|sort_name, t_aliases):
+    (constructor_name, args) ->
+      ConsDecl(constructor_name,
+               None(),
+               OptType(c))
+    with
+      args' := <map(sort-to-coq(|t_aliases))> args;
+      c := <foldr(!sort_name, mk-arrow)> args'
+
+rules // Rule generation
+
+  // The (0|1) for this relation is used to indicate whether we are generating a new inductive type (1) or not (0). 
+  //   arrowdecls-to-coq \subseteq List(ArrowName) x List(ArrowName) x (0|1)
+  //                               x List(Induc) x List(ArrowName)
+  arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, t_aliases, c_aliases):
+    ([], seen_arrows, w) -> ([], seen_arrows)
+  
+  arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, t_aliases, c_aliases):
+    ([(arrow_name, sort)|arrow_names], seen_arrows, w) -> (res, seen_arrows'')
+    where
+      // If the constructors for the current arrow has already been generated, don't generate it again.
+      <elem> ((arrow_name, sort), seen_arrows); 
+      // Generate the constructors for the rest of the arrow names
+      (res, seen_arrows'') :=
+        <arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, t_aliases, c_aliases)> (arrow_names, seen_arrows, w)
+  
+  arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, t_aliases, c_aliases):
+    ([(arrow_name, sort)|arrow_names], seen_arrows, w) -> (res, seen_arrows'')
+    where
+      (ruls, sig) := <hashtable-get(|(arrow_name, sort))> arrow_decl_map;
+      // Generate its type signature
+      coq_type_sig := <arrowsig-to-coq(|t_aliases)> sig;
+      // Apply potential alias
+      (arrow_rename, _) := <apply-alias(|t_aliases)> (arrow_name, <get-sort-name> sort);
+      // Generate its constructors
+      coq_ruls := <map(rule-to-coq(|arrow_rename, t_aliases, c_aliases))> ruls;
+      deps := <hashtable-get(|(arrow_name, sort))> arrow_dep_map;
+      // Generate the constructors for the arrows on which the current arrow depends
+      (coq_deps, seen_arrows') :=
+        <arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, t_aliases, c_aliases)>
+          (deps, [(arrow_name, sort)|seen_arrows], 0);
+      // Only make a `| ` if the list of constructors is non-empty:
+      (([] := coq_ruls; decls := None())
+        <+ decls := ListDeclBar(coq_ruls));
+      // Generate the constructors for the rest of the sort names
+      (coq_inductives, seen_arrows'') :=
+        <arrowdecls-to-coq(|arrow_decl_map, arrow_dep_map, t_aliases, c_aliases)>
+          (arrow_names, seen_arrows', w);
+      // Wrap the result appropriately based on the (0|1) flag
+      (!w; ?0 < (res := <concat> [[Induc(arrow_rename, None(), coq_type_sig, decls)], coq_deps, coq_inductives])
+              + (res := [Inductive([Induc(arrow_rename, None(), coq_type_sig, decls)|coq_deps])|coq_inductives])
+      )
+
+  arrowsig-to-coq(|alias_map):
+    (ro_ents, from_sort, from_rw_ents, to_sort, to_rw_ents) -> typ
+    with
+      // Collect read-only entity types, if any
+      ((ArrowROs(ros) := ro_ents)
+        <+ ros := []);
+      // Collect readable read-write entity types, if any
+      ((ArrowRWs(from_rws) := from_rw_ents)
+        <+ from_rws := []); 
+      // Collect written read-write entity types, if any
+      ((ArrowRWs(to_rws) := to_rw_ents)
+        <+ to_rws := []);
+      pre_type := <concat> [ros, [from_sort], from_rws, [to_sort], to_rws];
+      typ := <map(sort-to-coq(|alias_map)); foldr(!Prop(), mk-arrow)> pre_type
+
+  rule-to-coq(|rel_name, t_aliases, c_aliases):
+    rule ->
+      ConsDecl(ident_name,
+               OptBinders(idents),
+               OptType(rl))
+    with
+      (conc, prems) := <get-premises-and-conclusion> rule;
+      // Rule name
+      name := <extract-name-from-formula> conc;
+      rname := <concat-strings> [rel_name, "_", name];
+      ident_name := <newname> rname;
+      // Variables
+      pvars := <extract-variables> prems;
+      svars := <extract-variables> conc;
+      vars := <concat> [pvars, svars];
+      idents := <map(mk-bind)> vars;
+      // Conclusion
+      c := <formula-to-coq(|t_aliases, c_aliases)> conc;
+      // Premises
+      ps := <map(formula-to-coq(|t_aliases, c_aliases))> prems;
+      rl := <foldr(!c, mk-arrowln)> ps // arrows nested to the right, with the conclusion as final element
+  
+  mk-arrowln:
+    (x, y) -> ArrowLn(x, y)
+
+  mk-arrow:
+    (x, y) -> Arrow(x, y)
+      
+  mk-bind:
+    s -> Bind(s)
+
+rules // Formulae generation
+
+  formula-to-coq(|t_aliases, c_aliases):
+    Formula(r) -> r'
+    with
+      r' := <formula-to-coq(|t_aliases, c_aliases)> r
+
+  formula-to-coq(|t_aliases, c_aliases):
+    Relation(r,
+             Source(sterm, rws),
+             arrow, 
+             Target(tterm, rws')) ->
+      tt'
+    with
+      // Apply potential alias
+      (arrow_rename, sort) := <apply-alias(|t_aliases)> (<get-arrow-name> arrow, <get-arrow-sort; get-sort-name> arrow);
+      // Coqify
+      res0 := <aux-ent-to-coq(|c_aliases)> (arrow_rename, r);
+      st := <term-to-coq(|c_aliases)> sterm;
+      // If source term is a 0-tuple (by DS2V mapping)
+      ( (<equal> (st, NoTerm()); tl := res0)
+      <+ tl := Apply(res0, st)
+      );
+      st' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws, tl);
+      tt := <term-to-coq(|c_aliases)> tterm;
+      tt' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws', Apply(st', tt))
+  
+  formula-to-coq(|t_aliases, c_aliases):
+  	Match(x, y) -> Eq(tx, ty)
+  	with
+  		tx := <term-to-coq(|c_aliases)> x;
+  		ty := <term-to-coq(|c_aliases)> y
+   
+  formula-to-coq(|t_aliases, c_aliases):
+  	NMatch(x, y) -> NotE(tx, ty)
+  	with
+  		tx := <term-to-coq(|c_aliases)> x;
+  		ty := <term-to-coq(|c_aliases)> y
+  
+rules // Auxiliary entity generation
+
+  aux-ent-to-coq(|c_aliases):
+    (trm, NoReads()) -> trm
+
+  aux-ent-to-coq(|c_aliases):
+    (trm, Reads(reads)) -> res
+    with
+      res := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (reads, trm)
+
+  labelcomp-pair-to-coq(|c_aliases):
+    (LabelComp(_, trm), rel_name) ->
+      (res, rel_name)
+    with
+      res := <term-to-coq(|c_aliases)> trm
+
+rules // Term generation
+
+  term-to-coq(|c_aliases):
+    Con(c, ts) -> app
+    with
+//      l := <length; int-to-string> ts;
+//      name := <concat-strings> [c, l];
+      arity := <length> ts;
+      if ctor_kind := <hashtable-get(|(c, arity))> c_aliases
+      then
+        if <equal> (ctor_kind, Tuple())
+        then
+        	if <equal> (arity, 0)
+        	then
+        		app := NoTerm()
+        	else
+          	app := <tuplify(|c_aliases)> ts
+          end
+        else
+          !ctor_kind; ?Name(name);
+          ts' := <map(term-to-coq(|c_aliases))> ts;
+          app := <foldl(mk-app-rev)> (ts', name)
+        end
+      else
+        name := c;
+        ts' := <map(term-to-coq(|c_aliases))> ts;
+        app := <foldl(mk-app-rev)> (ts', name) // application nested to the left
+      end
+
+  term-to-coq(|c_aliases):
+    Map(bindings) -> map
+    with
+      bindings' := <map(term-to-coq(|c_aliases))> bindings;
+      nil := <coq-map-nil>;
+      cons := <coq-map-cons>;
+      map := <foldr(!nil, \ (x, y) -> Apply(Apply(cons, x), y) \ )> bindings'
+  
+  term-to-coq(|c_aliases):
+    Bind(x, y) -> cons
+    with
+      x' := <term-to-coq(|c_aliases)> x;
+      y' := <term-to-coq(|c_aliases)> y;
+      cons := <coq-map-bind> (x', y')
+
+  term-to-coq(|c_aliases):
+    MapSelect(m, t) -> Apply(Apply(ml, m'), t')
+    with
+      ml := <coq-map-lookup>;
+      m' := <term-to-coq(|c_aliases)> m;
+      t' := <term-to-coq(|c_aliases)> t
+
+  term-to-coq(|c_aliases):
+    MapExtend(m1, m2) ->
+      Apply(Apply(Apply(mu, m2'), x'), y')
+    with
+      ((Map([Bind(x, y)]) := m1)
+        <+ <debug> "Please use map updates of the form {x |--> y, m}. Other kinds of updates are currently not supported."; fail);
+      mu := <coq-map-update>;
+      m2' := <term-to-coq(|c_aliases)> m2;
+      x' := <term-to-coq(|c_aliases)> x;
+      y' := <term-to-coq(|c_aliases)> y
+
+  tuplify(|c_aliases):
+    [x,y|xs] -> Tuple(<term-to-coq(|c_aliases)> x, tail)
+    with
+      tail := <map(term-to-coq(|c_aliases))> [y|xs]
+
+  tuplify(|c_aliases):
+    [x] -> <term-to-coq(|c_aliases)> x
+  
+  mk-app-rev:
+    (x, y) -> Apply(y, x)
+
+  term-to-coq(|c_aliases):
+    VarRef(x) -> x
+
+  term-to-coq(|c_aliases):
+    Var(x) -> x
+
+	term-to-coq(|c_aliases):
+		Fresh() -> Apply(<coq-fresh>, "tt") // Unit function application
+
+	term-to-coq(|c_aliases):
+		Int(n) -> n
+		
+	term-to-coq(|c_aliases):
+		Cast(x, _) -> t // FIXME: what is the semantics of casts?
+		with
+			t := <term-to-coq(|c_aliases)> x
+
+	term-to-coq(|c_aliases):
+		ListTail(xs, ys) -> t
+		with
+			t' := <term-to-coq(|c_aliases)> ys;
+      cons := <coq-map-cons>;
+      t := <foldr(!t', \ (x, y) -> Apply(Apply(cons, <term-to-coq(|c_aliases)> x), y) \ )> xs
+      
+  term-to-coq(|c_aliases):
+  	List(xs) -> t
+  	with
+      nil := <coq-map-nil>;
+      cons := <coq-map-cons>;
+      t := <foldr(!nil, \ (x, y) -> Apply(Apply(cons, x), y) \ )> xs
+
+rules // Imports 
+
+  import-to-coq:
+    CoqImport(name) -> Import(Require(), name)
+
+rules // Extracting the source constructor name
+
+  extract-name-from-formula:
+    Relation(_, Source(c, _), _, _) -> name
+    with 
+      name := <extract-name-from-term> c
+
+  extract-name-from-formula:
+    Relation(_, Source(c), _, _) -> name
+    with
+      name := <extract-name-from-term> c
+
+  extract-name-from-term:
+    Con(name, _) -> name
+
+  extract-name-from-term:
+    Var(x) -> x
+
+  extract-name-from-term:
+    VarRef(x) -> x
+
+  extract-name-from-term:
+    Cast(x, _) -> <extract-name-from-term> x      
+  
+  extract-name-from-term:
+  	As(_, x) -> <extract-name-from-term> x
+    
+rules // Extracting variables
+
+  // Lists
+  extract-variables:
+    [] -> []
+  
+  extract-variables:
+    [t|ts] -> zs
+    with
+      xs := <extract-variables> t;
+      ys := <extract-variables> ts;
+      zs := <conc> (xs, ys)
+  
+  // Formulas and relations
+  extract-variables:
+    Formula(r) -> xs
+    with
+      xs := <extract-variables> r
+      
+  extract-variables:
+    Relation(reads, Source(s, writes), arrow, Target(t, writes')) -> xs
+    with
+      xs0 := <extract-variables> reads;
+      xs1 := <extract-variables> s;
+      xs2 := <extract-variables> writes;
+      xs3 := <extract-variables> arrow;
+      xs4 := <extract-variables> t;
+      xs5 := <extract-variables> writes';
+      xs := <concat> [xs0, xs1, xs2, xs3, xs4, xs5]
+  
+  extract-variables:
+    Relation(reads, Source(s), arrow, Target(t)) -> xs
+    with
+      xs0 := <extract-variables> reads;
+      xs1 := <extract-variables> s;
+      xs3 := <extract-variables> arrow;
+      xs4 := <extract-variables> t;
+      xs := <concat> [xs0, xs1, xs3, xs4]
+  
+  extract-variables:
+  	Match(x, y) -> zs
+  	with
+  		xs := <extract-variables> x;
+  		ys := <extract-variables> y;
+  		zs := <conc> (xs, ys)
+  
+  extract-variables:
+  	NMatch(x, y) -> zs
+  	with
+  		xs := <extract-variables> x;
+  		ys := <extract-variables> y;
+  		zs := <conc> (xs, ys)
+  
+  extract-variables:
+  	Cast(x, y) -> xs // FIXME: what is the semantics of casts?
+  	with
+  		xs := <extract-variables> x
+  
+  extract-variables:
+  	Int(_) -> []
+  
+  extract-variables:
+  	Fresh() -> []
+  
+  // Reads
+  extract-variables:
+    Reads(rs) -> xs
+    with
+      xs := <extract-variables> rs
+      
+  extract-variables:
+    NoReads() -> []
+
+  // Arrows
+  extract-variables:
+    NamedDynamicEmitted(emitted, _, _) -> xs
+    with
+      xs := <extract-variables> emitted 
+  
+  extract-variables:
+    NamedDynamic(_) -> []
+  
+  // Terms
+  extract-variables:
+    Var(x) -> [x]
+  
+  extract-variables:
+    Con(_, ts) -> xs
+    with
+      xs := <extract-variables> ts
+
+  extract-variables:
+    VarRef(_) -> []
+  
+  // Labelled components
+  extract-variables:
+    LabelComp(_, c) -> xs
+    with
+      xs := <extract-variables> c
+  
+  // Maps
+  extract-variables:
+    Map(r) -> xs
+    with
+      xs := <extract-variables> r
+  
+  extract-variables:
+    MapSelect(t1, t2) -> xs
+    with
+      xs1 := <extract-variables> t1;
+      xs2 := <extract-variables> t2;
+      xs := <conc> (xs1, xs2)
+      
+  extract-variables:
+    MapExtend(m, t) -> xs
+    with
+      xs1 := <extract-variables> m;
+      xs2 := <extract-variables> t;
+      xs := <conc> (xs1, xs2)
+      
+  extract-variables:
+    Bind(x, y) -> zs
+    with
+      xs := <extract-variables> x;
+      ys := <extract-variables> y;
+      zs := <conc> (xs, ys)
+
+  extract-variables:
+  	ListTail(x, y) -> zs
+  	with
+  		xs := <map(extract-variables); concat> x;
+  		ys := <extract-variables> y;
+  		zs := <conc> (xs, ys)
+  		
+  extract-variables:
+  	List(x) -> ys
+  	with
+  		ys := <map(extract-variables); concat> x
+
+	extract-variables:
+		As(x, y) -> zs
+		where
+			xs := <extract-variables> x;
+			ys := <extract-variables> y;
+			zs := <conc> (xs, ys)
+  
+  extract-variables:
+  	CasePattern(x, ys) -> [z1|zs2]
+  	with
+  		z1 := <extract-variables> x;
+  		zs2 := <map(extract-variables); concat> ys

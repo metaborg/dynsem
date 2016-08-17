@@ -1,7 +1,6 @@
 module backend/interpreter/utils
 
 imports
-  stratego/metaborg
   lib-ds
   backend/utils/utils
 

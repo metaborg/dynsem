@@ -2,6 +2,7 @@ module analysis/analysis-rules
 
 imports
   signatures/ds-sig
+  signatures/Signatures-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/rename
@@ -39,7 +40,9 @@ rules /* store variables */
     Rules(with(prime-typaths); map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
 
   store-rule:
-    r@Rule(_, _, Relation(_, Source(lhs, _), arr@NamedDynamicEmitted(_, arrow-name), _)) -> r
+    r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
+    where
+      arrow-name := <get-arrow-name> arr
     where
       lhs-ty := <rulelhs-get-type> lhs
     where
@@ -394,8 +397,9 @@ rules
   	  <type-check-match(|lhs-ty)> rhs
 
   type-check-premise:
-  	f@Formula(Relation(Reads(r*), Source(lhs, sc*), NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) -> f
+  	f@Formula(Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs, tc*))) -> f
     where
+      arrow-name := <get-arrow-name> arr;
       lhs-ty := <type-check-build> lhs;
     	if arrow-def := <lookup-def(|Arrows())> arrow-name
     	then

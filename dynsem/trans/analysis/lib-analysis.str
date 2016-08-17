@@ -3,7 +3,7 @@ module analysis/lib-analysis
 imports
   signatures/-
   analysis/constructors
-  stratego/metaborg
+  import-utils
 
 rules
 	

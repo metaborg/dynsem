@@ -11,6 +11,5 @@ menus
   menu: "Semantics"
 
     action  : "Generate DynSem Core"   = module-to-core-editor (openeditor) (source)
-    action  : "Generate Coq"           = generate-coq (openeditor) (meta)
     action  : "Generate Interpreter"   = ds-to-interp-editor
     action  : "Explicate arrow types"  = explicate-arrow-types-editor (openeditor) (source) (meta)

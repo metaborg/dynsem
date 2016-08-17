@@ -2,9 +2,14 @@ module lib-ds
 
 imports
   signatures/-
-  ds
   
 // utilities for DynSem analysis
+
+signature
+  constructors
+    Var : LID -> Term
+    Var : ID -> Term
+
 
 rules // utils for deterministic variable name generation
   

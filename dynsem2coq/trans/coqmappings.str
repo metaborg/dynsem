@@ -1,0 +1,29 @@
+module coq-semantics/coqmappings
+
+imports
+
+  signatures/-
+
+rules // For maps
+  
+  coq-map-type = !"map"
+  coq-map-lookup = !"map_lookup"
+  coq-map-update = !"map_update"
+
+  coq-map-nil = !"nil"
+  coq-map-cons = !"cons"
+  coq-map-bind:
+    (x, y) -> Tuple(x, [y])
+	
+rules // Nonces -- assumed to map onto an axiomatization, for now
+	
+	coq-fresh = !"fresh"
+
+rules // For distinguishing types assumed to be built-in
+
+  // FIXME: these should be mapped onto sensible types in Coq
+  coq-predefined = !["String", "Int"]
+
+rules // For lists
+  
+  coq-list-type = !"list"

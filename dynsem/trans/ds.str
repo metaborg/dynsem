@@ -2,21 +2,24 @@ module ds
 
 imports
 	signatures/ds-sig
+	signatures/Common-sig
+	analysis/constructors
 
 imports
-	stratego/metaborg
 	pp
 	outline
 	ds2ds/refocus
 	ds2ds/strict
 	ds2ds/sugar
+	analysis/lib-analysis
+	import-utils
 
 imports
   lib-ds
 	analysis/main
 	ds2ds/core
 	backend/interpreter/main
-	
+
 signature
   constructors
     Var : LID -> Term

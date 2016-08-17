@@ -1,0 +1,62 @@
+module generation/unfold_cases
+
+imports
+  signatures/ds-sig
+  signatures/Signatures-sig
+  
+rules // Unfold case constructions
+
+	unfold-rule-cases:
+		(prems, Rule([], d, conc)) -> [Rule(prems, d, conc)]
+		
+  unfold-rule-cases:
+  	(prems0, Rule([Formula(f)|prems1], d, conc)) ->
+  		rs
+  	with
+  		rs :=
+  			<unfold-rule-cases> (<concat> [prems0, [Formula(f)]],
+  															Rule(prems1, d, conc))
+	
+	unfold-rule-cases:
+		(prems0, Rule([CaseMatch(VarRef(x), cs)|prems1], d, conc)) ->
+			rs
+		with
+  		case_patterns := <filter(\ CasePattern(x, _) -> x\)> cs;
+			rs := <unfold-case> (VarRef(x), cs, case_patterns, prems0,
+															 Rule(prems1, d, conc))
+	
+	unfold-case:
+		(x, [CasePattern(patt, prems2)|cs], case_patterns, prems0,
+		 Rule(prems1, d, conc)) ->
+			rs
+		with
+  		neg_case_patterns :=
+				<filter(?x);
+				 map(\ t -> Formula(NMatch(x, t)) \)> case_patterns;
+			prems0' := <concat> [prems0, [Formula(Match(x, patt))|neg_case_patterns]];
+			prems1' := <concat> [prems2, prems1];
+  		rs0 := <unfold-rule-cases> (prems0', Rule(prems1', d, conc));
+  		rs1 :=
+		  	<unfold-case> (x, cs, case_patterns, prems0,
+		  										 Rule(prems1, d, conc));
+			rs := <concat> [rs0, rs1]
+			
+	unfold-case:
+		(x, [CaseOtherwise(prems2)|cs], case_patterns, prems0,
+		 Rule(prems1, d, conc)) ->
+			rs
+		with
+  		neg_case_patterns :=
+				<map(\ t -> Formula(NMatch(x, t)) \)> case_patterns;
+			prems0' := <concat> [prems0, neg_case_patterns];
+			prems1' := <concat> [prems2, prems1];
+  		rs0 := <unfold-rule-cases> (prems0', Rule(prems1', d, conc));
+		  rs1 :=
+		  	<unfold-case> (x, cs, case_patterns, prems0,
+		  										 Rule(prems1, d, conc));
+			rs := <concat> [rs0, rs1]
+	
+	unfold-case:
+		(x, [], case_patterns, prems0,
+		 Rule(prems1, d, conc)) ->
+		 	[]

@@ -2,7 +2,6 @@ module ds2ds/resolve-includes
 
 imports
   signatures/-
-  stratego/metaborg
   ds
   
 imports

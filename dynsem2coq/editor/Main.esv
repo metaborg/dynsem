@@ -1,0 +1,13 @@
+module Main
+
+language
+
+	context : none
+
+  provider : target/metaborg/stratego.ctree
+
+menus
+
+	menu: "Coq"
+	
+		action  : "Generate"           = generate-coq (openeditor) (meta) (source)
