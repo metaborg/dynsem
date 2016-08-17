@@ -7,10 +7,10 @@ dependencies:
   source:
   - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
   - org.metaborg:org.metaborg.lang.coq:${metaborgVersion}
-  - org.metaborg:dynsem:${metaborgVersion}  
+  - org.metaborg:dynsem:${metaborgVersion}
 contributions:
 - name: ds
-  id: org.metaborg:dynsem:${metaborgVersion}  
+  id: org.metaborg:dynsem:${metaborgVersion}
 language:
   stratego:
     format: ctree
