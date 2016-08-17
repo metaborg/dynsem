@@ -31,9 +31,9 @@ rules
       ; copy-propagation-module
       ; defactorize-module
       ; explicate-arrow-types
-      ; add-timeouts(|ds2v_timeouts)
-      ; prettify-vars-module // FIXME: this shouldn't be necessary, but if we prettify vars after explicating NaBL2 annotations, some variables are occasionally unexplicated
+      ; prettify-vars-module // FIXME: this shouldn't be necessary, but if we prettify vars after explicating NaBL2 annotations, some variables occasionally remain unexplicated
       ; explicate-nabl2-annotations(|nabl2_sigs)
+      ; add-timeouts(|ds2v_timeouts)
       ; prettify-vars-module // Again...
       ; unfold-as-patterns
     |project-path)
