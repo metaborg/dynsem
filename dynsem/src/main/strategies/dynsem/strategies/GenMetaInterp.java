@@ -5,7 +5,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.lang.Context;
 
 import dynsem.trans.ds_to_interp_editor_0_0;
-import dynsem.trans.parse_file_0_0;
+import dynsem.trans.parse_ds_0_0;
 
 public class GenMetaInterp {
 
@@ -14,7 +14,7 @@ public class GenMetaInterp {
 		Context ctx = dynsem.trans.Main.init();
 		ITermFactory tf = ctx.getFactory();
 
-		IStrategoTerm ast = parse_file_0_0.instance.invoke(ctx,
+		IStrategoTerm ast = parse_ds_0_0.instance.invoke(ctx,
 				tf.makeString(args[0]));
 		IStrategoTerm position = tf.makeList();
 		IStrategoTerm path = tf.makeString(args[0]);
