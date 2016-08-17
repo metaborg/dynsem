@@ -22,7 +22,7 @@ signature
 		NoType : Nabl2Sorts
 		Name : String -> Nabl2Sorts
 
-rules
+rules // Explication of annotations in rules
 
 	// Signature of cgen_sig_map:
 	//
