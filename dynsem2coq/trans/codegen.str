@@ -190,12 +190,16 @@ rules // Formulae generation
       res0 := <aux-ent-to-coq(|c_aliases)> (arrow_rename, r);
       st := <term-to-coq(|c_aliases)> sterm;
       // If source term is a 0-tuple (by DS2V mapping)
-      ( (<equal> (st, NoTerm()); tl := res0)
-      <+ tl := Apply(res0, st)
+      ( (<equal> (st, NoTerm()); stl := res0)
+      <+ stl := Apply(res0, st)
       );
-      st' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws, tl);
+      st' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws, stl);
       tt := <term-to-coq(|c_aliases)> tterm;
-      tt' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws', Apply(st', tt))
+      // If source term is a 0-tuple (by DS2V mapping)
+      ( (<equal> (tt, NoTerm()); ttl := st')
+      <+ ttl := Apply(st', tt)
+      );
+      tt' := <foldl(labelcomp-pair-to-coq(|c_aliases); mk-app-rev)> (rws', ttl)
   
   formula-to-coq(|t_aliases, c_aliases):
   	Match(x, y) -> Eq(tx, ty)
