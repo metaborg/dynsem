@@ -7,4 +7,3 @@ Bundle-Vendor: org.metaborg
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.metaborg.spoofax.eclipse
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Eclipse-BundleShape: dir
