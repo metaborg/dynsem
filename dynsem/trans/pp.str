@@ -17,26 +17,26 @@ rules
                       , [t1__']
                       )
                     ]
-    with t1__' := <pp-one-Z(prettyprint-ID)> t1__
+    with t1__' := <pp-one-Z(prettyprint-ds-ID)> t1__
 
   is-Var =
     ?Var(_)
 
   pp-dynsem-Premise-string =
     parenthesize-ds
-    ; prettyprint-Premise
+    ; prettyprint-ds-Premise
     ; !V([], <id>)
     ; box2text-string(|120)
   
   pp-dynsem-string =
     parenthesize-ds
-    ; prettyprint-Module
+    ; prettyprint-ds-Module
     ; !V([], <id>)
     ; box2text-string(|80)
 
   pp-dynsem-Rule-string =
     parenthesize-ds
-    ; prettyprint-Rule
+    ; prettyprint-ds-Rule
     ; !V([], <id>)
     ; box2text-string(|120)
 
