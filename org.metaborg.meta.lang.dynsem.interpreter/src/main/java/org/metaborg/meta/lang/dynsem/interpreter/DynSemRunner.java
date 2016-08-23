@@ -30,6 +30,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import com.google.common.collect.ImmutableMap;
 
 public class DynSemRunner {
+	public static final String SPOOFAX_CONTEXT_PROP = "SpoofaxContext";
+
 	private static final ILogger logger = LoggerUtils.logger(DynSemRunner.class);
 
 	private final Spoofax S;
@@ -113,7 +115,7 @@ public class DynSemRunner {
         }
         try {
             Callable<RuleResult> runner = entryPoint.getCallable(program, in, out, err,
-            		ImmutableMap.<String,Object>of("SpoofaxContext", context));
+            		ImmutableMap.<String,Object>of(SPOOFAX_CONTEXT_PROP, context));
             RuleResult result = runner.call();
             return result.result;
         } catch (Exception e) {
