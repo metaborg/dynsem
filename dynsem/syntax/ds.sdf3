@@ -144,6 +144,8 @@ context-free syntax // terms
   List.List     = <[ <{Term ", "}*> ]>
   List.ListTail = <[ <{Term ", "}*> | <Term> ]>
   Term = List
+  
+  Term.Tuple    = <(<{Term ", "}+>)>
 
   Term.Fresh  = [fresh]
   Term.True   = [true]
