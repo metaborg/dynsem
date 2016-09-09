@@ -111,6 +111,12 @@
     </dependency>
     <dependency>
       <groupId>org.metaborg</groupId>
+      <artifactId>meta.lib.spoofax</artifactId>
+      <type>spoofax-language</type>
+      <version>${metaborg-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
       <artifactId>org.metaborg.meta.lib.analysis</artifactId>
       <type>spoofax-language</type>
       <version>${metaborg-version}</version>
