@@ -38,6 +38,9 @@ rules
     where
       ConstructorType(_, c-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, <length> c*) 
 
+  type-of:
+    Tuple(t*) -> TupleType(<map(type-of)> t*)
+
   type-of =
     type-check-build-helper
 

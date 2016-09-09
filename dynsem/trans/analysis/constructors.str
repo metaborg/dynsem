@@ -36,6 +36,7 @@ signature
     StringType: DynSemType
     MapType: DynSemType * DynSemType -> DynSemType
     ListType: DynSemType -> DynSemType
+    TupleType: List(DynSemType) -> DynSemType
     ConstructorType: List(DynSemType) * DynSemType -> DynSemType
     ArrowType: DynSemType * DynSemType -> DynSemType
     FunctionType: List(DynSemType) * DynSemType -> DynSemType

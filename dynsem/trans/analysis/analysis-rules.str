@@ -20,8 +20,8 @@ rules /* syntactic checks */
   post-analysis-check:
     r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> <fail>
     where
-      <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)) + ?Cast(Var(_), SimpleSort(_)) + ?Cast(Wld(), SimpleSort(_)))> lhs;
-      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern, a list cast pattern, a wildcard cast pattern, or a variable cast pattern])
+      <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)) + ?Cast(_, TupleSort(_)) + ?Cast(Var(_), SimpleSort(_)) + ?Cast(Wld(), SimpleSort(_)))> lhs;
+      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern, a list cast pattern, a tuple cast pattern, a wildcard cast pattern, or a variable cast pattern])
   
   post-analysis-check:
     dec@Var(v) -> <fail>
@@ -134,6 +134,7 @@ rules
     <+ type-check-build-var
     <+ type-check-build-con
     <+ type-check-build-list
+    <+ type-check-build-tuple
     <+ type-check-build-map
     <+ type-check-build-cast
     <+ type-check-build-nativefuncall
@@ -195,6 +196,9 @@ rules
     where
       t-ty := <type-check-build> t;
       h-ty := <type-check-build> h
+  
+  type-check-build-tuple:
+    Tuple(t*) -> TupleType(<map(type-check-build)> t*)
 
   type-check-build-map:
     Map([]) -> MapType(ALPHATYPE(), ALPHATYPE())
@@ -278,6 +282,7 @@ rules // type rules for match-sides
     <+ type-check-match-con(|in-ty)
     <+ type-check-match-cast(|in-ty)
     <+ type-check-match-list(|in-ty)
+    <+ type-check-match-tuple(|in-ty)
   
   type-err-match(|in-ty):
   	t -> in-ty
@@ -361,6 +366,16 @@ rules // type rules for match-sides
     	h-ty := <type-check-match(|in-el-ty)> h;
     	l-ty := <type-coerce-full(id)> (t-ty, ListType(h-ty))
 
+  type-check-match-tuple(|in-ty):
+    Tuple(t*) -> TupleType(<zip(type-check-match-wrap)> (f-ty*, t*))
+    where
+      TupleType(f-ty*) := in-ty
+
+  type-check-match-tuple(|in-ty):
+    Tuple(t*) -> TupleType(<map(type-check-match(|in-ty))> t*)
+    where
+      ALPHATYPE() := in-ty
+
 rules
   
   type-check-premise-top =
@@ -388,7 +403,7 @@ rules
     f@Formula(Match(lhs, rhs)) -> f
     where
       lhs-ty := <type-check-build> lhs;
-      rhs-ty := <type-check-match(|lhs-ty)> rhs 
+      rhs-ty := <type-check-match(|lhs-ty)> rhs
   
   type-check-premise:
   	f@Formula(NMatch(lhs, rhs)) -> f

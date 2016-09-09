@@ -96,6 +96,10 @@ rules
       h-ty := <gen-implicit-type-of(is-matching)> h;
       ListType(e-ty) := <gen-implicit-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|h)> (h-ty, e-ty)
+
+//  gen-implicit-info-term(is-matching):
+//    Tuple(t*) -> <fail>
+//      t-ty* := <map(gen-implicit-type-of(is-matching))> t*;
   
   gen-implicit-info-term(is-matching):
     MapSelect(map-t, key-t) -> <fail>

@@ -118,6 +118,9 @@ rules // type rewriting
   rw-type:
     MapSort(key-sort, val-sort) -> MapType(<rw-type> key-sort, <rw-type> val-sort)
   
+  rw-type:
+    TupleSort(s*) -> TupleType(<rw-type> s*)
+  
   rw-type = is-list; map(rw-type)
 
   derw-type = is-list; map(derw-type)
