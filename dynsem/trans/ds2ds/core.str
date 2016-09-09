@@ -3,6 +3,7 @@ module ds2ds/core
 imports
   analysis/resolve-includes
   analysis/lib-analysis
+  analysis/mark-references
   ds2ds/-
   backend/interpreter/utils
   pp
@@ -12,7 +13,7 @@ rules
   module-to-core-editor:
     (_, position, ast, path, project-path) -> (filename, result)
     with
-      result := <module-to-core(|path, project-path); sugar-all; pp-debug> ast;
+      result := <module-to-core(|path, project-path); unmark-vars; sugar-all;  pp-debug> ast;
       filename := <guarantee-extension(|"core.ds")> path
 
 strategies
