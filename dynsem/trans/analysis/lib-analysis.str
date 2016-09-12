@@ -129,6 +129,9 @@ rules // type rewriting
     ListType(ty) -> ListSort(<derw-type> ty)
   
   derw-type:
+    TupleType(ty*) -> TupleSort(<map(derw-type)> ty*)
+  
+  derw-type:
     MapType(kty, vty) -> MapSort(<derw-type> kty, <derw-type> vty)
 
   derw-type:
