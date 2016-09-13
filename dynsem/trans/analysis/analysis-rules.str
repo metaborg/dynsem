@@ -562,6 +562,11 @@ rules
     where
       k-ty := <coerce-s> (a-k-ty, t-k-ty);
       v-ty := <coerce-s> (a-v-ty, t-v-ty)
+      
+  type-coerce(coerce-s):
+    (TupleType(a-ty*), TupleType(t-ty*)) -> TupleType(ty*)
+    where
+      ty* := <zip(coerce-s)> (a-ty*, t-ty*)
 
 rules /* support for implicit conversions */
   

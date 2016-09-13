@@ -18,6 +18,8 @@ signature
     
     TypedList : List(Term) * String -> List
     TypedListTail : List(Term) * Term * String -> List
+
+    TypedTuple : Term * String -> Term
     
     Rule : List(Premise) * INFER * Relation * RuleKind * String -> Rule
     

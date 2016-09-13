@@ -54,7 +54,7 @@ context-free syntax // constructor declarations
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
-  Type.TupleSort = [([{Type ", "}+])]
+  Type.TupleSort = [([{Type " * "}+])]
   Type = [[MapType]]
     
   MapType.MapSort = [Map([Type],[Type])]

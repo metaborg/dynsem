@@ -24,7 +24,7 @@ rules
     ; desugar-rec-tco
     ; desugar-unquote-strings
     ; desugar-nmatch-neq
-    ; resugar-lists
+    ; resugar-lists-tuples
 
 rules
 
@@ -218,7 +218,7 @@ rules /* unquote string literals */
   
 rules /* resugar list construction */
 
-  resugar-lists = innermost(resugar-list); innermost(add-typeanno-to-list)
+  resugar-lists-tuples = innermost(resugar-list); innermost(add-typeanno-to-list-tuples)
 
   resugar-list:
     Cast(Wld(), _) -> Wld()
@@ -232,29 +232,37 @@ rules /* resugar list construction */
   resugar-list:
     ListTail(h*, Cast(List([]), _)) -> List(h*)
   
-  add-typeanno-to-list:
+  add-typeanno-to-list-tuples:
     l@List(elems) -> TypedList(elems, list-class)
     where
       list-sort := <type-of; derw-type> l;
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
 
-  add-typeanno-to-list:
+  add-typeanno-to-list-tuples:
     l@ListTail(elems, tail) -> TypedListTail(elems, tail, list-class)
     where
       list-sort := <type-of; derw-type> l;
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort 
   
-  add-typeanno-to-list:
+  add-typeanno-to-list-tuples:
     Cast(List([]), list-sort) -> TypedList([], <ds-to-interp-terms-types-name; qualify-term-class> list-sort)
   
-  add-typeanno-to-list:
+  add-typeanno-to-list-tuples:
     Formula(Match(List([]), rhs)) -> Formula(Match(TypedList([], list-class), rhs))
     where
       list-sort := <type-of; derw-type> rhs;
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
   
-  add-typeanno-to-list:
+  add-typeanno-to-list-tuples:
     LabelComp(list-sort, List([])) -> LabelComp(list-sort, TypedList([], list-class))
     where
-      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort 
+      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+  
+  add-typeanno-to-list-tuples:
+    tup@Tuple(t*) -> TypedTuple(t*, tuple-class)
+    where
+      tuple-sort := <type-of; derw-type> tup; 
+      tuple-class := <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort
+
+
 

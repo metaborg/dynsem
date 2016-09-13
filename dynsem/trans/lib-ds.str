@@ -25,6 +25,7 @@ rules // projections for sorts
     + ?SimpleSort(<id>)
     + ?ListSort(s); !$[L_[<get-sort-name> s]]
     + ?MapSort(k-s, v-s); !$[L_[<get-sort-name> k-s]_[<get-sort-name> v-s]]
+    + ?TupleSort(s*); !$[T_[<map(get-sort-name); separate-by(|"_"); concat-strings> s*]]
   
 //  get-listsort-elementname = ?ListSort(<get-sort-name>)
 

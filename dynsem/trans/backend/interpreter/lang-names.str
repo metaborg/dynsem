@@ -49,6 +49,9 @@ rules
   
   ds-to-interp-terms-types-name:
     ListSort(s) -> $[List_[<ds-to-interp-terms-types-name; ds-utils-java-escape-id; string-replace(|".","_")> s]]
+  
+  ds-to-interp-terms-types-name:
+    TupleSort(s*) -> $[Tuple_[<map(ds-to-interp-terms-types-name; ds-utils-java-escape-id; string-replace(|".","_")); separate-by(|"_"); concat-strings> s*]]
 
   ds-box-java-type = try(internal-ds-box-java-type)
   
