@@ -261,11 +261,8 @@ rules /* resugar list construction */
   add-typeanno-to-list-tuples:
     tup@Tuple(t*) -> TypedTuple(t*, tuple-class)
     where
-      debug(!"ty0");
-      tuple-sort := <debug(!"ty1"); type-of; debug(!"ty2"); derw-type; debug(!"ty3")> tup; 
-      debug(!"ty4");
+      tuple-sort := <type-of; derw-type> tup; 
       tuple-class := <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort
-      ;debug(!"ty5")
 
 
 

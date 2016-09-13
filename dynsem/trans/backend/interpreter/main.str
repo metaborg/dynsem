@@ -20,15 +20,10 @@ rules
       <ds-to-interp(|path, project-path, local-project-path)> ast
       
   ds-to-interp(|path, project-path, local-project-path) =
-    debug(!0);
     ds-to-interp-init-options(|path, local-project-path);
-    debug(!1);
     ds-to-interp-table;
-    debug(!2);
     ds-to-interp-specification(|path, project-path);
-    debug(!3);
     ds-to-interp-terms(|path, local-project-path)
-    ;debug(!4)
   
   ds-to-interp-specification(|path, project-path) =
     module-to-core(|path, project-path);
