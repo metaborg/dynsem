@@ -792,12 +792,14 @@ rules /* term building */
       x_expectmethod := $[expect[x_sortclass]]
 
   ds-to-interp-terms-building:
-    sig* -> [con-build*, list-build*]
+    sig* -> [con-build*, list-build*, tuple-build*]
     where
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
+      tuple-dec* := <get-languagetuple-usage-in-signatures> sig*;
       con-build* := <map(ds-to-interp-terms-building-con)> con-dec*;
-      list-build* := <map(ds-to-interp-terms-building-list)> list-dec*
+      list-build* := <map(ds-to-interp-terms-building-list)> list-dec*;
+      tuple-build* := <map(ds-to-interp-terms-building-tuple)> tuple-dec*
 
   ds-to-interp-terms-building-con:
     dec@ConsDecl(_, kid*, s, _) ->
@@ -839,6 +841,41 @@ rules /* term building */
       else
         e_term := e |[ new x_termclass(e0*) ]|
       end
+
+  ds-to-interp-terms-building-tuple:
+    dec@TupleSort(s*) ->
+      compilation-unit |[
+        package ~x:<get-opt> BuildPkg();
+      
+        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.source.SourceSection;
+
+        @NodeChildren({ ~child* })
+        public abstract class x_class extends TermBuild {
+
+          public x_class(SourceSection source) {
+            super(source);
+          }
+          
+          @Specialization
+          public x_termclass doTyped(param0*) {
+            return e_term;
+          }
+          
+        }
+      ]|
+    where
+      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
+      child* := <ds-to-interp-terms-building-childannos> s*;
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      param0* := <ds-to-interp-terms-building-params> s*;
+      e0* := <ds-to-interp-terms-building-exprs> s*;
+      e_term := e |[ new x_termclass(e0*) ]|
 
   ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
   
@@ -914,12 +951,14 @@ rules /* term building */
 rules /* term matching */
 
   ds-to-interp-terms-matching:
-    sig* -> [con-match*, list-match*]
+    sig* -> [con-match*, list-match*, tuple-match*]
     where
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
+      tuple-dec* := <get-languagetuple-usage-in-signatures> sig*;
       con-match* := <map(ds-to-interp-terms-matching-con)> con-dec*;
-      list-match* := <map(ds-to-interp-terms-matching-list)> list-dec*
+      list-match* := <map(ds-to-interp-terms-matching-list)> list-dec*;
+      tuple-match* := <map(ds-to-interp-terms-matching-tuple)> tuple-dec*
 
   ds-to-interp-terms-matching-con:
     dec@ConsDecl(_, kid*, _, _) -> 
@@ -968,6 +1007,54 @@ rules /* term matching */
       param0* := <ds-to-interp-terms-matching-initparams> kid*;
       bstm0* := <ds-to-interp-terms-matching-finits> kid*;
       bstm1* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> kid*)
+      
+  ds-to-interp-terms-matching-tuple:
+    dec@TupleSort(s*) -> 
+      compilation-unit |[
+        package ~x:<get-opt> MatchPkg();
+        
+        import ~x:<get-opt> TermPkg().x_termclass;
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
+        
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.dsl.Fallback;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_matcherclass extends MatchPattern {
+        
+          ~fdec*
+        
+          public x_matcherclass(SourceSection source, param0*) {
+            super(source);
+            bstm0*
+          }
+        
+          @Specialization
+          public void doTyped(VirtualFrame frame, x_termclass term) {
+            bstm1*
+          }
+
+          @Fallback
+          public void doGeneric(VirtualFrame frame, Object term) {
+            if (term instanceof x_termclass) {
+              doTyped(frame, (x_termclass) term);
+            } else {
+              throw PatternMatchFailure.INSTANCE;
+            }
+          }
+          
+        }
+      ]|
+    where
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_matcherclass := $[[x_termclass]MatchPattern];
+      fdec* := <ds-to-interp-terms-matching-fdecs> s*; 
+      param0* := <ds-to-interp-terms-matching-initparams> s*;
+      bstm0* := <ds-to-interp-terms-matching-finits> s*;
+      bstm1* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> s*)
       
   ds-to-interp-terms-matching-initparams = map-with-index(ds-to-interp-terms-matching-initparam)
   
