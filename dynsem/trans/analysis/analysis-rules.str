@@ -18,10 +18,16 @@ rules /* syntactic checks */
   post-analysis-checks = alltd(post-analysis-check)
   
   post-analysis-check:
-    r@Rule(_, _, Relation(_, Source(lhs, _), _, _)) -> <fail>
+    r@Rule(_, _, Relation(_, src@Source(lhs, _), _, _)) -> <fail>
     where
-      <not(?Con(_, _) + ?As(_, Con(_, _)) + ?Cast(_, ListSort(_)) + ?Cast(_, TupleSort(_)) + ?Cast(Var(_), SimpleSort(_)) + ?Cast(Wld(), SimpleSort(_)))> lhs;
-      add-msg(|Warning(), lhs, $[Left hand side of reduction must be a constructor pattern, a list cast pattern, a tuple cast pattern, a wildcard cast pattern, or a variable cast pattern])
+      <not(is-valid-lhs)> lhs;
+      add-msg(|Warning(), src, $[Invalid rule LHS pattern])
+  
+  is-valid-lhs =
+    ?Con(_, _)
+    + ?Cast(_, _)
+    + ?As(_, <is-valid-lhs>)
+    + ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False()
   
   post-analysis-check:
     dec@Var(v) -> <fail>
@@ -70,6 +76,21 @@ rules /* store variables */
 
   rulelhs-get-type:
     As(_, t) -> <rulelhs-get-type> t
+  
+  rulelhs-get-type:
+    Int(_) -> IntType()
+  
+  rulelhs-get-type:
+    Real(_) -> RealType()
+  
+  rulelhs-get-type:
+    String(_) -> StringType()
+  
+  rulelhs-get-type:
+    True() -> BoolType()
+  
+  rulelhs-get-type:
+    False() -> BoolType()
 
   store-rule:
     (ArrowType(ma-ty, bu-ty), r@Rule(p*, _, Relation(Reads(r*), Source(lhs, sc*), _, Target(rhs, tc*)))) -> r
