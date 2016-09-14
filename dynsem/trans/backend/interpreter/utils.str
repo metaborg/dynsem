@@ -7,7 +7,7 @@ imports
 signature
   sorts
     DSOpt
-  
+ 
   constructors
     FilePath : DSOpt
     ProjectPath : DSOpt
@@ -48,99 +48,75 @@ rules
     prop -> <DSOpt> prop
 
   ds-to-interp-init-options(|path, project-path) =
-    where(
+  with(
+    <ds-to-interp-get-options> (path, project-path);
+    filter(\ (opt,val) -> <rules(DSOpt:+ opt -> val)> where not("false" := val) \)
+  )
+ 
+  ds-to-interp-get-options:
+    (path, project-path) -> [
+      (FilePath(), path),
+      (ProjectPath(), project-path),
+      (LangName(), langname),
+      (TableSource(), tbl-source),
+      (LangVersion(), lang-ver),
+      (MimeType(), lang-mime),
+      (StartSymbol(), start-symb),
+      (StartConstrName(), initcon-name),
+      (StartConstrArity(), initcon-arity),
+      (GenProject(), genproject-path),
+      (CreateProject(), do-create-genproject),
+      (CleanProject(), do-clean-genproject),
+      (EnableBacktracking(), do-enable-backtracking),
+      (EnableSafeComponents(), do-safe-components),
+      (EnableTermCaching(), do-term-caching),
+      (MavenGroupId(), genproject-groupid),
+      (MavenArtifactId(), genproject-artifactid),
+      (JavaGenDirRel(), java-gendir-rel),
+      (JavaGenDirAbs(), java-gendir-abs),
+      (TopPkg(), gen-pkg),
+      (TermPkg(), terms-pkg),
+      (BuildPkg(), tbuild-pkg),
+      (MatchPkg(), tmatch-pkg),
+      (NativePkg(), native-pkg),
+      (RuleRegistry(), rulereg-class),
+      (PreProcessor(), preprocess-class),
+      (TargetSpecRel(), target-specfile-rel),
+      (TargetSpecAbs(), target-specfile-abs),
+      (TargetTableRel(), target-tblfile-rel),
+      (TargetTableAbs(), target-tblfile-abs)
+    ]
+    where
       prop-file := $[[project-path]/dynsem.properties];
-      rules(DSOpt:+ FilePath() -> path);
-      rules(DSOpt:+ ProjectPath() -> project-path);
-      
       langname := <ds-to-interp-read-prop-required(|"source.langname"); ds-utils-java-escape-id> prop-file;
-      rules(DSOpt:+ LangName() -> langname);
-      
       tbl-source := <read-property(|"source.table", "target/metaborg/sdf.tbl"); make-absolute-path(|project-path)> prop-file;
-      rules(DSOpt:+ TableSource() -> tbl-source);
-      
       lang-ver := <ds-to-interp-read-prop-required(|"source.version")> prop-file;
-      rules(DSOpt:+ LangVersion() -> lang-ver);
-    
       lang-mime := <read-property(|"source.mimetype", $[application/x-[langname]])> prop-file;
-      rules(DSOpt:+ MimeType() -> lang-mime);
-      
       start-symb := <ds-to-interp-read-prop-required(|"source.startsymbol")> prop-file;
-      rules(DSOpt:+ StartSymbol() -> start-symb);
-      
       initcon-name := <ds-to-interp-read-prop-required(|"source.initconstructor.name")> prop-file;
-      rules(DSOpt:+ StartConstrName() -> initcon-name);
-  
       initcon-arity := <ds-to-interp-read-prop-required(|"source.initconstructor.arity")> prop-file;
-      rules(DSOpt:+ StartConstrArity() -> initcon-arity);
-      
       genproject-path := <ds-to-interp-read-prop-required(|"project.path"); make-absolute-path(|project-path)> prop-file;
-      rules(DSOpt:+ GenProject() -> genproject-path);
-      
       do-create-genproject := <read-property(|"project.create", "false")> prop-file;
-      rules(DSOpt:+ CreateProject() -> <?"true"> do-create-genproject);
-      
       do-clean-genproject := <read-property(|"project.clean", "false")> prop-file;
-      rules(DSOpt:+ CleanProject() -> <?"true"> do-clean-genproject);
-  
       do-enable-backtracking := <read-property(|"interpreter.fullbacktracking", "false")> prop-file;
-      rules(DSOpt:+ EnableBacktracking() -> <?"true"> do-enable-backtracking);
-      
       do-safe-components := <read-property(|"interpreter.safecomponents", "false")> prop-file;
-      rules(DSOpt:+ EnableSafeComponents() -> <?"true"> do-safe-components);
-
       do-term-caching := <read-property(|"interpreter.termcaching", "false")> prop-file;
-      rules(DSOpt:+ EnableTermCaching() -> <?"true"> do-term-caching);
-  
       genproject-groupid := <ds-to-interp-read-prop-required(|"project.groupid")> prop-file;
       genproject-artifactid := <ds-to-interp-read-prop-required(|"project.artifactid")> prop-file;
-      rules(
-        DSOpt:+ MavenGroupId() -> genproject-groupid
-        DSOpt:+ MavenArtifactId() -> genproject-artifactid
-      );
-  
       java-gendir-rel := <read-property(|"project.javapath", "src/main/java")> prop-file;
       java-gendir-abs := $[[genproject-path]/[java-gendir-rel]];
-      rules(
-        DSOpt:+ JavaGenDirRel() -> java-gendir-rel
-        DSOpt:+ JavaGenDirAbs() -> java-gendir-abs
-      );
-      
       gen-pkg := <read-property(|"project.javapackage", $[[<ds-utils-java-escape-id> genproject-groupid].[<ds-utils-java-escape-id> genproject-artifactid].generated])> prop-file;
       terms-pkg := $[[gen-pkg].terms];
       tbuild-pkg := $[[terms-pkg].build];
       tmatch-pkg := $[[terms-pkg].match];
-      rules(
-        DSOpt:+ TopPkg() -> gen-pkg
-        DSOpt:+ TermPkg() -> terms-pkg
-        DSOpt:+ BuildPkg() -> tbuild-pkg
-        DSOpt:+ MatchPkg() -> tmatch-pkg
-      );
-  
       native-pkg := <read-property(|"project.nativepackage", $[[langname].interpreter.natives])> prop-file;
-      rules(DSOpt:+ NativePkg() -> native-pkg);
-  
       rulereg-class := <read-property(|"project.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")> prop-file;
-      rules(DSOpt:+ RuleRegistry() -> rulereg-class);
-      
       preprocess-class := <read-property(|"project.preprocessor", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")> prop-file;
-      rules(DSOpt:+ PreProcessor() -> preprocess-class);
-  
       target-specfile-rel := <read-property(|"project.specpath", "src/main/resources/specification.aterm")> prop-file;
       target-specfile-abs := $[[genproject-path]/[target-specfile-rel]];
-      rules(
-        DSOpt:+ TargetSpecRel() -> target-specfile-rel
-        DSOpt:+ TargetSpecAbs() -> target-specfile-abs
-      );
-      
       target-tblfile-rel := <read-property(|"project.tablepath", "src/main/resources/parsetable.tbl")> prop-file;
-      target-tblfile-abs := $[[genproject-path]/[target-tblfile-rel]];
-      rules(
-        DSOpt:+ TargetTableRel() -> target-tblfile-rel
-        DSOpt:+ TargetTableAbs() -> target-tblfile-abs
-      )
-    )
-    
+      target-tblfile-abs := $[[genproject-path]/[target-tblfile-rel]]
+
   ds-to-interp-read-prop-required(|prop) =
     read-property(|prop, "N/A"); not(?"N/A" + ?"")
     <+ with(fail|$[Cannot read [prop] property])
