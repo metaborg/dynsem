@@ -374,6 +374,7 @@ rules /* Sort & Constructor classes */
         package ~x:<get-opt> TermPkg();
 
         import java.util.Iterator;
+        import org.apache.commons.lang3.builder.HashCodeBuilder;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
         import com.github.krukow.clj_lang.IPersistentStack;
@@ -474,6 +475,12 @@ rules /* Sort & Constructor classes */
           }
           
           @Override
+          @TruffleBoundary
+          public int hashCode() {
+            return new HashCodeBuilder().append(backend).toHashCode();
+          }
+          
+          @Override
           @SuppressWarnings("unchecked")
           @TruffleBoundary
           public Iterator<x_elemclass> iterator() {
@@ -550,6 +557,9 @@ rules /* Sort & Constructor classes */
 
   ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
     l@ListSort(_) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, l)
+  
+  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+    t@TupleSort(_) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, t)
 
   ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
     m@MapSort(_, _) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, m)
