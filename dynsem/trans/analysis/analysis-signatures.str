@@ -28,6 +28,7 @@ rules /* store signatures */
     ; <store-def(|Types())> RealType() => def-real; <store-prop(|SortKind(), def-real)> SystemSort()
     ; <store-def(|Types())> BoolType() => def-bool; <store-prop(|SortKind(), def-bool)> SystemSort()
     ; <store-def(|Types())> StringType() => def-str; <store-prop(|SortKind(), def-str)> SystemSort()
+    ; <store-def(|Types())> ASTType() => def-ast; <store-prop(|SortKind(), def-ast)> SystemSort()
 
   store-sorts = Sorts(map(store-sort))
 

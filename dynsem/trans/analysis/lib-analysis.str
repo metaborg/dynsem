@@ -151,6 +151,8 @@ rules // type rewriting
   
   derw-type: StringType() -> <derw-type> "String"
   
+  derw-type: ASTType() -> <derw-type> "AST"
+  
   id-to-type = id-to-builtin-type <+ is-string
 
   id-to-builtin-type:
@@ -170,6 +172,9 @@ rules // type rewriting
   
   id-to-builtin-type:
     "String" -> StringType()
+  
+  id-to-builtin-type:
+    "AST" -> ASTType()
   
   pp-type = pp-type-builtin <+ is-string <+ is-list; map(pp-type); separate-by(|", "); concat-strings
  

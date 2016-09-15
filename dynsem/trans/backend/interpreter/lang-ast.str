@@ -244,7 +244,7 @@ rules /* Sort & Constructor classes */
           }
         ]|
       end
-  
+
   ds-to-interp-terms-tupledecl:
     srt@TupleSort(c-ty*) ->
       compilation-unit |[
@@ -622,6 +622,9 @@ rules /* Sort & Constructor classes */
       ]|
     where
       x_tmp1 := $[_[<newname>]]
+  
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, SimpleSort("AST")) -> e |[ null ]|
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:

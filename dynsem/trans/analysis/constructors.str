@@ -28,6 +28,7 @@ signature
     Definition
   
   constructors
+    ASTType: DynSemType
     IntType: DynSemType
     LongType: DynSemType
     FloatType: DynSemType

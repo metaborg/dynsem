@@ -523,6 +523,7 @@ rules
   type-coerce-full(is-matching) =
     type-coerce-base
     <+ type-coerce(type-coerce-full(is-matching))
+    <+ type-coerce-ast-lift(is-matching, type-coerce-full(is-matching))
     <+ type-coerce-implicit-wrap(is-matching, type-coerce-full(is-matching))
     
   type-coerce-direct(is-matching) =
@@ -586,6 +587,13 @@ rules
     (TupleType(a-ty*), TupleType(t-ty*)) -> TupleType(ty*)
     where
       ty* := <zip(coerce-s)> (a-ty*, t-ty*)
+
+rules /* support for coercion to generic AST type */
+
+  type-coerce-ast-lift(is-matching, coerce-s):
+    (ty-from, ASTType()) -> ASTType()
+    where
+      LanguageSort() := <lookup-def(|Types()); lookup-prop(|SortKind())> ty-from
 
 rules /* support for implicit conversions */
   
