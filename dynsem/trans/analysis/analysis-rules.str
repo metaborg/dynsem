@@ -48,10 +48,8 @@ rules /* store variables */
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
     where
-      arrow-name := <get-arrow-name> arr
-    where
-      lhs-ty := <rulelhs-get-type> lhs
-    where
+      arrow-name := <get-arrow-name> arr;
+      lhs-ty := <rulelhs-get-type> lhs;
       if arrow-def := <lookup-def(|Arrows())> arrow-name
       then
 	      arrow-ty* := <lookup-props(|Type())> arrow-def;
@@ -289,8 +287,8 @@ rules
 
 rules // type rules for match-sides
   
-  type-check-match(|in-ty) =
-    type-check-match-helper(|in-ty)
+  type-check-match(|in-ty) = 
+    type-check-match-helper(|<try(is-alias; get-alias-base)> in-ty)
     <+ type-err-match(|in-ty)
   
   type-check-match-helper(|in-ty) =
@@ -388,7 +386,7 @@ rules // type rules for match-sides
     	l-ty := <type-coerce-full(id)> (t-ty, ListType(h-ty))
 
   type-check-match-tuple(|in-ty):
-    Tuple(t*) -> TupleType(<zip(type-check-match-wrap)> (f-ty*, t*))
+    ty@Tuple(t*) -> TupleType(<zip(type-check-match-wrap)> (f-ty*, t*))
     where
       TupleType(f-ty*) := in-ty
 
