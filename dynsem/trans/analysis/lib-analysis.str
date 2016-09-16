@@ -41,14 +41,18 @@ rules // renaming
 
 rules // storing and looking up
   
-  def-get-name = Snd
+  def-get-name = ?(_, <id>, _)
   
-  def-get-namespace = Fst
+  def-get-namespace = ?(<id>, _, _)
+  
+  new-def:
+    (namespace, name) -> (namespace, name, <newname> name)
   
   store-def(|namespace):
-    name -> (namespace, name)
+    name -> defi
     where
-      rules(Declared:+ (namespace, name) -> (namespace, name))
+      defi := <new-def> (namespace, name);
+      rules(Declared:+ (namespace, name) -> defi)
   
   lookup-def(|namespace):
     name -> <Declared> (namespace, name)
