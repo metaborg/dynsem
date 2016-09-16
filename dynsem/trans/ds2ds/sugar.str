@@ -23,13 +23,13 @@ rules // desugaring
   desugar-fundecl :
   	FunDecl(x, ts, t) -> ConsDecl(x, ts, t_source, Annos([MetafunAnno()]))
   	where 
-  		t_name := $[[x]__Arrow];
+  		t_name := $[[x]__Meta];
   	  t_source := SimpleSort(t_name)
 
   extract-arrow :
   	FunDecl(x, ts, t) -> (DefaultArrowDecl(NoArrowROs(), t_source, NoArrowRWs(), t, NoArrowRWs()), SortDecl(t_name))
   	where 
-  		t_name := $[[x]__Arrow];
+  		t_name := $[[x]__Meta];
   	  t_source := SimpleSort(t_name)
   	  	
   desugar-top = 
