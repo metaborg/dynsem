@@ -9,12 +9,12 @@ rules
   ds-to-interp-gen-project =
     if get-opt(|CreateProject()) then
       project := <get-opt> GenProject()
-      ; <file-exists + mkdir(id)> project
+      ; <file-exists + mkdir> project
       ; ds-to-interp-gen-project-launchconfig
       ; ds-to-interp-gen-project-pom
       ; java-gendir := <get-opt> JavaGenDirAbs()
-      ; <file-exists + mkdir(id)> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> TopPkg()]
-      ; <file-exists + mkdir(id)> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> NativePkg()]
+      ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> TopPkg()]
+      ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> NativePkg()]
     end
 
   ds-to-interp-gen-project-pom =

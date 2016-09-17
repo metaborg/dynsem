@@ -1,6 +1,7 @@
 module backend/interpreter/utils
 
 imports
+  libspoofax/resource/path
   lib-ds
   backend/utils/utils
 
@@ -87,15 +88,16 @@ rules
       (TargetTableAbs(), target-tblfile-abs)
     ]
     where
+      local-project-path := <local-path> project-path;
       prop-file := $[[project-path]/dynsem.properties];
       langname := <ds-to-interp-read-prop-required(|"source.langname"); ds-utils-java-escape-id> prop-file;
-      tbl-source := <read-property(|"source.table", "target/metaborg/sdf.tbl"); make-absolute-path(|project-path)> prop-file;
+      tbl-source := <read-property(|"source.table", "target/metaborg/sdf.tbl"); absolute-path(|local-project-path)> prop-file;
       lang-ver := <ds-to-interp-read-prop-required(|"source.version")> prop-file;
       lang-mime := <read-property(|"source.mimetype", $[application/x-[langname]])> prop-file;
       start-symb := <ds-to-interp-read-prop-required(|"source.startsymbol")> prop-file;
       initcon-name := <ds-to-interp-read-prop-required(|"source.initconstructor.name")> prop-file;
       initcon-arity := <ds-to-interp-read-prop-required(|"source.initconstructor.arity")> prop-file;
-      genproject-path := <ds-to-interp-read-prop-required(|"project.path"); make-absolute-path(|project-path)> prop-file;
+      genproject-path := <ds-to-interp-read-prop-required(|"project.path"); absolute-path(|local-project-path)> prop-file;
       do-create-genproject := <read-property(|"project.create", "false")> prop-file;
       do-clean-genproject := <read-property(|"project.clean", "false")> prop-file;
       do-enable-backtracking := <read-property(|"interpreter.fullbacktracking", "false")> prop-file;
@@ -122,4 +124,3 @@ rules
     <+ with(fail|$[Cannot read [prop] property])
 
   ds-to-interp-write-classes(|package) = ds-utils-java-emit-classes(id | package, <get-opt> JavaGenDirAbs())
-  
