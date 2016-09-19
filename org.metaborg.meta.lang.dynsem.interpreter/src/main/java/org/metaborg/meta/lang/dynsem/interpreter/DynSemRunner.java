@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgConstants;
 import org.metaborg.core.MetaborgException;
+import org.metaborg.core.MetaborgRuntimeException;
 import org.metaborg.core.context.IContext;
 import org.metaborg.core.language.ILanguage;
 import org.metaborg.core.language.ILanguageDiscoveryRequest;
@@ -31,6 +32,8 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import com.google.common.collect.ImmutableMap;
 
 public class DynSemRunner {
+    public static final String SPOOFAXPATH = "SPOOFAXPATH";
+
     public static final String SPOOFAX_CONTEXT_PROP = "SpoofaxContext";
     public static final String TYPE_METADATA = "TypeMetadata";
     public static final String PARAMS_METADATA = "PARAMSMetadata";
@@ -48,20 +51,37 @@ public class DynSemRunner {
         this.entryPoint = interpreter;
     }
  
-    private ILanguageImpl loadLanguage(String languageName)
-            throws MetaborgException {
-        String spoofaxPath = System.getenv("SPOOFAXPATH");
+    private ILanguageImpl loadLanguage(String languageName) throws MetaborgException {
+        String spoofaxPath = System.getenv(SPOOFAXPATH);
         if(spoofaxPath != null) {
             for(String spoofaxDirName : spoofaxPath.split(":")) {
                 if(spoofaxDirName.isEmpty()) {
                     continue;
                 }
-                FileObject spoofaxDir = S.resourceService.resolve(spoofaxDirName);
-                for(ILanguageDiscoveryRequest req : S.languageDiscoveryService.request(spoofaxDir)) {
-                    try {
-                        S.languageDiscoveryService.discover(req);
-                    } catch(MetaborgException e) {
-                        logger.warn("Failed to load language from {}.", spoofaxDir);
+                FileObject spoofaxDir;
+                try {
+                    spoofaxDir = S.resourceService.resolve(spoofaxDirName);
+                } catch (MetaborgRuntimeException ex) {
+                    String message = logger.format("Invalid path {} in "+SPOOFAXPATH, spoofaxDirName);
+                    logger.warn(message,ex);
+                    continue;
+                }
+                Iterable<ILanguageDiscoveryRequest> reqs;
+                try {
+                    reqs = S.languageDiscoveryService.request(spoofaxDir);
+                } catch (MetaborgException ex) {
+                    String message = logger.format("Failed when searching for languages in {}.", spoofaxDir);
+                    logger.warn(message,ex);
+                    continue;
+                }
+                for(ILanguageDiscoveryRequest req : reqs) {
+                    if(req.available()) {
+                        try {
+                            S.languageDiscoveryService.discover(req);
+                        } catch(MetaborgException ex) {
+                            String message = logger.format("Failed to load language at {}.", req.location());
+                            logger.warn(message,ex);
+                        }
                     }
                 }
             }
