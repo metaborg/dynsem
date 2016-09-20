@@ -1,0 +1,67 @@
+module analysis/explicate-2.0
+
+imports
+  signatures/-
+
+rules
+
+  explication-2-explicate-module:
+    mod@Module(name, section*) -> Module($[[name]_explicated2], section'*)
+    where
+      section'* := <explication-2-explicate-top> section*
+  
+  explication-2-explicate-top = fail
+
+
+rules
+
+  explicate-2-analysis-module = id
+
+
+//signature
+//  sorts
+//    Arrow
+//
+//  constructors
+//    Arr: Type * String -> Arrow
+//
+//strategies
+//  
+//  /*
+//  * Given a specification initialize the interarrow dependency list
+//  * with the declared arrows.
+//  * 
+//  * @type: Module -> List(Tuple(Arr, []))
+//  */
+//  explicate-2-deplist-init =
+//    collect-all(?ArrowDecl(_, _, _, _, _, _));
+//    nub;
+//    map(\ ArrowDecl(_, s, _, arrow, _, _) -> (Arr(s, arrow), []) \)
+//  
+//  explicate-2-deplist-add(|deplist):
+//    (from, to@Arr(_, _)) -> <map((?from, try(not(fetch-elem(?to)); ![to | <id>])))> deplist
+//  
+//  /*
+//  * Given a specification populate the interarrow dependency list
+//  *
+//  * @type: Module -> List(Tuple(Arr, List(Arr)))
+//  */
+//  explicate-2-deplist-build =
+//    ?mod;
+//    <env-alltd(explicate-2-deplist-build-rule)> (mod, <explicate-2-deplist-init> mod) 
+//  
+//  explicate-2-deplist-build-rule:
+//    (Rule(prem*, _, Relation(_, _, NamedDynamicEmitted(_, "init"), _)), deplist) -> <fail>
+//
+////  explicate-2-deplist-build-intern(|deplist) =
+////    env-alltd(
+//    
+//    
+////    ArrowDecl(
+////              ArrowROs([MapSort(SimpleSort("String"), SimpleSort("V"))])
+////            , SimpleSort("lookup__Meta")
+////            , ArrowRWs([MapSort(SimpleSort("Int"), SimpleSort("V"))])
+////            , "default"
+////            , SimpleSort("V")
+////            , ArrowRWs([MapSort(SimpleSort("Int"), SimpleSort("V"))])
+////            )

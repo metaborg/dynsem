@@ -76,11 +76,13 @@ rules /* store signatures */
   store-arrows = ArrowDeclarations(map(store-arrow))
   
   store-arrow:
-    d@ArrowDecl(_, in-srt, _, arrow, out-srt, _) -> d
+    d@ArrowDecl(ro*, in-srt, rw*, arrow, out-srt, _) -> d
     with
       <store-def(|Arrows())> arrow => arrow-def;
-      <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt)
-
+      <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt);
+      <store-prop(|ROs(), arrow-def)> <map(rw-type)> ro*;
+      <store-prop(|RWs(), arrow-def)> <map(rw-type)> rw*
+  
   store-native-operators = NativeOperators(map(store-native-operator))
   
   store-native-operator:

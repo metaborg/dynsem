@@ -21,6 +21,8 @@ signature
     NativeTypeJString: Property
     NativeTypeSuperType : Property
     Use: Property
+    ROs: Property
+    RWs: Property
     
 signature
   sorts
