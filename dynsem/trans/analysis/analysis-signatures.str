@@ -76,7 +76,7 @@ rules /* store signatures */
   store-arrows = ArrowDeclarations(map(store-arrow))
   
   store-arrow:
-    d@ArrowDecl(ro*, in-srt, rw*, arrow, out-srt, _) -> d
+    d@ArrowDecl(ArrowROs(ro*), in-srt, ArrowRWs(rw*), arrow, out-srt, _) -> d
     with
       <store-def(|Arrows())> arrow => arrow-def;
       <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt);
