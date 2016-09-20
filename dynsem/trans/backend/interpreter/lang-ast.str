@@ -25,7 +25,7 @@ rules
   ds-to-interp-clean-target =
     get-opt(|CleanProject()) <
       <concat-strings> [<get-opt> JavaGenDirAbs(), "/", <string-replace(|".", "/")> <get-opt> TopPkg()];
-      try(ds-rmdir)
+      try(rmdir)
     + id
 
 rules /* Sort & Constructor classes */
