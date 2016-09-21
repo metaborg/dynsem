@@ -81,8 +81,8 @@ rules /* store signatures */
     with
       <store-def(|Arrows())> arrow => arrow-def;
       <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt);
-      <store-prop(|ROs(), arrow-def)> <map(rw-type)> ro*;
-      <store-prop(|RWs(), arrow-def)> <map(rw-type)> rw*
+      <store-prop(|ROs(), arrow-def)> ro*;
+      <store-prop(|RWs(), arrow-def)> rw*
   
   store-semantic-components = Components(map(store-semantic-component))
   
@@ -252,4 +252,8 @@ rules
 	    <fetch-elem(?ArrowType(<id>, _); !(<id>, in-ty); type-coerce-sym(type-coerce-full(id)))> arrow-ty*;
 	    add-msg(|Error(), decl, $[Arrow LHS overlaps with another arrow with the same name])
 
-    
+  check-signature:
+    l@Label(x) -> <fail>
+    where
+      <not(lookup-def(|Components()))> x;
+      add-msg(|Error(), l, $[Unknown semantic component [x]]) 

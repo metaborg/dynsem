@@ -102,12 +102,12 @@ rules /* store variables */
       <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> tc*
 
   labelcomp-to-type-term-pair:
-    LabelComp(x, v) -> (ty, v)
+    LabelComp(Label(x), v) -> (ty, v)
     where
       ty := <lookup-def(|Components()); lookup-prop(|Type())> x
   
   labelcomp-to-type-term-pair:
-    LabelComp(x, v) -> <fail>
+    LabelComp(Label(x), v) -> <fail>
     where
       <not(lookup-def(|Components()))> x;
       add-msg(|Error(), x, $[Unknown semantic component [x]])

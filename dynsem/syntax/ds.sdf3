@@ -119,8 +119,10 @@ context-free syntax // formulas
   Rel.DynamicEmitted = [-[{LabelComp ", "}+]-->]
   Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[IDNOHYPH]->]
   
-  LabelComp.LabelComp = [[ID] [Term]]
+  LabelComp.LabelComp = [[Label] [Term]]
   LabelComp.VarLabelComp = [[Var]]
+
+  Label.Label = [[ID]]
 
 lexical syntax 
 

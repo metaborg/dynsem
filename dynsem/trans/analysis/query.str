@@ -90,6 +90,9 @@ rules /* variable scheme queries */
   get-var-name:
     VarRef(x) -> x
 
+  get-label-name:
+    Label(x) -> x
+
   get-all-varschemes =
     <concat> [<get-all-component-defs>, <get-all-varscheme-defs>]    
 
@@ -113,7 +116,7 @@ rules /* variable scheme queries */
 
   get-matching-varschemes(get-definitions) =
     not(is-string);
-    get-var-name;
+    (get-var-name <+ get-label-name);
     get-matching-varschemes(get-definitions)
 
   get-matching-varschemes(get-definitions):

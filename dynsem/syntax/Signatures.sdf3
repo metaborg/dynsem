@@ -124,10 +124,10 @@ context-free syntax
   ArrowDeclaration.ArrowDecl = [[ArrowROs] [Type] [ArrowRWs] -[IDNOHYPH]-> [Type] [ArrowRWs]]
   
   ArrowROs.NoArrowROs = []
-  ArrowROs.ArrowROs = [[{Type ", "}+] |-]
+  ArrowROs.ArrowROs = [[{Label ", "}+] |-]
   
   ArrowRWs.NoArrowRWs = []
-  ArrowRWs.ArrowRWs = [:: [{Type ", "}+]]
+  ArrowRWs.ArrowRWs = [:: [{Label ", "}+]]
    
     
 
