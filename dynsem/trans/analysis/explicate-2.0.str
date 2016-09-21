@@ -15,7 +15,47 @@ rules
 
 rules
 
-  explicate-2-analysis-module = id
+  explicate-2-analysis-module =
+    // store inter-arrow dependencies
+    // store arrow semantic components
+    id
+
+/*
+
+Semantic components are labelled: L1 S, L2 S, L3 S
+
+we declare semantic components like all other things:
+
+signature semantic components
+  L1 : S1
+  L2 : (X, Y)
+
+an arrow -A-> has RO components and RW components:
+  Sc(-A->) = { C(L1, RO), C(L2, RO), C(L3, RW) }
+
+an arrow has imports on the semantic components of other arrows. a dependence entry for arrow -A->
+to arrow -B-> indicates an import for all components except those explicitly excluded:
+
+  ScImp(-A->) = { Imp(-B->, [L1]), Imp(-B->, [L1, L2]), ... } 
+
+above, rule -A-> imports all components of -B-> except for component L1. The components in the intersection of the exclusion set of all imports
+are not imported. 
+
+A rule over -A-> having a premise call to -B-> which explicitly mentions components L1 and L2; the premise excludes those components from the imported components.
+
+
+Algorithm:
+
+Given a rule over arrow -A->, for each premise over -B-> with explicit components Ls:
+  - Sc(-B->) = Sc(-B->) + Ls
+  - ScImp(-A->) = ScImp(-A->) + Imp(-B->, Ls)
+
+
+
+
+*/
+
+
 
 
 //signature
