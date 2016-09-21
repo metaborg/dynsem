@@ -43,7 +43,7 @@ rules /* store variables */
     log-hitcount
   
   store-rules =
-    Rules(with(prime-typaths); map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
+    Rules(with(prime-typaths); map(store-rule /* <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked])) */))
 
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
@@ -102,13 +102,26 @@ rules /* store variables */
       <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> tc*
 
   labelcomp-to-type-term-pair:
-    LabelComp(ty, v) -> (<rw-type> ty, v)
+    LabelComp(x, v) -> (ty, v)
+    where
+      ty := <lookup-def(|Components()); lookup-prop(|Type())> x
   
   labelcomp-to-type-term-pair:
-  	VarLabelComp(v) -> (scheme-ty, v)
+    LabelComp(x, v) -> <fail>
+    where
+      <not(lookup-def(|Components()))> x;
+      add-msg(|Error(), x, $[Unknown semantic component [x]])
+  
+  labelcomp-to-type-term-pair:
+  	VarLabelComp(v) -> (ty, v)
   	where
-  	  scheme-def := <get-unique-matching-varscheme> v;
-  	  scheme-ty := <lookup-prop(|Type())> scheme-def
+  	  ty := <get-unique-matching-varscheme(get-all-component-defs); lookup-prop(|Type())> v
+  
+  labelcomp-to-type-term-pair:
+    ref@VarLabelComp(v) -> <fail>
+    where
+      <not(get-unique-matching-varscheme(get-all-component-defs))> v;
+      add-msg(|Error(), ref, $[No matching semantic component prefix for [<get-var-name> v]])
 
 rules
 
@@ -333,7 +346,7 @@ rules // type rules for match-sides
     Var(v) -> ty
     where
       <not(lookup-def(|Vars()))> v;
-      if scheme-def := <get-unique-matching-varscheme> v
+      if scheme-def := <get-unique-matching-varscheme(get-all-varschemes)> v
       then
         scheme-ty := <lookup-prop(|Type())> scheme-def;
         ty := <type-coerce-full(id)> (in-ty, scheme-ty)
@@ -397,13 +410,13 @@ rules // type rules for match-sides
 rules
   
   type-check-premise-top =
-  	type-check-premise
-    <+
-  	where(
-  		?p;
-  		p-str := <ensure(pp-dynsem-Premise-string)> p;
-    	add-msg(|Error(), p, $[Premise type check failed: [p-str]])
-  	)
+  	try(type-check-premise)
+//    <+
+//  	where(
+//  		?p;
+//  		p-str := <ensure(unmark-vars; pp-dynsem-Premise-string)> p;
+//    	add-msg(|Error(), p, $[Premise type check failed: [p-str]])
+//  	)
 
   type-check-premise:
   	f@Formula(TermEq(lhs, rhs)) -> f
@@ -441,8 +454,8 @@ rules
           ArrowType(in-ty, out-ty) := <lookup-prop(|Type())> arrow-def;
           <type-check-expectation(type-coerce-full(fail)|lhs, in-ty)> lhs-ty;
           <type-check-match(|out-ty)> rhs;
-          <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> [r*, sc*];
-          <map(labelcomp-to-type-term-pair; type-check-match-wrap)> tc*
+          <map(try(labelcomp-to-type-term-pair; type-check-build-expect-wrap))> [r*, sc*];
+          <map(try(labelcomp-to-type-term-pair; type-check-match-wrap))> tc*
         else
           arrow-ma-ty* := <map(lookup-prop(|Type()); ?ArrowType(<id>, _))> arrow-def*;
           add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])

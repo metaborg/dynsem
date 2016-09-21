@@ -16,6 +16,7 @@ rules /* store signatures */
       <+ store-constructors
       <+ store-native-operators
       <+ store-arrows
+      <+ store-semantic-components
       <+ store-native-datatypes
       <+ store-variable-schemes
       <+ store-aliases
@@ -82,6 +83,14 @@ rules /* store signatures */
       <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt);
       <store-prop(|ROs(), arrow-def)> <map(rw-type)> ro*;
       <store-prop(|RWs(), arrow-def)> <map(rw-type)> rw*
+  
+  store-semantic-components = Components(map(store-semantic-component))
+  
+  store-semantic-component:
+    d@CompDecl(x, s) -> d
+    with
+      <store-def(|Components())> x => comp-def;
+      <store-prop(|Type(), comp-def)> <rw-type> s
   
   store-native-operators = NativeOperators(map(store-native-operator))
   
@@ -190,8 +199,14 @@ rules
   check-signature:
     vs@VariableScheme(prefix, _) -> <fail>
     where
-	    <get-matching-varschemes> prefix => [_, _ | _];
-	    add-msg(|Error(), vs, $[Duplicate or overlapping variable prefix [prefix]])
+	    <get-matching-varschemes(get-all-varschemes)> prefix => [_, _ | _];
+	    add-msg(|Error(), vs, $[Duplicate or overlapping variable or semantic component prefix [prefix]])
+
+  check-signature:
+    cd@CompDecl(prefix, _) -> <fail>
+    where
+	    <get-matching-varschemes(get-all-varschemes)> prefix => [_, _ | _];
+	    add-msg(|Error(), cd, $[Duplicate or overlapping variable or semantic component prefix [prefix]])
   
   check-signature:
     Con(cname, c*) -> <fail>

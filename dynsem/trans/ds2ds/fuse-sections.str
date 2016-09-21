@@ -24,4 +24,3 @@ rules
   
   rule-con-name =
     ?Rule(_, _, Relation(_, Source(Con(<id>, _), _), _, _)) <+ !""
-  

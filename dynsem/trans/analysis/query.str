@@ -84,9 +84,22 @@ rules // type properties
 
 rules /* variable scheme queries */
 
-  get-reverse-matching-varschemes =
+  get-var-name:
+    Var(x) -> x
+  
+  get-var-name:
+    VarRef(x) -> x
+
+  get-all-varschemes =
+    <concat> [<get-all-component-defs>, <get-all-varscheme-defs>]    
+
+  get-all-component-defs = lookup-def-all(|Components())
+  
+  get-all-varscheme-defs = lookup-def-all(|VarSchemes())
+
+  get-reverse-matching-varschemes(get-definitions) =
     ?type;
-    lookup-def-all(|VarSchemes()); filter(is-type-matches-varscheme(|type))
+    get-definitions; filter(is-type-matches-varscheme(|type))
 
   is-type-matches-varscheme(|type) =
     where(
@@ -94,17 +107,17 @@ rules /* variable scheme queries */
       ?type    
     )
 
-  get-unique-matching-varscheme =
-    get-matching-varschemes;
+  get-unique-matching-varscheme(get-definitions) =
+    get-matching-varschemes(get-definitions);
     Hd
 
-  get-matching-varschemes =
+  get-matching-varschemes(get-definitions) =
     not(is-string);
-    (?Var(<id>) + ?VarRef(<id>));
-    get-matching-varschemes
+    get-var-name;
+    get-matching-varschemes(get-definitions)
 
-  get-matching-varschemes:
-    used-word -> <lookup-def-all(|VarSchemes()); filter(is-name-matches-varscheme(|used-word))>
+  get-matching-varschemes(get-definitions):
+    used-word -> <get-definitions; filter(is-name-matches-varscheme(|used-word))>
     where is-string
   
   is-name-matches-varscheme(|used-word):

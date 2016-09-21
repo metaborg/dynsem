@@ -10,6 +10,7 @@ signature
     VarSchemes: Namespace
     Constructors: Namespace
     Arrows: Namespace
+    Components: Namespace
     NativeDTFun: String -> Namespace
 
 signature

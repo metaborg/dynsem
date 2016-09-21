@@ -87,6 +87,8 @@ context-free syntax // rules
   ID = <allkeys> {reject}
   ID = <allvalues> {reject}
   ID = <otherwise> {reject}
+  ID = <semantic> {reject}
+  ID = <components> {reject}
 
 context-free syntax // formulas
 
@@ -117,7 +119,7 @@ context-free syntax // formulas
   Rel.DynamicEmitted = [-[{LabelComp ", "}+]-->]
   Rel.NamedDynamicEmitted = [-[{LabelComp ", "}+]-[IDNOHYPH]->]
   
-  LabelComp.LabelComp = [[Type] [Term]]
+  LabelComp.LabelComp = [[ID] [Term]]
   LabelComp.VarLabelComp = [[Var]]
 
 lexical syntax 
