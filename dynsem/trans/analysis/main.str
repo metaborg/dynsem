@@ -9,7 +9,6 @@ imports
 	analysis/mark-references
 	analysis/query
 	analysis/info-implicit-conversions
-	analysis/explicate-2.0
 	signatures/-
   lib-ds
 	libstratego-sglr
@@ -73,9 +72,6 @@ rules
         );
         log-timed(
           <store-rules-all> section* | "Storing rules"
-        );
-        log-timed(
-          <explicate-2-analysis-module> m | "Explication analysis"
         );
         log-timed(
           <post-analysis-checks> m | "Post-analysis checks"

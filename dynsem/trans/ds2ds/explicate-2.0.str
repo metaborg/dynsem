@@ -2,23 +2,29 @@ module analysis/explicate-2.0
 
 imports
   signatures/-
+  analysis/-
 
 rules
 
   explication-2-explicate-module:
     mod@Module(name, section*) -> Module($[[name]_explicated2], section'*)
     where
-      section'* := <explication-2-explicate-top> section*
+      debug(!"e0");
+      Module(_, section'*) := <explication-2-explicate-top> mod
+      ;debug(!"e1")
   
-  explication-2-explicate-top = fail
+  explication-2-explicate-top =
+    debug(!"e2"); m-in-analysis(debug(!"e3"); explication-2-gather-data; debug(!"e4"); unrename-all); debug(!"e5"); unmark-vars; debug(!"e6")
 
 
 rules
 
-  explicate-2-analysis-module =
-    // store inter-arrow dependencies
-    // store arrow semantic components
-    id
+  explication-2-gather-data = id
+
+//  explicate-2-analysis-module =
+//    // store inter-arrow dependencies
+//    // store arrow semantic components
+//    id
 
 /*
 
@@ -36,7 +42,7 @@ an arrow -A-> has RO components and RW components:
 an arrow has imports on the semantic components of other arrows. a dependence entry for arrow -A->
 to arrow -B-> indicates an import for all components except those explicitly excluded:
 
-  ScImp(-A->) = { Imp(-B->, [L1]), Imp(-B->, [L1, L2]), ... } 
+  ScImp(-A->) = { Imp(-B->, [L1]), Imp(-B->, [L1, L2]), ... }
 
 above, rule -A-> imports all components of -B-> except for component L1. The components in the intersection of the exclusion set of all imports
 are not imported. 
@@ -49,9 +55,6 @@ Algorithm:
 Given a rule over arrow -A->, for each premise over -B-> with explicit components Ls:
   - Sc(-B->) = Sc(-B->) + Ls
   - ScImp(-A->) = ScImp(-A->) + Imp(-B->, Ls)
-
-
-
 
 */
 

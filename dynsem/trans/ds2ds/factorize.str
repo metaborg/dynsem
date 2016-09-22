@@ -78,7 +78,7 @@ rules // lift constructor sub-terms in match
     map(try-factor(factorize-source-components, ?succ)); where(!succ); unzip; (concat, id)
   
   factorize-source-components:
-    LabelComp(ty, t) -> ([Formula(Match(VarRef(v), t))], LabelComp(ty, VarRef(v)))
+    LabelComp(l, t) -> ([Formula(Match(VarRef(v), t))], LabelComp(l, VarRef(v)))
     where
       <not(is-prime-factor)> t;
       v := <next-variable>
@@ -87,7 +87,7 @@ rules // lift constructor sub-terms in match
     map(try-factor(factorize-target-components, ?succ)); where(!succ); unzip; (concat, id)
   
   factorize-target-components:
-    LabelComp(ty, t) -> ([Formula(Match(t, VarRef(v)))], LabelComp(ty, VarRef(v)))
+    LabelComp(l, t) -> ([Formula(Match(t, VarRef(v)))], LabelComp(l, VarRef(v)))
     where
       <not(is-prime-factor)> t;
       v := <next-variable>

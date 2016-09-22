@@ -16,10 +16,9 @@ rules
   desugar-varschemes = alltd(desugar-varscheme)
   
   desugar-varscheme:
-    VarLabelComp(v) -> LabelComp(<derw-type> scheme-ty, v)
+    VarLabelComp(v) -> LabelComp(Label(<def-get-name> scheme-def), v)
     where
-    	scheme-def := <get-unique-matching-varscheme> v;
-    	scheme-ty := <lookup-prop(|Type())> scheme-def
+    	scheme-def := <get-unique-matching-varscheme(get-all-component-defs)> v
   
   // do not expand the variable schemes in as-bound variables
   // expanding to a cast will lead to a malformed AST
@@ -28,7 +27,7 @@ rules
   desugar-varscheme:
     var@Var(v) -> Cast(var, <derw-type> scheme-ty)
     where
-      scheme-def := <get-unique-matching-varscheme> v;
+      scheme-def := <get-unique-matching-varscheme(get-all-varschemes)> v;
       scheme-ty := <lookup-prop(|Type())> scheme-def
     	
 
