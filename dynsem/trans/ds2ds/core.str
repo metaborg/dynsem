@@ -20,34 +20,34 @@ strategies
 
   module-to-core(|path, project-path) =
     in-project-path(
-      debug(!0)
-      ; include-imports
-      ; debug(!1)
+//      debug(!0);
+      include-imports
+//      ; debug(!1)
       ; desugar-top
-      ; debug(!2)
+//      ; debug(!2)
       ; fuse-sections
-      ; debug(!3)
+//      ; debug(!3)
       ; desugar-varschemes-module
-      ; debug(!4)
+//      ; debug(!4)
       ; add-extra-typeannos-module
-      ; debug(!5)
+//      ; debug(!5)
       ; desugar-aliases-module
-      ; debug(!6)
+//      ; debug(!6)
       ; factorize-module
-      ; debug(!7)
+//      ; debug(!7)
       ; expand-implicits-module
-      ; debug(!8)
+//      ; debug(!8)
       ; factorize-module
-      ; debug(!9)
+//      ; debug(!9)
 //      ; explicate-module
       ; explication-2-explicate-module
-      ; debug(!10)
+//      ; debug(!10)
       ; copy-propagation-module
-      ; debug(!11)
+//      ; debug(!11)
       ; defactorize-module
-      ; debug(!12)
+//      ; debug(!12)
       ; insert-wildcards-module
-      ; debug(!13)
+//      ; debug(!13)
       ; prettify-vars-module
-      ; debug(!14)
+//      ; debug(!14)
     |project-path)

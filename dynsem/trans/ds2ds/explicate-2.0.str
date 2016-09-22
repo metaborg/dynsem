@@ -9,102 +9,121 @@ rules
   explication-2-explicate-module:
     mod@Module(name, section*) -> Module($[[name]_explicated2], section'*)
     where
-      debug(!"e0");
       Module(_, section'*) := <explication-2-explicate-top> mod
-      ;debug(!"e1")
   
   explication-2-explicate-top =
-    debug(!"e2"); m-in-analysis(debug(!"e3"); explication-2-gather-data; debug(!"e4"); unrename-all); debug(!"e5"); unmark-vars; debug(!"e6")
+    m-in-analysis(explication-2-gather-data; unrename-all); unmark-vars
 
+signature
+  sorts
+    Import Component ArrowDef CompDef CompKind
+  
+  constructors
+    Impo : ArrowDef * List(LabelDef) -> Import  
+    Comp : CompDef * CompKind -> Component
+    RO : CompKind
+    RW : CompKind
 
+strategies
+  
+  explication-2-api-init-storage(sto-comps, sto-imps) =
+    comps-table := <new-hashtable; sto-comps>;
+    imps-table := <new-hashtable; sto-imps>;
+    arrow-def* := <lookup-def-all(|Arrows())>;
+    <map(\ arrow-def -> <hashtable-put(|arrow-def, [])> comps-table \)> arrow-def*;
+    <map(\ arrow-def -> <hashtable-put(|arrow-def, [])> imps-table \)> arrow-def*
+  
+  explication-2-api-get-components(|comps, imps):
+    arrow-def -> <hashtable-get(|arrow-def)> comps
+  
+  explication-2-api-add-components(|comps, imps):
+    (arrow-def, new-compo*) -> compo*
+    where
+      old-compo* := <hashtable-get(|arrow-def)> comps;
+      compo* := <nub> [new-compo*, old-compo*];
+//      <debug(!"Adding compos: ")> (arrow-def, compo*);
+      <hashtable-put(|arrow-def, compo*)> comps
+  
+  explication-2-api-get-imports(|comps, imps):
+    arrow-def -> <hashtable-get(|arrow-def)> imps
+  
+  explication-2-api-add-imports(|comps, imps):
+    (arrow-def, new-imp*) -> imp*
+    where
+      old-imp* := <hashtable-get(|arrow-def)> imps;
+      imp* := <nub> [new-imp*, old-imp*];
+//      <debug(!"Adding imports: ")> (arrow-def, imp*);
+      <hashtable-put(|arrow-def, imp*)> imps
+  
 rules
 
-  explication-2-gather-data = id
+  explication-2-gather-data =
+    where(explication-2-api-init-storage(?comps-table, ?imps-table));
+    alltd(explication-2-gather-data-rule(|comps-table, imps-table))
+//    where(
+//      <debug(!"Components: ")> <hashtable-getlist> comps-table;
+//      <debug(!"Imports: ")> <hashtable-getlist> imps-table
+//    )
 
-//  explicate-2-analysis-module =
-//    // store inter-arrow dependencies
-//    // store arrow semantic components
-//    id
+  explication-2-gather-data-rule(|comps-table, imps-table):
+    r@Rule(prem*, infer, Relation(reads, src@Source(lhs, _), arr, _)) -> r
+    where // figure out which arrow definition we are using
+//      debug(!"r1");
+      arrow-name := <get-arrow-name> arr;
+//      debug(!"r2");
+      lhs-ty := <rulelhs-get-type> lhs;
+//      debug(!"r3");
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+//      debug(!"r4");
+      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
+    where // associate components used in conclusion
+//      debug(!"r5");
+      ro* := <explication-2-use-to-comp> reads;
+//      debug(!"r6");
+      rw* := <explication-2-use-to-comp> src;
+//      debug(!"r7");
+      <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
+    where // store premise-derived information
+//      debug(!"r8");
+      imp* := <filter(explication-2-gather-data-premise(|comps-table, imps-table); not(?Impo(arrow-def, _)))> prem*;
+//      debug(!"r9");
+      <explication-2-api-add-imports(|comps-table, imps-table)> (arrow-def, imp*)
+//      ;debug(!"r10")
+  
+  explication-2-gather-data-premise(|comps-table, imps-table):
+    Formula(Relation(reads, src@Source(lhs, _), arr, _)) -> Impo(arrow-def, <nub> [ex-ro*, ex-rw*])
+    where // figure out which are definition we are using
+//      debug(!"p1");
+      arrow-name := <get-arrow-name> arr;
+//      debug(!"p2");
+      lhs-ty := <type-of> lhs;
+//      debug(!"p3");
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+//      debug(!"p4");
+      arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+    where // associate components used in premise
+//      debug(!"p5");
+      ro* := <explication-2-use-to-comp> reads;
+//      debug(!"p6");
+      rw* := <explication-2-use-to-comp> src;
+//      debug(!"p7");
+      <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
+    where // compute imports
+//      debug(!"p8");
+      ex-ro* := <explication-2-use-to-compdef> reads;
+//      debug(!"p9");
+      ex-rw* := <explication-2-use-to-compdef> src
+//      ;debug(!"p10")
+  
+  explication-2-use-to-comp:
+    Reads(r*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RO()) \)> r*
+  
+  explication-2-use-to-comp:
+    Source(_, w*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RW()) \)> w*
+  
+  explication-2-use-to-compdef:
+    Reads(r*) -> <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> r*
+  
+  explication-2-use-to-compdef:
+    Source(_, w*) -> <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> w*
 
-/*
-
-Semantic components are labelled: L1 S, L2 S, L3 S
-
-we declare semantic components like all other things:
-
-signature semantic components
-  L1 : S1
-  L2 : (X, Y)
-
-an arrow -A-> has RO components and RW components:
-  Sc(-A->) = { C(L1, RO), C(L2, RO), C(L3, RW) }
-
-an arrow has imports on the semantic components of other arrows. a dependence entry for arrow -A->
-to arrow -B-> indicates an import for all components except those explicitly excluded:
-
-  ScImp(-A->) = { Imp(-B->, [L1]), Imp(-B->, [L1, L2]), ... }
-
-above, rule -A-> imports all components of -B-> except for component L1. The components in the intersection of the exclusion set of all imports
-are not imported. 
-
-A rule over -A-> having a premise call to -B-> which explicitly mentions components L1 and L2; the premise excludes those components from the imported components.
-
-
-Algorithm:
-
-Given a rule over arrow -A->, for each premise over -B-> with explicit components Ls:
-  - Sc(-B->) = Sc(-B->) + Ls
-  - ScImp(-A->) = ScImp(-A->) + Imp(-B->, Ls)
-
-*/
-
-
-
-
-//signature
-//  sorts
-//    Arrow
-//
-//  constructors
-//    Arr: Type * String -> Arrow
-//
-//strategies
-//  
-//  /*
-//  * Given a specification initialize the interarrow dependency list
-//  * with the declared arrows.
-//  * 
-//  * @type: Module -> List(Tuple(Arr, []))
-//  */
-//  explicate-2-deplist-init =
-//    collect-all(?ArrowDecl(_, _, _, _, _, _));
-//    nub;
-//    map(\ ArrowDecl(_, s, _, arrow, _, _) -> (Arr(s, arrow), []) \)
-//  
-//  explicate-2-deplist-add(|deplist):
-//    (from, to@Arr(_, _)) -> <map((?from, try(not(fetch-elem(?to)); ![to | <id>])))> deplist
-//  
-//  /*
-//  * Given a specification populate the interarrow dependency list
-//  *
-//  * @type: Module -> List(Tuple(Arr, List(Arr)))
-//  */
-//  explicate-2-deplist-build =
-//    ?mod;
-//    <env-alltd(explicate-2-deplist-build-rule)> (mod, <explicate-2-deplist-init> mod) 
-//  
-//  explicate-2-deplist-build-rule:
-//    (Rule(prem*, _, Relation(_, _, NamedDynamicEmitted(_, "init"), _)), deplist) -> <fail>
-//
-////  explicate-2-deplist-build-intern(|deplist) =
-////    env-alltd(
-//    
-//    
-////    ArrowDecl(
-////              ArrowROs([MapSort(SimpleSort("String"), SimpleSort("V"))])
-////            , SimpleSort("lookup__Meta")
-////            , ArrowRWs([MapSort(SimpleSort("Int"), SimpleSort("V"))])
-////            , "default"
-////            , SimpleSort("V")
-////            , ArrowRWs([MapSort(SimpleSort("Int"), SimpleSort("V"))])
-////            )
