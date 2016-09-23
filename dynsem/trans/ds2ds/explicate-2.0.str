@@ -59,11 +59,18 @@ rules
 
   explication-2-gather-data =
     where(explication-2-api-init-storage(?comps-table, ?imps-table));
+    where(explication-2-gather-data-arrowdecl(|comps-table, imps-table));
     alltd(explication-2-gather-data-rule(|comps-table, imps-table))
-//    where(
-//      <debug(!"Components: ")> <hashtable-getlist> comps-table;
-//      <debug(!"Imports: ")> <hashtable-getlist> imps-table
-//    )
+  
+  explication-2-gather-data-arrowdecl(|comps-table, imps-table) =
+      lookup-def-all(|Arrows());
+      map(explication-2-associate-decl-components(|comps-table, imps-table))
+
+  explication-2-associate-decl-components(|comps-table, imps-table) =
+    ?arrow-def;
+    ro* := <lookup-prop(|ROs()); map(\ Label(x) -> Comp(<lookup-def(|Components())> x, RO()) \)> arrow-def;
+    rw* := <lookup-prop(|RWs()); map(\ Label(x) -> Comp(<lookup-def(|Components())> x, RW()) \)> arrow-def;
+    <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
 
   explication-2-gather-data-rule(|comps-table, imps-table):
     r@Rule(prem*, infer, Relation(reads, src@Source(lhs, _), arr, _)) -> r
