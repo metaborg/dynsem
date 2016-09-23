@@ -41,7 +41,6 @@ strategies
     where
       old-compo* := <hashtable-get(|arrow-def)> comps;
       compo* := <nub> [new-compo*, old-compo*];
-//      <debug(!"Adding compos: ")> (arrow-def, compo*);
       <hashtable-put(|arrow-def, compo*)> comps
   
   explication-2-api-get-imports(|comps, imps):
@@ -52,7 +51,6 @@ strategies
     where
       old-imp* := <hashtable-get(|arrow-def)> imps;
       imp* := <nub> [new-imp*, old-imp*];
-//      <debug(!"Adding imports: ")> (arrow-def, imp*);
       <hashtable-put(|arrow-def, imp*)> imps
   
 rules
@@ -75,52 +73,32 @@ rules
   explication-2-gather-data-rule(|comps-table, imps-table):
     r@Rule(prem*, infer, Relation(reads, src@Source(lhs, _), arr, _)) -> r
     where // figure out which arrow definition we are using
-//      debug(!"r1");
       arrow-name := <get-arrow-name> arr;
-//      debug(!"r2");
       lhs-ty := <rulelhs-get-type> lhs;
-//      debug(!"r3");
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-//      debug(!"r4");
       arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
     where // associate components used in conclusion
-//      debug(!"r5");
       ro* := <explication-2-use-to-comp> reads;
-//      debug(!"r6");
       rw* := <explication-2-use-to-comp> src;
-//      debug(!"r7");
       <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
     where // store premise-derived information
-//      debug(!"r8");
       imp* := <filter(explication-2-gather-data-premise(|comps-table, imps-table); not(?Impo(arrow-def, _)))> prem*;
-//      debug(!"r9");
       <explication-2-api-add-imports(|comps-table, imps-table)> (arrow-def, imp*)
-//      ;debug(!"r10")
   
   explication-2-gather-data-premise(|comps-table, imps-table):
     Formula(Relation(reads, src@Source(lhs, _), arr, _)) -> Impo(arrow-def, <nub> [ex-ro*, ex-rw*])
     where // figure out which are definition we are using
-//      debug(!"p1");
       arrow-name := <get-arrow-name> arr;
-//      debug(!"p2");
       lhs-ty := <type-of> lhs;
-//      debug(!"p3");
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-//      debug(!"p4");
       arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
     where // associate components used in premise
-//      debug(!"p5");
       ro* := <explication-2-use-to-comp> reads;
-//      debug(!"p6");
       rw* := <explication-2-use-to-comp> src;
-//      debug(!"p7");
       <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
     where // compute imports
-//      debug(!"p8");
       ex-ro* := <explication-2-use-to-compdef> reads;
-//      debug(!"p9");
       ex-rw* := <explication-2-use-to-compdef> src
-//      ;debug(!"p10")
   
   explication-2-use-to-comp:
     Reads(r*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RO()) \)> r*
