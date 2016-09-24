@@ -19,7 +19,7 @@ signature
     Import Component ArrowDef CompDef CompKind
   
   constructors
-    Impo : ArrowDef * List(LabelDef) -> Import  
+    Impo : ArrowDef * List(Component) -> Import  
     Comp : CompDef * CompKind -> Component
     RO : CompKind
     RW : CompKind
@@ -58,7 +58,9 @@ rules
   explication-2-gather-data =
     where(explication-2-api-init-storage(?comps-table, ?imps-table));
     where(explication-2-gather-data-arrowdecl(|comps-table, imps-table));
-    alltd(explication-2-gather-data-rule(|comps-table, imps-table))
+    where(alltd(explication-2-gather-data-rule(|comps-table, imps-table)));
+    where(explication-2-compute-explicated-arrows(|comps-table, imps-table));
+    explication-2-explicate-arrow-decls-module(|comps-table, imps-table)
   
   explication-2-gather-data-arrowdecl(|comps-table, imps-table) =
       lookup-def-all(|Arrows());
@@ -107,8 +109,62 @@ rules
     Source(_, w*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RW()) \)> w*
   
   explication-2-use-to-compdef:
-    Reads(r*) -> <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> r*
+    Reads(r*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RO()) \)> r*
   
   explication-2-use-to-compdef:
-    Source(_, w*) -> <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> w*
+    Source(_, w*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RW())\)> w*
+  
+  explication-2-compute-explicated-arrows(|comps-table, imps-table) =
+    arrow-def* := <lookup-def-all(|Arrows())>;
+    stack := <range; map(!arrow-def*); concat> (1, <length> arrow-def*);
+    <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> stack
+  
+  explication-2-compute-explicated-arrows-work(|comps-table, imps-table):
+    [] -> []
+  
+  explication-2-compute-explicated-arrows-work(|comps-table, imps-table):
+    [arrow-def | defs] -> <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> defs
+    where
+      debug(!"i1");
+      impo* := <explication-2-api-get-imports(|comps-table, imps-table)> arrow-def;
+      debug(!"i2");
+      imported-arrow* := <map(?Impo(<id>, _)); nub> impo*;
+      debug(!"i3");
+      compo* := <mapconcat(explication-2-compute-imported-comps(|impo*, comps-table, imps-table))> imported-arrow*;
+      debug(!"i4");
+      <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, compo*)
+      ;debug(!"i5")
+  
+  explication-2-compute-imported-comps(|impo*, comps-table, imps-table):
+    arrow-def -> new-compo*
+    where
+      debug(!"i6");
+      excluded-compo* := <debug(!"i6a"); filter(?Impo(arrow-def, <id>)); debug(!"i6b"); !(<id>, []); foldl(debug(!"i6c"); isect; debug(!"i6d")); debug(!"i6e")> impo*;
+      debug(!"i7");
+      new-compo* := <isect> (<explication-2-api-get-components(|comps-table, imps-table)> arrow-def, excluded-compo*)
+      ;debug(!"i8")
+  
+  explication-2-explicate-arrow-decls-module(|comps-table, imps-table):
+    Module(name, section*) -> Module(name, section'*)
+    where
+      section'* := <map(try(Signatures(map(try(ArrowDeclarations(map(explication-2-explicate-arrow-decl(|comps-table, imps-table))))))))> section*
 
+  explication-2-explicate-arrow-decl(|comps-table, imps-table):
+    ArrowDecl(_, lhs-s, _, arrow-name, rhs-s, _) -> <debug(!"ex9")> ArrowDecl(ArrowROs(ro*), lhs-s, ArrowRWs(rw*), arrow-name, rhs-s, ArrowRWs(rw*))
+    where
+      lhs-ty := <rw-type> lhs-s;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty);
+      (ro-comp*, rw-comp*) := <explication-2-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
+      (ro*, rw*) := <(map(\ Comp(x, _) -> Label(<def-get-name> x) \), map(\ Comp(x, _) -> Label(<def-get-name> x) \))> (ro-comp*, rw-comp*)
+
+
+/*
+Arrow explication algorithm in O(N^2) steps
+
+Let arrow stack S.
+
+Pop R in S:
+  associate components Imps(-R->) into Comps(-R->)
+  
+*/
