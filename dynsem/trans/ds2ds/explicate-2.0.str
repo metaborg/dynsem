@@ -139,9 +139,10 @@ rules
     arrow-def -> new-compo*
     where
       debug(!"i6");
-      excluded-compo* := <debug(!"i6a"); filter(?Impo(arrow-def, <id>)); debug(!"i6b"); !(<id>, []); foldl(debug(!"i6c"); isect; debug(!"i6d")); debug(!"i6e")> impo*;
+      compo* := <explication-2-api-get-components(|comps-table, imps-table)> arrow-def;
+      excluded-compo* := <debug(!"i6a"); filter(?Impo(arrow-def, <id>)); debug(!"i6b"); !(<id>, compo*); foldl(debug(!"i6c"); isect; debug(!"i6d")); debug(!"i6e")> impo*;
       debug(!"i7");
-      new-compo* := <isect> (<explication-2-api-get-components(|comps-table, imps-table)> arrow-def, excluded-compo*)
+      new-compo* := <diff> (compo*, excluded-compo*)
       ;debug(!"i8")
   
   explication-2-explicate-arrow-decls-module(|comps-table, imps-table):
