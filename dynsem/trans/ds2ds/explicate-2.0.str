@@ -125,25 +125,17 @@ rules
   explication-2-compute-explicated-arrows-work(|comps-table, imps-table):
     [arrow-def | defs] -> <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> defs
     where
-      debug(!"i1");
       impo* := <explication-2-api-get-imports(|comps-table, imps-table)> arrow-def;
-      debug(!"i2");
       imported-arrow* := <map(?Impo(<id>, _)); nub> impo*;
-      debug(!"i3");
       compo* := <mapconcat(explication-2-compute-imported-comps(|impo*, comps-table, imps-table))> imported-arrow*;
-      debug(!"i4");
       <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, compo*)
-      ;debug(!"i5")
   
   explication-2-compute-imported-comps(|impo*, comps-table, imps-table):
     arrow-def -> new-compo*
     where
-      debug(!"i6");
       compo* := <explication-2-api-get-components(|comps-table, imps-table)> arrow-def;
-      excluded-compo* := <debug(!"i6a"); filter(?Impo(arrow-def, <id>)); debug(!"i6b"); !(<id>, compo*); foldl(debug(!"i6c"); isect; debug(!"i6d")); debug(!"i6e")> impo*;
-      debug(!"i7");
+      excluded-compo* := <filter(?Impo(arrow-def, <id>)); !(<id>, compo*); foldl(isect)> impo*;
       new-compo* := <diff> (compo*, excluded-compo*)
-      ;debug(!"i8")
   
   explication-2-explicate-arrow-decls-module(|comps-table, imps-table):
     Module(name, section*) -> Module(name, section'*)
@@ -151,7 +143,7 @@ rules
       section'* := <map(try(Signatures(map(try(ArrowDeclarations(map(explication-2-explicate-arrow-decl(|comps-table, imps-table))))))))> section*
 
   explication-2-explicate-arrow-decl(|comps-table, imps-table):
-    ArrowDecl(_, lhs-s, _, arrow-name, rhs-s, _) -> <debug(!"ex9")> ArrowDecl(ArrowROs(ro*), lhs-s, ArrowRWs(rw*), arrow-name, rhs-s, ArrowRWs(rw*))
+    ArrowDecl(_, lhs-s, _, arrow-name, rhs-s, _) -> ArrowDecl(ArrowROs(ro*), lhs-s, ArrowRWs(rw*), arrow-name, rhs-s, ArrowRWs(rw*))
     where
       lhs-ty := <rw-type> lhs-s;
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
