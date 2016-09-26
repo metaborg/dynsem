@@ -98,9 +98,6 @@ rules // desugaring
     IsValue(term) -> TermEq(Con("IsValue",[term]),Con("True",[]))
 
   desugar :
-    MapSort_Deprecated(t1, t2) -> MapSort(t1, t2)
-
-  desugar :
     Map([b | b*@[_|_]]) -> MapExtend(Map([b]), Map(b*))
     
   desugar :
