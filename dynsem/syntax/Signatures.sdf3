@@ -58,8 +58,6 @@ context-free syntax // constructor declarations
   ConsAnno.ImplicitAnno = [implicit]
   ConsAnno.MetafunAnno = [meta-function]
 
-  ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
-
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
   Type.TupleSort = [([{Type " * "}+])]
@@ -121,6 +119,8 @@ context-free syntax
   ArrowDeclaration.DefaultArrowDecl = [[ArrowROs] [Type] [ArrowRWs] --> [Type] [ArrowRWs]]
 
   ArrowDeclaration.ArrowDecl = [[ArrowROs] [Type] [ArrowRWs] -[IDNOHYPH]-> [Type] [ArrowRWs]]
+  
+  ArrowDeclaration.MetaFunDecl = [[ArrowROs] [ID]([{Type ", "}+]) [ArrowRWs] --> [Type] [ArrowRWs]]
   
   ArrowROs.NoArrowROs = []
   ArrowROs.ArrowROs = [[{Label ", "}+] |-]
