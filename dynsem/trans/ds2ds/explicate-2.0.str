@@ -207,7 +207,7 @@ rules
       // used components
       comp-use* := <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> labelcomp*;
       // definition components
-      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); filter(\ Comp(comp-def, kind) -> comp-def \)> arrow-def;
+      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); explicate-2-util-filter-transform-compdefs(explicate-2-util-comp-to-compdef|kind)> arrow-def;
       // thus missing components
       comp-extra* := <diff> (comp-def*, comp-use*);
       // lookup extra names and convert to labelcomp
@@ -220,12 +220,16 @@ rules
       // used components
       comp-use* := <map(explicate-2-api-compgen-register(|compgen-table, kind))> labelcomp*;
       // definition components
-      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); filter(\ Comp(comp-def, kind) -> comp-def \)> arrow-def;
+      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); explicate-2-util-filter-transform-compdefs(explicate-2-util-comp-to-compdef|kind)> arrow-def;
       // thus missing components
       comp-extra* := <diff> (comp-def*, comp-use*);
       // register and convert to labelcomp
       extra-labelcomp* := <map(explicate-2-api-compgen-intro(|compgen-table, kind))> comp-extra*
   
+  explicate-2-util-comp-to-compdef = ?Comp(<id>, _)
+  
+  explicate-2-util-filter-transform-compdefs(s|kind) =
+    filter(?Comp(_, kind); s)
   
   explicate-2-api-compgen-register(|compgen-table, kind):
     LabelComp(Label(x), VarRef(v)) -> comp-def
