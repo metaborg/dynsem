@@ -60,7 +60,8 @@ rules
     where(explication-2-gather-data-arrowdecl(|comps-table, imps-table));
     where(alltd(explication-2-gather-data-rule(|comps-table, imps-table)));
     where(explication-2-compute-explicated-arrows(|comps-table, imps-table));
-    explication-2-explicate-arrow-decls-module(|comps-table, imps-table)
+    explication-2-explicate-arrow-decls-module(|comps-table, imps-table);
+    explication-2-explicate-rules-module(|comps-table, imps-table)
   
   explication-2-gather-data-arrowdecl(|comps-table, imps-table) =
       lookup-def-all(|Arrows());
@@ -116,6 +117,7 @@ rules
   
   explication-2-compute-explicated-arrows(|comps-table, imps-table) =
     arrow-def* := <lookup-def-all(|Arrows())>;
+    // FIXME: this causes an O(N^N) complexity
     stack := <range; map(!arrow-def*); concat> (1, <length> arrow-def*);
     <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> stack
   
@@ -151,13 +153,19 @@ rules
       (ro-comp*, rw-comp*) := <explication-2-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
       (ro*, rw*) := <(map(\ Comp(x, _) -> Label(<def-get-name> x) \), map(\ Comp(x, _) -> Label(<def-get-name> x) \))> (ro-comp*, rw-comp*)
 
+  explication-2-explicate-rules-module(|comps-table, imps-table):
+    Module(name, section*) -> Module(name, section'*)
+    where
+      section'* := <alltd(explication2-explicate-rule(|comps-table, imps-table))> section*
 
-/*
-Arrow explication algorithm in O(N^2) steps
-
-Let arrow stack S.
-
-Pop R in S:
-  associate components Imps(-R->) into Comps(-R->)
-  
-*/
+  explication2-explicate-rule(|comps-table, imps-table):
+    Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), arr, Target(rhs, tc1*))) ->
+      Rule(prem1*, infer, Relation(Reads(r1*), Source(lhs, sc1*), arr, Target(rhs, tc1*)))
+    where
+      arrow-name := <get-arrow-name> arr;
+      lhs-ty := <rulelhs-get-type> lhs;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
+    where
+      fail
+    
