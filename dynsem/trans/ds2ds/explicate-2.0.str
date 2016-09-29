@@ -179,13 +179,13 @@ rules
       // introduce RWs adding missing ones
       sc'* := <explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> sc*;
       // explicate premises
-      prem'* := <alltd(explication-2-explicate-premise(|comps-table, imps-table, compgen-table))> prem*;
+      prem'* := <alltd(explication-2-explicate-premise(|comps-table, imps-table, arrow-def, compgen-table))> prem*;
       // read missing RWs
       tc'* := <explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> tc*;
       // destroy storage
       <hashtable-destroy> compgen-table
   
-  explication-2-explicate-premise(|comps-table, imps-table, compgen-table):
+  explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table):
     Formula(Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Formula(Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
     where // figure out which arrow definition we are using
@@ -201,6 +201,43 @@ rules
       // introduce RWs adding missing ones
       tc'* := <explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> tc*
   
+  explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table):
+    CaseMatch(tb, case*) -> CaseMatch(tb, case'*)
+    where
+      // explicate the cases in forked compgen-tables returning [(case', compgen-table-fork)] 
+      case-compgen-table* := <map(explication-2-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table))> case*;
+      // introduce fresh variables for all the RW components
+      all-rw* := <explication-2-api-get-components(|comps-table, imps-table); explicate-2-util-filter-transform-compdefs(explicate-2-util-comp-to-compdef|RW())> rule-arrow-def;
+      <map(explicate-2-api-compgen-intro(|compgen-table, RW()))> all-rw*;
+      case'* := <map(explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table))> case-compgen-table*
+  
+  explication-2-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table):
+    t -> (<alltd(explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table-fork))> t, compgen-table-fork)
+    where
+      compgen-table-fork := <hashtable-copy> compgen-table
+  
+  explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table):
+    (CasePattern(pat, prem*), compgen-table-fork) -> CasePattern(pat, prem'*)
+    where
+      prem'* := <explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table)> (prem*, compgen-table-fork)
+
+  explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table):
+    (CaseOtherwise(prem*), compgen-table-fork) -> CaseOtherwise(prem'*)
+    where
+      prem'* := <explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table)> (prem*, compgen-table-fork)
+  
+  explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table):
+    (prem*, compgen-table-fork) -> [prem*, synonym*]
+    where
+      synonym* := <filter(explicate-2-introduce-synonym(|compgen-table-fork, compgen-table))> all-rw*
+  
+  explicate-2-introduce-synonym(|compgen-table-left, compgen-table-right):
+    comp -> Formula(Match(Var(v-left), Var(v-right)))
+    where
+      v-left := <hashtable-get(|comp)> compgen-table-left;
+      v-right := <hashtable-get(|comp)> compgen-table-right;
+      <not(eq)> (v-left, v-right)
+  
   explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
     labelcomp* -> [labelcomp*, extra-labelcomp*]
     where
@@ -212,7 +249,6 @@ rules
       comp-extra* := <diff> (comp-def*, comp-use*);
       // lookup extra names and convert to labelcomp
       extra-labelcomp* := <map(explicate-2-api-compgen-use(|compgen-table, kind))> comp-extra*
-  
   
   explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
     labelcomp* -> [labelcomp*, extra-labelcomp*]
