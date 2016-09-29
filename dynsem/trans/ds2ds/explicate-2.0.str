@@ -90,7 +90,7 @@ rules
       rw* := <explication-2-use-to-comp> src;
       <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
     where // store premise-derived information
-      imp* := <filter(explication-2-gather-data-premise(|comps-table, imps-table); not(?Impo(arrow-def, _)))> prem*;
+      imp* := <collect(explication-2-gather-data-premise(|comps-table, imps-table); not(?Impo(arrow-def, _)))> prem*;
       <explication-2-api-add-imports(|comps-table, imps-table)> (arrow-def, imp*)
   
   explication-2-gather-data-premise(|comps-table, imps-table):
