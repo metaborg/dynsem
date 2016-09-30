@@ -12,7 +12,7 @@ rules
       Module(_, section'*) := <explication-2-explicate-top> mod
   
   explication-2-explicate-top =
-    m-in-analysis(explication-2-gather-data; unrename-all); unmark-vars
+    m-in-analysis(explication-2-gather-data; unmark-vars; unrename-all); unmark-vars
 
 signature
   sorts
