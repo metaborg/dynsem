@@ -297,4 +297,4 @@ rules
   explicate-2-api-compgen-use(|compgen-table, kind):
     comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(<hashtable-get(|comp-def)> compgen-table))
   
-  opt-with(s) = with(s)
+  opt-with(s) = s // with(s)
