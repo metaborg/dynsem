@@ -166,12 +166,13 @@ rules
   explication-2-explicate-rule(|comps-table, imps-table):
     Rule(prem*, infer, Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Rule(prem'*, infer, Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
-    where
+    where opt-with(
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <rulelhs-get-type> lhs;
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
       arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
-    where
+    )
+    where opt-with(
       // init storage
       compgen-table := <new-hashtable>;
       // introduce ROs adding missing ones
@@ -184,63 +185,73 @@ rules
       tc'* := <explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> tc*;
       // destroy storage
       <hashtable-destroy> compgen-table
+    )
   
   explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table):
     Formula(Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Formula(Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
-    where // figure out which arrow definition we are using
+    where opt-with( // figure out which arrow definition we are using
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <type-of> lhs;
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
       arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
-    where
+    )
+    where opt-with(
       // read missing ROs
       ro'* := <explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RO())> ro*;
       // read missing RWs
       sc'* := <explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> sc*;
       // introduce RWs adding missing ones
       tc'* := <explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> tc*
+    )
   
   explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table):
     CaseMatch(tb, case*) -> CaseMatch(tb, case'*)
-    where
+    where opt-with(
       // explicate the cases in forked compgen-tables returning [(case', compgen-table-fork)] 
       case-compgen-table* := <map(explication-2-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table))> case*;
       // introduce fresh variables for all the RW components
       all-rw* := <explication-2-api-get-components(|comps-table, imps-table); explicate-2-util-filter-transform-compdefs(explicate-2-util-comp-to-compdef|RW())> rule-arrow-def;
       <map(explicate-2-api-compgen-intro(|compgen-table, RW()))> all-rw*;
       case'* := <map(explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table))> case-compgen-table*
+    )
   
   explication-2-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table):
     t -> (<alltd(explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table-fork))> t, compgen-table-fork)
-    where
+    where opt-with(
       compgen-table-fork := <hashtable-copy> compgen-table
+    )
   
   explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table):
     (CasePattern(pat, prem*), compgen-table-fork) -> CasePattern(pat, prem'*)
-    where
+    where opt-with(
       prem'* := <explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table)> (prem*, compgen-table-fork)
+    )
 
   explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table):
     (CaseOtherwise(prem*), compgen-table-fork) -> CaseOtherwise(prem'*)
-    where
+    where opt-with(
       prem'* := <explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table)> (prem*, compgen-table-fork)
+    )
   
   explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table):
     (prem*, compgen-table-fork) -> [prem*, synonym*]
-    where
+    where opt-with(
       synonym* := <filter(explicate-2-introduce-synonym(|compgen-table-fork, compgen-table))> all-rw*
+    )
   
   explicate-2-introduce-synonym(|compgen-table-left, compgen-table-right):
     comp -> Formula(Match(Var(v-left), Var(v-right)))
-    where
+    where opt-with(
       v-left := <hashtable-get(|comp)> compgen-table-left;
-      v-right := <hashtable-get(|comp)> compgen-table-right;
+      v-right := <hashtable-get(|comp)> compgen-table-right
+    )
+    where 
       <not(eq)> (v-left, v-right)
   
   explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
     labelcomp* -> [labelcomp*, extra-labelcomp*]
-    where
+    where opt-with(
       // used components
       comp-use* := <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> labelcomp*;
       // definition components
@@ -249,10 +260,11 @@ rules
       comp-extra* := <diff> (comp-def*, comp-use*);
       // lookup extra names and convert to labelcomp
       extra-labelcomp* := <map(explicate-2-api-compgen-use(|compgen-table, kind))> comp-extra*
+    )
   
   explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
     labelcomp* -> [labelcomp*, extra-labelcomp*]
-    where
+    where opt-with(
       // used components
       comp-use* := <map(explicate-2-api-compgen-register(|compgen-table, kind))> labelcomp*;
       // definition components
@@ -261,6 +273,7 @@ rules
       comp-extra* := <diff> (comp-def*, comp-use*);
       // register and convert to labelcomp
       extra-labelcomp* := <map(explicate-2-api-compgen-intro(|compgen-table, kind))> comp-extra*
+    )
   
   explicate-2-util-comp-to-compdef = ?Comp(<id>, _)
   
@@ -268,17 +281,20 @@ rules
     filter(?Comp(_, kind); s)
   
   explicate-2-api-compgen-register(|compgen-table, kind):
-    LabelComp(Label(x), VarRef(v)) -> comp-def
-    where
+    LabelComp(Label(x), Var(v)) -> comp-def
+    where opt-with(
       comp-def := <lookup-def(|Components())> x;
       <hashtable-put(|comp-def, v)> compgen-table
+    )
   
   explicate-2-api-compgen-intro(|compgen-table, kind):
-    comp-def -> LabelComp(Label(<def-get-name> comp-def), VarRef(v))
-    where
+    comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(v))
+    where opt-with(
       v := <newname> $[_lifted_[<lookup-prop(|Type()); derw-type; get-sort-name> comp-def]];
       <hashtable-put(|comp-def, v)> compgen-table
+    )
   
   explicate-2-api-compgen-use(|compgen-table, kind):
-    comp-def -> LabelComp(Label(<def-get-name> comp-def), VarRef(<hashtable-get(|comp-def)> compgen-table))
-    
+    comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(<hashtable-get(|comp-def)> compgen-table))
+  
+  opt-with(s) = with(s)
