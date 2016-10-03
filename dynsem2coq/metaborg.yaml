@@ -15,6 +15,8 @@ contributions:
 - name: ds
   id: org.metaborg:dynsem:${metaborgVersion}
 language:
+  sdf:
+    enabled: false
   stratego:
     format: ctree
     args:
