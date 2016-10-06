@@ -84,6 +84,15 @@ rules /* store signatures */
       <store-prop(|ROs(), arrow-def)> ro*;
       <store-prop(|RWs(), arrow-def)> rw*
   
+  store-arrow:
+    d@MetaFunDecl(ro, cname, kid-srt*, rw, out-srt, rw) -> d
+    where
+      t_name := $[[cname]__Meta];
+      t_source := SimpleSort(t_name);
+      <store-sort> SortDecl(t_name);
+      <store-constructor> ConsDecl(cname, kid-srt*, t_source, Annos([MetafunAnno()]));
+      <store-arrow> ArrowDecl(ro, t_source, rw, "default", out-srt, rw)
+  
   store-semantic-components = Components(map(store-semantic-component))
   
   store-semantic-component:
@@ -218,7 +227,8 @@ rules
   check-signature:
     <?d@NativeOpDecl(cname, c*, _)
     + ?d@ConsDecl(cname, c*, _, _)
-    + ?d@NativeConsDecl(cname, c*, _)> -> <fail>
+    + ?d@NativeConsDecl(cname, c*, _)
+    + ?d@MetaFunDecl(_, cname, c*, _, _, _)> -> <fail>
     where
       arity := <length> c*;
       <lookup-defs(|Constructors())> (cname, arity) => [_, _ | _];

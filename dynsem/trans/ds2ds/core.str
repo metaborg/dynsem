@@ -22,6 +22,7 @@ strategies
     in-project-path(
       include-imports
       ; desugar-top
+      ; desugar-meta-functions-top
       ; fuse-sections
       ; desugar-varschemes-module
       ; add-extra-typeannos-module

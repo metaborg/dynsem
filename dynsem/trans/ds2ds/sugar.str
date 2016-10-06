@@ -11,6 +11,8 @@ signature
 	
 rules // desugaring  
 	
+	desugar-meta-functions-top = alltd(desugar-functions)
+	
 	desugar-functions :
 		Signatures(sigs1) -> 
 		Signatures([Sorts(ss), Constructors(cs) | sigs2])
@@ -31,7 +33,6 @@ rules // desugaring
       t_source := SimpleSort(t_name)
 
   desugar-top = 
-  	alltd(desugar-functions);
   	innermost(desugar); 
   	alltd(rules-concat)
   
