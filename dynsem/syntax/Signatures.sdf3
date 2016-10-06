@@ -37,7 +37,7 @@ context-free syntax // variable schemes
 context-free syntax // semantic components
 
   SignatureSection.Components = <
-    semantic components
+    components
       <{CompDecl "\n"}*>>
   
   CompDecl.CompDecl = [[ID] : [Type]]
