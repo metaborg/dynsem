@@ -126,28 +126,35 @@ rules
     Source(_, w*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RW())\)> w*
   
   explication-2-compute-explicated-arrows(|comps-table, imps-table) =
-    arrow-def* := <lookup-def-all(|Arrows())>;
-    // FIXME: this causes an O(N^N) complexity
-    stack := <range; map(!arrow-def*); concat> (1, <length> arrow-def*);
-    <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> stack
+    opt-with(
+      arrow-def* := <lookup-def-all(|Arrows())>;
+      // FIXME: this causes an O(N^N) complexity
+      stack := <range; map(!arrow-def*); concat> (1, <length> arrow-def*);
+      <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> stack
+    )
   
   explication-2-compute-explicated-arrows-work(|comps-table, imps-table):
     [] -> []
   
-  explication-2-compute-explicated-arrows-work(|comps-table, imps-table):
-    [arrow-def | defs] -> <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> defs
-    where
+  explication-2-compute-explicated-arrows-work(|comps-table, imps-table) =
+    ?[arrow-def | defs];
+    opt-with(
       impo* := <explication-2-api-get-imports(|comps-table, imps-table)> arrow-def;
       imported-arrow* := <map(?Impo(<id>, _)); nub> impo*;
-      compo* := <mapconcat(explication-2-compute-imported-comps(|impo*, comps-table, imps-table))> imported-arrow*;
-      <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, compo*)
+      imported-compo* := <mapconcat(explication-2-compute-imported-comps(|impo*, comps-table, imps-table))> imported-arrow*;
+      declared-compo* := <explication-2-api-get-components(|comps-table, imps-table)> arrow-def;
+      compo* := <diff(explication-2-util-compo-eq)> (imported-compo*, declared-compo*);
+      <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, compo*);
+      <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> defs
+    )
   
   explication-2-compute-imported-comps(|impo*, comps-table, imps-table):
     arrow-def -> new-compo*
-    where
+    where opt-with(
       compo* := <explication-2-api-get-components(|comps-table, imps-table)> arrow-def;
-      excluded-compo* := <filter(?Impo(arrow-def, <id>)); !(<id>, compo*); foldl(isect)> impo*;
-      new-compo* := <diff> (compo*, excluded-compo*)
+      compo-ex-by-import* := <filter(?Impo(arrow-def, <id>)); !(<id>, compo*); foldl(isect(explication-2-util-compo-eq))> impo*;
+      new-compo* := <diff(explication-2-util-compo-eq)> (compo*, compo-ex-by-import*)
+    )
   
   explication-2-explicate-arrow-decls-module(|comps-table, imps-table):
     Module(name, section*) -> Module(name, section'*)
@@ -282,6 +289,8 @@ rules
   
   explicate-2-util-comp-to-compdef = ?Comp(<id>, _)
   
+  explication-2-util-compo-eq = ?(Comp(x, _), Comp(x, _))
+  
   explicate-2-util-filter-transform-compdefs(s|kind) =
     filter(?Comp(_, kind); s)
   
@@ -302,4 +311,4 @@ rules
   explicate-2-api-compgen-use(|compgen-table, kind):
     comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(<hashtable-get(|comp-def)> compgen-table))
   
-  opt-with(s) = s // with(s)
+  opt-with(s) = with(s)
