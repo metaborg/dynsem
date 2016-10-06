@@ -139,20 +139,30 @@ rules
   explication-2-compute-explicated-arrows-work(|comps-table, imps-table) =
     ?[arrow-def | defs];
     opt-with(
+      // imports by arrow-def
       impo* := <explication-2-api-get-imports(|comps-table, imps-table)> arrow-def;
+      // hence imported arrows
       imported-arrow* := <map(?Impo(<id>, _)); nub> impo*;
+      // imported components
       imported-compo* := <mapconcat(explication-2-compute-imported-comps(|impo*, comps-table, imps-table))> imported-arrow*;
+      // components declared/gathered so far
       declared-compo* := <explication-2-api-get-components(|comps-table, imps-table)> arrow-def;
+      // thus to be added components
       compo* := <diff(explication-2-util-compo-eq)> (imported-compo*, declared-compo*);
+      // add components
       <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, compo*);
+      // process rest of stack
       <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> defs
     )
   
   explication-2-compute-imported-comps(|impo*, comps-table, imps-table):
     arrow-def -> new-compo*
     where opt-with(
+      // arrow components declared/gathered so far
       compo* := <explication-2-api-get-components(|comps-table, imps-table)> arrow-def;
+      // components excluded from imports
       compo-ex-by-import* := <filter(?Impo(arrow-def, <id>)); !(<id>, compo*); foldl(isect(explication-2-util-compo-eq))> impo*;
+      // components to be added
       new-compo* := <diff(explication-2-util-compo-eq)> (compo*, compo-ex-by-import*)
     )
   
@@ -168,7 +178,7 @@ rules
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
       arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty);
       (ro-comp*, rw-comp*) := <explication-2-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
-      (ro*, rw*) := <(map(\ Comp(x, _) -> Label(<def-get-name> x) \), map(\ Comp(x, _) -> Label(<def-get-name> x) \))> (ro-comp*, rw-comp*)
+      (ro*, rw*) := <(map(explication-2-util-comp-to-label), map(explication-2-util-comp-to-label))> (ro-comp*, rw-comp*)
 
   explication-2-explicate-rules-module(|comps-table, imps-table):
     Module(name, section*) -> Module(name, section'*)
@@ -223,8 +233,8 @@ rules
       // explicate the cases in forked compgen-tables returning [(case', compgen-table-fork)] 
       case-compgen-table* := <map(explication-2-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table))> case*;
       // introduce fresh variables for all the RW components
-      all-rw* := <explication-2-api-get-components(|comps-table, imps-table); explicate-2-util-filter-transform-compdefs(explicate-2-util-comp-to-compdef|RW())> rule-arrow-def;
-      <map(explicate-2-api-compgen-intro(|compgen-table, RW()))> all-rw*;
+      all-rw* := <explication-2-api-get-components(|comps-table, imps-table); explication-2-util-filter-transform-compdefs(explication-2-util-comp-to-compdef|RW())> rule-arrow-def;
+      <map(explication-2-api-compgen-intro(|compgen-table, RW()))> all-rw*;
       case'* := <map(explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table))> case-compgen-table*
     )
   
@@ -267,48 +277,51 @@ rules
       // used components
       comp-use* := <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> labelcomp*;
       // definition components
-      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); explicate-2-util-filter-transform-compdefs(explicate-2-util-comp-to-compdef|kind)> arrow-def;
+      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); explication-2-util-filter-transform-compdefs(explication-2-util-comp-to-compdef|kind)> arrow-def;
       // thus missing components
       comp-extra* := <diff> (comp-def*, comp-use*);
       // lookup extra names and convert to labelcomp
-      extra-labelcomp* := <map(explicate-2-api-compgen-use(|compgen-table, kind))> comp-extra*
+      extra-labelcomp* := <map(explication-2-api-compgen-use(|compgen-table, kind))> comp-extra*
     )
   
   explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
     labelcomp* -> [labelcomp*, extra-labelcomp*]
     where opt-with(
       // used components
-      comp-use* := <map(explicate-2-api-compgen-register(|compgen-table, kind))> labelcomp*;
+      comp-use* := <map(explication-2-api-compgen-register(|compgen-table, kind))> labelcomp*;
       // definition components
-      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); explicate-2-util-filter-transform-compdefs(explicate-2-util-comp-to-compdef|kind)> arrow-def;
+      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); explication-2-util-filter-transform-compdefs(explication-2-util-comp-to-compdef|kind)> arrow-def;
       // thus missing components
       comp-extra* := <diff> (comp-def*, comp-use*);
       // register and convert to labelcomp
-      extra-labelcomp* := <map(explicate-2-api-compgen-intro(|compgen-table, kind))> comp-extra*
+      extra-labelcomp* := <map(explication-2-api-compgen-intro(|compgen-table, kind))> comp-extra*
     )
   
-  explicate-2-util-comp-to-compdef = ?Comp(<id>, _)
+  explication-2-util-comp-to-compdef = ?Comp(<id>, _)
   
   explication-2-util-compo-eq = ?(Comp(x, _), Comp(x, _))
   
-  explicate-2-util-filter-transform-compdefs(s|kind) =
+  explication-2-util-comp-to-label:
+    Comp(compdef, _) -> Label(<def-get-name> compdef)
+  
+  explication-2-util-filter-transform-compdefs(s|kind) =
     filter(?Comp(_, kind); s)
   
-  explicate-2-api-compgen-register(|compgen-table, kind):
+  explication-2-api-compgen-register(|compgen-table, kind):
     LabelComp(Label(x), Var(v)) -> comp-def
     where opt-with(
       comp-def := <lookup-def(|Components())> x;
       <hashtable-put(|comp-def, v)> compgen-table
     )
   
-  explicate-2-api-compgen-intro(|compgen-table, kind):
+  explication-2-api-compgen-intro(|compgen-table, kind):
     comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(v))
     where opt-with(
       v := <newname> $[_lifted_[<lookup-prop(|Type()); derw-type; get-sort-name> comp-def]];
       <hashtable-put(|comp-def, v)> compgen-table
     )
   
-  explicate-2-api-compgen-use(|compgen-table, kind):
+  explication-2-api-compgen-use(|compgen-table, kind):
     comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(<hashtable-get(|comp-def)> compgen-table))
   
   opt-with(s) = with(s)
