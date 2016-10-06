@@ -3,6 +3,7 @@ module analysis/explicate-2.0
 imports
   signatures/-
   analysis/-
+  lib-ds
 
 rules
 
@@ -12,7 +13,11 @@ rules
       Module(_, section'*) := <explication-2-explicate-top> mod
   
   explication-2-explicate-top =
-    m-in-analysis(explication-2-gather-data; unmark-vars; unrename-all); unmark-vars
+    m-in-analysis(
+      explication-2-explicate
+      ; unmark-vars
+      ; unrename-all
+      ); unmark-vars
 
 signature
   sorts
@@ -59,7 +64,7 @@ strategies
   
 rules
 
-  explication-2-gather-data =
+  explication-2-explicate =
     where(explication-2-api-init-storage(?comps-table, ?imps-table));
     where(explication-2-gather-data-arrowdecl(|comps-table, imps-table));
     where(alltd(explication-2-gather-data-rule(|comps-table, imps-table)));
