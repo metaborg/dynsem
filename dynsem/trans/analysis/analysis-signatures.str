@@ -240,7 +240,7 @@ rules
       [] := c*
     where
       <fetch-elem(?ImplicitAnno())> anno*;
-      add-msg(|Error(), d, $[Non-unary constructors may not be implicit])
+      add-msg(|Error(), d, $[Only unary constructors can be implicit])
 
   check-signature:
     decl@ArrowDecl(_, in-srt, _, name, out-srt, _) -> <fail>
