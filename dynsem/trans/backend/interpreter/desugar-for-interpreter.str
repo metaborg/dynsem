@@ -254,7 +254,7 @@ rules /* resugar list construction */
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
   
   add-typeanno-to-list-tuples:
-    LabelComp(Label(l), List([])) -> LabelComp(l, TypedList([], list-class))
+    LabelComp(Label(l), List([])) -> LabelComp(Label(l), TypedList([], list-class))
     where
       list-sort := <lookup-def(|Components()); lookup-prop(|Type())> l;
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
