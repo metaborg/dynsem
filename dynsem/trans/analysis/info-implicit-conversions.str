@@ -75,9 +75,9 @@ rules
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
 
   gen-implicit-info-term(is-matching):
-    LabelComp(s, t) -> <fail>
+    LabelComp(Label(l), t) -> <fail>
     where
-      ty := <rw-type> s;
+      ty := <lookup-def(|Components()); lookup-prop(|Type())> l;
       t-ty := <gen-implicit-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|t)> (t-ty, ty)
 

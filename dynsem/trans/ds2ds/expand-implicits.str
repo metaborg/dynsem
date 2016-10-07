@@ -83,7 +83,7 @@ rules /* lift and expand subterms on build sides */
       (v', p2*) := <lift-where-indirect <+ !(v, [])> (v-ty, v)
 
   expand-implicits-termbuild:
-    LabelComp(l, t) -> (LabelComp(l, t'), p*)
+    LabelComp(Label(l), t) -> (LabelComp(Label(l), t'), p*)
     where
       ty := <lookup-def(|Components()); lookup-prop(|Type())> l;
       (t', p*) := <lift-where-indirect> (ty, t)
