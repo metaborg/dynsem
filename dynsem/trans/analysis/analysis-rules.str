@@ -121,7 +121,7 @@ rules /* store variables */
     ref@VarLabelComp(v) -> <fail>
     where
       <not(get-unique-matching-varscheme(get-all-component-defs))> v;
-      add-msg(|Error(), ref, $[No matching semantic component prefix for [<get-var-name> v]])
+      add-msg(|Error(), ref, $[No matching semantic component prefix for [<unrename-var; get-var-name> v]])
 
 rules
 
