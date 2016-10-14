@@ -47,7 +47,7 @@ rules
   	open-import(
   	  resolve-path,
       parse-ds-file-report(add-msg(|Error(), t, $[Import [import-string] cannot be be parsed]));
-  	  Module(id, filter(?Imports(_) <+ ?Signatures(_))),
+      Module(id, id),
   	  analyze-module
   	)
 

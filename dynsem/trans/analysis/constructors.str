@@ -10,6 +10,7 @@ signature
     VarSchemes: Namespace
     Constructors: Namespace
     Arrows: Namespace
+    Components: Namespace
     NativeDTFun: String -> Namespace
 
 signature
@@ -21,6 +22,8 @@ signature
     NativeTypeJString: Property
     NativeTypeSuperType : Property
     Use: Property
+    ROs: Property
+    RWs: Property
     
 signature
   sorts

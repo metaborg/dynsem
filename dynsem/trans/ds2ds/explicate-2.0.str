@@ -1,0 +1,327 @@
+module analysis/explicate-2.0
+
+imports
+  signatures/-
+  analysis/-
+  lib-ds
+
+rules
+
+  explication-2-explicate-module:
+    mod@Module(name, section*) -> Module($[[name]_explicated2], section'*)
+    where
+      Module(_, section'*) := <explication-2-explicate-top> mod
+  
+  explication-2-explicate-top =
+    m-in-analysis(
+      explication-2-explicate
+      ; unmark-vars
+      ; unrename-all
+      ); unmark-vars
+
+signature
+  sorts
+    Import Component ArrowDef CompDef CompKind
+  
+  constructors
+    Impo : ArrowDef * List(Component) -> Import  
+    Comp : CompDef * CompKind -> Component
+    RO : CompKind
+    RW : CompKind
+
+strategies
+  
+  explication-2-api-init-storage(sto-comps, sto-imps) =
+    comps-table := <new-hashtable; sto-comps>;
+    imps-table := <new-hashtable; sto-imps>;
+    arrow-def* := <lookup-def-all(|Arrows())>;
+    <map(\ arrow-def -> <hashtable-put(|arrow-def, [])> comps-table \)> arrow-def*;
+    <map(\ arrow-def -> <hashtable-put(|arrow-def, [])> imps-table \)> arrow-def*
+  
+  explication-2-api-destroy-storage(|comps-table, imps-table) =
+    <hashtable-destroy> comps-table;
+    <hashtable-destroy> imps-table
+    
+  explication-2-api-get-components(|comps, imps):
+    arrow-def -> <hashtable-get(|arrow-def)> comps
+  
+  explication-2-api-add-components(|comps, imps):
+    (arrow-def, new-compo*) -> compo*
+    where
+      old-compo* := <hashtable-get(|arrow-def)> comps;
+      compo* := <nub> [new-compo*, old-compo*];
+      <hashtable-put(|arrow-def, compo*)> comps
+  
+  explication-2-api-get-imports(|comps, imps):
+    arrow-def -> <hashtable-get(|arrow-def)> imps
+  
+  explication-2-api-add-imports(|comps, imps):
+    (arrow-def, new-imp*) -> imp*
+    where
+      old-imp* := <hashtable-get(|arrow-def)> imps;
+      imp* := <nub> [new-imp*, old-imp*];
+      <hashtable-put(|arrow-def, imp*)> imps
+  
+rules
+
+  explication-2-explicate =
+    where(explication-2-api-init-storage(?comps-table, ?imps-table));
+    where(explication-2-gather-data-arrowdecl(|comps-table, imps-table));
+    where(alltd(explication-2-gather-data-rule(|comps-table, imps-table)));
+    where(explication-2-compute-explicated-arrows(|comps-table, imps-table));
+    explication-2-explicate-arrow-decls-module(|comps-table, imps-table);
+    explication-2-explicate-rules-module(|comps-table, imps-table);
+    where(explication-2-api-destroy-storage(|comps-table, imps-table))
+  
+  explication-2-gather-data-arrowdecl(|comps-table, imps-table) =
+      lookup-def-all(|Arrows());
+      map(explication-2-associate-decl-components(|comps-table, imps-table))
+
+  explication-2-associate-decl-components(|comps-table, imps-table) =
+    ?arrow-def;
+    ro* := <lookup-prop(|ROs()); map(\ Label(x) -> Comp(<lookup-def(|Components())> x, RO()) \)> arrow-def;
+    rw* := <lookup-prop(|RWs()); map(\ Label(x) -> Comp(<lookup-def(|Components())> x, RW()) \)> arrow-def;
+    <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
+
+  explication-2-gather-data-rule(|comps-table, imps-table):
+    r@Rule(prem*, infer, Relation(reads, src@Source(lhs, _), arr, _)) -> r
+    where // figure out which arrow definition we are using
+      arrow-name := <get-arrow-name> arr;
+      lhs-ty := <rulelhs-get-type> lhs;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
+    where // associate components used in conclusion
+      ro* := <explication-2-use-to-comp> reads;
+      rw* := <explication-2-use-to-comp> src;
+      <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
+    where // store premise-derived information
+      imp* := <collect(explication-2-gather-data-premise(|comps-table, imps-table); not(?Impo(arrow-def, _)))> prem*;
+      <explication-2-api-add-imports(|comps-table, imps-table)> (arrow-def, imp*)
+  
+  explication-2-gather-data-premise(|comps-table, imps-table):
+    Formula(Relation(reads, src@Source(lhs, _), arr, _)) -> Impo(arrow-def, <nub> [ex-ro*, ex-rw*])
+    where // figure out which arrow definition we are using
+      arrow-name := <get-arrow-name> arr;
+      lhs-ty := <type-of> lhs;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+    where // associate components used in premise
+      ro* := <explication-2-use-to-comp> reads;
+      rw* := <explication-2-use-to-comp> src;
+      <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
+    where // compute imports
+      ex-ro* := <explication-2-use-to-compdef> reads;
+      ex-rw* := <explication-2-use-to-compdef> src
+  
+  explication-2-use-to-comp:
+    Reads(r*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RO()) \)> r*
+  
+  explication-2-use-to-comp:
+    Source(_, w*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RW()) \)> w*
+  
+  explication-2-use-to-compdef:
+    Reads(r*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RO()) \)> r*
+  
+  explication-2-use-to-compdef:
+    Source(_, w*) -> <map(\ LabelComp(Label(x), _) -> Comp(<lookup-def(|Components())> x, RW())\)> w*
+  
+  explication-2-compute-explicated-arrows(|comps-table, imps-table) =
+    opt-with(
+      arrow-def* := <lookup-def-all(|Arrows())>;
+      // FIXME: this causes an O(N^N) complexity
+      stack := <range; map(!arrow-def*); concat> (1, <length> arrow-def*);
+      <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> stack
+    )
+  
+  explication-2-compute-explicated-arrows-work(|comps-table, imps-table):
+    [] -> []
+  
+  explication-2-compute-explicated-arrows-work(|comps-table, imps-table) =
+    ?[arrow-def | defs];
+    opt-with(
+      // imports by arrow-def
+      impo* := <explication-2-api-get-imports(|comps-table, imps-table)> arrow-def;
+      // hence imported arrows
+      imported-arrow* := <map(?Impo(<id>, _)); nub> impo*;
+      // imported components
+      imported-compo* := <mapconcat(explication-2-compute-imported-comps(|impo*, comps-table, imps-table))> imported-arrow*;
+      // components declared/gathered so far
+      declared-compo* := <explication-2-api-get-components(|comps-table, imps-table)> arrow-def;
+      // thus to be added components
+      compo* := <diff(explication-2-util-compo-eq)> (imported-compo*, declared-compo*);
+      // add components
+      <explication-2-api-add-components(|comps-table, imps-table)> (arrow-def, compo*);
+      // process rest of stack
+      <explication-2-compute-explicated-arrows-work(|comps-table, imps-table)> defs
+    )
+  
+  explication-2-compute-imported-comps(|impo*, comps-table, imps-table):
+    arrow-def -> new-compo*
+    where opt-with(
+      // arrow components declared/gathered so far
+      compo* := <explication-2-api-get-components(|comps-table, imps-table)> arrow-def;
+      // components excluded from imports
+      compo-ex-by-import* := <filter(?Impo(arrow-def, <id>)); !(<id>, compo*); foldl(isect(explication-2-util-compo-eq))> impo*;
+      // components to be added
+      new-compo* := <diff(explication-2-util-compo-eq)> (compo*, compo-ex-by-import*)
+    )
+  
+  explication-2-explicate-arrow-decls-module(|comps-table, imps-table):
+    Module(name, section*) -> Module(name, section'*)
+    where
+      section'* := <map(try(Signatures(map(try(ArrowDeclarations(map(explication-2-explicate-arrow-decl(|comps-table, imps-table))))))))> section*
+
+  explication-2-explicate-arrow-decl(|comps-table, imps-table):
+    ArrowDecl(_, lhs-s, _, arrow-name, rhs-s, _) -> ArrowDecl(ArrowROs(ro*), lhs-s, ArrowRWs(rw*), arrow-name, rhs-s, ArrowRWs(rw*))
+    where
+      lhs-ty := <rw-type> lhs-s;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty);
+      (ro-comp*, rw-comp*) := <explication-2-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
+      (ro*, rw*) := <(map(explication-2-util-comp-to-label), map(explication-2-util-comp-to-label))> (ro-comp*, rw-comp*)
+
+  explication-2-explicate-rules-module(|comps-table, imps-table):
+    Module(name, section*) -> Module(name, section'*)
+    where
+      section'* := <alltd(explication-2-explicate-rule(|comps-table, imps-table))> section*
+
+  explication-2-explicate-rule(|comps-table, imps-table):
+    Rule(prem*, infer, Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
+      Rule(prem'*, infer, Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
+    where opt-with(
+      arrow-name := <get-arrow-name> arr;
+      lhs-ty := <rulelhs-get-type> lhs;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
+    )
+    where opt-with(
+      // init storage
+      compgen-table := <new-hashtable>;
+      // introduce ROs adding missing ones
+      ro'* := <explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RO())> ro*;
+      // introduce RWs adding missing ones
+      sc'* := <explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> sc*;
+      // explicate premises
+      prem'* := <alltd(explication-2-explicate-premise(|comps-table, imps-table, arrow-def, compgen-table))> prem*;
+      // read missing RWs
+      tc'* := <explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> tc*;
+      // destroy storage
+      <hashtable-destroy> compgen-table
+    )
+  
+  explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table):
+    Formula(Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
+      Formula(Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
+    where opt-with( // figure out which arrow definition we are using
+      arrow-name := <get-arrow-name> arr;
+      lhs-ty := <type-of> lhs;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+    )
+    where opt-with(
+      // read missing ROs
+      ro'* := <explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RO())> ro*;
+      // read missing RWs
+      sc'* := <explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> sc*;
+      // introduce RWs adding missing ones
+      tc'* := <explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> tc*
+    )
+  
+  explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table):
+    CaseMatch(tb, case*) -> CaseMatch(tb, case'*)
+    where opt-with(
+      // explicate the cases in forked compgen-tables returning [(case', compgen-table-fork)] 
+      case-compgen-table* := <map(explication-2-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table))> case*;
+      // introduce fresh variables for all the RW components
+      all-rw* := <explication-2-api-get-components(|comps-table, imps-table); explication-2-util-filter-transform-compdefs(explication-2-util-comp-to-compdef|RW())> rule-arrow-def;
+      <map(explication-2-api-compgen-intro(|compgen-table, RW()))> all-rw*;
+      case'* := <map(explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table))> case-compgen-table*
+    )
+  
+  explication-2-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table):
+    t -> (<alltd(explication-2-explicate-premise(|comps-table, imps-table, rule-arrow-def, compgen-table-fork))> t, compgen-table-fork)
+    where opt-with(
+      compgen-table-fork := <hashtable-copy> compgen-table
+    )
+  
+  explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table):
+    (CasePattern(pat, prem*), compgen-table-fork) -> CasePattern(pat, prem'*)
+    where opt-with(
+      prem'* := <explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table)> (prem*, compgen-table-fork)
+    )
+
+  explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table):
+    (CaseOtherwise(prem*), compgen-table-fork) -> CaseOtherwise(prem'*)
+    where opt-with(
+      prem'* := <explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table)> (prem*, compgen-table-fork)
+    )
+  
+  explicate-2-introduce-synonyms-in-case-prems(|all-rw*, compgen-table):
+    (prem*, compgen-table-fork) -> [prem*, synonym*]
+    where opt-with(
+      synonym* := <filter(explicate-2-introduce-synonym(|compgen-table-fork, compgen-table))> all-rw*
+    )
+  
+  explicate-2-introduce-synonym(|compgen-table-left, compgen-table-right):
+    comp -> Formula(Match(Var(v-left), Var(v-right)))
+    where opt-with(
+      v-left := <hashtable-get(|comp)> compgen-table-left;
+      v-right := <hashtable-get(|comp)> compgen-table-right
+    )
+    where 
+      <not(eq)> (v-left, v-right)
+  
+  explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
+    labelcomp* -> [labelcomp*, extra-labelcomp*]
+    where opt-with(
+      // used components
+      comp-use* := <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> labelcomp*;
+      // definition components
+      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); explication-2-util-filter-transform-compdefs(explication-2-util-comp-to-compdef|kind)> arrow-def;
+      // thus missing components
+      comp-extra* := <diff> (comp-def*, comp-use*);
+      // lookup extra names and convert to labelcomp
+      extra-labelcomp* := <map(explication-2-api-compgen-use(|compgen-table, kind))> comp-extra*
+    )
+  
+  explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
+    labelcomp* -> [labelcomp*, extra-labelcomp*]
+    where opt-with(
+      // used components
+      comp-use* := <map(explication-2-api-compgen-register(|compgen-table, kind))> labelcomp*;
+      // definition components
+      comp-def* := <explication-2-api-get-components(|comps-table, imps-table); explication-2-util-filter-transform-compdefs(explication-2-util-comp-to-compdef|kind)> arrow-def;
+      // thus missing components
+      comp-extra* := <diff> (comp-def*, comp-use*);
+      // register and convert to labelcomp
+      extra-labelcomp* := <map(explication-2-api-compgen-intro(|compgen-table, kind))> comp-extra*
+    )
+  
+  explication-2-util-comp-to-compdef = ?Comp(<id>, _)
+  
+  explication-2-util-compo-eq = ?(Comp(x, _), Comp(x, _))
+  
+  explication-2-util-comp-to-label:
+    Comp(compdef, _) -> Label(<def-get-name> compdef)
+  
+  explication-2-util-filter-transform-compdefs(s|kind) =
+    filter(?Comp(_, kind); s)
+  
+  explication-2-api-compgen-register(|compgen-table, kind):
+    LabelComp(Label(x), Var(v)) -> comp-def
+    where opt-with(
+      comp-def := <lookup-def(|Components())> x;
+      <hashtable-put(|comp-def, v)> compgen-table
+    )
+  
+  explication-2-api-compgen-intro(|compgen-table, kind):
+    comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(v))
+    where opt-with(
+      v := <newname> $[_lifted_[<lookup-prop(|Type()); derw-type; get-sort-name> comp-def]];
+      <hashtable-put(|comp-def, v)> compgen-table
+    )
+  
+  explication-2-api-compgen-use(|compgen-table, kind):
+    comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(<hashtable-get(|comp-def)> compgen-table))
+  
+  opt-with(s) = s // with(s)

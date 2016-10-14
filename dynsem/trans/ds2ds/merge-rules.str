@@ -97,14 +97,14 @@ rules
     	(p3*, tc'*) := <map(rename-out-component); unzip; (concat, id)> tc*
 
   rename-in-component:
-  	LabelComp(ty, v) -> ([Formula(Match(v', v))], LabelComp(ty, v'))
+  	LabelComp(l@Label(x), v) -> ([Formula(Match(v', v))], LabelComp(l, v'))
   	where
-  		v' := VarRef($[[<get-sort-name; lower-case> ty]_in])
+  		v' := VarRef($[[<lookup-def(|Components()); lookup-prop(|Type()); derw-type; get-sort-name; lower-case> x]_in])
 
   rename-out-component:
-  	LabelComp(ty, v) -> ([Formula(Match(v, v'))], LabelComp(ty, v'))
+  	LabelComp(l@Label(x), v) -> ([Formula(Match(v, v'))], LabelComp(l, v'))
   	where
-  		v' := VarRef($[[<get-sort-name; lower-case> ty]_out])
+  		v' := VarRef($[[<lookup-def(|Components()); lookup-prop(|Type()); derw-type; get-sort-name; lower-case> x]_out])
 
   rename-output:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arrow, Target(rhs, tc*))) ->

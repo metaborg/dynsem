@@ -17,7 +17,6 @@ rules // utils for deterministic variable name generation
  
   next-variable = next-variable(|"_lifted_")
 
-
 rules // projections for sorts
   
   get-sort-name =
@@ -27,65 +26,15 @@ rules // projections for sorts
     + ?MapSort(k-s, v-s); !$[L_[<get-sort-name> k-s]_[<get-sort-name> v-s]]
     + ?TupleSort(s*); !$[T_[<map(get-sort-name); separate-by(|"_"); concat-strings> s*]]
   
-//  get-listsort-elementname = ?ListSort(<get-sort-name>)
-
 rules
     
-  // util for getting a set of arrows and their nonwritables and writables
-  get-module-arrows-elements:
-    mod -> <map(\ arrow-name -> <get-module-arrow-elements(|arrow-name)> mod \)> arrow-name*
-    with
-      arrow-name* := <get-module-arrow-declarations; map(get-arrow-name)> mod
-  
-  get-module-arrow-declaration(|arrow-name) = collect-one(?ArrowDecl(_, _, _, arrow-name, _, _))
-  
   get-module-arrow-declarations = collect-all(?ArrowDecl(_, _, _, _, _, _))
 
-  get-module-arrow-elements(|arrow-name):
-    mod -> (arrow-name, nonwritable*, writable*)
-    with
-      nonwritable* := <get-module-arrow-nonwritables(|arrow-name)> mod;
-      writable* := <get-module-arrow-writables(|arrow-name)> mod
-  
-  get-module-arrow-nonwritables(|arrow-name) =
-    where(arrow-name' := <strip-annos> arrow-name);
-    collect-one(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name'); get-rule-nonwritables)
-    <+ ![]
-  
-  get-module-arrow-writables(|arrow-name) =
-    where(arrow-name' := <strip-annos> arrow-name);
-    collect-one(where(get-rule-relation; get-relation-arrow-name; strip-annos; ?arrow-name'); get-rule-writables)
-    <+ ![]
-  
-  get-rule-nonwritables:
-    Rule(_, _, Relation(Reads(nonwritable*), _, _, _)) -> nonwritable*
-  
-  get-rule-writables:
-    Rule(_, _, Relation(_, Source(_, writable*), _, _)) -> writable*
-
 rules
-
-  get-rule-premises:
-    Rule(prem*, _, _) -> prem*
 
   get-rule-relation:
     Rule(_, _, rel) -> rel
 
-  get-formula-relation:
-    Formula(rel) -> rel
-
-  get-component-sort:
-    LabelComp(s, _) -> s
-
-  get-relation-writables:
-    Relation(_, _, NamedDynamicEmitted(comps, _), _) -> comps
-
-  get-relation-readables:
-    Relation(Reads(read*), _, _, _) -> read*
-
-  get-relation-changeables:
-    Relation(_, Source(_, sc*), _, Target(_, tc*)) -> [sc*, tc*]
-  
   get-relation-source:
     Relation(_, Source(src, _), _, _) -> src
   
@@ -104,250 +53,7 @@ rules
   get-arrow-name:
     NamedDynamic(name) -> name
 
-rules // new extracted components (working for inference of components on multiple arrow types)
-  
-  m-in-extracted-components(s) =
-  	{ WritableComps, ReadableComps, ChangeableComps:
-  		where(
-        ?t;
-        arrow* := <get-module-arrow-declarations; map(get-arrow-name)> t;
-        <map({
-          ?arrow;
-          rules(
-            WritableComps: arrow -> []
-            ReadableComps: arrow -> []
-            ChangeableComps: arrow -> []
-          )
-          })> arrow*;
-        rule* := <collect-all(?Rule(_, _, _))> t;
-        <repeat(where(extract-components(|arrow*)))> rule*
-  		);
-  		s
-  	}
-  
-  extract-components(|arrow*):
-    rule* -> rule*
-    with
-      init-arrow-comps := <map(CompList)> arrow*;
-      <map(extract-components-from-conclusion)> rule*;
-      <map(extract-components-from-premises)> rule*;
-      exit-arrow-comps := <map(CompList)> arrow*
-    where
-      <not(eq)> (init-arrow-comps, exit-arrow-comps)
-
-rules // extract components        
-
-  CompList:
-    arrow -> <make-set> [readable*, changeable*, writable*]
-    with
-      readable* := <ReadableComps> arrow;
-      changeable* := <ChangeableComps> arrow;
-      writable* := <WritableComps> arrow
-  
-  NonWritableComps:
-  	arrow -> <make-set> [readable*, changeable*]
-  	with
-  		readable* := <ReadableComps> arrow;
-  		changeable* := <ChangeableComps> arrow
-  
-  NonReadableComps:
-  	arrow -> <make-set> [writable*, changeable*]
-    with
-      writable* := <WritableComps> arrow;
-      changeable* := <ChangeableComps> arrow
-  
-  extract-components-from-conclusion:
-    rule -> rule
-    with
-      relation := <get-rule-relation> rule;
-      arrow := <get-relation-arrow-name> relation;
-      locl-readable* := <get-relation-readables; map(get-component-sort)> relation;
-      locl-writable* := <get-relation-writables; map(get-component-sort)> relation;
-      locl-changeable* := <get-relation-changeables; map(get-component-sort)> relation;
-      glob-readable* := <ReadableComps> arrow;
-      glob-writable* := <WritableComps> arrow;
-      glob-changeable* := <ChangeableComps> arrow;
-      readable* := <make-set> [locl-readable*, glob-readable*];
-      writable* := <make-set> [locl-writable*, glob-writable*];
-      changeable* := <make-set> [locl-changeable*, glob-changeable*];
-      rules(
-        ReadableComps : arrow -> <sort-comps; diff(|changeable*)> readable*
-        WritableComps : arrow -> <sort-comps> writable*
-        ChangeableComps : arrow -> <sort-comps> changeable*
-      )
-  
-  extract-components-from-premises:
-    rule -> rule
-    with
-      conc-arrow := <get-rule-relation; get-relation-arrow-name> rule;
-      conc-readable* := <ReadableComps> conc-arrow;
-      conc-writable* := <WritableComps> conc-arrow;
-      conc-changeable* := <ChangeableComps> conc-arrow;
-      conc-comps := <make-set> [conc-readable*, conc-writable*, conc-changeable*];
-      prem-arrow* := <get-rule-premises; filter(get-formula-relation; get-relation-arrow-name; not(?conc-arrow)); make-set> rule;
-      prem-readable* := <map(ReadableComps); concat; make-set> prem-arrow*;
-      prem-writable* := <map(WritableComps); concat; make-set> prem-arrow*;
-      prem-changeable* := <map(ChangeableComps); concat; make-set> prem-arrow*;
-      new-readable* := <diff> (prem-readable*, conc-comps);
-      new-writable* := <diff> (prem-writable*, conc-comps);
-      new-changeable* := <diff> (prem-changeable*, conc-comps);
-      readable* := <make-set> [new-readable*, conc-readable*];
-      writable* := <make-set> [new-writable*, conc-writable*];
-      changeable* := <make-set> [new-changeable*, conc-changeable*];
-      rules(
-        ReadableComps : conc-arrow -> <sort-comps; diff(|changeable*)> readable*
-        WritableComps : conc-arrow -> <sort-comps> writable*
-        ChangeableComps : conc-arrow -> <sort-comps> changeable*
-      )
-  
-  sort-comps = qsort(comp-gt)
-  
-  diff(|l2):
-    l1 -> <diff> (l1, l2)
-  
-  comp-gt = ?(SimpleSort(l), SimpleSort(r)); <string-gt> (l, r)
-  
-  comp-gt =
-    ?(ListSort(_), SimpleSort(_))
-  
-  comp-gt =
-    ?(ListSort(l), ListSort(r)); <string-gt> (l, r)
-
-  comp-gt =
-    ?(MapSort(_, _), <not(?MapSort(_, _))>)
-
-  comp-gt = 
-    ?(MapSort(lkey, _), MapSort(rkey, _)); <not(eq); comp-gt> (lkey, rkey)
-  
-  comp-gt =
-    ?(MapSort(key, lvalue), MapSort(key, rvalue)); <comp-gt> (lvalue, rvalue)
-      
-rules // component operations
-  
-  comp-var(|num):
-    name -> $[_lifted_[<lower-case> name]_[num]]
-  
-  mk-label-comps(|num) = 
-    map(mk-label-comp(|num))
-   
-  mk-label-comp(|num) :
-    name -> LabelComp(name, VarRef(<get-sort-name; comp-var(|num)> name))
-
-  mk-label-comp-str(|num) :
-    name -> $[[name]([<get-sort-name; comp-var(|num)> name])]
-
-  mk-label-comp(default|num) :
-    name -> <default <+ mk-label-comp(|num)> name
-    
-signature
-  constructors
-    N : T -> T
-        
-rules // pretty-printing terms 
-  
- pp-comps =
-    !$<[<<map(pp-comp); separate-by(|", ")>>]>
-    
- pp-comps-norm =
-    !$<[<<map(pp-comp-norm); separate-by(|", ")>>]>
-  
-  pp-comp :
-    LabelComp(name, t) -> $[[name]([<pp-term>t])]
-
-  pp-comp-norm :
-    LabelComp(name, t) -> $[[name]([<pp-term-norm>t])]
- 
-  pp-term-norm =
-    norm-all-cons; pp-term
-  
-  norm-all-cons = 
-    bottomup(try(norm-term))
-  
-  norm-term :
-    Con(c, t*) -> N(Con(c, t*))
-  
-  tr-list(s|sep) = 
-    map(s); separate-by(|sep); concat-strings
-  
-  pp-terms = 
-    map(pp-term); separate-by(|","); concat-strings
-    
-  pp-term :
-    N(t) -> $[<n>[<pp-term>t]]
-  
-  pp-term :
-    Con(c, t*) -> $[[c]([<pp-terms>t*])]
-    
-  pp-term :
-    Var(x) -> x
-
-  pp-term :
-    String(s) -> $["[<un-double-quote> s]"]
-    
-  pp-term :
-    Fresh() -> $[<new>]
-    
-  pp-term :
-    Map(l) -> $[Map([<pp-bindings> l])]
-    
-  pp-bindings :
-    [] -> $<[]>
-    
-  pp-bindings :
-    [b@Bind(x, y)] -> $<[<<pp-term>b>]>
-
-  // pp-bindings :
-  //   [b@Bind(x, y) | ts@[_|_]] -> $<[<<pp-term>b> | <<pp-bindings> ts>]>
-    
-  pp-bindings :
-    [MapEntry(t)] -> <pp-term>t
-    
-  // pp-bindings :
-  //   [MapEntry(t) | ts@[_|_]] -> $[<conc>([<pp-term>t], [<pp-bindings>ts])]
-
-  pp-bindings :
-    [t@Binds(_,_)] -> <pp-term>t
-
-  // pp-bindings :
-  //   [t@Binds(_,_) | ts@[_|_]] -> $[<conc>([<pp-term>t], [<pp-bindings>ts])]
-        
-  pp-term :
-    MapEntry(t) -> <pp-term>t
-
-  pp-term :
-    Bind(x, y) -> $[Bind([<pp-term>x], [<pp-term>y])]
-    
-  pp-term :
-    MapSelect(m, k) ->
-      $[<ds-mapselect>([<pp-term>k], [<pp-term>m])]
-      
-  pp-term :
-    MapExtend(t1, t2) -> 
-      $[<ds-mapextend>([<pp-term>t1], [<pp-term>t2])]
-      
-  pp-term :
-    Binds(t1, t2) -> $[<ds-binds>([<pp-term>t1], [<pp-term>t2])]
-
-  pp-term :
-    List(l) -> <pp-list> l
-        
-  pp-list :
-    [t*] -> $<[<<pp-terms>t*>]>
-    
-  pp-term :
-    ListTail(t*, t) -> $<[<<pp-terms>t*> | <<pp-term>t>]>
-    
-  // pp-term :
-  //   y -> <pp-aterm>
-    
-rules
-  
-  // pp-aterm :
-  //   c#(t*) -> $[[c]([<tr-list(pp-aterm|",")>t*])]
-
 rules // utils
-	
-	w-log-timed(s|msg) = where(log-timed(s|msg))
 	
 	log-timed(s|msg) =
       where(times => starttime)
@@ -363,24 +69,3 @@ rules // utils
                         ]
       ; log(|Info(),<id>)
       )
-  
-  foldl(s1, s2) = <foldl(s2)> (<id>, <s1>)
-
-  frequency-list = frequency-list-internal(|<new-hashtable>)
-
-  frequency-list-internal(|tbl):
-    [] -> <hashtable-getlist> tbl
-  
-  frequency-list-internal(|tbl):
-    [x | xs] -> <frequency-list-internal(|tbl)> xs
-    where
-      if hits := <hashtable-get(|x)> tbl
-      then
-        <hashtable-put(|x, <inc> hits)> tbl
-      else
-        <hashtable-put(|x, 1)> tbl
-      end
-
-  
-  
-  

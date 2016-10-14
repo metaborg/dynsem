@@ -44,22 +44,28 @@ rules
   type-of =
     type-check-build-helper
 
-  type-of-applicable-arrow(coerce-s):
-    (arrow-type*, term-ty) -> <fetch-elem(where(\ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-type*
+  get-applicable-arrowdef(coerce-s):
+    (arrow-def*, term-ty) -> <fetch-elem(where(lookup-prop(|Type()); \ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-def*
 
-  lookup-applicable-arrow-def:
-    type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
+//  lookup-applicable-arrow-def:
+//    term-ty -> <get-applicable-arrowdef(type-coerce-direct(fail))> (<lookup-def-all(|Arrows())>, term-ty)
 
-  is-applicable-arrow-def(|type-name) =
-    ?ArrowType(type-name, _)
-    <+
-    ?ArrowType(ltype-name, _);
-    <type-coerce-direct(fail)> (type-name, ltype-name)
+//  type-of-applicable-arrow(coerce-s):
+//    (arrow-type*, term-ty) -> <fetch-elem(where(\ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-type*
 
-  lookup-arrow-def:
-    (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
-    where
-      <lookup-applicable-arrow-def> c-ty => arrow*
+//  lookup-applicable-arrow-def:
+//    type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
+//
+//  is-applicable-arrow-def(|type-name) =
+//    ?ArrowType(type-name, _)
+//    <+
+//    ?ArrowType(ltype-name, _);
+//    <type-coerce-direct(fail)> (type-name, ltype-name)
+//
+//  lookup-arrow-def:
+//    (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
+//    where
+//      <lookup-applicable-arrow-def> c-ty => arrow*
 
 rules // projections
   
@@ -78,9 +84,25 @@ rules // type properties
 
 rules /* variable scheme queries */
 
-  get-reverse-matching-varschemes =
+  get-var-name:
+    Var(x) -> x
+  
+  get-var-name:
+    VarRef(x) -> x
+
+  get-label-name:
+    Label(x) -> x
+
+  get-all-varschemes =
+    <concat> [<get-all-component-defs>, <get-all-varscheme-defs>]    
+
+  get-all-component-defs = lookup-def-all(|Components())
+  
+  get-all-varscheme-defs = lookup-def-all(|VarSchemes())
+
+  get-reverse-matching-varschemes(get-definitions) =
     ?type;
-    lookup-def-all(|VarSchemes()); filter(is-type-matches-varscheme(|type))
+    get-definitions; filter(is-type-matches-varscheme(|type))
 
   is-type-matches-varscheme(|type) =
     where(
@@ -88,17 +110,17 @@ rules /* variable scheme queries */
       ?type    
     )
 
-  get-unique-matching-varscheme =
-    get-matching-varschemes;
+  get-unique-matching-varscheme(get-definitions) =
+    get-matching-varschemes(get-definitions);
     Hd
 
-  get-matching-varschemes =
+  get-matching-varschemes(get-definitions) =
     not(is-string);
-    (?Var(<id>) + ?VarRef(<id>));
-    get-matching-varschemes
+    (get-var-name <+ get-label-name);
+    get-matching-varschemes(get-definitions)
 
-  get-matching-varschemes:
-    used-word -> <lookup-def-all(|VarSchemes()); filter(is-name-matches-varscheme(|used-word))>
+  get-matching-varschemes(get-definitions):
+    used-word -> <get-definitions; filter(is-name-matches-varscheme(|used-word))>
     where is-string
   
   is-name-matches-varscheme(|used-word):

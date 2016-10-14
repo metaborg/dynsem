@@ -51,18 +51,16 @@ rules
     Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> <fail>
     where
       arrow-name := <get-arrow-name> arr;
-      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
       lhs-ty := <gen-implicit-type-of(id)> lhs;
-      ArrowType(dec-lhs-ty, _) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
+      ArrowType(dec-lhs-ty, _) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (<lookup-defs(|Arrows())> arrow-name, lhs-ty);
       <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
 
   gen-implicit-info-conclusion:
     Rule(_, _, Relation(_, Source(lhs, _), arr, Target(rhs, _))) -> <fail>
     where
       arrow-name := <get-arrow-name> arr;
-      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
       lhs-ty := <rulelhs-get-type> lhs;
-      ArrowType(_, dec-rhs-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
+      ArrowType(_, dec-rhs-ty) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (<lookup-defs(|Arrows())> arrow-name, lhs-ty);
       <gen-implicit-info-fact(fail|rhs)> (<gen-implicit-type-of(fail)> rhs, dec-rhs-ty)
   
   gen-implicit-info-premise:
@@ -77,9 +75,9 @@ rules
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
 
   gen-implicit-info-term(is-matching):
-    LabelComp(s, t) -> <fail>
+    LabelComp(Label(l), t) -> <fail>
     where
-      ty := <rw-type> s;
+      ty := <lookup-def(|Components()); lookup-prop(|Type())> l;
       t-ty := <gen-implicit-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|t)> (t-ty, ty)
 

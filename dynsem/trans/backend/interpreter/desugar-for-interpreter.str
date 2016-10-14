@@ -132,7 +132,7 @@ rules /* native operators */
 
 rules /* desugar rule conclusion/premise source */
 
-  desugar-semantic-components = alltd(desugar-rule-conclusion-source); alltd(desugar-relation-premise-source)
+  desugar-semantic-components = topdown(repeat(desugar-rule-conclusion-source <+ desugar-relation-premise-source))
 
   desugar-rule-conclusion-source:
     Rule(p*, infer, Relation(Reads(ro*), Source(t, rw*), rel, tgt), kind, class) -> Rule(p*, infer, Relation(Source(t, [ro*, rw*]), rel, tgt), kind, class) 
@@ -254,8 +254,9 @@ rules /* resugar list construction */
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
   
   add-typeanno-to-list-tuples:
-    LabelComp(list-sort, List([])) -> LabelComp(list-sort, TypedList([], list-class))
+    LabelComp(Label(l), List([])) -> LabelComp(Label(l), TypedList([], list-class))
     where
+      list-sort := <lookup-def(|Components()); lookup-prop(|Type())> l;
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
   
   add-typeanno-to-list-tuples:

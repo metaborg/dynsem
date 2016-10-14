@@ -15,19 +15,13 @@ rules
   add-extra-typeannos = alltd(add-extra-typeannos-rule); alltd(add-extra-typeannos-term)
   
   add-extra-typeannos-rule:
-    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(l@List([]), tc*))) ->
-      Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(l, bu-ty-str), tc*)))
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(t, tc*))) -> 
+      Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(t, bu-ty-str), tc*)))
     where
-      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      ArrowType(ma-ty, bu-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, <type-of> lhs);
-      bu-ty-str := <derw-type> bu-ty
-  
-  add-extra-typeannos-rule:
-    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(m@Map([]), tc*))) ->
-      Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(m, bu-ty-str), tc*)))
+      <?List([]) + ?Map([])> t
     where
-      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      ArrowType(ma-ty, bu-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, <type-of> lhs);
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (arrow-def*, <type-of> lhs);
       bu-ty-str := <derw-type> bu-ty
 
   add-extra-typeannos-term:

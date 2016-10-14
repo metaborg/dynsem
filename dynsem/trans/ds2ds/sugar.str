@@ -11,29 +11,28 @@ signature
 	
 rules // desugaring  
 	
+	desugar-meta-functions-top = alltd(desugar-functions)
+	
 	desugar-functions :
 		Signatures(sigs1) -> 
-		Signatures(
-			[ Sorts(ss)
-			, ArrowDeclarations(as) 
-			| sigs2])
-		where <collect(extract-arrow); unzip> sigs1 => (as@[_|_], ss);
-		      <alltd(desugar-fundecl)> sigs1 => sigs2
-		      
-  desugar-fundecl :
-  	FunDecl(x, ts, t) -> ConsDecl(x, ts, t_source, Annos([MetafunAnno()]))
-  	where 
-  		t_name := $[[x]__Arrow];
-  	  t_source := SimpleSort(t_name)
+		Signatures([Sorts(ss), Constructors(cs) | sigs2])
+		where
+		  <collect(extract-fun-sorts-constructors); unzip> sigs1 => (ss@[_|_], cs@[_|_]);
+		  <alltd(desugar-fundecl)> sigs1 => sigs2
+  
+  extract-fun-sorts-constructors:
+    MetaFunDecl(_, x, lhs-s*, _, _, _) -> (SortDecl(t_name), ConsDecl(x, lhs-s*, t_source, Annos([MetafunAnno()])))
+    where
+      t_name := $[[x]__Meta];
+      t_source := SimpleSort(t_name)
+  
+  desugar-fundecl:
+    MetaFunDecl(ro*, x, lhs-s*, rw1*, rhs-s, rw2*) -> DefaultArrowDecl(ro*, t_source, rw1*, rhs-s, rw2*)
+    where
+      t_name := $[[x]__Meta];
+      t_source := SimpleSort(t_name)
 
-  extract-arrow :
-  	FunDecl(x, ts, t) -> (DefaultArrowDecl(NoArrowROs(), t_source, NoArrowRWs(), t, NoArrowRWs()), SortDecl(t_name))
-  	where 
-  		t_name := $[[x]__Arrow];
-  	  t_source := SimpleSort(t_name)
-  	  	
   desugar-top = 
-  	alltd(desugar-functions);
   	innermost(desugar); 
   	alltd(rules-concat)
   
@@ -96,9 +95,6 @@ rules // desugaring
     
   desugar :
     IsValue(term) -> TermEq(Con("IsValue",[term]),Con("True",[]))
-
-  desugar :
-    MapSort_Deprecated(t1, t2) -> MapSort(t1, t2)
 
   desugar :
     Map([b | b*@[_|_]]) -> MapExtend(Map([b]), Map(b*))

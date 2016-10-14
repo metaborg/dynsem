@@ -43,27 +43,26 @@ rules /* store variables */
     log-hitcount
   
   store-rules =
-    Rules(with(prime-typaths); map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
+    Rules(with(prime-typaths); map(store-rule /* <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked])) */))
 
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
     where
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <rulelhs-get-type> lhs;
-      if arrow-def := <lookup-def(|Arrows())> arrow-name
+      if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
       then
-	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty) => arrow-ty
-	      then
-          <store-rule> (arrow-ty, r)
-	      else
-	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
-	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
-	      end
-	    else
+        if arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
+        then
+          <store-rule> (<lookup-prop(|Type())> arrow-def, r)
+        else
+          arrow-ma-ty* := <map(lookup-prop(|Type()); ?ArrowType(<id>, _))> arrow-def*;
+          add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
+        end
+      else
         add-msg(|Error(), arr, $[Arrow [arrow-name] is not declared])
-      end
-
+      end 
+    
   rulelhs-get-type:
     Con(cname, c*) -> ty
     where
@@ -103,13 +102,26 @@ rules /* store variables */
       <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> tc*
 
   labelcomp-to-type-term-pair:
-    LabelComp(ty, v) -> (<rw-type> ty, v)
+    LabelComp(Label(x), v) -> (ty, v)
+    where
+      ty := <lookup-def(|Components()); lookup-prop(|Type())> x
   
   labelcomp-to-type-term-pair:
-  	VarLabelComp(v) -> (scheme-ty, v)
+    LabelComp(Label(x), v) -> <fail>
+    where
+      <not(lookup-def(|Components()))> x;
+      add-msg(|Error(), x, $[Unknown semantic component [x]])
+  
+  labelcomp-to-type-term-pair:
+  	VarLabelComp(v) -> (ty, v)
   	where
-  	  scheme-def := <get-unique-matching-varscheme> v;
-  	  scheme-ty := <lookup-prop(|Type())> scheme-def
+  	  ty := <get-unique-matching-varscheme(get-all-component-defs); lookup-prop(|Type())> v
+  
+  labelcomp-to-type-term-pair:
+    ref@VarLabelComp(v) -> <fail>
+    where
+      <not(get-unique-matching-varscheme(get-all-component-defs))> v;
+      add-msg(|Error(), ref, $[No matching semantic component prefix for [<unrename-var; get-var-name> v]])
 
 rules
 
@@ -334,7 +346,7 @@ rules // type rules for match-sides
     Var(v) -> ty
     where
       <not(lookup-def(|Vars()))> v;
-      if scheme-def := <get-unique-matching-varscheme> v
+      if scheme-def := <get-unique-matching-varscheme(get-all-varschemes)> v
       then
         scheme-ty := <lookup-prop(|Type())> scheme-def;
         ty := <type-coerce-full(id)> (in-ty, scheme-ty)
@@ -398,13 +410,13 @@ rules // type rules for match-sides
 rules
   
   type-check-premise-top =
-  	type-check-premise
-    <+
-  	where(
-  		?p;
-  		p-str := <ensure(pp-dynsem-Premise-string)> p;
-    	add-msg(|Error(), p, $[Premise type check failed: [p-str]])
-  	)
+  	try(type-check-premise)
+//    <+
+//  	where(
+//  		?p;
+//  		p-str := <ensure(unmark-vars; pp-dynsem-Premise-string)> p;
+//    	add-msg(|Error(), p, $[Premise type check failed: [p-str]])
+//  	)
 
   type-check-premise:
   	f@Formula(TermEq(lhs, rhs)) -> f
@@ -435,22 +447,22 @@ rules
     where
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <type-check-build> lhs;
-    	if arrow-def := <lookup-def(|Arrows())> arrow-name
-    	then
-	      arrow-ty* := <lookup-props(|Type())> arrow-def;
-	      if <type-of-applicable-arrow(flip(type-coerce-full(fail)))> (arrow-ty*, lhs-ty) => ArrowType(in-ty, out-ty)
-	      then
-	        <type-check-expectation(type-coerce-full(fail)|lhs, in-ty)> lhs-ty;
-	        <type-check-match(|out-ty)> rhs;
-	        <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> [r*, sc*];
-	        <map(labelcomp-to-type-term-pair; type-check-match-wrap)> tc*
-	      else
-	        arrow-ma-ty* := <map(?ArrowType(<id>, _))> arrow-ty*;
-	        add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
-	      end
-	    else
-	      add-msg(|Error(), arrow-name, $[Arrow [arrow-name] is not declared])
-	    end
+      if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
+      then
+        if arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+        then
+          ArrowType(in-ty, out-ty) := <lookup-prop(|Type())> arrow-def;
+          <type-check-expectation(type-coerce-full(fail)|lhs, in-ty)> lhs-ty;
+          <type-check-match(|out-ty)> rhs;
+          <map(try(labelcomp-to-type-term-pair; type-check-build-expect-wrap))> [r*, sc*];
+          <map(try(labelcomp-to-type-term-pair; type-check-match-wrap))> tc*
+        else
+          arrow-ma-ty* := <map(lookup-prop(|Type()); ?ArrowType(<id>, _))> arrow-def*;
+          add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
+        end
+      else
+        add-msg(|Error(), arrow-name, $[Arrow [arrow-name] is not declared])
+      end
       
   type-check-premise:
     f@Formula(TypeCast(r@VarRef(v-name), ty-term)) -> f

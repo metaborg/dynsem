@@ -33,9 +33,8 @@ rules
     Relation(reads, src@Source(t, _), NamedDynamicEmitted(e, aname), tgt)
       -> Relation(reads, src, NamedDynamicEmitted(e, aname, <derw-type> atype), tgt)
     with
-      t-ty := <type-of> t;
-      arrow-def* := <lookup-applicable-arrow-def> t-ty;
-      (arrow-def, ArrowType(atype, _)) := <fetch-elem(where(Fst; def-get-name => aname))> arrow-def*
+      arrow-def := <get-applicable-arrowdef(type-coerce-direct(fail))> (<lookup-defs(|Arrows())> aname, <type-of> t);
+      ArrowType(atype, _) := <lookup-prop(|Type())> arrow-def
 
 rules // Utility predicate for new NamedDynamicEmitted ATerm
 
