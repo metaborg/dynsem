@@ -27,7 +27,7 @@ rules
       ; factorize-module
       ; expand-implicits-module
       ; factorize-module
-      ; explicate-module
+      ; explication-2-explicate-module
       ; copy-propagation-module
       ; defactorize-module
       ; explicate-arrow-types
