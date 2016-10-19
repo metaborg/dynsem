@@ -12,6 +12,7 @@ rules
       ; <file-exists + mkdir> project
       ; ds-to-interp-gen-project-launchconfig
       ; ds-to-interp-gen-project-pom
+      ; ds-to-interp-gen-project-gitignore
       ; java-gendir := <get-opt> JavaGenDirAbs()
       ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> TopPkg()]
       ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> NativePkg()]
@@ -107,5 +108,24 @@ rules
       </launchConfiguration>
     ], launch-file);
     <fclose> launch-file
+
+  ds-to-interp-gen-project-gitignore =
+    gitignore := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", ".gitignore"], "w");
+    <fputs> ($[
+      /target/
+      [<get-opt> TargetSpecRel()]
+      [<get-opt> TargetTableRel()]
+      [<get-opt; get-rel-path> TopPkg()]
+      [<get-opt; get-rel-path> TermPkg()]
+      [<get-opt; get-rel-path> BuildPkg()]
+      [<get-opt; get-rel-path> MatchPkg()]
+    ], gitignore);
+    <fclose> gitignore
+
+
+  get-rel-path:
+    pkg -> <concat-strings> [basedir, "/", <string-replace(|".", "/")> pkg]
+    where
+      basedir := <get-opt> JavaGenDirRel()
 
     
