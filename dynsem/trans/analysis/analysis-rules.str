@@ -21,7 +21,7 @@ rules /* syntactic checks */
     r@Rule(_, _, Relation(_, src@Source(lhs, _), _, _)) -> <fail>
     where
       <not(is-valid-lhs)> lhs;
-      add-msg(|Warning(), src, $[Invalid rule LHS pattern])
+      add-msg(|Error(), src, $[Invalid rule LHS pattern])
   
   is-valid-lhs =
     ?Con(_, _)
@@ -43,7 +43,7 @@ rules /* store variables */
     log-hitcount
   
   store-rules =
-    Rules(with(prime-typaths); map(store-rule /* <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked])) */))
+    Rules(with(prime-typaths); map(try(store-rule))) // <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
 
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
