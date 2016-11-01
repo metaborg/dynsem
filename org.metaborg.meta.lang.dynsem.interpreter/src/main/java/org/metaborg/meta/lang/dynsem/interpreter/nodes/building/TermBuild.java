@@ -86,8 +86,8 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "MapExtend", 2)) {
 			return MapExtendBuild.create(t, fd);
 		}
-		if (Tools.hasConstructor(t, "MapSelect", 2)) {
-			return MapSelectBuild.create(t, fd);
+		if (Tools.hasConstructor(t, "DeAssoc", 2)) {
+			return DeAssoc.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "MapHas", 2)) {
 			return MapHas.create(t, fd);
@@ -110,7 +110,7 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3)) {
 			return ListBuild.create(t, fd);
 		}
-		if(Tools.hasConstructor(t, "TypedTuple", 2)) {
+		if (Tools.hasConstructor(t, "TypedTuple", 2)) {
 			return TupleBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "NativeFunCall", 4)) {

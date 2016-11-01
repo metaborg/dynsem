@@ -69,11 +69,19 @@ rules /* lift and expand subterms on build sides */
       e-ty := <type-of> e;
       (m', p*) := <lift-where-indirect> (e-ty, m)
 
+  // map select
   expand-implicits-termbuild:
-    MapSelect(m-t, k-t) -> (MapSelect(m-t, k-t'), p*)
+    DeAssoc(m-t, k-t) -> (DeAssoc(m-t, k-t'), p*)
     where
       MapType(f-k-ty, _) := <type-of> m-t;
       (k-t', p*) := <lift-where-indirect <+ !(k-t, [])> (f-k-ty, k-t)
+
+  // list access
+  expand-implicits-termbuild:
+    DeAssoc(l-t, idx-t) -> (DeAssoc(l-t, idx-t'), p*)
+    where
+      ListType(f-l-ty) := <type-of> l-t;
+      (idx-t', p*) := <lift-where-indirect <+ !(idx-t, [])> (f-l-ty, idx-t)
 
   expand-implicits-termbuild:
     MapExtend(Map([Bind(k, v)]), m) -> (MapExtend(Map([Bind(k', v')]), m), [p1*, p2*])
