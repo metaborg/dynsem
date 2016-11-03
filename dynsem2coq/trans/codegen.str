@@ -286,7 +286,7 @@ rules // Term generation
       cons := <coq-map-bind> (x', y')
 
   term-to-coq(|c_aliases):
-    MapSelect(m, t) -> Apply(Apply(ml, m'), t')
+    DeAssoc(m, t) -> Apply(Apply(ml, m'), t')
     with
       ml := <coq-map-lookup>;
       m' := <term-to-coq(|c_aliases)> m;
@@ -505,7 +505,7 @@ rules // Extracting variables
       xs := <extract-variables> r
   
   extract-variables:
-    MapSelect(t1, t2) -> xs
+    DeAssoc(t1, t2) -> xs
     with
       xs1 := <extract-variables> t1;
       xs2 := <extract-variables> t2;
