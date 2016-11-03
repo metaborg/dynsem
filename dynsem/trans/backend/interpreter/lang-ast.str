@@ -379,7 +379,6 @@ rules /* Sort & Constructor classes */
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
         import com.github.krukow.clj_lang.IPersistentStack;
         import com.github.krukow.clj_lang.PersistentList;
-        import com.github.krukow.clj_lang.ISeq;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         import com.oracle.truffle.api.CompilerAsserts;
         import org.spoofax.interpreter.core.Tools;
@@ -413,8 +412,7 @@ rules /* Sort & Constructor classes */
           @Override
           public boolean hasStrategoTerm() {
             return strategoTerm != null;
-          }
-          
+          }        
           @Override
           public int size() {
             return backend.count();
@@ -429,15 +427,6 @@ rules /* Sort & Constructor classes */
                 return obj instanceof x_listclass;
               }
             };
-          }
-          
-          @Override
-          public x_elemclass get(int n) {
-            ISeq<x_elemclass> seq = backend.seq();
-            for (int k = 0; k < n; k++) {
-              seq = seq.next();
-            }
-            return seq != null ? seq.first() : null;
           }
         
           @Override

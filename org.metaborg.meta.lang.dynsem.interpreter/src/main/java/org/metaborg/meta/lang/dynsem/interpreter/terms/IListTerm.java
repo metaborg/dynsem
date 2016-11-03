@@ -14,11 +14,6 @@ import java.util.NoSuchElementException;
 public interface IListTerm<T> extends ITerm {
 
 	/**
-	 * @return the n-th element of this list, or <code>null</code> if the list is too short.
-	 */
-	public T get(int n);
-
-	/**
 	 * 
 	 * @return the first element of this list, or <code>null</code> if the list is empty.
 	 */

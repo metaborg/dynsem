@@ -189,7 +189,7 @@ rules
     <+ factorize-listtail-in-build
     <+ factorize-map-in-build
     <+ factorize-mapextend-in-build
-    <+ factorize-deassoc-in-build
+    <+ factorize-mapselect-in-build
     <+ factorize-cast-in-build
 
   factorize-constructors-in-build:
@@ -226,8 +226,8 @@ rules
       (prem2*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
       !success
 
-  factorize-deassoc-in-build:
-    DeAssoc(l, r) -> (prem*, DeAssoc(l, r'))
+  factorize-mapselect-in-build:
+    MapSelect(l, r) -> (prem*, MapSelect(l, r'))
     where
       (prem*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
       !success

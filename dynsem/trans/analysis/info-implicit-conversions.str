@@ -95,17 +95,8 @@ rules
       ListType(e-ty) := <gen-implicit-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|h)> (h-ty, e-ty)
 
-  // map select
   gen-implicit-info-term(is-matching):
-    DeAssoc(l-t, _) -> <fail>
-    where
-      ListType(f-l-ty) := <gen-implicit-type-of(is-matching); get-alias-base> l-t;
-      a-l-ty := <gen-implicit-type-of(is-matching)> l-t;
-      <gen-implicit-info-fact(is-matching|l-t)> (a-l-ty, f-l-ty)
-
-  // list index access
-  gen-implicit-info-term(is-matching):
-    DeAssoc(map-t, key-t) -> <fail>
+    MapSelect(map-t, key-t) -> <fail>
     where
       MapType(f-key-ty, _) := <gen-implicit-type-of(is-matching); get-alias-base> map-t;
       a-key-ty := <gen-implicit-type-of(is-matching)> key-t;
