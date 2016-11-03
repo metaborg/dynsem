@@ -145,9 +145,9 @@ context-free syntax // terms
   Term.Real     = [[REAL]]
   Term.Con      = [[ID]([{Term ", "}*])]
   
-  List.List     = <[ <{Term ", "}*> ]>
-  List.ListTail = <[ <{Term ", "}*> | <Term> ]>
-  Term = List
+  Term.List     = <[ <{Term ", "}*> ]>
+  Term.ListTail = <[ <{Term ", "}*> | <Term> ]>
+  Term.ListLength = <|<Term>|>
   
   Term.Tuple    = <(<{Term ", "}+>)>
 
@@ -157,13 +157,16 @@ context-free syntax // terms
   
   Term.Map    = [{[{Entry  ", "}*]}]
   Entry.Bind  = [[Term] |--> [Term]]
-  Entry.Binds = [[Term] |*-> [Term]]
+
+//  Entry.Binds = [[Term] |*-> [Term]]
+
   Entry.MapEntry = [[Term]]
   
-  Term.MapSelect = <<Term>[<Term>]>
+  Term.DeAssoc = <<Term>[<Term>]>
+  
   Term.MapHas = <<Term>[<Term>?]>
   Term.MapExtend = [[Term] + [Term]] {assoc}
-  Term.MapUnbind = [[Term] \ [Term]] {assoc}
+//  Term.MapUnbind = [[Term] \ [Term]] {assoc}
 
   Term.MapKeys = [allkeys([Term])]
   Term.MapValues = [allvalues([Term])]
@@ -175,7 +178,7 @@ context-free priorities
   Rule.Axiom, Rule.Rule, Rule.RuleW
   > Term.MapKeys, Term.MapValues
   > Term.Con
-  > Term.MapHas, Term.MapSelect
+  > Term.MapHas, Term.DeAssoc
   > Term.MapExtend, Term.As
   > Cast.Cast
   

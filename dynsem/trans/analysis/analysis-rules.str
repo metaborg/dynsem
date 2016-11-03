@@ -228,6 +228,12 @@ rules
       t-ty := <type-check-build> t;
       h-ty := <type-check-build> h
   
+  type-check-build-list:
+    DeAssoc(l, idx) -> e-ty
+    where
+      ListType(e-ty) := <type-check-build> l;
+      IntType() := <type-check-build> idx
+  
   type-check-build-tuple:
     Tuple(t*) -> TupleType(<map(type-check-build)> t*)
 
@@ -247,7 +253,7 @@ rules
       map2-ty := <type-check-build> map2
 
   type-check-build-map:
-    MapSelect(m-t, k-t) -> val-ty
+    DeAssoc(m-t, k-t) -> val-ty
     where
       map-ty@MapType(f-key-ty, val-ty) := <type-check-build> m-t;
       a-key-ty := <type-check-build> k-t;
