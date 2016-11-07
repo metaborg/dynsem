@@ -1,5 +1,5 @@
-#! /bin/sh
-set -e
+#!/bin/bash
+set -ev
 cd $TRAVIS_BUILD_DIR/dynsem
 mvn install
 cd $TRAVIS_BUILD_DIR/dynsem2coq
