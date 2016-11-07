@@ -1,5 +1,6 @@
 language: java
-
+before_script:
+  - echo "MAVEN_OPTS='-server -Xms512m -Xmx1024m -Xss16m'" > ~/.mavenrc
 script: ./travis-build.sh
 
 cache:
