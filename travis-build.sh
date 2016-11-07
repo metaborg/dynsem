@@ -1,8 +1,8 @@
-#! /bin/sh
-set -e
+#!/bin/bash
+set -ev
 cd $TRAVIS_BUILD_DIR/dynsem
-mvn install
+mvn -Pstandalone install
 cd $TRAVIS_BUILD_DIR/dynsem2coq
-mvn install
-cd org.metaborg.meta.lang.dynsem.interpreter
+mvn -Pstandalone install
+cd $TRAVIS_BUILD_DIR/org.metaborg.meta.lang.dynsem.interpreter
 mvn -Pstandalone test
