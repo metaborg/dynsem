@@ -14,6 +14,8 @@ dependencies:
 contributions:
 - name: ds
   id: org.metaborg:dynsem:${metaborgVersion}
+build:
+ useBuildSystemSpec: true
 language:
   sdf:
     enabled: false
