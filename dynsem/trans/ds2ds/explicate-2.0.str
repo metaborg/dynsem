@@ -41,7 +41,7 @@ strategies
   explication-2-api-destroy-storage(|comps-table, imps-table) =
     <hashtable-destroy> comps-table;
     <hashtable-destroy> imps-table
-    
+  
   explication-2-api-get-components(|comps, imps):
     arrow-def -> <hashtable-get(|arrow-def)> comps
   
@@ -49,7 +49,7 @@ strategies
     (arrow-def, new-compo*) -> compo*
     where
       old-compo* := <hashtable-get(|arrow-def)> comps;
-      compo* := <nub> [new-compo*, old-compo*];
+      compo* := <nub; explication-2-util-qsort-comps> [new-compo*, old-compo*];
       <hashtable-put(|arrow-def, compo*)> comps
   
   explication-2-api-get-imports(|comps, imps):
@@ -272,7 +272,7 @@ rules
       <not(eq)> (v-left, v-right)
   
   explication-2-use-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
-    labelcomp* -> [labelcomp*, extra-labelcomp*]
+    labelcomp* -> <explication-2-util-qsort-comps> [labelcomp*, extra-labelcomp*]
     where opt-with(
       // used components
       comp-use* := <map(\ LabelComp(Label(x), _) -> <lookup-def(|Components())> x \)> labelcomp*;
@@ -285,7 +285,7 @@ rules
     )
   
   explication-2-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, kind):
-    labelcomp* -> [labelcomp*, extra-labelcomp*]
+    labelcomp* -> <explication-2-util-qsort-comps> [labelcomp*, extra-labelcomp*]
     where opt-with(
       // used components
       comp-use* := <map(explication-2-api-compgen-register(|compgen-table, kind))> labelcomp*;
@@ -300,6 +300,12 @@ rules
   explication-2-util-comp-to-compdef = ?Comp(<id>, _)
   
   explication-2-util-compo-eq = ?(Comp(x, _), Comp(x, _))
+  
+  explication-2-util-compo-gt = ?(Comp((_, x, _), _), Comp((_, y, _), _)); !(x, y); string-gt
+  
+  explication-2-util-compo-gt = ?(LabelComp(Label(x), _), LabelComp(Label(y), _)); !(x, y); string-gt
+  
+  explication-2-util-qsort-comps = qsort(explication-2-util-compo-gt)
   
   explication-2-util-comp-to-label:
     Comp(compdef, _) -> Label(<def-get-name> compdef)
