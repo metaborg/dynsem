@@ -22,7 +22,7 @@ rules
   	  (prem2*, read'*) := <try-factor(factorize-source-components)> read*;
       (prem3*, lhs') := <try-factor(factorize-lhs)> lhs;
       (prem4*, sc'*) := <try-factor(factorize-source-components)> sc*;
-      (prem5*, rhs') := <try-factor(factorize-rhs)> rhs;
+      (prem5*, rhs') := <try-factor(factorize-build)> rhs;
       (prem6*, tc'*) := <try-factor(factorize-target-components)> tc*;
       prem7* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*, prem5*, prem6*]
 
@@ -72,7 +72,7 @@ rules // lift constructor sub-terms in match
     where
       (p*, t2) := <factorize-lhs> t1
   
-  factorize-rhs = lift-build-on-cond(not(is-prime-factor), ?succ); where(!succ)
+//  factorize-rhs = lift-build-on-cond(not(is-prime-factor), ?succ); where(!succ)
   
   factorize-source-components =
     map(try-factor(factorize-source-components, ?succ)); where(!succ); unzip; (concat, id)
@@ -98,6 +98,24 @@ rules // lift constructor sub-terms in match
     factorize-match-in-premise
     <+ factorize-termeq-in-premise
     <+ factorize-relation-in-premise
+    <+ factorize-casematch-premise
+  
+  factorize-cases = repeat(some(factorize-case))
+  
+  factorize-case:
+    CasePattern(pat, p*) -> CasePattern(pat, <factorize-premises> p*)
+  
+  factorize-case:
+    CaseOtherwise(p*) -> CaseOtherwise(<factorize-premises> p*)
+  
+//  factorize-casematch-premise = fail
+  
+  factorize-casematch-premise:
+    CaseMatch(t, case*) -> [p-t*, CaseMatch(t', case*)]
+    where
+      (p-t*, t') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> t;
+//      case'* := <factorize-cases> case*;
+      !success
   
   factorize-match-in-premise:
     Formula(Match(lhs, rhs)) -> [p-lhs*, Formula(Match(lhs', rhs')) ,p-rhs*]
@@ -128,7 +146,7 @@ rules // lift constructor sub-terms in match
     [p1*, p2*, p3*, Formula(Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*))), p4*, p5*]
     where
       (p1*, read'*) := <try-factor(factorize-target-components, ?succ)> read*;
-      (p2*, lhs') := <try-factor(factorize-rhs, ?succ)> lhs;
+      (p2*, lhs') := <try-factor(factorize-build, ?succ)> lhs;
       (p3*, sc'*) := <try-factor(factorize-target-components, ?succ)> sc*;
       (p4*, rhs') := <lift-match-on-cond(not(is-prime-factor), ?succ)> rhs;
       (p5*, tc'*) := <try-factor(factorize-source-components, ?succ)> tc*;

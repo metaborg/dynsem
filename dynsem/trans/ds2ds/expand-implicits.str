@@ -41,6 +41,22 @@ rules
       (sc'*, p3*) := <map(expand-implicits-termbuild <+ \ LabelComp(l, t) -> (LabelComp(l, t), []) \); unzip; (id, concat)> sc*;
       p* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p1*, p2*, p3*]
 
+  expand-implicits-premise:
+    CaseMatch(t, case*) -> [p*, CaseMatch(t', case'*)]
+    where
+      (t', p*) := <expand-implicits-termbuild <+ !(t, [])> t;
+      case'* := <map(expand-implicits-case)> case*
+  
+  expand-implicits-case:
+    CasePattern(pat, p*) -> CasePattern(pat, p'*)
+    where
+      p'* := <mapconcat(expand-implicits-premise)> p*
+  
+  expand-implicits-case:
+    CaseOtherwise(p*) -> CaseOtherwise(p'*)
+    where
+      p'* := <mapconcat(debug(!1); expand-implicits-premise; debug(!2))> p*
+
 rules /* lift and expand subterms on build sides */
 
   expand-implicits-termbuild:
