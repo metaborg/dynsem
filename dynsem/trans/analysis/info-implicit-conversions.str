@@ -31,7 +31,9 @@ rules
           )
         ); fail
       + gen-implicit-info-conclusion; fail
-      + MergePoint(gen-implicit-info, gen-implicit-info, id); fail
+      + CaseMatch(id, filter(gen-implicit-info)); fail
+      + CasePattern(id, filter(gen-implicit-info)); fail
+      + CaseOtherwise(filter(gen-implicit-info)); fail
       + PremiseBlock(filter(gen-implicit-info)); fail
       + Formula(gen-implicit-info); fail
       + Relation(
