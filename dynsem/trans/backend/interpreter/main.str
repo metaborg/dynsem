@@ -18,16 +18,26 @@ rules
     with
       local-project-path := $[[<prim("local_path")> project-path]/];
       <ds-to-interp(|path, project-path, local-project-path)> ast
-      
+  
+  ds-to-interp-specification-editor:
+    (_, _, ast, path, project-path) -> (filename, ast')
+    with
+      local-project-path := $[[<prim("local_path")> project-path]/];
+      ds-to-interp-init-options(|path, local-project-path);
+      ast' := <ds-to-interp-specification(|path, project-path)> ast;
+      filename := <guarantee-extension(|"interpretable.aterm")> path
+  
   ds-to-interp(|path, project-path, local-project-path) =
     ds-to-interp-init-options(|path, local-project-path);
     ds-to-interp-table;
-    ds-to-interp-specification(|path, project-path);
+    ds-to-interp-specification(|path, project-path); ds-to-interp-specification-write;
     ds-to-interp-terms(|path, local-project-path)
   
   ds-to-interp-specification(|path, project-path) =
     module-to-core(|path, project-path);
-    in-project-path(desugar-for-interpreter-module|project-path);
+    in-project-path(desugar-for-interpreter-module|project-path)
+  
+  ds-to-interp-specification-write =
     where(
       ?result;
       fout := <fopen> (<get-opt> TargetSpecAbs(), "w");
