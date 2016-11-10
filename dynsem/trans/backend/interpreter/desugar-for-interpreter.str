@@ -51,6 +51,9 @@ rules
     Cast(_, srt@SimpleSort(s)) -> (SortKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
     where
       <not(is-builtin-type)> s
+
+  get-relation-kind-class:
+    Cast(_, SimpleSort("AST")) -> (SortKind(), "org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm")
   
   get-relation-kind-class:
     Cast(_, SimpleSort("String")) -> (PrimitiveKind(), "java.lang.String")
