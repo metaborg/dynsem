@@ -53,7 +53,7 @@ rules
       <not(is-builtin-type)> s
 
   get-relation-kind-class:
-    Cast(_, SimpleSort("AST")) -> (SortKind(), "org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm")
+    Cast(_, SimpleSort("AST")) -> (ASTKind(), "org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm")
   
   get-relation-kind-class:
     Cast(_, SimpleSort("String")) -> (PrimitiveKind(), "java.lang.String")

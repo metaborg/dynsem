@@ -25,6 +25,7 @@ signature
     
     TermKind : RuleKind
     SortKind : RuleKind
+    ASTKind  : RuleKind
     PrimitiveKind : RuleKind
     NativeKind : RuleKind
     ListKind : RuleKind
