@@ -8,6 +8,7 @@ imports
   analysis/rename
   analysis/query
   analysis/analysis-signatures
+  analysis/mark-references
 	pp
   ds
   lib-ds
@@ -43,7 +44,7 @@ rules /* store variables */
     log-hitcount
   
   store-rules =
-    Rules(with(prime-typaths); map(try(store-rule))) // <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
+    Rules(with(prime-typaths); map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked. This is a bug, please report it.]))))
 
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
@@ -416,13 +417,13 @@ rules // type rules for match-sides
 rules
   
   type-check-premise-top =
-  	try(type-check-premise)
-//    <+
-//  	where(
-//  		?p;
-//  		p-str := <ensure(unmark-vars; pp-dynsem-Premise-string)> p;
-//    	add-msg(|Error(), p, $[Premise type check failed: [p-str]])
-//  	)
+  	type-check-premise
+    <+
+  	where(
+  		?p;
+  		p-str := <ensure(unmark-vars; pp-dynsem-Premise-string)> p;
+    	add-msg(|Error(), p, $[Premise type check failed: [p-str] This is a bug, please report it.])
+  	)
 
   type-check-premise:
   	f@Formula(TermEq(lhs, rhs)) -> f
@@ -464,7 +465,7 @@ rules
           <map(try(labelcomp-to-type-term-pair; type-check-match-wrap))> tc*
         else
           arrow-ma-ty* := <map(lookup-prop(|Type()); ?ArrowType(<id>, _))> arrow-def*;
-          add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
+          add-msg(|Error(), lhs, $[Expected one of: [<map(pp-type)> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
         end
       else
         add-msg(|Error(), arrow-name, $[Arrow [arrow-name] is not declared])
