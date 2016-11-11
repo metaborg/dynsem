@@ -29,12 +29,12 @@ public class AlternativeRuleCallNode extends AAlternativeRuleCallNode {
 	public RuleResult execute(Object[] arguments) {
 		Class<?> nextDispatchClass = getNextDispatchClass(dispatchClass, parentRuleKind, arguments[0]);
 
-		if (nextDispatchClass != null) {
-			System.out.println(
-					"Executing alternative to " + dispatchClass + " on next dispatch " + nextDispatchClass.getName());
-		} else {
-			System.out.println("Failing with lack of alternatives for dispatch " + dispatchClass);
-		}
+//		if (nextDispatchClass != null) {
+//			System.out.println(
+//					"Executing alternative to " + dispatchClass + " on next dispatch " + nextDispatchClass.getName());
+//		} else {
+//			System.out.println("Failing with lack of alternatives for dispatch " + dispatchClass);
+//		}
 
 		if (nextDispatchClass == null) {
 			executeFailure(arguments[0]);

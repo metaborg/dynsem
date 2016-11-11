@@ -106,8 +106,6 @@ public class RuleRegistry {
 					rulesForName.put(r.getDispatchClass(), rulesForClass);
 				}
 
-				System.out.println("Registering rule for class: " + r.getDispatchClass().getName() + " of kind " + r.getKind());
-				
 				rulesForClass.add(r);
 			}
 

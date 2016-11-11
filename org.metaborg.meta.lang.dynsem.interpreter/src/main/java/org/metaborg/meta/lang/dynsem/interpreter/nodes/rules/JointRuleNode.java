@@ -41,7 +41,7 @@ public class JointRuleNode extends DynSemNode {
 	}
 
 	private RuleResult executeRules(Object[] arguments) {
-		System.out.println("Executing " + kind + " " + arrowName + " on "+ arguments[0].getClass().getName() + " dispatch " + dispatchClass.getName());
+//		System.out.println("Executing " + kind + " " + arrowName + " on "+ arguments[0].getClass().getName() + " dispatch " + dispatchClass.getName());
 		try {
 			return primaryRulesNode.execute(arguments);
 		} catch (PatternMatchFailure pmfx) {
