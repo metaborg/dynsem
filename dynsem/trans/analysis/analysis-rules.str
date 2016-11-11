@@ -548,6 +548,7 @@ rules
   type-coerce-direct(is-matching) =
     type-coerce-base
     <+ type-coerce(type-coerce-direct(is-matching))
+    <+ type-coerce-ast-lift(is-matching, type-coerce-direct(is-matching))
   
   type-coerce-base = eq; Fst
 
