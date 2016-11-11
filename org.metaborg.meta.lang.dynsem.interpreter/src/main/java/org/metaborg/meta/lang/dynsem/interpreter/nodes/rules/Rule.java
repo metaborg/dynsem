@@ -123,6 +123,9 @@ public abstract class Rule extends DynSemNode {
 		if (Tools.hasConstructor(flag, "SortKind", 0)) {
 			return RuleKind.SORT;
 		}
+		if (Tools.hasConstructor(flag, "ASTKind", 0)){
+			return RuleKind.AST;
+		}
 		if (Tools.hasConstructor(flag, "PrimitiveKind", 0)) {
 			return RuleKind.PRIMITIVE;
 		}

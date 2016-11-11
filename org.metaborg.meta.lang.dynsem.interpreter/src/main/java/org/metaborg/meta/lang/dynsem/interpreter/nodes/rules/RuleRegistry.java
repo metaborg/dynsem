@@ -70,7 +70,7 @@ public class RuleRegistry {
 		}
 
 		if (jointRuleForClass == null) {
-			jointRuleForClass = new JointRuleRoot(SourceSection.createUnavailable("rule", "adhoc"), RuleKind.ADHOC,
+			jointRuleForClass = new JointRuleRoot(SourceSection.createUnavailable("rule", "adhoc"), RuleKind.DYNAMIC,
 					arrowName, dispatchClass, new Rule[0]);
 			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}
@@ -106,6 +106,8 @@ public class RuleRegistry {
 					rulesForName.put(r.getDispatchClass(), rulesForClass);
 				}
 
+				System.out.println("Registering rule for class: " + r.getDispatchClass().getName() + " of kind " + r.getKind());
+				
 				rulesForClass.add(r);
 			}
 

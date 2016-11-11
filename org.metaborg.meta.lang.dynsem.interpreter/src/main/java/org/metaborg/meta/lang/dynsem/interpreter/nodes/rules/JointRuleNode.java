@@ -23,7 +23,7 @@ public class JointRuleNode extends DynSemNode {
 		}
 
 		// only rules over constructors have a fallback
-		if (kind == RuleKind.TERM || kind == RuleKind.ADHOC) {
+		if (kind == RuleKind.TERM || kind == RuleKind.DYNAMIC) {
 			this.sortRuleNode = SortRuleCallNodeGen.create(source, arrowName);
 		} else {
 			this.sortRuleNode = new FailSortRuleCallNode(source);
