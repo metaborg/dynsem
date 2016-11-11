@@ -12,5 +12,4 @@ menus
 
     action  : "Generate Interpreter"   = ds-to-interp-editor
     action  : "Generate DynSem Core"   = module-to-core-editor (openeditor) (source)
-    action  : "Explicate arrow types"  = explicate-arrow-types-editor (openeditor) (source) (meta)
     action  : "Generate interpretable spec" = ds-to-interp-specification-editor (openeditor) (source) (meta)
