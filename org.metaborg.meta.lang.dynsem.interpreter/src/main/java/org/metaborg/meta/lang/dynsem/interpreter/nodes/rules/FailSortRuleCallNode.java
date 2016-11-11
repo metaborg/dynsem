@@ -6,7 +6,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.source.SourceSection;
 
-public class FailSortRuleCallNode extends ASortRuleCallNode {
+public class FailSortRuleCallNode extends AAlternativeRuleCallNode {
 
 	public FailSortRuleCallNode(SourceSection source) {
 		super(source);

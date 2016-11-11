@@ -8,30 +8,22 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class JointRuleNode extends DynSemNode {
 
-	@Child private RuleUnionNode mainRuleNode;
-	@Child private ASortRuleCallNode sortRuleNode;
-	private String arrowName;
-	private Class<?> dispatchClass;
-	private RuleKind kind;
+	@Child private RuleSetNode primaryRulesNode;
+
+	@Child private AAlternativeRuleCallNode alternativeRulesNode;
+
+	private final String arrowName;
+	private final Class<?> dispatchClass;
+	private final RuleKind kind;
 
 	public JointRuleNode(SourceSection source, RuleKind kind, String arrowName, Class<?> dispatchClass, Rule[] rules) {
 		super(source);
-		if (rules.length == 1) {
-			this.mainRuleNode = new SingleRuleUnionNode(source, arrowName, dispatchClass, rules[0]);
-		} else {
-			this.mainRuleNode = new MultiRuleUnionNode(source, arrowName, dispatchClass, rules);
-		}
-
-		// only rules over constructors have a fallback
-		if (kind == RuleKind.TERM || kind == RuleKind.DYNAMIC) {
-			this.sortRuleNode = SortRuleCallNodeGen.create(source, arrowName);
-		} else {
-			this.sortRuleNode = new FailSortRuleCallNode(source);
-		}
-
+		this.kind = kind;
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;
-		this.kind = kind;
+
+		this.primaryRulesNode = new NonEmptyRuleSetNode(source, arrowName, dispatchClass, rules);
+		this.alternativeRulesNode = new AlternativeRuleCallNode(source, dispatchClass, kind, arrowName);
 	}
 
 	public RuleResult execute(Object[] arguments) {
@@ -39,11 +31,7 @@ public class JointRuleNode extends DynSemNode {
 		boolean repeat = true;
 		while (repeat) {
 			try {
-				try {
-					return mainRuleNode.execute(arguments);
-				} catch (PatternMatchFailure pmfx) {
-					return sortRuleNode.execute(arguments[0], arguments);
-				}
+				return executeRules(arguments);
 			} catch (RecurException recex) {
 				repeat = true;
 			}
@@ -52,12 +40,21 @@ public class JointRuleNode extends DynSemNode {
 		return res;
 	}
 
-	public RuleUnionNode getUnionNode() {
-		return mainRuleNode;
+	private RuleResult executeRules(Object[] arguments) {
+		System.out.println("Executing " + kind + " " + arrowName + " on "+ arguments[0].getClass().getName() + " dispatch " + dispatchClass.getName());
+		try {
+			return primaryRulesNode.execute(arguments);
+		} catch (PatternMatchFailure pmfx) {
+			return alternativeRulesNode.execute(arguments);
+		}
 	}
 
-	public ASortRuleCallNode getSortRuleNode() {
-		return sortRuleNode;
+	public RuleSetNode getUnionNode() {
+		return primaryRulesNode;
+	}
+
+	public AAlternativeRuleCallNode getSortRuleNode() {
+		return alternativeRulesNode;
 	}
 
 	public String getArrowName() {

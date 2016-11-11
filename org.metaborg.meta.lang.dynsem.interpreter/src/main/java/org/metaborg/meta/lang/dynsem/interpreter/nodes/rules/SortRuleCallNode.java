@@ -10,7 +10,8 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class SortRuleCallNode extends ASortRuleCallNode {
+@Deprecated
+public abstract class SortRuleCallNode extends AAlternativeRuleCallNode {
 
 	private final String arrowName;
 
@@ -22,7 +23,7 @@ public abstract class SortRuleCallNode extends ASortRuleCallNode {
 	@Specialization(limit = "1", guards = "o.getSortClass() == sortDispatchClass")
 	public RuleResult doFallback(IApplTerm o, Object[] arguments,
 			@Cached("o.getSortClass()") Class<?> sortDispatchClass,
-			@Cached("createRuleUnionNode(o, sortDispatchClass)") RuleUnionNode sortJointRule) {
+			@Cached("createRuleUnionNode(o, sortDispatchClass)") RuleSetNode sortJointRule) {
 		try {
 			return sortJointRule.execute(arguments);
 		} catch (PatternMatchFailure pmfx) {
@@ -34,7 +35,7 @@ public abstract class SortRuleCallNode extends ASortRuleCallNode {
 		}
 	}
 
-	protected final RuleUnionNode createRuleUnionNode(IApplTerm o, Class<?> sortDispatchClass) {
+	protected final RuleSetNode createRuleUnionNode(IApplTerm o, Class<?> sortDispatchClass) {
 		JointRuleRoot root = getContext().getRuleRegistry().lookupRules(arrowName, sortDispatchClass);
 		return NodeUtil.cloneNode(root.getJointNode().getUnionNode());
 	}

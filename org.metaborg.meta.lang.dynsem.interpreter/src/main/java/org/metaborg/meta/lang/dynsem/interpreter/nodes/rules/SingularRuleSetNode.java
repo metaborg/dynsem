@@ -7,11 +7,12 @@ import java.util.List;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class SingleRuleUnionNode extends RuleUnionNode {
+@Deprecated
+public class SingularRuleSetNode extends RuleSetNode {
 
 	@Child private Rule rule;
 
-	public SingleRuleUnionNode(SourceSection source, String arrowName, Class<?> dispatchClass, Rule rule) {
+	public SingularRuleSetNode(SourceSection source, String arrowName, Class<?> dispatchClass, Rule rule) {
 		super(source, arrowName, dispatchClass);
 		this.rule = rule;
 	}

@@ -153,7 +153,7 @@ public class TestDispatch {
 
 		rr.adoptChildren();
 
-		RuleUnionNode union = rr.getJointNode().getUnionNode();
+		RuleSetNode union = rr.getJointNode().getUnionNode();
 
 		assertEquals(4, union.getRules().size());
 
@@ -196,7 +196,7 @@ public class TestDispatch {
 		rr1.adoptChildren();
 		registry.registerJointRule(r1.getArrowName(), r1.getDispatchClass(), rr1);
 
-		RuleUnionNode union = rr1.getJointNode().getUnionNode();
+		RuleSetNode union = rr1.getJointNode().getUnionNode();
 		assertEquals(1, union.getRules().size());
 		assertEquals(union, r1.getParent());
 
@@ -207,7 +207,7 @@ public class TestDispatch {
 		rr2.adoptChildren();
 		registry.registerJointRule(r2.getArrowName(), r2.getDispatchClass(), rr2);
 
-		RuleUnionNode union2 = rr2.getJointNode().getUnionNode();
+		RuleSetNode union2 = rr2.getJointNode().getUnionNode();
 		assertEquals(1, union2.getRules().size());
 		assertEquals(union2, r2.getParent());
 
