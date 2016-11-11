@@ -57,6 +57,7 @@ public class RuleRegistry {
 
 	@TruffleBoundary
 	public JointRuleRoot lookupRules(String arrowName, Class<?> dispatchClass) {
+		assert dispatchClass != null;
 		if (!isInit) {
 			init();
 			isInit = true;

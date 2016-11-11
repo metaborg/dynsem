@@ -10,7 +10,7 @@ public class JointRuleNode extends DynSemNode {
 
 	@Child private RuleSetNode primaryRulesNode;
 
-	@Child private AAlternativeRuleCallNode alternativeRulesNode;
+	@Child private AlternativeRuleCallNode alternativeRulesNode;
 
 	private final String arrowName;
 	private final Class<?> dispatchClass;
@@ -23,7 +23,7 @@ public class JointRuleNode extends DynSemNode {
 		this.dispatchClass = dispatchClass;
 
 		this.primaryRulesNode = new NonEmptyRuleSetNode(source, arrowName, dispatchClass, rules);
-		this.alternativeRulesNode = new AlternativeRuleCallNode(source, dispatchClass, kind, arrowName);
+		this.alternativeRulesNode = AlternativeRuleCallNodeGen.create(source, dispatchClass, kind, arrowName);
 	}
 
 	public RuleResult execute(Object[] arguments) {
@@ -41,7 +41,6 @@ public class JointRuleNode extends DynSemNode {
 	}
 
 	private RuleResult executeRules(Object[] arguments) {
-//		System.out.println("Executing " + kind + " " + arrowName + " on "+ arguments[0].getClass().getName() + " dispatch " + dispatchClass.getName());
 		try {
 			return primaryRulesNode.execute(arguments);
 		} catch (PatternMatchFailure pmfx) {
@@ -51,10 +50,6 @@ public class JointRuleNode extends DynSemNode {
 
 	public RuleSetNode getUnionNode() {
 		return primaryRulesNode;
-	}
-
-	public AAlternativeRuleCallNode getSortRuleNode() {
-		return alternativeRulesNode;
 	}
 
 	public String getArrowName() {

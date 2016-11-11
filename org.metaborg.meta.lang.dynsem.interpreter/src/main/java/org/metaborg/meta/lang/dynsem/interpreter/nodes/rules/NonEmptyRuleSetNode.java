@@ -38,7 +38,6 @@ public class NonEmptyRuleSetNode extends RuleSetNode {
 		} else {
 			throw PatternMatchFailure.INSTANCE;
 		}
-
 	}
 
 	@Override

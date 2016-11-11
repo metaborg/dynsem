@@ -1,17 +1,19 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
-import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.dsl.Cached;
+import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class AlternativeRuleCallNode extends AAlternativeRuleCallNode {
+public abstract class AlternativeRuleCallNode extends DynSemNode {
 
 	private final RuleKind parentRuleKind;
 	private final String arrowName;
@@ -25,29 +27,26 @@ public class AlternativeRuleCallNode extends AAlternativeRuleCallNode {
 		this.arrowName = arrowName;
 	}
 
-	@Override
-	public RuleResult execute(Object[] arguments) {
-		Class<?> nextDispatchClass = getNextDispatchClass(dispatchClass, parentRuleKind, arguments[0]);
+	public abstract RuleResult execute(Object[] arguments);
 
-//		if (nextDispatchClass != null) {
-//			System.out.println(
-//					"Executing alternative to " + dispatchClass + " on next dispatch " + nextDispatchClass.getName());
-//		} else {
-//			System.out.println("Failing with lack of alternatives for dispatch " + dispatchClass);
-//		}
-
+	@Specialization(limit = "1", guards = "nextDispatchClass == getNextDispatchClass(reductionTerm(arguments))")
+	public RuleResult doCached(Object[] arguments,
+			@Cached("getNextDispatchClass(reductionTerm(arguments))") Class<?> nextDispatchClass,
+			@Cached("createUnionNode(nextDispatchClass)") JointRuleNode targetRuleNode) {
 		if (nextDispatchClass == null) {
-			executeFailure(arguments[0]);
+			executeFailure(reductionTerm(arguments));
 		}
-		JointRuleRoot root = getContext().getRuleRegistry().lookupRules(arrowName, nextDispatchClass);
-
-		return root.execute(Truffle.getRuntime().createVirtualFrame(arguments, new FrameDescriptor()));
+		return targetRuleNode.execute(arguments);
 	}
 
-	private static Class<?> getNextDispatchClass(Class<?> currentDispatchClass, RuleKind kind, Object term) {
+	protected Object reductionTerm(Object[] arguments) {
+		return arguments[0];
+	}
+
+	protected Class<?> getNextDispatchClass(Object term) {
 		// decision tree based on ruleKind and dispatchClass
 		Class<?> nextDispatchClass = null;
-		switch (kind) {
+		switch (parentRuleKind) {
 		case AST:
 		case MAP:
 		case PRIMITIVE:
@@ -64,16 +63,16 @@ public class AlternativeRuleCallNode extends AAlternativeRuleCallNode {
 			nextDispatchClass = BuiltinTypesGen.asIApplTerm(term).getSortClass();
 			break;
 		case PLACEHOLDER:
-			if (IApplTerm.class.isAssignableFrom(currentDispatchClass)) {
+			if (IApplTerm.class.isAssignableFrom(dispatchClass)) {
 				// we're either in a constructor or a sort position
-				if (currentDispatchClass == BuiltinTypesGen.asIApplTerm(term).getSortClass()) {
+				if (dispatchClass == BuiltinTypesGen.asIApplTerm(term).getSortClass()) {
 					// we're in the sort case
 					nextDispatchClass = ITerm.class;
 				} else {
 					// we're in the constructor case
 					nextDispatchClass = BuiltinTypesGen.asIApplTerm(term).getSortClass();
 				}
-			} else if (ITerm.class.isAssignableFrom(currentDispatchClass) && currentDispatchClass != ITerm.class) {
+			} else if (ITerm.class.isAssignableFrom(dispatchClass) && dispatchClass != ITerm.class) {
 				// we're in a list, tuple or something like this case
 				// FIXME: for now we don't fall back on AST rules for lists and tuples
 				// nextDispatchClass = ITerm.class;
@@ -90,6 +89,11 @@ public class AlternativeRuleCallNode extends AAlternativeRuleCallNode {
 		} else {
 			throw new ReductionFailure("No rules applicable for term " + term, InterpreterUtils.createStacktrace());
 		}
+	}
+
+	protected JointRuleNode createUnionNode(Class<?> nextDispatchClass) {
+		return NodeUtil
+				.cloneNode(getContext().getRuleRegistry().lookupRules(arrowName, nextDispatchClass).getJointNode());
 	}
 
 }
