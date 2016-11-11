@@ -55,6 +55,8 @@ public class AlternativeRuleCallNode extends AAlternativeRuleCallNode {
 			break;
 		case LIST:
 		case TUPLE:
+			// FIXME: for now we don't fall back on AST rules for lists and tuples
+			break;
 		case SORT:
 			nextDispatchClass = ITerm.class;
 			break;
@@ -71,14 +73,15 @@ public class AlternativeRuleCallNode extends AAlternativeRuleCallNode {
 					// we're in the constructor case
 					nextDispatchClass = BuiltinTypesGen.asIApplTerm(term).getSortClass();
 				}
-			} else if (currentDispatchClass != ITerm.class) {
+			} else if (ITerm.class.isAssignableFrom(currentDispatchClass) && currentDispatchClass != ITerm.class) {
 				// we're in a list, tuple or something like this case
-				nextDispatchClass = ITerm.class;
+				// FIXME: for now we don't fall back on AST rules for lists and tuples
+				// nextDispatchClass = ITerm.class;
 			}
-
 		}
 
 		return nextDispatchClass;
+
 	}
 
 	private static void executeFailure(Object term) {
