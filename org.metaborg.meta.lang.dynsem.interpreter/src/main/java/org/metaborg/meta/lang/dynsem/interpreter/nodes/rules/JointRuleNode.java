@@ -75,7 +75,7 @@ public class JointRuleNode extends DynSemNode {
 	@Override
 	@TruffleBoundary
 	public String toString() {
-		return dispatchClass.getSimpleName() + "-" + arrowName + "->";
+		return dispatchClass.getSimpleName() + " -" + arrowName + "-> ";
 	}
 
 }
