@@ -21,9 +21,9 @@ rules
       where
       	ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (<lookup-defs(|Arrows())> arrow-name, <type-of> lhs);
       	(lhs', p-lhs*) := <try-or-mktup(expand-implicits-source(|ma-ty))> lhs;
-      	p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> p*;
       	(rhs', p-rhs*) := <try-or-mktup(expand-implicits-target(|bu-ty))> rhs;
-      	p''* := <alltd(eliminate-unneeded-cast)> [p-lhs*, p'*, p-rhs*]
+      	p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p-lhs*, p*, p-rhs*];
+      	p''* := <alltd(eliminate-unneeded-cast)> p'*
 
   expand-implicits-premise:
     Formula(Match(tl, tr)) -> p*
@@ -208,15 +208,15 @@ rules /* introduce explicit reductions/coercions where required on BUILD side */
 rules /* introduce explicit reductions/coercions where required on TARGET side */
 
   expand-implicits-target(|bu-ty):
-    vref@VarRef(_) -> (VarRef(v-new), prem*)
+    t -> (VarRef(v-new), prem*)
     where
-      v-ty := <type-of> vref;
+      v-ty := <type-of> t;
       <not(type-coerce-direct(fail))> (v-ty, bu-ty)
     where
       ty-path* := <get-typath-memo(type-coerce-full(fail))> (v-ty, bu-ty, BuildMode());
       v-new := <def-new-variable> bu-ty;
-      prem* := <expand-typath-build> (ty-path*, vref, Var(v-new))
-
+      prem* := <expand-typath-build> (ty-path*, t, Var(v-new))
+      
   try-or-mktup(s) = s <+ \ t -> (t, []) \
   try-or-mksingleton(s) = s <+ MkSingleton
   
