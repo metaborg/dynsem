@@ -497,19 +497,6 @@ rules
       end
 
   type-check-premise:
-  	f@TryOr(PremiseBlock(l*), PremiseBlock(r*)) -> f
-    with
-      <map(type-check-premise-top)> l*;
-      <map(type-check-premise-top)> r*
-
-  type-check-premise:
-    f@MergePoint(cond, PremiseBlock(l*), PremiseBlock(r*)) -> f
-    with
-    	<type-check-premise-top> cond;
-      <map(type-check-premise-top)> l*;
-      <map(type-check-premise-top)> r*
-  
-  type-check-premise:
     f@CaseMatch(tb, case*) -> f
     with
       in-ty := <type-check-build> tb;

@@ -32,16 +32,6 @@ context-free syntax // rules
   Premise.Formula = [[Formula]]
   Premise.AllFail = <all-fail> {deprecated}
 
-  PremisesBlock.PremiseBlock = <{
-    <{Premise ";\n"}*>
-  }>
-
-  Premise.MergePoint = [
-    [Premise]
-    < [PremisesBlock]
-    + [PremisesBlock]
-  ] {deprecated("Use a case pattern match instead")}
-  
   Premise.CaseMatch = [
     case [Term] of {
       [{Case "\n"}+]
@@ -58,11 +48,6 @@ context-free syntax // rules
       [{Premise ";\n"}*]
   ]
   
-  Premise.TryOr = [
-    try [PremisesBlock]
-  	or  [PremisesBlock]
-  ] {deprecated}
-
   ID = <_> {reject}
   ID = <imports> {reject}
   ID = <signature> {reject}

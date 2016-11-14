@@ -24,27 +24,6 @@ rules
   rename-all-vars = alltd(origin-track-forced(rename-var))
   
   rename-var:
-  	TryOr(l, r) -> TryOr(l', r')
-  	where
-  	  new-scope-renames(
-        l' := <rename-all-vars> l
-      );
-      new-scope-renames(
-        r' := <rename-all-vars> r
-      )
-  
-  rename-var:
-    MergePoint(p, l, r) -> MergePoint(p', l', r')
-    where
-      new-scope-renames(
-        p' := <rename-all-vars> p;
-        l' := <rename-all-vars> l
-      );
-      new-scope-renames(
-        r' := <rename-all-vars> r
-      )
-
-  rename-var:
     CasePattern(pat, p*) -> CasePattern(pat', p'*)
     where
       new-scope-renames(
