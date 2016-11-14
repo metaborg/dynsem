@@ -56,7 +56,7 @@ rules
   expand-implicits-case:
     CaseOtherwise(p*) -> CaseOtherwise(p'*)
     where
-      p'* := <mapconcat(debug(!1); expand-implicits-premise; debug(!2))> p*
+      p'* := <mapconcat(expand-implicits-premise)> p*
 
 rules /* lift and expand subterms on build sides */
 
