@@ -70,7 +70,7 @@ public class RuleRegistry {
 		}
 
 		if (jointRuleForClass == null) {
-			jointRuleForClass = new JointRuleRoot(SourceSection.createUnavailable("rule", "adhoc"), RuleKind.ADHOC,
+			jointRuleForClass = new JointRuleRoot(SourceSection.createUnavailable("rule", "adhoc"), RuleKind.PLACEHOLDER,
 					arrowName, dispatchClass, new Rule[0]);
 			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}

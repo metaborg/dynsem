@@ -40,6 +40,7 @@ signature
     TargetSpecAbs : DSOpt
     TargetTableRel : DSOpt
     TargetTableAbs : DSOpt
+    JVMArgs : DSOpt
 
 rules
 
@@ -85,7 +86,8 @@ rules
       (TargetSpecRel(), target-specfile-rel),
       (TargetSpecAbs(), target-specfile-abs),
       (TargetTableRel(), target-tblfile-rel),
-      (TargetTableAbs(), target-tblfile-abs)
+      (TargetTableAbs(), target-tblfile-abs),
+      (JVMArgs(), jvm-args)
     ]
     where
       local-project-path := <local-path> project-path;
@@ -117,7 +119,8 @@ rules
       target-specfile-rel := <read-property(|"project.specpath", "src/main/resources/specification.aterm")> prop-file;
       target-specfile-abs := $[[genproject-path]/[target-specfile-rel]];
       target-tblfile-rel := <read-property(|"project.tablepath", "src/main/resources/parsetable.tbl")> prop-file;
-      target-tblfile-abs := $[[genproject-path]/[target-tblfile-rel]]
+      target-tblfile-abs := $[[genproject-path]/[target-tblfile-rel]];
+      jvm-args := <read-property(|"interpreter.vmargs", "")> prop-file
 
   ds-to-interp-read-prop-required(|prop) =
     read-property(|prop, "N/A"); not(?"N/A" + ?"")

@@ -8,6 +8,7 @@ imports
   analysis/rename
   analysis/query
   analysis/analysis-signatures
+  analysis/mark-references
 	pp
   ds
   lib-ds
@@ -43,7 +44,7 @@ rules /* store variables */
     log-hitcount
   
   store-rules =
-    Rules(with(prime-typaths); map(try(store-rule))) // <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked]))))
+    Rules(with(prime-typaths); map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked. This is a bug, please report it.]))))
 
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
@@ -52,12 +53,12 @@ rules /* store variables */
       lhs-ty := <rulelhs-get-type> lhs;
       if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
       then
-        if arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
+        if arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
         then
           <store-rule> (<lookup-prop(|Type())> arrow-def, r)
         else
           arrow-ma-ty* := <map(lookup-prop(|Type()); ?ArrowType(<id>, _))> arrow-def*;
-          add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
+          add-msg(|Error(), lhs, $[Expected one of: [<map(pp-type)> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
         end
       else
         add-msg(|Error(), arr, $[Arrow [arrow-name] is not declared])
@@ -331,19 +332,19 @@ rules // type rules for match-sides
     (in-ty, t) -> <type-check-match(|in-ty)> t
   
   type-check-match-num(|in-ty):
-    Int(_) -> <type-coerce-full(id)> (in-ty, IntType())
+    Int(_) -> <type-coerce-full(id)> (IntType(), in-ty)
 
   type-check-match-num(|in-ty):
-    Real(_) -> <type-coerce-full(id)> (in-ty, RealType())
+    Real(_) -> <type-coerce-full(id)> (RealType(), in-ty)
   
   type-check-match-bool(|in-ty):
-    True() -> <type-coerce-full(id)> (in-ty, BoolType())
+    True() -> <type-coerce-full(id)> (BoolType(), in-ty)
 
   type-check-match-bool(|in-ty):
-    False() -> <type-coerce-full(id)> (in-ty, BoolType())
+    False() -> <type-coerce-full(id)> (BoolType(), in-ty)
   
   type-check-match-str(|in-ty):
-    String(_) -> <type-coerce-full(id)> (in-ty, StringType())
+    String(_) -> <type-coerce-full(id)> (StringType(), in-ty)
   
   type-check-match-wld(|in-ty):
     Wld() -> in-ty
@@ -355,7 +356,7 @@ rules // type rules for match-sides
       if scheme-def := <get-unique-matching-varscheme(get-all-varschemes)> v
       then
         scheme-ty := <lookup-prop(|Type())> scheme-def;
-        ty := <type-coerce-full(id)> (in-ty, scheme-ty)
+        ty := <type-coerce-full(id)> (scheme-ty, in-ty)
       else
         ty := in-ty
       end;
@@ -375,13 +376,13 @@ rules // type rules for match-sides
   		ty := <type-check-match(|in-ty)> p
 
   type-check-match-cast(|in-ty):
-  	Cast(t, ty-trm) -> <type-coerce-full(id)> (in-ty, t-ty)
+  	Cast(t, ty-trm) -> <type-coerce-full(id)> (t-ty, in-ty)
   	where
   		cast-ty := <rw-type> ty-trm;
   		t-ty := <type-check-match(|cast-ty)> t
   		
   type-check-match-con(|in-ty):
-    t@Con(c, aparam*) -> <type-coerce-full(id)> (in-ty, ty)
+    t@Con(c, aparam*) -> <type-coerce-full(id)> (ty, in-ty)
     where
       c-def := <lookup-def(|Constructors())> (c, <length> aparam*);
       ConstructorType(fparam-ty*, ty) := <lookup-prop(|Type())> c-def;
@@ -392,16 +393,16 @@ rules // type rules for match-sides
       end
   
   type-check-match-list(|in-ty):
-  	List([]) -> <type-coerce-full(id)> (in-ty, ListType(ALPHATYPE()))
+  	List([]) -> <type-coerce-full(id)> (ListType(ALPHATYPE()), in-ty)
   
   type-check-match-list(|in-ty):
-  	ListTail([h], t) -> <type-coerce-full(id)> (in-ty, l-ty)
+  	ListTail([h], t) -> <type-coerce-full(id)> (l-ty, in-ty)
   	where
   		<?ListType(in-el-ty)> in-ty
     where
     	t-ty@ListType(t-el-ty) := <type-check-match(|in-ty)> t;
     	h-ty := <type-check-match(|in-el-ty)> h;
-    	l-ty := <type-coerce-full(id)> (t-ty, ListType(h-ty))
+    	l-ty := <type-coerce-full(id)> (ListType(h-ty), t-ty)
 
   type-check-match-tuple(|in-ty):
     ty@Tuple(t*) -> TupleType(<zip(type-check-match-wrap)> (f-ty*, t*))
@@ -416,13 +417,13 @@ rules // type rules for match-sides
 rules
   
   type-check-premise-top =
-  	try(type-check-premise)
-//    <+
-//  	where(
-//  		?p;
-//  		p-str := <ensure(unmark-vars; pp-dynsem-Premise-string)> p;
-//    	add-msg(|Error(), p, $[Premise type check failed: [p-str]])
-//  	)
+  	type-check-premise
+    <+
+  	where(
+  		?p;
+  		p-str := <ensure(unmark-vars; pp-dynsem-Premise-string)> p;
+    	add-msg(|Error(), p, $[Premise type check failed: [p-str] This is a bug, please report it.])
+  	)
 
   type-check-premise:
   	f@Formula(TermEq(lhs, rhs)) -> f
@@ -464,7 +465,7 @@ rules
           <map(try(labelcomp-to-type-term-pair; type-check-match-wrap))> tc*
         else
           arrow-ma-ty* := <map(lookup-prop(|Type()); ?ArrowType(<id>, _))> arrow-def*;
-          add-msg(|Error(), lhs, $[Expected one of: [<pp-type> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
+          add-msg(|Error(), lhs, $[Expected one of: [<map(pp-type)> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
         end
       else
         add-msg(|Error(), arrow-name, $[Arrow [arrow-name] is not declared])
@@ -547,6 +548,7 @@ rules
   type-coerce-direct(is-matching) =
     type-coerce-base
     <+ type-coerce(type-coerce-direct(is-matching))
+    <+ type-coerce-ast-lift(is-matching, type-coerce-direct(is-matching))
   
   type-coerce-base = eq; Fst
 
@@ -618,7 +620,8 @@ rules /* support for implicit conversions */
   type-coerce-implicit-wrap(is-matching, coerce-s):
     ty-tup@(_, _) -> <type-path-get-out-ty(is-matching)> ty-step*
     where
-      ty-step* := <type-coerce-implicit(is-matching, coerce-s)> ty-tup
+      ty-tup' := <try(is-matching; \ (a, b) -> (b, a) \)> ty-tup; 
+      ty-step* := <type-coerce-implicit(is-matching, coerce-s)> ty-tup'
   
   type-coerce-implicit(is-matching, coerce-s):
     (ty-from, ty-to) -> <get-typath-memo(coerce-s)> (ty-from, ty-to, mode)

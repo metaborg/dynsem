@@ -134,6 +134,7 @@ rules
         <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${resource_loc}"/>
         <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<get-opt> MavenArtifactId()]"/>
         <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
+        <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="[<get-opt> JVMArgs()]"/>
       </launchConfiguration>
     ], launch-file);
     <fclose> launch-file

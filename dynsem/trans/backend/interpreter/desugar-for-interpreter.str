@@ -51,6 +51,9 @@ rules
     Cast(_, srt@SimpleSort(s)) -> (SortKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
     where
       <not(is-builtin-type)> s
+
+  get-relation-kind-class:
+    Cast(_, SimpleSort("AST")) -> (ASTKind(), "org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm")
   
   get-relation-kind-class:
     Cast(_, SimpleSort("String")) -> (PrimitiveKind(), "java.lang.String")
@@ -66,6 +69,9 @@ rules
   
   get-relation-kind-class:
     Cast(_, srt@ListSort(_)) -> (ListKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
+  
+  get-relation-kind-class:
+    Cast(_, srt@TupleSort(_)) -> (TupleKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
 
   qualify-term-class:
     class -> $[[<get-opt> TermPkg()].[class]]
@@ -260,9 +266,12 @@ rules /* resugar list construction */
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
   
   add-typeanno-to-list-tuples:
+    Cast(Tuple(t*), tuple-sort@TupleSort(_)) -> TypedTuple(t*, <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort) 
+  
+  add-typeanno-to-list-tuples:
     tup@Tuple(t*) -> TypedTuple(t*, tuple-class)
     where
-      tuple-sort := <type-of; derw-type> tup; 
+      tuple-sort := <type-of; derw-type> tup;
       tuple-class := <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort
 
 

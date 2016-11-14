@@ -11,11 +11,11 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class MultiRuleUnionNode extends RuleUnionNode {
+public class NonEmptyRuleSetNode extends RuleSetNode {
 
 	@Children private final Rule[] rules;
 
-	public MultiRuleUnionNode(SourceSection source, String arrowName, Class<?> dispatchClass, Rule[] rules) {
+	public NonEmptyRuleSetNode(SourceSection source, String arrowName, Class<?> dispatchClass, Rule[] rules) {
 		super(source, arrowName, dispatchClass);
 		this.rules = rules;
 	}
@@ -23,18 +23,21 @@ public class MultiRuleUnionNode extends RuleUnionNode {
 	@ExplodeLoop
 	public RuleResult execute(final Object[] arguments) {
 		CompilerAsserts.compilationConstant(rules.length);
-
+		PatternMatchFailure lastFailure = null;
 		for (int i = 0; i < rules.length; i++) {
 			try {
 				final Rule r = rules[i];
 				return r.execute(Truffle.getRuntime().createVirtualFrame(arguments, r.getFrameDescriptor()));
 			} catch (PatternMatchFailure pmfx) {
-				;
+				lastFailure = pmfx;
 			}
 		}
-		// there are no rules or all rules failed. we throw a soft exception to allow sort-based rules to be tried
-		throw PatternMatchFailure.INSTANCE;
-
+		// there are no rules or all rules have failed. we throw a soft exception to allow alternative rules to be tried
+		if (lastFailure != null) {
+			throw lastFailure;
+		} else {
+			throw PatternMatchFailure.INSTANCE;
+		}
 	}
 
 	@Override
