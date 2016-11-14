@@ -29,5 +29,6 @@ signature
     PrimitiveKind : RuleKind
     NativeKind : RuleKind
     ListKind : RuleKind
+    TupleKind : RuleKind
     MapKind : RuleKind
     
