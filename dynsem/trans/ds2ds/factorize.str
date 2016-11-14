@@ -5,7 +5,7 @@ imports
   lib-ds
   
 strategies
-    
+  
   factorize-module:
     Module(name, section*) -> Module($[[name]_factorized], section'*)
     where
@@ -100,7 +100,7 @@ rules // lift constructor sub-terms in match
     <+ factorize-relation-in-premise
     <+ factorize-casematch-premise
   
-  factorize-cases = repeat(some(factorize-case))
+  factorize-cases = some(factorize-case)
   
   factorize-case:
     CasePattern(pat, p*) -> CasePattern(pat, <factorize-premises> p*)
@@ -108,13 +108,11 @@ rules // lift constructor sub-terms in match
   factorize-case:
     CaseOtherwise(p*) -> CaseOtherwise(<factorize-premises> p*)
   
-//  factorize-casematch-premise = fail
-  
   factorize-casematch-premise:
     CaseMatch(t, case*) -> [p-t*, CaseMatch(t', case*)]
     where
       (p-t*, t') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> t;
-//      case'* := <factorize-cases> case*;
+      case'* := <factorize-cases> case*;
       !success
   
   factorize-match-in-premise:
