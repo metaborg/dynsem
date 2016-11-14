@@ -123,6 +123,9 @@ public abstract class Rule extends DynSemNode {
 		if (Tools.hasConstructor(flag, "SortKind", 0)) {
 			return RuleKind.SORT;
 		}
+		if (Tools.hasConstructor(flag, "ASTKind", 0)) {
+			return RuleKind.AST;
+		}
 		if (Tools.hasConstructor(flag, "PrimitiveKind", 0)) {
 			return RuleKind.PRIMITIVE;
 		}
@@ -131,6 +134,9 @@ public abstract class Rule extends DynSemNode {
 		}
 		if (Tools.hasConstructor(flag, "ListKind", 0)) {
 			return RuleKind.LIST;
+		}
+		if (Tools.hasConstructor(flag, "TupleKind", 0)) {
+			return RuleKind.TUPLE;
 		}
 		if (Tools.hasConstructor(flag, "MapKind", 0)) {
 			return RuleKind.MAP;

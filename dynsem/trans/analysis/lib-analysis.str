@@ -204,6 +204,9 @@ rules // type rewriting
   	StringType() -> "String"
   
   pp-type-builtin:
+    ASTType() -> "AST"
+  
+  pp-type-builtin:
     ListType(ety) -> $[List([<pp-type> ety])]
   
   pp-type-builtin:
