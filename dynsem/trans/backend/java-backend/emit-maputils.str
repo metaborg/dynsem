@@ -47,48 +47,30 @@ rules
     m-ty@MapType(k-ty, v-ty) ->
       class-body-dec* |[
         public static IStrategoTerm x_toterm(PersistentMap<x_kty, x_vty> map, ITermFactory factory) {
-          IStrategoConstructor bindCons = factory.makeConstructor("Bind", 2);
-
-          IStrategoTerm[] kids = new IStrategoTerm[map.size()];
+          IStrategoTerm[] entries = new IStrategoTerm[map.size()];
 
           int idx = 0;
           for (Entry<x_kty, x_vty> entry : map.entrySet()) {
-            kids[idx] = factory.makeAppl(bindCons,
-                        e_keytrm, e_valtrm);
+            entries[idx] = factory.makeTuple(e_keytrm, e_valtrm);
             idx++;
           }
 
-          return factory.makeAppl(factory.makeConstructor("Map", 1), factory.makeList(kids));
+          return factory.makeList(entries);
         }
 
         public static x_maptype x_fromterm(IStrategoTerm term) {
           PersistentMap<x_kty, x_vty> result = PersistentHashMap.EMPTY;
-			    if (Tools.isTermAppl(term)) {
-			      IStrategoAppl appl = (IStrategoAppl) term;
-			      if (Tools.hasConstructor(appl, "Map", 1)) {
-			        IStrategoTerm bindsTerm = appl.getSubterm(0);
-              if (Tools.isTermList(bindsTerm)) {
-	              IStrategoList binds = (IStrategoList) bindsTerm;
-			          for (int idx = 0; idx < binds.getSubtermCount(); idx++) {
-			            IStrategoTerm kid = binds.getSubterm(idx);
-			            if (Tools.isTermAppl(kid)) {
-			              IStrategoAppl bindAppl = (IStrategoAppl) kid;
-			              if (Tools.hasConstructor(bindAppl, "Bind", 2)) {
-			                result = MapUtils.add(result, e_key, e_value);
-			              } else {
-			                throw new MalformedASTException("Malformed map");
-		                }
-	                } else {
-	                  throw new MalformedASTException("Malformed map");
-	                }
-	              }
-	              return result;
-	            } else {
-	              throw new MalformedASTException("Malformed map");
-	            }
-            } else {
-              throw new MalformedASTException("Malformed map");
+			    if (Tools.isTermList(term)) {
+            IStrategoList entries = (IStrategoList) term;
+            for (int idx = 0; idx < entries.getSubtermCount(); idx++) {
+              IStrategoTerm entry = entries.getSubterm(idx);
+              if (Tools.isTermTuple(entry) && entry.getSubtermCount() == 2) {
+                result = MapUtils.add(result, e_key, e_value);
+              } else {
+                throw new MalformedASTException("Malformed map");
+              }
             }
+            return result;
           } else {
             throw new MalformedASTException("Malformed map");
           }
@@ -102,8 +84,8 @@ rules
       x_vty := <ds2java-type-to-boxed-type> v-ty;
       e_keytrm := <ds2java-atermconversion-name(| e |[ entry.getKey() ]|)> k-ty;
       e_valtrm := <ds2java-atermconversion-name(| e |[ entry.getValue() ]|)> v-ty;
-      e_key := <ds2java-gennode-instantiation> (e |[ bindAppl.getSubterm(0) ]|, k-ty);
-      e_value := <ds2java-gennode-instantiation> (e |[ bindAppl.getSubterm(1) ]|, v-ty)
+      e_key := <ds2java-gennode-instantiation> (e |[ entry.getSubterm(0) ]|, k-ty);
+      e_value := <ds2java-gennode-instantiation> (e |[ entry.getSubterm(1) ]|, v-ty)
 
   ds2java-map2aterm-name:
     m-ty@MapType(_, _) -> $[[<ds2java-type-to-identifier> m-ty]2aterm]

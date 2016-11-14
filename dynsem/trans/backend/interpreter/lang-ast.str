@@ -587,14 +587,14 @@ rules /* Sort & Constructor classes */
         new Object() {
           public com.github.krukow.clj_lang.PersistentHashMap apply() {
             IStrategoAppl x_mapT = (IStrategoAppl) e_term;
-            assert Tools.hasConstructor(x_mapT, "Map", 1);
+            assert Tools.isTermList(x_mapT);
           
-            IStrategoList x_bindsT = Tools.listAt(x_mapT, 0);
+            IStrategoList x_bindsT = (IStrategoList)x_mapT;
           
             java.util.Map<x_keyclass, x_valclass> x_map = new java.util.HashMap<x_keyclass, x_valclass>(
                 Math.round(x_bindsT.size() / 0.75f), 0.75f);
             for (IStrategoTerm x_bindT : x_bindsT) {
-              assert Tools.isTermAppl(x_bindT) && Tools.hasConstructor((IStrategoAppl) x_bindT, "Bind", 2);
+              assert Tools.isTermTuple(x_bindT) && x_bindT.getSubtermCount() == 2;
               x_map.put(e_keycreate, e_valcreate);
             }
             return com.github.krukow.clj_lang.PersistentHashMap.create(x_map);
