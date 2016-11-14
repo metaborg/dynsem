@@ -33,13 +33,14 @@ rules
 
   expand-implicits-premise:
     Formula(Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), tgt@Target(_, _))) ->
-      [p*, Formula(Relation(Reads(r'*), Source(lhs', sc'*), arr, tgt))]
+      [p*, Formula(Relation(Reads(r'*), Source(lhs'', sc'*), arr, tgt))]
     where
       (r'*, p1*) := <map(expand-implicits-termbuild <+ \ LabelComp(l, t) -> (LabelComp(l, t), []) \); unzip; (id, concat)> r*;
       ArrowType(in-ty, _) :=  <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (<lookup-defs(|Arrows())> arrow-name, <type-of> lhs); 
       (lhs', p2*) := <lift-where-indirect <+ \ (_, t) -> (t, []) \> (in-ty, lhs);
-      (sc'*, p3*) := <map(expand-implicits-termbuild <+ \ LabelComp(l, t) -> (LabelComp(l, t), []) \); unzip; (id, concat)> sc*;
-      p* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p1*, p2*, p3*]
+      (lhs'', p3*) := <expand-implicits-termbuild <+ \ t -> (t, []) \> lhs';
+      (sc'*, p4*) := <map(expand-implicits-termbuild <+ \ LabelComp(l, t) -> (LabelComp(l, t), []) \); unzip; (id, concat)> sc*;
+      p* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p1*, p2*, p3*, p4*]
 
   expand-implicits-premise:
     CaseMatch(t, case*) -> [p*, CaseMatch(t', case'*)]
