@@ -17,15 +17,14 @@ rules
   
   expand-implicits-rule:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
-      Rule(p''*, infer, Relation(Reads(r*), Source(lhs', sc*), arr, Target(rhs', tc*)))
+      Rule(p'*, infer, Relation(Reads(r*), Source(lhs', sc*), arr, Target(rhs', tc*)))
       where
         lhs-ty := <type-of> lhs;
         arrow-def* := <lookup-defs(|Arrows())> arrow-name;
         ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
         (lhs', p-lhs*) := <try-or-mktup(expand-implicits-source(|ma-ty))> lhs;
         (rhs', p-rhs*) := <try-or-mktup(expand-implicits-target(|bu-ty))> rhs;
-        p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p-lhs*, p*, p-rhs*];
-        p''* := <alltd(eliminate-unneeded-cast)> p'*
+        p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p-lhs*, p*, p-rhs*]
 
   expand-implicits-premise:
     Formula(Match(tl, tr)) -> p*
@@ -121,9 +120,6 @@ rules /* lift and expand subterms on build sides */
       t-ty := <type-of> t;
       <not(type-coerce-direct(fail))> (t-ty, e-ty);
       v-new := <def-new-variable> e-ty
-
-  eliminate-unneeded-cast:
-    Formula(Match(lt@VarRef(_), Cast(rt, _))) -> Formula(Match(lt, rt)) 
 
 rules /* introduce explicit reductions/coercions where required on MATCH side */
 
