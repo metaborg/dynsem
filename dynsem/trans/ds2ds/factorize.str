@@ -22,7 +22,7 @@ rules
   	  (prem2*, read'*) := <try-factor(factorize-source-components)> read*;
       (prem3*, lhs') := <try-factor(factorize-lhs)> lhs;
       (prem4*, sc'*) := <try-factor(factorize-source-components)> sc*;
-      (prem5*, rhs') := <try-factor(factorize-build)> rhs;
+      (prem5*, rhs') := <try-factor(factorize-rhs)> rhs;
       (prem6*, tc'*) := <try-factor(factorize-target-components)> tc*;
       prem7* := <factorize-premises> [prem3*, prem2*, prem4*, prem1*, prem5*, prem6*]
 
@@ -72,7 +72,7 @@ rules // lift constructor sub-terms in match
     where
       (p*, t2) := <factorize-lhs> t1
   
-//  factorize-rhs = lift-build-on-cond(not(is-prime-factor), ?succ); where(!succ)
+  factorize-rhs = lift-build-on-cond(not(is-prime-factor), ?succ); where(!succ)
   
   factorize-source-components =
     map(try-factor(factorize-source-components, ?succ)); where(!succ); unzip; (concat, id)
