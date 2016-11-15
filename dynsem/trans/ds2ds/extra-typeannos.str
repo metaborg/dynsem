@@ -12,7 +12,7 @@ rules
     where
       <m-in-analysis(add-extra-typeannos; unrename-all); unmark-vars> m => Module(name, section*)
   
-  add-extra-typeannos = alltd(add-extra-typeannos-rule); alltd(add-extra-typeannos-term)
+  add-extra-typeannos = alltd(add-extra-typeannos-rule); alltd(add-extra-typeannos-premise); alltd(add-extra-typeannos-term)
   
   add-extra-typeannos-rule:
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(t, tc*))) -> 
@@ -24,13 +24,18 @@ rules
       ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (arrow-def*, <type-of> lhs);
       bu-ty-str := <derw-type> bu-ty
 
+  add-extra-typeannos-premise:
+    Formula(Match(lhs, rhs)) -> Formula(Match(lhs, rhs'))
+    where
+      lhs-ty := <type-of> lhs;
+      rhs' := <add-extra-typeannos-term <+ Snd> (lhs-ty, rhs)
+
   add-extra-typeannos-term:
     Con(name, c*) -> Con(name, c'*)
     where
       c-def := <lookup-def(|Constructors())> (name, <length> c*);
       ConstructorType(c-ty*, ty) := <lookup-prop(|Type())> c-def;
       c'* := <zip(add-extra-typeannos-term <+ Snd)> (c-ty*, c*)
-  
   
   add-extra-typeannos-term:
     x@(_, c@Con(_, _)) -> <try(add-extra-typeannos-term)> c
@@ -48,3 +53,6 @@ rules
   
   add-extra-typeannos-term:
     (ty, l@List([])) -> Cast(l, <derw-type> ty)
+  
+  add-extra-typeannos-term:
+    (ty, t@Tuple(_)) -> Cast(t, <derw-type> ty)
