@@ -52,25 +52,27 @@ rules
     Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> <fail>
     where
       arrow-name := <get-arrow-name> arr;
-      lhs-ty := <gen-implicit-type-of(id)> lhs;
-      ArrowType(dec-lhs-ty, _) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (<lookup-defs(|Arrows())> arrow-name, lhs-ty);
-      <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      lhs-ty := <gen-implicit-info-type-of(id)> lhs;
+      ArrowType(dec-lhs-ty, _) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
+      <gen-implicit-info-fact(id|lhs)> (lhs-ty, dec-lhs-ty)
 
   gen-implicit-info-conclusion:
     Rule(_, _, Relation(_, Source(lhs, _), arr, Target(rhs, _))) -> <fail>
     where
       arrow-name := <get-arrow-name> arr;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
       lhs-ty := <rulelhs-get-type> lhs;
-      ArrowType(_, dec-rhs-ty) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (<lookup-defs(|Arrows())> arrow-name, lhs-ty);
-      <gen-implicit-info-fact(fail|rhs)> (<gen-implicit-type-of(fail)> rhs, dec-rhs-ty)
+      ArrowType(_, dec-rhs-ty) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
+      <gen-implicit-info-fact(fail)> (rhs, dec-rhs-ty)
   
   gen-implicit-info-premise:
     _ -> <fail>
     where
       ?p@Match(lt, rt) + ?p@NMatch(lt, rt)
     where
-      l-ty := <gen-implicit-type-of(fail)> lt;
-      r-ty := <gen-implicit-type-of(id)> rt;
+      l-ty := <gen-implicit-info-type-of(fail)> lt;
+      r-ty := <gen-implicit-info-type-of(id)> rt;
       <try(gen-implicit-info-fact(id|p))> (r-ty, l-ty)
   
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
@@ -79,7 +81,7 @@ rules
     LabelComp(Label(l), t) -> <fail>
     where
       ty := <lookup-def(|Components()); lookup-prop(|Type())> l;
-      t-ty := <gen-implicit-type-of(is-matching)> t;
+      t-ty := <gen-implicit-info-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|t)> (t-ty, ty)
 
   gen-implicit-info-term(is-matching):
@@ -87,29 +89,29 @@ rules
     where
       c-arity := <length> c*;
       ConstructorType(fc-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
-      <zip(try(\ (c, fc-ty) -> <gen-implicit-info-fact(is-matching|c)> (<gen-implicit-type-of(is-matching)> c, fc-ty) \))> (c*, fc-ty*)
+      <zip(try(gen-implicit-info-fact(is-matching)))> (c*, fc-ty*)
 
   gen-implicit-info-term(is-matching):
     ListTail([h], t) -> <fail>
     where
-      h-ty := <gen-implicit-type-of(is-matching)> h;
-      ListType(e-ty) := <gen-implicit-type-of(is-matching)> t;
+      h-ty := <gen-implicit-info-type-of(is-matching)> h;
+      ListType(e-ty) := <gen-implicit-info-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|h)> (h-ty, e-ty)
 
   // map select
   gen-implicit-info-term(is-matching):
     DeAssoc(l-t, _) -> <fail>
     where
-      ListType(f-l-ty) := <gen-implicit-type-of(is-matching); get-alias-base> l-t;
-      a-l-ty := <gen-implicit-type-of(is-matching)> l-t;
+      ListType(f-l-ty) := <gen-implicit-info-type-of(is-matching); get-alias-base> l-t;
+      a-l-ty := <gen-implicit-info-type-of(is-matching)> l-t;
       <gen-implicit-info-fact(is-matching|l-t)> (a-l-ty, f-l-ty)
 
   // list index access
   gen-implicit-info-term(is-matching):
     DeAssoc(map-t, key-t) -> <fail>
     where
-      MapType(f-key-ty, _) := <gen-implicit-type-of(is-matching); get-alias-base> map-t;
-      a-key-ty := <gen-implicit-type-of(is-matching)> key-t;
+      MapType(f-key-ty, _) := <gen-implicit-info-type-of(is-matching); get-alias-base> map-t;
+      a-key-ty := <gen-implicit-info-type-of(is-matching)> key-t;
       <gen-implicit-info-fact(is-matching|key-t)> (a-key-ty, f-key-ty)
 
   gen-implicit-info-fact(is-matching|on-term) =
@@ -120,9 +122,13 @@ rules
     type-path-to-string(is-matching);
     ?path-string;
     add-msg(|Note(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
+  
+  gen-implicit-info-fact(is-matching):
+    (t, ex-ty) -> <gen-implicit-info-fact(is-matching|t)> (actual-ty, ex-ty)
+    where
+      actual-ty := <gen-implicit-info-type-of(is-matching)> t
 
-  gen-implicit-type-of(is-matching) = type-of
-
+  gen-implicit-info-type-of(is-matching) = type-of
 
 
 
