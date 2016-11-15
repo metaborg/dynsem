@@ -19,11 +19,13 @@ rules
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(rhs, tc*))) ->
       Rule(p''*, infer, Relation(Reads(r*), Source(lhs', sc*), arr, Target(rhs', tc*)))
       where
-      	ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (<lookup-defs(|Arrows())> arrow-name, <type-of> lhs);
-      	(lhs', p-lhs*) := <try-or-mktup(expand-implicits-source(|ma-ty))> lhs;
-      	(rhs', p-rhs*) := <try-or-mktup(expand-implicits-target(|bu-ty))> rhs;
-      	p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p-lhs*, p*, p-rhs*];
-      	p''* := <alltd(eliminate-unneeded-cast)> p'*
+        lhs-ty := <type-of> lhs;
+        arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+        ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
+        (lhs', p-lhs*) := <try-or-mktup(expand-implicits-source(|ma-ty))> lhs;
+        (rhs', p-rhs*) := <try-or-mktup(expand-implicits-target(|bu-ty))> rhs;
+        p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p-lhs*, p*, p-rhs*];
+        p''* := <alltd(eliminate-unneeded-cast)> p'*
 
   expand-implicits-premise:
     Formula(Match(tl, tr)) -> p*
