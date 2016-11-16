@@ -586,7 +586,7 @@ rules /* Sort & Constructor classes */
       e |[
         new Object() {
           public com.github.krukow.clj_lang.PersistentHashMap apply() {
-            IStrategoAppl x_mapT = (IStrategoAppl) e_term;
+            IStrategoTerm x_mapT = e_term;
             assert Tools.isTermList(x_mapT);
           
             IStrategoList x_bindsT = (IStrategoList)x_mapT;
