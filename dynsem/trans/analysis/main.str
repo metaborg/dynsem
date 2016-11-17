@@ -14,7 +14,20 @@ imports
 	libstratego-sglr
 	ds
 	import-utils
+	pp
 
+rules
+
+  debug-show-analyzed:
+    (_, _, ast, path, project-path) -> (filename, result)
+    with {| MyCurrentFile:
+      filename := <guarantee-extension(|"analyzed.ds")> path;
+      f-path := $[[project-path]/[path]];
+      rules(MyCurrentFile: _ -> f-path);
+      editor-init;
+      result := <in-project-path(m-in-analysis(id)|project-path); unmark-vars; sugar-all; pp-debug> ast
+    |}
+      
 rules
 
   m-in-analysis(s) =
