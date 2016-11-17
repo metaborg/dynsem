@@ -9,53 +9,147 @@ imports
   
 strategies
 	
-	rename-all = alltd(rename)
+	rename-all = alltd(rename-rule)
 	
 rules
-  
-  rename:
-    Rule(p*, i, r) -> Rule(p'*, i, r')
+
+  rename-rule:
+    r@Rule(p*, i, Relation(reads, source, arrow, target)) -> Rule(p'*, i, Relation(reads', source', arrow', target'))
     where
-      new-scope-renames(
-        r' := <rename-all-vars> r;
-        p'* := <rename-all-vars> p*
-      )
+      rename-api-init-storage(?renames, ?invrenames);
+      // pre-allocate renames for variables visible throughout the rule
+      var-name* := <rename-collect-vardefs-top> r;
+      <rename-api-rename-all(|renames, invrenames)> var-name*; 
+      reads' := <rename-vars(|renames, invrenames)> reads;
+      source' := <rename-vars(|renames, invrenames)> source;
+      arrow' := <rename-vars(|renames, invrenames)> arrow;
+      p'* := <rename-premises(|renames, invrenames)> p*;
+      target' := <rename-vars(|renames, invrenames)> target
   
-  rename-all-vars = alltd(origin-track-forced(rename-var))
+  rename-collect-vardefs-top =
+    collect-om(rename-collect-vardefs, (flatten-list, flatten-list); union)
   
-  rename-var:
+  rename-collect-vardefs:
+    Var(x) -> x
+  
+  rename-collect-vardefs:
+    CaseMatch(t, case*) -> <map(rename-collect-vardefs-top); rename-api-isect-lists> case*
+  
+  rename-premises(|renames, invrenames) =
+    map(try(rename-premise(|renames, invrenames)))
+  
+  rename-premise(|renames, invrenames) =
+    not(?CaseMatch(_, _));
+    rename-vars(|renames, invrenames)
+
+  rename-premise(|renames, invrenames):
+    CaseMatch(t, case*) -> CaseMatch(t', case'*)
+    where
+      // rename the term build
+      t' := <rename-vars(|renames, invrenames)> t;
+      // rename in cases
+      case'* := <map(rename-case(|renames, invrenames))> case*
+  
+  rename-case(|renames, invrenames):
     CasePattern(pat, p*) -> CasePattern(pat', p'*)
     where
-      new-scope-renames(
-        pat' := <rename-all-vars> pat;
-        p'* := <rename-all-vars> p*
-      )
-  
-  rename-var:
+      pat' := <rename-vars(|renames, invrenames)> pat;
+      <rename-api-scope-fork(?renames', ?invrenames')> (renames, invrenames);
+      p'* := <rename-premises(|renames', invrenames')> p*;
+      rename-api-destroy-storage(|renames', invrenames')
+
+  rename-case(|renames, invrenames):
     CaseOtherwise(p*) -> CaseOtherwise(p'*)
     where
-      new-scope-renames(
-        p'* := <rename-all-vars> p*
-      )
+      <rename-api-scope-fork(?renames', ?invrenames')> (renames, invrenames);
+      p'* := <rename-premises(|renames', invrenames')> p*;
+      rename-api-destroy-storage(|renames', invrenames')
+
+  rename-vars(|renames, invrenames) =
+    alltd(rename-var(|renames, invrenames))
   
-  rename-var:
-  	VarRef(v) -> VarRef(<rename(|Vars())> v)
+  rename-var(|renames, invrenames):
+    VarRef(v) -> VarRef(<rename-api-rename(|renames, invrenames)> v)
   
-  rename-var:
-  	Var(v) -> Var(<rename(|Vars())> v)
-  
+  // TODO: mark duplicate variables at this position!
+  rename-var(|renames, invrenames):
+    Var(v) -> Var(<rename-api-rename(|renames, invrenames)> v)
+
 rules
 
-  unrename-all = alltd(unrename-var)
+  unrename-all = id
 
-  unrename-var:
-  	v -> <invrename(|Vars())> v
-  	where
-  		is-string
+  unrename-var = id
 
-  unrename-var:
-    VarRef(v) -> VarRef(<unrename-var> v)
-
-  unrename-var:
-    Var(v) -> Var(<unrename-var> v)
-
+strategies
+  
+  /*
+  * Initialize storage for variable renaming
+  *
+  * The two strategy parameters are invoked on the freshly created hashtables,
+  * so they can be used to bind variables to the stores
+  */
+  rename-api-init-storage(sto-renames, sto-invrenames) =
+    where( 
+      renames-table := <new-hashtable; sto-renames>;
+      invrenames-table := <new-hashtable; sto-invrenames>
+    )
+  
+  rename-api-destroy-storage(|sto-renames, sto-invrenames) =
+    where(
+      <hashtable-destroy> sto-renames;
+      <hashtable-destroy> sto-invrenames
+    )
+  
+  /*
+  * Destroy the storage hashtables
+  */
+  rename-api-destroy-storage(|renames, invrenames) =
+    where(
+      <hashtable-destroy> renames;
+      <hashtable-destroy> invrenames
+    )
+  
+  /*
+  * Introduces a new scope for renames. The new scope is a copy of the current scope
+  */
+  rename-api-scope-fork(sto-renames, sto-invrenames):
+    (renames, invrenames) -> (renames, invrenames)
+    where
+      <hashtable-copy; sto-renames> renames;
+      <sto-invrenames> invrenames
+  
+  /*
+  * Rename a name. The name already given to this variable is returned. Fails if name has not previously been renamed.
+  */
+  rename-api-rename(|renames, invrenames):
+    name -> name'
+    where
+      name' := <hashtable-get(|name)> renames
+  
+  /*
+  * Rename a name. Create a new name for the given name and store the renaming. Fails if the variable has already been renamed.
+  */
+  rename-api-rename(|renames, invrenames):
+    name -> name'
+    where
+      <not(hashtable-get(|name))> renames
+    where
+      name' := <newname> name;
+      <hashtable-put(|name, name')> renames;
+      <hashtable-put(|name', name)> invrenames
+  
+  rename-api-rename-all(|renames, invrenames) =
+    is-list;
+    map(rename-api-rename(|renames, invrenames))
+  
+  /*
+  * Inverse rename of a name. Returns the original name which the given renamed name is based on.
+  */ 
+  rename-api-invrename(|renames, invrenames):
+    name' -> <hashtable-get(|name')> invrenames
+  
+  rename-api-isect-lists = 
+    ?l;
+    u := <foldr(![], union)> l;
+    <foldl(isect)> (l, u)
