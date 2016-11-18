@@ -87,8 +87,6 @@ rules
   rename-var(|env):
     VarRef(v) -> VarRef(<rename-api-rename(|env)> v)
   
-  // TODO: mark duplicate variables at this position!
-  // rename will fail for variables that have already been renamed
   rename-var(|env):
     Var(v) -> Var(<rename-api-rename(|env)> v)
   
@@ -97,12 +95,12 @@ rules
   unrename-all = alltd(unrename-var)
 
   unrename-var:
-    VarRef(x) -> <rename-api-invrename(|env)> x
+    VarRef(x) -> VarRef(<rename-api-invrename(|env)> x)
     where
       env := <RenameEnvs>
   
   unrename-var:
-    VarRef(x) -> <rename-api-invrename(|env)> x
+    VarRef(x) -> VarRef(<rename-api-invrename(|env)> x)
     where
       env := <RenameEnvs>
   
