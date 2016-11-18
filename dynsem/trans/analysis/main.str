@@ -32,9 +32,11 @@ rules
 
   m-in-analysis(s) =
     new-analysis-scope(
-      new-type-transitions-scope(
-        analyze-top;
-        s
+      in-rename-scope(
+        new-type-transitions-scope(
+          analyze-top;
+          s
+        )
       )
     )
 	
