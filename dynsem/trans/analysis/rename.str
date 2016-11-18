@@ -30,11 +30,8 @@ rules
 
   rename-rule(|env):
     r@Rule(p*, i, Relation(reads, source, arrow, target)) -> Rule(p'*, i, Relation(reads', source', arrow', target'))
-    where
+    with
       rename-api-scopefork-fresh(?env',
-        // pre-allocate renames for variables visible throughout the rule
-        var-name* := <rename-collect-vardefs-top> r;
-        <rename-api-rename-all(|env')> var-name*; 
         reads' := <rename-vars(|env')> reads;
         source' := <rename-vars(|env')> source;
         arrow' := <rename-vars(|env')> arrow;
@@ -59,16 +56,19 @@ rules
     rename-vars(|env)
 
   rename-premise(|env):
-    CaseMatch(t, case*) -> CaseMatch(t', case'*)
-    where
+    c@CaseMatch(t, case*) -> CaseMatch(t', case'*)
+    with
       // rename the term build
       t' := <rename-vars(|env)> t;
+      // pre-allocate renames for variables visible throughout the branches
+      var-name* := <rename-collect-vardefs-top; concat> c;
+      <map(rename-api-rename-pre(|env))> var-name*;
       // rename in cases
       case'* := <map(rename-case(|env))> case*
   
   rename-case(|env):
     CasePattern(pat, p*) -> CasePattern(pat', p'*)
-    where
+    with
       pat' := <rename-vars(|env)> pat;
       rename-api-scopefork-copy(?env',
         p'* := <rename-premises(|env')> p*
@@ -76,7 +76,7 @@ rules
 
   rename-case(|env):
     CaseOtherwise(p*) -> CaseOtherwise(p'*)
-    where
+    with
       rename-api-scopefork-copy(?env',
         p'* := <rename-premises(|env')> p*
       | env)
@@ -88,6 +88,7 @@ rules
     VarRef(v) -> VarRef(<rename-api-rename(|env)> v)
   
   // TODO: mark duplicate variables at this position!
+  // rename will fail for variables that have already been renamed
   rename-var(|env):
     Var(v) -> Var(<rename-api-rename(|env)> v)
   
@@ -146,15 +147,19 @@ strategies
   /*
   * Rename a name. The name already given to this variable is returned. Fails if name has not previously been renamed.
   */
-  rename-api-rename(|sto):
+  rename-api-rename-use(|sto):
     name -> name'
     where
       name' := <Fst; hashtable-get(|name)> sto
   
+  rename-api-rename(|sto) =
+    rename-api-rename-use(|sto)
+    <+ rename-api-rename-def(|sto)
+  
   /*
   * Rename a name. Create a new name for the given name and store the renaming. Fails if the variable has already been renamed.
   */
-  rename-api-rename(|sto):
+  rename-api-rename-def(|sto):
     name -> name'
     where
       <Fst; not(hashtable-get(|name))> sto
@@ -163,9 +168,7 @@ strategies
       <Fst; hashtable-put(|name, name')> sto;
       <Snd; hashtable-put(|name', name)> sto
   
-  rename-api-rename-all(|sto) =
-    is-list;
-    map(rename-api-rename(|sto))
+  rename-api-rename-pre(|sto) = rename-api-rename(|sto) // TODO implement
   
   /*
   * Inverse rename of a name. Returns the original name which the given renamed name is based on.
