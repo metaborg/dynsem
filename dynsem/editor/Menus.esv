@@ -5,8 +5,9 @@ menus
   menu: "Syntax"
     
     action: "Format"               = format-editor (openeditor) 
+    action: "Show Analyzed" = debug-show-analyzed (source) (openeditor) (meta)
     action: "Show Abstract Syntax" = debug-show-aterm (source) (openeditor) (meta) 
-    action: "Show Desugared Syntax" = debug-show-desugared (source) (openeditor) (meta) 
+    action: "Show Desugared Syntax" = debug-show-desugared (source) (openeditor) (meta)
                                                                                                                                                                                          
   menu: "Semantics"
 
