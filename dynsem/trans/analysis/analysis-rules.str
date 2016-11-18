@@ -364,10 +364,18 @@ rules // type rules for match-sides
       <store-prop(|Type(), v-def)> ty
   
   type-check-match-var(|in-ty):
-    dec@Var(v) -> <fail>
+    dec@Var(v) -> in-ty
     where
-      <lookup-def(|Vars())> v;
-      add-msg(|Error(), dec, $[Duplicate variable [<unrename-var> v]])
+      v-ty := <lookup-def(|Vars()); lookup-prop(|Type())> v;
+      <not(type-coerce-direct(id))> (in-ty, v-ty);
+      add-msg(|Error(), dec, $[Rebinding variable [<unrename-var> v] with incompatibe type])
+  
+  type-check-match-var(|in-ty):
+    dec@Var(v) -> in-ty
+    where
+      v-ty := <lookup-def(|Vars()); lookup-prop(|Type())> v;
+      <type-coerce-direct(id)> (v-ty, in-ty)
+//      add-msg(|Warning(), dec, $[Possible rebinding of variable [<unrename-var> v]])
   
   type-check-match-as(|in-ty):
   	As(v, p) -> ty
