@@ -35,6 +35,18 @@ rules /* syntactic checks */
     where
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
       add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
+  
+  post-analysis-check:
+    MapKeys(m-t) -> <fail>
+    where
+      MapType(ALPHATYPE(), _) := <type-check-build> m-t;
+      add-msg(|Warning(), m-t, $[Please insert a type cast to clarify map type])
+  
+  post-analysis-check:
+    MapValues(m-t) -> <fail>
+    where
+      MapType(_, ALPHATYPE()) := <type-check-build> m-t;
+      add-msg(|Warning(), m-t, $[Please insert a type cast to clarify map type])
 
 rules /* store variables */
   

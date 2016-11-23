@@ -15,6 +15,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
+import com.google.inject.multibindings.MapKey;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -91,6 +92,12 @@ public abstract class TermBuild extends DynSemNode {
 		}
 		if (Tools.hasConstructor(t, "MapHas", 2)) {
 			return MapHas.create(t, fd);
+		}
+		if(Tools.hasConstructor(t, "TypedMapKeys", 2)){
+			return TypedMapKeys.create(t, fd);
+		}
+		if(Tools.hasConstructor(t, "TypedMapValues", 2)){
+			return TypedMapValues.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "True", 0)) {
 			return TrueLiteralTermBuild.create(t, fd);

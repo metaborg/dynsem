@@ -42,7 +42,12 @@ rules /* Sort & Constructor classes */
       tuple-class* := <map(ds-to-interp-terms-tupledecl)> tuple-dec*;
       list-class* := <map(ds-to-interp-terms-listdecl)> list-dec*
   
-  get-languagelist-usage-in-signatures = collect-all(?ListSort(_)); nub
+  get-languagelist-usage-in-signatures:
+    sig -> [explicit-list*, implicit-map-key*, implicit-map-val*]
+    where
+      explicit-list* := <collect-all(?ListSort(_)); nub> sig;
+      implicit-map-key* := <collect-all(\ MapSort(k, _) -> ListSort(k) \); nub> sig;
+      implicit-map-val* := <collect-all(\ MapSort(_, v) -> ListSort(v) \); nub> sig
   
   get-languagetuple-usage-in-signatures = collect-all(?TupleSort(_)); nub
   
@@ -373,6 +378,7 @@ rules /* Sort & Constructor classes */
       compilation-unit |[
         package ~x:<get-opt> TermPkg();
 
+        import java.util.Collection;
         import java.util.Iterator;
         import org.apache.commons.lang3.builder.HashCodeBuilder;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
@@ -393,6 +399,10 @@ rules /* Sort & Constructor classes */
         
           public x_listclass(x_elemclass[] elems) {
             this(elems, null);
+          }
+ 
+          public x_listclass(Collection<x_elemclass> elemSet) {
+            this(elemSet.toArray(new x_elemclass[0]));
           }
         
           @SuppressWarnings("unchecked")

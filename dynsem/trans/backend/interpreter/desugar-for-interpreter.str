@@ -273,6 +273,18 @@ rules /* resugar list construction */
     where
       tuple-sort := <type-of; derw-type> tup;
       tuple-class := <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort
+  
+  add-typeanno-to-list-tuples:
+    MapKeys(t) -> TypedMapKeys(t, keylist-class)
+    where
+      MapType(k, _) := <type-of> t;
+      keylist-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> ListType(k)
+  
+  add-typeanno-to-list-tuples:
+    MapValues(t) -> TypedMapValues(t, valuelist-class)
+    where
+      MapType(_, v) := <type-of> t;
+      valuelist-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> ListType(v)
 
 
 
