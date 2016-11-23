@@ -3,7 +3,6 @@ module analysis/lib-analysis
 imports
   signatures/-
   analysis/-
-  import-utils
 
 rules
 	

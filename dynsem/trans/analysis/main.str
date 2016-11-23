@@ -13,7 +13,7 @@ imports
   lib-ds
 	libstratego-sglr
 	ds
-	import-utils
+	src-gen/stratego/metaborg
 	pp
 
 rules
@@ -111,3 +111,8 @@ rules /* helpers for import handling */
   parse-ds-file-report(report) = 
     parse-ds
     <+ debug(!"failed to parse: "); report; debug(!"reported error: "); fail
+  
+  parse-ds:
+    file -> str
+    where
+      str := <prim("STRSGLR_parse_string", id|file, (), (), file)>
