@@ -101,7 +101,7 @@ rules /* helpers for import handling */
   resolve-path =
   	?import-string;
     (
-      !"ds"; language-source-and-include-locations;
+      language; language-source-and-include-locations;
       fetch-elem(!$[[<id>]/[import-string].ds]; file-exists)
       <+
       add-msg(|Error(), import-string, $[Import [import-string] cannot be resolved]);
