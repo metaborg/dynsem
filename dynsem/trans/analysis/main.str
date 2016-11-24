@@ -140,6 +140,10 @@ rules /* helpers for import handling */
     with
       add-msg(|Error(), t, $[Imported module [import-string] cannot be be parsed])
 
+  console-import-parse-error =
+    ?Import(<id>);
+    fatal-err(|"Cannot read/parse module: ") 
+
 strategies // caching file reading utilities
   
   open-cached-file(resolve-path, parse-file) =

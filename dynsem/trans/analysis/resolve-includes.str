@@ -5,30 +5,17 @@ imports
   ds
   
 imports
-  analysis/lib-analysis
   analysis/main
 
 rules
 	
 	include-imports:
-		Module(name, section*) -> Module(name, section'*)
+		ast@Module(module-name, section*) -> Module(module-name, <filter(not(?Imports(_)))> [section*, imported-section*])
 		with
-			(import*, section-noimports*) := <partition(?Imports(<id>)); (concat, id)> section*;
-      section'* := <include-imports(|<OptProjectPath>, [name])> (import*, section-noimports*)
-
-  include-imports(|include-dir, imported*):
-   ([], section*) -> section*
-
-  include-imports(|include-dir, imported*):
-    ([Import(i) | ixs*], section*) -> <include-imports(|include-dir, [name, imported*])> ([ixs*, new-import*], [section* | imported-section-noimports*])
-    with
-    	Module(name, imported-section*) := <resolve-path; parse-ds-file-report(fatal-err-missing-import(|i))> i;
-      if <not(fetch-elem(?name))> imported*
-      then
-        (new-import*, imported-section-noimports*) := <partition(?Imports(<id>)); (concat, id)> imported-section*
-      else
-        new-import* := [];
-        imported-section-noimports* := []
-      end
-
-  fatal-err-missing-import(|file) = <fatal-err(|"File not found: ")> file
+		  // compute transitive imports
+		  analyze-api-get-all-imports(editor-import-parse-error);
+      // remove the current module from the imports
+      filter(not(?Import(module-name)));
+      // read the imported modules
+      imported-section* := <mapconcat(open-cached-file(analyze-api-resolve-import, parse-ds-file-report(console-import-parse-error)); ?Module(_, <id>))>
+      
