@@ -40,67 +40,24 @@ rules
       )
     )
 	
-  analyze-top = 
-    // compute the transitive closure set of imports
-    analyze-api-get-all-imports(editor-import-parse-error);
-    // analyze the signatures of each module separately
-    // merge the analysis results from all the modules
-    // analyze the signatures of the current module
-    // analyze the rules of the current module
-    id
-    
-  analyze-api-get-all-imports(parse-error) =
-    ?ast;
-    direct-import* := <analyze-api-get-direct-imports; nub> ast;
-    <analyze-compute-imports(parse-error)> (direct-import*, [])
-  
-  analyze-api-get-direct-imports:
-    Module(_, sec*) -> <filter(?Imports(<id>)); concat> sec*
-  
-  analyze-compute-imports(parse-error):
-    ([], impo*) -> impo*
-  
-  analyze-compute-imports(parse-error):
-    ([impX|impXs], imp*) -> <analyze-compute-imports(parse-error)> (<nub> [new-imp*|impXs], [impX, imp*])
+  analyze-top:
+    ast@Module(module-name, _) -> <analyze-module> ast
     with
-      if <open-import(analyze-api-resolve-import, parse-ds-file-report(\ _ -> <parse-error> impX \), ?ast)> impX
-      then
-        more-imp* := <analyze-api-get-direct-imports> ast;
-        new-imp* := <diff> (more-imp*, imp*)
-      else
-        new-imp* := []
-      end
-	
-  analyze-api-resolve-import:
-    Import(m) -> <resolve-path> m
+      // compute the transitive closure set of imports
+      analyze-api-get-all-imports(editor-import-parse-error);
+      // remove the current file from the imports
+      filter(not(?Import(module-name)));
+      // analyze the signatures of each module
+      map(try(analyze-import))
 
-//	analyze-top = {| IsImported:
-//	  where(
-//		  if f := <MyCurrentFile>
-//		  then
-//	  	  rules(IsImported: f)
-//	  	end);
-//	  analyze-module
-//  |}
-//
-//  analyze-module =
-//    analyze-imports(analyze-module);
-//    analyze-module-local
-//  
-//  analyze-imports(analysis) =
-//    Module(id, where(filter(Imports(filter(analyze-import(analysis))))))
-//  
-//  analyze-import(analysis) = 
-//  	?t@Import(import-string);
-//  	!import-string;
-//  	open-import(
-//  	  resolve-path,
-//      parse-ds-file-report(add-msg(|Error(), t, $[Import [import-string] cannot be be parsed]));
-//      Module(id, id),
-//  	  analyze-module
-//  	)
+strategies // analysis workhorse
 
-  analyze-module-local =
+  analyze-import =
+    open-cached-file(analyze-api-resolve-import, parse-ds-file-report(id));
+    Module(id, filter(?Signatures(_)));
+    analyze-module
+
+  analyze-module =
     desugar-top;
     log-timed(mark-vars| "Marking variable def sites");
     log-timed(rename-all| "Renaming variables");
@@ -129,7 +86,34 @@ rules
           <gen-implicit-info-top> m | "Implicit conversion info"
         )
       | "Analysis" )
+
+strategies // import resolution
+
+  analyze-api-get-all-imports(parse-error) =
+    ?ast;
+    direct-import* := <analyze-api-get-direct-imports; nub> ast;
+    <analyze-compute-imports(parse-error)> (direct-import*, [])
   
+  analyze-api-get-direct-imports:
+    Module(_, sec*) -> <filter(?Imports(<id>)); concat> sec*
+  
+  analyze-compute-imports(parse-error):
+    ([], impo*) -> impo*
+  
+  analyze-compute-imports(parse-error):
+    ([impX|impXs], imp*) -> <analyze-compute-imports(parse-error)> (<nub> [new-imp*|impXs], [impX, imp*])
+    with
+      if ast := <open-cached-file(analyze-api-resolve-import, parse-ds-file-report(\ _ -> <parse-error> impX \))> impX
+      then
+        more-imp* := <analyze-api-get-direct-imports> ast;
+        new-imp* := <diff> (more-imp*, imp*)
+      else
+        new-imp* := []
+      end
+  
+  analyze-api-resolve-import:
+    Import(m) -> <resolve-path> m
+
 rules /* helpers for import handling */
 
   resolve-path =
@@ -144,7 +128,7 @@ rules /* helpers for import handling */
 
   parse-ds-file-report(report) = 
     parse-ds
-    <+ debug(!"failed to parse: "); report; debug(!"reported error: "); fail
+    <+ report; fail
   
   parse-ds:
     file -> str
@@ -155,3 +139,28 @@ rules /* helpers for import handling */
     t@Import(import-string) -> t
     with
       add-msg(|Error(), t, $[Imported module [import-string] cannot be be parsed])
+
+strategies // caching file reading utilities
+  
+  open-cached-file(resolve-path, parse-file) =
+    open-cached-file(resolve-path, parse-file, ?result);
+    !result
+  
+  open-cached-file(resolve-path, parse-file, record-declarations):
+    import -> file
+    where
+      path       := <resolve-path> import;
+      cache-path := <import-cache-path> path;
+      ( <is-newer> (cache-path, path);
+        file := <ReadFromFile> cache-path
+      <+
+        file := <parse-file> path;
+        if <file-exists> path then
+          // Only cache if on filesystem (e.g., ignore libstratego-lib)
+          <try(WriteToBinaryFile)> (cache-path, file)
+        end        
+      );
+      {| CurrentFile:
+        rules(CurrentFile := path);
+        <record-declarations> file
+      |}
