@@ -13,9 +13,8 @@ rules
 		ast@Module(module-name, section*) -> Module(module-name, <filter(not(?Imports(_)))> [section*, imported-section*])
 		with
 		  // compute transitive imports
-		  analyze-api-get-all-imports(editor-import-parse-error);
+		  analyze-api-get-all-imports(console-file-not-found-error, editor-import-parse-error);
       // remove the current module from the imports
       filter(not(?Import(module-name)));
       // read the imported modules
-      imported-section* := <mapconcat(open-cached-file(analyze-api-resolve-import, parse-ds-file-report(console-import-parse-error)); ?Module(_, <id>))>
-      
+      imported-section* := <mapconcat(open-cached-file(analyze-api-resolve-import(console-file-not-found-error), parse-ds-file-report(console-import-parse-error)); ?Module(_, <id>))>

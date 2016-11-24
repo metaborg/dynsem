@@ -44,7 +44,7 @@ rules
     ast@Module(module-name, _) -> <analyze-module> ast
     with
       // compute the transitive closure set of imports
-      analyze-api-get-all-imports(editor-import-parse-error);
+      analyze-api-get-all-imports(editor-import-resolution-error, editor-import-parse-error);
       // remove the current file from the imports
       filter(not(?Import(module-name)));
       // analyze the signatures of each module
@@ -53,7 +53,7 @@ rules
 strategies // analysis workhorse
 
   analyze-import =
-    open-cached-file(analyze-api-resolve-import, parse-ds-file-report(id));
+    open-cached-file(analyze-api-resolve-import(id), parse-ds-file-report(id));
     Module(id, filter(?Signatures(_)));
     analyze-module
 
@@ -89,21 +89,21 @@ strategies // analysis workhorse
 
 strategies // import resolution
 
-  analyze-api-get-all-imports(parse-error) =
+  analyze-api-get-all-imports(resolution-error, parse-error) =
     ?ast;
     direct-import* := <analyze-api-get-direct-imports; nub> ast;
-    <analyze-compute-imports(parse-error)> (direct-import*, [])
+    <analyze-compute-imports(resolution-error, parse-error)> (direct-import*, [])
   
   analyze-api-get-direct-imports:
     Module(_, sec*) -> <filter(?Imports(<id>)); concat> sec*
   
-  analyze-compute-imports(parse-error):
+  analyze-compute-imports(resolution-error, parse-error):
     ([], impo*) -> impo*
   
-  analyze-compute-imports(parse-error):
-    ([impX|impXs], imp*) -> <analyze-compute-imports(parse-error)> (<nub> [new-imp*|impXs], [impX, imp*])
+  analyze-compute-imports(resolution-error, parse-error):
+    ([impX|impXs], imp*) -> <analyze-compute-imports(resolution-error, parse-error)> (<nub> [new-imp*|impXs], [impX, imp*])
     with
-      if ast := <open-cached-file(analyze-api-resolve-import, parse-ds-file-report(\ _ -> <parse-error> impX \))> impX
+      if ast := <open-cached-file(analyze-api-resolve-import(resolution-error), parse-ds-file-report(\ _ -> <parse-error> impX \))> impX
       then
         more-imp* := <analyze-api-get-direct-imports> ast;
         new-imp* := <diff> (more-imp*, imp*)
@@ -111,18 +111,18 @@ strategies // import resolution
         new-imp* := []
       end
   
-  analyze-api-resolve-import:
-    Import(m) -> <resolve-path> m
+  analyze-api-resolve-import(resolution-error):
+    Import(m) -> <resolve-path(resolution-error)> m
 
 rules /* helpers for import handling */
 
-  resolve-path =
+  resolve-path(resolution-error) =
   	?import-string;
     (
       language; language-source-and-include-locations;
       fetch-elem(!$[[<id>]/[import-string].ds]; file-exists)
       <+
-      add-msg(|Error(), import-string, $[Import [import-string] cannot be resolved]);
+      resolution-error;
       fail
     )
 
@@ -143,6 +143,19 @@ rules /* helpers for import handling */
   console-import-parse-error =
     ?Import(<id>);
     fatal-err(|"Cannot read/parse module: ") 
+
+  editor-import-resolution-error:
+    s -> s
+    where
+      add-msg(|Error(), s, $[Import [s] cannot be resolved])
+ 
+  editor-module-name-error:
+    s -> s
+    where
+      add-msg(|Error(), s, $[Module name [s] does not match file name and path])
+  
+  console-file-not-found-error =
+    fatal-err(|"File not found: ")
 
 strategies // caching file reading utilities
   
