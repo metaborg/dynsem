@@ -74,7 +74,7 @@ strategies // analysis workhorse
           <map(try(store-signatures))> section* | "Storing signatures"
         );
         log-timed(
-          <check-signatures> section* | "Checking signatures" 
+          <check-signatures> m | "Checking signatures" 
         );
         log-timed(
           <store-rules-all> section* | "Storing rules"

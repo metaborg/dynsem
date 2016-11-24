@@ -1,12 +1,8 @@
 module analysis/analysis-signatures
 
 imports
-  signatures/ds-sig
-  signatures/Signatures-sig
-  analysis/lib-analysis
-  analysis/constructors
-  analysis/analysis-rules
-  analysis/query
+  signatures/-
+  analysis/-
 
 rules /* store signatures */
   
@@ -173,6 +169,11 @@ rules /* store signatures */
 rules
   
   check-signatures = alltd(check-signature)
+  
+  check-signature:
+    Module(module-name, _) -> <fail>
+    where
+      <resolve-path(editor-module-name-error)> module-name
   
   check-signature:
     SimpleSort(s) -> <fail>
