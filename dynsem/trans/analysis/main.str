@@ -42,30 +42,30 @@ rules
 	
   analyze-top = 
     // compute the transitive closure set of imports
-    analyze-get-imports-top(editor-import-parse-error);
+    analyze-api-get-all-imports(editor-import-parse-error);
     // analyze the signatures of each module separately
     // merge the analysis results from all the modules
     // analyze the signatures of the current module
     // analyze the rules of the current module
     id
     
-  analyze-get-imports-top(parse-error) =
+  analyze-api-get-all-imports(parse-error) =
     ?ast;
-    direct-import* := <analyze-api-get-direct-import-files; nub> ast;
-    <analyze-get-imports(parse-error)> (direct-import*, [])
+    direct-import* := <analyze-api-get-direct-imports; nub> ast;
+    <analyze-compute-imports(parse-error)> (direct-import*, [])
   
-  analyze-api-get-direct-import-files:
+  analyze-api-get-direct-imports:
     Module(_, sec*) -> <filter(?Imports(<id>)); concat> sec*
   
-  analyze-get-imports(parse-error):
+  analyze-compute-imports(parse-error):
     ([], impo*) -> impo*
   
-  analyze-get-imports(parse-error):
-    ([impX|impXs], imp*) -> <analyze-get-imports(parse-error)> (<nub> [new-imp*|impXs], [impX, imp*])
+  analyze-compute-imports(parse-error):
+    ([impX|impXs], imp*) -> <analyze-compute-imports(parse-error)> (<nub> [new-imp*|impXs], [impX, imp*])
     with
       if <open-import(analyze-api-resolve-import, parse-ds-file-report(\ _ -> <parse-error> impX \), ?ast)> impX
       then
-        more-imp* := <analyze-api-get-direct-import-files> ast;
+        more-imp* := <analyze-api-get-direct-imports> ast;
         new-imp* := <diff> (more-imp*, imp*)
       else
         new-imp* := []
