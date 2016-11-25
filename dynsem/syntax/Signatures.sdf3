@@ -51,7 +51,6 @@ context-free syntax // constructor declarations
   ConsDecl.NullaryConsDecl = [[ID] : [Type] [ConsAnnos]]
   ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type] [ConsAnnos]]
   
-  
   ConsAnnos.NoAnnos = []
 
   ConsAnnos.Annos = [{[ { ConsAnno "," }* ]}]
@@ -120,7 +119,7 @@ context-free syntax
 
   ArrowDeclaration.ArrowDecl = [[ArrowROs] [Type] [ArrowRWs] -[IDNOHYPH]-> [Type] [ArrowRWs]]
   
-  ArrowDeclaration.MetaFunDecl = [[ArrowROs] [ID]([{Type ", "}+]) [ArrowRWs] --> [Type] [ArrowRWs]]
+  ArrowDeclaration.MetaFunDecl = [[ArrowROs] [ID]([{Type ", "}*]) [ArrowRWs] --> [Type] [ArrowRWs]]
   
   ArrowROs.NoArrowROs = []
   ArrowROs.ArrowROs = [[{Label ", "}+] |-]
