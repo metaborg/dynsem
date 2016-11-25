@@ -8,10 +8,10 @@ imports
 
 rules
   
-  desugar-varschemes-module :
-    mod@Module(_, _) -> Module($[[name]_varschemes], section'*)
-    where
-      <m-in-analysis(desugar-varschemes; unrename-all); unmark-vars> mod => Module(name, section'*)
+  desugar-varschemes-module =
+    ?Module(_, _);
+    m-in-analysis(desugar-varschemes; unrename-all);
+    unmark-vars
 
   desugar-varschemes = alltd(desugar-varscheme)
   

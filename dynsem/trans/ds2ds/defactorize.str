@@ -11,14 +11,10 @@ imports
 strategies
 
   defactorize-module =
-    Module(!$[[<id>]_unfactorized],
-      alltd(defactorize-rule)
-    )
+    Module(id, alltd(defactorize-rule))
   
   insert-wildcards-module =
-    Module(!$[[<id>]_unfactorized],
-      alltd(insert-wildcards-rule)
-    )
+    Module(id, alltd(insert-wildcards-rule))
 
 rules
   

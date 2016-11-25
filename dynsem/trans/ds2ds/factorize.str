@@ -6,10 +6,8 @@ imports
   
 strategies
   
-  factorize-module:
-    Module(name, section*) -> Module($[[name]_factorized], section'*)
-    where
-      section'* := <map(try(factorize-rules))> section*
+  factorize-module =
+    Module(id, map(try(factorize-rules)))
         
   factorize-rules = alltd(\ Wld() -> VarRef(<next-variable>) \); alltd(factorize-typecast); alltd(factorize-rule)
   

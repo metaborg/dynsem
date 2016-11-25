@@ -8,10 +8,10 @@ imports
 
 rules
 
-  expand-implicits-module:
-    m@Module(_, _) -> Module($[[name]_explimpl], section*)
-    where
-      <m-in-analysis(expand-implicits; unrename-all); unmark-vars> m => Module(name, section*)
+  expand-implicits-module =
+    ?Module(_, _);
+    m-in-analysis(expand-implicits; unrename-all);
+    unmark-vars
 
   expand-implicits = alltd(expand-implicits-rule)
   
