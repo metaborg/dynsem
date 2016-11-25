@@ -8,8 +8,6 @@ imports
 imports
 	pp
 	outline
-	ds2ds/refocus
-	ds2ds/strict
 	ds2ds/sugar
 	analysis/lib-analysis
 	src-gen/stratego/metaborg
