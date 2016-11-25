@@ -285,6 +285,15 @@ rules /* resugar list construction */
     where
       MapType(_, v) := <type-of> t;
       valuelist-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> ListType(v)
+  
+  add-typeanno-to-list-tuples:
+    Relation(src, arr@NamedDynamicEmitted(_, arr-name, in-sort), Target(Tuple(tup-t*), o-rw*)) ->
+      Relation(src, arr, Target(TypedTuple(tup-t*, tuple-class), o-rw*))
+    where
+      in-ty := <rw-type> in-sort;
+      arr-def* := <lookup-defs(|Arrows())> arr-name;
+      ArrowType(_, out-ty) := <get-applicable-arrowdef(flip(type-coerce-direct(fail))); lookup-prop(|Type())> (arr-def*, in-ty);
+      tuple-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> out-ty
 
 
 
