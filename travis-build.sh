@@ -7,4 +7,4 @@ mvn -Pstandalone install
 cd $TRAVIS_BUILD_DIR/org.metaborg.meta.lang.dynsem.interpreter
 mvn -Pstandalone test
 cd $TRAVIS_BUILD_DIR/metaborg-sl/org.metaborg.lang.sl
-mvn verify
+mvn -Pstandalone verify
