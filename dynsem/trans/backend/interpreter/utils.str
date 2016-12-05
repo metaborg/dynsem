@@ -91,7 +91,13 @@ rules
     ]
     where
       local-project-path := <local-path> project-path;
-      prop-file := $[[project-path]/dynsem.properties];
+      prop-file := $[[project-path]/dynsem.properties]
+    with
+      if <not(read-property(|"source.langname", ""))> prop-file
+      then
+        fatal-err(|"Could not find/read a dynsem.properties file")
+      end
+    where
       langname := <ds-to-interp-read-prop-required(|"source.langname"); ds-utils-java-escape-id> prop-file;
       tbl-source := <read-property(|"source.table", "target/metaborg/sdf.tbl"); absolute-path(|local-project-path)> prop-file;
       lang-ver := <ds-to-interp-read-prop-required(|"source.version")> prop-file;
@@ -124,6 +130,6 @@ rules
 
   ds-to-interp-read-prop-required(|prop) =
     read-property(|prop, "N/A"); not(?"N/A" + ?"")
-    <+ with(fail|$[Cannot read [prop] property])
+    <+ fatal-err(|$[Cannot read [prop] property])
 
   ds-to-interp-write-classes(|package) = ds-utils-java-emit-classes(id | package, <get-opt> JavaGenDirAbs())

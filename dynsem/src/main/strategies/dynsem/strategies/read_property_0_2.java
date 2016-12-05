@@ -1,6 +1,5 @@
 package dynsem.strategies;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -32,8 +31,7 @@ public class read_property_0_2 extends Strategy {
 
 		try(InputStream is = context.getIOAgent().openInputStream(Tools.javaString(current))) {
 			prop.load(is);
-		} catch (IOException e) {
-			context.getIOAgent().printError(e.getMessage());
+		} catch (Exception e) {
 			return null;
 		}
 		
