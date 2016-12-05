@@ -29,9 +29,11 @@ rules
   
   ds-to-interp(|path, project-path, local-project-path) =
     ds-to-interp-init-options(|path, local-project-path);
-    ds-to-interp-table;
-    ds-to-interp-specification(|path, project-path); ds-to-interp-specification-write;
-    ds-to-interp-terms(|path, local-project-path)
+    log-timed(
+      ds-to-interp-table;
+      ds-to-interp-specification(|path, project-path); ds-to-interp-specification-write;
+      ds-to-interp-terms(|path, local-project-path)
+    |$[Generating interpreter at: [<get-opt> GenProject()]])
   
   ds-to-interp-specification(|path, project-path) =
     module-to-core(|path, project-path);
