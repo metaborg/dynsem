@@ -121,6 +121,11 @@
       <type>spoofax-language</type>
       <version>${metaborg-version}</version>
     </dependency>
+        <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.spoofax.meta.core</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
   </dependencies>
   <profiles>
     <profile>
