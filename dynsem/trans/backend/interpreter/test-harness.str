@@ -42,6 +42,7 @@ rules
         import org.junit.runner.RunWith;
         import org.junit.runners.Parameterized;
         import org.junit.runners.Parameterized.Parameters;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
         import ~x:<get-opt> TopPkg().x_entryPoint;
         
         @RunWith(Parameterized.class)
