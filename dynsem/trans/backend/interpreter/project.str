@@ -12,6 +12,7 @@ rules
       ; <file-exists + mkdir> project
       ; ds-to-interp-gen-project-launchconfig
       ; ds-to-interp-gen-project-pom
+      ; ds-to-interp-gen-apt-settings
       ; ds-to-interp-gen-project-gitignore
       ; java-gendir := <get-opt> JavaGenDirAbs()
       ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> TopPkg()]
@@ -128,6 +129,17 @@ rules
           </dependencies>
       </project>], pom-file);
     <fclose> pom-file
+  
+  ds-to-interp-gen-apt-settings =
+    settings-dir := $[[<get-opt> GenProject()]/.settings];
+    <file-exists <+ mkdir> settings-dir;
+    apt-settings-file := <fopen> ($[[settings-dir]/org.jboss.tools.maven.apt.prefs], "w");
+    apt-settings :=
+      $[eclipse.preferences.version=1
+        org.jboss.tools.maven.apt.aptProcessDuringReconcile=true
+        org.jboss.tools.maven.apt.mode=jdt_apt];
+    <fputs> (apt-settings, apt-settings-file);
+    <fclose> apt-settings-file
   
   ds-to-interp-gen-project-launchconfig =
     launch-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), ".launch"], "w");
