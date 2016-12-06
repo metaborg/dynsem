@@ -55,6 +55,10 @@ rules
                           <includes>**/**</includes>
                         </fileset>
                         <fileset>
+                          <directory>[<get-opt; get-rel-path(|<get-opt> TestJavaDir())> TestPkg()]</directory>
+                          <includes>**/**</includes>
+                        </fileset>
+                        <fileset>
                           <directory>${basedir}</directory>
                           <includes>[<get-opt> TargetSpecRel()]</includes>
                         </fileset>
