@@ -81,22 +81,27 @@ rules
         
           @Test
           public void testEagerEval() throws Exception {
+            final FileInputStream fis = new FileInputStream(testData.outputFile);
+            final String expectedOutput = IOUtils.toString(fis, Charset.defaultCharset());
+            IOUtils.closeQuietly(fis);
         
-            x_entryPoint.evaluate(testData.programFile, inputStream, outputStream,
-                errorStream);
+            final RuleResult res = SLEntryPoint.evaluate(testData.programFile, inputStream, outputStream, errorStream);
+            final Object resVal = res.result;
         
             outputStream.flush();
             errorStream.flush();
         
-            FileInputStream fis = new FileInputStream(testData.outputFile);
-            String expectedOutput = IOUtils.toString(fis, Charset.defaultCharset());
-            IOUtils.closeQuietly(fis);
-            String actualOutput = new String(outputStream.toByteArray());
-        
-            if (errorStream.size() > 0) {
-              actualOutput = new String(errorStream.toByteArray()) + System.lineSeparator();
+            final StringBuilder outBuilder = new StringBuilder();
+            outBuilder.append(new String(outputStream.toByteArray()));
+            if(resVal != null){
+              outBuilder.append(resVal.toString());
+              outBuilder.append(System.lineSeparator());
             }
-            assertEquals(expectedOutput.trim(), actualOutput.trim());
+            if (errorStream.size() > 0) {
+              outBuilder.append(new String(errorStream.toByteArray()));
+              outBuilder.append(System.lineSeparator());
+            }
+            assertEquals(expectedOutput.trim(), outBuilder.toString().trim());
           }
         
           @Parameters(name = "{index}: {0}")
