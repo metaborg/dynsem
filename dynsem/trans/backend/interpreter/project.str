@@ -51,7 +51,7 @@ rules
                     <configuration>
                       <filesets>
                         <fileset>
-                          <directory>[<get-opt; get-rel-path> TopPkg()]</directory>
+                          <directory>[<get-opt; get-rel-path(|<get-opt> JavaGenDirRel())> TopPkg()]</directory>
                           <includes>**/**</includes>
                         </fileset>
                         <fileset>
@@ -149,22 +149,24 @@ rules
 
   ds-to-interp-gen-project-gitignore =
     gitignore := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", ".gitignore"], "w");
+    basedir-java := <get-opt> JavaGenDirRel();
+    basedir-test := <get-opt> TestJavaDir();
     <fputs> ($[
       /target/
       [<get-opt> TargetSpecRel()]
       [<get-opt> TargetTableRel()]
-      [<get-opt; get-rel-path> TopPkg()]
-      [<get-opt; get-rel-path> TermPkg()]
-      [<get-opt; get-rel-path> BuildPkg()]
-      [<get-opt; get-rel-path> MatchPkg()]
+      [<get-opt; get-rel-path(|basedir-java)> TopPkg()]
+      [<get-opt; get-rel-path(|basedir-java)> TermPkg()]
+      [<get-opt; get-rel-path(|basedir-java)> BuildPkg()]
+      [<get-opt; get-rel-path(|basedir-java)> MatchPkg()]
+      [<get-opt; get-rel-path(|basedir-test)> TestPkg()]
       /[<get-opt> LangName()].launch
+      /Test[<get-opt> LangName()].launch
     ], gitignore);
     <fclose> gitignore
 
 
-  get-rel-path:
+  get-rel-path(|basedir):
     pkg -> <concat-strings> [basedir, "/", <string-replace(|".", "/")> pkg]
-    where
-      basedir := <get-opt> JavaGenDirRel()
 
     

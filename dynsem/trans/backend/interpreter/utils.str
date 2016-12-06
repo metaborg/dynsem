@@ -13,6 +13,7 @@ signature
     FilePath : DSOpt
     ProjectPath : DSOpt
     LangName : DSOpt
+    LangFileExtens: DSOpt
     TableSource : DSOpt
     LangVersion : DSOpt
     MimeType : DSOpt
@@ -41,6 +42,11 @@ signature
     TargetTableRel : DSOpt
     TargetTableAbs : DSOpt
     JVMArgs : DSOpt
+    GenJUnit : DSOpt
+    TestJavaDir : DSOpt
+    TestJavaDirAbs : DSOpt
+    TestsDir : DSOpt
+    TestPkg : DSOpt
 
 rules
 
@@ -60,6 +66,7 @@ rules
       (FilePath(), path),
       (ProjectPath(), project-path),
       (LangName(), langname),
+      (LangFileExtens(), fileextensions),
       (TableSource(), tbl-source),
       (LangVersion(), lang-ver),
       (MimeType(), lang-mime),
@@ -87,7 +94,12 @@ rules
       (TargetSpecAbs(), target-specfile-abs),
       (TargetTableRel(), target-tblfile-rel),
       (TargetTableAbs(), target-tblfile-abs),
-      (JVMArgs(), jvm-args)
+      (JVMArgs(), jvm-args),
+      (GenJUnit(), do-generate-junit),
+      (TestJavaDir(), tests-java-dir),
+      (TestJavaDirAbs(), tests-java-dir-abs),
+      (TestsDir(), tests-dir),
+      (TestPkg(), tests-pkg)
     ]
     where
       local-project-path := <local-path> project-path;
@@ -99,6 +111,7 @@ rules
       end
     where
       langname := <ds-to-interp-read-prop-required(|"source.langname"); ds-utils-java-escape-id> prop-file;
+      fileextensions := <read-property(|"source.extensions", <lower-case> langname); string-tokenize(|[','])> prop-file;
       tbl-source := <read-property(|"source.table", "target/metaborg/sdf.tbl"); absolute-path(|local-project-path)> prop-file;
       lang-ver := <ds-to-interp-read-prop-required(|"source.version")> prop-file;
       lang-mime := <read-property(|"source.mimetype", $[application/x-[langname]])> prop-file;
@@ -120,13 +133,18 @@ rules
       tbuild-pkg := $[[terms-pkg].build];
       tmatch-pkg := $[[terms-pkg].match];
       native-pkg := <read-property(|"project.nativepackage", $[[langname].interpreter.natives])> prop-file;
+      tests-pkg := $[[gen-pkg].test];
       rulereg-class := <read-property(|"project.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")> prop-file;
       preprocess-class := <read-property(|"project.preprocessor", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")> prop-file;
       target-specfile-rel := <read-property(|"project.specpath", "src/main/resources/specification.aterm")> prop-file;
       target-specfile-abs := $[[genproject-path]/[target-specfile-rel]];
       target-tblfile-rel := <read-property(|"project.tablepath", "src/main/resources/parsetable.tbl")> prop-file;
       target-tblfile-abs := $[[genproject-path]/[target-tblfile-rel]];
-      jvm-args := <read-property(|"interpreter.vmargs", "")> prop-file
+      jvm-args := <read-property(|"interpreter.vmargs", "")> prop-file;
+      do-generate-junit := <read-property(|"project.generatejunit", "false")> prop-file;
+      tests-java-dir := <read-property(|"project.testjavapath", "src/test/java")> prop-file;
+      tests-java-dir-abs := $[[genproject-path]/[tests-java-dir]];
+      tests-dir := <read-property(|"project.testspath", "src/test/resources")> prop-file
 
   ds-to-interp-read-prop-required(|prop) =
     read-property(|prop, "N/A"); not(?"N/A" + ?"")
