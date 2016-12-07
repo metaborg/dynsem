@@ -125,6 +125,11 @@ rules /* language file. interpreter entry point */
           RuleResult res = evaluate(args[0], System.getProperty("user.dir"), System.in, System.out, System.err);
           System.out.println(res.result);
         }
+        
+        public static void nailMain(NGContext ctx) throws Exception {
+          RuleResult res = evaluate(ctx.getArgs()[0], ctx.getWorkingDirectory(), ctx.in, ctx.out, ctx.err);
+          ctx.out.println(res.result);
+        }
 
         public static RuleResult evaluate(String programFile, String workingDirectory,
             InputStream inputStream, OutputStream outputStream,
