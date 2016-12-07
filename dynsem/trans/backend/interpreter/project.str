@@ -11,6 +11,7 @@ rules
       project := <get-opt> GenProject()
       ; <file-exists + mkdir> project
       ; ds-to-interp-gen-project-launchconfig
+      ; ds-to-interp-gen-project-daemon-launchconfig
       ; ds-to-interp-gen-project-pom
       ; ds-to-interp-gen-apt-settings
       ; ds-to-interp-gen-project-gitignore
@@ -126,6 +127,11 @@ rules
               <artifactId>org.spoofax.terms</artifactId>
               <version>2.1.0-SNAPSHOT</version>
             </dependency>
+            <dependency>
+              <groupId>com.martiansoftware</groupId>
+              <artifactId>nailgun-server</artifactId>
+              <version>0.9.1</version>
+            </dependency>
           </dependencies>
       </project>], pom-file);
     <fclose> pom-file
@@ -147,7 +153,7 @@ rules
     $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]Language.java"/>
+        <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]EntryPoint.java"/>
         </listAttribute>
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="1"/>
@@ -161,6 +167,28 @@ rules
         <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="[<get-opt> JVMArgs()]"/>
       </launchConfiguration>
     ], launch-file);
+    <fclose> launch-file
+
+  ds-to-interp-gen-project-daemon-launchconfig = 
+    daemon-cfg := 
+      $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+          <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+              <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]Daemon.java"/>
+          </listAttribute>
+          <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+            <listEntry value="1"/>
+          </listAttribute>
+          <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+          <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
+          <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<get-opt> TopPkg()].[<get-opt> LangName()]Daemon"/>
+          <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<get-opt> MavenArtifactId()]"/>
+          <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
+          <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="[<get-opt> JVMArgs()]"/>
+        </launchConfiguration>
+      ];
+    launch-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), " (Daemon).launch"], "w");
+    <fputs> (daemon-cfg, launch-file);
     <fclose> launch-file
 
   ds-to-interp-gen-project-gitignore =
@@ -178,6 +206,7 @@ rules
       [<get-opt; get-rel-path(|basedir-test)> TestPkg()]
       /[<get-opt> LangName()].launch
       /Test[<get-opt> LangName()].launch
+      /[<get-opt> LangName()] (Daemon).launch
     ], gitignore);
     <fclose> gitignore
 

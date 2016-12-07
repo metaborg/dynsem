@@ -213,4 +213,29 @@ rules /* language file. interpreter entry point */
       
       }
     ]|
+  
+  ds-to-interp-language-daemonentry =
+    langname := <get-opt> LangName();
+    x_entryPoint := $[[langname]EntryPoint];
+    x_classname := $[[langname]Daemon];
+    e_aliasname := Lit(String([Chars(langname)]));
+    e_aliasdescr := Lit(String([Chars($[Run [langname] interpreter daemon])]));
+    !compilation-unit |[
+      package org.metaborg.sl.interpreter.generated;
+
+      import com.martiansoftware.nailgun.Alias;
+      import com.martiansoftware.nailgun.AliasManager;
+      import com.martiansoftware.nailgun.NGServer;
+      
+      public class x_classname {
+      
+        public static void main(String[] args) {
+          final NGServer server = new NGServer();
+          final AliasManager aliasManager = server.getAliasManager();
+          aliasManager.addAlias(new Alias(e_aliasname, e_aliasdescr, x_entryPoint.class));
+          server.run();
+        }
+      
+      }
+    ]|
     
