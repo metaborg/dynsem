@@ -39,10 +39,15 @@ public abstract class DynSemEntryPoint {
 		this.ruleRegistry = ruleRegistry;
 	}
 
-	public Callable<RuleResult> getCallable(String file, InputStream input, OutputStream output, OutputStream error) {
+	public Callable<RuleResult> getCallable(String file, String workingDirectory, InputStream input,
+			OutputStream output, OutputStream error) {
 		try {
-			IStrategoTerm term = getTransformer().transform(getParser().parse(
-					Source.newBuilder(new File(file)).name("Evaluate to interpreter").mimeType(getMimeType()).build()));
+			File f = new File(file);
+			if (!f.isAbsolute() && !f.exists()) {
+				f = new File(workingDirectory, file);
+			}
+			IStrategoTerm term = getTransformer().transform(getParser()
+					.parse(Source.newBuilder(f).name("Evaluate to interpreter").mimeType(getMimeType()).build()));
 			return getCallable(term, input, output, error);
 		} catch (IOException ioex) {
 			throw new RuntimeException("Eval failed", ioex);

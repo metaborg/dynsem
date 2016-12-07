@@ -86,7 +86,7 @@ rules
             final String expectedOutput = IOUtils.toString(fis, Charset.defaultCharset());
             IOUtils.closeQuietly(fis);
         
-            final RuleResult res = x_entryPoint.evaluate(testData.programFile, inputStream, outputStream, errorStream);
+            final RuleResult res = x_entryPoint.evaluate(testData.programFile, System.getProperty("user.dir"), inputStream, outputStream, errorStream);
             final Object resVal = res.result;
         
             outputStream.flush();

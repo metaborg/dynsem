@@ -122,15 +122,15 @@ rules /* language file. interpreter entry point */
         }
 
         public static void main(String[] args) throws Exception {
-          RuleResult res = evaluate(args[0], System.in, System.out, System.err);
+          RuleResult res = evaluate(args[0], System.getProperty("user.dir"), System.in, System.out, System.err);
           System.out.println(res.result);
         }
 
-        public static RuleResult evaluate(String programFile,
+        public static RuleResult evaluate(String programFile, String workingDirectory,
             InputStream inputStream, OutputStream outputStream,
             OutputStream errorStream) throws Exception {
           return new x_entryPoint()
-                .getCallable(programFile, inputStream, outputStream, errorStream)
+                .getCallable(programFile, workingDirectory, inputStream, outputStream, errorStream)
                 .call();
         }
         
@@ -197,7 +197,7 @@ rules /* language file. interpreter entry point */
         public static void main(String[] args) throws IOException {
           String file = args[0];
       
-          Callable<RuleResult> callee = new x_entryPoint().getCallable(file, System.in,
+          Callable<RuleResult> callee = new x_entryPoint().getCallable(file, System.getProperty("user.dir"), System.in,
               System.out, System.err);
       
           BenchmarkConfiguration benchconfig = new BenchmarkConfiguration();
