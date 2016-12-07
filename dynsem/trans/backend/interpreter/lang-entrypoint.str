@@ -94,6 +94,7 @@ rules /* language file. interpreter entry point */
       import org.spoofax.interpreter.terms.ITermFactory;
       import org.spoofax.terms.io.TAFTermReader;
       import org.apache.commons.io.FilenameUtils;
+      import com.martiansoftware.nailgun.NGContext;
       
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemEntryPoint;
@@ -226,7 +227,7 @@ rules /* language file. interpreter entry point */
     e_aliasname := Lit(String([Chars(langname)]));
     e_aliasdescr := Lit(String([Chars($[Run [langname] interpreter daemon])]));
     !compilation-unit |[
-      package org.metaborg.sl.interpreter.generated;
+      package ~x:<get-opt> TopPkg();
 
       import com.martiansoftware.nailgun.Alias;
       import com.martiansoftware.nailgun.AliasManager;
