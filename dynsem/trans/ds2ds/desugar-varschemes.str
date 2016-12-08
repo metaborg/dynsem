@@ -29,6 +29,19 @@ rules
     where
       scheme-def := <get-unique-matching-varscheme(get-all-varschemes)> v;
       scheme-ty := <lookup-prop(|Type())> scheme-def
-    	
+rules
+  
+  resugar-varschemes-module =
+    ?Module(_, _);
+    m-in-analysis(resugar-varschemes; unrename-all);
+    unmark-vars
+  
+  resugar-varschemes = alltd(resugar-varscheme)
+  
+  resugar-varscheme:
+    LabelComp(Label(lname), v) -> VarLabelComp(v)
+    where
+      scheme-def := <get-unique-matching-varscheme(get-all-component-defs)> v;
+      <def-get-name> scheme-def => lname
 
-
+      
