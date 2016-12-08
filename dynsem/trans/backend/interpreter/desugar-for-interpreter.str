@@ -191,7 +191,8 @@ rules /* TCO */
     Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
       Formula(RecRelation(src, rel, tgt))
     where
-      (c, <length> k*, arrow-name) := <CurrentRelation>;
+      (c, k-length, arrow-name) := <CurrentRelation>;
+      <eq> (k-length, <length> k*);
       s
 
   desugar-prem-rec-tco(s):
