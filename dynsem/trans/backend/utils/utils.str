@@ -7,6 +7,8 @@ rules
   
   external read-property(|propname, defaultval)
   
+  external fmakeexecutable(|)
+  
 rules
 
   ds-utils-java-emit-classes(createdir|outputpkg, basedir) =

@@ -12,6 +12,7 @@ rules
       ; <file-exists + mkdir> project
       ; ds-to-interp-gen-project-launchconfig
       ; ds-to-interp-gen-project-daemon-launchconfig
+      ; ds-to-interp-gen-shell-scripts
       ; ds-to-interp-gen-project-pom
       ; ds-to-interp-gen-apt-settings
       ; ds-to-interp-gen-project-gitignore
@@ -190,6 +191,28 @@ rules
     launch-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), " (Daemon).launch"], "w");
     <fputs> (daemon-cfg, launch-file);
     <fclose> launch-file
+
+  ds-to-interp-gen-shell-scripts =
+    client-sh :=
+      $[#! /bin/sh
+
+        ng [<get-opt> LangName()] $1
+        ];
+    server-sh :=
+      $[#! /bin/sh
+        
+        mvn exec:java -Dexec.mainClass=[<get-opt> TopPkg()].[<get-opt> LangName()]Daemon
+       ];
+    client-fp:= <concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), ".sh"];
+    client-file := <fopen> (client-fp, "w");
+    <fputs> (client-sh, client-file);
+    <fclose> client-file;
+    <fmakeexecutable> client-fp;
+    server-fp := <concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), "-daemon.sh"];
+    server-file := <fopen> (server-fp, "w");
+    <fputs> (server-sh, server-file);
+    <fclose> server-file;
+    <fmakeexecutable> server-fp
 
   ds-to-interp-gen-project-gitignore =
     gitignore := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", ".gitignore"], "w");
