@@ -508,7 +508,18 @@ rules /* Sort & Constructor classes */
           @Override
           @TruffleBoundary
           public String toString() {
-            return backend.toString();
+            final StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            IPersistentStack<x_elemclass> tail = backend;
+            while (tail.peek() != null) {
+              sb.append(tail.peek());
+              tail = tail.pop();
+              if (tail.peek() != null) {
+                sb.append(", ");
+              }
+            }
+            sb.append("]");
+            return sb.toString();
           }
           
           @TruffleBoundary
