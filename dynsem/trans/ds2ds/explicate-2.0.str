@@ -85,7 +85,7 @@ rules
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <rulelhs-get-type> lhs;
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
+      arrow-def := <get-applicable-arrowdef(type-coerce-direct(id))> (arrow-def*, lhs-ty)
     where // associate components used in conclusion
       ro* := <explication-2-use-to-comp> reads;
       rw* := <explication-2-use-to-comp> src;
@@ -100,7 +100,7 @@ rules
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <type-of> lhs;
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+      arrow-def := <get-applicable-arrowdef(flip(type-coerce-direct(id)))> (arrow-def*, lhs-ty)
     where // associate components used in premise
       ro* := <explication-2-use-to-comp> reads;
       rw* := <explication-2-use-to-comp> src;
@@ -172,7 +172,7 @@ rules
     where
       lhs-ty := <rw-type> lhs-s;
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty);
+      arrow-def := <get-applicable-arrowdef(type-coerce-direct(id))> (arrow-def*, lhs-ty);
       (ro-comp*, rw-comp*) := <explication-2-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
       (ro*, rw*) := <(map(explication-2-util-comp-to-label), map(explication-2-util-comp-to-label))> (ro-comp*, rw-comp*)
 
@@ -188,7 +188,7 @@ rules
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <rulelhs-get-type> lhs;
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(type-coerce-full(id))> (arrow-def*, lhs-ty)
+      arrow-def := <get-applicable-arrowdef(type-coerce-direct(id))> (arrow-def*, lhs-ty)
     )
     where opt-with(
       // init storage
@@ -212,7 +212,7 @@ rules
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <type-of> lhs;
       arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+      arrow-def := <get-applicable-arrowdef(flip(type-coerce-direct(id)))> (arrow-def*, lhs-ty)
     )
     where opt-with(
       // read missing ROs
