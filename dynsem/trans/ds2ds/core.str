@@ -32,7 +32,7 @@ strategies
       ; factorize-module
       ; expand-implicits-module
       ; factorize-module
-      ; explication-2-explicate-module
+      ; explication-explicate-module
       ; copy-propagation-module
       ; defactorize-module
       ; insert-wildcards-module
