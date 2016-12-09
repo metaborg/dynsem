@@ -88,7 +88,7 @@ rules /* store signatures */
       t_source := SimpleSort(t_name);
       <store-sort> SortDecl(t_name);
       <store-constructor> ConsDecl(cname, kid-srt*, t_source, Annos([MetafunAnno()]));
-      <store-arrow> ArrowDecl(ro, t_source, rw, "default", out-srt, rw)
+      <store-arrow> ArrowDecl(ro, t_source, rw, "", out-srt, rw)
   
   store-semantic-components = Components(map(store-semantic-component))
   

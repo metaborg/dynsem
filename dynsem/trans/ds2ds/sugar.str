@@ -69,13 +69,13 @@ rules // desugaring
     NullaryNativeOpDecl(c, s) -> NativeOpDecl(c, [], s)
   
   desugar :
-    DefaultArrowDecl(ros, l-ty, rwsin, r-ty, rwsout) -> ArrowDecl(ros, l-ty, rwsin, "default", r-ty, rwsout)
+    DefaultArrowDecl(ros, l-ty, rwsin, r-ty, rwsout) -> ArrowDecl(ros, l-ty, rwsin, "", r-ty, rwsout)
   
   desugar :
-    Dynamic() -> NamedDynamic("default")
+    Dynamic() -> NamedDynamic("")
   
   desugar :
-    DynamicEmitted(e) -> NamedDynamicEmitted(e, "default")
+    DynamicEmitted(e) -> NamedDynamicEmitted(e, "")
   
   desugar :
     NamedDynamic(n) -> NamedDynamicEmitted([], n)
