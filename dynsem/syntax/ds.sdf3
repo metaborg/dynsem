@@ -20,7 +20,7 @@ context-free syntax // rules
   Rule.Rule = [
     [{Premise ";\n"}+]
     [INFER]
-    [Relation]
+    [Relation].
   ]
   
   Rule.RuleW = [

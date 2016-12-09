@@ -108,12 +108,3 @@ rules // Debugging
       filename := <guarantee-extension(|"desugared.aterm")> path;
       result   := <desugar-top> ast
 			
-rules // Builders
-      
-  // format rules
-  format-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"pp.ds")> path;
-      result   := <sugar-all; pp-debug> ast
-

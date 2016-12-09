@@ -3,12 +3,29 @@ module ds2ds/sugar
 imports
 	signatures/-
 	ds
+	pp
 	
 signature
   constructors
     MapExtend : Map * Map -> Map
     MapEntry : Map -> Bind
-	
+
+rules
+
+  format-derivationstyle-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      Module(name, section*) := <alltd(format-derivationstyle-rule)> ast;
+      result := <pp-debug> Module($[[name].derivation], section*);
+      filename := <guarantee-extension(|"derivation.ds")> path
+  
+  format-codestyle-editor:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      Module(name, section*) := <innermost(format-codestyle-rule)> ast;
+      result := <pp-debug> Module($[[name].code], section*);
+      filename := <guarantee-extension(|"code.ds")> path
+
 rules // desugaring  
 	
 	desugar-meta-functions-top = alltd(desugar-functions)
@@ -33,7 +50,7 @@ rules // desugaring
       t_source := SimpleSort(t_name)
 
   desugar-top = 
-  	innermost(desugar); 
+  	innermost(desugar + format-derivationstyle-rule); 
   	alltd(rules-concat)
   
   desugar :
@@ -50,9 +67,6 @@ rules // desugaring
 
   desugar :
     NullaryNativeOpDecl(c, s) -> NativeOpDecl(c, [], s)
-  
-  desugar :
-    RuleW(form, prem*) -> Rule(prem*, "---", form)
   
   desugar :
     DefaultArrowDecl(ros, l-ty, rwsin, r-ty, rwsout) -> ArrowDecl(ros, l-ty, rwsin, "default", r-ty, rwsout)
@@ -118,9 +132,17 @@ rules // desugaring
   	 Rules(list) -> Rules(list1)
   	 where list1 := <map(?Cons(_,_) <+ ( \ n -> Cons(n,Nil()) \)); concat> list
 
+rules
+
+  format-derivationstyle-rule:
+    RuleW(form, prem*) -> Rule(prem*, "----------------", form)
+
+  format-codestyle-rule:
+    Rule(prem*, _, form) -> RuleW(form, prem*)
+
 rules // sugaring
   
-  sugar-all = innermost(sugar)
+  sugar-all = innermost(sugar + format-codestyle-rule)
   
   sugar :
     NativeFunctionDecl(name, [], type) -> NativeNoArgFunctionDecl(name, type)
@@ -160,7 +182,4 @@ rules // sugaring
 
   sugar :
     TermEq(Con("IsValue",[term]),Con("True",[])) -> IsValue(term)
-    
-  sugar :
-    Rule(prem*, _, form) -> RuleW(form, prem*)
 
