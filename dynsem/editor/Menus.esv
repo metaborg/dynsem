@@ -3,16 +3,21 @@ module Menus
 menus
   
   menu: "Syntax"
-    
-    action: "Format"               = format-editor (openeditor) 
-    action: "Show Analyzed" = debug-show-analyzed (source) (openeditor) (meta)
-    action: "Show Abstract Syntax" = debug-show-aterm (source) (openeditor) (meta) 
-    action: "Show Desugared Syntax" = debug-show-desugared (source) (openeditor) (meta)
-                                                                                                                                                                                         
-  menu: "Semantics"
+    action: "Show AST" = debug-show-aterm (source)
+  
+  menu: "Analysis"
+    action: "Show analyzed" = debug-show-analyzed (source) (openeditor) (meta)
+    action: "Show desugared" = debug-show-desugared (source) (openeditor) (meta)
+  
+  menu: "Format"
+    action: "Derivation style" = format-derivationstyle-editor (openeditor) (source)
+    action: "Code style" = format-codestyle-editor (openeditor) (source)
 
-    action  : "Generate Interpreter"   = ds-to-interp-editor
-    action  : "Explicate components" = explication-explicate-editor (openeditor) (source)
-    action  : "Expand implicits" = expand-implicits-editor (openeditor) (source) 
-    action  : "Generate DynSem Core"   = module-to-core-editor (openeditor) (source)
-    action  : "Generate interpretable spec" = ds-to-interp-specification-editor (openeditor) (source) (meta)
+  menu: "Semantics"
+    action: "Explicate components" = explication-explicate-editor (openeditor) (source)
+    action: "Lift implicits" = expand-implicits-editor (openeditor) (source)
+    action: "Core"   = module-to-core-editor (openeditor) (source)
+    
+  menu: "Interpreter"
+    action: "Generate" = ds-to-interp-editor (source)
+    action: "Spec" = ds-to-interp-specification-editor (openeditor) (source) (meta)
