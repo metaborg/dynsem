@@ -4,9 +4,31 @@ imports
   signatures/-
   ds
   analysis/-
+  ds2ds/-
   lib-ds
 
 rules
+
+  expand-implicits-editor:
+    (_, _, ast, path, project-path) -> (filename, result)
+    with
+      let
+        explicate = 
+          in-project-path(
+            desugar-top
+            ; desugar-meta-functions-top
+            ; desugar-varschemes-module
+            ; factorize-module
+            ; expand-implicits-module
+            ; defactorize-module
+            ; prettify-vars-module
+            ; resugar-varschemes-module
+          |project-path)
+      in
+        Module(name, section*) := <explicate; unmark-vars; sugar-all> ast;
+        result := <pp-debug> Module($[[name].noimplicits], section*);
+        filename := <guarantee-extension(|"noimplicits.ds")> path
+      end
 
   expand-implicits-module =
     ?Module(_, _);
