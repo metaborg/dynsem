@@ -27,6 +27,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	public abstract boolean isSafeComponentsEnabled();
 
 	public abstract boolean isTermCachingEnabled();
+	
+	public abstract boolean isDEBUG();
 
 	@Override
 	protected DynSemContext createContext(Env env) {

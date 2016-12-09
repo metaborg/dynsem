@@ -12,6 +12,7 @@ rules /* language file. interpreter entry point */
     e_dobacktrack := <if <get-opt> EnableBacktracking() then !e |[ true ]| else !e |[ false ]| end>;
     e_safecomponents := <if get-opt(|EnableSafeComponents()) then !e |[ true ]| else !e |[ false ]| end>;
     e_termcaching := <if get-opt(|EnableTermCaching()) then !e |[ true ]| else !e |[ false ]| end>;
+    e_debugging := <if get-opt(|EnableDebug()) then !e |[ true ]| else !e |[ false ]| end>;
     !compilation-unit |[
       package ~x:<get-opt> TopPkg();
       
@@ -60,6 +61,7 @@ rules /* language file. interpreter entry point */
         public static final boolean ENABLE_BACKTRACKING = e_dobacktrack;
         public static final boolean ENABLE_SAFECOMPONENTS = e_safecomponents;
         public static final boolean ENABLE_TERMCACHING = e_termcaching;
+        public final static boolean ENABLE_DEBUG = e_debugging;
         
         @Override
         public boolean isFullBacktrackingEnabled() {
@@ -76,6 +78,10 @@ rules /* language file. interpreter entry point */
           return ENABLE_TERMCACHING;
         }
         
+        @Override
+        public boolean isDEBUG() {
+          return ENABLE_DEBUG;
+        }
         
       }
     ]|
