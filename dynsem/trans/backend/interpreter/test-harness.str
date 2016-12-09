@@ -42,7 +42,6 @@ rules
         import org.junit.runner.RunWith;
         import org.junit.runners.Parameterized;
         import org.junit.runners.Parameterized.Parameters;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
         import ~x:<get-opt> TopPkg().x_entryPoint;
         
         @RunWith(Parameterized.class)
@@ -86,18 +85,14 @@ rules
             final String expectedOutput = IOUtils.toString(fis, Charset.defaultCharset());
             IOUtils.closeQuietly(fis);
         
-            final RuleResult res = x_entryPoint.evaluate(testData.programFile, System.getProperty("user.dir"), inputStream, outputStream, errorStream);
-            final Object resVal = res.result;
+            x_entryPoint.evaluate(testData.programFile, System.getProperty("user.dir"), inputStream, outputStream, errorStream);
         
             outputStream.flush();
             errorStream.flush();
         
             final StringBuilder outBuilder = new StringBuilder();
             outBuilder.append(new String(outputStream.toByteArray()));
-            if(resVal != null){
-              outBuilder.append(resVal.toString());
-              outBuilder.append(System.lineSeparator());
-            }
+
             if (errorStream.size() > 0) {
               outBuilder.append(new String(errorStream.toByteArray()));
               outBuilder.append(System.lineSeparator());
