@@ -23,7 +23,7 @@ rules
         package ~x:<get-opt> TestPkg();
         
         import static org.junit.Assert.assertEquals;
-        
+        import static org.junit.Assert.fail;
         import java.io.File;
         import java.io.FileInputStream;
         import java.io.IOException;
@@ -81,6 +81,25 @@ rules
         
           @Test
           public void testEagerEval() throws Exception {
+            if (testData.outputFile != null) {
+              testEvaluateSuccess();
+            } else {
+              testEvaluateFailure();
+            }
+        
+          }
+        
+          private void testEvaluateFailure() {
+            try {
+              x_entryPoint.evaluate(testData.programFile, System.getProperty("user.dir"), inputStream, outputStream,
+                  errorStream);
+              fail("Failure expected but success encountered");
+            } catch (Exception ex) {
+              ;
+            }
+          }
+        
+          private void testEvaluateSuccess() throws Exception {
             final FileInputStream fis = new FileInputStream(testData.outputFile);
             final String expectedOutput = IOUtils.toString(fis, Charset.defaultCharset());
             IOUtils.closeQuietly(fis);
