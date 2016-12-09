@@ -4,14 +4,41 @@ imports
   signatures/-
   analysis/-
   lib-ds
-
+  ds2ds/-
+  
 rules
+
+  explication-explicate-editor:
+    (_, _, ast, path, project-path) -> (filename, result)
+    with
+      let
+        explicate = 
+          in-project-path(
+            include-imports
+            ; desugar-top
+            ; desugar-meta-functions-top
+            ; fuse-sections
+            ; desugar-varschemes-module
+            ; factorize-module
+            ; expand-implicits-module
+            ; factorize-module
+            ; explication-explicate-module
+            ; defactorize-module
+            ; prettify-vars-module
+            ; resugar-varschemes-module
+          |project-path)
+      in
+        Module(name, section*) := <explicate; unmark-vars; sugar-all> ast;
+        result := <pp-debug> Module($[[name].explicated], section*);
+        filename := <guarantee-extension(|"explicated.ds")> path
+      end
+
+  
 
   explication-explicate-module =
     ?Module(_, _);
     m-in-analysis(
       explication-explicate
-      ; unmark-vars
       ; unrename-all
       ); unmark-vars
 

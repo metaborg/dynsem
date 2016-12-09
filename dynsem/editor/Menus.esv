@@ -12,5 +12,6 @@ menus
   menu: "Semantics"
 
     action  : "Generate Interpreter"   = ds-to-interp-editor
+    action  : "Explicate components" = explication-explicate-editor (openeditor) (source)
     action  : "Generate DynSem Core"   = module-to-core-editor (openeditor) (source)
     action  : "Generate interpretable spec" = ds-to-interp-specification-editor (openeditor) (source) (meta)

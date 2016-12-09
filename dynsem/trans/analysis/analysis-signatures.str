@@ -96,7 +96,7 @@ rules /* store signatures */
     d@CompDecl(x, s) -> d
     with
       <store-def(|Components())> x => comp-def;
-      <store-prop(|Type(), comp-def)> <rw-type> s
+      <rw-type; store-prop(|Type(), comp-def)> s
   
   store-native-operators = NativeOperators(map(store-native-operator))
   

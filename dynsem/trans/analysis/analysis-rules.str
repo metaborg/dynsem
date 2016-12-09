@@ -317,7 +317,7 @@ rules
 rules // type rules for match-sides
   
   type-check-match(|in-ty) = 
-    type-check-match-helper(|<try(is-alias; get-alias-base)> in-ty)
+    type-check-match-helper(|in-ty)
     <+ type-err-match(|in-ty)
   
   type-check-match-helper(|in-ty) =
