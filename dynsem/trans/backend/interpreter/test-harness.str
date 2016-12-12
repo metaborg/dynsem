@@ -141,9 +141,8 @@ rules
                 expectedOutput = null;
               }
         
-              data.add(new TestData(testProgram.getName(),
-                  testProgram.getAbsolutePath(), expectedInput,
-                  expectedOutput));
+              final String testName = testDir.toURI().relativize(testProgram.toURI()).getPath().toString();
+              data.add(new TestData(testName, testProgram.getAbsolutePath(), expectedInput, expectedOutput));
             }
             
             return data;
