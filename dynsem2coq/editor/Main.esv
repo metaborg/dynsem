@@ -10,4 +10,4 @@ menus
 
 	menu: "Coq"
 	
-		action  : "Generate"           = generate-coq (openeditor) (meta) (source)
+		action  : "Generate Coq"           = generate-coq (openeditor) (meta) (source)
