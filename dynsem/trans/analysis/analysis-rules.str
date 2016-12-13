@@ -414,11 +414,15 @@ rules // type rules for match-sides
   	List([]) -> <type-coerce-full(id)> (ListType(ALPHATYPE()), in-ty)
   
   type-check-match-list(|in-ty):
-  	ListTail([h], t) -> <type-coerce-full(id)> (l-ty, in-ty)
-  	where
-  		<?ListType(in-el-ty)> in-ty
+    ListTail([h], t) -> <type-coerce-full(id)> (l-ty, in-ty')
     where
-    	t-ty@ListType(t-el-ty) := <type-check-match(|in-ty)> t;
+      in-ty' := <get-alias-base> in-ty
+      <+
+      in-ty' := in-ty
+    where
+      ListType(in-el-ty) := in-ty'
+    where
+    	t-ty@ListType(t-el-ty) := <type-check-match(|in-ty')> t;
     	h-ty := <type-check-match(|in-el-ty)> h;
     	l-ty := <type-coerce-full(id)> (ListType(h-ty), t-ty)
 
