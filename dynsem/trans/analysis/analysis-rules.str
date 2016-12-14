@@ -68,7 +68,7 @@ rules /* store variables */
           <store-rule> (<lookup-prop(|Type())> arrow-def, r)
         else
           arrow-ma-ty* := <map(lookup-prop(|Type()); ?ArrowType(<id>, _))> arrow-def*;
-          add-msg(|Error(), lhs, $[Expected one of: [<map(pp-type); separate-by(|", ")> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
+          add-msg(|Error(), lhs, $[Expected one of: [<map(pp-type); separate-by(|", "); concat-strings> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
         end
       else
         add-msg(|Error(), arr, $[Arrow [arrow-name] is not declared])
@@ -487,7 +487,7 @@ rules
           <map(try(labelcomp-to-type-term-pair; type-check-match-wrap))> tc*
         else
           arrow-ma-ty* := <map(lookup-prop(|Type()); ?ArrowType(<id>, _))> arrow-def*;
-          add-msg(|Error(), lhs, $[Expected one of: [<map(pp-type)> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
+          add-msg(|Error(), lhs, $[Expected one of: [<map(pp-type); separate-by(|", "); concat-strings> arrow-ma-ty*] but found [<pp-type> lhs-ty]])
         end
       else
         add-msg(|Error(), arrow-name, $[Arrow [arrow-name] is not declared])
@@ -582,7 +582,7 @@ rules
     (ty-from, ty-to) -> <coerce-s> (<get-alias-base> ty-from, ty-to)
     where
       <is-alias> ty-from
-  
+
   type-coerce(coerce-s):
     (ty-from, ty-to) -> <coerce-s> (ty-from, <get-alias-base> ty-to)
     where
