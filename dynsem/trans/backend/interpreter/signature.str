@@ -25,6 +25,7 @@ signature
     TypedMapValues: Term * String -> Term
     
     StrConcat: Term * Term -> Term
+    ListConcat: Term * Term -> Term
     
     Rule : List(Premise) * INFER * Relation * RuleKind * String -> Rule
     

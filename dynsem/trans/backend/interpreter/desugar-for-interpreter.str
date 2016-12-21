@@ -306,3 +306,10 @@ rules /* desugaring concat */
     where
       StringType() := <type-of> t1;
       StringType() := <type-of> t2
+
+  desugar-concat:
+    Concat(t1, t2) -> ListConcat(t1, t2)
+    where
+      ListType(ty1) := <type-of> t1;
+      ListType(ty2) := <type-of> t2;
+      <eq> (ty1, ty2)

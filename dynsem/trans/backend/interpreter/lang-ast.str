@@ -522,6 +522,13 @@ rules /* Sort & Constructor classes */
             return sb.toString();
           }
           
+          @SuppressWarnings("rawtypes")
+          @Override
+          @TruffleBoundary
+          public x_elemclass[] toArray() {
+            return (x_elemclass[]) ((PersistentList) this.backend).toArray(new x_elemclass[size()]);  
+          }
+          
           @TruffleBoundary
           private static IPersistentStack<x_elemclass> _pop(
               IPersistentStack<x_elemclass> backend) {
