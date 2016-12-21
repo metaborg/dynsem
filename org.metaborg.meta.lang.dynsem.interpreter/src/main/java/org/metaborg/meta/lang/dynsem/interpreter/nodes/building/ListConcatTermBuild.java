@@ -22,7 +22,7 @@ public abstract class ListConcatTermBuild extends TermBuild {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Specialization
 	public IListTerm doLists(IListTerm l, IListTerm r){
-		return l.addAll(r.toArray());
+		return r.addAll(l.toArray());
 	}
 	
 	
