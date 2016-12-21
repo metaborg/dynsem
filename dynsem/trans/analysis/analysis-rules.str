@@ -260,8 +260,8 @@ rules
   type-check-build-map:
     MapExtend(map1, map2) -> <type-coerce-sym(type-coerce-full(fail))> (map1-ty, map2-ty)
     where
-      map1-ty := <type-check-build> map1;
-      map2-ty := <type-check-build> map2
+      map1-ty@MapType(_, _) := <type-check-build; try(get-alias-base)> map1;
+      map2-ty@MapType(_, _) := <type-check-build; try(get-alias-base)> map2
 
   type-check-build-map:
     DeAssoc(m-t, k-t) -> val-ty
