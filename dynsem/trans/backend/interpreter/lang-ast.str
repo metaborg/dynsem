@@ -526,7 +526,11 @@ rules /* Sort & Constructor classes */
           @Override
           @TruffleBoundary
           public x_elemclass[] toArray() {
-            return (x_elemclass[]) ((PersistentList) this.backend).toArray(new x_elemclass[size()]);  
+            if (size() > 0) {
+              return (x_elemclass[]) ((PersistentList) this.backend).toArray(new x_elemclass[size()]);  
+            } else {
+              return new x_elemclass[0];
+            }
           }
           
           @TruffleBoundary
