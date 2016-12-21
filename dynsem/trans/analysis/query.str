@@ -40,6 +40,9 @@ rules
 
   type-of:
     Tuple(t*) -> TupleType(<map(type-of)> t*)
+  
+  type-of:
+    Concat(t1, _) -> <type-of> t1
 
   type-of =
     type-check-build-helper

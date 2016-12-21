@@ -299,16 +299,16 @@ rules /* resugar list construction */
 
 rules /* desugaring concat */
 
-  desugar-concat-all = bottomup(try(desugar-concat))
+  desugar-concat-all = alltd(desugar-concat)
 
   desugar-concat:
-    Concat(t1, t2) -> StrConcat(t1, t2)
+    Concat(t1, t2) -> StrConcat(<desugar-concat-all> t1, <desugar-concat-all> t2)
     where
       StringType() := <type-of> t1;
       StringType() := <type-of> t2
 
   desugar-concat:
-    Concat(t1, t2) -> ListConcat(t1, t2)
+    Concat(t1, t2) -> ListConcat(<desugar-concat-all> t1, <desugar-concat-all> t2)
     where
       ListType(ty1) := <type-of> t1;
       ListType(ty2) := <type-of> t2;
