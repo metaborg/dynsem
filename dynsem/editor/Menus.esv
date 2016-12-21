@@ -2,10 +2,10 @@ module Menus
 
 menus
   
-  menu: "Syntax"
-    action: "Show AST" = debug-show-aterm (source)
+  menu: "Syntax" (meta)
+    action: "Show AST" = debug-show-aterm (openeditor) (source) (meta)
   
-  menu: "Analysis"
+  menu: "Analysis" (meta)
     action: "Show analyzed" = debug-show-analyzed (source) (openeditor) (meta)
     action: "Show desugared" = debug-show-desugared (source) (openeditor) (meta)
   
