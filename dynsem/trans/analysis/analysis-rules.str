@@ -202,6 +202,12 @@ rules
   type-check-build-str:
     String(_) -> StringType()
   
+  type-check-build-str:
+    Concat(t1, t2) -> StringType()
+    where
+      StringType() := <type-check-build> t1;
+      StringType() := <type-check-build> t2
+  
   type-check-build-bool:
     True() -> BoolType()
   

@@ -109,10 +109,6 @@ context-free syntax // formulas
 
   Label.Label = [[ID]]
 
-lexical syntax 
-
-  // TermCon = ID 
-  
 context-free syntax // terms
 
   Var.VarRef    = [[ID]]
@@ -126,6 +122,7 @@ context-free syntax // terms
   Term.Wld      = <_>
   
   Term.String   = [[STRING]]
+  
   Term.Int      = [[INT]]
   Term.Real     = [[REAL]]
   Term.Con      = [[ID]([{Term ", "}*])]
@@ -133,6 +130,8 @@ context-free syntax // terms
   Term.List     = <[ <{Term ", "}*> ]>
   Term.ListTail = <[ <{Term ", "}*> | <Term> ]>
   Term.ListLength = <|<Term>|>
+  Term.Concat   = [[Term] ++ [Term]] {left}
+  
   
   Term.Tuple    = <(<{Term ", "}+>)>
 
@@ -150,7 +149,7 @@ context-free syntax // terms
   Term.DeAssoc = <<Term>[<Term>]>
   
   Term.MapHas = <<Term>[<Term>?]>
-  Term.MapExtend = [[Term] + [Term]] {assoc}
+  Term.MapExtend = [[Term] + [Term]] {left}
 //  Term.MapUnbind = [[Term] \ [Term]] {assoc}
 
   Term.MapKeys = [allkeys([Term])]
@@ -164,6 +163,10 @@ context-free priorities
   > Term.MapKeys, Term.MapValues
   > Term.Con
   > Term.MapHas, Term.DeAssoc
-  > Term.MapExtend, Term.As
+  > {left:
+    Term.MapExtend
+    Term.Concat
+    }
+  > Term.As
   > Cast.Cast
   
