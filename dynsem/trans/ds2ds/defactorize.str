@@ -11,14 +11,10 @@ imports
 strategies
 
   defactorize-module =
-    Module(!$[[<id>]_unfactorized],
-      alltd(defactorize-rule)
-    )
+    Module(id, alltd(defactorize-rule))
   
   insert-wildcards-module =
-    Module(!$[[<id>]_unfactorized],
-      alltd(insert-wildcards-rule)
-    )
+    Module(id, alltd(insert-wildcards-rule))
 
 rules
   
@@ -92,24 +88,8 @@ rules
 
   eliminate-patternmatch-premises =
     filter(
-      hoist-patternmatches-mergepoint
-      <+ hoist-patternmatches-casematch
+      hoist-patternmatches-casematch
       <+ not(eliminate-patternmatch-premise))
-
-  hoist-patternmatches-mergepoint:
-    MergePoint(c, PremiseBlock(p1*), PremiseBlock(p2*)) -> MergePoint(c, PremiseBlock(p1'*), PremiseBlock(p2'*))
-    where
-      p1'* := <hoist-patternmatches-in-premises-scoped(try(?succ))> p1*;
-      p2'* := <hoist-patternmatches-in-premises-scoped(try(?succ))> p2*;
-      !succ
-
-  hoist-patternmatches-mergepoint-branch(record-progress):
-    PremiseBlock(p*) -> PremiseBlock(<hoist-patternmatches-in-premises-scoped(record-progress)> p''*)
-    where {| ReadCount, PropagatePatternMatch:
-      <count-varreads-premises> p*;
-      p'* := <eliminate-patternmatch-premises> p*;
-      p''* := <innermost(replace-singletonwrite(record-progress))> p'*
-    |}
 
   hoist-patternmatches-casematch:
     CaseMatch(t, case*) -> CaseMatch(t, case'*)

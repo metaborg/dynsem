@@ -1,0 +1,104 @@
+module generation/err_rules
+
+imports
+  signatures/ds-sig
+  signatures/Signatures-sig
+  analysis/-
+  ds2ds/explicate-arrow-types
+  lib-ds
+  preprocess
+
+rules // Introduce timeout value as a constructor for all sorts
+      
+  mk-timeout-val(|sort_decls):
+    sort -> Con(timeout_name', [])
+    with
+      sort_name := <get-sort-name> sort;
+      suffix := <string-as-chars(\ [x|_] -> x' where x' := <upper-case-chars> [x] \)> sort_name;
+      timeout_name := <conc-strings> ("Timeout", suffix);
+      // Check if constructor name is already defined
+      cnames := <get-all-constructor-names> sort_decls;
+      if <elem> (timeout_name, cnames)
+      then
+        timeout_name' := <newname> timeout_name
+      else
+        timeout_name' := timeout_name
+      end
+    
+rules // Introduce rules for propagating exceptions
+
+  add-propagation-rules(mkerr|arrow_sigs):
+    arrow_decl_map -> 1
+    with
+      arrow_decl_keys := <hashtable-keys> arrow_decl_map;
+      rules_ := <map({ rs, rs', sig, key:
+                       ?key;
+                       if <elem> (key, arrow_sigs)
+                       then
+                         (rs, sig) := <hashtable-get(|key)> arrow_decl_map;
+                         rs' := <map(add-propagation-to-rule(mkerr|arrow_decl_map, arrow_sigs)); concat> rs;
+                         <hashtable-put(|key, (rs', sig))> arrow_decl_map
+                       end })> arrow_decl_keys
+  
+	add-propagation-to-rule(mkerr|arrow_decls, arrow_sigs):
+    Rule(prems, d, conc@Relation(_, _, _, Target(target, _))) ->
+      rules'
+    with
+      rules' := <add-propagation-to-premises(mkerr|arrow_decls, arrow_sigs, d, conc)> (prems, [], [])
+
+ 	add-propagation-to-premises(mkerr|arrow_decls, arrow_sigs, d, conc):
+    ([], seen_prems, rs) -> [Rule(seen_prems, d, conc)|rs]
+
+  add-propagation-to-premises(mkerr|arrow_decls, arrow_sigs, d, conc):
+    ([f@Formula(Relation(r, s, a@NamedDynamicEmitted(_, arrow_name, src_sort), Target(target, rws)))|prems], seen_prems, rs) ->
+      rs'
+    where
+      // If target is a variable, and this variable occurs in a
+      // in tail position, error is automatically propagated.
+      ( [] := prems;
+        Var(x) := target;
+        Relation(_, _, _, Target(VarRef(x), rws')) := conc;
+        // Check that read-write components are either equal terms, or the same variable
+        ( <equal> (rws, rws') <+
+          (rws := <bottomup(try(\ VarRef(x) -> Var(x) \))> rws') );
+        rs' := [Rule(<conc> (seen_prems, [f]), d, conc)|rs] )
+      <+
+      // Otherwise, if the relation signature is in arrow_sigs, add a rule for propagating error
+      ( !((arrow_name, src_sort), arrow_sigs);
+        <elem> ((arrow_name, src_sort), arrow_sigs);
+        (_, (_, _, _, to_sort, _)) := <hashtable-get(|(arrow_name, src_sort))> arrow_decls;
+        err := <mkerr> to_sort;
+        prems' := <concat> [seen_prems, [Formula(Relation(r, s, a, Target(err, rws)))]];
+        seen_prems' := <concat> [seen_prems, [Formula(Relation(r, s, a , Target(target, rws)))]];
+        // If target of formula is a variable, check that the variable is not an error (otherwise the error rule should match)
+        if ((VarRef(y) := target) <+ (Var(y) := target))
+        then seen_prems'' := <concat> [seen_prems', [Formula(NMatch(VarRef(y), err))]]
+        else seen_prems'' := seen_prems'
+        end;
+        Relation(cr, cs, ca, Target(_, crws)) := conc;
+        (_, (_, _, _, conc_to_sort, _)) := <hashtable-get(|(<get-arrow-name> ca, <get-arrow-sort> ca))> arrow_decls;
+        conc_err := <mkerr> conc_to_sort;
+        rs' :=
+        	<add-propagation-to-premises(mkerr|arrow_decls, arrow_sigs, d, conc)>
+        		(prems, seen_prems'', [Rule(prems', d, Relation(cr, cs, ca, Target(conc_err, crws)))|rs]) )
+  
+  add-propagation-to-premises(mkerr|arrow_decls, arrow_sigs, d, conc):
+    ([p|prems], seen_prems, rs) ->
+      rs'
+    where
+      not(!p; ?Formula(Relation(r, s, a@NamedDynamicEmitted(_, arrow_name, src_sort), Target(target, rws))); <elem> ((arrow_name, src_sort), arrow_sigs));
+      seen_prems' := <concat> [seen_prems, [p]]; 
+      rs' := <add-propagation-to-premises(mkerr|arrow_decls, arrow_sigs, d, conc)> (prems, seen_prems', rs)
+   
+rules // Utilities for sort declarations
+
+  get-all-constructor-names:
+    sort_decls -> cnames
+    with
+      cnames := <hashtable-keys;
+                 map({ key : ?key; <hashtable-get(|key)> sort_decls; map(\ (cname, _) -> cname \) });
+                 concat> sort_decls
+
+rules // Analyze totality of premises
+
+rules // Introduce "wrong" transitions for non-total premises

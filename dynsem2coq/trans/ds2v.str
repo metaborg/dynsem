@@ -1,0 +1,79 @@
+module coq-semantics/ds2v
+
+imports
+	stratego/metaborg
+
+signature
+
+	sorts DS2V constructors
+		ArrowAlias : String * Sort * String -> DS2V
+		SortAlias : String * String -> DS2V
+		CoqImport : String -> DS2V
+    Import : String -> DS2V
+		Timeouts : List((String, String)) -> DS2V
+		ConstructorAlias : String * Int * CtorKind -> DS2V
+    NativeOpAlias : String * Int * String -> DS2V
+    Nabl2Signature : String -> DS2V
+
+  sorts CtorKind constructors
+    Name : String -> CtorKind
+    Tuple : CtorKind
+
+rules
+
+	get-ds2v-data(|seen_imports):
+		path -> (as', coq_ims', tos', <union-triple> (nabl2_sig', nabl2_sig))
+		with
+			ds2v := <get-ds2v> path;
+			as := <filter(?ArrowAlias(_, _, _) <+ ?SortAlias(_, _) <+ ?ConstructorAlias(_, _, _) <+ ?NativeOpAlias(_, _, _))> ds2v;
+			coq_ims := <filter(?CoqImport(_))> ds2v;
+			tos := <filter(?Timeouts(<id>)); concat> ds2v;
+			nabl2_sigpaths := <filter(?Nabl2Signature(<id>))> ds2v;
+			ims := <filter({ x : ?Import(x); not(<elem> (x, seen_imports)); !x })> ds2v;
+			nabl2_sigs := <map(get-nabl2sig)> nabl2_sigpaths;
+			nabl2_sig := <union-triples> (([], [], []), nabl2_sigs); // Flatten signatures
+			(as', coq_ims', tos', nabl2_sig') := <get-ds2vs(|[path|seen_imports])> (ims, as, coq_ims, tos, nabl2_sig)
+			
+  get-ds2vs(|seen_imports):
+    ([], as, ims, tos, nabl2_sigs) -> (as, ims, tos, nabl2_sigs)
+  
+  get-ds2vs(|seen_imports):
+    ([path|xs], as, ims, tos, nabl2_sig) -> r
+    with
+      (as', ims', tos', nabl2_sig') := <get-ds2v-data(|[path|seen_imports])> path;
+      r := <get-ds2vs(|[path|seen_imports])>
+      			(xs, <conc> (as, as'), <conc> (ims, ims'), <conc> (tos, tos'), <union-triple> (nabl2_sig, nabl2_sig'))
+  
+  ds-source-and-include-locations = !"ds"; language-source-and-include-locations
+  
+	get-ds2v:
+    path -> ds2v
+    with
+      (ds2v_file := <guarantee-extension(|"ds2v")> path;
+ 			 ds-source-and-include-locations;
+     	 path' := <fetch-elem(!$[[<id>]/[ds2v_file]]; file-exists)>;
+       ds2v := <read-text-file; read-from-string> path'
+      ) <+
+      !path; debug(!"Could not read DS2V file: ");
+      ds2v := []
+
+  get-nabl2sig:
+  	path -> nabl2_sig
+  	with
+  		( file := <guarantee-extension(|"nabl2sig")> path;
+  			ds-source-and-include-locations;
+      	path' := <fetch-elem(!$[[<id>]/[file]]; file-exists)>;
+  			nabl2_sig := <read-text-file; read-from-string> path'
+  	  ) <+
+  	  <conc-strings; debug> ("Could not read NaBL2 signature file: ", path); fail
+
+	union-triples:
+		(x, []) -> x
+
+	union-triples:
+		(t1, [t2|ts]) ->
+			<union-triples> (<union-triple> (t1, t2), ts)
+
+	union-triple:
+		((x1, x2, x3), (y1, y2, y3)) -> (<conc; nub> (x1, y1), <conc; nub> (x2, y2), <conc; nub> (x3, y3))
+ 

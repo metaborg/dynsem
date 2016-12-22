@@ -40,6 +40,10 @@ public abstract class MatchPattern extends DynSemNode {
 			return GenericListMatch.create(t, fd);
 		}
 
+		if (Tools.hasConstructor(t, "TypedTuple", 2)) {
+			return TupleMatch.create(t, fd);
+		}
+
 		if (Tools.hasConstructor(t, "LabelComp", 2)) {
 			// TODO we should use the type information from the labelcomp instead of skipping over it
 			return MatchPattern.create(Tools.applAt(t, 1), fd);

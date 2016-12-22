@@ -7,28 +7,28 @@ imports
 
 rules
 
-  add-extra-typeannos-module:
-    m@Module(_, _) -> Module($[[name]_typeannos], section*)
-    where
-      <m-in-analysis(add-extra-typeannos; unrename-all); unmark-vars> m => Module(name, section*)
-      
-  add-extra-typeannos = alltd(add-extra-typeannos-rule); alltd(add-extra-typeannos-term)
+  add-extra-typeannos-module =
+    ?Module(_, _);
+    m-in-analysis(add-extra-typeannos; unrename-all);
+    unmark-vars
+  
+  add-extra-typeannos = alltd(add-extra-typeannos-rule); alltd(add-extra-typeannos-premise); alltd(add-extra-typeannos-term)
   
   add-extra-typeannos-rule:
-    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(l@List([]), tc*))) ->
-      Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(l, bu-ty-str), tc*)))
+    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(t, tc*))) -> 
+      Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(t, bu-ty-str), tc*)))
     where
-      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      ArrowType(ma-ty, bu-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, <type-of> lhs);
-      bu-ty-str := <derw-type> bu-ty
-  
-  add-extra-typeannos-rule:
-    Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(m@Map([]), tc*))) ->
-      Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(m, bu-ty-str), tc*)))
+      <?List([]) + ?Map([])> t
     where
-      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      ArrowType(ma-ty, bu-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, <type-of> lhs);
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (arrow-def*, <type-of> lhs);
       bu-ty-str := <derw-type> bu-ty
+
+  add-extra-typeannos-premise:
+    Formula(Match(lhs, rhs)) -> Formula(Match(lhs, rhs'))
+    where
+      lhs-ty := <type-of> lhs;
+      rhs' := <add-extra-typeannos-term <+ Snd> (lhs-ty, rhs)
 
   add-extra-typeannos-term:
     Con(name, c*) -> Con(name, c'*)
@@ -38,7 +38,9 @@ rules
       c'* := <zip(add-extra-typeannos-term <+ Snd)> (c-ty*, c*)
   
   add-extra-typeannos-term:
-    (_, c@Con(_, _)) -> <try(add-extra-typeannos-term)> c
+    x@(_, c@Con(_, _)) -> <try(add-extra-typeannos-term)> c
+    where
+    	<TupleToList> x // FIXME: This works around a bug in the Stratego interpreter where terms of arity 2 are matched as if they were tuples
   
   add-extra-typeannos-term:
     (lty@ListType(ty), ListTail(h, t)) -> ListTail(h', t')
@@ -51,4 +53,6 @@ rules
   
   add-extra-typeannos-term:
     (ty, l@List([])) -> Cast(l, <derw-type> ty)
-
+  
+  add-extra-typeannos-term:
+    (ty, t@Tuple(_)) -> Cast(t, <derw-type> ty)

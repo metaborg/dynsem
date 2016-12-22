@@ -5,7 +5,7 @@ imports
 
 rules
   
-  copy-propagation-module = Module(!$[[<id>]_copyprop], alltd(copy-propagation-rule))
+  copy-propagation-module = Module(id, alltd(copy-propagation-rule))
 
   copy-propagation-rule:
     Rule(prem*, infer, Relation(reads, source, arrow, Target(rhs, tc*))) ->

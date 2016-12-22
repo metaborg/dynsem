@@ -34,6 +34,14 @@ context-free syntax // variable schemes
   
   AliasDecl.AliasDecl = [[ID] = [Type]]
 
+context-free syntax // semantic components
+
+  SignatureSection.Components = <
+    components
+      <{CompDecl "\n"}*>>
+  
+  CompDecl.CompDecl = [[ID] : [Type]]
+
 context-free syntax // constructor declarations
 
   SignatureSection.Constructors = <
@@ -43,21 +51,18 @@ context-free syntax // constructor declarations
   ConsDecl.NullaryConsDecl = [[ID] : [Type] [ConsAnnos]]
   ConsDecl.ConsDecl = [[ID] : [{Type " * "}+] -> [Type] [ConsAnnos]]
   
-  
   ConsAnnos.NoAnnos = []
 
   ConsAnnos.Annos = [{[ { ConsAnno "," }* ]}]
   ConsAnno.ImplicitAnno = [implicit]
   ConsAnno.MetafunAnno = [meta-function]
 
-  ConsDecl.FunDecl = [[ID] : [{Type " * "}*] --> [Type]]
-
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
+  Type.TupleSort = [([{Type " * "}+])]
   Type = [[MapType]]
     
   MapType.MapSort = [Map([Type],[Type])]
-  MapType.MapSort_Deprecated = [Map<[Type],[Type]>] {deprecated("Use Map(T1,T2) instead")}
 
 template options
 
@@ -114,11 +119,13 @@ context-free syntax
 
   ArrowDeclaration.ArrowDecl = [[ArrowROs] [Type] [ArrowRWs] -[IDNOHYPH]-> [Type] [ArrowRWs]]
   
+  ArrowDeclaration.MetaFunDecl = [[ArrowROs] [ID]([{Type ", "}*]) [ArrowRWs] --> [Type] [ArrowRWs]]
+  
   ArrowROs.NoArrowROs = []
-  ArrowROs.ArrowROs = [[{Type ", "}+] |-]
+  ArrowROs.ArrowROs = [[{Label ", "}+] |-]
   
   ArrowRWs.NoArrowRWs = []
-  ArrowRWs.ArrowRWs = [:: [{Type ", "}+]]
+  ArrowRWs.ArrowRWs = [:: [{Label ", "}+]]
    
     
 

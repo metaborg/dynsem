@@ -1,0 +1,44 @@
+module generation/unfold_as_patterns
+
+// Coq does not support 'as patterns', such as DynSem's c@Seq(c1, c2). We unfold such patterns to explicit matching instead.
+
+imports
+  signatures/ds-sig
+  signatures/Signatures-sig
+  signatures/Signatures-sig
+  ds
+  analysis/analysis-rules
+  
+rules // Unfold case constructions
+
+	unfold-as-patterns =
+		alltd(unfold-as-patterns-in-rules)
+		
+	unfold-as-patterns-in-rules:
+		Rule(prems, d, conc) -> r
+		with
+			(conc', prems0) := <unfold-as-pattern-in-term> conc;
+			// Unfold as-patterns for each premise, and add explicit matches to list of premises:
+			prems3 :=
+				<foldr(![],
+					{ x, prem2, prems2 :
+					\ (prem1, prems1) ->
+						x
+						where
+							(prem2, prems2) := <unfold-as-pattern-in-term> prem1;
+							x := <concat> [prems2, [prem2], prems1] \ })> prems;
+			prems' := <conc> (prems0, prems3);
+			r := Rule(prems', d, conc')
+
+	unfold-as-pattern-in-term:
+		t -> (t', matches)
+		with
+			( // Find 'As' term, if it exists
+				t0 := <oncetd(?As(Var(x), y); !Var(x))> t;
+				// Unfold as pattern, and search for more
+				(t', matches1) := <unfold-as-pattern-in-term> t0;
+				matches := [Formula(Match(VarRef(x), y))|matches1]
+			)
+			<+ // If 'As' term does not exist
+			t' := t; matches := [] 
+		

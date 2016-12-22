@@ -30,6 +30,9 @@ rules
       <not(is-builtin-type)> s
   
   ds-to-interp-terms-types-name:
+    SimpleSort("AST") -> $[org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm]
+  
+  ds-to-interp-terms-types-name:
     SimpleSort("String") -> $[String]
 
   ds-to-interp-terms-types-name:
@@ -49,6 +52,9 @@ rules
   
   ds-to-interp-terms-types-name:
     ListSort(s) -> $[List_[<ds-to-interp-terms-types-name; ds-utils-java-escape-id; string-replace(|".","_")> s]]
+  
+  ds-to-interp-terms-types-name:
+    TupleSort(s*) -> $[Tuple_[<map(ds-to-interp-terms-types-name; ds-utils-java-escape-id; string-replace(|".","_")); separate-by(|"_"); concat-strings> s*]]
 
   ds-box-java-type = try(internal-ds-box-java-type)
   
@@ -60,7 +66,7 @@ rules
     
   is-primitive-type = try(?SimpleSort(<id>)); (?"Int" + ?"Bool")
   
-  is-builtin-type = try(?SimpleSort(<id>)); (?"String" + ?"Int" + ?"Bool")
+  is-builtin-type = try(?SimpleSort(<id>)); (?"String" + ?"Int" + ?"Bool" + ?"AST")
   
   is-builtin-type = ?ListSort(<is-builtin-type>)
   

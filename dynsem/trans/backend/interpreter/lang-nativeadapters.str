@@ -2,10 +2,10 @@ module backend/interpreter/lang-nativeadapters
 
 imports
   signatures/ds-sig
+  signatures/Signatures-sig
   backend/interpreter/utils
   backend/interpreter/lang-names
   libjava-front
-//  stratego/metaborg
 
 rules
   

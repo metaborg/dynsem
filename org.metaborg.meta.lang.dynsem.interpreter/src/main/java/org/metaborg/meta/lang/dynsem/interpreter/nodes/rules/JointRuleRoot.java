@@ -25,7 +25,7 @@ public class JointRuleRoot extends RootNode {
 	}
 
 	@Override
-	public Object execute(VirtualFrame frame) {
+	public RuleResult execute(VirtualFrame frame) {
 		return jointNode.execute(frame.getArguments());
 	}
 

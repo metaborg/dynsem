@@ -2,16 +2,13 @@ module backend/utils/utils
 
 imports
   libjava-front
-  backend/utils/mkdir
 
 rules
   
   external read-property(|propname, defaultval)
   
-  external make-absolute-path(|prefix)
+  external fmakeexecutable(|)
   
-  external ds-rmdir(|)
-
 rules
 
   ds-utils-java-emit-classes(createdir|outputpkg, basedir) =
@@ -22,7 +19,7 @@ rules
     filename := <ds-utils-java-extractname; guarantee-extension(|"java")> ast;
     if createdir then
       outputdir := <concat-strings> [basedir, "/", <string-replace(|".", "/")> outputpkg];
-      (<file-exists <+ mkdir(id)> outputdir)
+      (<file-exists <+ mkdir> outputdir)
     else
       outputdir := basedir
     end;
@@ -42,3 +39,7 @@ rules
   ds-utils-debugged-java-pp =
     pp-java-string <+
     bottomup(try(not(is-string) ; not(is-list) ; not(pp-java-string) ; debug(!"ERROR: cannot pp "))) ; fail
+  
+  mkidx:
+    idx -> $[_[idx]]
+  

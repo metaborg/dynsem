@@ -1,1 +1,4 @@
 
+[submodule "metaborg-sl"]
+	path = metaborg-sl
+	url = https://github.com/MetaBorgCube/metaborg-sl

@@ -46,6 +46,7 @@ rules /* term registry */
             bstm1*
             bstm2*
             bstm3*
+            bstm4*
           }
           
           @Override
@@ -119,11 +120,13 @@ rules /* term registry */
       decl* := <filter(?Constructors(<id>) + ?NativeOperators(<id>) + ?NativeDataTypes(<id>)); concat> sig*;
       (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _)))> decl*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
+      tuple-dec* := <get-languagetuple-usage-in-signatures> sig*;
       x_classname := $[[<get-opt> LangName()]TermRegistry]; 
       bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
       bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
       bstm2* := <ds-to-interp-nattyterms-registry-inits> nattydecl*;
-      bstm3* := <ds-to-interp-lists-registry-inits> list-dec*
+      bstm3* := <ds-to-interp-lists-registry-inits> list-dec*;
+      bstm4* := <ds-to-interp-tuples-registry-inits> tuple-dec*
 
   ds-to-interp-terms-registry-inits = mapconcat(ds-to-interp-terms-registry-init)
   
@@ -156,6 +159,38 @@ rules /* term registry */
       x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
       e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*;
       e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+
+  ds-to-interp-tuples-registry-inits = mapconcat(ds-to-interp-tuples-registry-init)
+
+  ds-to-interp-tuples-registry-init:
+    dec@TupleSort(s*) ->
+      bstm* |[
+       builderFactories.put(x_conclass.class, new ITermBuildFactory() {
+    
+          @Override
+          public x_termbuildclass apply(SourceSection source,
+              TermBuild... children) {
+            return x_termbuildNODEGEN.create(source, e1*);
+          }
+        });
+
+        matcherFactories.put(x_conclass.class, new ITermMatchPatternFactory() {
+    
+          @Override
+          public MatchPattern apply(SourceSection source,
+              MatchPattern... children) {
+            return x_termmatchNODEGEN.create(source, e2*);
+          }
+        });
+      ]|
+    with
+      x_conclass := <ds-to-interp-terms-types-name> dec;
+      x_termbuildclass := $[[x_conclass]Build];
+      x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> s*;
+      e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> s*
 
   ds-to-interp-lists-registry-inits = mapconcat(ds-to-interp-lists-registry-init)
   

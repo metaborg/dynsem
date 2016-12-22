@@ -7,12 +7,12 @@ imports
 
 rules
 
-  desugar-aliases-module:
-    m@Module(_, _) -> Module($[[name]_noaliases], section*)
-    where
-      <m-in-analysis(desugar-aliases; unrename-all); unmark-vars> m => Module(name, section*)
+  desugar-aliases-module =
+    ?Module(_, _);
+    m-in-analysis(desugar-aliases; unrename-all);
+    unmark-vars
   
-  desugar-aliases = alltd(desugar-alias); Module(id, remove-alias-decls)
+  desugar-aliases = innermost(desugar-alias); Module(id, remove-alias-decls)
   
   desugar-alias:
     d@SimpleSort(s) -> <derw-type> base-ty

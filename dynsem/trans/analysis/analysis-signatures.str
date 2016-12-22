@@ -1,11 +1,9 @@
 module analysis/analysis-signatures
 
 imports
-  signatures/ds-sig
-  analysis/lib-analysis
-  analysis/constructors
-  analysis/analysis-rules
-  analysis/query
+  signatures/-
+  analysis/-
+  backend/utils/utils
 
 rules /* store signatures */
   
@@ -15,6 +13,7 @@ rules /* store signatures */
       <+ store-constructors
       <+ store-native-operators
       <+ store-arrows
+      <+ store-semantic-components
       <+ store-native-datatypes
       <+ store-variable-schemes
       <+ store-aliases
@@ -27,6 +26,7 @@ rules /* store signatures */
     ; <store-def(|Types())> RealType() => def-real; <store-prop(|SortKind(), def-real)> SystemSort()
     ; <store-def(|Types())> BoolType() => def-bool; <store-prop(|SortKind(), def-bool)> SystemSort()
     ; <store-def(|Types())> StringType() => def-str; <store-prop(|SortKind(), def-str)> SystemSort()
+    ; <store-def(|Types())> ASTType() => def-ast; <store-prop(|SortKind(), def-ast)> SystemSort()
 
   store-sorts = Sorts(map(store-sort))
 
@@ -74,11 +74,30 @@ rules /* store signatures */
   store-arrows = ArrowDeclarations(map(store-arrow))
   
   store-arrow:
-    d@ArrowDecl(_, in-srt, _, arrow, out-srt, _) -> d
+    d@ArrowDecl(ArrowROs(ro*), in-srt, ArrowRWs(rw*), arrow, out-srt, _) -> d
     with
       <store-def(|Arrows())> arrow => arrow-def;
-      <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt)
-
+      <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt);
+      <store-prop(|ROs(), arrow-def)> ro*;
+      <store-prop(|RWs(), arrow-def)> rw*
+  
+  store-arrow:
+    d@MetaFunDecl(ro, cname, kid-srt*, rw, out-srt, rw) -> d
+    where
+      t_name := $[[cname]__Meta];
+      t_source := SimpleSort(t_name);
+      <store-sort> SortDecl(t_name);
+      <store-constructor> ConsDecl(cname, kid-srt*, t_source, Annos([MetafunAnno()]));
+      <store-arrow> ArrowDecl(ro, t_source, rw, "", out-srt, rw)
+  
+  store-semantic-components = Components(map(store-semantic-component))
+  
+  store-semantic-component:
+    d@CompDecl(x, s) -> d
+    with
+      <store-def(|Components())> x => comp-def;
+      <rw-type; store-prop(|Type(), comp-def)> s
+  
   store-native-operators = NativeOperators(map(store-native-operator))
   
   store-native-operator:
@@ -153,6 +172,22 @@ rules
   check-signatures = alltd(check-signature)
   
   check-signature:
+    Module(module-name, _) -> <fail>
+    where
+      <resolve-path(editor-module-name-error)> module-name
+  
+  check-signature:
+    Module(module-name, _) -> <fail>
+    where
+      project-path := <OptProjectPath>;
+      local-project-path := <local-path> project-path;
+      prop-file := $[[project-path]/dynsem.properties];
+      if <not(read-property(|"source.langname", ""))> prop-file
+      then
+        add-msg(|Warning(), module-name, "Could not find or read a dynsem.properties file")
+      end  
+  
+  check-signature:
     SimpleSort(s) -> <fail>
     where
       <id-to-type; not(lookup-def(|Types()))> s;
@@ -186,8 +221,14 @@ rules
   check-signature:
     vs@VariableScheme(prefix, _) -> <fail>
     where
-	    <get-matching-varschemes> prefix => [_, _ | _];
-	    add-msg(|Error(), vs, $[Duplicate or overlapping variable prefix [prefix]])
+	    <get-matching-varschemes(get-all-varschemes)> prefix => [_, _ | _];
+	    add-msg(|Error(), vs, $[Duplicate or overlapping variable or semantic component prefix [prefix]])
+
+  check-signature:
+    cd@CompDecl(prefix, _) -> <fail>
+    where
+	    <get-matching-varschemes(get-all-varschemes)> prefix => [_, _ | _];
+	    add-msg(|Error(), cd, $[Duplicate or overlapping variable or semantic component prefix [prefix]])
   
   check-signature:
     Con(cname, c*) -> <fail>
@@ -199,7 +240,8 @@ rules
   check-signature:
     <?d@NativeOpDecl(cname, c*, _)
     + ?d@ConsDecl(cname, c*, _, _)
-    + ?d@NativeConsDecl(cname, c*, _)> -> <fail>
+    + ?d@NativeConsDecl(cname, c*, _)
+    + ?d@MetaFunDecl(_, cname, c*, _, _, _)> -> <fail>
     where
       arity := <length> c*;
       <lookup-defs(|Constructors())> (cname, arity) => [_, _ | _];
@@ -221,7 +263,7 @@ rules
       [] := c*
     where
       <fetch-elem(?ImplicitAnno())> anno*;
-      add-msg(|Error(), d, $[Non-unary constructors may not be implicit])
+      add-msg(|Error(), d, $[Only unary constructors can be implicit])
 
   check-signature:
     decl@ArrowDecl(_, in-srt, _, name, out-srt, _) -> <fail>
@@ -233,4 +275,8 @@ rules
 	    <fetch-elem(?ArrowType(<id>, _); !(<id>, in-ty); type-coerce-sym(type-coerce-full(id)))> arrow-ty*;
 	    add-msg(|Error(), decl, $[Arrow LHS overlaps with another arrow with the same name])
 
-    
+  check-signature:
+    l@Label(x) -> <fail>
+    where
+      <not(lookup-def(|Components()))> x;
+      add-msg(|Error(), l, $[Unknown semantic component [x]]) 

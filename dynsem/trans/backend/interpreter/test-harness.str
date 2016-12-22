@@ -1,0 +1,244 @@
+module backend/interpreter/test-harness
+
+imports
+  backend/interpreter/utils
+  backend/utils/-
+  
+rules
+
+  ds-to-interp-gen-test-harness =
+    if get-opt(|GenJUnit()) then
+      ds-to-interp-gen-junitsuite
+      ; ds-utils-java-emit-class(id|<get-opt> TestPkg(), <get-opt> TestJavaDirAbs())
+      ; ds-to-inter-gen-junit-launchconfig
+    end
+
+
+  ds-to-interp-gen-junitsuite =
+    x_entryPoint := $[[<get-opt> LangName()]EntryPoint];
+    testspath := <get-opt> TestsDir();
+    e_xten* := <get-opt; map(\ s -> Lit(String([Chars(s)])) \)> LangFileExtens();
+    x_classname := $[Test[<get-opt> LangName()]];
+    !compilation-unit |[
+        package ~x:<get-opt> TestPkg();
+        
+        import static org.junit.Assert.assertEquals;
+        import static org.junit.Assert.fail;
+        import java.io.File;
+        import java.io.FileInputStream;
+        import java.io.IOException;
+        import java.io.InputStream;
+        import java.nio.charset.Charset;
+        import java.util.Collection;
+        import java.util.LinkedList;
+        
+        import org.apache.commons.io.FilenameUtils;
+        import org.apache.commons.io.IOUtils;
+        import org.apache.commons.io.input.NullInputStream;
+        import org.apache.commons.io.output.ByteArrayOutputStream;
+        import org.junit.After;
+        import org.junit.Before;
+        import org.junit.Test;
+        import org.junit.runner.RunWith;
+        import org.junit.runners.Parameterized;
+        import org.junit.runners.Parameterized.Parameters;
+        import ~x:<get-opt> TopPkg().x_entryPoint;
+        
+        @RunWith(Parameterized.class)
+        public class x_classname {
+        
+          public static final String TESTSPATH = ~e:Lit(String([Chars(testspath)]));
+          private static final String[] EXTENSIONS = new String[] { e_xten* };
+        
+          private TestData testData;
+          private InputStream inputStream;
+          private ByteArrayOutputStream outputStream;
+          private ByteArrayOutputStream errorStream;
+        
+          public x_classname(TestData td) {
+            this.testData = td;
+          }
+        
+          @Before
+          public void setUp() throws IOException {
+            if (testData.inputFile != null) {
+              InputStream is = new FileInputStream(new File(testData.inputFile));
+              inputStream = is;
+            } else {
+              inputStream = new NullInputStream(0);
+            }
+        
+            outputStream = new ByteArrayOutputStream();
+            errorStream = new ByteArrayOutputStream();
+          }
+        
+          @After
+          public void tearDown() throws IOException {
+            inputStream.close();
+            outputStream.close();
+            errorStream.close();
+          }
+        
+          @Test
+          public void testEagerEval() throws Exception {
+            if (testData.outputFile != null) {
+              testEvaluateSuccess();
+            } else {
+              testEvaluateFailure();
+            }
+        
+          }
+        
+          private void testEvaluateFailure() {
+            try {
+              x_entryPoint.evaluate(testData.programFile, System.getProperty("user.dir"), inputStream, outputStream,
+                  errorStream);
+              fail("Failure expected but success encountered");
+            } catch (Exception ex) {
+              ;
+            }
+          }
+        
+          private void testEvaluateSuccess() throws Exception {
+            final FileInputStream fis = new FileInputStream(testData.outputFile);
+            final String expectedOutput = IOUtils.toString(fis, Charset.defaultCharset());
+            IOUtils.closeQuietly(fis);
+        
+            x_entryPoint.evaluate(testData.programFile, System.getProperty("user.dir"), inputStream, outputStream, errorStream);
+        
+            outputStream.flush();
+            errorStream.flush();
+        
+            final StringBuilder outBuilder = new StringBuilder();
+            outBuilder.append(new String(outputStream.toByteArray()));
+
+            if (errorStream.size() > 0) {
+              outBuilder.append(new String(errorStream.toByteArray()));
+              outBuilder.append(System.lineSeparator());
+            }
+            assertEquals(expectedOutput.trim(), outBuilder.toString().trim());
+          }
+        
+          @Parameters(name = "{index}: {0}")
+          public static Collection<TestData> testTargets() {
+        
+            File testDir = new File(TESTSPATH);
+            LinkedList<File> programs = getAllFiles(testDir, new FileFilter());
+            LinkedList<TestData> data = new LinkedList<TestData>();
+        
+            for (File testProgram : programs) {
+              String baseName = FilenameUtils.getBaseName(testProgram.getName());
+        
+              String expectedInput = testProgram.getParent()
+                  + IOUtils.DIR_SEPARATOR + baseName + ".input";
+              if (!new File(expectedInput).exists()) {
+                expectedInput = null;
+              }
+        
+              String expectedOutput = testProgram.getParent()
+                  + IOUtils.DIR_SEPARATOR + baseName + ".output";
+              if (!new File(expectedOutput).exists()) {
+                expectedOutput = null;
+              }
+        
+              final String testName = testDir.toURI().relativize(testProgram.toURI()).getPath().toString();
+              data.add(new TestData(testName, testProgram.getAbsolutePath(), expectedInput, expectedOutput));
+            }
+            
+            return data;
+          }
+        
+          private static class TestData {
+            public final String testname;
+            public final String programFile;
+            public final String inputFile;
+            public final String outputFile;
+        
+            public TestData(String testname, String programFile, String inputFile,
+                String outputFile) {
+              this.testname = testname;
+              this.programFile = programFile;
+              this.inputFile = inputFile;
+              this.outputFile = outputFile;
+            }
+        
+            @Override
+            public String toString() {
+              return testname;
+            }
+          }
+        
+          interface LanguageFileFilter {
+            public boolean accept(File file);
+          }
+        
+          static class FileFilter implements LanguageFileFilter {
+            public boolean accept(File file) {
+              for (String ext : EXTENSIONS) {
+                if (FilenameUtils.getExtension(file.getName())
+                    .equalsIgnoreCase(ext))
+                  return true;
+              }
+              return false;
+            }
+          }
+        
+          public static LinkedList<File> getAllFiles(File root,
+              LanguageFileFilter filter) {
+        
+            File[] list = root.listFiles();
+        
+            LinkedList<File> res = new LinkedList<File>();
+        
+            if (list == null)
+              return res;
+        
+            for (File f : list) {
+              if (f.isDirectory()) {
+                res.addAll(getAllFiles(f, filter));
+              } else if (filter.accept(f)) {
+                res.add(f);
+              }
+            }
+            return res;
+          }
+        }
+      ]|
+
+  ds-to-inter-gen-junit-launchconfig =
+    launch-cfg := 
+      $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
+        <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+          <listEntry
+            value="/[<get-opt> MavenArtifactId()]/[<get-opt> TestJavaDir()]/[<get-opt; string-replace(|".", "/")> TestPkg()]/Test[<get-opt> LangName()].java" />
+        </listAttribute>
+        <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+          <listEntry value="1" />
+        </listAttribute>
+        <stringAttribute key="org.eclipse.jdt.junit.CONTAINER"
+          value="" />
+        <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR"
+          value="false" />
+        <stringAttribute key="org.eclipse.jdt.junit.TESTNAME"
+          value="" />
+        <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND"
+          value="org.eclipse.jdt.junit.loader.junit4" />
+        <booleanAttribute
+          key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true" />
+        <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER"
+          value="org.eclipse.m2e.launchconfig.classpathProvider" />
+        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE"
+          value="[<get-opt> TestPkg()].Test[<get-opt> LangName()]" />
+        <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR"
+          value="[<get-opt> MavenArtifactId()]" />
+        <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER"
+          value="org.eclipse.m2e.launchconfig.sourcepathProvider" />
+        <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS"
+          value="-ea [<get-opt> JVMArgs()]" />
+      </launchConfiguration>];
+      launch-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", "Test", <get-opt> LangName(), ".launch"], "w");
+      <fputs> (launch-cfg, launch-file);
+      <fclose> launch-file
+
+    

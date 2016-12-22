@@ -12,8 +12,6 @@ import com.oracle.truffle.api.nodes.RootNode;
 
 public class DynSemRuleForeignAccess implements Factory {
 
-	public static final ForeignAccess INSTANCE = ForeignAccess.create(new DynSemRuleForeignAccess());
-
 	@Override
 	public boolean canHandle(TruffleObject o) {
 		return o instanceof DynSemRule;

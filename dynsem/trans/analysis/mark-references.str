@@ -46,7 +46,5 @@ rules
   	<+ CaseOtherwise(mark-vardefs-in-premise)
 
   make-vars =
-  	alltd( \ VarRef(x) -> Var(x) \)
+  	alltd(origin-track-forced(\ VarRef(x) -> Var(x) \))
 
-rules
-  

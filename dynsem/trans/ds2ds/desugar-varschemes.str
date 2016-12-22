@@ -8,18 +8,17 @@ imports
 
 rules
   
-  desugar-varschemes-module :
-    mod@Module(_, _) -> Module($[[name]_varschemes], section'*)
-    where
-      <m-in-analysis(desugar-varschemes; unrename-all); unmark-vars> mod => Module(name, section'*)
+  desugar-varschemes-module =
+    ?Module(_, _);
+    m-in-analysis(desugar-varschemes; unrename-all);
+    unmark-vars
 
   desugar-varschemes = alltd(desugar-varscheme)
   
   desugar-varscheme:
-    VarLabelComp(v) -> LabelComp(<derw-type> scheme-ty, v)
+    VarLabelComp(v) -> LabelComp(Label(<def-get-name> scheme-def), v)
     where
-    	scheme-def := <get-unique-matching-varscheme> v;
-    	scheme-ty := <lookup-prop(|Type())> scheme-def
+    	scheme-def := <get-unique-matching-varscheme(get-all-component-defs)> v
   
   // do not expand the variable schemes in as-bound variables
   // expanding to a cast will lead to a malformed AST
@@ -28,8 +27,21 @@ rules
   desugar-varscheme:
     var@Var(v) -> Cast(var, <derw-type> scheme-ty)
     where
-      scheme-def := <get-unique-matching-varscheme> v;
+      scheme-def := <get-unique-matching-varscheme(get-all-varschemes)> v;
       scheme-ty := <lookup-prop(|Type())> scheme-def
-    	
+rules
+  
+  resugar-varschemes-module =
+    ?Module(_, _);
+    m-in-analysis(resugar-varschemes; unrename-all);
+    unmark-vars
+  
+  resugar-varschemes = alltd(resugar-varscheme)
+  
+  resugar-varscheme:
+    LabelComp(Label(lname), v) -> VarLabelComp(v)
+    where
+      scheme-def := <get-unique-matching-varscheme(get-all-component-defs)> v;
+      <def-get-name> scheme-def => lname
 
-
+      

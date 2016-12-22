@@ -12,6 +12,7 @@ rules /* language file. interpreter entry point */
     e_dobacktrack := <if <get-opt> EnableBacktracking() then !e |[ true ]| else !e |[ false ]| end>;
     e_safecomponents := <if get-opt(|EnableSafeComponents()) then !e |[ true ]| else !e |[ false ]| end>;
     e_termcaching := <if get-opt(|EnableTermCaching()) then !e |[ true ]| else !e |[ false ]| end>;
+    e_debugging := <if get-opt(|EnableDebug()) then !e |[ true ]| else !e |[ false ]| end>;
     !compilation-unit |[
       package ~x:<get-opt> TopPkg();
       
@@ -60,6 +61,7 @@ rules /* language file. interpreter entry point */
         public static final boolean ENABLE_BACKTRACKING = e_dobacktrack;
         public static final boolean ENABLE_SAFECOMPONENTS = e_safecomponents;
         public static final boolean ENABLE_TERMCACHING = e_termcaching;
+        public final static boolean ENABLE_DEBUG = e_debugging;
         
         @Override
         public boolean isFullBacktrackingEnabled() {
@@ -76,6 +78,10 @@ rules /* language file. interpreter entry point */
           return ENABLE_TERMCACHING;
         }
         
+        @Override
+        public boolean isDEBUG() {
+          return ENABLE_DEBUG;
+        }
         
       }
     ]|
@@ -94,6 +100,7 @@ rules /* language file. interpreter entry point */
       import org.spoofax.interpreter.terms.ITermFactory;
       import org.spoofax.terms.io.TAFTermReader;
       import org.apache.commons.io.FilenameUtils;
+      import com.martiansoftware.nailgun.NGContext;
       
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemEntryPoint;
@@ -122,15 +129,20 @@ rules /* language file. interpreter entry point */
         }
 
         public static void main(String[] args) throws Exception {
-          RuleResult res = evaluate(args[0], System.in, System.out, System.err);
+          RuleResult res = evaluate(args[0], System.getProperty("user.dir"), System.in, System.out, System.err);
           System.out.println(res.result);
         }
+        
+        public static void nailMain(NGContext ctx) throws Exception {
+          RuleResult res = evaluate(ctx.getArgs()[0], ctx.getWorkingDirectory(), ctx.in, ctx.out, ctx.err);
+          ctx.out.println(res.result);
+        }
 
-        public static RuleResult evaluate(String programFile,
+        public static RuleResult evaluate(String programFile, String workingDirectory,
             InputStream inputStream, OutputStream outputStream,
             OutputStream errorStream) throws Exception {
           return new x_entryPoint()
-                .getCallable(programFile, inputStream, outputStream, errorStream)
+                .getCallable(programFile, workingDirectory, inputStream, outputStream, errorStream)
                 .call();
         }
         
@@ -197,7 +209,7 @@ rules /* language file. interpreter entry point */
         public static void main(String[] args) throws IOException {
           String file = args[0];
       
-          Callable<RuleResult> callee = new x_entryPoint().getCallable(file, System.in,
+          Callable<RuleResult> callee = new x_entryPoint().getCallable(file, System.getProperty("user.dir"), System.in,
               System.out, System.err);
       
           BenchmarkConfiguration benchconfig = new BenchmarkConfiguration();
@@ -209,6 +221,31 @@ rules /* language file. interpreter entry point */
           benchmark.execute();
       
           benchmark.writeToFile();
+        }
+      
+      }
+    ]|
+  
+  ds-to-interp-language-daemonentry =
+    langname := <get-opt> LangName();
+    x_entryPoint := $[[langname]EntryPoint];
+    x_classname := $[[langname]Daemon];
+    e_aliasname := Lit(String([Chars(langname)]));
+    e_aliasdescr := Lit(String([Chars($[Run [langname] interpreter daemon])]));
+    !compilation-unit |[
+      package ~x:<get-opt> TopPkg();
+
+      import com.martiansoftware.nailgun.Alias;
+      import com.martiansoftware.nailgun.AliasManager;
+      import com.martiansoftware.nailgun.NGServer;
+      
+      public class x_classname {
+      
+        public static void main(String[] args) {
+          final NGServer server = new NGServer();
+          final AliasManager aliasManager = server.getAliasManager();
+          aliasManager.addAlias(new Alias(e_aliasname, e_aliasdescr, x_entryPoint.class));
+          server.run();
         }
       
       }

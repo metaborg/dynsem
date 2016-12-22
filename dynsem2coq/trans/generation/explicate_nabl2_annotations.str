@@ -1,0 +1,332 @@
+module generation/explicate_nabl2_annotations
+
+imports
+  signatures/ds-sig
+  signatures/Signatures-sig
+  lib-ds
+  analysis/analysis-signatures
+  analysis/analysis-rules
+  analysis/query
+  ds2ds/explicate-arrow-types
+  
+signature
+	
+	// These could probably be imported from the NaBL2 language project instead
+	sorts Nabl2Sorts constructors
+		TypeSig : Name * List(Nabl2Sorts) -> Nabl2Sorts
+		TypeSort : Nabl2Sorts
+		CGenSig : Nabl2Sorts * Nabl2Sorts * List(Nabl2Sorts) * Nabl2Sorts -> Nabl2Sorts
+		SortNoArgs : String -> Nabl2Sorts
+		Sort : String * List(Nabl2Sorts) -> Nabl2Sorts
+		Type : Nabl2Sorts
+		NoType : Nabl2Sorts
+		Name : String -> Nabl2Sorts
+
+rules // Explication of annotations in rules
+
+	// Signature of cgen_sig_map:
+	//
+	//   GeneratorName -> (SortName * List(Kind) * Option(Kind))
+	// where
+	//   GeneratorName = String 
+	//   Kind = Scope | Type
+
+	explicate-nabl2-annotations(|nabl2_sig):
+		mod -> mod4
+		with
+			(type_sigs, cgen_sigs, subterm_sigs) := nabl2_sig;
+			type_constructors := <map(type-sig-to-consdecl)> type_sigs;
+			mod0 := <foldr(!mod, add-cgen-sigs)> cgen_sigs;
+			// Remember the sorts of generators
+			cgen_sig_map := <new-hashtable>;
+			<map(\ CGenSig(Name(cgen_name), sort, _, _) ->
+						 <hashtable-put(|cgen_name, SimpleSort(<normalize-sort; postify> sort))> cgen_sig_map \)> cgen_sigs;
+			// Iterate through subterm signatures and update ConsDecls in Module accordingly
+			mod1 := <foldr(!mod0, transform-subterm-sig(|cgen_sig_map))> subterm_sigs;
+			// All cgen sorts (both postifiable and postified sorts)
+			all_cgen_sorts := <get-all-cgen-sorts> cgen_sigs;
+			// Update all derived sorts (all sorts that do not occur in an NaBL2 signature)
+			mod2 := <postify-derived-sorts-in-consdecls(|all_cgen_sorts)> mod1;
+			// cgen sorts (only postifiable but not postified sorts)
+			cgen_sorts := <get-all-cgen-sorts> cgen_sigs;
+			// Update arrow signatures and rules accordingly
+			mod3 := <postify-sorts-in-arrowdecls(|cgen_sorts)> mod2;
+			mod4 := <postify-constructors(|cgen_sorts, cgen_sigs)> mod3
+
+rules // Translating NaBL2 signatures to DynSem
+
+	type-sig-to-consdecl:
+		TypeSig(name, params) -> ConsDecl(name, <map(type-param-to-consdecl-param)> params, SimpleSort("Type"), Annos([]))
+		
+	type-param-to-consdecl-param:
+		TypeSort() -> SimpleSort("Type")
+
+rules // Augmenting module with sort declarations and constructors for explicated term sorts
+
+	// Generates a new sort declaration and constructor for each annotated term
+	add-cgen-sigs:
+		(CGenSig(Name(cgen_name), sort, ann_list, type), mod) ->
+			mod'
+		with
+			sort' := <normalize-sort> sort;
+			( // Check that sort is actually defined:
+				<check-sort-defined> (mod, sort');
+				scope_kind_list := <map(kindify)> ann_list;
+				type_kind_list := <kindify-type> type;
+				cons_decl :=
+					ConsDecl(<postify-constructor> sort', <concat> [scope_kind_list, type_kind_list, [sort']], SimpleSort(<postify> sort'), Annos([]));
+				mod' :=
+					<alltd(\ Sorts(ss) -> Sorts(<add-after(|<store-sort> SortDecl(<get-sort-name> sort'))> (SortDecl(<postify> sort'), ss)) \);
+					 alltd(\ Constructors(cs) -> Constructors([<store-constructor> cons_decl|cs]) \)> mod
+			) <+
+			(
+				<concat-strings; debug> ["ERROR: Sort ", <normalize-sort; get-sort-name> sort, " is used in NaBL2 signature, but is ill-defined!"];
+				mod' := mod
+			)
+
+	check-sort-defined:
+		(mod, SimpleSort(x)) -> 1
+		where
+			<oncetd(?SortDecl(x))> mod
+
+	check-sort-defined:
+		(mod, ListSort(x)) -> 1
+		where
+			<check-sort-defined> (mod, x)
+			
+	check-sort-defined:
+		(mod, MapSort(x, y)) -> 1
+		where
+			<check-sort-defined> (mod, x);
+			<check-sort-defined> (mod, y)
+
+rules // Replace occurrences of non-explicated term sorts with explicated ones
+
+	transform-subterm-sig(|cgen_sig_map):
+		(((constructor, arity), subterm_sig), mod) ->
+			mod'
+		with
+			mod' :=
+				<bottomup(try({
+						params, s, a, params:
+							?ConsDecl(constructor, params, s, a);
+							arity := <length> params;
+							! <store-constructor> ConsDecl(constructor, <replace-ns(|cgen_sig_map, subterm_sig)> params, s, a)
+					}))> mod
+
+rules // Replacing sub-term positions with explicated term sorts
+
+	replace-ns(|cgen_sig_map, subterm_sig):
+		params -> params
+		where
+			subterm_sig := []
+			
+	replace-ns(|cgen_sig_map, subterm_sig):
+		params -> params''
+		where
+			[(cgen, subterm_pos)|ss'] := subterm_sig;
+			sort := <hashtable-get(|cgen)> cgen_sig_map;
+			params' := <replace-n> (subterm_pos, sort, params);
+			params'' := <replace-ns(|cgen_sig_map, ss')> params'
+			
+	replace-n:
+		(0, x, [_|zs]) -> [x|zs]
+		
+	replace-n:
+		(n, x, [y|zs]) -> [y|<replace-n> (<subt> (n, 1), x, zs)]
+		where
+			<gt> (n, 0)
+
+rules // Map NaBL2 sorts onto DynSem sorts
+
+	normalize-sort:
+		SortNoArgs(sort_name) -> SimpleSort(sort_name)
+		
+	normalize-sort:
+		Sort("List", [sort]) -> ListSort(<normalize-sort> sort)
+
+rules // Postify: generate names for annotated sorts and their constructors
+
+	postify:
+		SimpleSort(sort_name) -> <conc-strings> ("Post", sort_name)
+		
+	postify-constructor:
+		SimpleSort(sort_name) -> <conc-strings> (<first-char> sort_name, "_")
+
+	postify:
+		ListSort(sort) -> <conc-strings> ("PostL", <get-sort-name; first-char> sort)
+		
+	postify-constructor:
+		ListSort(sort) -> <concat-strings> ["L", <get-sort-name; first-char> sort, "_"]
+
+	postify:
+		MapSort(sort1, sort2) -> <concat-strings> ["PostM", <get-sort-name; first-char> sort1, <get-sort-name; first-char> sort2]
+		
+	postify-constructor:
+		MapSort(sort1, sort2) -> <concat-strings> ["M", <get-sort-name; first-char> sort1, <get-sort-name; first-char> sort2, "_"]
+
+rules // Kindify: translate NaBL2 kinds to DynSem sorts
+
+	// Note that these names follow the scopegraph-api;
+	// they can/will be renamed by DS2V sort aliases when mapping to Coq
+	kindify:
+		"s" -> SimpleSort("Scope")
+	
+	kindify:
+		Type() -> SimpleSort("Type")
+
+	kindify-type:
+		Type() -> [SimpleSort("Type")]
+	
+	kindify-type:
+		None() -> []
+
+	kindify-type:
+		NoType() -> []
+
+rules // Postify derived sorts in ConsDecl's
+	
+	postify-derived-sorts-in-consdecls(|cgen_sorts):
+		mod ->
+			<alltd({cons, cons': \
+				cons@ConsDecl(cname, cparams, sort, annos) ->
+					cons'
+				where
+					(( // If sort is a derived sort (i.e., not a cgen sort)
+						not(<elem> (sort, cgen_sorts));
+						cons' :=
+							<store-constructor>
+								ConsDecl(cname,
+								<map(
+									alltd({ sort' :
+										?sort';
+										<elem> (sort', cgen_sorts);
+										!SimpleSort(<postify> sort')
+									}))> cparams, sort, annos)
+					) <+
+					(cons' := cons)) \})> mod
+
+rules // Replace sorts in arrow declarations with postified ones:
+
+	postify-sorts-in-arrowdecls(|cgen_sorts):
+		mod -> mod'
+		with
+			mod' :=
+				<bottomup(try({
+					ads, sort, x, y :
+						( // Replace sorts in arrow decls
+							?ArrowDeclarations(ads);
+							!ArrowDeclarations(<alltd({
+								sort :
+									?sort;
+									// If sort is a  cgen sort
+									<elem> (sort, cgen_sorts);
+									// Postify it
+									! SimpleSort(<postify> sort)
+								})> ads)
+						) <+
+						( // Replace sorts in named arrow relations
+							?NamedDynamicEmitted(x, y, sort);
+							<elem> (sort, cgen_sorts);
+							!NamedDynamicEmitted(x, y, SimpleSort(<postify> sort))
+						)
+					}))> mod 
+
+rules // Replace all occurrences of constructors in pre-types with their post-counterparts
+// E.g., if we have an NaBL2 signature [[ Expr ^ (s) : * ]] for the sort Expr, and the sort Expr is:
+//
+//   sorts Expr constructors
+//     Plus : Expr * Expr -> Expr
+//
+// This might get transformed into:
+//
+//   sorts Expr constructors
+//     Plus : PostExpr * PostExpr -> Expr
+//   sorts PostExpr constructors
+//     E_ : Scope * Type * Expr -> PostExpr
+//
+// postify-constructors unfolds every occurrence of a Plus(_, _) expression into an expression E_(s, t, Plus(_, _)), where s and t are fresh.
+	
+	postify-constructors(|cgen_sorts, cgen_sigs) =
+		alltd(postify-constructor-rule(|cgen_sorts, cgen_sigs))
+
+	postify-constructor-rule(|cgen_sorts, cgen_sigs):
+		r@Rule(_, _, _) -> <alltd(postify-constructor-term(|cgen_sorts, cgen_sigs)); store-rule> r
+
+	postify-constructor-term(|cgen_sorts, cgen_sigs):
+		t -> t'
+		where
+			// If the term is not a variable
+			not(?Var(_));
+			not(?VarRef(_));
+			// And we can infer the sort of the term 
+			sort := <type-of> t;
+			// And the (normalized) type is a cgen sort (type-of returns only the sort name in case of SimpleSorts ...)
+			( (<elem> (sort, cgen_sorts); norm_sort := sort)
+			<+ (<elem> (SimpleSort(sort), cgen_sorts); norm_sort := SimpleSort(sort)) );
+			t' := Con(<postify-constructor> norm_sort, <generate-fresh-anno-params(|cgen_sigs)> (norm_sort, t))
+	
+	generate-fresh-anno-params(|cgen_sigs):
+		(sort, t) -> <conc> (annos, [t])
+		with
+			!cgen_sigs;
+			<fetch({
+				sort0, ann_list, type, annos0 :
+					?CGenSig(_, sort0, ann_list, type);
+					sort := <normalize-sort> sort0;
+					annos0 := <map(!Var(<newname> "_lifted_"))> ann_list;
+					if <equal> (type, NoType())
+					then
+						annos := annos0
+					else
+						annos := [Var(<newname> "_lifted_")|annos0]
+					end
+				})> cgen_sigs
+		
+
+rules // Calculating constraint generation sorts (i.e., which sorts have a constraint generation function associated with them)
+
+	// All cgen sorts includes postified sorts
+	get-all-cgen-sorts:
+		cgen_sigs -> <map(get-all-cgen-sort-cgensig); concat> cgen_sigs
+		
+	get-all-cgen-sort-cgensig:
+		CGenSig(_, sort, _, _) -> [<normalize-sort> sort, SimpleSort(<normalize-sort; postify> sort)]
+
+	// These do not include postified sorts
+	get-cgen-sorts:
+		cgen_sigs -> <map(get-cgen-sort-cgensig)> cgen_sigs
+		
+	get-cgen-sort-cgensig:
+		CGenSig(_, sort, _, _) -> <normalize-sort> sort
+
+rules // Utility for adding an element to a list before/after a particular element, or at the end of the list, if the element is not found
+	
+	add-after(|e):
+		(x, []) -> [x]
+
+	add-after(|e):
+		(x, [e|xs]) -> [e, x|xs]
+		
+	add-after(|e):
+		(x, [y|xs]) -> [y|zs]
+		where
+			!(x, y); not(equal);
+			zs := <add-after(|e)> (x, xs)
+	
+	add-before(|e):
+		(x, []) -> [x]
+	
+	add-before(|e):
+		(x, [e|xs]) -> [x, e|xs]
+		
+	add-before(|e):
+		(x, [y|xs]) -> [y|zs]
+		where
+			!(x, y); not(equal);
+			zs := <add-before(|e)> (x, xs)
+
+rules // Utility for getting first char of string
+
+	first-char =
+		string-as-chars(\ [x|_] -> <upper-case-chars> [x] \)

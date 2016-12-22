@@ -1,0 +1,307 @@
+module coq-semantics/preprocess
+
+imports
+  generation/explicate_nabl2_annotations
+  signatures/-
+  analysis/-
+  ds2ds/explicate-arrow-types
+  ds2ds/prettify-vars
+  lib-ds
+  coqmappings
+  ds2v
+  generation/err_rules
+	generation/unfold_cases // FIXME: should happen in main.
+  signatures/ds-sig
+  signatures/Module-sig
+	signatures/Signatures-sig
+
+rules
+           
+  pre-process-module:
+    (mod, ds2v_aliases, ds2v_timeouts) ->
+      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map, t_aliases, c_aliases)
+    with
+      // Construct type (sort/arrow) alias map
+      t_aliases := <new-hashtable>;
+      // Construct constructor alias map
+      c_aliases := <new-hashtable>;
+      // Populate maps based on DS2V annotations
+      <collect-ds2v-aliases(|ds2v_aliases)> (t_aliases, c_aliases);
+      // Populate hashmaps with accumulated information about DynSem specification
+      (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map) :=
+        <collect-data-from-module; data-to-hashmap(|c_aliases); analyze-mutual-dependencies(|ds2v_aliases)>
+          (mod, ds2v_aliases);
+      <collect-overloaded-arrow-aliases(|arrow_decl_map)> t_aliases;
+      // FIXME: Eventually, we should collect and rename overloaded DynSem term constructors, too.
+      //        DynSem supports arity overloading, and Coq does not.
+      // Add propagation rules for clocked relations
+      // NOTE: This could be moved into ds2ds/clock-timeouts
+      <add-propagation-rules(mk-timeout-val|ds2v_timeouts)> arrow_decl_map
+
+rules // Accumulate information about declared arrows, rules, and AST constructors
+
+  // NOTE: This is inefficient... 
+  collect-data-from-module:
+    (Module(name, contents), ds2v_aliases) -> (sort_decls, sort_constrs, arrow_decls, ruls, ds2v_aliases)
+    with
+      // Signatures
+      sigs* := <filter(?Signatures(<id>)); concat> contents;
+      // Rules
+      ruls := <filter(?Rules(<id>)); concat;
+      				 map(\ rule -> <unfold-rule-cases> ([], rule) \); // Unfolds case constructions into multiple rules
+      				 concat> contents;
+      // Sort declarations
+      sort_decls := <filter(?Sorts(<id>)); concat; filter(?SortDecl(<id>))> sigs*;
+      // Sort constructors
+      sort_constrs := <filter(?Constructors(<id>)); concat> sigs*;
+      // Arrow declarations
+      arrow_decls := <filter(?ArrowDeclarations(<id>)); concat> sigs*
+
+rules // Store accumulated information in maps for easy dereferencing
+
+  // Type of sort_decl_map:
+  //
+  //   SortName -fin-> Constructors
+  //   Constructors := List(ConstructorName x List(Sort))
+  //
+  // Type of arrow_decl_map:
+  //
+  //   (RelName, SortName) -fin-> (Rules, RelSignature)
+  //   RelSignature := (List(Sorts_RO) x Sort_From x List(Sorts_RW) x Sort_To x List(Sorts_RW))
+  //   Rules := RuleName -fin-> (Formula_Conclusion x List(Formula_Premise))
+  //
+  // Type of sort_dep_map:
+  //
+  //   SortName -fin-> SortName
+  //
+  // Type of arrow_dep_map:
+  //
+  //   RelName -fin-> RelName
+
+  data-to-hashmap(|c_aliases):
+    (sort_decls, sort_constrs, arrow_decls, ruls, ds2v_aliases) -> (sort_decl_map, arrow_decl_map)
+    with
+      // Sort declarations
+      sort_decl_map := <new-hashtable>;
+      <map(instantiate-sortdecl(|sort_decl_map, ds2v_aliases))> sort_decls;
+      <map(push-sort-constructor(|sort_decl_map, ds2v_aliases, c_aliases))> sort_constrs;
+      
+      // Arrow declarations
+      arrow_decl_map := <new-hashtable>;
+      <map(instantiate-arrow(|arrow_decl_map, ds2v_aliases))> arrow_decls;
+      <map(push-named-rule(|arrow_decl_map, ds2v_aliases))> ruls
+
+  instantiate-sortdecl(|m, ds2v_aliases):
+    sort_name -> 1
+    with
+      if <not(is-builtin-sort(|ds2v_aliases))> sort_name // If sort is not a Coq built-in
+      then <hashtable-put(|sort_name, [])> m
+      end
+
+  instantiate-arrow(|m, ds2v_aliases):
+    ArrowDecl(ro_ents, from_sort, from_rw_ents, rel_name, to_sort, to_rw_ents) -> 1
+    with
+      if <not(is-builtin-arrow(|ds2v_aliases))> (rel_name, <get-sort-name> from_sort) // If arrow is not a Coq built-in
+      then <hashtable-put(|(rel_name, from_sort), ([], (ro_ents, from_sort, from_rw_ents, to_sort, to_rw_ents)))> m
+      end
+  
+  push-sort-constructor(|m, t_aliases, c_aliases):
+    ConsDecl(name, from_sorts, SimpleSort(to_sort), annotations) -> 1
+    with
+      // Check that constructor is not a tuple alias (if so, all occurrences of constructed terms get replaced by a tuple)
+      arity := <length> from_sorts;
+      if (not(<hashtable-get(|(name, arity))> c_aliases))
+      then
+        // Check that sort is not a Coq built-in
+        if <not(is-builtin-sort(|t_aliases))> to_sort 
+        then 
+          name' := <rename-constructor> (name, from_sorts);
+          cs := <hashtable-get(|to_sort)> m;
+          <hashtable-put(|to_sort, [(name', from_sorts)|cs])> m
+        else
+          !name; debug(! (<concat-strings> ["WARNING: The sort ", to_sort, " maps to a Coq built-in type, but has constructor: "]))
+        end
+      end
+  
+  push-sort-constructor(|m, ds2v_aliases):
+    NullaryConsDecl(name, SimpleSort(to_sort), annotations) -> 1
+    with
+      if <not(is-builtin-sort(|ds2v_aliases))> to_sort // If sort is not a Coq built-in
+      then 
+        name' := <rename-constructor> (name, []);
+        cs := <hashtable-get(|to_sort)> m;
+        <hashtable-put(|to_sort, [(name', [])|cs])> m
+      else
+        !name; debug(! (<concat-strings> ["WARNING: The sort ", to_sort, " maps to a Coq built-in type, but has constructor: "]))
+      end
+  
+  push-named-rule(|m, ds2v_aliases):
+    rule -> 1
+    with
+      (conc, prems) := <get-premises-and-conclusion> rule;
+      (name, sort) := <get-rel-name-and-sort> conc;
+      if <not(is-builtin-arrow(|ds2v_aliases))> (name, <get-sort-name> sort) // If arrow is not a Coq built-in
+      then
+        (rs, sig) := <hashtable-get(|(name, sort))> m;
+        <hashtable-put(|(name, sort), ([rule|rs], sig))> m
+      else
+        sort_name := <get-sort-name> sort;
+        m0 := <rename-overloaded-arrow> (name, sort_name);
+        m1 := <concat-strings> ["WARNING: The arrow ", m0, " maps to a Coq built-in type, but has rule(s)."];
+        !""; debug(!m1)
+      end
+
+rules // Analyze mutual dependencies
+
+  analyze-mutual-dependencies(|ds2v_aliases):
+    (sort_decl_map, arrow_decl_map) -> (sort_decl_map, arrow_decl_map, sort_dep_map, arrow_dep_map)
+    with
+      sort_dep_map := <new-hashtable>;
+      arrow_dep_map := <new-hashtable>;
+      <hashtable-keys; map(sort-analyze-dependency(|sort_decl_map, sort_dep_map, ds2v_aliases))> sort_decl_map;
+      <hashtable-keys; map(arrow-analyze-dependency(|arrow_decl_map, arrow_dep_map, ds2v_aliases))> arrow_decl_map
+
+rules // Sort dependency analysis
+
+  sort-analyze-dependency(|sort_decl_map, sort_dep_map, ds2v_aliases):
+    sort_name -> 1
+    with
+      constrctors := <hashtable-get(|sort_name)> sort_decl_map;
+      deps := <map(\ (c_name, c_args) -> (<foldr(![], sort-predefined-or-definee(|sort_name, ds2v_aliases))> c_args) \); concat> constrctors;
+      <hashtable-put(|sort_name, deps)> sort_dep_map
+
+  sort-predefined-or-definee(|c_name1, ds2v_aliases):
+    (SimpleSort(c_name2), deps) -> deps'
+    with
+      predefineds := <coq-predefined>;
+      ((!c_name2; ?c_name1; deps' := deps)
+        <+ (<elem> (c_name2, predefineds); deps' := deps)
+        <+ (<is-builtin-sort(|ds2v_aliases)> c_name2; deps' := deps)
+        <+ deps' := [c_name2|deps])
+  
+  sort-predefined-or-definee(|c_name1, ds2v_aliases):
+  	(ListSort(x), deps) -> <sort-predefined-or-definee(|c_name1, ds2v_aliases)> (x, deps)
+  
+  sort-predefined-or-definee(|c_name1, ds2v_aliases):
+    (MapSort(from_sort, to_sort), deps) -> deps'
+    with
+      from_deps := <sort-predefined-or-definee(|c_name1, ds2v_aliases)> (from_sort, deps);
+      deps' := <sort-predefined-or-definee(|c_name1, ds2v_aliases)> (to_sort, from_deps)
+
+rules // Arrow dependency analysis
+
+  arrow-analyze-dependency(|arrow_decl_map, arrow_dep_map, ds2v_aliases):
+    (arrow_name, sort) -> 1
+    with
+      (ruls, rel_sig) := <hashtable-get(|(arrow_name, sort))> arrow_decl_map;
+      deps := <map({prems: Rule(prems, _, _) := <id>; (<foldr(![], arrow-definee(|arrow_name, sort, ds2v_aliases))> prems)}); concat> ruls;
+      <hashtable-put(|(arrow_name, sort), deps)> arrow_dep_map
+
+  arrow-definee(|arrow_name, sort, ds2v_aliases):
+    (Formula(rel@Relation(_, _, _, _)), deps) -> deps'
+    with
+      (arrow_name', sort') := <get-rel-name-and-sort> rel;
+      ((?(arrow_name, sort); deps' := deps)
+        <+ <is-builtin-arrow(|ds2v_aliases)> (arrow_name', <get-sort-name> sort'); deps' := deps 
+        <+ deps' := [(arrow_name', sort')|deps])
+
+  arrow-definee(|arrow_name, sort, ds2v_aliases):
+    (x, deps) -> deps
+    where
+    	not(!x; ?Formula(rel@Relation(_, _, _, _)))
+  
+rules // Alias collection and querying
+
+	find-duplicate-arrow-names:
+    arrow_decl_map -> dups
+    with
+      dups := <hashtable-keys; map(\ (name, _) -> name \); duplicates> arrow_decl_map
+
+	collect-overloaded-arrow-aliases(|arrow_decl_map):
+		alias_map -> 1
+		with
+      dup_arrow_names := <find-duplicate-arrow-names> arrow_decl_map;
+      <hashtable-keys; map(try({ name, sort, sort_name, rename:
+      												 ?(name, sort); 
+      												 <elem> (name, dup_arrow_names);
+      												 sort_name := <get-sort-name> sort;
+      												 rename := <rename-overloaded-arrow> (name, sort_name);
+      												 <hashtable-put(|(name, sort_name), (rename, sort))> alias_map }))> arrow_decl_map
+
+	apply-alias(|alias_map):
+		name -> rename
+		with
+			(rename := <hashtable-get(|name)> alias_map)
+			<+ (rename := name)
+	
+	collect-ds2v-aliases(|ds2v_aliases):
+		(t_aliases, c_aliases) -> 1
+		with
+			<map(try({ name, sort, coq_name, ctor_kind, arity:
+								 (?ArrowAlias(name, sort, coq_name);
+								  <hashtable-put(|(name, sort), (coq_name, sort))> t_aliases)
+								 <+ (?SortAlias(name, coq_name);
+								 		 <hashtable-put(|name, coq_name)> t_aliases)
+								 <+ (?ConstructorAlias(name, arity, ctor_kind);
+								     <hashtable-put(|(name, arity), ctor_kind)> c_aliases)
+								 <+ (?NativeOpAlias(name, arity, coq_name);
+								     <hashtable-put(|(name, arity), Name(coq_name))> c_aliases) }))> ds2v_aliases
+			
+
+	// Succeeds if sort_name has a defined ds2v alias
+	is-builtin-sort(|ds2v_aliases):
+		sort_name -> 1
+		where
+			[_|_] := <filter(?SortAlias(sort_name, _))> ds2v_aliases
+
+	// Succeeds if arrow_name has a defined ds2v alias
+	is-builtin-arrow(|ds2v_aliases):
+		(arrow_name, sort) -> 1
+		where
+			[_|_] := <filter(?ArrowAlias(arrow_name, sort, _))> ds2v_aliases
+
+rules // Utilities for querying rules
+
+  get-rel-name:
+    Relation(_, _, arrow, _) -> name
+    with
+      name := <get-arrow-name> arrow
+    
+  get-rel-name-and-sort:
+    Relation(_, _, arrow, _) -> (name, sort)
+    with
+      name := <get-arrow-name> arrow;
+      sort := <get-arrow-sort> arrow
+    
+  get-arrow-name:
+    NamedDynamicEmitted(_, name, _) -> name
+
+  get-arrow-sort:
+    NamedDynamicEmitted(_, _, sort) -> sort
+
+  get-premises-and-conclusion:
+    Rule(prems, _, conc) -> (conc, prems)
+
+  get-arrow-name:
+    NamedDynamic(name) -> name
+
+rules // Utilities for lists
+
+  duplicates:
+    [] -> []
+  
+  duplicates:
+    [x|xs] -> dups
+    where
+      (<elem> (x, xs); dups := [x|<filter(not(?x)); duplicates> xs])
+      	<+ dups := <duplicates> xs
+  
+rules // Naming conventions
+
+  rename-overloaded-arrow:
+    (arrow_name, sort_name) -> <concat-strings> [arrow_name, "_", sort_name]
+
+//  rename-constructor:
+//    (constructor_name, args) -> <concat-strings> [constructor_name, <length; int-to-string> args]
+  rename-constructor:
+    (constructor_name, args) -> constructor_name

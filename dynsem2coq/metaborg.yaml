@@ -1,0 +1,38 @@
+---
+id: org.metaborg:dynsem2coq:${metaborgVersion}
+name: dynsem2coq
+dependencies:
+  compile:
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  source:
+  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
+  - org.metaborg:org.metaborg.lang.coq:${metaborgVersion}
+  - org.metaborg:dynsem:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.nabl2.shared:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.nabl2.runtime:${metaborgVersion}
+contributions:
+- name: ds
+  id: org.metaborg:dynsem:${metaborgVersion}
+build:
+ useBuildSystemSpec: true
+language:
+  sdf:
+    enabled: false
+  stratego:
+    format: ctree
+    args:
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-sglr
+    - -la
+    - stratego-gpp
+    - -la
+    - stratego-xtc
+    - -la
+    - stratego-aterm
+    - -la
+    - stratego-sdf
+    - -la
+    - strc

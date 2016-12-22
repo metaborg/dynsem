@@ -20,9 +20,6 @@ public abstract class Premise extends DynSemNode {
 
 	public static Premise create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
-		if (Tools.hasConstructor(t, "MergePoint", 3)) {
-			return MergePointPremise.create(t, fd);
-		}
 		if (Tools.hasConstructor(t, "CaseMatch", 2)) {
 			return CaseMatchPremise.create(t, fd);
 		}

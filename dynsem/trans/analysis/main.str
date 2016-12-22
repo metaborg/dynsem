@@ -11,88 +11,159 @@ imports
 	analysis/info-implicit-conversions
 	signatures/-
   lib-ds
-	stratego/metaborg
 	libstratego-sglr
 	ds
+	src-gen/stratego/metaborg
+	pp
 
+rules
+
+  debug-show-analyzed:
+    (_, _, ast, path, project-path) -> (filename, result)
+    with {| MyCurrentFile:
+      filename := <guarantee-extension(|"analyzed.ds")> path;
+      f-path := $[[project-path]/[path]];
+      rules(MyCurrentFile: _ -> f-path);
+      editor-init;
+      result := <in-project-path(m-in-analysis(id)|project-path); unmark-vars; sugar-all; pp-debug> ast
+    |}
+      
 rules
 
   m-in-analysis(s) =
     new-analysis-scope(
-      new-type-transitions-scope(
-        analyze-top;
-        s
+      in-rename-scope(
+        new-type-transitions-scope(
+          analyze-top;
+          s
+        )
       )
     )
 	
-	analyze-top = {| IsImported:
-	  where(
-		  if f := <MyCurrentFile>
-		  then
-	  	  rules(IsImported: f)
-	  	end);
-	  analyze-module
-  |}
+  analyze-top:
+    ast@Module(module-name, _) -> <analyze-module> ast
+    with
+      // compute the transitive closure set of imports
+      analyze-api-get-all-imports(editor-import-resolution-error, editor-import-parse-error);
+      // remove the current file from the imports
+      filter(not(?Import(module-name)));
+      // analyze the signatures of each module
+      map(try(analyze-import))
+
+strategies // analysis workhorse
+
+  analyze-import =
+    open-cached-file(analyze-api-resolve-import(id), parse-ds-file-report(id));
+    Module(id, filter(?Signatures(_)));
+    analyze-module
 
   analyze-module =
-    analyze-imports(analyze-module);
-    analyze-module-local
-  
-  analyze-imports(analysis) =
-    Module(id, where(filter(Imports(filter(analyze-import(analysis))))))
-  
-  analyze-import(analysis) = 
-  	?t@Import(import-string);
-  	!import-string;
-  	open-import(
-  	  resolve-path,
-      parse-ds-file-report(add-msg(|Error(), t, $[Import [import-string] cannot be be parsed]));
-  	  Module(id, filter(?Imports(_) <+ ?Signatures(_))),
-  	  analyze-module
-  	)
-
-  analyze-module-local =
-	    desugar-top;
-	    log-timed(mark-vars| "Marking variable def sites");
-	    log-timed(rename-all| "Renaming variables");
-	    log-timed(store-all| "Storing all definitions")
+    desugar-top;
+    mark-vars;
+    rename-all;
+    store-all
   
   store-all:
     m@Module(n, section*) -> m
     with
-      log-timed(
-        log-timed(
-          store-built-ins | "Storing built-in signatures"
-        );
-        log-timed(
-          <map(try(store-signatures))> section* | "Storing signatures"
-        );
-        log-timed(
-          <check-signatures> section* | "Checking signatures" 
-        );
-        log-timed(
-          <store-rules-all> section* | "Storing rules"
-        );
-        log-timed(
-          <post-analysis-checks> m | "Post-analysis checks"
-        );
-        log-timed(
-          <gen-implicit-info-top> m | "Implicit conversion info"
-        )
-      | "Analysis" )
+      store-built-ins;
+      <map(try(store-signatures))> section*;
+      <check-signatures> m;
+      <store-rules-all> section*;
+      <post-analysis-checks> m;
+      <gen-implicit-info-top> m
+
+strategies // import resolution
+
+  analyze-api-get-all-imports(resolution-error, parse-error) =
+    ?ast;
+    direct-import* := <analyze-api-get-direct-imports; nub> ast;
+    <analyze-compute-imports(resolution-error, parse-error)> (direct-import*, [])
   
+  analyze-api-get-direct-imports:
+    Module(_, sec*) -> <filter(?Imports(<id>)); concat> sec*
+  
+  analyze-compute-imports(resolution-error, parse-error):
+    ([], impo*) -> impo*
+  
+  analyze-compute-imports(resolution-error, parse-error):
+    ([impX|impXs], imp*) -> <analyze-compute-imports(resolution-error, parse-error)> (<nub> [new-imp*|impXs], [impX, imp*])
+    with
+      if ast := <open-cached-file(analyze-api-resolve-import(resolution-error), parse-ds-file-report(\ _ -> <parse-error> impX \))> impX
+      then
+        more-imp* := <analyze-api-get-direct-imports> ast;
+        new-imp* := <diff> (more-imp*, imp*)
+      else
+        new-imp* := []
+      end
+  
+  analyze-api-resolve-import(resolution-error):
+    Import(m) -> <resolve-path(resolution-error)> m
+
 rules /* helpers for import handling */
 
-  resolve-path =
+  resolve-path(resolution-error) =
   	?import-string;
     (
-      ds-source-and-include-locations;
+      language; language-source-and-include-locations;
       fetch-elem(!$[[<id>]/[import-string].ds]; file-exists)
       <+
-      add-msg(|Error(), import-string, $[Import [import-string] cannot be resolved]);
+      resolution-error;
       fail
     )
-  
+
   parse-ds-file-report(report) = 
-    parse-ds-file
-    <+ debug(!"failed to parse: "); report; debug(!"reported error: "); fail
+    parse-ds
+    <+ report; fail
+  
+  parse-ds:
+    file -> str
+    where
+      str := <prim("STRSGLR_parse_string", id|file, (), (), file)>
+  
+  editor-import-parse-error:
+    t@Import(import-string) -> t
+    with
+      add-msg(|Error(), t, $[Imported module [import-string] cannot be be parsed])
+
+  console-import-parse-error =
+    ?Import(<id>);
+    fatal-err(|"Cannot read/parse module: ") 
+
+  editor-import-resolution-error:
+    s -> s
+    where
+      add-msg(|Error(), s, $[Import [s] cannot be resolved])
+ 
+  editor-module-name-error:
+    s -> s
+    where
+      add-msg(|Error(), s, $[Module name [s] does not match file name and path])
+  
+  console-file-not-found-error =
+    fatal-err(|"File not found: ")
+
+strategies // caching file reading utilities
+  
+  open-cached-file(resolve-path, parse-file) =
+    open-cached-file(resolve-path, parse-file, ?result);
+    !result
+  
+  open-cached-file(resolve-path, parse-file, record-declarations):
+    import -> file
+    where
+      path       := <resolve-path> import;
+      cache-path := <import-cache-path> path;
+      ( <is-newer> (cache-path, path);
+        file := <ReadFromFile> cache-path
+      <+
+        file := <parse-file> path;
+        if <file-exists> path then
+          // Only cache if on filesystem (e.g., ignore libstratego-lib)
+          <try(WriteToBinaryFile)> (cache-path, file)
+        end        
+      );
+      {| CurrentFile:
+        rules(CurrentFile := path);
+        <record-declarations> file
+      |}

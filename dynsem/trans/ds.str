@@ -2,21 +2,22 @@ module ds
 
 imports
 	signatures/ds-sig
+	signatures/Common-sig
+	analysis/constructors
 
 imports
-	stratego/metaborg
 	pp
 	outline
-	ds2ds/refocus
-	ds2ds/strict
 	ds2ds/sugar
+	analysis/lib-analysis
+	src-gen/stratego/metaborg
 
 imports
   lib-ds
 	analysis/main
 	ds2ds/core
 	backend/interpreter/main
-	
+
 signature
   constructors
     Var : LID -> Term
@@ -107,12 +108,3 @@ rules // Debugging
       filename := <guarantee-extension(|"desugared.aterm")> path;
       result   := <desugar-top> ast
 			
-rules // Builders
-      
-  // format rules
-  format-editor:
-    (selected, position, ast, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"pp.ds")> path;
-      result   := <sugar-all; pp-debug> ast
-

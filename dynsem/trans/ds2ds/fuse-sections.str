@@ -15,13 +15,13 @@ rules
       natcons-decl  := <collect-all(?NativeConstructors(<id>)); concat; !NativeConstructors(<id>)> body*;
       natops-decl   := <collect-all(?NativeOperators(<id>)); concat; !NativeOperators(<id>)> body*;
       arrow-decl    := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
+      semcomps-decls := <collect-all(?Components(<id>)); concat; !Components(<id>)> body*;
       varschemes-decl := <collect-all(?VariableSchemes(<id>)); concat; !VariableSchemes(<id>)> body*;
       aliases-decl := <collect-all(?Aliases(<id>)); concat; !Aliases(<id>)> body*;
-      signatures    := [ sort-decl, cons-decl, natcons-decl, natops-decl, arrow-decl, natty-decl, varschemes-decl, aliases-decl ];
+      signatures    := [ sort-decl, cons-decl, natcons-decl, natops-decl, arrow-decl, natty-decl, semcomps-decls, varschemes-decl, aliases-decl ];
       rule-decl*    := <collect-all(?Rules(<id>)); concat; sort-rules> body*
   
   sort-rules = qsort((rule-con-name, rule-con-name); string-gt)
   
   rule-con-name =
     ?Rule(_, _, Relation(_, Source(Con(<id>, _), _), _, _)) <+ !""
-  

@@ -1,6 +1,7 @@
 language: java
-
-script: cd org.metaborg.meta.lang.dynsem.interpreter && mvn -Pstandalone test
+before_script:
+  - echo "MAVEN_OPTS='-server -Xms512m -Xmx1024m -Xss16m'" > ~/.mavenrc
+script: ./travis-build.sh
 
 cache:
  directories:

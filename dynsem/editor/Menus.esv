@@ -2,15 +2,23 @@ module Menus
 
 menus
   
-  menu: "Syntax"
-    
-    action: "Format"               = format-editor (openeditor) 
-    action: "Show Abstract Syntax" = debug-show-aterm (source) (openeditor) (meta) 
-    action: "Show Desugared Syntax" = debug-show-desugared (source) (openeditor) (meta) 
-                                                                                                                                                                                         
-  menu: "Semantics"
+  menu: "Syntax" (meta)
+    action: "Show AST" = debug-show-aterm (openeditor) (source) (meta)
+  
+  menu: "Analysis" (meta)
+    action: "Show analyzed" = debug-show-analyzed (source) (openeditor) (meta)
+    action: "Show desugared" = debug-show-desugared (source) (openeditor) (meta)
+  
+  menu: "Format"
+    action: "Derivation style" = format-derivationstyle-editor (openeditor) (source)
+    action: "Code style" = format-codestyle-editor (openeditor) (source)
 
-    action  : "Generate DynSem Core"   = module-to-core-editor (openeditor) (source)
-    action  : "Generate Coq"           = generate-coq (openeditor) (meta)
-    action  : "Generate Interpreter"   = ds-to-interp-editor
-    action  : "Explicate arrow types"  = explicate-arrow-types-editor (openeditor) (source) (meta)
+  menu: "Semantics"
+    action: "Explicate components" = explication-explicate-editor (openeditor) (source)
+    action: "Lift implicits" = expand-implicits-editor (openeditor) (source)
+    action: "Core"   = module-to-core-editor (openeditor) (source)
+    
+  menu: "Interpreter"
+    action: "Generate interpreter" = ds-to-interp-editor (source)
+    action: "Generate spec only" = ds-to-interp-specification-editor (source) (meta)
+    action: "Spec" = ds-to-specification-editor (openeditor) (source) (meta)

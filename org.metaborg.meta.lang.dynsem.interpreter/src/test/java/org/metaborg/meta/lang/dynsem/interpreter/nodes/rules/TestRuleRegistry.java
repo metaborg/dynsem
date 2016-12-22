@@ -124,7 +124,7 @@ public class TestRuleRegistry {
 		assertNotNull(jr);
 		assertEquals("fred", jr.getArrowName());
 		assertEquals(String.class, jr.getDispatchClass());
-		assertEquals(RuleKind.ADHOC, jr.getKind());
+		assertEquals(RuleKind.PLACEHOLDER, jr.getKind());
 
 		JointRuleRoot jrr2 = registry.lookupRules("fred", String.class);
 		assertEquals(jrr, jrr2);

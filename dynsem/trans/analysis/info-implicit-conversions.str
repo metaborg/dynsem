@@ -2,11 +2,13 @@ module analysis/info-implicit-conversions
 
 imports
   signatures/ds-sig
+  signatures/Module-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/analysis-rules
   analysis/query
   analysis/analysis-signatures
+  lib-ds
 
 rules
   
@@ -29,8 +31,9 @@ rules
           )
         ); fail
       + gen-implicit-info-conclusion; fail
-      + MergePoint(gen-implicit-info, gen-implicit-info, id); fail
-      + PremiseBlock(filter(gen-implicit-info)); fail
+      + CaseMatch(id, filter(gen-implicit-info)); fail
+      + CasePattern(id, filter(gen-implicit-info)); fail
+      + CaseOtherwise(filter(gen-implicit-info)); fail
       + Formula(gen-implicit-info); fail
       + Relation(
           Reads(gen-implicit-info(fail)),
@@ -46,37 +49,39 @@ rules
     )
   
   gen-implicit-info-conclusion:
-    Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), _)) -> <fail>
+    Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> <fail>
     where
-      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
-      lhs-ty := <gen-implicit-type-of(id)> lhs;
-      ArrowType(dec-lhs-ty, _) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
-      <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
+      arrow-name := <get-arrow-name> arr;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
+      lhs-ty := <gen-implicit-info-type-of(id)> lhs;
+      ArrowType(dec-lhs-ty, _) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
+      <gen-implicit-info-fact(id|lhs)> (lhs-ty, dec-lhs-ty)
 
   gen-implicit-info-conclusion:
-    Rule(_, _, Relation(_, Source(lhs, _), NamedDynamicEmitted(_, arrow-name), Target(rhs, _))) -> <fail>
+    Rule(_, _, Relation(_, Source(lhs, _), arr, Target(rhs, _))) -> <fail>
     where
-      arrow-ty* := <lookup-def(|Arrows()); lookup-props(|Type())> arrow-name;
+      arrow-name := <get-arrow-name> arr;
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
       lhs-ty := <rulelhs-get-type> lhs;
-      ArrowType(_, dec-rhs-ty) := <type-of-applicable-arrow(type-coerce-full(id))> (arrow-ty*, lhs-ty);
-      <gen-implicit-info-fact(fail|rhs)> (<gen-implicit-type-of(fail)> rhs, dec-rhs-ty)
+      ArrowType(_, dec-rhs-ty) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
+      <gen-implicit-info-fact(fail)> (rhs, dec-rhs-ty)
   
   gen-implicit-info-premise:
     _ -> <fail>
     where
       ?p@Match(lt, rt) + ?p@NMatch(lt, rt)
     where
-      l-ty := <gen-implicit-type-of(fail)> lt;
-      r-ty := <gen-implicit-type-of(id)> rt;
+      l-ty := <gen-implicit-info-type-of(fail)> lt;
+      r-ty := <gen-implicit-info-type-of(id)> rt;
       <try(gen-implicit-info-fact(id|p))> (r-ty, l-ty)
   
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
 
   gen-implicit-info-term(is-matching):
-    LabelComp(s, t) -> <fail>
+    LabelComp(Label(l), t) -> <fail>
     where
-      ty := <rw-type> s;
-      t-ty := <gen-implicit-type-of(is-matching)> t;
+      ty := <lookup-def(|Components()); lookup-prop(|Type())> l;
+      t-ty := <gen-implicit-info-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|t)> (t-ty, ty)
 
   gen-implicit-info-term(is-matching):
@@ -84,20 +89,29 @@ rules
     where
       c-arity := <length> c*;
       ConstructorType(fc-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
-      <zip(try(\ (c, fc-ty) -> <gen-implicit-info-fact(is-matching|c)> (<gen-implicit-type-of(is-matching)> c, fc-ty) \))> (c*, fc-ty*)
+      <zip(try(gen-implicit-info-fact(is-matching)))> (c*, fc-ty*)
 
   gen-implicit-info-term(is-matching):
     ListTail([h], t) -> <fail>
     where
-      h-ty := <gen-implicit-type-of(is-matching)> h;
-      ListType(e-ty) := <gen-implicit-type-of(is-matching)> t;
+      h-ty := <gen-implicit-info-type-of(is-matching)> h;
+      ListType(e-ty) := <gen-implicit-info-type-of(is-matching)> t;
       <gen-implicit-info-fact(is-matching|h)> (h-ty, e-ty)
-  
+
+  // map select
   gen-implicit-info-term(is-matching):
-    MapSelect(map-t, key-t) -> <fail>
+    DeAssoc(l-t, _) -> <fail>
     where
-      MapType(f-key-ty, _) := <gen-implicit-type-of(is-matching); get-alias-base> map-t;
-      a-key-ty := <gen-implicit-type-of(is-matching)> key-t;
+      ListType(f-l-ty) := <gen-implicit-info-type-of(is-matching); get-alias-base> l-t;
+      a-l-ty := <gen-implicit-info-type-of(is-matching)> l-t;
+      <gen-implicit-info-fact(is-matching|l-t)> (a-l-ty, f-l-ty)
+
+  // list index access
+  gen-implicit-info-term(is-matching):
+    DeAssoc(map-t, key-t) -> <fail>
+    where
+      MapType(f-key-ty, _) := <gen-implicit-info-type-of(is-matching); get-alias-base> map-t;
+      a-key-ty := <gen-implicit-info-type-of(is-matching)> key-t;
       <gen-implicit-info-fact(is-matching|key-t)> (a-key-ty, f-key-ty)
 
   gen-implicit-info-fact(is-matching|on-term) =
@@ -108,9 +122,13 @@ rules
     type-path-to-string(is-matching);
     ?path-string;
     add-msg(|Note(), on-term, $[Term of type [<pp-type> actual-ty] conforms to type [<pp-type> expected-ty] by implicit conversions: [path-string]])
+  
+  gen-implicit-info-fact(is-matching):
+    (t, ex-ty) -> <gen-implicit-info-fact(is-matching|t)> (actual-ty, ex-ty)
+    where
+      actual-ty := <gen-implicit-info-type-of(is-matching)> t
 
-  gen-implicit-type-of(is-matching) = type-of
-
+  gen-implicit-info-type-of(is-matching) = type-of
 
 
 

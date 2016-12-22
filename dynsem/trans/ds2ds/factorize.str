@@ -5,11 +5,9 @@ imports
   lib-ds
   
 strategies
-    
-  factorize-module:
-    Module(name, section*) -> Module($[[name]_factorized], section'*)
-    where
-      section'* := <map(try(factorize-rules))> section*
+  
+  factorize-module =
+    Module(id, map(try(factorize-rules)))
         
   factorize-rules = alltd(\ Wld() -> VarRef(<next-variable>) \); alltd(factorize-typecast); alltd(factorize-rule)
   
@@ -78,7 +76,7 @@ rules // lift constructor sub-terms in match
     map(try-factor(factorize-source-components, ?succ)); where(!succ); unzip; (concat, id)
   
   factorize-source-components:
-    LabelComp(ty, t) -> ([Formula(Match(VarRef(v), t))], LabelComp(ty, VarRef(v)))
+    LabelComp(l, t) -> ([Formula(Match(VarRef(v), t))], LabelComp(l, VarRef(v)))
     where
       <not(is-prime-factor)> t;
       v := <next-variable>
@@ -87,7 +85,7 @@ rules // lift constructor sub-terms in match
     map(try-factor(factorize-target-components, ?succ)); where(!succ); unzip; (concat, id)
   
   factorize-target-components:
-    LabelComp(ty, t) -> ([Formula(Match(t, VarRef(v)))], LabelComp(ty, VarRef(v)))
+    LabelComp(l, t) -> ([Formula(Match(t, VarRef(v)))], LabelComp(l, VarRef(v)))
     where
       <not(is-prime-factor)> t;
       v := <next-variable>
@@ -98,6 +96,22 @@ rules // lift constructor sub-terms in match
     factorize-match-in-premise
     <+ factorize-termeq-in-premise
     <+ factorize-relation-in-premise
+    <+ factorize-casematch-premise
+  
+  factorize-cases = some(factorize-case)
+  
+  factorize-case:
+    CasePattern(pat, p*) -> CasePattern(pat, <factorize-premises> p*)
+  
+  factorize-case:
+    CaseOtherwise(p*) -> CaseOtherwise(<factorize-premises> p*)
+  
+  factorize-casematch-premise:
+    CaseMatch(t, case*) -> [p-t*, CaseMatch(t', case*)]
+    where
+      (p-t*, t') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> t;
+      case'* := <factorize-cases> case*;
+      !success
   
   factorize-match-in-premise:
     Formula(Match(lhs, rhs)) -> [p-lhs*, Formula(Match(lhs', rhs')) ,p-rhs*]
@@ -128,7 +142,7 @@ rules // lift constructor sub-terms in match
     [p1*, p2*, p3*, Formula(Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*))), p4*, p5*]
     where
       (p1*, read'*) := <try-factor(factorize-target-components, ?succ)> read*;
-      (p2*, lhs') := <try-factor(factorize-rhs, ?succ)> lhs;
+      (p2*, lhs') := <try-factor(factorize-build, ?succ)> lhs;
       (p3*, sc'*) := <try-factor(factorize-target-components, ?succ)> sc*;
       (p4*, rhs') := <lift-match-on-cond(not(is-prime-factor), ?succ)> rhs;
       (p5*, tc'*) := <try-factor(factorize-source-components, ?succ)> tc*;
@@ -189,7 +203,7 @@ rules
     <+ factorize-listtail-in-build
     <+ factorize-map-in-build
     <+ factorize-mapextend-in-build
-    <+ factorize-mapselect-in-build
+    <+ factorize-deassoc-in-build
     <+ factorize-cast-in-build
 
   factorize-constructors-in-build:
@@ -226,8 +240,8 @@ rules
       (prem2*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
       !success
 
-  factorize-mapselect-in-build:
-    MapSelect(l, r) -> (prem*, MapSelect(l, r'))
+  factorize-deassoc-in-build:
+    DeAssoc(l, r) -> (prem*, DeAssoc(l, r'))
     where
       (prem*, r') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> r;
       !success

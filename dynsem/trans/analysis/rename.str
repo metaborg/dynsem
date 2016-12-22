@@ -3,80 +3,175 @@ module analysis/rename
 imports
   signatures/ds-sig
   ds
-  analysis/lib-analysis
-  analysis/constructors
-  stratego/metaborg
   
 strategies
 	
-	rename-all = alltd(rename)
+  in-rename-scope(s) = {| RenameEnvs:    
+    where(
+      env := <rename-api-init-global-storage>;
+      rules(RenameEnvs: _ -> env)
+    );
+	  s;
+	  where(
+	   <rename-api-destroy-global-storage> env
+	  )
+	|}
+	
+  rename-all =
+    where(
+      env := <RenameEnvs>
+    );
+    alltd(rename-rule(|env))
 	
 rules
-  
-  rename:
-    Rule(p*, i, r) -> Rule(p'*, i, r')
-    where
-      new-scope-renames(
-        r' := <rename-all-vars> r;
-        p'* := <rename-all-vars> p*
-      )
-  
-  rename-all-vars = alltd(origin-track-forced(rename-var))
-  
-  rename-var:
-  	TryOr(l, r) -> TryOr(l', r')
-  	where
-  	  new-scope-renames(
-        l' := <rename-all-vars> l
-      );
-      new-scope-renames(
-        r' := <rename-all-vars> r
-      )
-  
-  rename-var:
-    MergePoint(p, l, r) -> MergePoint(p', l', r')
-    where
-      new-scope-renames(
-        p' := <rename-all-vars> p;
-        l' := <rename-all-vars> l
-      );
-      new-scope-renames(
-        r' := <rename-all-vars> r
-      )
 
-  rename-var:
+  rename-rule(|env):
+    r@Rule(p*, i, Relation(reads, source, arrow, target)) -> Rule(p'*, i, Relation(reads', source', arrow', target'))
+    with
+      rename-api-scopefork-fresh(?env',
+        reads' := <rename-vars(|env')> reads;
+        source' := <rename-vars(|env')> source;
+        arrow' := <rename-vars(|env')> arrow;
+        p'* := <rename-premises(|env')> p*;
+        target' := <rename-vars(|env')> target
+      | env)
+  
+  rename-collect-vardefs-top =
+    collect-om(rename-collect-vardefs, (flatten-list, flatten-list); union)
+  
+  rename-collect-vardefs:
+    Var(x) -> x
+  
+  rename-collect-vardefs:
+    CaseMatch(t, case*) -> <map(rename-collect-vardefs-top); rename-api-isect-lists> case*
+  
+  rename-premises(|env) =
+    map(try(rename-premise(|env)))
+  
+  rename-premise(|env) =
+    not(?CaseMatch(_, _));
+    rename-vars(|env)
+
+  rename-premise(|env):
+    c@CaseMatch(t, case*) -> CaseMatch(t', case'*)
+    with
+      // rename the term build
+      t' := <rename-vars(|env)> t;
+      // pre-allocate renames for variables visible throughout the branches
+      var-name* := <rename-collect-vardefs-top; concat> c;
+      <map(rename-api-rename-pre(|env))> var-name*;
+      // rename in cases
+      case'* := <map(rename-case(|env))> case*
+  
+  rename-case(|env):
     CasePattern(pat, p*) -> CasePattern(pat', p'*)
-    where
-      new-scope-renames(
-        pat' := <rename-all-vars> pat;
-        p'* := <rename-all-vars> p*
-      )
-  
-  rename-var:
+    with
+      pat' := <rename-vars(|env)> pat;
+      rename-api-scopefork-copy(?env',
+        p'* := <rename-premises(|env')> p*
+      | env)
+
+  rename-case(|env):
     CaseOtherwise(p*) -> CaseOtherwise(p'*)
-    where
-      new-scope-renames(
-        p'* := <rename-all-vars> p*
-      )
+    with
+      rename-api-scopefork-copy(?env',
+        p'* := <rename-premises(|env')> p*
+      | env)
+
+  rename-vars(|env) =
+    alltd(rename-var(|env))
   
-  rename-var:
-  	VarRef(v) -> VarRef(<rename(|Vars())> v)
+  rename-var(|env):
+    VarRef(v) -> VarRef(<rename-api-rename(|env)> v)
   
-  rename-var:
-  	Var(v) -> Var(<rename(|Vars())> v)
+  rename-var(|env):
+    Var(v) -> Var(<rename-api-rename(|env)> v)
   
 rules
 
   unrename-all = alltd(unrename-var)
 
   unrename-var:
-  	v -> <invrename(|Vars())> v
-  	where
-  		is-string
-
+    VarRef(x) -> VarRef(<rename-api-invrename(|env)> x)
+    where
+      env := <RenameEnvs>
+  
   unrename-var:
-    VarRef(v) -> VarRef(<unrename-var> v)
-
+    VarRef(x) -> VarRef(<rename-api-invrename(|env)> x)
+    where
+      env := <RenameEnvs>
+  
   unrename-var:
-    Var(v) -> Var(<unrename-var> v)
+    x -> <rename-api-invrename(|env)> x
+    where
+      is-string;
+      env := <RenameEnvs>
 
+strategies
+  
+  rename-api-init-global-storage =
+    renames := <new-hashtable>;
+    invrenames := <new-hashtable>;
+    !(renames, invrenames)
+  
+  rename-api-destroy-global-storage =
+    ?(renames, invrenames);
+    <hashtable-destroy> renames;
+    <hashtable-destroy> invrenames
+  
+  rename-api-scopefork-fresh(bind, transform|env) =
+    where(
+      (renames, invrenames) := env;
+      renames' := <new-hashtable> renames;
+      invrenames' := invrenames;
+      <bind> (renames', invrenames')
+    );
+    transform;
+    <hashtable-destroy> renames'
+  
+  rename-api-scopefork-copy(bind, transform|env) =
+    where(
+      (renames, invrenames) := env;
+      renames' := <hashtable-copy> renames;
+      invrenames' := invrenames;
+      <bind> (renames', invrenames')
+    );
+    transform;
+    <hashtable-destroy> renames'
+  
+  /*
+  * Rename a name. The name already given to this variable is returned. Fails if name has not previously been renamed.
+  */
+  rename-api-rename-use(|sto):
+    name -> name'
+    where
+      name' := <Fst; hashtable-get(|name)> sto
+  
+  rename-api-rename(|sto) =
+    rename-api-rename-use(|sto)
+    <+ rename-api-rename-def(|sto)
+  
+  /*
+  * Rename a name. Create a new name for the given name and store the renaming. Fails if the variable has already been renamed.
+  */
+  rename-api-rename-def(|sto):
+    name -> name'
+    where
+      <Fst; not(hashtable-get(|name))> sto
+    where
+      name' := <newname> name;
+      <Fst; hashtable-put(|name, name')> sto;
+      <Snd; hashtable-put(|name', name)> sto
+  
+  rename-api-rename-pre(|sto) = rename-api-rename(|sto) // TODO implement
+  
+  /*
+  * Inverse rename of a name. Returns the original name which the given renamed name is based on.
+  */ 
+  rename-api-invrename(|sto):
+    name' -> <Snd; hashtable-get(|name')> sto
+  
+  rename-api-isect-lists = 
+    ?l;
+    u := <foldr(![], union)> l;
+    <foldl(isect)> (l, u)
