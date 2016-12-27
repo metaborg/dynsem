@@ -35,8 +35,6 @@ import com.google.common.collect.ImmutableMap;
 public class DynSemRunner {
     public static final String SPOOFAXPATH = "SPOOFAXPATH";
 
-    public static final String NABL2_CONTEXT_PROP = "NaBL2Context";
-
     private static final ILogger logger = LoggerUtils.logger(DynSemRunner.class);
 
     private final Spoofax S;
@@ -135,7 +133,7 @@ public class DynSemRunner {
             if ( context instanceof ISpoofaxScopeGraphContext) {
                     ISpoofaxScopeGraphContext<?> scopeGraphContext = (ISpoofaxScopeGraphContext<?>) context;
                     scopeGraphContext.unit(file.getName().getURI()).solution().ifPresent(solution -> {
-                        propBuilder.put(NABL2_CONTEXT_PROP, new NaBL2Context(solution, S.termFactoryService.getGeneric()));
+                        propBuilder.put(NaBL2Context.class.getName(), new NaBL2Context(solution, S.termFactoryService.getGeneric()));
                     });
             }
             props = propBuilder.build();
