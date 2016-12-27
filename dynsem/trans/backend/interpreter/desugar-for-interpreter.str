@@ -24,6 +24,7 @@ rules
     ; desugar-rec-tco
     ; desugar-unquote-strings
     ; desugar-nmatch-neq
+    ; desugar-concat-all
     ; resugar-lists-tuples
 
 rules
@@ -296,5 +297,19 @@ rules /* resugar list construction */
       ArrowType(_, out-ty) := <get-applicable-arrowdef(flip(type-coerce-direct(fail))); lookup-prop(|Type())> (arr-def*, in-ty);
       tuple-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> out-ty
 
+rules /* desugaring concat */
 
+  desugar-concat-all = alltd(desugar-concat)
 
+  desugar-concat:
+    Concat(t1, t2) -> StrConcat(<desugar-concat-all> t1, <desugar-concat-all> t2)
+    where
+      StringType() := <type-of> t1;
+      StringType() := <type-of> t2
+
+  desugar-concat:
+    Concat(t1, t2) -> ListConcat(<desugar-concat-all> t1, <desugar-concat-all> t2)
+    where
+      ListType(ty1) := <type-of> t1;
+      ListType(ty2) := <type-of> t2;
+      <eq> (ty1, ty2)

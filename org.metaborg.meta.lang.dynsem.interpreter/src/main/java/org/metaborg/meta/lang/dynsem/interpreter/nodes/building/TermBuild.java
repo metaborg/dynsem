@@ -111,11 +111,17 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "String", 1)) {
 			return StringLiteralTermBuild.create(t, fd);
 		}
+		if(Tools.hasConstructor(t, "StrConcat", 2)){
+			return StringConcatTermBuild.create(t, fd);
+		}
 		if (Tools.hasConstructor(t, "ListSource", 2)) {
 			return create(Tools.applAt(t, 0), fd);
 		}
 		if (Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3)) {
 			return ListBuild.create(t, fd);
+		}
+		if(Tools.hasConstructor(t, "ListConcat", 2)){
+			return ListConcatTermBuildNodeGen.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "TypedTuple", 2)) {
 			return TupleBuild.create(t, fd);

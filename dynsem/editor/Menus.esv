@@ -2,10 +2,10 @@ module Menus
 
 menus
   
-  menu: "Syntax"
-    action: "Show AST" = debug-show-aterm (source)
+  menu: "Syntax" (meta)
+    action: "Show AST" = debug-show-aterm (openeditor) (source) (meta)
   
-  menu: "Analysis"
+  menu: "Analysis" (meta)
     action: "Show analyzed" = debug-show-analyzed (source) (openeditor) (meta)
     action: "Show desugared" = debug-show-desugared (source) (openeditor) (meta)
   
@@ -20,4 +20,5 @@ menus
     
   menu: "Interpreter"
     action: "Generate interpreter" = ds-to-interp-editor (source)
-    action: "Spec" = ds-to-interp-specification-editor (openeditor) (source) (meta)
+    action: "Generate spec only" = ds-to-interp-specification-editor (source) (meta)
+    action: "Spec" = ds-to-specification-editor (openeditor) (source) (meta)

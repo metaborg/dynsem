@@ -202,6 +202,12 @@ rules
   type-check-build-str:
     String(_) -> StringType()
   
+  type-check-build-str:
+    Concat(t1, t2) -> StringType()
+    where
+      StringType() := <type-check-build> t1;
+      StringType() := <type-check-build> t2
+  
   type-check-build-bool:
     True() -> BoolType()
   
@@ -245,6 +251,12 @@ rules
       ListType(e-ty) := <type-check-build> l;
       IntType() := <type-check-build> idx
   
+  type-check-build-list:
+    Concat(t1, t2) -> <type-coerce-sym(type-coerce-full(fail))> (ty1, ty2)
+    where
+      ty1@ListType(_) := <type-check-build> t1;
+      ty2@ListType(_) := <type-check-build> t2
+  
   type-check-build-tuple:
     Tuple(t*) -> TupleType(<map(type-check-build)> t*)
 
@@ -260,8 +272,8 @@ rules
   type-check-build-map:
     MapExtend(map1, map2) -> <type-coerce-sym(type-coerce-full(fail))> (map1-ty, map2-ty)
     where
-      map1-ty := <type-check-build> map1;
-      map2-ty := <type-check-build> map2
+      map1-ty@MapType(_, _) := <type-check-build; try(get-alias-base)> map1;
+      map2-ty@MapType(_, _) := <type-check-build; try(get-alias-base)> map2
 
   type-check-build-map:
     DeAssoc(m-t, k-t) -> val-ty

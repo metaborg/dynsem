@@ -54,29 +54,34 @@ public interface IListTerm<T> extends ITerm {
 	public IListTerm<T> drop(int numElems);
 
 	/**
-	 * Append an element to this list
+	 * Prepend an element to this list
 	 * 
 	 * @param elem
 	 *            the element to be appended
-	 * @return a new {@link IListTerm} containing all elements of this {@link IListTerm} and the given <code>elem</code>
-	 *         at the last position.
+	 * @return a new {@link IListTerm} containing the new element followed by the elements in of this {@link IListTerm}
 	 */
 	public IListTerm<T> add(T elem);
 
 	/**
-	 * Batch append multiple elements to this {@link IListTerm} to obtain a new list
+	 * Batch prepend multiple elements to this {@link IListTerm} to obtain a new list
 	 * 
 	 * @param elems
 	 *            an array of elements to be appended
-	 * @return a new {@link IListTerm} containing the elements of this {@link IListTerm} followed by the elements in the
-	 *         <code>elems</code> array.
+	 * @return a new {@link IListTerm} containing the prepended elements from <code>elems</code> followed by the elements of this {@link IListTerm}
 	 */
 	public IListTerm<T> addAll(T[] elems);
 
+	
+	
 	/**
 	 * 
 	 * @return an iterator for this {@link IListTerm}
 	 */
 	public Iterator<T> iterator();
+	
+	/**
+	 * @return an array containing all of the elements in this list
+	 */
+	public T[] toArray();
 
 }
