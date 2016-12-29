@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 import java.util.Optional;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.nabl2.interpreter.InterpreterTerms;
 import org.metaborg.meta.nabl2.stratego.StrategoTermIndex;
 import org.metaborg.meta.nabl2.terms.ITerm;
 import org.metaborg.meta.nabl2.terms.generic.GenericTerms;
@@ -26,7 +27,7 @@ public abstract class NaBL2TermBuild extends TermBuild {
     }
 
     protected IStrategoTerm getSolution() {
-        return context.getInterpreterTerms().context(context.getSolution());
+        return context.getStrategoTerms().toStratego(InterpreterTerms.context(context.getSolution()));
     }
 
     protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
