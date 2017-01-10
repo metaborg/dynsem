@@ -1,7 +1,7 @@
 ---
 id: org.metaborg:dynsem:${metaborgVersion}
 name: ds
-metaborgVersion: 2.1.0-SNAPSHOT
+metaborgVersion: 2.1.0
 dependencies:
   compile:
   - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
