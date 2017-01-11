@@ -18,8 +18,10 @@ import org.metaborg.core.messages.IMessagePrinter;
 import org.metaborg.core.messages.StreamMessagePrinter;
 import org.metaborg.core.project.IProject;
 import org.metaborg.core.project.IProjectService;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2Context;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.spoofax.core.Spoofax;
+import org.metaborg.spoofax.core.context.scopegraph.ISpoofaxScopeGraphContext;
 import org.metaborg.spoofax.core.unit.ISpoofaxAnalyzeUnit;
 import org.metaborg.spoofax.core.unit.ISpoofaxInputUnit;
 import org.metaborg.spoofax.core.unit.ISpoofaxParseUnit;
@@ -27,16 +29,11 @@ import org.metaborg.util.concurrent.IClosableLock;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.interpreter.terms.ITermFactory;
 
 import com.google.common.collect.ImmutableMap;
 
 public class DynSemRunner {
     public static final String SPOOFAXPATH = "SPOOFAXPATH";
-
-    public static final String SPOOFAX_CONTEXT_PROP = "SpoofaxContext";
-    public static final String TYPE_METADATA = "TypeMetadata";
-    public static final String PARAMS_METADATA = "PARAMSMetadata";
 
     private static final ILogger logger = LoggerUtils.logger(DynSemRunner.class);
 
@@ -101,7 +98,7 @@ public class DynSemRunner {
     public Object run(FileObject file, InputStream in, OutputStream out, OutputStream err)
             throws MetaborgException {
         IStrategoTerm program;
-        IContext context;
+        ImmutableMap<String, Object> props;
         try {
             IProjectService projectService = S.injector.getInstance(IProjectService.class);
             IProject project = projectService.get(file);
@@ -120,7 +117,7 @@ public class DynSemRunner {
                 throw new MetaborgException("Parsing returned errors.");
             }
 
-            context = S.contextService.get(file, project, language);
+            IContext context = S.contextService.get(file, project, language);
             ISpoofaxAnalyzeUnit analyzed;
             try(IClosableLock lock = context.write()) {
                 analyzed = S.analysisService.analyze(parsed, context).result();
@@ -132,21 +129,20 @@ public class DynSemRunner {
             if(!analyzed.success()) {
                 throw new MetaborgException("Analysis returned errors.");
             }
+            ImmutableMap.Builder<String,Object> propBuilder = ImmutableMap.builder();
+            if ( context instanceof ISpoofaxScopeGraphContext) {
+                    ISpoofaxScopeGraphContext<?> scopeGraphContext = (ISpoofaxScopeGraphContext<?>) context;
+                    scopeGraphContext.unit(file.getName().getURI()).solution().ifPresent(solution -> {
+                        propBuilder.put(NaBL2Context.class.getName(), new NaBL2Context(solution, S.termFactoryService.getGeneric()));
+                    });
+            }
+            props = propBuilder.build();
             program = analyzed.ast();
         } catch (IOException e) {
             throw new MetaborgException("Analysis failed.", e);
         }
         try {
-            ITermFactory factory = S.termFactoryService.getGeneric();
-            IStrategoTerm Type = factory.makeAppl(factory.makeConstructor("Type", 0));
-            IStrategoTerm Params = factory.makeAppl(factory.makeConstructor("Params", 0));
-
-            Callable<RuleResult> runner = entryPoint.getCallable(program, in, out, err,
-                    ImmutableMap.<String,Object>of(
-                            SPOOFAX_CONTEXT_PROP, context,
-                            PARAMS_METADATA, Params,
-                            TYPE_METADATA, Type
-                    ));
+            Callable<RuleResult> runner = entryPoint.getCallable(program, in, out, err, props);
             RuleResult result = runner.call();
             return result.result;
         } catch (Exception e) {
@@ -160,5 +156,5 @@ public class DynSemRunner {
             printer.print(message, false);
         }
     }
-
+    
 }
