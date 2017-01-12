@@ -41,6 +41,7 @@ context-free syntax // semantic components
       <{CompDecl "\n"}*>>
   
   CompDecl.CompDecl = [[ID] : [Type]]
+  CompDecl.CompDeclDefault = [[ID] : [Type] = [Term]]
 
 context-free syntax // constructor declarations
 

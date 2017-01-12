@@ -98,6 +98,13 @@ rules /* store signatures */
       <store-def(|Components())> x => comp-def;
       <rw-type; store-prop(|Type(), comp-def)> s
   
+  store-semantic-component:
+    d@CompDeclDefault(x, s, t) -> d
+    with
+      <store-def(|Components())> x => comp-def;
+      <rw-type; store-prop(|Type(), comp-def)> s;
+      <store-prop(|DefaultValue(), comp-def)> t
+  
   store-native-operators = NativeOperators(map(store-native-operator))
   
   store-native-operator:

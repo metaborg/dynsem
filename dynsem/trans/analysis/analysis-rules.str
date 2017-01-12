@@ -109,7 +109,10 @@ rules /* store variables */
       |};
       <map(labelcomp-to-type-term-pair; type-check-match-wrap)> [r*, sc*];
       <map(type-check-premise-top)> p*;
-      <type-check-build-expect(|bu-ty)> rhs;
+      switch !rhs
+        case ?TermPlaceholder(): id
+        otherwise: <type-check-build-expect(|bu-ty)> rhs
+      end;
       <map(labelcomp-to-type-term-pair; type-check-build-expect-wrap)> tc*
 
   labelcomp-to-type-term-pair:
