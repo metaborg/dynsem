@@ -38,7 +38,7 @@ rules
   explication-explicate-module =
     ?Module(_, _);
     m-in-analysis(
-      explication-explicate
+      explication-api-explicate
       ; unrename-all
       ); unmark-vars
 
@@ -87,14 +87,31 @@ strategies
   
 rules
 
-  explication-explicate =
+  explication-api-explicate(s) = 
     where(explication-api-init-storage(?comps-table, ?imps-table));
     where(explication-gather-data-arrowdecl(|comps-table, imps-table));
     where(alltd(explication-gather-data-rule(|comps-table, imps-table)));
     where(explication-compute-explicated-arrows(|comps-table, imps-table));
-    explication-explicate-arrow-decls-module(|comps-table, imps-table);
-    explication-explicate-rules-module(|comps-table, imps-table);
+    s(|comps-table, imps-table);
     where(explication-api-destroy-storage(|comps-table, imps-table))
+
+  explication-api-explicate(pre, post) =
+    let
+      work(|comps-table, imps-table) =
+        pre(|comps-table, imps-table);
+        explication-explicate-arrow-decls-module(|comps-table, imps-table);
+        explication-explicate-rules-module(|comps-table, imps-table);
+        post(|comps-table, imps-table)
+    in
+      explication-api-explicate(work)
+    end  
+  
+  explication-api-explicate =
+    let
+      noop(|comps-table, imps-table) = id
+    in
+      explication-api-explicate(noop, noop)
+    end
   
   explication-gather-data-arrowdecl(|comps-table, imps-table) =
       lookup-def-all(|Arrows());
