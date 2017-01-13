@@ -1,0 +1,51 @@
+module ds2ds/expand-defaultcomponents
+
+imports
+  signatures/-
+  ds2ds/explication
+  analysis/lib-analysis
+  analysis/constructors
+  analysis/main
+  
+  
+rules
+
+  expand-defaultcomponents =
+    ?Module(_, _);
+    m-in-analysis(
+      explication-api-explicate(
+        expand-defaultcomponents-module
+      )
+    )
+
+  expand-defaultcomponents-module:
+    mod@Module(_, _) -> mod'
+    where
+      // get exceptional components
+      exncomps := <expand-defaultcomponents-get-exceptionalcomps>;
+      mod' := <expand-exncomponents-module> (mod, exncomps)  
+      
+  expand-defaultcomponents-get-exceptionalcomps =
+    lookup-def-all(|Components());
+    filter(has-prop(|DefaultValue()))
+  
+  expand-exncomponents-module:
+    (mod@Module(_, _), []) -> mod
+  
+  expand-exncomponents-module:
+    (mod@Module(_, _), [c | cs]) -> <expand-exncomponents-module> (mod', cs)
+    where
+      mod' := <expand-exncomponent(|c)> mod
+  
+  
+  
+  expand-exncomponent(|comp):
+    mod@Module(_, _) -> <fail>
+    where
+      
+
+
+  
+
+
+

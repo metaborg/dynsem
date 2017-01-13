@@ -63,7 +63,7 @@ rules /* store variables */
       lhs-ty := <rulelhs-get-type> lhs;
       if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
       then
-        if arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+        if arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-name, lhs-ty)
         then
           <store-rule> (<lookup-prop(|Type())> arrow-def, r)
         else
