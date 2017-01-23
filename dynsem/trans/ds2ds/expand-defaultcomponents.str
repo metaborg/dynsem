@@ -2,50 +2,111 @@ module ds2ds/expand-defaultcomponents
 
 imports
   signatures/-
+  lib-ds
   ds2ds/explication
   analysis/lib-analysis
   analysis/constructors
   analysis/main
-  
+  analysis/query
+  analysis/analysis-rules
+  analysis/rename
+  analysis/mark-references
   
 rules
 
-  expand-defaultcomponents =
+  expand-defaultcomponents-module-top =
     ?Module(_, _);
     m-in-analysis(
       explication-api-explicate(
         expand-defaultcomponents-module
-      )
-    )
+      );
+      unrename-all
+    );
+    unmark-vars
 
-  expand-defaultcomponents-module:
-    mod@Module(_, _) -> mod'
+  expand-defaultcomponents-module(|comps-table, imps-table):
+    mod@Module(_, _) -> <expand-exncomponents-module(|comps-table, imps-table)> (mod, exncomps)
     where
-      // get exceptional components
-      exncomps := <expand-defaultcomponents-get-exceptionalcomps>;
-      mod' := <expand-exncomponents-module> (mod, exncomps)  
+      exncomps := <expand-defaultcomponents-get-exceptionalcomps>
       
   expand-defaultcomponents-get-exceptionalcomps =
     lookup-def-all(|Components());
     filter(has-prop(|DefaultValue()))
   
-  expand-exncomponents-module:
+  expand-exncomponents-module(|comps-table, imps-table):
     (mod@Module(_, _), []) -> mod
   
-  expand-exncomponents-module:
-    (mod@Module(_, _), [c | cs]) -> <expand-exncomponents-module> (mod', cs)
+  expand-exncomponents-module(|comps-table, imps-table):
+    (mod@Module(_, _), [c | cs]) -> <expand-exncomponents-module(|comps-table, imps-table)> (mod', cs)
     where
-      mod' := <expand-exncomponent(|c)> mod
-  
-  
-  
-  expand-exncomponent(|comp):
-    mod@Module(_, _) -> <fail>
+      mod' := <expand-exncomponent(|c, comps-table, imps-table)> mod
+    
+  expand-exncomponent(|comp, comps-table, imps-table):
+    mod@Module(_, _) -> <alltd(expand-exncomponent-rule(|comp, comps-table, imps-table))> mod
+
+  expand-exncomponent-rule(|comp-def, comps-table, imps-table):
+    Rule(prem*, infer, Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) ->
+      Rule(prem'*, infer, Relation(reads, Source(lhs, [sc*, sc-comp]), arr, Target(rhs, tc'*)))
+    where opt-with(
+      arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
+    )
     where
-      
+      comp@Comp(_, RW()) := <explication-api-has-component(|comps-table, imps-table)> (arrow-def, comp-def)
+    where opt-with(
+      compgen-table := <new-hashtable>;
+      sc-comp := <explication-api-compgen-intro(|compgen-table)> comp-def;
+      prem'* := <expand-exncomponent-premises(|comp-def, comps-table, imps-table, arrow-def, compgen-table)> prem*;
+      tc'* := <expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def)> tc*;
+      <hashtable-destroy> compgen-table
+    )
 
-
+  expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table):
+    [] -> []
+    
+  expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table):
+    [prem | prems] -> [prem | prems']
+    where
+      <not(?Formula(Relation(_, _, _, _)))> prem
+    where
+      prems' := <expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table)> prems
   
+  expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table):
+    [prem@Formula(Relation(_, Source(lhs, _), arr, _)) | prems] -> [prem | prems']
+    where opt-with(
+      arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
+    )
+    where
+      <not(explication-api-has-component(|comps-table, imps-table))> (arrow-def, comp-def);
+      prems' := <expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table)> prems
+  
+  expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table):
+    [Formula(Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) | prems] ->
+      [Formula(Relation(reads, Source(lhs, sc'*), arr, Target(rhs, [tc*, tc-comp]))) | prems']
+    where opt-with(
+      arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
+    )
+    where
+      <explication-api-has-component(|comps-table, imps-table)> (arrow-def, comp-def);
+      opt-with(
+        sc'* := <expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def)> sc*;
+        tc-name := <explication-api-compgen-intro-gen> comp-def;
+        tc-comp := <explication-api-compgen-intro-record(|compgen-table)> (comp-def, tc-name)
+      )
+    where
+      prems' := <expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table)> prems
 
+  expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def):
+    labelcomp* -> [labelcomp*, extra-labelcomp]
+    where opt-with(
+      extra-labelcomp := <explication-api-compgen-use(|compgen-table, RW())> comp-def
+    )
 
+//  expand-exncomponent-intro-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def):
+//    labelcomp* -> [labelcomp*, extra-labelcomp]
+//    where opt-with(
+//      // used components
+//      comp-use* := <map(explication-api-compgen-register(|compgen-table, RW()))> labelcomp*;
+//      extra-labelcomp := <explication-api-compgen-intro(|compgen-table)> comp-def
+//    )
+  
 

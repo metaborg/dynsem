@@ -68,6 +68,12 @@ strategies
   explication-api-get-components(|comps, imps):
     arrow-def -> <hashtable-get(|arrow-def)> comps
   
+  explication-api-has-component(|comps, imps):
+    (arrow-def, comp-def) -> comp'
+    where
+      <explication-api-get-components(|comps, imps)> arrow-def;
+      fetch-elem(?Comp(comp-def, _); ?comp')
+  
   explication-api-add-components(|comps, imps):
     (arrow-def, new-compo*) -> compo*
     where
@@ -260,7 +266,7 @@ rules
       case-compgen-table* := <map(explication-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table))> case*;
       // introduce fresh variables for all the RW components
       all-rw* := <explication-api-get-components(|comps-table, imps-table); explication-util-filter-transform-compdefs(explication-util-comp-to-compdef|RW())> rule-arrow-def;
-      <map(explication-api-compgen-intro(|compgen-table, RW()))> all-rw*;
+      <map(explication-api-compgen-intro(|compgen-table))> all-rw*;
       case'* := <map(explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table))> case-compgen-table*
     )
   
@@ -320,7 +326,7 @@ rules
       // thus missing components
       comp-extra* := <diff> (comp-def*, comp-use*);
       // register and convert to labelcomp
-      extra-labelcomp* := <map(explication-api-compgen-intro(|compgen-table, kind))> comp-extra*
+      extra-labelcomp* := <map(explication-api-compgen-intro(|compgen-table))> comp-extra*
     )
   
   explication-util-comp-to-compdef = ?Comp(<id>, _)
@@ -346,14 +352,23 @@ rules
       <hashtable-put(|comp-def, v)> compgen-table
     )
   
-  explication-api-compgen-intro(|compgen-table, kind):
-    comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(v))
+  explication-api-compgen-intro(|compgen-table):
+    comp-def -> label-comp
     where opt-with(
-      v := <newname> $[_lifted_[<lookup-prop(|Type()); derw-type; get-sort-name> comp-def]];
+      v := <explication-api-compgen-intro-gen> comp-def;
+      label-comp := <explication-api-compgen-intro-record(|compgen-table)> (comp-def, v)
+    )
+
+  explication-api-compgen-intro-gen:
+    comp-def -> v
+    where
+      v := <newname> $[_lifted_[<lookup-prop(|Type()); derw-type; get-sort-name> comp-def]]
+  
+  explication-api-compgen-intro-record(|compgen-table):
+    (comp-def, v) -> LabelComp(Label(<def-get-name> comp-def), Var(v))
+    where opt-with(
       <hashtable-put(|comp-def, v)> compgen-table
     )
   
   explication-api-compgen-use(|compgen-table, kind):
     comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(<hashtable-get(|comp-def)> compgen-table))
-  
-  opt-with(s) = s // with(s)

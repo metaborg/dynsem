@@ -69,3 +69,5 @@ rules // utils
                         ]
       ; log(|Info(),<id>)
       )
+  
+  opt-with(s) = with(s)
