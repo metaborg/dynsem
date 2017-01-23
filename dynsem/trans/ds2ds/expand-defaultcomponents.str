@@ -55,33 +55,34 @@ rules
     where opt-with(
       compgen-table := <new-hashtable>;
       sc-comp := <explication-api-compgen-intro(|compgen-table)> comp-def;
-      prem'* := <expand-exncomponent-premises(|comp-def, comps-table, imps-table, arrow-def, compgen-table)> prem*;
+      prem'* := <expand-exncomponent-premises(|comp-def, rhs, comps-table, imps-table, arrow-def, compgen-table)> prem*;
       tc'* := <expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def)> tc*;
       <hashtable-destroy> compgen-table
     )
 
-  expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table):
+  expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
     [] -> []
     
-  expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table):
+  expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
     [prem | prems] -> [prem | prems']
     where
-      <not(?Formula(Relation(_, _, _, _)))> prem
+      <not(?Formula(Relation(_, _, _, _)))> prem;
+      <not(?CaseMatch(_, _))> prem
     where
-      prems' := <expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table)> prems
+      prems' := <expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table)> prems
   
-  expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table):
+  expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
     [prem@Formula(Relation(_, Source(lhs, _), arr, _)) | prems] -> [prem | prems']
     where opt-with(
       arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
     )
     where
       <not(explication-api-has-component(|comps-table, imps-table))> (arrow-def, comp-def);
-      prems' := <expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table)> prems
+      prems' := <expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table)> prems
   
-  expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table):
-    [Formula(Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) | prems] ->
-      [Formula(Relation(reads, Source(lhs, sc'*), arr, Target(rhs, [tc*, tc-comp]))) | prems']
+  expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
+    [Formula(Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) | prems1] ->
+      [Formula(Relation(reads, Source(lhs, sc'*), arr, Target(rhs, [tc*, tc-comp]))) | prems3]
     where opt-with(
       arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
     )
@@ -90,10 +91,31 @@ rules
       opt-with(
         sc'* := <expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def)> sc*;
         tc-name := <explication-api-compgen-intro-gen> comp-def;
-        tc-comp := <explication-api-compgen-intro-record(|compgen-table)> (comp-def, tc-name)
+        tc-comp := <explication-api-compgen-intro-record(|compgen-table)> (comp-def, tc-name);
+        prems2 := <expand-exncomponent-guard-premises(|comp-def, tc-name, rout)> prems1
       )
     where
-      prems' := <expand-exncomponent-premises(|comp-def, comps-table, imps-table, rule-arrow-def, compgen-table)> prems
+      prems3 := <expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table)> prems2
+
+  expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
+    [CaseMatch(tb, case*) | prems1] -> [CaseMatch(tb, case'*) | prems2]
+    where opt-with(
+      // explicate the cases in forked compgen-tables returning [(case', compgen-table-fork)] 
+      case-compgen-table* := <map(expand-exncomponent-premises-fork(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table))> case*;
+      
+      // introduce fresh variables for all the RW components
+      all-rw* := <explication-api-get-components(|comps-table, imps-table); explication-util-filter-transform-compdefs(explication-util-comp-to-compdef|RW())> rule-arrow-def;
+      <map(explication-api-compgen-intro(|compgen-table))> all-rw*;
+      case'* := <map(explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table))> case-compgen-table*;
+      
+      prems2 := <expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table)> prems1
+    )
+
+  expand-exncomponent-premises-fork(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
+    t -> (<expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table-fork)> t, compgen-table-fork)
+    where opt-with(
+      compgen-table-fork := <hashtable-copy> compgen-table
+    )
 
   expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def):
     labelcomp* -> [labelcomp*, extra-labelcomp]
@@ -101,12 +123,10 @@ rules
       extra-labelcomp := <explication-api-compgen-use(|compgen-table, RW())> comp-def
     )
 
-//  expand-exncomponent-intro-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def):
-//    labelcomp* -> [labelcomp*, extra-labelcomp]
-//    where opt-with(
-//      // used components
-//      comp-use* := <map(explication-api-compgen-register(|compgen-table, RW()))> labelcomp*;
-//      extra-labelcomp := <explication-api-compgen-intro(|compgen-table)> comp-def
-//    )
-  
+  expand-exncomponent-guard-premises(|comp-def, tc-name, rout):
+    prems -> [CaseMatch(VarRef(tc-name), [case-ok, case-nok])]
+    where
+      default-term := <lookup-prop(|DefaultValue())> comp-def;
+      case-ok := CasePattern(default-term, prems);
+      case-nok := CaseOtherwise([Formula(Match(TermPlaceholder(), rout))])
 
