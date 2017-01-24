@@ -33,9 +33,9 @@ strategies
       ; expand-implicits-module
       ; factorize-module
       ; expand-defaultcomponents-module-top
-//      ; explication-explicate-module
-//      ; copy-propagation-module
-//      ; defactorize-module
-//      ; insert-wildcards-module
-//      ; prettify-vars-module
+      ; explication-explicate-module
+      ; copy-propagation-module
+      ; defactorize-module
+      ; insert-wildcards-module
+      ; prettify-vars-module
     |project-path)
