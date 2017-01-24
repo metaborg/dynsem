@@ -48,16 +48,25 @@ rules
     Rule(prem*, infer, Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Rule(prem'*, infer, Relation(reads, Source(lhs, [sc*, sc-comp]), arr, Target(rhs, tc'*)))
     where opt-with(
+      debug(!1);
       arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
+      ;debug(!2)
     )
     where
+      debug(!3);
       comp@Comp(_, RW()) := <explication-api-has-component(|comps-table, imps-table)> (arrow-def, comp-def)
     where opt-with(
+      debug(!4);
       compgen-table := <new-hashtable>;
+      debug(!5);
       sc-comp := <explication-api-compgen-intro(|compgen-table)> comp-def;
+      debug(!6);
       prem'* := <expand-exncomponent-premises(|comp-def, rhs, comps-table, imps-table, arrow-def, compgen-table)> prem*;
+      debug(!7);
       tc'* := <expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def)> tc*;
+      debug(!8);
       <hashtable-destroy> compgen-table
+      ;debug(!9)
     )
 
   expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
@@ -100,16 +109,17 @@ rules
   expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
     [CaseMatch(tb, case*) | prems1] -> [CaseMatch(tb, case'*) | prems2]
     where opt-with(
-      // explicate the cases in forked compgen-tables returning [(case', compgen-table-fork)] 
       case-compgen-table* := <map(expand-exncomponent-premises-fork(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table))> case*;
-      
-      // introduce fresh variables for all the RW components
-      all-rw* := <explication-api-get-components(|comps-table, imps-table); explication-util-filter-transform-compdefs(explication-util-comp-to-compdef|RW())> rule-arrow-def;
-      <map(explication-api-compgen-intro(|compgen-table))> all-rw*;
-      case'* := <map(explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table))> case-compgen-table*;
-      
+      <map(explication-api-compgen-intro(|compgen-table))> [comp-def];
+      case'* := <map(explicate-2-introduce-synonyms-in-case(|[comp-def], compgen-table))> case-compgen-table*;
       prems2 := <expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table)> prems1
     )
+
+  expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
+    CasePattern(pat, prems) -> CasePattern(pat, <expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table)> prems)
+
+  expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
+    CaseOtherwise(prems) -> CaseOtherwise(<expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table)> prems)
 
   expand-exncomponent-premises-fork(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
     t -> (<expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table-fork)> t, compgen-table-fork)
