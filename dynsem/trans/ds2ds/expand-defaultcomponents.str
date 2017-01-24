@@ -51,6 +51,7 @@ rules
       arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
     )
     where
+      <not(fetch-elem(?LabelComp(Label(<id>), _); lookup-def(|Components()); ?comp-def))> [sc*, tc*];
       comp@Comp(_, RW()) := <explication-api-has-component(|comps-table, imps-table)> (arrow-def, comp-def)
     where opt-with(
       compgen-table := <new-hashtable>;
