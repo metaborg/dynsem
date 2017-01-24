@@ -45,8 +45,8 @@ rules
     mod@Module(_, _) -> <alltd(expand-exncomponent-rule(|comp, comps-table, imps-table))> mod
 
   expand-exncomponent-rule(|comp-def, comps-table, imps-table):
-    Rule(prem*, infer, Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) ->
-      Rule(prem'*, infer, Relation(reads, Source(lhs, [sc*, sc-comp]), arr, Target(rhs, tc'*)))
+    Rule(prems1, infer, Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) ->
+      Rule(prems3, infer, Relation(reads, Source(lhs, [sc*, tc-comp]), arr, Target(rhs, tc'*)))
     where opt-with(
       arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
     )
@@ -54,8 +54,10 @@ rules
       comp@Comp(_, RW()) := <explication-api-has-component(|comps-table, imps-table)> (arrow-def, comp-def)
     where opt-with(
       compgen-table := <new-hashtable>;
-      sc-comp := <explication-api-compgen-intro(|compgen-table)> comp-def;
-      prem'* := <expand-exncomponent-premises(|comp-def, rhs, comps-table, imps-table, arrow-def, compgen-table)> prem*;
+      tc-name := <explication-api-compgen-intro-gen> comp-def;
+      tc-comp := <explication-api-compgen-intro-record(|compgen-table)> (comp-def, tc-name);
+      prems2 := <expand-exncomponent-guard-premises(|comp-def, tc-name, rhs)> prems1;
+      prems3 := <expand-exncomponent-premises(|comp-def, rhs, comps-table, imps-table, arrow-def, compgen-table)> prems2;
       tc'* := <expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def)> tc*;
       <hashtable-destroy> compgen-table
     )
