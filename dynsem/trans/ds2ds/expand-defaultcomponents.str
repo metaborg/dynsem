@@ -48,25 +48,16 @@ rules
     Rule(prem*, infer, Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Rule(prem'*, infer, Relation(reads, Source(lhs, [sc*, sc-comp]), arr, Target(rhs, tc'*)))
     where opt-with(
-      debug(!1);
       arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
-      ;debug(!2)
     )
     where
-      debug(!3);
       comp@Comp(_, RW()) := <explication-api-has-component(|comps-table, imps-table)> (arrow-def, comp-def)
     where opt-with(
-      debug(!4);
       compgen-table := <new-hashtable>;
-      debug(!5);
       sc-comp := <explication-api-compgen-intro(|compgen-table)> comp-def;
-      debug(!6);
       prem'* := <expand-exncomponent-premises(|comp-def, rhs, comps-table, imps-table, arrow-def, compgen-table)> prem*;
-      debug(!7);
       tc'* := <expand-exncomponent-use-comp(|comp-def, comps-table, imps-table, compgen-table, arrow-def)> tc*;
-      debug(!8);
       <hashtable-destroy> compgen-table
-      ;debug(!9)
     )
 
   expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
