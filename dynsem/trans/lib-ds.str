@@ -70,4 +70,33 @@ rules // utils
       ; log(|Info(),<id>)
       )
   
+  log-timed-cummulate-scope(s) =
+    {| CummulatedTimes:
+      s
+     |}
+  
+  log-timed-cummulate-show =
+    where( 
+      all-keys-CummulatedTimes;
+      map(\ k -> $[[k] => [<CummulatedTimes> k]] \);
+      separate-by(|"\n");
+      concat-strings;
+      debug(!"Measured times: \n")
+    )
+  
+  log-timed-cummulate(s|cat) =
+    where(times => starttime)
+    ; s
+    ; where(
+        time-taken := <diff-times; self-children-user-time; ticks-to-seconds> (<times>, starttime);
+        if prev-time := <CummulatedTimes> cat
+        then
+          sum-time := <add> (prev-time, time-taken);
+          rules(CummulatedTimes: cat -> sum-time)
+        else
+          sum-time := time-taken;
+          rules(CummulatedTimes: cat -> sum-time)    
+        end
+    )
+  
   opt-with(s) = with(s)
