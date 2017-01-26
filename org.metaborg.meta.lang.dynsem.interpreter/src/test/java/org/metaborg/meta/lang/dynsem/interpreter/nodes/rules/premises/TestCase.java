@@ -1,8 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -12,16 +12,10 @@ import org.junit.Test;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.TrueLiteralTermMatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.TrueLiteralTermMatchPatternNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.WldMatchPattern;
-import static org.mockito.Mockito.*;
-import com.oracle.truffle.api.CallTarget;
-import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.frame.FrameDescriptor;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.CaseMatchPremise.CaseMatchFailure;
+
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.Node;
-import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class TestCase {
@@ -68,7 +62,7 @@ public class TestCase {
 		verify(p).execute(f);
 	}
 
-	@Test(expected = PatternMatchFailure.class)
+	@Test(expected = CaseMatchFailure.class)
 	public void testExecuteCaseMatchFailure() {
 		VirtualFrame f = mock(VirtualFrame.class);
 		Premise p = mock(Premise.class);
@@ -76,9 +70,9 @@ public class TestCase {
 		Case c = new Case.CasePattern(src, TrueLiteralTermMatchPatternNodeGen.create(src), new Premise[] { p });
 		try {
 			c.execute(f, false);
-		} catch (PatternMatchFailure pmfx) {
+		} catch (CaseMatchFailure cmfx) {
 			verify(p, never()).execute(f);
-			throw pmfx;
+			throw cmfx;
 		}
 	}
 
