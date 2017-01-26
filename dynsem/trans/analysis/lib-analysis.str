@@ -6,7 +6,7 @@ imports
 
 rules
 	
-	new-analysis-scope(s) = {| Declared, Properties, Messages: s |}
+	new-analysis-scope(s) = {| AllDeclarations, Declared, Properties, Messages: s |}
 
   in-project-path(s|project-path) = {| OptProjectPath:
     rules(OptProjectPath: _ -> project-path);
@@ -26,7 +26,13 @@ rules // storing and looking up
     name -> defi
     where
       defi := <new-def> (namespace, name);
-      rules(Declared:+ (namespace, name) -> defi)
+      rules(Declared:+ (namespace, name) -> defi);
+      if old-defs := <AllDeclarations> namespace
+      then
+        rules(AllDeclarations: namespace -> [defi | old-defs]) 
+      else
+        rules(AllDeclarations: namespace -> [defi])
+      end
   
   lookup-def(|namespace):
     name -> <Declared> (namespace, name)
@@ -34,7 +40,8 @@ rules // storing and looking up
   lookup-defs(|namespace):
     name -> <bagof-Declared> (namespace, name)
     
-  lookup-def-all(|namespace) = all-keys-Declared; filter(?(namespace, _)); mapconcat(bagof-Declared)
+  lookup-def-all(|namespace) =
+    <AllDeclarations> namespace
    
   store-prop(|proptype, declaration):
     propval -> propval
