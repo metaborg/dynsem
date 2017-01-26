@@ -82,7 +82,7 @@ rules /* variable scheme queries */
     Label(x) -> x
 
   get-all-varschemes =
-    <concat> [<get-all-component-defs>, <get-all-varscheme-defs>]    
+    <concat> [<get-all-component-defs>, <get-all-varscheme-defs>]
 
   get-all-component-defs = lookup-def-all(|Components())
   
@@ -116,18 +116,9 @@ rules /* variable scheme queries */
     where
       scheme-name := <def-get-name> scheme-def
     where
-      used-word-chars := <explode-string> used-word;
-      scheme-word-chars := <explode-string> scheme-name;
-      used-word-suffix-chars := <left-match> (used-word-chars, scheme-word-chars);
-      if not(!used-word-suffix-chars => [])
-      then
-	      if not(<Hd> used-word-suffix-chars => '_')
-	      then
-	        <filter(not(?'\''); not(MkSingleton; dec-chars-to-int))> used-word-suffix-chars => []
-	      end
-	    end
+      <native-name-matches-varscheme(|scheme-name)> used-word
 
-
+  external native-name-matches-varscheme(|scheme-name)
 
 
 
