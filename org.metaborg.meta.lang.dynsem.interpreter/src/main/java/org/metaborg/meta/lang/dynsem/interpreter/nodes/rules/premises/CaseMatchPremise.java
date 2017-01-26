@@ -11,6 +11,7 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ControlFlowException;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
@@ -42,10 +43,10 @@ public class CaseMatchPremise extends Premise {
 			try {
 				cases[i].execute(frame, t);
 				break;
-			} catch (PatternMatchFailure pmfx) {
+			} catch (CaseMatchFailure cfx) {
 				// the current case has failed, if it was the last case re-throw the exception
 				if (i == cases.length - 1) {
-					throw pmfx;
+					throw PatternMatchFailure.INSTANCE;
 				}
 			}
 		}
@@ -70,6 +71,19 @@ public class CaseMatchPremise extends Premise {
 		}
 
 		return new CaseMatchPremise(SourceSectionUtil.fromStrategoTerm(t), tb, cases);
+	}
+
+	public static class CaseMatchFailure extends ControlFlowException {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -746789551947282631L;
+
+		public static final CaseMatchFailure INSTANCE = new CaseMatchFailure();
+
+		private CaseMatchFailure() {
+		}
 	}
 
 }

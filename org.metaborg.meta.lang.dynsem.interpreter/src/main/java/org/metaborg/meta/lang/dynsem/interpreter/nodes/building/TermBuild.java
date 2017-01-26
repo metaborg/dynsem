@@ -15,7 +15,6 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
-import com.google.inject.multibindings.MapKey;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -136,6 +135,9 @@ public abstract class TermBuild extends DynSemNode {
 			// FIXME: this is a hack. we should use the type information from
 			// the cast
 			return TermBuild.create(Tools.applAt(t, 0), fd);
+		}
+		if(Tools.hasConstructor(t, "TermPlaceholder", 0)) {
+			return TermPlaceholderBuild.create(t, fd);
 		}
 
 		throw new NotImplementedException("Unsupported term build: " + t);

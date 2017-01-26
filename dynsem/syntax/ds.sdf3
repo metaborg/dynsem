@@ -132,6 +132,7 @@ context-free syntax // terms
   Term.ListLength = <|<Term>|>
   Term.Concat   = [[Term] ++ [Term]] {left}
   
+  Term.TermPlaceholder = <???>
   
   Term.Tuple    = <(<{Term ", "}+>)>
 

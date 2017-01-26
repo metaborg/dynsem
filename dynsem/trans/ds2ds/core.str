@@ -32,6 +32,7 @@ strategies
       ; factorize-module
       ; expand-implicits-module
       ; factorize-module
+      ; expand-defaultcomponents-module-top
       ; explication-explicate-module
       ; copy-propagation-module
       ; defactorize-module

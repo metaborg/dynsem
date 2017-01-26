@@ -38,7 +38,7 @@ rules
   explication-explicate-module =
     ?Module(_, _);
     m-in-analysis(
-      explication-explicate
+      explication-api-explicate
       ; unrename-all
       ); unmark-vars
 
@@ -68,6 +68,12 @@ strategies
   explication-api-get-components(|comps, imps):
     arrow-def -> <hashtable-get(|arrow-def)> comps
   
+  explication-api-has-component(|comps, imps):
+    (arrow-def, comp-def) -> comp'
+    where
+      <explication-api-get-components(|comps, imps)> arrow-def;
+      fetch-elem(?Comp(comp-def, _); ?comp')
+  
   explication-api-add-components(|comps, imps):
     (arrow-def, new-compo*) -> compo*
     where
@@ -87,14 +93,31 @@ strategies
   
 rules
 
-  explication-explicate =
+  explication-api-explicate(s) = 
     where(explication-api-init-storage(?comps-table, ?imps-table));
     where(explication-gather-data-arrowdecl(|comps-table, imps-table));
     where(alltd(explication-gather-data-rule(|comps-table, imps-table)));
     where(explication-compute-explicated-arrows(|comps-table, imps-table));
-    explication-explicate-arrow-decls-module(|comps-table, imps-table);
-    explication-explicate-rules-module(|comps-table, imps-table);
+    s(|comps-table, imps-table);
     where(explication-api-destroy-storage(|comps-table, imps-table))
+
+  explication-api-explicate(pre, post) =
+    let
+      work(|comps-table, imps-table) =
+        pre(|comps-table, imps-table);
+        explication-explicate-arrow-decls-module(|comps-table, imps-table);
+        explication-explicate-rules-module(|comps-table, imps-table);
+        post(|comps-table, imps-table)
+    in
+      explication-api-explicate(work)
+    end  
+  
+  explication-api-explicate =
+    let
+      noop(|comps-table, imps-table) = id
+    in
+      explication-api-explicate(noop, noop)
+    end
   
   explication-gather-data-arrowdecl(|comps-table, imps-table) =
       lookup-def-all(|Arrows());
@@ -109,10 +132,7 @@ rules
   explication-gather-data-rule(|comps-table, imps-table):
     r@Rule(prem*, infer, Relation(reads, src@Source(lhs, _), arr, _)) -> r
     where // figure out which arrow definition we are using
-      arrow-name := <get-arrow-name> arr;
-      lhs-ty := <rulelhs-get-type> lhs;
-      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(type-coerce-direct(id))> (arrow-def*, lhs-ty)
+      arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
     where // associate components used in conclusion
       ro* := <explication-use-to-comp> reads;
       rw* := <explication-use-to-comp> src;
@@ -124,10 +144,7 @@ rules
   explication-gather-data-premise(|comps-table, imps-table):
     Formula(Relation(reads, src@Source(lhs, _), arr, _)) -> Impo(arrow-def, <nub> [ex-ro*, ex-rw*])
     where // figure out which arrow definition we are using
-      arrow-name := <get-arrow-name> arr;
-      lhs-ty := <type-of> lhs;
-      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(flip(type-coerce-direct(id)))> (arrow-def*, lhs-ty)
+      arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
     where // associate components used in premise
       ro* := <explication-use-to-comp> reads;
       rw* := <explication-use-to-comp> src;
@@ -197,9 +214,7 @@ rules
   explication-explicate-arrow-decl(|comps-table, imps-table):
     ArrowDecl(_, lhs-s, _, arrow-name, rhs-s, _) -> ArrowDecl(ArrowROs(ro*), lhs-s, ArrowRWs(rw*), arrow-name, rhs-s, ArrowRWs(rw*))
     where
-      lhs-ty := <rw-type> lhs-s;
-      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(type-coerce-direct(id))> (arrow-def*, lhs-ty);
+      arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (arrow-name, <rw-type> lhs-s);
       (ro-comp*, rw-comp*) := <explication-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
       (ro*, rw*) := <(map(explication-util-comp-to-label), map(explication-util-comp-to-label))> (ro-comp*, rw-comp*)
 
@@ -212,10 +227,7 @@ rules
     Rule(prem*, infer, Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Rule(prem'*, infer, Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
     where opt-with(
-      arrow-name := <get-arrow-name> arr;
-      lhs-ty := <rulelhs-get-type> lhs;
-      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(type-coerce-direct(id))> (arrow-def*, lhs-ty)
+      arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
     )
     where opt-with(
       // init storage
@@ -236,10 +248,7 @@ rules
     Formula(Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Formula(Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
     where opt-with( // figure out which arrow definition we are using
-      arrow-name := <get-arrow-name> arr;
-      lhs-ty := <type-of> lhs;
-      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      arrow-def := <get-applicable-arrowdef(flip(type-coerce-direct(id)))> (arrow-def*, lhs-ty)
+      arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
     )
     where opt-with(
       // read missing ROs
@@ -257,7 +266,7 @@ rules
       case-compgen-table* := <map(explication-explicate-premise-fork(|comps-table, imps-table, rule-arrow-def, compgen-table))> case*;
       // introduce fresh variables for all the RW components
       all-rw* := <explication-api-get-components(|comps-table, imps-table); explication-util-filter-transform-compdefs(explication-util-comp-to-compdef|RW())> rule-arrow-def;
-      <map(explication-api-compgen-intro(|compgen-table, RW()))> all-rw*;
+      <map(explication-api-compgen-intro(|compgen-table))> all-rw*;
       case'* := <map(explicate-2-introduce-synonyms-in-case(|all-rw*, compgen-table))> case-compgen-table*
     )
   
@@ -317,7 +326,7 @@ rules
       // thus missing components
       comp-extra* := <diff> (comp-def*, comp-use*);
       // register and convert to labelcomp
-      extra-labelcomp* := <map(explication-api-compgen-intro(|compgen-table, kind))> comp-extra*
+      extra-labelcomp* := <map(explication-api-compgen-intro(|compgen-table))> comp-extra*
     )
   
   explication-util-comp-to-compdef = ?Comp(<id>, _)
@@ -343,14 +352,23 @@ rules
       <hashtable-put(|comp-def, v)> compgen-table
     )
   
-  explication-api-compgen-intro(|compgen-table, kind):
-    comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(v))
+  explication-api-compgen-intro(|compgen-table):
+    comp-def -> label-comp
     where opt-with(
-      v := <newname> $[_lifted_[<lookup-prop(|Type()); derw-type; get-sort-name> comp-def]];
+      v := <explication-api-compgen-intro-gen> comp-def;
+      label-comp := <explication-api-compgen-intro-record(|compgen-table)> (comp-def, v)
+    )
+
+  explication-api-compgen-intro-gen:
+    comp-def -> v
+    where
+      v := <newname> $[_lifted_[<lookup-prop(|Type()); derw-type; get-sort-name> comp-def]]
+  
+  explication-api-compgen-intro-record(|compgen-table):
+    (comp-def, v) -> LabelComp(Label(<def-get-name> comp-def), Var(v))
+    where opt-with(
       <hashtable-put(|comp-def, v)> compgen-table
     )
   
   explication-api-compgen-use(|compgen-table, kind):
     comp-def -> LabelComp(Label(<def-get-name> comp-def), Var(<hashtable-get(|comp-def)> compgen-table))
-  
-  opt-with(s) = s // with(s)

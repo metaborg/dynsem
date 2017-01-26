@@ -63,7 +63,7 @@ rules /* store variables */
       lhs-ty := <rulelhs-get-type> lhs;
       if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
       then
-        if arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+        if arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-name, lhs-ty)
         then
           <store-rule> (<lookup-prop(|Type())> arrow-def, r)
         else
@@ -169,7 +169,8 @@ rules
     <+ type-err-build
   
   type-check-build-helper =
-    type-check-build-num
+    type-check-build-termplaceholder
+    <+ type-check-build-num
     <+ type-check-build-str
     <+ type-check-build-bool
     <+ type-check-build-fresh
@@ -180,6 +181,7 @@ rules
     <+ type-check-build-map
     <+ type-check-build-cast
     <+ type-check-build-nativefuncall
+  
   
   type-err-build-match-symbols:
     t -> NONETYPE()
@@ -192,6 +194,9 @@ rules
     t -> NONETYPE()
     where
       add-msg(|Error(), t, $[Type error])
+
+  type-check-build-termplaceholder:
+    TermPlaceholder() -> ALPHATYPE()
   
   type-check-build-num:
   	Int(_) -> IntType()

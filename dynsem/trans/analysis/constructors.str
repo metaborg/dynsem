@@ -24,6 +24,7 @@ signature
     Use: Property
     ROs: Property
     RWs: Property
+    DefaultValue: Property
     
 signature
   sorts

@@ -47,28 +47,13 @@ rules
   type-of =
     type-check-build-helper
 
+  lookup-applicable-arrowdef(coerce-s):
+    (arrow-name, lhs-ty) -> <get-applicable-arrowdef(coerce-s)> (arrow-def*, lhs-ty)
+    where
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name
+
   get-applicable-arrowdef(coerce-s):
     (arrow-def*, term-ty) -> <fetch-elem(where(lookup-prop(|Type()); \ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-def*
-
-//  lookup-applicable-arrow-def:
-//    term-ty -> <get-applicable-arrowdef(type-coerce-direct(fail))> (<lookup-def-all(|Arrows())>, term-ty)
-
-//  type-of-applicable-arrow(coerce-s):
-//    (arrow-type*, term-ty) -> <fetch-elem(where(\ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-type*
-
-//  lookup-applicable-arrow-def:
-//    type -> <lookup-def-all(|Arrows()); filter(\ a-def -> (a-def, <lookup-props(|Type()); fetch-elem(where(is-applicable-arrow-def(|type)))> a-def) \); make-set>
-//
-//  is-applicable-arrow-def(|type-name) =
-//    ?ArrowType(type-name, _)
-//    <+
-//    ?ArrowType(ltype-name, _);
-//    <type-coerce-direct(fail)> (type-name, ltype-name)
-//
-//  lookup-arrow-def:
-//    (c-ty, arrow-name) -> <fetch-elem(where(Fst; def-get-name; ?arrow-name))> arrow*
-//    where
-//      <lookup-applicable-arrow-def> c-ty => arrow*
 
 rules // projections
   
@@ -97,7 +82,7 @@ rules /* variable scheme queries */
     Label(x) -> x
 
   get-all-varschemes =
-    <concat> [<get-all-component-defs>, <get-all-varscheme-defs>]    
+    <concat> [<get-all-component-defs>, <get-all-varscheme-defs>]
 
   get-all-component-defs = lookup-def-all(|Components())
   
@@ -131,18 +116,9 @@ rules /* variable scheme queries */
     where
       scheme-name := <def-get-name> scheme-def
     where
-      used-word-chars := <explode-string> used-word;
-      scheme-word-chars := <explode-string> scheme-name;
-      used-word-suffix-chars := <left-match> (used-word-chars, scheme-word-chars);
-      if not(!used-word-suffix-chars => [])
-      then
-	      if not(<Hd> used-word-suffix-chars => '_')
-	      then
-	        <filter(not(?'\''); not(MkSingleton; dec-chars-to-int))> used-word-suffix-chars => []
-	      end
-	    end
+      <native-name-matches-varscheme(|scheme-name)> used-word
 
-
+  external native-name-matches-varscheme(|scheme-name)
 
 
 
