@@ -1,7 +1,8 @@
 module coq-semantics/ds2v
 
 imports
-	stratego/metaborg
+
+  libspoofax/resource/path
 
 signature
 
@@ -44,7 +45,7 @@ rules
       r := <get-ds2vs(|[path|seen_imports])>
       			(xs, <conc> (as, as'), <conc> (ims, ims'), <conc> (tos, tos'), <union-triple> (nabl2_sig, nabl2_sig'))
   
-  ds-source-and-include-locations = !"ds"; language-source-and-include-locations
+  ds-source-and-include-locations = !"ds"; language-source-and-include-directories
   
 	get-ds2v:
     path -> ds2v

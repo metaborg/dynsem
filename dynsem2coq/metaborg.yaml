@@ -6,7 +6,6 @@ dependencies:
   - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
   source:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
-  - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
   - org.metaborg:org.metaborg.lang.coq:${metaborgVersion}
   - org.metaborg:dynsem:${metaborgVersion}
   - org.metaborg:org.metaborg.meta.nabl2.shared:${metaborgVersion}

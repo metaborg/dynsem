@@ -8,7 +8,6 @@ dependencies:
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
   source:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
-  - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
 exports:
 - directory: ./
   includes:

@@ -10,7 +10,7 @@ imports
 	outline
 	ds2ds/sugar
 	analysis/lib-analysis
-	src-gen/stratego/metaborg
+	libspoofax/stratego/dynrule
 
 imports
   lib-ds
@@ -30,7 +30,7 @@ rules // Analysis
 		with {| MyCurrentFile:
 		  f-path := $[[project-path]/[path]];
 		  rules(MyCurrentFile: _ -> f-path);
-		  editor-init;
+		  reset-dynamic-rules;
 		  f := <origin-file> ast;
 			<in-project-path(m-in-analysis(
 				where(
@@ -56,8 +56,7 @@ rules
       with(
         handle := <fopen> (filename, "w");
         <fputs> (string, handle);
-        <fclose> handle;
-        <refresh-workspace-file> filename
+        <fclose> handle
       )
     end
     

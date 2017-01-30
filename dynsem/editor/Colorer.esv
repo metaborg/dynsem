@@ -1,6 +1,6 @@
 module Colorer
 
-imports editor/Colorer.generated
+imports libspoofax/color/default
 
 colorer
 

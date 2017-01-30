@@ -3,7 +3,7 @@ module pp
 imports
   libstratego-lib
   libstratego-gpp
-  runtime/tmpl/pp
+  libspoofax/sdf/pp
   signatures/-
   pp/-
   pp/ds-parenthesize

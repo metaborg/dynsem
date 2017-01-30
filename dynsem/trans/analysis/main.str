@@ -12,8 +12,11 @@ imports
 	signatures/-
   lib-ds
 	libstratego-sglr
+	libspoofax/stratego/dynrule
+	libspoofax/core/language
+	libspoofax/resource/path
+	libspoofax/resource/cache
 	ds
-	src-gen/stratego/metaborg
 	pp
 
 rules
@@ -24,7 +27,7 @@ rules
       filename := <guarantee-extension(|"analyzed.ds")> path;
       f-path := $[[project-path]/[path]];
       rules(MyCurrentFile: _ -> f-path);
-      editor-init;
+      reset-dynamic-rules;
       result := <in-project-path(m-in-analysis(id)|project-path); unmark-vars; sugar-all; pp-debug> ast
     |}
       
@@ -105,7 +108,7 @@ rules /* helpers for import handling */
   resolve-path(resolution-error) =
   	?import-string;
     (
-      language; language-source-and-include-locations;
+      language; language-source-and-include-directories;
       fetch-elem(!$[[<id>]/[import-string].ds]; file-exists)
       <+
       resolution-error;
@@ -154,7 +157,7 @@ strategies // caching file reading utilities
     where
       path       := <resolve-path> import;
       cache-path := <import-cache-path> path;
-      ( <is-newer> (cache-path, path);
+      ( <file-is-newer> (cache-path, path);
         file := <ReadFromFile> cache-path
       <+
         file := <parse-file> path;
