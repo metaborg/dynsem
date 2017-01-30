@@ -53,9 +53,15 @@ rules /* store variables */
   store-rules-all =
     alltd(store-rules)
   
-  store-rules =
-    Rules(with(prime-typaths); map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked. This is a bug, please report it.]))))
-
+  store-rules:
+    rs@Rules([]) -> rs
+  
+  store-rules:
+    Rules(rulz@[_|_]) -> Rules(rulz')
+    with
+      prime-typaths;
+      rulz' := <map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked. This is a bug, please report it.])))> rulz
+  
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
     where
