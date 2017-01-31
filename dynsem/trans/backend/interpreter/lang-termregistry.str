@@ -230,7 +230,7 @@ rules /* term registry */
         });
       ]|
     where
-      x_natop := <concat-strings> [name, "_", <length; int-to-string> kid*];
+      x_natop := <concat-strings> [<ds-utils-java-escape-id> name, "_", <length; int-to-string> kid*];
       e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
 
   ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
