@@ -41,7 +41,7 @@ rules // storing and looking up
     name -> <bagof-Declared> (namespace, name)
     
   lookup-def-all(|namespace) =
-    <AllDeclarations> namespace
+    <AllDeclarations> namespace <+ ![]
    
   store-prop(|proptype, declaration):
     propval -> propval
