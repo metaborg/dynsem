@@ -48,7 +48,7 @@ rules
     Rule(prems1, infer, Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Rule(prems3, infer, Relation(reads, Source(lhs, [sc*, tc-comp]), arr, Target(rhs, tc'*)))
     where opt-with(
-      arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
+      arrow-def := <resolve-applicable-arrow-defsite> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
     )
     where
       <not(fetch-elem(?LabelComp(Label(<id>), _); lookup-def(|Components()); ?comp-def))> [sc*, tc*];
@@ -77,7 +77,7 @@ rules
   expand-exncomponent-premises(|comp-def, rout, comps-table, imps-table, rule-arrow-def, compgen-table):
     [prem@Formula(Relation(_, Source(lhs, _), arr, _)) | prems] -> [prem | prems']
     where opt-with(
-      arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
+      arrow-def := <resolve-applicable-arrow-callsite> (<get-arrow-name> arr, <type-of> lhs)
     )
     where
       <not(explication-api-has-component(|comps-table, imps-table))> (arrow-def, comp-def);
@@ -87,7 +87,7 @@ rules
     [Formula(Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) | prems1] ->
       [Formula(Relation(reads, Source(lhs, sc'*), arr, Target(rhs, [tc*, tc-comp]))) | prems3]
     where opt-with(
-      arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
+      arrow-def := <resolve-applicable-arrow-callsite> (<get-arrow-name> arr, <type-of> lhs)
     )
     where
       <explication-api-has-component(|comps-table, imps-table)> (arrow-def, comp-def);

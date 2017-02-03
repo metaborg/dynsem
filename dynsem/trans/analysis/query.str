@@ -47,13 +47,27 @@ rules
   type-of =
     type-check-build-helper
 
-  lookup-applicable-arrowdef(coerce-s):
-    (arrow-name, lhs-ty) -> <get-applicable-arrowdef(coerce-s)> (arrow-def*, lhs-ty)
+  resolve-applicable-arrow-defsite:
+    (arrow-name, term-ty) -> <select-applicable-arrow-defsite> (arrow-def*, term-ty)
     where
       arrow-def* := <lookup-defs(|Arrows())> arrow-name
 
-  get-applicable-arrowdef(coerce-s):
-    (arrow-def*, term-ty) -> <fetch-elem(where(lookup-prop(|Type()); \ ArrowType(ex-ty, _) -> <coerce-s> (ex-ty, term-ty) \))> arrow-def*
+  select-applicable-arrow-defsite:
+    (arrow-def*, term-ty) -> arrow-def
+    where
+      arrow-def := <fetch-elem(where(lookup-prop(|Type()); \ ArrowType(lhs-ty, _) -> <type-coerce-direct(id)> (term-ty, lhs-ty) \))> arrow-def*
+
+  resolve-applicable-arrow-callsite:
+    (arrow-name, term-ty) -> <select-applicable-arrow-callsite> (arrow-def*, term-ty)
+    where
+      arrow-def* := <lookup-defs(|Arrows())> arrow-name
+
+  select-applicable-arrow-callsite:
+    (arrow-def*, term-ty) -> arrow-def
+    where
+      arrow-def := <fetch-elem(where(lookup-prop(|Type()); \ ArrowType(lhs-ty, _) -> <type-coerce-direct(fail)> (term-ty, lhs-ty) \))> arrow-def*
+      <+
+      arrow-def := <fetch-elem(where(lookup-prop(|Type()); \ ArrowType(lhs-ty, _) -> <type-coerce-full(fail)> (term-ty, lhs-ty) \))> arrow-def*
 
 rules // projections
   

@@ -132,7 +132,7 @@ rules
   explication-gather-data-rule(|comps-table, imps-table):
     r@Rule(prem*, infer, Relation(reads, src@Source(lhs, _), arr, _)) -> r
     where // figure out which arrow definition we are using
-      arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
+      arrow-def := <resolve-applicable-arrow-defsite> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
     where // associate components used in conclusion
       ro* := <explication-use-to-comp> reads;
       rw* := <explication-use-to-comp> src;
@@ -144,7 +144,7 @@ rules
   explication-gather-data-premise(|comps-table, imps-table):
     Formula(Relation(reads, src@Source(lhs, _), arr, _)) -> Impo(arrow-def, <nub> [ex-ro*, ex-rw*])
     where // figure out which arrow definition we are using
-      arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
+      arrow-def := <resolve-applicable-arrow-callsite> (<get-arrow-name> arr, <type-of> lhs)
     where // associate components used in premise
       ro* := <explication-use-to-comp> reads;
       rw* := <explication-use-to-comp> src;
@@ -214,7 +214,7 @@ rules
   explication-explicate-arrow-decl(|comps-table, imps-table):
     ArrowDecl(_, lhs-s, _, arrow-name, rhs-s, _) -> ArrowDecl(ArrowROs(ro*), lhs-s, ArrowRWs(rw*), arrow-name, rhs-s, ArrowRWs(rw*))
     where
-      arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (arrow-name, <rw-type> lhs-s);
+      arrow-def := <resolve-applicable-arrow-defsite> (arrow-name, <rw-type> lhs-s);
       (ro-comp*, rw-comp*) := <explication-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
       (ro*, rw*) := <(map(explication-util-comp-to-label), map(explication-util-comp-to-label))> (ro-comp*, rw-comp*)
 
@@ -227,7 +227,7 @@ rules
     Rule(prem*, infer, Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Rule(prem'*, infer, Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
     where opt-with(
-      arrow-def := <lookup-applicable-arrowdef(type-coerce-direct(id))> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
+      arrow-def := <resolve-applicable-arrow-defsite> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
     )
     where opt-with(
       // init storage
@@ -248,7 +248,7 @@ rules
     Formula(Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
       Formula(Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
     where opt-with( // figure out which arrow definition we are using
-      arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-direct(id)))> (<get-arrow-name> arr, <type-of> lhs)
+      arrow-def := <resolve-applicable-arrow-callsite> (<get-arrow-name> arr, <type-of> lhs)
     )
     where opt-with(
       // read missing ROs
