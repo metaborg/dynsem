@@ -69,7 +69,7 @@ rules /* store variables */
       lhs-ty := <rulelhs-get-type> lhs;
       if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
       then
-        if arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-name, lhs-ty)
+        if arrow-def := <lookup-applicable-arrowdef(flip(type-coerce-full(fail)))> (arrow-name, lhs-ty)
         then
           <store-rule> (<lookup-prop(|Type())> arrow-def, r)
         else
@@ -501,7 +501,7 @@ rules
       lhs-ty := <type-check-build> lhs;
       if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
       then
-        if arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+        if arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(fail)))> (arrow-def*, lhs-ty)
         then
           ArrowType(in-ty, out-ty) := <lookup-prop(|Type())> arrow-def;
           <type-check-expectation(type-coerce-full(fail)|lhs, in-ty)> lhs-ty;
