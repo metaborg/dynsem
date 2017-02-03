@@ -53,7 +53,7 @@ rules
     where
       arrow-name := <get-arrow-name> arr;
       lhs-ty := <gen-implicit-info-type-of(id)> lhs;
-      ArrowType(dec-lhs-ty, _) := <lookup-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-name, lhs-ty);
+      ArrowType(dec-lhs-ty, _) := <lookup-applicable-arrowdef(flip(type-coerce-full(fail))); lookup-prop(|Type())> (arrow-name, lhs-ty);
       <gen-implicit-info-fact(id|lhs)> (lhs-ty, dec-lhs-ty)
 
   gen-implicit-info-conclusion:
