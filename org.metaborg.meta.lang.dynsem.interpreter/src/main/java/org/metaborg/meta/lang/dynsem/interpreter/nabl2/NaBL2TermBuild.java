@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.nabl2.interpreter.InterpreterTerms;
 import org.metaborg.meta.nabl2.stratego.StrategoTermIndices;
+import org.metaborg.meta.nabl2.stratego.TermIndex;
 import org.metaborg.meta.nabl2.terms.ITerm;
 import org.metaborg.meta.nabl2.terms.generic.GenericTerms;
-import org.metaborg.meta.nabl2.terms.generic.TermIndex;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.source.SourceSection;
