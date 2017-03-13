@@ -1,0 +1,80 @@
+module ds2ds/desugar-guarded-binds
+
+imports
+  signatures/-
+  analysis/-
+
+rules
+  
+  desugar-guarded-binds-module = Module(id, alltd(desugar-guarded-binds))
+  
+  desugar-guarded-binds:
+    GuardedBind(v, guarded-value*) -> p
+    where
+      [p] := <foldr(![], desugar-guarded-bind(|v))> guarded-value*
+  
+  desugar-guarded-bind(|v):
+    (UValue(t), _) -> [Formula(Match(t, v))]
+  
+  desugar-guarded-bind(|v):
+    (GValue(t, ct), p*) -> [CaseMatch(Cast(ct, <derw-type> BoolType()), [case_positive, case_negative])]
+    where
+      case_positive := CasePattern(True(), [Formula(Match(t, v))]);
+      case_negative := CaseOtherwise(p*)
+  
+  desugar-guarded-bind(|v):
+    (NegGValue(t, ct), p*) -> [CaseMatch(Cast(ct, <derw-type> BoolType()), [case_positive, case_negative])]
+    where
+      case_positive := CasePattern(False(), [Formula(Match(t, v))]);
+      case_negative := CaseOtherwise(p*) 
+  
+      
+    
+    
+//      type-check-premise:
+//    f@GuardedBind(v, guarded-value*) -> f
+//    where
+//      <map(try(type-check-guarded-value(|v)))> guarded-value*;
+//      if (_, [_|_]) := <split-fetch(?UValue(_))> guarded-value*
+//      then
+//        add-msg(|Warning(), guarded-value*, $[Contains unreachble assignments])
+//      end
+//  
+//  type-check-guarded-value(|v):
+//    UValue(t) -> <type-check-premise> Formula(Match(t, v))
+//  
+//  type-check-guarded-value(|v):
+//    guarded-value -> <type-check-premise> Formula(Match(t, v))
+//    where
+//      ?GValue(t, ct) + ?NegGValue(t, ct)
+//    where
+//      ct-ty := <type-check-build> ct;
+//      <type-coerce-full(fail)> (ct-ty, BoolType())
+  
+//  
+//  
+//  copy-propagation-module = Module(id, alltd(copy-propagation-rule))
+//
+//  copy-propagation-rule:
+//    Rule(prem*, infer, Relation(reads, source, arrow, Target(rhs, tc*))) ->
+//      Rule(prem'*, infer, Relation(reads, source, arrow, Target(rhs', tc'*)))
+//    where {| PropagateCopy:
+//      prem'* := <filter(copy-propagation)> prem*;
+//      rhs' := <copy-propagation-prop> rhs;
+//      tc'* := <copy-propagation-prop> tc*
+//    |}
+//  
+//  copy-propagation-premises = is-list;  {| PropagateCopy: filter(copy-propagation) |}
+//  
+//  copy-propagation =
+//    not(copy-propagation-prop; copy-propagation-rec);
+//    copy-propagation-prop
+//  
+//  copy-propagation-prop = alltd(VarRef(PropagateCopy))
+//  
+//  copy-propagation-rec:
+//    f@Formula(Match(VarRef(var1), VarRef(var2))) -> f
+//    where
+//      rules(PropagateCopy:+ var2 -> var1)
+
+

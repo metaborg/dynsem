@@ -26,6 +26,7 @@ strategies
       ; desugar-top
       ; desugar-meta-functions-top
       ; fuse-sections
+      ; desugar-guarded-binds-module
       ; desugar-varschemes-module
       ; add-extra-typeannos-module
       ; desugar-aliases-module
