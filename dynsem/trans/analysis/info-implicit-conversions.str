@@ -121,7 +121,9 @@ rules
 
   // list index access
   gen-implicit-info-term(is-matching):
-    DeAssoc(map-t, key-t) -> <fail>
+    deassoc-like -> <fail>
+    where
+      ?DeAssoc(map-t, key-t) + ?MapHas(map-t, key-t)
     where
       MapType(f-key-ty, _) := <gen-implicit-info-type-of(is-matching); get-alias-base> map-t;
       a-key-ty := <gen-implicit-info-type-of(is-matching)> key-t;

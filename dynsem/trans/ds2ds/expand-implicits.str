@@ -128,6 +128,13 @@ rules /* lift and expand subterms on build sides */
       ListType(f-l-ty) := <type-of> l-t;
       (idx-t', p*) := <lift-where-indirect <+ !(idx-t, [])> (f-l-ty, idx-t)
 
+  // map has check
+  expand-implicits-termbuild:
+    MapHas(m-t, k-t) -> (MapHas(m-t, k-t'), p*)
+    where
+      MapType(f-k-ty, _) := <type-of> m-t;
+      (k-t', p*) := <lift-where-indirect <+ !(k-t, [])> (f-k-ty, k-t)
+
   expand-implicits-termbuild:
     MapExtend(Map([Bind(k, v)]), m) -> (MapExtend(Map([Bind(k', v')]), m), [p1*, p2*])
     where
