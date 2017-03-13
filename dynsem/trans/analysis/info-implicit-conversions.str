@@ -31,7 +31,7 @@ rules
           )
         ); fail
       + gen-implicit-info-conclusion; fail
-      + CaseMatch(id, filter(gen-implicit-info)); fail
+      + CaseMatch(gen-implicit-info(fail), filter(gen-implicit-info)); fail
       + CasePattern(id, filter(gen-implicit-info)); fail
       + CaseOtherwise(filter(gen-implicit-info)); fail
       + Formula(gen-implicit-info); fail
@@ -82,6 +82,13 @@ rules
       <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
   
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
+
+  gen-implicit-info-term(is-matching):
+    Cast(t, s) -> <fail>
+    where
+      s-ty := <rw-type> s;
+      t-ty := <gen-implicit-info-type-of(is-matching)> t;
+      <gen-implicit-info-fact(is-matching|t)> (t-ty, s-ty)
 
   gen-implicit-info-term(is-matching):
     LabelComp(Label(l), t) -> <fail>
