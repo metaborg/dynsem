@@ -39,8 +39,10 @@ context-free syntax // rules
   ]
   
   Premise.GuardedBind = [
-    [Var] as [{GuardedValue "\n or"}+]
+    [Term] as [{GuardedValue "\n or"}+]
   ]
+  
+  
   
   GuardedValue.GValue = [[Term] if [Term]]
   GuardedValue.NegGValue = [[Term] if not [Term]]
