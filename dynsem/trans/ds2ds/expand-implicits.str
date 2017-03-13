@@ -83,6 +83,12 @@ rules
 rules /* lift and expand subterms on build sides */
 
   expand-implicits-termbuild:
+    Cast(t, s) -> (t', p*)
+    where
+      s-ty := <rw-type> s;
+      (t', p*) := <lift-where-indirect> (s-ty, t)
+  
+  expand-implicits-termbuild:
     Con(c, child*) -> (Con(c, child'*), p*)
     where
       ConstructorType(child-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> child*);
