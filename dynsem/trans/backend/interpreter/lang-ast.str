@@ -9,15 +9,15 @@ imports
 rules
   
   ds-to-interp-terms-module =
-    ?Module(_, <fetch-elem(?Signatures(sig*))>);
+    ?mod@Module(_, <fetch-elem(?Signatures(sig*))>);
     where(ds-to-interp-clean-target; ds-to-interp-gen-project);
-    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> sig*;
-    <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> sig*;
+    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> mod;
+    <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
     <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-    <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-    <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> sig*;
+    <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
+    <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
     <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-    <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> sig*;
+    <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
     ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
     ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
     ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
@@ -33,12 +33,14 @@ rules
 rules /* Sort & Constructor classes */
 
   ds-to-interp-terms-signatures-top:
-    sig* -> [sort-class*, cons-class*, tuple-class*, list-class*]
+    mod@Module(_, section*) -> [sort-class*, cons-class*, tuple-class*, list-class*]
+    where
+      <fetch-elem(?Signatures(sig*))> section*
     where
       sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
-      tuple-dec* := <get-languagetuple-usage-in-signatures> sig*;
+      tuple-dec* := <get-languagetuple-usage-in-module> mod;
       sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
       cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*;
       tuple-class* := <map(ds-to-interp-terms-tupledecl)> tuple-dec*;
@@ -51,7 +53,10 @@ rules /* Sort & Constructor classes */
       implicit-map-key* := <collect-all(\ MapSort(k, _) -> ListSort(k) \); nub> sig;
       implicit-map-val* := <collect-all(\ MapSort(_, v) -> ListSort(v) \); nub> sig
   
-  get-languagetuple-usage-in-signatures = collect-all(?TupleSort(_)); nub
+  get-languagetuple-usage-in-module =
+    ?Module(_, _);
+    collect-all(?TupleSort(_));
+    nub
   
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s) ->
@@ -734,7 +739,7 @@ rules /* Sort & Constructor classes */
 rules /* type system class */
 
   ds-to-interp-terms-types-signatures:
-    sig-sec* ->
+    mod@Module(_, section*) ->
       compilation-unit |[
         package ~x:<get-opt> TopPkg();
 
@@ -749,11 +754,12 @@ rules /* type system class */
           
         }
       ]|
-    where 
+    where
+      <fetch-elem(?Signatures(sig-sec*))> section*;
       decl* := <filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>)); concat;
         qsort(?(ConsDecl(_, _, _, _), SortDecl(_)) + ?(SortDecl(_), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
       list* := <get-languagelist-usage-in-signatures> sig-sec*;
-      tuple* := <get-languagetuple-usage-in-signatures> sig-sec*;
+      tuple* := <get-languagetuple-usage-in-module> mod;
       ![decl*, tuple*, list*];
       map(ds-to-interp-terms-types-name);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
@@ -795,11 +801,13 @@ rules /* term building */
       x_expectmethod := $[expect[x_sortclass]]
 
   ds-to-interp-terms-building:
-    sig* -> [con-build*, list-build*, tuple-build*]
+    mod@Module(_, section*) -> [con-build*, list-build*, tuple-build*]
     where
+      <fetch-elem(?Signatures(sig*))> section*;
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
-      tuple-dec* := <get-languagetuple-usage-in-signatures> sig*;
+      tuple-dec* := <get-languagetuple-usage-in-module> mod;
+      debug(!"Tuples: ");
       con-build* := <map(ds-to-interp-terms-building-con)> con-dec*;
       list-build* := <map(ds-to-interp-terms-building-list)> list-dec*;
       tuple-build* := <map(ds-to-interp-terms-building-tuple)> tuple-dec*
@@ -954,11 +962,12 @@ rules /* term building */
 rules /* term matching */
 
   ds-to-interp-terms-matching:
-    sig* -> [con-match*, list-match*, tuple-match*]
+    mod@Module(_, section*) -> [con-match*, list-match*, tuple-match*]
     where
+      <fetch-elem(?Signatures(sig*))> section*;
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
-      tuple-dec* := <get-languagetuple-usage-in-signatures> sig*;
+      tuple-dec* := <get-languagetuple-usage-in-module> mod;
       con-match* := <map(ds-to-interp-terms-matching-con)> con-dec*;
       list-match* := <map(ds-to-interp-terms-matching-list)> list-dec*;
       tuple-match* := <map(ds-to-interp-terms-matching-tuple)> tuple-dec*

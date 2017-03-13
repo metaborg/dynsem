@@ -10,7 +10,7 @@ imports
 rules /* term registry */
 
   ds-to-interp-terms-registry-top:
-    sig* ->
+    mod@Module(_, section*) ->
       compilation-unit |[
         package ~x:<get-opt> TopPkg();
         
@@ -117,10 +117,11 @@ rules /* term registry */
       }
       ]|
     where
+      <fetch-elem(?Signatures(sig*))> section*;
       decl* := <filter(?Constructors(<id>) + ?NativeOperators(<id>) + ?NativeDataTypes(<id>)); concat> sig*;
       (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _)))> decl*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
-      tuple-dec* := <get-languagetuple-usage-in-signatures> sig*;
+      tuple-dec* := <get-languagetuple-usage-in-module> mod;
       x_classname := $[[<get-opt> LangName()]TermRegistry]; 
       bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
       bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
