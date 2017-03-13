@@ -314,7 +314,12 @@ rules
     Cast(t, ty-t) -> cast-ty
     where
       t-ty := <type-check-build> t;
-      cast-ty := <rw-type> ty-t
+      cast-ty := <rw-type> ty-t;
+      if <not(type-coerce-full(fail))> (t-ty, cast-ty)
+      then
+        add-msg(|Error(), t, $[Term of type [<pp-type> t-ty] cannot be cast to type [<pp-type> cast-ty]])
+      end
+      
 
   type-check-build-nativefuncall:
     SortFunCall(fun-name, parent-t, param-t*) -> fun-ty
@@ -428,7 +433,7 @@ rules // type rules for match-sides
       c-def := <lookup-def(|Constructors())> (c, <length> aparam*);
       ConstructorType(fparam-ty*, ty) := <lookup-prop(|Type())> c-def;
       <zip(type-check-match-wrap)> (fparam-ty*, aparam*);
-      if <not(InSource); lookup-prop(|ConsKind())> c-def => MetafunCons()
+      if <not(InSource); lookup-prop(|ConsKind())> c-def => Metafunc()
       then
         add-msg(|Error(), t, $[Cannot match against meta-function [c]])
       end
