@@ -108,9 +108,6 @@ rules // desugaring
     Axiom(form) -> Rule([], "---------", form)
     
   desugar :
-    IsValue(term) -> TermEq(Con("IsValue",[term]),Con("True",[]))
-
-  desugar :
     Map([b | b*@[_|_]]) -> MapExtend(Map([b]), Map(b*))
     
   desugar :
@@ -179,7 +176,4 @@ rules // sugaring
 
   sugar :
   	Source(term,[]) -> Source(term)
-
-  sugar :
-    TermEq(Con("IsValue",[term]),Con("True",[])) -> IsValue(term)
 

@@ -30,7 +30,6 @@ context-free syntax // rules
   ]
   
   Premise.Formula = [[Formula]]
-  Premise.AllFail = <all-fail> {deprecated}
 
   Premise.CaseMatch = [
     case [Term] of {
@@ -41,8 +40,6 @@ context-free syntax // rules
   Premise.GuardedBind = [
     [Term] as [{GuardedValue "\n or"}+]
   ]
-  
-  
   
   GuardedValue.GValue = [[Term] if [Term]]
   GuardedValue.NegGValue = [[Term] if not [Term]]
@@ -102,8 +99,6 @@ context-free syntax // formulas
   
   Formula = [[Relation]]
   Relation.Relation = [[Reads][Source] [Rel] [Target]]
-  
-  Formula.IsValue  = [value([Term])]
   
   Reads.NoReads = []
   Reads.Reads   = [[{LabelComp ", "}+] |- ]

@@ -566,8 +566,6 @@ rules
     where
       <type-check-build-expect(|BoolType())> ct
   
-  type-check-premise = ?AllFail()
-
   type-check-case(|in-ty):
     c@CaseOtherwise(prem*) -> c
     with
