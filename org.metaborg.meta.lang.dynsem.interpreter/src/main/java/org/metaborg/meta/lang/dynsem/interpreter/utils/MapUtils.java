@@ -32,6 +32,11 @@ public class MapUtils {
 	}
 
 	@TruffleBoundary
+	public static <K, V> PersistentMap<K, V> remove(PersistentMap<K, V> map, K key) {
+		return map.minus(key);
+	}
+
+	@TruffleBoundary
 	public static <K, V> V get(PersistentMap<K, V> map, K key) {
 		return map.get(key);
 	}

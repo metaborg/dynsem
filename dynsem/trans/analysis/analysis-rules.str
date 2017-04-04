@@ -287,6 +287,13 @@ rules
       map2-ty@MapType(_, _) := <type-check-build; try(get-alias-base)> map2
 
   type-check-build-map:
+    MapUnbind(map-t, key-t) -> map-ty
+    where
+      map-ty@MapType(m-key-ty, _) := <type-check-build; try(get-alias-base)> map-t;
+      key-ty := <type-check-build; try(get-alias-base)> key-t;
+      <type-coerce-full(fail)> (key-ty, m-key-ty)
+
+  type-check-build-map:
     DeAssoc(m-t, k-t) -> val-ty
     where
       map-ty@MapType(f-key-ty, val-ty) := <type-check-build> m-t;

@@ -141,6 +141,12 @@ rules /* lift and expand subterms on build sides */
       MapType(k-ty, v-ty) := <type-of> m;
       (k', p1*) := <lift-where-indirect <+ !(k, [])> (k-ty, k);
       (v', p2*) := <lift-where-indirect <+ !(v, [])> (v-ty, v)
+  
+  expand-implicits-termbuild:
+    MapUnbind(map, key) -> (MapUnbind(map, key'), p1*)
+    where
+      MapType(k-ty, v-ty) := <type-of> map;
+      (key', p1*) := <lift-where-indirect <+ !(key, [])> (k-ty, key)
 
   expand-implicits-termbuild:
     LabelComp(Label(l), t) -> (LabelComp(Label(l), t'), p*)

@@ -152,6 +152,14 @@ rules
       MapType(f-key-ty, _) := <gen-implicit-info-type-of(is-matching); get-alias-base> map-t;
       a-key-ty := <gen-implicit-info-type-of(is-matching)> key-t;
       <gen-implicit-info-fact(is-matching|key-t)> (a-key-ty, f-key-ty)
+  
+  gen-implicit-info-term(is-matching):
+    MapUnbind(map, key) -> <fail>
+    where not(is-matching)
+    where
+      MapType(f-key-ty, _) := <gen-implicit-info-type-of(is-matching); get-alias-base> map;
+      a-key-ty := <gen-implicit-info-type-of(is-matching)> key;
+      <gen-implicit-info-fact(is-matching|key)> (a-key-ty, f-key-ty)
 
   gen-implicit-info-fact(is-matching|on-term) =
     (is-matching < Swap + id);

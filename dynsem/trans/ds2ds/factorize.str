@@ -235,6 +235,13 @@ rules
       (prem2*, v') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> v;
       !success
   
+  factorize-map-in-build:
+    MapUnbind(map, key) -> ([prem1*, prem2*], MapUnbind(map', key'))
+    where
+      (prem1*, map') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> map;
+      (prem2*, key') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> key;
+      !success
+  
   factorize-mapextend-in-build:
     MapExtend(l, r) -> ([prem1*, prem2*], MapExtend(l', r'))
     where

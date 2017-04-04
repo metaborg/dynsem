@@ -162,7 +162,7 @@ context-free syntax // terms
   
   Term.MapHas = <<Term>[<Term>?]>
   Term.MapExtend = [[Term] + [Term]] {left}
-//  Term.MapUnbind = [[Term] \ [Term]] {assoc}
+  Term.MapUnbind = [[Term] \ [Term]] {left}
 
   Term.MapKeys = [allkeys([Term])]
   Term.MapValues = [allvalues([Term])]
