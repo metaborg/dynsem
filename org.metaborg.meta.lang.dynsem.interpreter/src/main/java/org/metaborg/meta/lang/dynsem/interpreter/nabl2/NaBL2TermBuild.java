@@ -7,7 +7,7 @@ import org.metaborg.meta.nabl2.interpreter.InterpreterTerms;
 import org.metaborg.meta.nabl2.stratego.StrategoTermIndices;
 import org.metaborg.meta.nabl2.stratego.TermIndex;
 import org.metaborg.meta.nabl2.terms.ITerm;
-import org.metaborg.meta.nabl2.terms.generic.GenericTerms;
+import org.metaborg.meta.nabl2.terms.generic.TB;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.source.SourceSection;
@@ -31,7 +31,7 @@ public abstract class NaBL2TermBuild extends TermBuild {
 
     protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
         TermIndex index = getTermIndex(sterm);
-        ITerm keyterm = GenericTerms.newAppl(key);
+        ITerm keyterm = TB.newAppl(key);
         Optional<ITerm> val = context.getSolution().getAstProperties().getValue(index, keyterm);
         if(!val.isPresent()) { 
             throw new IllegalArgumentException("Node has no type.");
