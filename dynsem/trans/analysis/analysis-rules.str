@@ -459,7 +459,7 @@ rules // type rules for match-sides
   type-check-match-tuple(|in-ty):
     ty@Tuple(t*) -> TupleType(<zip(type-check-match-wrap)> (f-ty*, t*))
     where
-      TupleType(f-ty*) := in-ty
+      TupleType(f-ty*) := <get-alias-base> in-ty
 
   type-check-match-tuple(|in-ty):
     Tuple(t*) -> TupleType(<map(type-check-match(|in-ty))> t*)
