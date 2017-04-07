@@ -142,6 +142,7 @@ context-free syntax // terms
   Term.ListTail = <[ <{Term ", "}*> | <Term> ]>
   Term.ListLength = <|<Term>|>
   Term.Concat   = [[Term] ++ [Term]] {left}
+  Term.Reverse  = [`[Term]] {left}
   
   Term.TermPlaceholder = <???>
   

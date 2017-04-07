@@ -268,6 +268,11 @@ rules
       ty1@ListType(_) := <type-check-build> t1;
       ty2@ListType(_) := <type-check-build> t2
   
+  type-check-build-list:
+    Reverse(t) -> ty
+    where
+      ty@ListType(_) := <type-check-build; get-alias-base> t
+  
   type-check-build-tuple:
     Tuple(t*) -> TupleType(<map(type-check-build)> t*)
 
