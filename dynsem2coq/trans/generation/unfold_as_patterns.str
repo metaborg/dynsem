@@ -4,8 +4,7 @@ module generation/unfold_as_patterns
 
 imports
   signatures/ds-sig
-  signatures/Signatures-sig
-  signatures/Signatures-sig
+  signatures/dynsem/Signatures-sig
   ds
   analysis/analysis-rules
   
