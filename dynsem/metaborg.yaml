@@ -16,6 +16,23 @@ exports:
   directory: trans
 - language: Stratego-Sugar
   directory: src-gen
+- language: ATerm
+  directory: src-gen/syntax
+- language: SDF
+  directory: src-gen/syntax
+  includes: "**/*.sdf"
+- language: TemplateLang
+  directory: syntax
+  includes: "**/*.sdf3"
+- language: Stratego-Sugar
+  directory: trans
+  includes: "**/*.str"
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "**/*.str"
+- language: EditorService
+  directory: src-gen
+  includes: "**/*.esv"
 contributions:
 - name: ds
   id: org.metaborg:dynsem:${metaborgVersion}

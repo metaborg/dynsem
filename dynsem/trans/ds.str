@@ -2,7 +2,7 @@ module ds
 
 imports
 	signatures/ds-sig
-	signatures/Common-sig
+	signatures/dynsem/Common-sig
 	analysis/constructors
 
 imports
