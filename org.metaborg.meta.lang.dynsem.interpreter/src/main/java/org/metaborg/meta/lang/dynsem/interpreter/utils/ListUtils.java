@@ -10,6 +10,9 @@ public class ListUtils {
 
 	@TruffleBoundary
 	public static <T> IPersistentStack<T> reverse(IPersistentStack<T> list) {
+		if (list.count() == 0) {
+			return list;
+		}
 		final PersistentList<T> plist = (PersistentList<T>) list;
 
 		final LinkedList<T> temp = new LinkedList<>();
