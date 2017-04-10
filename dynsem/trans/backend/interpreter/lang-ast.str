@@ -385,6 +385,7 @@ rules /* Sort & Constructor classes */
         import org.apache.commons.lang3.builder.HashCodeBuilder;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+        import org.metaborg.meta.lang.dynsem.interpreter.utils.ListUtils;
         import com.github.krukow.clj_lang.IPersistentStack;
         import com.github.krukow.clj_lang.PersistentList;
         import com.github.krukow.clj_lang.ISeq;
@@ -495,6 +496,11 @@ rules /* Sort & Constructor classes */
               backend = _cons(backend, elems[idx]);
             }
             return new x_listclass(backend, getStrategoTerm());
+          }
+          
+          @Override
+          public x_listclass reverse() {
+            return new x_listclass(ListUtils.reverse(backend), null);
           }
           
           @Override
