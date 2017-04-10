@@ -21,15 +21,8 @@ public abstract class ListReverseTermBuild extends TermBuild {
 	@SuppressWarnings("rawtypes")
 	@Specialization
 	public IListTerm doEvaluated(IListTerm l) {
-		
-		return null;
+		return l.reverse();
 	}
-
-	// @SuppressWarnings({ "rawtypes", "unchecked" })
-	// @Specialization
-	// public IListTerm doLists(IListTerm l, IListTerm r){
-	// return r.addAll(l.toArray());
-	// }
 
 	public static ListReverseTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "Reverse", 1);
