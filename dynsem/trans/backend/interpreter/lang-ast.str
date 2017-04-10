@@ -813,7 +813,6 @@ rules /* term building */
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      debug(!"Tuples: ");
       con-build* := <map(ds-to-interp-terms-building-con)> con-dec*;
       list-build* := <map(ds-to-interp-terms-building-list)> list-dec*;
       tuple-build* := <map(ds-to-interp-terms-building-tuple)> tuple-dec*
