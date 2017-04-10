@@ -23,6 +23,7 @@ public class DynSemContext {
 
 	private final InputStream input;
 	private final PrintStream output;
+	private final PrintStream err;
 
 	private final IDynSemLanguageParser parser;
 	private final ITermRegistry termRegistry;
@@ -31,16 +32,17 @@ public class DynSemContext {
 	private final Map<String, Object> config;
 
 	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
-		this(parser, termRegistry, ruleRegistry, System.in, System.out, new HashMap<String, Object>());
+		this(parser, termRegistry, ruleRegistry, System.in, System.out, System.err, new HashMap<String, Object>());
 	}
 
 	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry,
-			InputStream input, PrintStream output, Map<String, Object> config) {
+			InputStream input, PrintStream output, PrintStream err, Map<String, Object> config) {
 		this.parser = parser;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
 		this.output = output;
+		this.err = err;
 		this.config = config;
 	}
 
@@ -129,6 +131,14 @@ public class DynSemContext {
 	 */
 	public PrintStream getOutput() {
 		return output;
+	}
+
+	/**
+	 * 
+	 * @return a reference to the error {@link OutputStream} configured for this {@link DynSemContext}
+	 */
+	public PrintStream getErr() {
+		return err;
 	}
 
 }
