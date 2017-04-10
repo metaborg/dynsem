@@ -226,7 +226,7 @@ rules /* unquote string literals */
   
 rules /* resugar list construction */
 
-  resugar-lists-tuples = innermost(resugar-list); innermost(add-typeanno-to-list-tuples)
+  resugar-lists-tuples = innermost(resugar-list); bottomup(try(add-typeanno-to-list-tuples)); innermost(list-to-typedlist)
 
   resugar-list:
     Cast(Wld(), _) -> Wld()
@@ -241,60 +241,61 @@ rules /* resugar list construction */
     ListTail(h*, Cast(List([]), _)) -> List(h*)
   
   add-typeanno-to-list-tuples:
-    l@List(elems) -> TypedList(elems, list-class)
+    l@List(elems) -> Cast(List(elems), list-sort)
     where
-      list-sort := <type-of; derw-type> l;
-      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+      list-sort := <type-of; derw-type> l
 
   add-typeanno-to-list-tuples:
-    l@ListTail(elems, tail) -> TypedListTail(elems, tail, list-class)
+    l@ListTail(elems, tail) -> Cast(ListTail(elems, tail), list-sort)
     where
-      list-sort := <type-of; derw-type> l;
-      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort 
+      list-sort := <type-of; derw-type> l 
   
   add-typeanno-to-list-tuples:
-    Cast(List([]), list-sort) -> TypedList([], <ds-to-interp-terms-types-name; qualify-term-class> list-sort)
-  
-  add-typeanno-to-list-tuples:
-    Formula(Match(List([]), rhs)) -> Formula(Match(TypedList([], list-class), rhs))
+    Formula(Match(List([]), rhs)) -> Formula(Match(Cast(List([]), list-sort), rhs))
     where
-      list-sort := <type-of; derw-type> rhs;
-      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+      list-sort := <type-of; derw-type> rhs
   
   add-typeanno-to-list-tuples:
-    LabelComp(Label(l), List([])) -> LabelComp(Label(l), TypedList([], list-class))
+    LabelComp(Label(l), List([])) -> LabelComp(Label(l), Cast(List([]), list-sort))
     where
-      list-sort := <lookup-def(|Components()); lookup-prop(|Type()); derw-type> l;
-      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+      list-sort := <lookup-def(|Components()); lookup-prop(|Type()); derw-type> l
   
   add-typeanno-to-list-tuples:
-    Cast(Tuple(t*), tuple-sort@TupleSort(_)) -> TypedTuple(t*, <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort) 
-  
-  add-typeanno-to-list-tuples:
-    tup@Tuple(t*) -> TypedTuple(t*, tuple-class)
+    tup@Tuple(t*) -> Cast(Tuple(t*), tuple-sort)
     where
-      tuple-sort := <type-of; derw-type> tup;
-      tuple-class := <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort
+      tuple-sort := <type-of; derw-type> tup
   
   add-typeanno-to-list-tuples:
-    MapKeys(t) -> TypedMapKeys(t, keylist-class)
+    MapKeys(t) -> Cast(MapKeys(t), <derw-type> ListType(k))
     where
-      MapType(k, _) := <type-of> t;
-      keylist-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> ListType(k)
+      MapType(k, _) := <type-of> t
   
   add-typeanno-to-list-tuples:
-    MapValues(t) -> TypedMapValues(t, valuelist-class)
+    MapValues(t) -> Cast(MapValues(t), <derw-type> ListType(v))
     where
-      MapType(_, v) := <type-of> t;
-      valuelist-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> ListType(v)
+      MapType(_, v) := <type-of> t
   
   add-typeanno-to-list-tuples:
     Relation(src, arr@NamedDynamicEmitted(_, arr-name, in-sort), Target(Tuple(tup-t*), o-rw*)) ->
-      Relation(src, arr, Target(TypedTuple(tup-t*, tuple-class), o-rw*))
+      Relation(src, arr, Target(Cast(Tuple(tup-t*), <derw-type> out-ty), o-rw*))
     where
       in-ty := <rw-type> in-sort;
-      ArrowType(_, out-ty) := <select-applicable-arrow-callsite; lookup-prop(|Type())> (<lookup-defs(|Arrows())> arr-name, in-ty);
-      tuple-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> out-ty
+      ArrowType(_, out-ty) := <select-applicable-arrow-callsite; lookup-prop(|Type())> (<lookup-defs(|Arrows())> arr-name, in-ty)
+  
+  list-to-typedlist:
+    Cast(List(elems), list-sort) -> TypedList(elems, list-class)
+    where
+       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+  
+  list-to-typedlist:
+    Cast(ListTail(elems, tail), list-sort) -> TypedListTail(elems, tail, list-class)
+    where
+      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+  
+  list-to-typedlist:
+    Cast(Tuple(elems), tuple-sort) -> TypedTuple(elems, tuple-class)
+    where
+       tuple-class := <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort
 
 rules /* desugaring concat */
 
