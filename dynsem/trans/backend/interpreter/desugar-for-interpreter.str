@@ -296,6 +296,16 @@ rules /* resugar list construction */
     Cast(Tuple(elems), tuple-sort) -> TypedTuple(elems, tuple-class)
     where
        tuple-class := <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort
+  
+  list-to-typedlist:
+    Cast(MapKeys(t), list-sort) -> TypedMapKeys(t, keylist-class)
+    where
+      keylist-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+  
+  list-to-typedlist:
+    Cast(MapValues(t), list-sort) -> TypedMapValues(t, vallist-class)
+    where
+      vallist-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
 
 rules /* desugaring concat */
 
