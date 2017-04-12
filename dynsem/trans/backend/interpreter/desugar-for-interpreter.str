@@ -256,6 +256,11 @@ rules /* resugar list construction */
       list-sort := <type-of; derw-type> rhs
   
   add-typeanno-to-list-tuples:
+    Formula(Match(lhs, tup@Tuple(_))) -> Formula(Match(lhs, Cast(tup, tuple-sort)))
+    where
+      tuple-sort := <type-of; derw-type> lhs
+  
+  add-typeanno-to-list-tuples:
     LabelComp(Label(l), List([])) -> LabelComp(Label(l), Cast(List([]), list-sort))
     where
       list-sort := <lookup-def(|Components()); lookup-prop(|Type()); derw-type> l

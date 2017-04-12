@@ -18,7 +18,7 @@ rules
     Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr@NamedDynamicEmitted(_, arrow-name), Target(t, tc*))) -> 
       Rule(p*, infer, Relation(Reads(r*), Source(lhs, sc*), arr, Target(Cast(t, bu-ty-str), tc*)))
     where
-      <?List([]) + ?Map([])> t
+      <?List([]) + ?Map([]) + ?Tuple(_)> t
     where
       ArrowType(ma-ty, bu-ty) := <resolve-applicable-arrow-defsite; lookup-prop(|Type())> (arrow-name, <type-of> lhs);
       bu-ty-str := <derw-type> bu-ty
