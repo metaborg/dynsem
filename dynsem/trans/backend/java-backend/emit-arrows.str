@@ -2,6 +2,7 @@ module backend/java-backend/emit-arrows
 
 imports
   signatures/ds-sig
+  signatures/dynsem/-
   libjava-front
   
 imports

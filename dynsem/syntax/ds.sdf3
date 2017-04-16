@@ -1,8 +1,8 @@
 module ds
 
-imports Common Module Signatures
+imports dynsem/Common dynsem/Module dynsem/Signatures
  
-context-free start-symbols Module
+context-free start-symbols Module 
 
 context-free syntax // rules
      

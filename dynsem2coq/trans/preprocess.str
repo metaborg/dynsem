@@ -10,10 +10,10 @@ imports
   coqmappings
   ds2v
   generation/err_rules
-	generation/unfold_cases // FIXME: should happen in main.
+  generation/unfold_cases // FIXME: should happen in main.
   signatures/ds-sig
-  signatures/Module-sig
-	signatures/Signatures-sig
+  signatures/dynsem/Module-sig
+  signatures/dynsem/Signatures-sig
 
 rules
            

@@ -1,7 +1,7 @@
-module Signatures
+module dynsem/Signatures
 
 imports
-  Common
+  dynsem/Common
   ds
 
 context-free syntax

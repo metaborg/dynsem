@@ -2,6 +2,7 @@ module ds2ds/copy-propagation
 
 imports
   signatures/-
+  signatures/dynsem/-
 
 rules
   
