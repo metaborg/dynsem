@@ -21,7 +21,7 @@ rules
     ; mark-rule-arguments
     ; desugar-natives
     ; desugar-list-reductions
-    ; desugar-rec-tco
+//    ; desugar-rec-tco
     ; desugar-unquote-strings
     ; desugar-nmatch-neq
     ; desugar-concat-all
@@ -264,7 +264,7 @@ rules /* resugar list construction */
   add-typeanno-to-list-tuples:
     LabelComp(Label(l), List([])) -> LabelComp(Label(l), TypedList([], list-class))
     where
-      list-sort := <lookup-def(|Components()); lookup-prop(|Type())> l;
+      list-sort := <lookup-def(|Components()); lookup-prop(|Type()); derw-type> l;
       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
   
   add-typeanno-to-list-tuples:
@@ -293,8 +293,7 @@ rules /* resugar list construction */
       Relation(src, arr, Target(TypedTuple(tup-t*, tuple-class), o-rw*))
     where
       in-ty := <rw-type> in-sort;
-      arr-def* := <lookup-defs(|Arrows())> arr-name;
-      ArrowType(_, out-ty) := <get-applicable-arrowdef(flip(type-coerce-direct(fail))); lookup-prop(|Type())> (arr-def*, in-ty);
+      ArrowType(_, out-ty) := <select-applicable-arrow-callsite; lookup-prop(|Type())> (<lookup-defs(|Arrows())> arr-name, in-ty);
       tuple-class := <derw-type; ds-to-interp-terms-types-name; qualify-term-class> out-ty
 
 rules /* desugaring concat */

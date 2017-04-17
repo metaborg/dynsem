@@ -2,6 +2,7 @@ module ds2ds/core
 
 imports
   signatures/-
+  signatures/dynsem/-
   analysis/resolve-includes
   analysis/lib-analysis
   analysis/mark-references
@@ -32,6 +33,7 @@ strategies
       ; factorize-module
       ; expand-implicits-module
       ; factorize-module
+      ; expand-defaultcomponents-module-top
       ; explication-explicate-module
       ; copy-propagation-module
       ; defactorize-module

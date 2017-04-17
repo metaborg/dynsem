@@ -3,7 +3,7 @@ module generation/clock_timeouts
 imports
 	codegen
   signatures/ds-sig
-  signatures/Signatures-sig
+  signatures/dynsem/Signatures-sig
   analysis/analysis-rules
   lib-ds
   ds2ds/explicate-arrow-types

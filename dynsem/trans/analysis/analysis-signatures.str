@@ -55,7 +55,7 @@ rules /* store signatures */
         if
           <fetch-elem(?MetafunAnno())> anno*
         then
-          <store-prop(|ConsKind(), c-def)> MetafunCons()
+          <store-prop(|ConsKind(), c-def)> Metafunc()
         else
           <store-prop(|ConsKind(), c-def)> LanguageCons()
         end
@@ -97,6 +97,13 @@ rules /* store signatures */
     with
       <store-def(|Components())> x => comp-def;
       <rw-type; store-prop(|Type(), comp-def)> s
+  
+  store-semantic-component:
+    d@CompDeclDefault(x, s, t) -> d
+    with
+      <store-def(|Components())> x => comp-def;
+      <rw-type; store-prop(|Type(), comp-def)> s;
+      <store-prop(|DefaultValue(), comp-def)> t
   
   store-native-operators = NativeOperators(map(store-native-operator))
   

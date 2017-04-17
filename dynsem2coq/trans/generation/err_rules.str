@@ -2,7 +2,7 @@ module generation/err_rules
 
 imports
   signatures/ds-sig
-  signatures/Signatures-sig
+  signatures/dynsem/Signatures-sig
   analysis/-
   ds2ds/explicate-arrow-types
   lib-ds

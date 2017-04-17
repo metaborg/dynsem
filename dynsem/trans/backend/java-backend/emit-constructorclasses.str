@@ -2,6 +2,7 @@ module backend/java-backend/emit-constructorclasses
 
 imports
   signatures/-
+  signatures/dynsem/-
   ds
 
 imports

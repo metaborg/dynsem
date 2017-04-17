@@ -2,7 +2,7 @@ module generation/unfold_cases
 
 imports
   signatures/ds-sig
-  signatures/Signatures-sig
+  signatures/dynsem/Signatures-sig
   
 rules // Unfold case constructions
 

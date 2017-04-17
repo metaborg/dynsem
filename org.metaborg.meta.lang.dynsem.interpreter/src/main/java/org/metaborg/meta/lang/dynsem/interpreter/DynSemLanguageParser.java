@@ -11,6 +11,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.client.SGLRParseResult;
+import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
 import org.spoofax.jsglr.client.imploder.TermTreeFactory;
 import org.spoofax.jsglr.client.imploder.TreeBuilder;
 import org.spoofax.jsglr.shared.SGLRException;
@@ -45,7 +46,7 @@ public class DynSemLanguageParser implements IDynSemLanguageParser {
 
 		try {
 			SGLRParseResult parseResult = parser.parse(IOUtils.toString(src.getInputStream(), Charset.defaultCharset()),
-					src.getName(), startSymbol);
+					src.getPath(), startSymbol);
 			IStrategoTerm term = (IStrategoTerm) parseResult.output;
 			return term;
 		} catch (SGLRException | InterruptedException | IOException e) {
@@ -55,7 +56,8 @@ public class DynSemLanguageParser implements IDynSemLanguageParser {
 	}
 
 	private void createParser() {
-		TreeBuilder treebuilder = new TreeBuilder(new TermTreeFactory(new TermFactory()));
+		TreeBuilder treebuilder = new TreeBuilder(
+				new TermTreeFactory(new ImploderOriginTermFactory(new TermFactory())));
 
 		parser = new SGLR(treebuilder, loadPT());
 

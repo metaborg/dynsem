@@ -2,6 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.CaseMatchPremise.CaseMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -86,7 +88,11 @@ public abstract class Case extends DynSemNode {
 		@Override
 		public void execute(VirtualFrame frame, Object t) {
 			// execute the match
-			pattern.executeMatch(frame, t);
+			try {
+				pattern.executeMatch(frame, t);
+			} catch (PatternMatchFailure pmex) {
+				throw CaseMatchFailure.INSTANCE;
+			}
 
 			// signal that the match has actually succeeded
 			patternSucceeded.enter();

@@ -1,4 +1,4 @@
-module Common
+module dynsem/Common
   
   context-free syntax
     NONE.None = <>

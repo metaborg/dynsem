@@ -20,8 +20,7 @@ rules
     where
       <?List([]) + ?Map([])> t
     where
-      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-      ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (arrow-def*, <type-of> lhs);
+      ArrowType(ma-ty, bu-ty) := <resolve-applicable-arrow-defsite; lookup-prop(|Type())> (arrow-name, <type-of> lhs);
       bu-ty-str := <derw-type> bu-ty
 
   add-extra-typeannos-premise:

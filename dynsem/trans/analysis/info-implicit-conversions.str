@@ -2,7 +2,7 @@ module analysis/info-implicit-conversions
 
 imports
   signatures/ds-sig
-  signatures/Module-sig
+  signatures/dynsem/Module-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/analysis-rules
@@ -31,7 +31,7 @@ rules
           )
         ); fail
       + gen-implicit-info-conclusion; fail
-      + CaseMatch(id, filter(gen-implicit-info)); fail
+      + CaseMatch(gen-implicit-info(fail), filter(gen-implicit-info)); fail
       + CasePattern(id, filter(gen-implicit-info)); fail
       + CaseOtherwise(filter(gen-implicit-info)); fail
       + Formula(gen-implicit-info); fail
@@ -52,18 +52,16 @@ rules
     Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> <fail>
     where
       arrow-name := <get-arrow-name> arr;
-      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
       lhs-ty := <gen-implicit-info-type-of(id)> lhs;
-      ArrowType(dec-lhs-ty, _) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
+      ArrowType(dec-lhs-ty, _) := <resolve-applicable-arrow-defsite; lookup-prop(|Type())> (arrow-name, lhs-ty);
       <gen-implicit-info-fact(id|lhs)> (lhs-ty, dec-lhs-ty)
 
   gen-implicit-info-conclusion:
     Rule(_, _, Relation(_, Source(lhs, _), arr, Target(rhs, _))) -> <fail>
     where
       arrow-name := <get-arrow-name> arr;
-      arrow-def* := <lookup-defs(|Arrows())> arrow-name;
       lhs-ty := <rulelhs-get-type> lhs;
-      ArrowType(_, dec-rhs-ty) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
+      ArrowType(_, dec-rhs-ty) := <resolve-applicable-arrow-callsite; lookup-prop(|Type())> (arrow-name, lhs-ty);
       <gen-implicit-info-fact(fail)> (rhs, dec-rhs-ty)
   
   gen-implicit-info-premise:
@@ -75,7 +73,22 @@ rules
       r-ty := <gen-implicit-info-type-of(id)> rt;
       <try(gen-implicit-info-fact(id|p))> (r-ty, l-ty)
   
+  gen-implicit-info-premise:
+    Formula(Relation(_, Source(lhs, _), arr, _)) -> <fail>
+    where
+      arrow-name := <get-arrow-name> arr;
+      lhs-ty := <gen-implicit-info-type-of(id)> lhs;
+      ArrowType(dec-lhs-ty, _) := <resolve-applicable-arrow-callsite; lookup-prop(|Type())> (arrow-name, lhs-ty);
+      <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
+  
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
+
+  gen-implicit-info-term(is-matching):
+    Cast(t, s) -> <fail>
+    where
+      s-ty := <rw-type> s;
+      t-ty := <gen-implicit-info-type-of(is-matching)> t;
+      <gen-implicit-info-fact(is-matching|t)> (t-ty, s-ty)
 
   gen-implicit-info-term(is-matching):
     LabelComp(Label(l), t) -> <fail>
@@ -88,7 +101,7 @@ rules
     Con(c-name, c*) -> <fail>
     where
       c-arity := <length> c*;
-      ConstructorType(fc-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
+      ConstructorType(fc-ty*, cons-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c-name, c-arity);
       <zip(try(gen-implicit-info-fact(is-matching)))> (c*, fc-ty*)
 
   gen-implicit-info-term(is-matching):

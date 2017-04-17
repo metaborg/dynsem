@@ -2,7 +2,7 @@ module generation/explicate_nabl2_annotations
 
 imports
   signatures/ds-sig
-  signatures/Signatures-sig
+  signatures/dynsem/Signatures-sig
   lib-ds
   analysis/analysis-signatures
   analysis/analysis-rules

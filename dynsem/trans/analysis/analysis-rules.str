@@ -2,7 +2,7 @@ module analysis/analysis-rules
 
 imports
   signatures/ds-sig
-  signatures/Signatures-sig
+  signatures/dynsem/Signatures-sig
   analysis/lib-analysis
   analysis/constructors
   analysis/rename
@@ -53,9 +53,15 @@ rules /* store variables */
   store-rules-all =
     alltd(store-rules)
   
-  store-rules =
-    Rules(with(prime-typaths); map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked. This is a bug, please report it.]))))
-
+  store-rules:
+    rs@Rules([]) -> rs
+  
+  store-rules:
+    Rules(rulz@[_|_]) -> Rules(rulz')
+    with
+      prime-typaths;
+      rulz' := <map(store-rule <+ where(add-msg(|Error(), <id>, $[Rule could not be type checked. This is a bug, please report it.])))> rulz
+  
   store-rule:
     r@Rule(_, _, Relation(_, Source(lhs, _), arr, _)) -> r
     where
@@ -63,7 +69,7 @@ rules /* store variables */
       lhs-ty := <rulelhs-get-type> lhs;
       if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
       then
-        if arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+        if arrow-def := <select-applicable-arrow-defsite> (arrow-def*, lhs-ty)
         then
           <store-rule> (<lookup-prop(|Type())> arrow-def, r)
         else
@@ -72,7 +78,7 @@ rules /* store variables */
         end
       else
         add-msg(|Error(), arr, $[Arrow [arrow-name] is not declared])
-      end 
+      end
     
   rulelhs-get-type:
     Con(cname, c*) -> ty
@@ -169,7 +175,8 @@ rules
     <+ type-err-build
   
   type-check-build-helper =
-    type-check-build-num
+    type-check-build-termplaceholder
+    <+ type-check-build-num
     <+ type-check-build-str
     <+ type-check-build-bool
     <+ type-check-build-fresh
@@ -180,6 +187,7 @@ rules
     <+ type-check-build-map
     <+ type-check-build-cast
     <+ type-check-build-nativefuncall
+  
   
   type-err-build-match-symbols:
     t -> NONETYPE()
@@ -192,6 +200,9 @@ rules
     t -> NONETYPE()
     where
       add-msg(|Error(), t, $[Type error])
+
+  type-check-build-termplaceholder:
+    TermPlaceholder() -> ALPHATYPE()
   
   type-check-build-num:
   	Int(_) -> IntType()
@@ -303,7 +314,12 @@ rules
     Cast(t, ty-t) -> cast-ty
     where
       t-ty := <type-check-build> t;
-      cast-ty := <rw-type> ty-t
+      cast-ty := <rw-type> ty-t;
+      if <not(type-coerce-full(fail))> (t-ty, cast-ty)
+      then
+        add-msg(|Error(), t, $[Term of type [<pp-type> t-ty] cannot be cast to type [<pp-type> cast-ty]])
+      end
+      
 
   type-check-build-nativefuncall:
     SortFunCall(fun-name, parent-t, param-t*) -> fun-ty
@@ -389,15 +405,10 @@ rules // type rules for match-sides
     dec@Var(v) -> in-ty
     where
       v-ty := <lookup-def(|Vars()); lookup-prop(|Type())> v;
-      <not(type-coerce-direct(id))> (in-ty, v-ty);
-      add-msg(|Error(), dec, $[Rebinding variable [<unrename-var> v] with incompatibe type])
-  
-  type-check-match-var(|in-ty):
-    dec@Var(v) -> in-ty
-    where
-      v-ty := <lookup-def(|Vars()); lookup-prop(|Type())> v;
-      <type-coerce-direct(id)> (v-ty, in-ty)
-//      add-msg(|Warning(), dec, $[Possible rebinding of variable [<unrename-var> v]])
+      if <not(type-coerce-full(fail))> (in-ty, v-ty)
+      then
+        add-msg(|Error(), dec, $[Rebinding variable [<unrename-var> v] with incompatibe type (found [<pp-type> in-ty], expected [<pp-type> v-ty])])
+      end
   
   type-check-match-as(|in-ty):
   	As(v, p) -> ty
@@ -417,7 +428,7 @@ rules // type rules for match-sides
       c-def := <lookup-def(|Constructors())> (c, <length> aparam*);
       ConstructorType(fparam-ty*, ty) := <lookup-prop(|Type())> c-def;
       <zip(type-check-match-wrap)> (fparam-ty*, aparam*);
-      if <not(InSource); lookup-prop(|ConsKind())> c-def => MetafunCons()
+      if <not(InSource); lookup-prop(|ConsKind())> c-def => Metafunc()
       then
         add-msg(|Error(), t, $[Cannot match against meta-function [c]])
       end
@@ -490,7 +501,7 @@ rules
       lhs-ty := <type-check-build> lhs;
       if arrow-def* := <lookup-defs(|Arrows()); not(?[])> arrow-name
       then
-        if arrow-def := <get-applicable-arrowdef(flip(type-coerce-full(id)))> (arrow-def*, lhs-ty)
+        if arrow-def := <select-applicable-arrow-callsite> (arrow-def*, lhs-ty)
         then
           ArrowType(in-ty, out-ty) := <lookup-prop(|Type())> arrow-def;
           <type-check-expectation(type-coerce-full(fail)|lhs, in-ty)> lhs-ty;
@@ -641,7 +652,7 @@ rules /* support for implicit conversions */
   type-coerce-implicit-wrap(is-matching, coerce-s):
     ty-tup@(_, _) -> <type-path-get-out-ty(is-matching)> ty-step*
     where
-      ty-tup' := <try(is-matching; \ (a, b) -> (b, a) \)> ty-tup; 
+      ty-tup' := <try(is-matching; Swap)> ty-tup; 
       ty-step* := <type-coerce-implicit(is-matching, coerce-s)> ty-tup'
   
   type-coerce-implicit(is-matching, coerce-s):

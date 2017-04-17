@@ -42,8 +42,7 @@ rules
       Rule(p'*, infer, Relation(Reads(r*), Source(lhs', sc*), arr, Target(rhs', tc*)))
       where
         lhs-ty := <type-of> lhs;
-        arrow-def* := <lookup-defs(|Arrows())> arrow-name;
-        ArrowType(ma-ty, bu-ty) := <get-applicable-arrowdef(flip(type-coerce-full(id))); lookup-prop(|Type())> (arrow-def*, lhs-ty);
+        ArrowType(ma-ty, bu-ty) := <resolve-applicable-arrow-defsite; lookup-prop(|Type())> (arrow-name, lhs-ty);
         (lhs', p-lhs*) := <try-or-mktup(expand-implicits-source(|ma-ty))> lhs;
         (rhs', p-rhs*) := <try-or-mktup(expand-implicits-target(|bu-ty))> rhs;
         p'* := <mapconcat(try-or-mksingleton(expand-implicits-premise))> [p-lhs*, p*, p-rhs*]
@@ -59,7 +58,7 @@ rules
       [p*, Formula(Relation(Reads(r'*), Source(lhs'', sc'*), arr, tgt))]
     where
       (r'*, p1*) := <map(expand-implicits-termbuild <+ \ LabelComp(l, t) -> (LabelComp(l, t), []) \); unzip; (id, concat)> r*;
-      ArrowType(in-ty, _) :=  <get-applicable-arrowdef(type-coerce-full(id)); lookup-prop(|Type())> (<lookup-defs(|Arrows())> arrow-name, <type-of> lhs); 
+      ArrowType(in-ty, _) :=  <resolve-applicable-arrow-callsite; lookup-prop(|Type())> (arrow-name, <type-of> lhs); 
       (lhs', p2*) := <lift-where-indirect <+ \ (_, t) -> (t, []) \> (in-ty, lhs);
       (lhs'', p3*) := <expand-implicits-termbuild <+ \ t -> (t, []) \> lhs';
       (sc'*, p4*) := <map(expand-implicits-termbuild <+ \ LabelComp(l, t) -> (LabelComp(l, t), []) \); unzip; (id, concat)> sc*;
@@ -83,6 +82,12 @@ rules
 
 rules /* lift and expand subterms on build sides */
 
+  expand-implicits-termbuild:
+    Cast(t, s) -> (t', p*)
+    where
+      s-ty := <rw-type> s;
+      (t', p*) := <lift-where-indirect> (s-ty, t)
+  
   expand-implicits-termbuild:
     Con(c, child*) -> (Con(c, child'*), p*)
     where
