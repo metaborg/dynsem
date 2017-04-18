@@ -4,7 +4,9 @@ imports
 	signatures/ds-sig
 	signatures/dynsem/Common-sig
 	analysis/constructors
-
+  completion/completion
+  completion/dynsem/-
+  
 imports
 	pp
 	outline

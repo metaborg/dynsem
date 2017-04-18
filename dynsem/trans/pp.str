@@ -6,9 +6,28 @@ imports
   libspoofax/sdf/pp
   signatures/-
   pp/-
-  pp/ds-parenthesize
+  pp/dynsem/-
   ds
-  
+
+rules
+  pp-ds-string =
+    parenthesize-ds
+    ; prettyprint-ds-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-ds-string =
+    parenthesize-ds
+    ; prettyprint-ds
+    ; !V([], <id>)
+    ; box2text-string(|120)
+    
+  pp-partial-ds-string(|sort) =
+    parenthesize-ds
+    ; prettyprint-ds(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)  
+      
 rules
   
   prettyprint-Var :
