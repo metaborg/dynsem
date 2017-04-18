@@ -11,9 +11,6 @@ language
                         
   extensions : ds
   
-  table         : target/metaborg/sdf.tbl
-  start symbols : Module
-  
   provider : target/metaborg/stratego.jar
   provider : target/metaborg/stratego-javastrat.jar
 

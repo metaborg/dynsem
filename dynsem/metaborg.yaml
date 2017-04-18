@@ -42,7 +42,13 @@ pardonedLanguages:
 - SDF
 build:
  useBuildSystemSpec: true
+ 
 language:
+  sdf:
+    # If set to java, set the table in editor/Syntax.esv to target/metaborg/sdf-new.tbl
+    sdf2table: java
+    placeholder:
+      prefix: "$"
   stratego:
     format: jar
     args:
