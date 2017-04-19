@@ -4,6 +4,8 @@ imports
   ds2ds/-
   analysis/-
   libstratego-gpp
+  pp
+  pp-coq
 	pp/Coq-parenthesize
 	pp/Coq-pp
 	generation/clock_timeouts
