@@ -1,6 +1,7 @@
 module Colorer
 
 imports libspoofax/color/default
+        completion/colorer/ds-cc-esv
 
 colorer
 
