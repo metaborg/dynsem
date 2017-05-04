@@ -44,6 +44,7 @@ rules
   	<+ As(make-vars, make-vars)
   	<+ CasePattern(make-vars, mark-vardefs-in-premise)
   	<+ CaseOtherwise(mark-vardefs-in-premise)
+  	<+ GuardedBind(make-vars, id)
 
   make-vars =
   	alltd(origin-track-forced(\ VarRef(x) -> Var(x) \))

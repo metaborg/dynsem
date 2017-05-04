@@ -268,6 +268,11 @@ rules
       ty1@ListType(_) := <type-check-build> t1;
       ty2@ListType(_) := <type-check-build> t2
   
+  type-check-build-list:
+    Reverse(t) -> ty
+    where
+      ty@ListType(_) := <type-check-build; get-alias-base> t
+  
   type-check-build-tuple:
     Tuple(t*) -> TupleType(<map(type-check-build)> t*)
 
@@ -285,6 +290,13 @@ rules
     where
       map1-ty@MapType(_, _) := <type-check-build; try(get-alias-base)> map1;
       map2-ty@MapType(_, _) := <type-check-build; try(get-alias-base)> map2
+
+  type-check-build-map:
+    MapUnbind(map-t, key-t) -> map-ty
+    where
+      map-ty@MapType(m-key-ty, _) := <type-check-build; try(get-alias-base)> map-t;
+      key-ty := <type-check-build; try(get-alias-base)> key-t;
+      <type-coerce-full(fail)> (key-ty, m-key-ty)
 
   type-check-build-map:
     DeAssoc(m-t, k-t) -> val-ty
@@ -452,7 +464,7 @@ rules // type rules for match-sides
   type-check-match-tuple(|in-ty):
     ty@Tuple(t*) -> TupleType(<zip(type-check-match-wrap)> (f-ty*, t*))
     where
-      TupleType(f-ty*) := in-ty
+      TupleType(f-ty*) := <get-alias-base> in-ty
 
   type-check-match-tuple(|in-ty):
     Tuple(t*) -> TupleType(<map(type-check-match(|in-ty))> t*)
@@ -546,10 +558,26 @@ rules
     with
       in-ty := <type-check-build> tb;
       <map(type-check-case(|in-ty))> case*
-      
   
-  type-check-premise = ?AllFail()
-
+  type-check-premise:
+    f@GuardedBind(v, guarded-value*) -> f
+    where
+      <map(try(type-check-guarded-value(|v)))> guarded-value*;
+      if (_, [_|_]) := <split-fetch(?UValue(_))> guarded-value*
+      then
+        add-msg(|Warning(), guarded-value*, $[Contains unreachble assignments])
+      end
+  
+  type-check-guarded-value(|v):
+    UValue(t) -> <type-check-premise> Formula(Match(t, v))
+  
+  type-check-guarded-value(|v):
+    guarded-value -> <type-check-premise-top> Formula(Match(t, v))
+    where
+      ?GValue(t, ct) + ?NegGValue(t, ct)
+    where
+      <type-check-build-expect(|BoolType())> ct
+  
   type-check-case(|in-ty):
     c@CaseOtherwise(prem*) -> c
     with

@@ -128,18 +128,38 @@ rules /* lift and expand subterms on build sides */
       ListType(f-l-ty) := <type-of> l-t;
       (idx-t', p*) := <lift-where-indirect <+ !(idx-t, [])> (f-l-ty, idx-t)
 
+  // map has check
+  expand-implicits-termbuild:
+    MapHas(m-t, k-t) -> (MapHas(m-t, k-t'), p*)
+    where
+      MapType(f-k-ty, _) := <type-of> m-t;
+      (k-t', p*) := <lift-where-indirect <+ !(k-t, [])> (f-k-ty, k-t)
+
   expand-implicits-termbuild:
     MapExtend(Map([Bind(k, v)]), m) -> (MapExtend(Map([Bind(k', v')]), m), [p1*, p2*])
     where
       MapType(k-ty, v-ty) := <type-of> m;
       (k', p1*) := <lift-where-indirect <+ !(k, [])> (k-ty, k);
       (v', p2*) := <lift-where-indirect <+ !(v, [])> (v-ty, v)
+  
+  expand-implicits-termbuild:
+    MapUnbind(map, key) -> (MapUnbind(map, key'), p1*)
+    where
+      MapType(k-ty, v-ty) := <type-of> map;
+      (key', p1*) := <lift-where-indirect <+ !(key, [])> (k-ty, key)
 
   expand-implicits-termbuild:
     LabelComp(Label(l), t) -> (LabelComp(Label(l), t'), p*)
     where
       ty := <lookup-def(|Components()); lookup-prop(|Type())> l;
       (t', p*) := <lift-where-indirect> (ty, t)
+
+  expand-implicits-termbuild:
+    c@Concat(t1, t2) -> (Concat(t1', t2'), [p1*, p2*])
+    where
+      StringType() := <type-of> c;
+      (t1', p1*) := <lift-where-indirect> (StringType(), t1);
+      (t2', p2*) := <lift-where-indirect> (StringType(), t2) 
 
   lift-where-indirect:
     (e-ty, t) -> (VarRef(v-new), [Formula(Match(t, Var(v-new)))])

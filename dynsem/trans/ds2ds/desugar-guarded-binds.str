@@ -1,0 +1,31 @@
+module ds2ds/desugar-guarded-binds
+
+imports
+  signatures/-
+  analysis/-
+
+rules
+  
+  desugar-guarded-binds-module = Module(id, alltd(desugar-guarded-binds))
+  
+  desugar-guarded-binds:
+    GuardedBind(v, guarded-value*) -> p
+    where
+      [p] := <foldr(![], desugar-guarded-bind(|v))> guarded-value*
+  
+  desugar-guarded-bind(|v):
+    (UValue(t), _) -> [Formula(Match(t, v))]
+  
+  desugar-guarded-bind(|v):
+    (GValue(t, ct), p*) -> [CaseMatch(Cast(ct, <derw-type> BoolType()), [case_positive, case_negative])]
+    where
+      case_positive := CasePattern(True(), [Formula(Match(t, v))]);
+      case_negative := CaseOtherwise(p*)
+  
+  desugar-guarded-bind(|v):
+    (NegGValue(t, ct), p*) -> [CaseMatch(Cast(ct, <derw-type> BoolType()), [case_positive, case_negative])]
+    where
+      case_positive := CasePattern(False(), [Formula(Match(t, v))]);
+      case_negative := CaseOtherwise(p*) 
+ 
+ 

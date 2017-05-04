@@ -81,6 +81,30 @@ rules
       ArrowType(dec-lhs-ty, _) := <resolve-applicable-arrow-callsite; lookup-prop(|Type())> (arrow-name, lhs-ty);
       <gen-implicit-info-fact(fail|lhs)> (lhs-ty, dec-lhs-ty)
   
+  gen-implicit-info-premise:
+    GuardedBind(rhs, guarded-value*) -> <fail>
+    where
+      rhs-ty := <gen-implicit-info-type-of(fail)> rhs;
+      <filter(gen-implicit-info-guardedvalue(|rhs, rhs-ty))> guarded-value*
+  
+  gen-implicit-info-guardedvalue(|rhs, rhs-ty):
+    guarded-value -> <fail>
+    where
+      ?GValue(_, ct) + ?NegGValue(_, ct)
+    where
+    <gen-implicit-info(fail)> ct;
+      ct-ty := <gen-implicit-info-type-of(fail); get-alias-base> ct;
+      <gen-implicit-info-fact(fail|ct)> (ct-ty, BoolType())
+  
+  gen-implicit-info-guardedvalue(|rhs, rhs-ty):
+    guarded-value -> <fail>
+    where
+      ?GValue(t, _) + ?NegGValue(t, _) + ?UValue(t)
+    where
+      <gen-implicit-info(fail)> t;
+      t-ty := <gen-implicit-info-type-of(fail); get-alias-base> t;
+      <gen-implicit-info-fact(fail|rhs)> (t-ty, rhs-ty)
+  
   gen-implicit-info(is-matching) = alltd(gen-implicit-info-term(is-matching))
 
   gen-implicit-info-term(is-matching):
@@ -121,11 +145,21 @@ rules
 
   // list index access
   gen-implicit-info-term(is-matching):
-    DeAssoc(map-t, key-t) -> <fail>
+    deassoc-like -> <fail>
+    where
+      ?DeAssoc(map-t, key-t) + ?MapHas(map-t, key-t)
     where
       MapType(f-key-ty, _) := <gen-implicit-info-type-of(is-matching); get-alias-base> map-t;
       a-key-ty := <gen-implicit-info-type-of(is-matching)> key-t;
       <gen-implicit-info-fact(is-matching|key-t)> (a-key-ty, f-key-ty)
+  
+  gen-implicit-info-term(is-matching):
+    MapUnbind(map, key) -> <fail>
+    where not(is-matching)
+    where
+      MapType(f-key-ty, _) := <gen-implicit-info-type-of(is-matching); get-alias-base> map;
+      a-key-ty := <gen-implicit-info-type-of(is-matching)> key;
+      <gen-implicit-info-fact(is-matching|key)> (a-key-ty, f-key-ty)
 
   gen-implicit-info-fact(is-matching|on-term) =
     (is-matching < Swap + id);

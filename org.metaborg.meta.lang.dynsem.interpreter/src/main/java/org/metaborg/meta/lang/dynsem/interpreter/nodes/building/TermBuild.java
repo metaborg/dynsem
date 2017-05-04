@@ -86,16 +86,19 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "MapExtend", 2)) {
 			return MapExtendBuild.create(t, fd);
 		}
+		if (Tools.hasConstructor(t, "MapUnbind", 2)) {
+			return MapUnbindBuild.create(t, fd);
+		}
 		if (Tools.hasConstructor(t, "DeAssoc", 2)) {
 			return DeAssoc.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "MapHas", 2)) {
 			return MapHas.create(t, fd);
 		}
-		if(Tools.hasConstructor(t, "TypedMapKeys", 2)){
+		if (Tools.hasConstructor(t, "TypedMapKeys", 2)) {
 			return TypedMapKeys.create(t, fd);
 		}
-		if(Tools.hasConstructor(t, "TypedMapValues", 2)){
+		if (Tools.hasConstructor(t, "TypedMapValues", 2)) {
 			return TypedMapValues.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "True", 0)) {
@@ -110,7 +113,7 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "String", 1)) {
 			return StringLiteralTermBuild.create(t, fd);
 		}
-		if(Tools.hasConstructor(t, "StrConcat", 2)){
+		if (Tools.hasConstructor(t, "StrConcat", 2)) {
 			return StringConcatTermBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "ListSource", 2)) {
@@ -119,9 +122,14 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3)) {
 			return ListBuild.create(t, fd);
 		}
-		if(Tools.hasConstructor(t, "ListConcat", 2)){
+		if (Tools.hasConstructor(t, "ListConcat", 2)) {
 			return ListConcatTermBuildNodeGen.create(t, fd);
 		}
+
+		if (Tools.hasConstructor(t, "Reverse", 1)) {
+			return ListReverseTermBuildNodeGen.create(t, fd);
+		}
+
 		if (Tools.hasConstructor(t, "TypedTuple", 2)) {
 			return TupleBuild.create(t, fd);
 		}
@@ -136,7 +144,7 @@ public abstract class TermBuild extends DynSemNode {
 			// the cast
 			return TermBuild.create(Tools.applAt(t, 0), fd);
 		}
-		if(Tools.hasConstructor(t, "TermPlaceholder", 0)) {
+		if (Tools.hasConstructor(t, "TermPlaceholder", 0)) {
 			return TermPlaceholderBuild.create(t, fd);
 		}
 

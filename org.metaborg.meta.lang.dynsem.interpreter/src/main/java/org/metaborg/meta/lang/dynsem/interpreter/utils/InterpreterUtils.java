@@ -86,4 +86,23 @@ public final class InterpreterUtils {
 
 		return str.toString();
 	}
+
+	public static int stackDepth() {
+		final StringBuilder str = new StringBuilder();
+		Truffle.getRuntime().iterateFrames(new FrameInstanceVisitor<Integer>() {
+
+			@Override
+			public Integer visitFrame(FrameInstance frameInstance) {
+				CallTarget callTarget = frameInstance.getCallTarget();
+				RootNode rn = ((RootCallTarget) callTarget).getRootNode();
+				if (rn.getClass().getName().contains("DynSemRuleForeignAccess")) {
+					return 1;
+				}
+				str.append(" ");
+				return null;
+			}
+
+		});
+		return str.length();
+	}
 }

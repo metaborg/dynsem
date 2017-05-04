@@ -112,10 +112,10 @@ rules
             final StringBuilder outBuilder = new StringBuilder();
             outBuilder.append(new String(outputStream.toByteArray()));
 
-            if (errorStream.size() > 0) {
-              outBuilder.append(new String(errorStream.toByteArray()));
-              outBuilder.append(System.lineSeparator());
-            }
+//            if (errorStream.size() > 0) {
+//              outBuilder.append(new String(errorStream.toByteArray()));
+//              outBuilder.append(System.lineSeparator());
+//            }
             assertEquals(expectedOutput.trim(), outBuilder.toString().trim());
           }
         

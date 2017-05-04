@@ -9,7 +9,7 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class Fresh extends TermBuild {
 
-	private static int next = Integer.MIN_VALUE;
+	private static int next = 0;
 
 	public Fresh(SourceSection source) {
 		super(source);

@@ -4,7 +4,9 @@ imports
 	signatures/ds-sig
 	signatures/dynsem/Common-sig
 	analysis/constructors
-
+  completion/completion
+  completion/dynsem/-
+  
 imports
 	pp
 	outline
@@ -25,8 +27,15 @@ signature
 
 rules // Analysis
 	
+	editor-analyze:
+	 (ast, _, _) -> (ast, [], [], [])
+	 where
+	   <?() <+ ?Module-Plhdr()> ast
+	
   editor-analyze:
     (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
+    where
+      <not(?() <+ ?Module-Plhdr())> ast
 		with {| MyCurrentFile:
 		  f-path := $[[project-path]/[path]];
 		  rules(MyCurrentFile: _ -> f-path);

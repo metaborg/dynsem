@@ -2,6 +2,9 @@ module Syntax
 
 language
 
+  table         : target/metaborg/sdf-new.tbl
+  start symbols : Module
+
   line comment  : "//"
   block comment : "/*" * "*/"
 

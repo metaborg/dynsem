@@ -67,18 +67,24 @@ public interface IListTerm<T> extends ITerm {
 	 * 
 	 * @param elems
 	 *            an array of elements to be appended
-	 * @return a new {@link IListTerm} containing the prepended elements from <code>elems</code> followed by the elements of this {@link IListTerm}
+	 * @return a new {@link IListTerm} containing the prepended elements from <code>elems</code> followed by the
+	 *         elements of this {@link IListTerm}
 	 */
 	public IListTerm<T> addAll(T[] elems);
 
-	
-	
+	/**
+	 * Reverse this list. The new list will contain the same elements but in reverse order
+	 * 
+	 * @return a new {@link IListTerm} containing the same items but in reverse order
+	 */
+	public IListTerm<T> reverse();
+
 	/**
 	 * 
 	 * @return an iterator for this {@link IListTerm}
 	 */
 	public Iterator<T> iterator();
-	
+
 	/**
 	 * @return an array containing all of the elements in this list
 	 */
