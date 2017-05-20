@@ -125,6 +125,12 @@ rules // desugaring
      // this converts a Rule into a list of Rules
      // so they must later be concatenated, post-desugaring:
   
+  desugar :
+    RuleWDot(form, prem*) -> RuleW(form, prem*)
+  
+  desugar :
+    RuleDot(prem*, inf, form) -> Rule(prem*, inf, form)
+  
   rules-concat :
   	 Rules(list) -> Rules(list1)
   	 where list1 := <map(?Cons(_,_) <+ ( \ n -> Cons(n,Nil()) \)); concat> list
