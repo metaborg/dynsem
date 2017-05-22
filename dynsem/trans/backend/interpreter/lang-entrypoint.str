@@ -226,6 +226,55 @@ rules /* language file. interpreter entry point */
       }
     ]|
   
+  ds-to-interp-language-coreentry =
+    langname := <get-opt> LangName();
+    e_langname := Lit(String([Chars(langname)]));
+    x_entryPoint := $[[langname]EntryPoint];
+    x_classname := $[[langname]Runner];
+    !compilation-unit |[
+      package ~x:<get-opt> TopPkg();
+
+      import org.apache.commons.vfs2.FileObject;
+
+      import org.metaborg.core.MetaborgException;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemRunner;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemRunnerModule;
+      import org.metaborg.spoofax.core.Spoofax;
+
+      import com.google.inject.Module;
+
+      public class x_classname extends DynSemRunner {
+
+        public x_classname(Spoofax S) throws MetaborgException {
+          super(S, e_langname, new x_entryPoint());
+        }
+
+        public static void main(String[] args) {
+          if(args.length < 1) {
+              System.err.println("Usage: " + x_classname.class.getName() + " FILES");
+              return;
+          }
+          Spoofax S = null;
+          try {
+            S = new Spoofax(new DynSemRunnerModule(), new Module[0]);
+            DynSemRunner runner = new x_classname(S);
+            for(String fileName : args) {
+              FileObject file = S.resourceService.resolve(fileName);
+              Object result = runner.run(file, System.in, System.out, System.err);
+              System.out.println(result);
+            }
+          } catch (MetaborgException mbe) {
+            mbe.printStackTrace(System.err);
+          } finally {
+            if(S != null) {
+              S.close();
+            }
+          }
+        }
+
+      }
+    ]|
+
   ds-to-interp-language-daemonentry =
     langname := <get-opt> LangName();
     x_entryPoint := $[[langname]EntryPoint];
