@@ -15,6 +15,7 @@ rules
       ; ds-to-interp-gen-project-daemon-launchconfig
       ; ds-to-interp-gen-shell-scripts
       ; ds-to-interp-gen-project-pom
+      ; ds-to-interp-gen-logback-xml
       ; ds-to-interp-gen-apt-settings
       ; ds-to-interp-gen-project-gitignore
       ; java-gendir := <get-opt> JavaGenDirAbs()
@@ -107,6 +108,9 @@ rules
               </snapshots>
             </repository>
           </repositories>
+          <properties>
+            <slf4j.version>1.7.10</slf4j.version>
+          </properties>
           <dependencies>
             <dependency>
               <groupId>org.metaborg</groupId>
@@ -134,10 +138,45 @@ rules
               <artifactId>nailgun-server</artifactId>
               <version>0.9.1</version>
             </dependency>
+            <!-- Logging -->
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-api</artifactId>
+              <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>jcl-over-slf4j</artifactId>
+              <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>ch.qos.logback</groupId>
+              <artifactId>logback-classic</artifactId>
+              <version>1.1.2</version>
+            </dependency>
           </dependencies>
       </project>], pom-file);
     <fclose> pom-file
   
+  ds-to-interp-gen-logback-xml =
+    <get-opt ; (file-exists <+ mkdir)> ResourceDirAbs();
+    logback-file := <fopen> (<get-opt> TargetLogbackAbs(), "w");
+    <fputs> (
+      $[<configuration>
+          <appender name="stderr"
+                    class="ch.qos.logback.core.ConsoleAppender">
+            <target>System.err</target>
+            <encoder>
+              <pattern>%date{HH:mm:ss.SSS} | %-12.12thread | %-5level | %-40.40logger{30} - %message%n</pattern>
+            </encoder>
+          </appender>
+
+          <root level="warn">
+            <appender-ref ref="stderr" />
+          </root>
+       </configuration>], logback-file);
+    <fclose> logback-file
+
   ds-to-interp-gen-apt-settings =
     settings-dir := $[[<get-opt> GenProject()]/.settings];
     <file-exists <+ mkdir> settings-dir;
@@ -269,6 +308,7 @@ rules
       /target/
       [<get-opt> TargetSpecRel()]
       [<get-opt> TargetTableRel()]
+      [<get-opt> TargetLogbackRel()]
       [<get-opt; get-rel-path(|basedir-java)> TopPkg()]
       [<get-opt; get-rel-path(|basedir-java)> TermPkg()]
       [<get-opt; get-rel-path(|basedir-java)> BuildPkg()]
