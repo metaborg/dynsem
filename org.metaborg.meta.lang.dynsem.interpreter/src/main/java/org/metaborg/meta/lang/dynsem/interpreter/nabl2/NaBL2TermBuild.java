@@ -32,7 +32,7 @@ public abstract class NaBL2TermBuild extends TermBuild {
     protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
         TermIndex index = getTermIndex(sterm);
         ITerm keyterm = TB.newAppl(key);
-        Optional<ITerm> val = context.getSolution().getAstProperties().getValue(index, keyterm);
+        Optional<ITerm> val = context.getSolution().astProperties().getValue(index, keyterm);
         if(!val.isPresent()) { 
             throw new IllegalArgumentException("Node has no type.");
         }
