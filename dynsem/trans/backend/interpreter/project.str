@@ -120,13 +120,13 @@ rules
             <dependency>
               <groupId>com.oracle.truffle</groupId>
               <artifactId>truffle-api</artifactId>
-              <version>0.21</version>
+              <version>0.23</version>
               <type>jar</type>
             </dependency>
             <dependency>
               <groupId>com.oracle.truffle</groupId>
               <artifactId>truffle-dsl-processor</artifactId>
-              <version>0.21</version>
+              <version>0.23</version>
             </dependency>
             <dependency>
               <groupId>org.metaborg</groupId>
