@@ -22,7 +22,7 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class Rule extends DynSemNode {
 
 	public final static String DEFAULT_NAME = "";
-	
+
 	private final FrameDescriptor fd;
 	private final String arrowName;
 	private final RuleKind kind;

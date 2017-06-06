@@ -21,11 +21,10 @@ public abstract class ListConcatTermBuild extends TermBuild {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Specialization
-	public IListTerm doLists(IListTerm l, IListTerm r){
+	public IListTerm doLists(IListTerm l, IListTerm r) {
 		return r.addAll(l.toArray());
 	}
-	
-	
+
 	public static ListConcatTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "ListConcat", 2);
 

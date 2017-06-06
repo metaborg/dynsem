@@ -1,6 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -12,17 +15,11 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.FalseLiteralTermMatchPatternNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.IntLiteralTermMatchPatternNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.StringLiteralTermMatchPatternNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.TrueLiteralTermMatchPatternNodeGen;
-import org.strategoxt.stratego_lib.pattern_match_1_0;
 
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.SourceSection;
-import static org.mockito.Mockito.*;
 
 public class TestCaseMatchPremise {
 

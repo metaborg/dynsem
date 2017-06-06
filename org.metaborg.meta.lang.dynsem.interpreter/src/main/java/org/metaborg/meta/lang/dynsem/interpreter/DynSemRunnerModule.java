@@ -10,14 +10,14 @@ import com.google.inject.Singleton;
 
 public class DynSemRunnerModule extends SpoofaxModule {
 
-    @Override
-    protected void bindProject() {
-        bind(IProjectService.class).to(ConfigBasedProjectService.class).in(Singleton.class);
-    }
+	@Override
+	protected void bindProject() {
+		bind(IProjectService.class).to(ConfigBasedProjectService.class).in(Singleton.class);
+	}
 
-    @Override
-    protected void bindEditor() {
-        bind(IEditorRegistry.class).to(NullEditorRegistry.class).in(Singleton.class);
-    }
+	@Override
+	protected void bindEditor() {
+		bind(IEditorRegistry.class).to(NullEditorRegistry.class).in(Singleton.class);
+	}
 
 }
