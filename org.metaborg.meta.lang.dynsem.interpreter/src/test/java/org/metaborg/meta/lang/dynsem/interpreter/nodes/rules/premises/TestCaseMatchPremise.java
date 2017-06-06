@@ -27,7 +27,7 @@ public class TestCaseMatchPremise {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		src = SourceSection.createUnavailable("unit", "test");
+		src = DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
 		DynSemContext.LANGUAGE = mock(DynSemLanguage.class);
 	}
 

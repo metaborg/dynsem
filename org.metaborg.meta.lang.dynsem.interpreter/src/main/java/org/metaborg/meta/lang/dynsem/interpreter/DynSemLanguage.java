@@ -6,11 +6,13 @@ import java.util.Map;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.JointRuleRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
+import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
@@ -18,6 +20,11 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	public static final String PARSER = "PARSER";
 	public static final String TERM_REGISTRY = "TERM_REGISTRY";
 	public static final String RULE_REGISTRY = "RULE_REGISTRY";
+
+	public static final String DYNSEM_MIMETYPE = "application/x-dynsem";
+
+	public static final Source BUILTIN_DYNSEM_SOURCE = Source.newBuilder("Unavailable").name("noname").mimeType(DYNSEM_MIMETYPE)
+			.build();
 
 	public DynSemLanguage() {
 	}
@@ -85,8 +92,12 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		return context;
 	}
 
-	@Override
-	protected boolean isInstrumentable(Node node) {
-		return false;
+	public static SourceSection getSourceSectionNone() {
+		return BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
 	}
+
+	public static SourceSection getSourceSectionFromStrategoTerm(IStrategoTerm aterm) {
+		return BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
+	}
+
 }

@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -56,7 +56,7 @@ public abstract class GenericListMatch extends MatchPattern {
 			tailPattern = MatchPattern.create(Tools.applAt(t, 1), fd);
 		}
 
-		return GenericListMatchNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), numHeadElems, tailPattern);
+		return GenericListMatchNodeGen.create(DynSemLanguage.getSourceSectionFromStrategoTerm(t), numHeadElems, tailPattern);
 	}
 
 }

@@ -89,7 +89,7 @@ public class TestDispatch {
 	}
 
 	private static SourceSection getDummySource() {
-		return SourceSection.createUnavailable("unit", "test");
+		return DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
 	}
 
 	@Test

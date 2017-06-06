@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -31,7 +31,7 @@ public abstract class ListConcatTermBuild extends TermBuild {
 		TermBuild left = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild right = TermBuild.create(Tools.applAt(t, 1), fd);
 
-		return ListConcatTermBuildNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), left, right);
+		return ListConcatTermBuildNodeGen.create(DynSemLanguage.getSourceSectionFromStrategoTerm(t), left, right);
 	}
 
 }

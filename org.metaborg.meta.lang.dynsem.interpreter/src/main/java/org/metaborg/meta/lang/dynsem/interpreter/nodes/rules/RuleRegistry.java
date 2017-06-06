@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -18,7 +19,6 @@ import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-import com.oracle.truffle.api.source.SourceSection;
 
 public class RuleRegistry {
 
@@ -68,9 +68,10 @@ public class RuleRegistry {
 		if (jointRulesForName != null) {
 			jointRuleForClass = jointRulesForName.get(dispatchClass);
 		}
-
+		
 		if (jointRuleForClass == null) {
-			jointRuleForClass = new JointRuleRoot(SourceSection.createUnavailable("rule", "adhoc"),
+			
+			jointRuleForClass = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(),
 					RuleKind.PLACEHOLDER, arrowName, dispatchClass, new Rule[0]);
 			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}
@@ -115,7 +116,7 @@ public class RuleRegistry {
 					Class<?> dispatchClass = rulesForClass.getKey();
 					RuleKind kind = rulesForClass.getValue().get(0).getKind();
 					registry.registerJointRule(arrowName, dispatchClass,
-							new JointRuleRoot(SourceSection.createUnavailable("rule", "multiple locations"), kind,
+							new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), kind,
 									arrowName, dispatchClass, rulesForClass.getValue().toArray(new Rule[] {})));
 				}
 			}

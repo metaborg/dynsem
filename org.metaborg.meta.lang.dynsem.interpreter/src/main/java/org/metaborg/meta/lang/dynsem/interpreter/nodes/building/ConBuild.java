@@ -1,8 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -35,8 +35,7 @@ public class ConBuild extends TermBuild {
 		for (int i = 0; i < children.length; i++) {
 			children[i] = TermBuild.create(Tools.applAt(childrenT, i), fd);
 		}
-
-		return new ConBuild(constr, children, SourceSectionUtil.fromStrategoTerm(t));
+		return new ConBuild(constr, children, DynSemLanguage.getSourceSectionFromStrategoTerm(t));
 	}
 
 	@Override

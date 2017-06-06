@@ -23,7 +23,8 @@ public class TestCase {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		src = SourceSection.createUnavailable("test", "unit");
+//		src = SourceSection.createUnavailable("test", "unit");
+		src = DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
 		DynSemContext.LANGUAGE = mock(DynSemLanguage.class);
 	}
 

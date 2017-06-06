@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -42,7 +42,7 @@ public abstract class MapBuild extends TermBuild {
 		public static EmptyMapBuild create(IStrategoAppl t) {
 			assert Tools.hasConstructor(t, "Map", 1);
 			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
-			return new EmptyMapBuild(SourceSectionUtil.fromStrategoTerm(t));
+			return new EmptyMapBuild(DynSemLanguage.getSourceSectionFromStrategoTerm(t));
 		}
 
 		@Override
@@ -81,7 +81,7 @@ public abstract class MapBuild extends TermBuild {
 			TermBuild keyNode = TermBuild.create(Tools.applAt(bind, 0), fd);
 			TermBuild valNode = TermBuild.create(Tools.applAt(bind, 1), fd);
 
-			return new BindMapBuild(keyNode, valNode, SourceSectionUtil.fromStrategoTerm(t));
+			return new BindMapBuild(keyNode, valNode, DynSemLanguage.getSourceSectionFromStrategoTerm(t));
 		}
 
 		@Override

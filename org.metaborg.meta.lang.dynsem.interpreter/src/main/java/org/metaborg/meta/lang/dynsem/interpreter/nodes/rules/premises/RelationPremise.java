@@ -1,12 +1,12 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InvokeRelationNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RelationPremiseInputBuilder;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -72,6 +72,6 @@ public class RelationPremise extends Premise {
 		}
 		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
 				DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
-				SourceSectionUtil.fromStrategoTerm(t));
+				DynSemLanguage.getSourceSectionFromStrategoTerm(t));
 	}
 }
