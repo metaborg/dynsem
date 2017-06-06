@@ -15,7 +15,8 @@ public class DynSemRule implements TruffleObject {
 
 	@Override
 	public ForeignAccess getForeignAccess() {
-		return ForeignAccess.create(new DynSemRuleForeignAccess());
+		throw new UnsupportedOperationException();
+//		return ForeignAccess.create(new DynSemRuleForeignAccess());
 	}
 
 	/**

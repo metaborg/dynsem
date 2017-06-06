@@ -16,6 +16,8 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.vm.PolyglotEngine;
 import com.oracle.truffle.api.vm.PolyglotEngine.Builder;
@@ -62,15 +64,19 @@ public abstract class DynSemEntryPoint {
 	public Callable<RuleResult> getCallable(IStrategoTerm term, InputStream input, OutputStream output,
 			OutputStream error, Map<String, Object> config) {
 		try {
+
 			PolyglotEngine vm = buildPolyglotEngine(input, output, error, config);
 			assert vm.getLanguages().containsKey(getMimeType());
-			Value interpreter = vm.eval(Source.newBuilder(new InputStreamReader(getSpecificationTerm()))
-					.name("Evaluate to interpreter").mimeType(getMimeType()).build());
 			ITerm programTerm = getTermRegistry().parseProgramTerm(term);
+
+			Value interpreter = vm.eval(Source.newBuilder(new InputStreamReader(getSpecificationTerm()))
+					.name("Interpreter specification").mimeType(getMimeType()).build());
+
 			return new Callable<RuleResult>() {
 				@Override
 				public RuleResult call() throws Exception {
-					return interpreter.execute(programTerm).as(RuleResult.class);
+					DynSemRule rule = (DynSemRule) interpreter.get();
+					return rule.getRuleTarget().execute(Truffle.getRuntime().createVirtualFrame(new Object[] { programTerm }, new FrameDescriptor()));
 				}
 			};
 		} catch (IOException e) {
@@ -95,7 +101,7 @@ public abstract class DynSemEntryPoint {
 	 */
 	public PolyglotEngine buildPolyglotEngine(InputStream input, OutputStream output, OutputStream error,
 			Map<String, Object> config) {
-		assert DynSemContext.LANGUAGE != null : "DynSemContext.LANGUAGE must be set for creatingxx the RuleRegistry";
+		assert DynSemContext.LANGUAGE != null : "DynSemContext.LANGUAGE must be set before creating the RuleRegistry";
 		final Builder builder = PolyglotEngine.newBuilder();
 
 		for (Entry<String, Object> cfgEntry : config.entrySet()) {
