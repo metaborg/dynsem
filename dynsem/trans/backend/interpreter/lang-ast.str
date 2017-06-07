@@ -1099,7 +1099,6 @@ rules /* term matching */
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
         
-        import com.oracle.truffle.api.dsl.Fallback;
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.nodes.ExplodeLoop;
         import com.oracle.truffle.api.frame.VirtualFrame;
@@ -1149,11 +1148,6 @@ rules /* term matching */
             for (int idx = 0; idx < elemPatterns.length; idx++) {
               elemPatterns[idx].executeMatch(frame, elems[idx]);
             }
-          }
-        
-          @Fallback
-          public void doNotAList(VirtualFrame frame, Object other) {
-            throw PatternMatchFailure.INSTANCE;
           }
         
         }
