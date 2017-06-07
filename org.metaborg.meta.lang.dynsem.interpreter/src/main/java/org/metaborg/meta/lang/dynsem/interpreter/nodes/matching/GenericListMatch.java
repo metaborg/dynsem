@@ -5,7 +5,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
-import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -41,9 +40,13 @@ public abstract class GenericListMatch extends MatchPattern {
 		tailPattern.executeMatch(frame, list.drop(numHeadElems));
 	}
 
-	@Fallback
+	@Specialization(guards = "notAList(t)")
 	public void doFail(VirtualFrame frame, Object t) {
 		throw PatternMatchFailure.INSTANCE;
+	}
+	
+	protected static boolean notAList(Object t){
+		return !(t instanceof IListTerm<?>);
 	}
 
 	public static GenericListMatch create(IStrategoAppl t, FrameDescriptor fd) {
