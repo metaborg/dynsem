@@ -62,10 +62,9 @@ public class DynSemRunner {
 					continue;
 				}
 				try {
-					S.languageDiscoveryService.scanLanguagesInDirectory(spoofaxDir);
+					S.languageDiscoveryService.languagesFromDirectory(spoofaxDir);
 				} catch (MetaborgException ex) {
-					String message = logger.format("Failed to load languages at {}.", spoofaxDir);
-					logger.warn(message, ex);
+					// ignore non-language directories on path
 				}
 			}
 		}
