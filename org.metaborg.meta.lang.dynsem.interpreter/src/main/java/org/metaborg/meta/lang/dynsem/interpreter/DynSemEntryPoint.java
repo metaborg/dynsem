@@ -75,8 +75,9 @@ public abstract class DynSemEntryPoint {
 			return new Callable<RuleResult>() {
 				@Override
 				public RuleResult call() throws Exception {
-					DynSemRule rule = (DynSemRule) interpreter.get();
-					return rule.getRuleTarget().execute(Truffle.getRuntime().createVirtualFrame(new Object[] { programTerm }, new FrameDescriptor()));
+					DynSemRule rule = interpreter.as(DynSemRule.class);
+					return rule.getRuleTarget().execute(Truffle.getRuntime()
+							.createVirtualFrame(new Object[] { programTerm }, new FrameDescriptor()));
 				}
 			};
 		} catch (IOException e) {
