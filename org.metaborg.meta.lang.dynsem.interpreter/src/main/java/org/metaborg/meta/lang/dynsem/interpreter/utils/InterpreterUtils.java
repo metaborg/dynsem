@@ -18,40 +18,40 @@ import com.oracle.truffle.api.nodes.RootNode;
 
 public final class InterpreterUtils {
 
-	public static void setComponent(Object[] arguments, int idx, Object val) {
-		if (DynSemContext.LANGUAGE.isSafeComponentsEnabled() && val == null) {
+	public static void setComponent(DynSemContext ctx, Object[] arguments, int idx, Object val) {
+		if (ctx.isSafeComponentsEnabled() && val == null) {
 			throw new ReductionFailure("Attempted to write null component at index " + idx, createStacktrace());
 		}
 		arguments[idx] = val;
 	}
 
-	public static Object getComponent(Object[] arguments, int idx) {
+	public static Object getComponent(DynSemContext ctx, Object[] arguments, int idx) {
 		final Object val = arguments[idx];
-		if (DynSemContext.LANGUAGE.isSafeComponentsEnabled() && val == null) {
+		if (ctx.isSafeComponentsEnabled() && val == null) {
 			throw new ReductionFailure("Attempted access to null component at index " + idx, createStacktrace());
 		}
 		return val;
 	}
 
-	public static Object readSlot(VirtualFrame frame, FrameSlot slot) {
+	public static Object readSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot) {
 		final Object val = frame.getValue(slot);
-		if (DynSemContext.LANGUAGE.isSafeComponentsEnabled() && val == null) {
+		if (ctx.isSafeComponentsEnabled() && val == null) {
 			throw new ReductionFailure("Accessed null value for slot " + slot.getIdentifier(), createStacktrace());
 		}
 
 		return val;
 	}
 
-	public static void writeSlot(VirtualFrame frame, FrameSlot slot, Object val) {
-		if (DynSemContext.LANGUAGE.isSafeComponentsEnabled() && val == null) {
+	public static void writeSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot, Object val) {
+		if (ctx.isSafeComponentsEnabled() && val == null) {
 			throw new ReductionFailure("Attempted to write null value for slot " + slot.getIdentifier(),
 					createStacktrace());
 		}
 		frame.setObject(slot, val);
 	}
 
-	public static <T> T notNull(T val) {
-		if (DynSemContext.LANGUAGE.isSafeComponentsEnabled() && val == null) {
+	public static <T> T notNull(DynSemContext ctx, T val) {
+		if (ctx.isSafeComponentsEnabled() && val == null) {
 			throw new ReductionFailure("Null value encountered", createStacktrace());
 		}
 		return val;

@@ -82,7 +82,7 @@ public class RuleRegistry {
 		CompilerAsserts.neverPartOfCompilation();
 		try {
 			TAFTermReader reader = new TAFTermReader(new TermFactory());
-
+			
 			IStrategoTerm topSpecTerm;
 			topSpecTerm = reader.parseFromStream(specStream);
 			specStream.close();
