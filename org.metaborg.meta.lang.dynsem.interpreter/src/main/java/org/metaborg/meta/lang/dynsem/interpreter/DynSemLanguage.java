@@ -20,37 +20,13 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	// Keys for configuration parameters for a DynSemContext.
 
 	public static final String CONTEXT_OBJECT = "dynsemctx-object";
-	
+
 	public static final String DYNSEM_MIME = "application/x-dynsem";
-	
-	// public static final String PARSER = "PARSER";
-	// public static final String TERM_REGISTRY = "TERM_REGISTRY";
-	// public static final String RULE_REGISTRY = "RULE_REGISTRY";
-
-	// private static final String DYNSEM_MIMETYPE = "application/x-dynsem";
-
-	// private static final Source BUILTIN_DYNSEM_SOURCE = Source.newBuilder("Unavailable").name("noname")
-	// .mimeType(DYNSEM_MIMETYPE).build();
 
 	@CompilationFinal private DynSemContext ctx;
 
-	public DynSemLanguage() {
-	}
-
-	// public abstract boolean isFullBacktrackingEnabled();
-	//
-	// public abstract boolean isSafeComponentsEnabled();
-	//
-	// public abstract boolean isTermCachingEnabled();
-	//
-	// public abstract boolean isDEBUG();
-
 	@Override
 	protected CallTarget parse(final ParsingRequest request) throws Exception {
-		if (!ctx.isInitialized()) {
-			ctx.initialize(this);
-		}
-
 		// NOTE: the source is the AST of an object language program
 		Source code = request.getSource();
 		IStrategoTerm programAST = new TAFTermReader(new TermFactory()).parseFromStream(code.getInputStream());
@@ -64,30 +40,19 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 			@Override
 			public Object execute(VirtualFrame frame) {
+
 				return rootDispatch.execute(frame, programTerm.getClass(), new Object[] { programTerm });
 			}
 		};
-
+		startInterpretation.getRootNode();
 		return Truffle.getRuntime().createCallTarget(startInterpretation);
 	}
 
 	@Override
 	protected DynSemContext createContext(Env env) {
 		ctx = (DynSemContext) env.getConfig().get(CONTEXT_OBJECT);
+		ctx.initialize(this);
 		return ctx;
-		//
-		//
-		//
-		//
-		//
-		//
-		// Map<String, Object> config = env.getConfig();
-		//
-		// IDynSemLanguageParser parser = (IDynSemLanguageParser) config.get(PARSER);
-		// ITermRegistry termRegistry = (ITermRegistry) config.get(TERM_REGISTRY);
-		// RuleRegistry ruleRegistry = (RuleRegistry) config.get(RULE_REGISTRY);
-		// return new DynSemContext(parser, termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()),
-		// new PrintStream(env.err()), config);
 	}
 
 	public DynSemContext getContext() {
@@ -126,14 +91,6 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	protected Object getLanguageGlobal(DynSemContext context) {
 		return context;
 	}
-
-	// public static SourceSection getSourceSectionNone() {
-	// return BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
-	// }
-	//
-	// public static SourceSection getSourceSectionFromStrategoTerm(IStrategoTerm aterm) {
-	// return BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
-	// }
 
 	public static Source getSyntheticSource(final String text, final String name, final String mimetype) {
 		return Source.newBuilder(text).internal().name(name).mimeType(mimetype).build();
