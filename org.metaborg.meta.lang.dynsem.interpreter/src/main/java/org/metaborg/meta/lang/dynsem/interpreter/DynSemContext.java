@@ -89,7 +89,8 @@ public class DynSemContext {
 	public void initialize(DynSemLanguage lang) {
 		if (initialized)
 			return;
-		RuleRegistry.populate(ruleRegistry, specification);
+		ruleRegistry.setLanguage(lang);
+		ruleRegistry.populate(specification);
 		initialized = true;
 	}
 

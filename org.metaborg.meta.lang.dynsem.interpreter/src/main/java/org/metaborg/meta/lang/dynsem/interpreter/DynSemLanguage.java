@@ -83,7 +83,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 	@Override
 	protected boolean isObjectOfLanguage(Object obj) {
-		return obj instanceof DynSemRule;
+//		return obj instanceof DynSemRule;
+		return false;
 	}
 
 	@Override

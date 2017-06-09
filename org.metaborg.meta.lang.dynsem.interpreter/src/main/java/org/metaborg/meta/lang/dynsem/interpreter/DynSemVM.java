@@ -20,6 +20,7 @@ import org.spoofax.terms.io.TAFTermReader;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.vm.PolyglotEngine;
 import com.oracle.truffle.api.vm.PolyglotEngine.Builder;
+import com.oracle.truffle.api.vm.PolyglotEngine.Value;
 
 public class DynSemVM {
 
@@ -65,7 +66,10 @@ public class DynSemVM {
 			return new Callable<RuleResult>() {
 				@Override
 				public RuleResult call() throws Exception {
-					return engine.eval(code).as(RuleResult.class);
+					Value v = engine.eval(code);
+					v.get();
+					return null;
+//					return v.as(RuleResult.class);
 				}
 			};
 		} catch (IOException ioex) {

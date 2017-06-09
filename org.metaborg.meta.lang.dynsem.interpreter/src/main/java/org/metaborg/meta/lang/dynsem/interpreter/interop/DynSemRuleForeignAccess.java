@@ -1,4 +1,6 @@
-package org.metaborg.meta.lang.dynsem.interpreter;
+package org.metaborg.meta.lang.dynsem.interpreter.interop;
+
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
