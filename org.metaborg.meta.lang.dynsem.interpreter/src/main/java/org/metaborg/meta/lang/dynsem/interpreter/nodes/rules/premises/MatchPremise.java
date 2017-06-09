@@ -1,9 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheOptionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -23,7 +21,7 @@ public class MatchPremise extends Premise {
 
 	public MatchPremise(TermBuild term, MatchPattern pattern, SourceSection source) {
 		super(source);
-		this.term = DynSemContext.LANGUAGE.isTermCachingEnabled() ? TermBuildCacheNode.create(term) : term;
+		this.term = new TermBuildCacheOptionNode(term);
 		this.patt = pattern;
 	}
 
