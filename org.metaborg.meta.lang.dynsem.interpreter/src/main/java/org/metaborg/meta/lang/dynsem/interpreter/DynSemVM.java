@@ -1,8 +1,11 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PipedReader;
 import java.io.PipedWriter;
@@ -52,11 +55,13 @@ public class DynSemVM {
 		// FIXME: this is bad bad bad, because the properties are per-program but we are setting them per-VM
 		ctx.writeProperties(properties);
 		try {
-			PipedWriter termOut = new PipedWriter();
-			PipedReader termIn = new PipedReader(termOut);
-			new TAFTermReader(new TermFactory()).unparseToFile(term, termOut);
+			ByteArrayOutputStream termOut = new ByteArrayOutputStream();
 
-			Source code = Source.newBuilder(termIn).name("Program").mimeType(ctx.getMimeTypeObjLanguage()).build();
+			new TAFTermReader(new TermFactory()).unparseToFile(term, termOut);
+			ByteArrayInputStream termIn = new ByteArrayInputStream(termOut.toByteArray());
+
+			Source code = Source.newBuilder(new InputStreamReader(termIn)).name("Program")
+					.mimeType(ctx.getMimeTypeObjLanguage()).build();
 
 			return new Callable<RuleResult>() {
 				@Override
@@ -75,18 +80,18 @@ public class DynSemVM {
 		builder.setIn((InputStream) config.get(DynSemContext.CONFIG_STDIN));
 		builder.setOut((OutputStream) config.get(DynSemContext.CONFIG_STDOUT));
 		builder.setErr((OutputStream) config.get(DynSemContext.CONFIG_STDERR));
-		
+
 		String mimeType = ctx.getMimeTypeObjLanguage();
 
 		for (Entry<String, Object> cfg : config.entrySet()) {
 			builder.config(mimeType, cfg.getKey(), cfg.getValue());
 		}
-		
+
 		builder.config(mimeType, DynSemLanguage.CONTEXT_OBJECT, ctx);
 
 		return builder;
 	}
-	
+
 	public DynSemContext getContext() {
 		return ctx;
 	}
