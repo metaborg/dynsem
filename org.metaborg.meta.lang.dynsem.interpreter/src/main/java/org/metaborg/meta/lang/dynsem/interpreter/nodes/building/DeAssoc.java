@@ -50,10 +50,4 @@ public abstract class DeAssoc extends TermBuild {
 		return list.get(idx);
 	}
 
-//	@Override
-//	public Object executeGeneric(VirtualFrame frame) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
 }
