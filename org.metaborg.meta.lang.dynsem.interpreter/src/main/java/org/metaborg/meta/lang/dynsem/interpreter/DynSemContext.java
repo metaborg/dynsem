@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 
@@ -35,6 +36,7 @@ public class DynSemContext {
 	public static final String CONFIG_TERMCACHE = "TERMCACHE";
 	public static final String CONFIG_PARSER = "PARSER";
 	public static final String CONFIG_TERMREGISTRY = "TERMREG";
+	public static final String CONFIG_TERMTRANSFORMER = "TERMTRANSFORM";
 	public static final String CONFIG_RULEREG = "RULEREG";
 	public static final String CONFIG_MIMETYPE = "MIMETYPEOBJLANG";
 
@@ -45,6 +47,7 @@ public class DynSemContext {
 	private final PrintStream err;
 
 	private final IDynSemLanguageParser parser;
+	private ITermTransformer termTransformer;
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
 
@@ -60,7 +63,7 @@ public class DynSemContext {
 
 	public DynSemContext(Map<String, Object> config) {
 		// TODO: there must be a smell here...
-		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermRegistry) config.get(CONFIG_TERMREGISTRY),
+		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermTransformer) config.get(CONFIG_TERMTRANSFORMER), (ITermRegistry) config.get(CONFIG_TERMREGISTRY),
 				(RuleRegistry) config.get(CONFIG_RULEREG), (InputStream) config.get(CONFIG_STDIN),
 				(PrintStream) config.get(CONFIG_STDOUT), (PrintStream) config.get(CONFIG_STDERR),
 				(InputStream) config.get(CONFIG_DSSPEC), (String) config.get(CONFIG_MIMETYPE),
@@ -68,10 +71,11 @@ public class DynSemContext {
 				(boolean) config.get(CONFIG_TERMCACHE), (boolean) config.get(CONFIG_DEBUG), config);
 	}
 
-	private DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry,
+	private DynSemContext(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry, RuleRegistry ruleRegistry,
 			InputStream input, PrintStream output, PrintStream err, InputStream specification, String mimetype_lang,
 			boolean backtracking, boolean safecomponents, boolean caching, boolean debug, Map<String, Object> config) {
 		this.parser = parser;
+		this.termTransformer = transformer;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
@@ -125,6 +129,10 @@ public class DynSemContext {
 		return termRegistry;
 	}
 
+	public ITermTransformer getTermTransformer() {
+		return termTransformer;
+	}
+	
 	/**
 	 * Read property from the custom property store maintained by this {@link DynSemContext}.
 	 * 

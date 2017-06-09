@@ -12,7 +12,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
@@ -24,13 +23,11 @@ import com.oracle.truffle.api.vm.PolyglotEngine.Builder;
 public class DynSemVM {
 
 	private final DynSemContext ctx;
-	private final ITermTransformer transformer;
 
 	private final PolyglotEngine engine;
 
-	public DynSemVM(ITermTransformer transformer, Map<String, Object> config) {
+	public DynSemVM(Map<String, Object> config) {
 		this.ctx = new DynSemContext(config);
-		this.transformer = transformer;
 
 		engine = createPolyglotBuilder(config).build();
 	}
@@ -41,7 +38,7 @@ public class DynSemVM {
 			if (!f.isAbsolute() && !f.exists()) {
 				f = new File(workingDirectory, file);
 			}
-			IStrategoTerm term = transformer.transform(ctx.getParser()
+			IStrategoTerm term = ctx.getTermTransformer().transform(ctx.getParser()
 					.parse(Source.newBuilder(f).name("Program").mimeType(ctx.getMimeTypeObjLanguage()).build()));
 			return getCallable(term, properties);
 		} catch (IOException ioex) {

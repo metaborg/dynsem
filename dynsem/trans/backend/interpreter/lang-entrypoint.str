@@ -131,12 +131,13 @@ rules /* language file. interpreter entry point */
           config.put(DynSemContext.CONFIG_DEBUG, DEBUG);
       
           config.put(DynSemContext.CONFIG_PARSER, createParser());
+          config.put(DynSemContext.CONFIG_TERMTRANSFORMER, createTransformer());
           config.put(DynSemContext.CONFIG_TERMREGISTRY, createTermRegistry());
           config.put(DynSemContext.CONFIG_RULEREG, createRuleRegistry());
           config.put(DynSemContext.CONFIG_MIMETYPE, MIME_TYPE);
           config.put(DynSemContext.CONFIG_DSSPEC, getSpecificationTerm());
       
-          DynSemVM vm = new DynSemVM(createTransformer(), config);
+          DynSemVM vm = new DynSemVM(config);
       
           return vm;
         }
