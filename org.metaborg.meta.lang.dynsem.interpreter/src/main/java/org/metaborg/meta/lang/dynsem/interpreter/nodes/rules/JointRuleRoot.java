@@ -12,7 +12,8 @@ public class JointRuleRoot extends DynSemRootNode {
 
 	@Child private JointRuleNode jointNode;
 
-	public JointRuleRoot(DynSemLanguage lang, SourceSection source, RuleKind kind, String arrowName, Class<?> dispatchClass, Rule[] rules) {
+	public JointRuleRoot(DynSemLanguage lang, SourceSection source, RuleKind kind, String arrowName,
+			Class<?> dispatchClass, Rule[] rules) {
 		super(lang);
 		this.jointNode = new JointRuleNode(source, kind, arrowName, dispatchClass, rules);
 

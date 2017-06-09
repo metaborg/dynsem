@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
@@ -17,10 +18,7 @@ import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
-	// Keys for configuration parameters for a DynSemContext.
-
 	public static final String CONTEXT_OBJECT = "dynsemctx-object";
-
 	public static final String DYNSEM_MIME = "application/x-dynsem";
 
 	@CompilationFinal private DynSemContext ctx;
@@ -34,13 +32,12 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 		RootNode startInterpretation = new RootNode(this) {
 
-			@Child private DispatchNode rootDispatch = DispatchNodeGen.create(
-					getSyntheticSource("rootnote", "startinterpreter", ctx.getMimeTypeObjLanguage()).createSection(1),
+			@Child private DispatchNode rootDispatch = DispatchNodeGen.create(SourceUtils
+					.getSyntheticSource("rootnote", "startinterpreter", ctx.getMimeTypeObjLanguage()).createSection(1),
 					"init");
 
 			@Override
 			public Object execute(VirtualFrame frame) {
-
 				return rootDispatch.execute(frame, programTerm.getClass(), new Object[] { programTerm });
 			}
 		};
@@ -83,16 +80,11 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 	@Override
 	protected boolean isObjectOfLanguage(Object obj) {
-//		return obj instanceof DynSemRule;
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected Object getLanguageGlobal(DynSemContext context) {
+	protected DynSemContext getLanguageGlobal(DynSemContext context) {
 		return context;
-	}
-
-	public static Source getSyntheticSource(final String text, final String name, final String mimetype) {
-		return Source.newBuilder(text).internal().name(name).mimeType(mimetype).build();
 	}
 }

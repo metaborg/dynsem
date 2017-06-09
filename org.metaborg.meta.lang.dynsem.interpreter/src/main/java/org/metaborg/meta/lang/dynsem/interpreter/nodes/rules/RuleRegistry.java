@@ -131,7 +131,8 @@ public class RuleRegistry {
 		}
 	}
 
-	protected final JointRuleRoot createJointRoot(RuleKind kind, String arrowName, Class<?> dispatchClass, Rule[] rules) {
+	protected final JointRuleRoot createJointRoot(RuleKind kind, String arrowName, Class<?> dispatchClass,
+			Rule[] rules) {
 		return new JointRuleRoot(language, SourceUtils.dynsemSourceSectionUnvailable(), kind, arrowName, dispatchClass,
 				rules);
 	}

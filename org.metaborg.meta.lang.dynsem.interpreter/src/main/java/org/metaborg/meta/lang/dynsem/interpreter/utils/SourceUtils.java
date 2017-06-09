@@ -17,4 +17,8 @@ public class SourceUtils {
 		return Source.newBuilder("notext").name("noname").internal().mimeType(DynSemLanguage.DYNSEM_MIME).build()
 				.createUnavailableSection();
 	}
+
+	public static Source getSyntheticSource(final String text, final String name, final String mimetype) {
+		return Source.newBuilder(text).internal().name(name).mimeType(mimetype).build();
+	}
 }
