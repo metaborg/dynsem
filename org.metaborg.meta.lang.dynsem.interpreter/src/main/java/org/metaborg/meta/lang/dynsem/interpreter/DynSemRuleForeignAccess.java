@@ -8,8 +8,14 @@ import com.oracle.truffle.api.interop.ForeignAccess;
 import com.oracle.truffle.api.interop.ForeignAccess.Factory;
 import com.oracle.truffle.api.interop.Message;
 import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.RootNode;
 
+/**
+ * 
+ * @author vladvergu
+ * @deprecated Removed support until proper reimplementation
+ */
 public class DynSemRuleForeignAccess implements Factory {
 
 	@Override
@@ -44,9 +50,12 @@ public class DynSemRuleForeignAccess implements Factory {
 			super(DynSemLanguage.class, null, null);
 		}
 
+		@Child private Node unbox;
+		
 		@Override
 		public Object execute(VirtualFrame frame) {
 			DynSemRule rule = (DynSemRule) ForeignAccess.getReceiver(frame);
+			
 			return rule.getRuleTarget().getCallTarget().call(ForeignAccess.getArguments(frame).toArray());
 		}
 

@@ -38,10 +38,14 @@ signature
     NativePkg : DSOpt
     RuleRegistry : DSOpt
     PreProcessor : DSOpt
+    ResourceDirRel : DSOpt
+    ResourceDirAbs : DSOpt
     TargetSpecRel : DSOpt
     TargetSpecAbs : DSOpt
     TargetTableRel : DSOpt
     TargetTableAbs : DSOpt
+    TargetLogbackRel : DSOpt
+    TargetLogbackAbs : DSOpt
     JVMArgs : DSOpt
     GenJUnit : DSOpt
     TestJavaDir : DSOpt
@@ -92,10 +96,14 @@ rules
       (NativePkg(), native-pkg),
       (RuleRegistry(), rulereg-class),
       (PreProcessor(), preprocess-class),
+      (ResourceDirRel(), resource-dir-rel),
+      (ResourceDirAbs(), resource-dir-abs),
       (TargetSpecRel(), target-specfile-rel),
       (TargetSpecAbs(), target-specfile-abs),
       (TargetTableRel(), target-tblfile-rel),
       (TargetTableAbs(), target-tblfile-abs),
+      (TargetLogbackRel(), target-logback-rel),
+      (TargetLogbackAbs(), target-logback-abs),
       (JVMArgs(), jvm-args),
       (GenJUnit(), do-generate-junit),
       (TestJavaDir(), tests-java-dir),
@@ -139,10 +147,14 @@ rules
       tests-pkg := $[[gen-pkg].test];
       rulereg-class := <read-property(|"project.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")> prop-file;
       preprocess-class := <read-property(|"project.preprocessor", "org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer.IDENTITY")> prop-file;
-      target-specfile-rel := <read-property(|"project.specpath", "src/main/resources/specification.aterm")> prop-file;
+      resource-dir-rel := "src/main/resources";
+      resource-dir-abs := $[[genproject-path]/[resource-dir-rel]];
+      target-specfile-rel := <read-property(|"project.specpath", $[[resource-dir-rel]/specification.aterm])> prop-file;
       target-specfile-abs := $[[genproject-path]/[target-specfile-rel]];
-      target-tblfile-rel := <read-property(|"project.tablepath", "src/main/resources/parsetable.tbl")> prop-file;
+      target-tblfile-rel := <read-property(|"project.tablepath", $[[resource-dir-rel]/parsetable.tbl])> prop-file;
       target-tblfile-abs := $[[genproject-path]/[target-tblfile-rel]];
+      target-logback-rel := $[[resource-dir-rel]/logback.xml];
+      target-logback-abs := $[[genproject-path]/[target-logback-rel]];
       jvm-args := <read-property(|"interpreter.vmargs", "")> prop-file;
       do-generate-junit := <read-property(|"project.generatejunit", "false")> prop-file;
       tests-java-dir := <read-property(|"project.testjavapath", "src/test/java")> prop-file;

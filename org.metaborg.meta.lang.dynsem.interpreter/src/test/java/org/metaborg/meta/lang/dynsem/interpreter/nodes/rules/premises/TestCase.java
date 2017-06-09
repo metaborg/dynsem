@@ -11,7 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.TrueLiteralTermMatchPatternNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.CaseMatchPremise.CaseMatchFailure;
 
@@ -24,7 +23,8 @@ public class TestCase {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		src = SourceSection.createUnavailable("test", "unit");
+//		src = SourceSection.createUnavailable("test", "unit");
+		src = DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
 		DynSemContext.LANGUAGE = mock(DynSemLanguage.class);
 	}
 

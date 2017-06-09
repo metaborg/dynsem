@@ -1,7 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -10,9 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
-
-import com.oracle.truffle.api.source.SourceSection;
 
 public class TestRuleRegistry {
 
@@ -45,9 +43,9 @@ public class TestRuleRegistry {
 	public void testRuleCount1() {
 		RuleRegistry registry = new RuleRegistry();
 
-		JointRuleRoot jrr1 = new JointRuleRoot(SourceSection.createUnavailable("unit", "test"), RuleKind.TERM, "arrow1",
+		JointRuleRoot jrr1 = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), RuleKind.TERM, "arrow1",
 				String.class, new Rule[] {});
-		JointRuleRoot jrr2 = new JointRuleRoot(SourceSection.createUnavailable("unit", "test"), RuleKind.TERM, "arrow1",
+		JointRuleRoot jrr2 = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), RuleKind.TERM, "arrow1",
 				int.class, new Rule[] {});
 
 		registry.registerJointRule("arrow1", String.class, jrr1);
@@ -60,10 +58,10 @@ public class TestRuleRegistry {
 	public void testRuleCount2() {
 		RuleRegistry registry = new RuleRegistry();
 
-		JointRuleRoot jrr1 = new JointRuleRoot(SourceSection.createUnavailable("unit", "test"), RuleKind.TERM, "arrow1",
+		JointRuleRoot jrr1 = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), RuleKind.TERM, "arrow1",
 				String.class, new Rule[2]);
 
-		JointRuleRoot jrr2 = new JointRuleRoot(SourceSection.createUnavailable("unit", "test"), RuleKind.TERM, "arrow1",
+		JointRuleRoot jrr2 = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), RuleKind.TERM, "arrow1",
 				int.class, new Rule[3]);
 
 		registry.registerJointRule("arrow1", String.class, jrr1);
@@ -76,7 +74,7 @@ public class TestRuleRegistry {
 	public void testRegisterJointRule() {
 		RuleRegistry registry = new RuleRegistry();
 
-		JointRuleRoot jrr1 = new JointRuleRoot(SourceSection.createUnavailable("unit", "test"), RuleKind.TERM, "arrow1",
+		JointRuleRoot jrr1 = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), RuleKind.TERM, "arrow1",
 				String.class, new Rule[2]);
 
 		registry.registerJointRule("fred", String.class, jrr1);
@@ -88,9 +86,9 @@ public class TestRuleRegistry {
 	public void testRegisterJointRuleReregister() {
 		RuleRegistry registry = new RuleRegistry();
 
-		JointRuleRoot jrr1 = new JointRuleRoot(SourceSection.createUnavailable("unit", "test"), RuleKind.TERM, "fred",
+		JointRuleRoot jrr1 = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), RuleKind.TERM, "fred",
 				String.class, new Rule[2]);
-		JointRuleRoot jrr2 = new JointRuleRoot(SourceSection.createUnavailable("unit", "test"), RuleKind.TERM, "fred",
+		JointRuleRoot jrr2 = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), RuleKind.TERM, "fred",
 				String.class, new Rule[2]);
 
 		registry.registerJointRule("fred", String.class, jrr1);
@@ -104,7 +102,7 @@ public class TestRuleRegistry {
 	public void testLookupRulesRuleFound() {
 		RuleRegistry registry = new RuleRegistry();
 
-		JointRuleRoot jrr1 = new JointRuleRoot(SourceSection.createUnavailable("unit", "test"), RuleKind.TERM, "fred",
+		JointRuleRoot jrr1 = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), RuleKind.TERM, "fred",
 				String.class, new Rule[2]);
 		registry.registerJointRule("fred", String.class, jrr1);
 

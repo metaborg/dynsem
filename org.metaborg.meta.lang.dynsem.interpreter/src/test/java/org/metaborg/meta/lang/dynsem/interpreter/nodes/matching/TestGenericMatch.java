@@ -27,7 +27,7 @@ public class TestGenericMatch {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		src = SourceSection.createUnavailable("unit", "test");
+		src = DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
 		DynSemLanguage lang = mock(DynSemLanguage.class);
 		DynSemContext.LANGUAGE = lang;
 	}

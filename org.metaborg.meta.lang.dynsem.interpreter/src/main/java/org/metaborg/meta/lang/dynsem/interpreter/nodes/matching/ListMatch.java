@@ -1,8 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -58,7 +58,7 @@ public class ListMatch extends MatchPattern {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
 
-		return new ListMatch(SourceSectionUtil.fromStrategoTerm(t), elemPatterns, tailPattern, dispatchClass);
+		return new ListMatch(DynSemLanguage.getSourceSectionFromStrategoTerm(t), elemPatterns, tailPattern, dispatchClass);
 	}
 
 }

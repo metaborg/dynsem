@@ -66,7 +66,7 @@ public final class InterpreterUtils {
 			@Override
 			public Integer visitFrame(FrameInstance frameInstance) {
 				CallTarget callTarget = frameInstance.getCallTarget();
-				Frame frame = frameInstance.getFrame(FrameAccess.READ_ONLY, true);
+				Frame frame = frameInstance.getFrame(FrameAccess.READ_ONLY);
 				RootNode rn = ((RootCallTarget) callTarget).getRootNode();
 				if (rn.getClass().getName().contains("DynSemRuleForeignAccess")) {
 					return 1;

@@ -1,8 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -57,7 +57,7 @@ public class ListBuild extends TermBuild {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
 
-		return new ListBuild(SourceSectionUtil.fromStrategoTerm(t), elemNodes, tailNodes, dispatchClass);
+		return new ListBuild(DynSemLanguage.getSourceSectionFromStrategoTerm(t), elemNodes, tailNodes, dispatchClass);
 	}
 
 }

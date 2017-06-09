@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.Disambiguator;
 import org.spoofax.jsglr.client.ParseTable;
 import org.spoofax.jsglr.client.SGLR;
 import org.spoofax.jsglr.client.SGLRParseResult;
@@ -45,6 +46,8 @@ public class DynSemLanguageParser implements IDynSemLanguageParser {
 		}
 
 		try {
+			final Disambiguator disambiguator = parser.getDisambiguator();
+			disambiguator.setFilterPriorities(false);
 			SGLRParseResult parseResult = parser.parse(IOUtils.toString(src.getInputStream(), Charset.defaultCharset()),
 					src.getPath(), startSymbol);
 			IStrategoTerm term = (IStrategoTerm) parseResult.output;

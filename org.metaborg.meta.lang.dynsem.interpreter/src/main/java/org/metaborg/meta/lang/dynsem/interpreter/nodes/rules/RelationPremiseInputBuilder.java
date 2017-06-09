@@ -1,10 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheNode;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -42,7 +42,7 @@ public class RelationPremiseInputBuilder extends TermBuild {
 			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
 		}
 
-		return new RelationPremiseInputBuilder(lhsNode, rwNodes, SourceSectionUtil.fromStrategoTerm(source));
+		return new RelationPremiseInputBuilder(lhsNode, rwNodes, DynSemLanguage.getSourceSectionFromStrategoTerm(source));
 	}
 
 	@ExplodeLoop

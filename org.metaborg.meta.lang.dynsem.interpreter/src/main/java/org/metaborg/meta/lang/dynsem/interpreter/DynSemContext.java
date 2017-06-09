@@ -19,6 +19,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
  *
  */
 public class DynSemContext {
+	
 	public static DynSemLanguage LANGUAGE;
 
 	private final InputStream input;
@@ -30,7 +31,7 @@ public class DynSemContext {
 	private final RuleRegistry ruleRegistry;
 
 	private final Map<String, Object> config;
-
+	
 	public DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry) {
 		this(parser, termRegistry, ruleRegistry, System.in, System.out, System.err, new HashMap<String, Object>());
 	}

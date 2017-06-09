@@ -1,7 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemRuleForeignAccess;
-
 import com.oracle.truffle.api.CompilerDirectives.ValueType;
 import com.oracle.truffle.api.interop.ForeignAccess;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -18,6 +16,7 @@ public class RuleResult implements TruffleObject {
 
 	@Override
 	public ForeignAccess getForeignAccess() {
-		return ForeignAccess.create(new DynSemRuleForeignAccess());
+		throw new UnsupportedOperationException();
+//		return ForeignAccess.create(new DynSemRuleForeignAccess());
 	}
 }

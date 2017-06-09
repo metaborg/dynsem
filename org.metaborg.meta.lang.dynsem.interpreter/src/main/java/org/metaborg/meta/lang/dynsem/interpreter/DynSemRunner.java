@@ -64,8 +64,7 @@ public class DynSemRunner {
 				try {
 					S.languageDiscoveryService.languagesFromDirectory(spoofaxDir);
 				} catch (MetaborgException ex) {
-					String message = logger.format("Failed to load languages at {}.", spoofaxDir);
-					logger.warn(message, ex);
+					// ignore non-language directories on path
 				}
 			}
 		}
@@ -103,27 +102,32 @@ public class DynSemRunner {
 			}
 
 			IContext context = S.contextService.get(file, project, language);
-			ISpoofaxAnalyzeUnit analyzed;
-			try (IClosableLock lock = context.write()) {
-				analyzed = S.analysisService.analyze(parsed, context).result();
+			if (S.analysisService.available(language)) {
+				ISpoofaxAnalyzeUnit analyzed;
+				try (IClosableLock lock = context.write()) {
+					analyzed = S.analysisService.analyze(parsed, context).result();
+				}
+				if (!analyzed.valid()) {
+					throw new MetaborgException("Analysis failed.");
+				}
+				printMessages(err, analyzed.messages());
+				if (!analyzed.success()) {
+					throw new MetaborgException("Analysis returned errors.");
+				}
+				ImmutableMap.Builder<String, Object> propBuilder = ImmutableMap.builder();
+				if (context instanceof ISpoofaxScopeGraphContext) {
+					ISpoofaxScopeGraphContext<?> scopeGraphContext = (ISpoofaxScopeGraphContext<?>) context;
+					scopeGraphContext.unit(file.getName().getURI()).solution().ifPresent(solution -> {
+						propBuilder.put(NaBL2Context.class.getName(),
+								new NaBL2Context(solution, S.termFactoryService.getGeneric()));
+					});
+				}
+				props = propBuilder.build();
+				program = analyzed.hasAst() ? analyzed.ast() : parsed.ast();
+			} else {
+				program = parsed.ast();
+				props = ImmutableMap.of();
 			}
-			if (!analyzed.valid()) {
-				throw new MetaborgException("Analysis failed.");
-			}
-			printMessages(err, analyzed.messages());
-			if (!analyzed.success()) {
-				throw new MetaborgException("Analysis returned errors.");
-			}
-			ImmutableMap.Builder<String, Object> propBuilder = ImmutableMap.builder();
-			if (context instanceof ISpoofaxScopeGraphContext) {
-				ISpoofaxScopeGraphContext<?> scopeGraphContext = (ISpoofaxScopeGraphContext<?>) context;
-				scopeGraphContext.unit(file.getName().getURI()).solution().ifPresent(solution -> {
-					propBuilder.put(NaBL2Context.class.getName(),
-							new NaBL2Context(solution, S.termFactoryService.getGeneric()));
-				});
-			}
-			props = propBuilder.build();
-			program = analyzed.ast();
 		} catch (IOException e) {
 			throw new MetaborgException("Analysis failed.", e);
 		}

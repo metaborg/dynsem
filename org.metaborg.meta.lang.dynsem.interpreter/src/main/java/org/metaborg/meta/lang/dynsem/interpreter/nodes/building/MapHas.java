@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -22,7 +22,7 @@ public abstract class MapHas extends TermBuild {
 		assert Tools.hasConstructor(t, "MapHas", 2);
 		TermBuild mapNode = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild keyNode = TermBuild.create(Tools.applAt(t, 1), fd);
-		return MapHasNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), mapNode, keyNode);
+		return MapHasNodeGen.create(DynSemLanguage.getSourceSectionFromStrategoTerm(t), mapNode, keyNode);
 	}
 
 	public MapHas(SourceSection source) {

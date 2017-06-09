@@ -1,7 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -10,15 +13,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.RootNode;
@@ -60,6 +59,7 @@ public class TestDispatch {
 	public void tearDown() throws Exception {
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test(expected = ReductionFailure.class)
 	public void testExecuteNoTarget() {
 		RuleRegistry registry = new RuleRegistry();
@@ -89,10 +89,11 @@ public class TestDispatch {
 	}
 
 	private static SourceSection getDummySource() {
-		return SourceSection.createUnavailable("unit", "test");
+		return DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection();
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testExecuteSingleTarget() throws Exception {
 		RuleRegistry registry = new RuleRegistry();
 		DynSemContext ctx = DynSemContext.LANGUAGE.getContext();
@@ -127,6 +128,7 @@ public class TestDispatch {
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testExecuteMultiTarget() throws Exception {
 		RuleRegistry registry = new RuleRegistry();
 		DynSemContext ctx = DynSemContext.LANGUAGE.getContext();
@@ -174,6 +176,7 @@ public class TestDispatch {
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testExecuteFallbackToSortSuccess() throws Exception {
 		RuleRegistry registry = new RuleRegistry();
 		DynSemContext ctx = DynSemContext.LANGUAGE.getContext();
