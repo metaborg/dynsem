@@ -36,8 +36,7 @@ public class DynSemContext {
 	public static final String CONFIG_PARSER = "PARSER";
 	public static final String CONFIG_TERMREGISTRY = "TERMREG";
 	public static final String CONFIG_RULEREG = "RULEREG";
-	public static final String CONFIG_MIMEOBJLANG = "MIMEOBJLANG";
-	public static final String CONFIG_MIMEDSLANG = "MIMEDSLANG";
+	public static final String CONFIG_MIMETYPE = "MIMETYPEOBJLANG";
 
 	private final InputStream specification;
 
@@ -50,7 +49,6 @@ public class DynSemContext {
 	private final RuleRegistry ruleRegistry;
 
 	private final String mimetype_lang;
-	private final String mimetype_ds;
 
 	private Map<String, Object> properties;
 
@@ -65,16 +63,14 @@ public class DynSemContext {
 		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermRegistry) config.get(CONFIG_TERMREGISTRY),
 				(RuleRegistry) config.get(CONFIG_RULEREG), (InputStream) config.get(CONFIG_STDIN),
 				(PrintStream) config.get(CONFIG_STDOUT), (PrintStream) config.get(CONFIG_STDERR),
-				(InputStream) config.get(CONFIG_DSSPEC), (String) config.get(CONFIG_MIMEOBJLANG),
-				(String) config.get(CONFIG_MIMEDSLANG), (boolean) config.get(CONFIG_BACKTRACK),
-				(boolean) config.get(CONFIG_SAFECOMPS), (boolean) config.get(CONFIG_TERMCACHE),
-				(boolean) config.get(CONFIG_DEBUG), config);
+				(InputStream) config.get(CONFIG_DSSPEC), (String) config.get(CONFIG_MIMETYPE),
+				(boolean) config.get(CONFIG_BACKTRACK), (boolean) config.get(CONFIG_SAFECOMPS),
+				(boolean) config.get(CONFIG_TERMCACHE), (boolean) config.get(CONFIG_DEBUG), config);
 	}
 
 	private DynSemContext(IDynSemLanguageParser parser, ITermRegistry termRegistry, RuleRegistry ruleRegistry,
 			InputStream input, PrintStream output, PrintStream err, InputStream specification, String mimetype_lang,
-			String mimetype_ds, boolean backtracking, boolean safecomponents, boolean caching, boolean debug,
-			Map<String, Object> config) {
+			boolean backtracking, boolean safecomponents, boolean caching, boolean debug, Map<String, Object> config) {
 		this.parser = parser;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
@@ -83,7 +79,6 @@ public class DynSemContext {
 		this.err = err;
 		this.specification = specification;
 		this.mimetype_lang = mimetype_lang;
-		this.mimetype_ds = mimetype_ds;
 		this.backtracking = backtracking;
 		this.safecomponents = safecomponents;
 		this.caching = caching;
@@ -206,10 +201,6 @@ public class DynSemContext {
 
 	public String getMimeTypeObjLanguage() {
 		return mimetype_lang;
-	}
-
-	public String getMimeTypeDS() {
-		return mimetype_ds;
 	}
 
 	public boolean isFullBacktrackingEnabled() {

@@ -20,6 +20,9 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	// Keys for configuration parameters for a DynSemContext.
 
 	public static final String CONTEXT_OBJECT = "dynsemctx-object";
+	
+	public static final String DYNSEM_MIME = "application/x-dynsem";
+	
 	// public static final String PARSER = "PARSER";
 	// public static final String TERM_REGISTRY = "TERM_REGISTRY";
 	// public static final String RULE_REGISTRY = "RULE_REGISTRY";
@@ -85,6 +88,14 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 		// RuleRegistry ruleRegistry = (RuleRegistry) config.get(RULE_REGISTRY);
 		// return new DynSemContext(parser, termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()),
 		// new PrintStream(env.err()), config);
+	}
+
+	public DynSemContext getContext() {
+		return ctx;
+	}
+
+	public static DynSemContext getContext(final RootNode rootnode) {
+		return rootnode.getLanguage(DynSemLanguage.class).getContext();
 	}
 
 	@Override

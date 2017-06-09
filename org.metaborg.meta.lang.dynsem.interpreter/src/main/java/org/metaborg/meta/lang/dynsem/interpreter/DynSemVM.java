@@ -75,12 +75,14 @@ public class DynSemVM {
 		builder.setIn((InputStream) config.get(DynSemContext.CONFIG_STDIN));
 		builder.setOut((OutputStream) config.get(DynSemContext.CONFIG_STDOUT));
 		builder.setErr((OutputStream) config.get(DynSemContext.CONFIG_STDERR));
-
-		String mimetype = ctx.getMimeTypeObjLanguage();
+		
+		String mimeType = ctx.getMimeTypeObjLanguage();
 
 		for (Entry<String, Object> cfg : config.entrySet()) {
-			builder.config(mimetype, cfg.getKey(), cfg.getValue());
+			builder.config(mimeType, cfg.getKey(), cfg.getValue());
 		}
+		
+		builder.config(mimeType, DynSemLanguage.CONTEXT_OBJECT, ctx);
 
 		return builder;
 	}
