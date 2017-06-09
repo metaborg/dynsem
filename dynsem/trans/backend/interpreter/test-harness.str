@@ -15,7 +15,7 @@ rules
 
 
   ds-to-interp-gen-junitsuite =
-    x_entryPoint := $[[<get-opt> LangName()]EntryPoint];
+    x_entryPoint := $[[<get-opt> LangName()]Main];
     testspath := <get-opt> TestsDir();
     e_xten* := <get-opt; map(\ s -> Lit(String([Chars(s)])) \)> LangFileExtens();
     x_classname := $[Test[<get-opt> LangName()]];
@@ -28,6 +28,7 @@ rules
         import java.io.FileInputStream;
         import java.io.IOException;
         import java.io.InputStream;
+        import java.io.PrintStream;
         import java.nio.charset.Charset;
         import java.util.Collection;
         import java.util.LinkedList;
@@ -43,6 +44,7 @@ rules
         import org.junit.runners.Parameterized;
         import org.junit.runners.Parameterized.Parameters;
         import ~x:<get-opt> TopPkg().x_entryPoint;
+        import org.metaborg.meta.lang.dynsem.interpreter.DynSemVM;
         
         @RunWith(Parameterized.class)
         public class x_classname {
@@ -54,6 +56,8 @@ rules
           private InputStream inputStream;
           private ByteArrayOutputStream outputStream;
           private ByteArrayOutputStream errorStream;
+        
+          private DynSemVM vm;
         
           public x_classname(TestData td) {
             this.testData = td;
@@ -70,6 +74,7 @@ rules
         
             outputStream = new ByteArrayOutputStream();
             errorStream = new ByteArrayOutputStream();
+                vm = SLMain.createVM(inputStream, new PrintStream(outputStream), new PrintStream(errorStream), new HashMap<String, Object>());
           }
         
           @After
@@ -91,8 +96,7 @@ rules
         
           private void testEvaluateFailure() {
             try {
-              x_entryPoint.evaluate(testData.programFile, System.getProperty("user.dir"), inputStream, outputStream,
-                  errorStream);
+              x_entryPoint.evaluate(vm, testData.programFile, System.getProperty("user.dir"));
               fail("Failure expected but success encountered");
             } catch (Exception ex) {
               ;
@@ -104,7 +108,7 @@ rules
             final String expectedOutput = IOUtils.toString(fis, Charset.defaultCharset());
             IOUtils.closeQuietly(fis);
         
-            x_entryPoint.evaluate(testData.programFile, System.getProperty("user.dir"), inputStream, outputStream, errorStream);
+            x_entryPoint.evaluate(vm, testData.programFile, System.getProperty("user.dir"));
         
             outputStream.flush();
             errorStream.flush();
