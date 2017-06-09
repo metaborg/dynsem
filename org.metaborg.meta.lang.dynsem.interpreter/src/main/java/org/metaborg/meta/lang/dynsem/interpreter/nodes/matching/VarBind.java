@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -28,7 +27,8 @@ public class VarBind extends MatchPattern {
 
 	public static VarBind create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "VarRef", 1);
-		return new VarBind(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()), SourceUtils.dynsemSourceSectionFromATerm(t));
+		return new VarBind(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
+				SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 }

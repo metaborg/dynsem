@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -69,11 +68,11 @@ public class RuleRegistry {
 		if (jointRulesForName != null) {
 			jointRuleForClass = jointRulesForName.get(dispatchClass);
 		}
-		
+
 		if (jointRuleForClass == null) {
-			
-			jointRuleForClass = new JointRuleRoot(SourceUtils.dynsemSourceSectionUnvailable(),
-					RuleKind.PLACEHOLDER, arrowName, dispatchClass, new Rule[0]);
+
+			jointRuleForClass = new JointRuleRoot(SourceUtils.dynsemSourceSectionUnvailable(), RuleKind.PLACEHOLDER,
+					arrowName, dispatchClass, new Rule[0]);
 			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}
 		return jointRuleForClass;
@@ -83,7 +82,7 @@ public class RuleRegistry {
 		CompilerAsserts.neverPartOfCompilation();
 		try {
 			TAFTermReader reader = new TAFTermReader(new TermFactory());
-			
+
 			IStrategoTerm topSpecTerm;
 			topSpecTerm = reader.parseFromStream(specStream);
 			specStream.close();
@@ -117,8 +116,8 @@ public class RuleRegistry {
 					Class<?> dispatchClass = rulesForClass.getKey();
 					RuleKind kind = rulesForClass.getValue().get(0).getKind();
 					registry.registerJointRule(arrowName, dispatchClass,
-							new JointRuleRoot(SourceUtils.dynsemSourceSectionUnvailable(), kind,
-									arrowName, dispatchClass, rulesForClass.getValue().toArray(new Rule[] {})));
+							new JointRuleRoot(SourceUtils.dynsemSourceSectionUnvailable(), kind, arrowName,
+									dispatchClass, rulesForClass.getValue().toArray(new Rule[] {})));
 				}
 			}
 

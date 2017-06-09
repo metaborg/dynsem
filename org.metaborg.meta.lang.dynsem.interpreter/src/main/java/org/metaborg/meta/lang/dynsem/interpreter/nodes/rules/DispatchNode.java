@@ -29,6 +29,7 @@ public abstract class DispatchNode extends DynSemNode {
 	public RuleResult doDirect(VirtualFrame frame, Class<?> dispatchClass, Object[] args,
 			@Cached("dispatchClass") Class<?> cachedDispatchClass,
 			@Cached("create(getUnionRootNode(cachedDispatchClass).getCallTarget())") DirectCallNode callNode) {
+		getRootNode();
 		return (RuleResult) callNode.call(args);
 	}
 

@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PipedReader;
-import java.io.PipedWriter;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -52,6 +50,7 @@ public class DynSemVM {
 	}
 
 	public Callable<RuleResult> getCallable(IStrategoTerm term, Map<String, Object> properties) {
+		assert engine.getLanguages().containsKey(ctx.getMimeTypeObjLanguage());
 		// FIXME: this is bad bad bad, because the properties are per-program but we are setting them per-VM
 		ctx.writeProperties(properties);
 		try {

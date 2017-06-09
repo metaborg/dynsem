@@ -51,11 +51,11 @@ public class DynSemRuleForeignAccess implements Factory {
 		}
 
 		@Child private Node unbox;
-		
+
 		@Override
 		public Object execute(VirtualFrame frame) {
 			DynSemRule rule = (DynSemRule) ForeignAccess.getReceiver(frame);
-			
+
 			return rule.getRuleTarget().getCallTarget().call(ForeignAccess.getArguments(frame).toArray());
 		}
 

@@ -1,8 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -30,8 +28,9 @@ public class ListBuild extends TermBuild {
 	public Object executeGeneric(VirtualFrame frame) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
 		final ITermBuildFactory tbFactory = getContext().getTermRegistry().lookupBuildFactory(listClass);
-		final TermBuild concreteListBuild = tbFactory.apply(getSourceSection(), cloneNodes(elemNodes), cloneNode(tailNode));
-		
+		final TermBuild concreteListBuild = tbFactory.apply(getSourceSection(), cloneNodes(elemNodes),
+				cloneNode(tailNode));
+
 		return replace(concreteListBuild).executeGeneric(frame);
 	}
 

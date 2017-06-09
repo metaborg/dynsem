@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -29,7 +28,8 @@ public class VarRead extends TermBuild {
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "VarRef", 1);
-		return new VarRead(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()), SourceUtils.dynsemSourceSectionFromATerm(t));
+		return new VarRead(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
+				SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 	@Override

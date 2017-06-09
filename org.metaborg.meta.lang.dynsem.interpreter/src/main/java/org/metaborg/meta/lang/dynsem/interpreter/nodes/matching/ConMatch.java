@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -31,8 +30,8 @@ public class ConMatch extends MatchPattern {
 		final ITermRegistry termReg = ctx.getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
 
-		MatchPattern matcher = InterpreterUtils.notNull(ctx, termReg.lookupMatchFactory(termClass)).apply(getSourceSection(),
-				cloneNodes(children));
+		MatchPattern matcher = InterpreterUtils.notNull(ctx, termReg.lookupMatchFactory(termClass))
+				.apply(getSourceSection(), cloneNodes(children));
 
 		replace(matcher).executeMatch(frame, t);
 	}

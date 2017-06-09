@@ -3,7 +3,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;

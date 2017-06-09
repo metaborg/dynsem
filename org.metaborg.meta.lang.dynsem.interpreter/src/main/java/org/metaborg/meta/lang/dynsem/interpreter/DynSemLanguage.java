@@ -44,7 +44,6 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 				return rootDispatch.execute(frame, programTerm.getClass(), new Object[] { programTerm });
 			}
 		};
-		startInterpretation.getRootNode();
 		return Truffle.getRuntime().createCallTarget(startInterpretation);
 	}
 

@@ -12,7 +12,7 @@ public class SourceUtils {
 		return Source.newBuilder("notext").name("noname").internal().mimeType(DynSemLanguage.DYNSEM_MIME).build()
 				.createUnavailableSection();
 	}
-	
+
 	public static SourceSection dynsemSourceSectionUnvailable() {
 		return Source.newBuilder("notext").name("noname").internal().mimeType(DynSemLanguage.DYNSEM_MIME).build()
 				.createUnavailableSection();
