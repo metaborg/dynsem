@@ -75,7 +75,7 @@ rules
         
             outputStream = new ByteArrayOutputStream();
             errorStream = new ByteArrayOutputStream();
-                vm = SLMain.createVM(inputStream, new PrintStream(outputStream), new PrintStream(errorStream), new HashMap<String, Object>());
+                vm = x_entryPoint.createVM(inputStream, new PrintStream(outputStream), new PrintStream(errorStream), new HashMap<String, Object>());
           }
         
           @After
