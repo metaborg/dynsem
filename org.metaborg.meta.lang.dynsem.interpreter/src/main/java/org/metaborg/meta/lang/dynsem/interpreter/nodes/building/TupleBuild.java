@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -27,8 +28,7 @@ public class TupleBuild extends TermBuild {
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
-		final TermBuild concreteListBuild = InterpreterUtils
-				.notNull(getContext().getTermRegistry().lookupBuildFactory(tupleClass))
+		final TermBuild concreteListBuild = getContext().getTermRegistry().lookupBuildFactory(tupleClass)
 				.apply(getSourceSection(), cloneNodes(elemNodes));
 		return replace(concreteListBuild).executeGeneric(frame);
 	}
@@ -51,7 +51,7 @@ public class TupleBuild extends TermBuild {
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
-		return new TupleBuild(DynSemLanguage.getSourceSectionFromStrategoTerm(t), children, dispatchClass);
+		return new TupleBuild(SourceUtils.dynsemSourceSectionFromATerm(t), children, dispatchClass);
 	}
 
 }

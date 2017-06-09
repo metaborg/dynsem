@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CompilerAsserts;
@@ -20,7 +21,7 @@ public class WldMatchPattern extends MatchPattern {
 
 	public static WldMatchPattern create(IStrategoAppl t) {
 		CompilerAsserts.neverPartOfCompilation();
-		return new WldMatchPattern(DynSemLanguage.getSourceSectionFromStrategoTerm(t));
+		return new WldMatchPattern(SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 }

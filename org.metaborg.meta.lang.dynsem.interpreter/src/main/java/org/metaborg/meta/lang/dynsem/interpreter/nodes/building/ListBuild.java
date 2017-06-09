@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -28,9 +29,9 @@ public class ListBuild extends TermBuild {
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
-		final TermBuild concreteListBuild = InterpreterUtils
-				.notNull(getContext().getTermRegistry().lookupBuildFactory(listClass))
-				.apply(getSourceSection(), cloneNodes(elemNodes), cloneNode(tailNode));
+		final ITermBuildFactory tbFactory = getContext().getTermRegistry().lookupBuildFactory(listClass);
+		final TermBuild concreteListBuild = tbFactory.apply(getSourceSection(), cloneNodes(elemNodes), cloneNode(tailNode));
+		
 		return replace(concreteListBuild).executeGeneric(frame);
 	}
 
@@ -57,7 +58,7 @@ public class ListBuild extends TermBuild {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
 
-		return new ListBuild(DynSemLanguage.getSourceSectionFromStrategoTerm(t), elemNodes, tailNodes, dispatchClass);
+		return new ListBuild(SourceUtils.dynsemSourceSectionFromATerm(t), elemNodes, tailNodes, dispatchClass);
 	}
 
 }

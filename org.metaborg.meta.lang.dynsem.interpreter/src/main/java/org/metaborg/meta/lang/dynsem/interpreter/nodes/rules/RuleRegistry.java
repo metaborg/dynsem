@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -71,7 +72,7 @@ public class RuleRegistry {
 		
 		if (jointRuleForClass == null) {
 			
-			jointRuleForClass = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(),
+			jointRuleForClass = new JointRuleRoot(SourceUtils.dynsemSourceSectionUnvailable(),
 					RuleKind.PLACEHOLDER, arrowName, dispatchClass, new Rule[0]);
 			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}
@@ -116,7 +117,7 @@ public class RuleRegistry {
 					Class<?> dispatchClass = rulesForClass.getKey();
 					RuleKind kind = rulesForClass.getValue().get(0).getKind();
 					registry.registerJointRule(arrowName, dispatchClass,
-							new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), kind,
+							new JointRuleRoot(SourceUtils.dynsemSourceSectionUnvailable(), kind,
 									arrowName, dispatchClass, rulesForClass.getValue().toArray(new Rule[] {})));
 				}
 			}

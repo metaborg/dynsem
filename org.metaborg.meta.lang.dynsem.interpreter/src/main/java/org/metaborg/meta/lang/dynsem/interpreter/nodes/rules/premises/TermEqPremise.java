@@ -4,6 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -34,7 +35,7 @@ public abstract class TermEqPremise extends Premise {
 		assert Tools.hasConstructor(t, "TermEq", 2);
 		TermBuild lhs = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild rhs = TermBuild.create(Tools.applAt(t, 1), fd);
-		return TermEqPremiseNodeGen.create(DynSemLanguage.getSourceSectionFromStrategoTerm(t), lhs, rhs);
+		return TermEqPremiseNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), lhs, rhs);
 	}
 
 	@Specialization

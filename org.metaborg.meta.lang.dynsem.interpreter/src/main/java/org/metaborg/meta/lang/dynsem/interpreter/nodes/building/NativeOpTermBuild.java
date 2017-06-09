@@ -1,8 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -35,11 +37,11 @@ public class NativeOpTermBuild extends TermBuild {
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
-		final ITermRegistry termReg = getContext().getTermRegistry();
+		final DynSemContext ctx = getContext();
+		final ITermRegistry termReg = ctx.getTermRegistry();
 		final Class<?> termClass = termReg.getNativeOperatorClass(constr, children.length);
 
-		TermBuild build = InterpreterUtils.notNull(termReg.lookupNativeOpBuildFactory(termClass))
-				.apply(getSourceSection(), children);
+		TermBuild build = termReg.lookupNativeOpBuildFactory(termClass).apply(getSourceSection(), children);
 		return replace(build).executeGeneric(frame);
 	}
 
@@ -54,7 +56,7 @@ public class NativeOpTermBuild extends TermBuild {
 			children[i] = TermBuild.create(Tools.applAt(childrenT, i), fd);
 		}
 
-		return new NativeOpTermBuild(constr, children, DynSemLanguage.getSourceSectionFromStrategoTerm(t));
+		return new NativeOpTermBuild(constr, children, SourceUtils.dynsemSourceSectionFromATerm(t));
 
 	}
 

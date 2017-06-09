@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -28,7 +29,7 @@ public abstract class TypedMapValues extends TermBuild {
 		assert Tools.hasConstructor(t, "TypedMapValues", 2);
 		TermBuild mapNode = TermBuild.create(Tools.applAt(t, 0), fd);
 		String valueListClass = Tools.javaStringAt(t, 1);
-		return TypedMapValuesNodeGen.create(DynSemLanguage.getSourceSectionFromStrategoTerm(t), valueListClass, mapNode);
+		return TypedMapValuesNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), valueListClass, mapNode);
 	}
 
 	public TypedMapValues(SourceSection source, String keylistClass) {

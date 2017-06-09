@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -27,7 +28,7 @@ public class AsMatch extends MatchPattern {
 
 	public static AsMatch create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "As", 2);
-		return new AsMatch(DynSemLanguage.getSourceSectionFromStrategoTerm(t), VarBind.create(Tools.applAt(t, 0), fd),
+		return new AsMatch(SourceUtils.dynsemSourceSectionFromATerm(t), VarBind.create(Tools.applAt(t, 0), fd),
 				MatchPattern.create(Tools.applAt(t, 1), fd));
 
 	}

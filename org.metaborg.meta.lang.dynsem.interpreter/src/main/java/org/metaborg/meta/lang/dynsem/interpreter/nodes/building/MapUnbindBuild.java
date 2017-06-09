@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.MapUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -27,7 +28,7 @@ public abstract class MapUnbindBuild extends TermBuild {
 		TermBuild map = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild key = TermBuild.create(Tools.applAt(t, 1), fd);
 
-		return MapUnbindBuildNodeGen.create(DynSemLanguage.getSourceSectionFromStrategoTerm(t), map, key);
+		return MapUnbindBuildNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), map, key);
 	}
 
 	@Specialization
