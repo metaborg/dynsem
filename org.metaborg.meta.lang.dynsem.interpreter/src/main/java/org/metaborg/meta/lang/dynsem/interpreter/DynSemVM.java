@@ -7,11 +7,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
@@ -19,6 +26,7 @@ import org.spoofax.terms.io.TAFTermReader;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.vm.PolyglotEngine;
 import com.oracle.truffle.api.vm.PolyglotEngine.Builder;
+import com.oracle.truffle.api.vm.PolyglotEngine.Value;
 
 public class DynSemVM {
 
@@ -69,6 +77,44 @@ public class DynSemVM {
 			throw new RuntimeException("Evaluation failed", ioex);
 		}
 
+	}
+
+	public Callable<RuleResult> getRuleCallable(String ruleName, IStrategoAppl appl, Object[] components) {
+		final Value rule = lookupRule(ruleName, appl);
+		final ArrayList<Object> args = new ArrayList<>(1 + components.length);
+		args.add(toTerm(appl));
+		args.addAll(Arrays.asList(components));
+		return () -> {
+			return rule.execute(args.toArray()).as(RuleResult.class);
+		};
+	}
+
+	private Value lookupRule(String ruleName, IStrategoAppl appl) {
+		final String fullName = ruleName + "/" + applOp(appl) + "/" + applArity(appl);
+		System.out.println(fullName);
+		final Value rule = engine.findGlobalSymbol(fullName);
+		if(rule == null) {
+			throw new NoSuchElementException("No rule '" + ruleName + "' found for " + appl.toString(1));
+		}
+		return rule;
+	}
+
+	private ITerm toTerm(IStrategoAppl appl) {
+		final Class<?> termClass =
+				getContext().getTermRegistry().getConstructorClass(applOp(appl), applArity(appl));
+		try {
+			return (ITerm) MethodUtils.invokeStaticMethod(termClass, "create", appl);
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			throw new RuntimeException("Term is not convertible.");
+		}
+	}
+
+	private String applOp(IStrategoAppl appl) {
+		return appl.getConstructor().getName();
+	}
+
+	private int applArity(IStrategoAppl appl) {
+		return appl.getConstructor().getArity();
 	}
 
 	private Builder createPolyglotBuilder(Map<String, Object> config) {
