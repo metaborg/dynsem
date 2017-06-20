@@ -1,8 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -25,11 +26,12 @@ public class ConMatch extends MatchPattern {
 
 	@Override
 	public void executeMatch(VirtualFrame frame, Object t) {
-		final ITermRegistry termReg = getContext().getTermRegistry();
+		final DynSemContext ctx = getContext();
+		final ITermRegistry termReg = ctx.getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
 
-		MatchPattern matcher = InterpreterUtils.notNull(termReg.lookupMatchFactory(termClass)).apply(getSourceSection(),
-				cloneNodes(children));
+		MatchPattern matcher = InterpreterUtils.notNull(ctx, termReg.lookupMatchFactory(termClass))
+				.apply(getSourceSection(), cloneNodes(children));
 
 		replace(matcher).executeMatch(frame, t);
 	}
@@ -44,6 +46,6 @@ public class ConMatch extends MatchPattern {
 			children[i] = MatchPattern.create(Tools.applAt(childrenT, i), fd);
 		}
 
-		return new ConMatch(constr, children, DynSemLanguage.getSourceSectionFromStrategoTerm(t));
+		return new ConMatch(constr, children, SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 }

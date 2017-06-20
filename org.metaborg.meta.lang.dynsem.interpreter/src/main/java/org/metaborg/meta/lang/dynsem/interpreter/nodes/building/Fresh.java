@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -16,7 +16,7 @@ public class Fresh extends TermBuild {
 	}
 
 	public static Fresh create(IStrategoAppl t, FrameDescriptor fd) {
-		return new Fresh(DynSemLanguage.getSourceSectionFromStrategoTerm(t));
+		return new Fresh(SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 	@Override

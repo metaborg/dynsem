@@ -1,8 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RecurException;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -50,7 +50,7 @@ public class RecursiveRelationPremise extends Premise {
 			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
 		}
 
-		return new RecursiveRelationPremise(DynSemLanguage.getSourceSectionFromStrategoTerm(t), lhsNode, rwNodes);
+		return new RecursiveRelationPremise(SourceUtils.dynsemSourceSectionFromATerm(t), lhsNode, rwNodes);
 
 	}
 }
