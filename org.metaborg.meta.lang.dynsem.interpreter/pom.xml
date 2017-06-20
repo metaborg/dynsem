@@ -17,6 +17,21 @@
 		<deployRepositoryId>metaborg-nexus</deployRepositoryId>
 	</properties>
 
+  <!-- FIXME: Metaborg parent POMs do not allow us to download snapshot releases. We need those in order to build
+    our code standalone (which is not only easier for testing locally, but required on TravisCI). -->
+  <repositories>
+    <repository>
+      <id>metaborg-snapshot-repo</id>
+      <url>http://artifacts.metaborg.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.github.krukow</groupId>
