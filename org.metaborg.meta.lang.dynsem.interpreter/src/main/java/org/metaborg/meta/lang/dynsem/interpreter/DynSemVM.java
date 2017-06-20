@@ -12,8 +12,14 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.TermTransformer;
+import org.spoofax.terms.attachments.OriginAttachment;
 import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.source.Source;
@@ -51,9 +57,31 @@ public class DynSemVM {
 		// FIXME: this is bad bad bad, because the properties are per-program but we are setting them per-VM
 		ctx.writeProperties(properties);
 		try {
+			ITermFactory factory = new TermFactory();
+
+			// convert origin attachments to annotations
+			IStrategoTerm aTerm = new TermTransformer(factory, false) {
+
+				@Override
+				public IStrategoTerm preTransform(IStrategoTerm term) {
+					OriginAttachment orig = OriginAttachment.get(term);
+					IStrategoList annos = null;
+					if (orig != null) {
+						IStrategoAppl attachmentTerm = ImploderAttachment.TYPE.toTerm(factory,
+								ImploderAttachment.get(orig.getOrigin()));
+						annos = factory.makeListCons(attachmentTerm, term.getAnnotations());
+					}
+					if (annos != null) {
+						return factory.annotateTerm(term, annos);
+					}
+					return term;
+				}
+			}.transform(term);
+
+			// massage the term into an input stream for the Source
 			ByteArrayOutputStream termOut = new ByteArrayOutputStream();
 
-			new TAFTermReader(new TermFactory()).unparseToFile(term, termOut);
+			new TAFTermReader(factory).unparseToFile(aTerm, termOut);
 			ByteArrayInputStream termIn = new ByteArrayInputStream(termOut.toByteArray());
 
 			Source code = Source.newBuilder(new InputStreamReader(termIn)).name("Program")
