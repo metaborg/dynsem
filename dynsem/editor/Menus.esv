@@ -17,6 +17,7 @@ menus
     action: "Explicate components" = explication-explicate-editor (openeditor) (source)
     action: "Lift implicits" = expand-implicits-editor (openeditor) (source)
     action: "Core"   = module-to-core-editor (openeditor) (source)
+    action: "Core (AST)"   = module-to-core-nopp-editor (openeditor) (source) (meta)
     
   menu: "Interpreter"
     action: "Generate interpreter" = ds-to-interp-editor (source)

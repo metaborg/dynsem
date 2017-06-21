@@ -18,6 +18,13 @@ rules
       Module(name, section*) := <module-to-core(|path, project-path); unmark-vars; sugar-all> ast;
       result := <pp-debug> Module($[[name].core], section*);
       filename := <guarantee-extension(|"core.ds")> path
+  
+  module-to-core-nopp-editor:
+    (_, position, ast, path, project-path) -> (filename, Module($[[name].core.nosug], section*))
+    with
+      Module(name, section*) := <module-to-core(|path, project-path)> ast;
+//      result := <pp-debug> Module($[[name].core], section*);
+      filename := <guarantee-extension(|"core.nosug.aterm")> path
 
 strategies
 
