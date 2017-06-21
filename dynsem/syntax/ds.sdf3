@@ -114,7 +114,7 @@ context-free syntax // formulas
   Formula.TypeCheck = [[Var] <? [Type]]
   Formula.TypeCast = [[Var] <: [Type]]
   
-  Formula = [[Relation]]
+  Formula = Relation
   Relation.Relation = [[Reads][Source] [Rel] [Target]]
   
   Reads.NoReads = []
