@@ -17,11 +17,11 @@ public abstract class aterm2term_1 extends TermBuild {
 
 	@Specialization
 	public ITTerm doEvaluated(IStrategoTerm aterm) {
-		System.out.println(aterm);
 		throw new RuntimeException("Not implemented");
 	}
 
-	public static TermBuild create(SourceSection source, TermBuild left) {
-		return aterm2term_1NodeGen.create(source, left);
+	public static TermBuild create(SourceSection source, TermBuild tb) {
+		return aterm2term_1NodeGen.create(source, tb);
 	}
+
 }
