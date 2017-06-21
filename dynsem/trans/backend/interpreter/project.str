@@ -120,13 +120,13 @@ rules
             <dependency>
               <groupId>com.oracle.truffle</groupId>
               <artifactId>truffle-api</artifactId>
-              <version>0.23</version>
+              <version>0.26</version>
               <type>jar</type>
             </dependency>
             <dependency>
               <groupId>com.oracle.truffle</groupId>
               <artifactId>truffle-dsl-processor</artifactId>
-              <version>0.23</version>
+              <version>0.26</version>
             </dependency>
             <dependency>
               <groupId>org.metaborg</groupId>
@@ -194,14 +194,14 @@ rules
     $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-          <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]EntryPoint.java"/>
+          <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]Main.java"/>
         </listAttribute>
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
           <listEntry value="1"/>
         </listAttribute>
         <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
         <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
-        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<get-opt> TopPkg()].[<get-opt> LangName()]EntryPoint"/>
+        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<get-opt> TopPkg()].[<get-opt> LangName()]Main"/>
         <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${resource_loc}"/>
         <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<get-opt> MavenArtifactId()]"/>
         <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
@@ -262,7 +262,7 @@ rules
     local-sh :=
       $[#! /bin/sh
         
-        MAVEN_OPTS="[<get-opt> JVMArgs()]" mvn exec:java -Dexec.mainClass=[<get-opt> TopPkg()].[<get-opt> LangName()]EntryPoint -Dexec.args="$1"
+        MAVEN_OPTS="[<get-opt> JVMArgs()]" mvn exec:java -Dexec.mainClass=[<get-opt> TopPkg()].[<get-opt> LangName()]Main -Dexec.args="$1"
       ];
     core-sh :=
       $[#! /bin/sh

@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
@@ -38,12 +37,12 @@ public class DynSemRunner {
 
 	private final Spoofax S;
 	private final ILanguageImpl language;
-	private final DynSemEntryPoint entryPoint;
+	private final DynSemVM vm;
 
-	public DynSemRunner(Spoofax S, String languageName, DynSemEntryPoint interpreter) throws MetaborgException {
+	public DynSemRunner(Spoofax S, String languageName, DynSemVM vm) throws MetaborgException {
 		this.S = S;
 		this.language = loadLanguage(languageName);
-		this.entryPoint = interpreter;
+		this.vm = vm;
 	}
 
 	private ILanguageImpl loadLanguage(String languageName) throws MetaborgException {
@@ -62,10 +61,9 @@ public class DynSemRunner {
 					continue;
 				}
 				try {
-					S.languageDiscoveryService.scanLanguagesInDirectory(spoofaxDir);
+					S.languageDiscoveryService.languagesFromDirectory(spoofaxDir);
 				} catch (MetaborgException ex) {
-					String message = logger.format("Failed to load languages at {}.", spoofaxDir);
-					logger.warn(message, ex);
+					// ignore non-language directories on path
 				}
 			}
 		}
@@ -80,7 +78,7 @@ public class DynSemRunner {
 		return langImpl;
 	}
 
-	public Object run(FileObject file, InputStream in, OutputStream out, OutputStream err) throws MetaborgException {
+	public Object run(FileObject file) throws MetaborgException {
 		IStrategoTerm program;
 		ImmutableMap<String, Object> props;
 		try {
@@ -97,7 +95,7 @@ public class DynSemRunner {
 			if (!parsed.valid()) {
 				throw new MetaborgException("Parsing failed.");
 			}
-			printMessages(err, parsed.messages());
+			printMessages(vm.getContext().getErr(), parsed.messages());
 			if (!parsed.success()) {
 				throw new MetaborgException("Parsing returned errors.");
 			}
@@ -111,7 +109,7 @@ public class DynSemRunner {
 				if (!analyzed.valid()) {
 					throw new MetaborgException("Analysis failed.");
 				}
-				printMessages(err, analyzed.messages());
+				printMessages(vm.getContext().getErr(), analyzed.messages());
 				if (!analyzed.success()) {
 					throw new MetaborgException("Analysis returned errors.");
 				}
@@ -133,7 +131,7 @@ public class DynSemRunner {
 			throw new MetaborgException("Analysis failed.", e);
 		}
 		try {
-			Callable<RuleResult> runner = entryPoint.getCallable(program, in, out, err, props);
+			Callable<RuleResult> runner = vm.getCallable(program, props);
 			RuleResult result = runner.call();
 			return result.result;
 		} catch (Exception e) {

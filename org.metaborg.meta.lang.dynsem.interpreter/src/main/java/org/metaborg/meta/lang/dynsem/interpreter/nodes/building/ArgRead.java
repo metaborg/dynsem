@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -24,7 +24,7 @@ public class ArgRead extends TermBuild {
 
 	public static TermBuild create(IStrategoAppl t) {
 		assert Tools.hasConstructor(t, "ArgRead", 1);
-		return new ArgRead(Tools.intAt(t, 0).intValue(), DynSemLanguage.getSourceSectionFromStrategoTerm(t));
+		return new ArgRead(Tools.intAt(t, 0).intValue(), SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 	@Override

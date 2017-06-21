@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
@@ -83,8 +82,8 @@ public abstract class AlternativeRuleCallNode extends DynSemNode {
 
 	}
 
-	private static void executeFailure(Object term) {
-		if (DynSemContext.LANGUAGE.isFullBacktrackingEnabled()) {
+	protected void executeFailure(Object term) {
+		if (getContext().isFullBacktrackingEnabled()) {
 			throw PatternMatchFailure.INSTANCE;
 		} else {
 			throw new ReductionFailure("No rules applicable for term " + term, InterpreterUtils.createStacktrace());

@@ -1140,6 +1140,15 @@ rules /* term matching */
         
             tailPattern.executeMatch(frame, list.drop(elemPatterns.length));
           }
+          
+          @Specialization(guards = "notAList(o)")
+          public void doFail(VirtualFrame frame, Object o) {
+            throw PatternMatchFailure.INSTANCE;
+          }
+          
+          protected static boolean notAList(Object o){
+            return !(o instanceof x_listclass);
+          }
         
           @ExplodeLoop
           private final void matchElemPatterns(VirtualFrame frame,
