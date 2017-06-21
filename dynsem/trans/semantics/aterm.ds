@@ -1,0 +1,19 @@
+module semantics/aterm
+
+imports
+  semantics/values
+
+signature
+  native datatypes
+    "org.spoofax.interpreter.terms.IStrategoTerm" as ATerm {
+    }
+  
+  native operators
+    aterm2term: ATerm -> T
+
+  arrows
+    convert(ATerm) --> T
+
+rules
+
+  convert(t) --> aterm2term(t)

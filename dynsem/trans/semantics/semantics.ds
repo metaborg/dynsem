@@ -1,0 +1,24 @@
+module semantics/semantics
+
+imports
+  ds-signatures/ds-sig
+  semantics/values
+  semantics/aterm
+  
+signature
+  sorts
+    Eval
+    
+  constructors
+    Eval : ATerm * Module -> Eval
+  
+  arrows
+    Eval -init-> T
+
+rules
+  
+  Eval(t, spec) -init-> prog
+  where
+    convert(t) --> prog
+
+  
