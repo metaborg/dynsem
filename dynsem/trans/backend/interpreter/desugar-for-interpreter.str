@@ -235,13 +235,13 @@ rules /* resugar list construction */
     ListTail(h1*, ListTail(h2*, tl)) -> ListTail([h1*, h2*], tl)
   
   resugar-list:
-    ListTail(h1*, List(h2*)) -> List([h1*, h2*])
+    ListTail(h1*, List_(h2*)) -> List_([h1*, h2*])
   
   resugar-list:
-    ListTail(h*, Cast(List([]), _)) -> List(h*)
+    ListTail(h*, Cast(List_([]), _)) -> List_(h*)
   
   add-typeanno-to-list-tuples:
-    l@List(elems) -> Cast(List(elems), list-sort)
+    l@List_(elems) -> Cast(List_(elems), list-sort)
     where
       list-sort := <type-of; derw-type> l
 
@@ -251,7 +251,7 @@ rules /* resugar list construction */
       list-sort := <type-of; derw-type> l 
   
   add-typeanno-to-list-tuples:
-    Formula(Match(List([]), rhs)) -> Formula(Match(Cast(List([]), list-sort), rhs))
+    Formula(Match(List_([]), rhs)) -> Formula(Match(Cast(List_([]), list-sort), rhs))
     where
       list-sort := <type-of; derw-type> rhs
   
@@ -261,7 +261,7 @@ rules /* resugar list construction */
       tuple-sort := <type-of; derw-type> lhs
   
   add-typeanno-to-list-tuples:
-    LabelComp(Label(l), List([])) -> LabelComp(Label(l), Cast(List([]), list-sort))
+    LabelComp(Label(l), List_([])) -> LabelComp(Label(l), Cast(List_([]), list-sort))
     where
       list-sort := <lookup-def(|Components()); lookup-prop(|Type()); derw-type> l
   
@@ -288,7 +288,7 @@ rules /* resugar list construction */
       ArrowType(_, out-ty) := <select-applicable-arrow-callsite; lookup-prop(|Type())> (<lookup-defs(|Arrows())> arr-name, in-ty)
   
   list-to-typedlist:
-    Cast(List(elems), list-sort) -> TypedList(elems, list-class)
+    Cast(List_(elems), list-sort) -> TypedList(elems, list-class)
     where
        list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
   
