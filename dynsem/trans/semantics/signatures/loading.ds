@@ -12,8 +12,8 @@ signature
     SortDecl -load-> U
     List(ConsDecl) -load-> U
     ConsDecl -load-> U
-    List(ArrowDeclaration) -load-> U
-    ArrowDeclaration -load-> U
+    List(ArrowDecl) -load-> U
+    ArrowDecl -load-> U
 
 rules
 
@@ -55,25 +55,17 @@ rules // constructors
 
 rules // arrows
 
-  ArrowDeclarations(arrowz) -load-> U()
+  Arrows(arrowz) -load-> U()
   where
     arrowz -load-> _
   
-  [] : List(ArrowDeclaration) -load-> U()
+  [] : List(ArrowDecl) -load-> U()
   
-  [arr|arrs] : List(ArrowDeclaration) -load-> U()
+  [arr|arrs] : List(ArrowDecl) -load-> U()
   where
     arr -load-> _;
     arrs -load-> _
 
-//  ArrowDecl(
-//              ArrowROs([Label("E")])
-//            , SimpleSort("Exp")
-//            , ArrowRWs([Label("H")])
-//            , ""
-//            , SimpleSort("V")
-//            , ArrowRWs([Label("H")])
-//            )
   ArrowDecl(ros, in-ty, rw-ins, x, out-ty, rw-outs) :: A -load-> U() :: A { (x, in-ty) |--> out-ty, A} 
 
 
