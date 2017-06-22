@@ -1,16 +1,8 @@
 module semantics/values
 
 signature
-  sorts
-    T
-    
+ sorts
+    U
+  
   constructors
-    ApplT: String * List(T) -> T
-    TuplT: List(T) -> T
-    ListT: List(T) -> T
-    IntT: Int -> T
-//    LongT: Long -> T
-//    FloatT: Float -> T
-//    RealT: Real -> T
-    StrT: String -> T
-    
+    U: U

@@ -1,0 +1,46 @@
+module semantics/spec-repr
+
+imports
+  ds-signatures/ds-sig
+  semantics/values
+  
+signature
+  sort aliases
+    // table of constructor name * arity to sort name
+    Conses = Map((String * Int), String)
+  
+  components
+    C : Conses
+
+  arrows
+    Module -load-> U
+    ModuleSection -load-> U
+    SignatureSection -load-> U
+    List(ConsDecl) -load-> U
+    ConsDecl -load-> U
+    
+rules
+  
+  Module(_, [_, sigz, rulz]) -load-> U()
+  where
+    sigz -load-> _
+//    ;ruls -load-> _
+    
+  Signatures([sortz, constructorz, nativeconstructorz, nativeoperatorz, arrowz, nativedatatypez, componentz, variableschemez]) -load-> U()
+  where
+    constructorz -load-> _
+  
+  Constructors(consdecls) -load-> U()
+  where
+    consdecls -load-> U()
+  
+  [] : List(ConsDecl) -load-> U()
+  
+  [cons|conss] : List(ConsDecl) -load-> U()
+  where
+    cons -load-> _;
+    conss -load-> _
+  
+  ConsDecl(x, kids, SimpleSort(srt), _) :: C -load-> U() :: C {(x, |kids|) |--> srt, C}
+
+      
