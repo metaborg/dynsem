@@ -18,6 +18,7 @@ menus
     action: "Lift implicits" = expand-implicits-editor (openeditor) (source)
     action: "Core"   = module-to-core-editor (openeditor) (source)
     action: "Core (AST)"   = module-to-core-nopp-editor (openeditor) (source) (meta)
+    action: "Typed Core (AST)" = module-to-typed-core-aterm (openeditor) (source) (meta)
     
   menu: "Interpreter"
     action: "Generate interpreter" = ds-to-interp-editor (source)
