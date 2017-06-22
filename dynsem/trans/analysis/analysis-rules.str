@@ -273,6 +273,12 @@ rules
     where
       ty@ListType(_) := <type-check-build; get-alias-base> t
   
+  type-check-build-list:
+    ListLength(t) -> IntType()
+    where
+      t-ty := <type-check-build> t;
+      <type-coerce-full(fail)> (t-ty, ListType(ALPHATYPE()))
+  
   type-check-build-tuple:
     Tuple(t*) -> TupleType(<map(type-check-build)> t*)
 
