@@ -1,0 +1,17 @@
+module semantics/rules/representation
+
+imports
+  ds-signatures/ds-sig
+
+signature
+  // extra constructors (not found in syntax definition)
+  constructors
+    NamedDynamicEmitted : List(LabelComp) * String * Type -> Rel
+
+  sort aliases
+    Rules = Map((String * Type), List(Rule))
+  
+  components
+    R : Rules
+  
+  

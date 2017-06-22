@@ -1,5 +1,4 @@
 <factorypath>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/metaborg/org.metaborg.meta.lang.dynsem.interpreter/2.3.0-SNAPSHOT/org.metaborg.meta.lang.dynsem.interpreter-2.3.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/github/krukow/clj-ds/0.0.4/clj-ds-0.0.4.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/metaborg/org.strategoxt.strj/2.3.0-SNAPSHOT/org.strategoxt.strj-2.3.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/metaborg/org.spoofax.interpreter.core/2.3.0-SNAPSHOT/org.spoofax.interpreter.core-2.3.0-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>

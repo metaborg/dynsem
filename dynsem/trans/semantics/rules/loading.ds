@@ -1,0 +1,31 @@
+module semantics/rules/loading
+
+imports
+  semantics/unit
+  semantics/rules/representation
+  ds-signatures/ds-sig
+  
+signature
+  arrows
+    ModuleSection -load-> U
+    List(Rule) -load-> U
+    Rule -load-> U
+    
+rules
+
+  Rules(rulz) -load-> U()
+  where
+    rulz -load-> _
+  
+  [] : List(Rule) -load-> U()
+  
+  [r|rs] : List(Rule) -load-> U()
+  where
+    r -load-> _;
+    rs -load-> _
+  
+  
+  r@Rule(prems, _, Relation(ros, Source(lhs, rw-ins), NamedDynamicEmitted(_, x, in-ty), Target(rhs, rw-outs))) :: R -load-> U() :: R {(x, in-ty) |--> [r|rs], R}
+  where
+    R[(x, in-ty)] => rs
+

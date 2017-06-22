@@ -1,7 +1,6 @@
 module semantics/semantics
 
 imports
-//  ds-signatures/ds-sig
   semantics/aterm
   semantics/terms
   semantics/module
@@ -9,19 +8,18 @@ imports
 signature
   sorts
     Eval
-    Eval2
     
   constructors
     Eval : ATerm * Module -> Eval
     
   arrows
-    Eval -init-> (T * Sorts * Constructors * Arrows)
+    Eval -init-> (T * Rules * Sorts * Constructors * Arrows)
     
 rules
   
-  Eval(t, spec) -init-> (prog, S, C, A)
+  Eval(t, spec) -init-> (prog, R, S, C, A)
   where
     convert(t) --> prog;
-    spec :: S {}, C {}, A {} -load-> _ :: S, C, A
+    spec :: S {}, C {}, A {} -load-> _ :: S, C, A, R
 
   
