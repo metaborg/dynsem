@@ -80,7 +80,7 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "ArgRead", 1)) {
 			return ArgRead.create(t);
 		}
-		if (Tools.hasConstructor(t, "Map", 1)) {
+		if (Tools.hasConstructor(t, "Map_", 1)) {
 			return MapBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "MapExtend", 2)) {
