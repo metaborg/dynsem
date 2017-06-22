@@ -15,7 +15,7 @@ rules
       cons-decl     := <collect-all(?Constructors(<id>)); concat; !Constructors(<id>)> body*;
       natcons-decl  := <collect-all(?NativeConstructors(<id>)); concat; !NativeConstructors(<id>)> body*;
       natops-decl   := <collect-all(?NativeOperators(<id>)); concat; !NativeOperators(<id>)> body*;
-      arrow-decl    := <collect-all(?ArrowDeclarations(<id>)); concat; !ArrowDeclarations(<id>)> body*;
+      arrow-decl    := <collect-all(?Arrows(<id>)); concat; !Arrows(<id>)> body*;
       semcomps-decls := <collect-all(?Components(<id>)); concat; !Components(<id>)> body*;
       varschemes-decl := <collect-all(?VariableSchemes(<id>)); concat; !VariableSchemes(<id>)> body*;
       aliases-decl := <collect-all(?Aliases(<id>)); concat; !Aliases(<id>)> body*;
