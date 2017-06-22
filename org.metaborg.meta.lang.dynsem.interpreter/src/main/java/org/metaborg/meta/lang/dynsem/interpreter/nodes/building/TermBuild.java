@@ -129,6 +129,10 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "Reverse", 1)) {
 			return ListReverseTermBuildNodeGen.create(t, fd);
 		}
+		
+		if(Tools.hasConstructor(t, "ListLength", 1)){
+			return ListLengthTermBuild.create(t, fd);
+		}
 
 		if (Tools.hasConstructor(t, "TypedTuple", 2)) {
 			return TupleBuild.create(t, fd);
