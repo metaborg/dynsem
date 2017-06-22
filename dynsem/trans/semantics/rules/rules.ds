@@ -2,3 +2,4 @@ module semantics/rules/rules
 
 imports
   semantics/rules/representation
+  semantics/rules/loading

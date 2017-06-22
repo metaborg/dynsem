@@ -20,6 +20,6 @@ rules
   Eval(t, spec) -init-> (prog, R, S, C, A)
   where
     convert(t) --> prog;
-    spec :: S {}, C {}, A {} -load-> _ :: S, C, A, R
+    spec :: S {}, C {}, A {}, R {} -load-> _ :: S, C, A, R
 
   
