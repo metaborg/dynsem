@@ -17,7 +17,8 @@ public abstract class aterm2term_1 extends TermBuild {
 
 	@Specialization
 	public ITTerm doEvaluated(IStrategoTerm aterm) {
-		throw new RuntimeException("Not implemented");
+		ITTerm trm = TermConverter.convert(aterm);
+		return trm;
 	}
 
 	public static TermBuild create(SourceSection source, TermBuild tb) {
