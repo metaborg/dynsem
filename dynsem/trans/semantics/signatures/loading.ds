@@ -1,0 +1,79 @@
+module semantics/signatures/loading
+
+imports
+  semantics/signatures/representation
+  semantics/unit
+  
+signature
+  arrows
+    ModuleSection -load-> U
+    SignatureSection -load-> U
+    List(SortDecl) -load-> U
+    SortDecl -load-> U
+    List(ConsDecl) -load-> U
+    ConsDecl -load-> U
+    List(ArrowDeclaration) -load-> U
+    ArrowDeclaration -load-> U
+
+rules
+
+  Signatures([sortz, constructorz, nativeconstructorz, nativeoperatorz, arrowz, nativedatatypez, componentz, variableschemez]) -load-> U()
+  where
+    sortz -load-> _;
+    constructorz -load-> _;
+    arrowz -load-> _
+
+rules // sorts
+
+  Sorts(sortdecls) -load-> U()
+  where
+    sortdecls -load-> _
+
+  [] : List(SortDecl) -load-> U()
+  
+  [srt|srts] : List(SortDecl) -load-> U()
+  where
+    srt -load-> _;
+    srts -load-> _
+  
+  SortDecl(x) :: S -load-> U() :: S {SimpleSort(x) |--> SimpleSort(x), S}
+  
+rules // constructors
+  
+  Constructors(consdecls) -load-> U()
+  where
+    consdecls -load-> _
+  
+  [] : List(ConsDecl) -load-> U()
+  
+  [cons|conss] : List(ConsDecl) -load-> U()
+  where
+    cons -load-> _;
+    conss -load-> _
+  
+  ConsDecl(x, kids, ty, _) :: C -load-> U() :: C {(x, |kids|) |--> ty, C}
+
+rules // arrows
+
+  ArrowDeclarations(arrowz) -load-> U()
+  where
+    arrowz -load-> _
+  
+  [] : List(ArrowDeclaration) -load-> U()
+  
+  [arr|arrs] : List(ArrowDeclaration) -load-> U()
+  where
+    arr -load-> _;
+    arrs -load-> _
+
+//  ArrowDecl(
+//              ArrowROs([Label("E")])
+//            , SimpleSort("Exp")
+//            , ArrowRWs([Label("H")])
+//            , ""
+//            , SimpleSort("V")
+//            , ArrowRWs([Label("H")])
+//            )
+  ArrowDecl(ros, in-ty, rw-ins, x, out-ty, rw-outs) :: A -load-> U() :: A { (x, in-ty) |--> out-ty, A} 
+
+
