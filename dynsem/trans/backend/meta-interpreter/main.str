@@ -1,0 +1,25 @@
+module backend/meta-interpreter/main
+
+imports
+  signatures/ds-sig
+  lib-ds
+  ds
+
+imports
+  backend/meta-interpreter/desugar-for-metaspec
+//  libstratego-aterm
+
+//imports
+//  backend/interpreter/-
+//  ds2ds/core
+//  analysis/-
+  
+rules
+  module-to-typed-core-aterm:
+    (_, position, ast, path, project-path) -> (filename, Module($[[name].typedcore], section*))
+    with
+      Module(name, section*) := <module-to-core(|path, project-path); sugar-for-metaspec; unmark-vars> ast;
+      filename := <guarantee-extension(|"typedcore.aterm")> path
+  
+  
+  

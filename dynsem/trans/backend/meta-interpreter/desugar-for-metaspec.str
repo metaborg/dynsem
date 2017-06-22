@@ -1,0 +1,19 @@
+module backend/meta-interpreter/desugar-for-metaspec
+
+imports
+  signatures/ds-sig
+  lib-ds
+  ds
+  ds2ds/more-typeannos
+
+rules
+  sugar-for-metaspec =
+    resugar-and-typecast-lists
+
+  
+  
+  
+  
+  
+  
+  

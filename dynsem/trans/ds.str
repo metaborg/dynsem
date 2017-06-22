@@ -19,6 +19,7 @@ imports
 	analysis/main
 	ds2ds/core
 	backend/interpreter/main
+	backend/meta-interpreter/main
 
 signature
   constructors
