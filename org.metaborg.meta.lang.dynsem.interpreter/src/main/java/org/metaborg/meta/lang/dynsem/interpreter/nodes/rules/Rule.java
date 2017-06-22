@@ -3,9 +3,9 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -111,8 +111,8 @@ public abstract class Rule extends DynSemNode {
 
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 
-			return new ReductionRule(DynSemLanguage.getSourceSectionFromStrategoTerm(ruleT), fd, kind, arrowName, dispatchClass,
-					RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
+			return new ReductionRule(SourceUtils.dynsemSourceSectionFromATerm(ruleT), fd, kind, arrowName,
+					dispatchClass, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
 		}
 
 		throw new NotImplementedException("Unsupported rule term: " + ruleT);

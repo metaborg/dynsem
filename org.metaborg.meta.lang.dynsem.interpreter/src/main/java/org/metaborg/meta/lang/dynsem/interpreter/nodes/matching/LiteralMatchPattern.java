@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
@@ -15,7 +15,7 @@ public abstract class LiteralMatchPattern extends MatchPattern {
 	}
 
 	public static LiteralMatchPattern create(IStrategoAppl t, FrameDescriptor fd) {
-		SourceSection source = DynSemLanguage.getSourceSectionFromStrategoTerm(t);
+		SourceSection source = SourceUtils.dynsemSourceSectionFromATerm(t);
 		if (Tools.hasConstructor(t, "True", 0)) {
 			return TrueLiteralTermMatchPatternNodeGen.create(source);
 		}

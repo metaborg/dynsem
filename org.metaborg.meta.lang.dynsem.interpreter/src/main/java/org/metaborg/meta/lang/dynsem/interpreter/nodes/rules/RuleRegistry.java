@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -18,6 +19,7 @@ import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class RuleRegistry {
@@ -26,11 +28,17 @@ public class RuleRegistry {
 
 	private boolean isInit;
 
-	public RuleRegistry() {
-	}
+	@CompilationFinal private DynSemLanguage language;
 
 	protected void init() {
+	}
 
+	public void setLanguage(DynSemLanguage language) {
+		this.language = language;
+	}
+
+	public DynSemLanguage getLanguage() {
+		return language;
 	}
 
 	@TruffleBoundary
@@ -68,17 +76,15 @@ public class RuleRegistry {
 		if (jointRulesForName != null) {
 			jointRuleForClass = jointRulesForName.get(dispatchClass);
 		}
-		
+
 		if (jointRuleForClass == null) {
-			
-			jointRuleForClass = new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(),
-					RuleKind.PLACEHOLDER, arrowName, dispatchClass, new Rule[0]);
+			jointRuleForClass = createJointRoot(RuleKind.PLACEHOLDER, arrowName, dispatchClass, new Rule[0]);
 			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
 		}
 		return jointRuleForClass;
 	}
 
-	public final static void populate(RuleRegistry registry, InputStream specStream) {
+	public void populate(InputStream specStream) {
 		CompilerAsserts.neverPartOfCompilation();
 		try {
 			TAFTermReader reader = new TAFTermReader(new TermFactory());
@@ -115,15 +121,20 @@ public class RuleRegistry {
 				for (Entry<Class<?>, List<Rule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
 					RuleKind kind = rulesForClass.getValue().get(0).getKind();
-					registry.registerJointRule(arrowName, dispatchClass,
-							new JointRuleRoot(DynSemLanguage.BUILTIN_DYNSEM_SOURCE.createUnavailableSection(), kind,
-									arrowName, dispatchClass, rulesForClass.getValue().toArray(new Rule[] {})));
+					registerJointRule(arrowName, dispatchClass, createJointRoot(kind, arrowName, dispatchClass,
+							rulesForClass.getValue().toArray(new Rule[] {})));
 				}
 			}
 
 		} catch (IOException ioex) {
 			throw new RuntimeException("Could not load specification ATerm", ioex);
 		}
+	}
+
+	protected final JointRuleRoot createJointRoot(RuleKind kind, String arrowName, Class<?> dispatchClass,
+			Rule[] rules) {
+		return new JointRuleRoot(language, SourceUtils.dynsemSourceSectionUnvailable(), kind, arrowName, dispatchClass,
+				rules);
 	}
 
 	private static IStrategoList ruleListTerm(IStrategoTerm topSpecTerm) {

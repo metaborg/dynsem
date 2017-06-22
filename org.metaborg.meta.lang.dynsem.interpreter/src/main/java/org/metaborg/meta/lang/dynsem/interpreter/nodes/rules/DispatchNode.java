@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -29,6 +29,7 @@ public abstract class DispatchNode extends DynSemNode {
 	public RuleResult doDirect(VirtualFrame frame, Class<?> dispatchClass, Object[] args,
 			@Cached("dispatchClass") Class<?> cachedDispatchClass,
 			@Cached("create(getUnionRootNode(cachedDispatchClass).getCallTarget())") DirectCallNode callNode) {
+		getRootNode();
 		return (RuleResult) callNode.call(args);
 	}
 
@@ -51,7 +52,7 @@ public abstract class DispatchNode extends DynSemNode {
 		String arrowName = Tools.stringAt(arrow, 1).stringValue();
 
 		assert Tools.hasConstructor(source, "Source", 2);
-		return DispatchNodeGen.create(DynSemLanguage.getSourceSectionFromStrategoTerm(source), arrowName);
+		return DispatchNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(source), arrowName);
 	}
 
 }
