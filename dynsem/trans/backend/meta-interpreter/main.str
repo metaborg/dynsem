@@ -6,6 +6,8 @@ imports
   ds
 
 imports
+  ds2ds/core
+  analysis/mark-references
   backend/meta-interpreter/desugar-for-metaspec
 //  libstratego-aterm
 

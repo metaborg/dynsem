@@ -5,9 +5,12 @@ imports
   lib-ds
   ds
   ds2ds/more-typeannos
-
+  ds2ds/explicate-arrow-types
+  
 rules
+
   sugar-for-metaspec =
+    explicate-arrow-types;
     resugar-and-typecast-lists
 
   
