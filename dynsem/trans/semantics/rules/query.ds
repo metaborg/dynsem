@@ -6,10 +6,12 @@ imports
 signature
   arrows
     lookup-rule(String, Type) --> RuleChain
-
+    lookup-rule(Rel) --> RuleChain
 rules
   
   R |- lookup-rule(x, ty) --> R[(x, ty)]
+  
+  lookup-rule(NamedDynamicEmitted(_, x, ty)) --> lookup-rule(x, ty)
 
 
 

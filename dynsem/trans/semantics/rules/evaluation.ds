@@ -70,11 +70,11 @@ rules
       log("Matching writes") --> _;
     match-components(rw-pat, rw-ins) :: E1 --> _ :: E2;
       log("Matching lhs") --> _;
-    T |- match(lhs) :: E2 --> _ :: E3;
+    T |- lhs :: E2 -match-> _ :: E3;
       log("Eval premises") --> _;
     prems :: E3 --> _ :: E4;
       log("Build rhs") --> _;
-    build(rhs) :: E4 --> T' :: E5;
+    rhs :: E4 -build-> T' :: E5;
       log("Build components") --> _;
     build-components(rw-blds) :: E5 --> rw-outs :: E6
       ;log("Done rule") --> _
@@ -84,12 +84,12 @@ rules
   match-components([LabelComp(label, pat) | labels], comps) --> match-components(labels, comps)
   where
     comps[label] => T;
-    T |- match(pat) --> _
+    T |- pat -match-> _
   
   build-components([]) --> {}
   
   build-components([LabelComp(label, bld) | labels]) --> { label |--> T, comps}
   where
-    build(bld) --> T;
+    bld -build-> T;
     build-components(labels) --> comps
   

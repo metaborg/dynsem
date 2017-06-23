@@ -11,17 +11,29 @@ signature
     T : T
   
   arrows
-    match(Term) --> U
+    Term -match-> U
     match-all(List(T), List(Term)) --> U
-    eq-name-arity((String * String), (Int * Int)) --> U
+    eq-name-arity((String * String), (Int * Int)) --> Bool
+    
 rules
   
-  T ApplT(x1, kids) |- match(Con(x2, kid-pats)) --> U()
+  // the OK() flag check should not be necessary, but there is bug in the propagation transformation
+  T |- __Var2Term__(VarRef(x)) :: ST OK(), E -match-> U() :: ST OK(), E {x |--> T, E}
   where
-    eq-name-arity((x1, x2), (|kids|, |kid-pats|)) --> _;
+    log("Assign " ++ x ++ " = " ++ str(T)) --> _
+  
+  T ApplT(x1, kids) |- Con(x2, kid-pats) -match-> U()
+  where
+      int2string(|kids|) => l-arity;
+      int2string(|kid-pats|) => r-arity; 
+      log("Matching appl " ++ x1 ++ " " ++ x2 ++ " kids " ++ l-arity ++ " " ++ r-arity) --> _;
+    eq-name-arity((x1, x2), (|kids|, |kid-pats|)) --> true;
+      log("Go ahead, superficial match") --> _;
     match-all(kids, kid-pats) --> _
 
-  T |- match(VarRef(x)) :: E --> U() :: E {x |--> T, E}
+  T |- pat : Term :: ST OK() -match-> ??? :: ST F()
+  where
+    log("Match failure: " ++ str(T) ++ " =!=> " ++ str(pat)) --> _
 
 rules // helpers
 
@@ -29,17 +41,17 @@ rules // helpers
   
   match-all([T | Ts], [pat | pats]) --> match-all(Ts, pats)
   where
-    T |- match(pat) --> _
+    T |- pat -match-> _
 
-  eq-name-arity((x1, x2), (i1, i2)) --> U()
+  eq-name-arity((x1, x2), (i1, i2)) --> true
   where
     x1 == x2;
     i1 == i2
   
-  eq-name-arity((x1, x2), _) --> ??? :: ST F()
+  eq-name-arity((x1, x2), _) --> false
   where
     x1 != x2
   
-  eq-name-arity(_, (i1, i2)) --> ??? :: ST F()
+  eq-name-arity(_, (i1, i2)) --> false
   where
     i1 != i2

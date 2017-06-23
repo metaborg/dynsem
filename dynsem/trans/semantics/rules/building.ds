@@ -1,11 +1,19 @@
 module semantics/rules/building
 
 imports
+  semantics/rules/evaluation
   semantics/unit
   semantics/terms
   ds-signatures/ds-sig
   
 signature
   arrows
-    build(Term) --> T
+    Term -build-> T
 
+rules
+  
+  __Var2Term__(VarRef(x)) :: E -build-> E[x]
+  where
+    log("Reading var " ++ x) --> _ 
+  
+  Map_([]) -build-> MapT({})

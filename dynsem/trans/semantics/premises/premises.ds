@@ -3,8 +3,36 @@ module semantics/premises/premises
 imports
   ds-signatures/ds-sig
   semantics/unit
+  semantics/rules/evaluation
   
 signature
   arrows
     List(Premise) --> U
     Premise --> U
+
+rules
+
+  x : List(Premise) --> U()
+  where
+    x => [] // work around missing type annotated list in this case (in combination with default components)
+  
+  [prem | prems] : List(Premise) --> prems
+  where
+    prem --> _
+
+  Formula(Relation(Reads(ro-blds), Source(bld, rw-blds), arrow@NamedDynamicEmitted(_, x, _), Target(pat, rw-pats))) --> U()
+  where
+      log("Applying rule " ++ x) --> _;
+    lookup-rule(arrow) --> r;
+      log("Found rule " ++ str(r)) --> _;
+    build-components(ro-blds) --> ro-ins;
+      log("Building rw comps") --> _;
+    build-components(rw-blds) --> rw-ins;
+      log("Building term") --> _;
+    bld -build-> T;
+      log("Applying actual") --> _;
+    apply-rules(r, T, ro-ins, rw-ins) --> (T', rw-outs);
+      log("Matching out") --> _;
+    T' |- pat -match-> _;
+      log("Matching out comps") --> _;
+    match-components(rw-pats, rw-outs) --> _ 

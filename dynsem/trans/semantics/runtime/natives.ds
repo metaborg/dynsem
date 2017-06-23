@@ -5,10 +5,12 @@ signature
     error: String -> String
     str: AST -> String
     logdebug: String -> String
+    int2string: Int -> String
     
   arrows
     halt-error(String) --> String
     log(String) --> String
+    int2str(Int) --> String
     
 rules
 
@@ -18,3 +20,4 @@ rules
   where
     logdebug(s) => _
   
+  int2str(i) --> int2string(i)
