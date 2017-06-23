@@ -37,7 +37,12 @@ rules
     bld -build-> T;
     T |- pat -match-> _
 
-    
+//  Formula(TermNeq(__Var2Term__(VarRef(s1)), __Var2Term__(VarRef(s2))))
+//  Formula(TermEq(bld1, bld2)) --> U()
+//  where
+//    ...
+
+
   CaseMatch(bld, casepats) --> U()
   where
     bld -build-> T;
