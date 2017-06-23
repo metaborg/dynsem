@@ -18,8 +18,19 @@ rules
   where
     log("Reading var " ++ x) --> _ 
   
-  Con(x, kid-blds) -build-> ApplT(x, kids)
+  __Cast2Term__(Cast(bld, _)) -build-> bld
+  
+  C |- Con(x, kid-blds) -build-> ApplT(x, kids)
   where
+    // ensure regular constructors (i.e. not native ops, or some other magic thing)
+    C[(x, |kid-blds|)?] == true;
+    kid-blds -build-> kids
+  
+  C |- Con(x, kid-blds) -build-> ApplT(x, kids)
+  where
+    // ensure regular constructors (i.e. not native ops, or some other magic thing)
+    C[(x, |kid-blds|)?] == false;
+    halt-error("Unknown constructor " ++ x ++ "/" ++ int2string(|kid-blds|)) --> _;
     kid-blds -build-> kids
   
   [] : List(Term) -build-> []
