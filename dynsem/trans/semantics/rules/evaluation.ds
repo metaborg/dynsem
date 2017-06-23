@@ -64,20 +64,12 @@ rules
 
   apply-rule(r@Rule(prems, _, Relation(Reads(ro-pat), Source(lhs, rw-pat), _, Target(rhs, rw-blds))), T, ro-ins, rw-ins) --> (T', rw-outs)
   where
-      log("Trying rule " ++ str(r)) --> _;
-      log("Matching reads") --> _;
     match-components(ro-pat, ro-ins) :: E {} --> _ :: E1;
-      log("Matching writes") --> _;
     match-components(rw-pat, rw-ins) :: E1 --> _ :: E2;
-      log("Matching lhs") --> _;
     T |- lhs :: E2 -match-> _ :: E3;
-      log("Eval premises") --> _;
     prems :: E3 --> _ :: E4;
-      log("Build rhs") --> _;
     rhs :: E4 -build-> T' :: E5;
-      log("Build components") --> _;
     build-components(rw-blds) :: E5 --> rw-outs :: E6
-      ;log("Done rule") --> _
 
   match-components([], _) --> U()
   
