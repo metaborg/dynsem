@@ -33,7 +33,12 @@ public abstract class AlternativeRuleCallNode extends DynSemNode {
 			@Cached("getNextDispatchClass(reductionTerm(arguments))") Class<?> nextDispatchClass,
 			@Cached("createUnionNode(nextDispatchClass)") JointRuleNode targetRuleNode) {
 		if (nextDispatchClass == null) {
-			executeFailure(reductionTerm(arguments));
+			if (getContext().isFullBacktrackingEnabled()) {
+				throw PatternMatchFailure.INSTANCE;
+			} else {
+				throw new ReductionFailure("No rules applicable for term " + reductionTerm(arguments),
+						InterpreterUtils.createStacktrace());
+			}
 		}
 		return targetRuleNode.execute(arguments);
 	}
@@ -80,14 +85,6 @@ public abstract class AlternativeRuleCallNode extends DynSemNode {
 
 		return nextDispatchClass;
 
-	}
-
-	protected void executeFailure(Object term) {
-		if (getContext().isFullBacktrackingEnabled()) {
-			throw PatternMatchFailure.INSTANCE;
-		} else {
-			throw new ReductionFailure("No rules applicable for term " + term, InterpreterUtils.createStacktrace());
-		}
 	}
 
 	protected JointRuleNode createUnionNode(Class<?> nextDispatchClass) {
