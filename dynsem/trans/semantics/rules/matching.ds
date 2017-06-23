@@ -16,6 +16,10 @@ signature
     eq-name-arity((String * String), (Int * Int)) --> Bool
     
 rules
+
+  T |- pat : Term :: ST OK() -match-> ??? :: ST F()
+  where
+    log("Match failure: " ++ str(T) ++ " =!=> " ++ str(pat)) --> _
   
   // the OK() flag check should not be necessary, but there is bug in the propagation transformation
   T |- __Var2Term__(VarRef(x)) :: ST OK(), E -match-> U() :: ST OK(), E {x |--> T, E}
@@ -31,9 +35,25 @@ rules
       log("Go ahead, superficial match") --> _;
     match-all(kids, kid-pats) --> _
 
-  T |- pat : Term :: ST OK() -match-> ??? :: ST F()
+  __Cast2Term__(Cast(pat, _)) -match-> U()
   where
-    log("Match failure: " ++ str(T) ++ " =!=> " ++ str(pat)) --> _
+    pat -match-> _
+
+  T ListT(kids) |- List_(kid-pats) -match-> match-all(kids, kid-pats)
+  where
+    eq-name-arity(("",""), (|kids|, |kid-pats|)) --> true
+
+  T ListT(kids) |- ListTail([], tail-pat) -match-> U()
+  where
+    T ListT(kids) |- tail-pat -match-> _
+  
+  T ListT([kid|kids]) |- ListTail([pat|pats], tail-pat) -match-> U()
+  where
+    T kid |- pat -match-> _;
+    T ListT(kids) |- ListTail(pats, tail-pat) -match-> _
+  
+  Wld() -match-> U()
+  
 
 rules // helpers
 
