@@ -1,0 +1,20 @@
+module semantics/runtime/natives
+
+signature
+  native operators
+    error: String -> String
+    str: AST -> String
+    logdebug: String -> String
+    
+  arrows
+    halt-error(String) --> String
+    log(String) --> String
+    
+rules
+
+  halt-error(s) --> error(s)
+  
+  log(s) --> s
+  where
+    logdebug(s) => _
+  

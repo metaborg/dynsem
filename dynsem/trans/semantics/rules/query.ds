@@ -6,3 +6,10 @@ imports
 signature
   arrows
     lookup-rule(String, Type) --> RuleChain
+
+rules
+  
+  R |- lookup-rule(x, ty) --> R[(x, ty)]
+
+
+

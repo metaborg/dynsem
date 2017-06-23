@@ -5,6 +5,7 @@ imports
   semantics/rules/representation
   semantics/rules/query
   semantics/signatures/query
+  semantics/runtime/natives
   
 signature
   
@@ -13,15 +14,49 @@ signature
   
   arrows
     eval(T) --> T
-    apply-rule(RuleChain, T, Comps, Comps) --> (T * Comps)
-    
+    apply-rules(RuleChain, T, Comps, Comps) --> (T * Comps)
+    apply-rule(Rule, T, Comps, Comps) --> (T * Comps)
+  
+  sorts
+    Status
+  
+  constructors
+    OK: Status
+    F : Status
+  
+  components
+    ST : Status = OK()
+  
 rules
   
   eval(t) --> t'
   where
+    log("Eval init") --> _;
     t -type-> type;
     lookup-rule("init", type) --> r;
-    apply-rule(r, t, {}, {}) --> (t', _)
+    apply-rules(r, t, {}, {}) :: ST OK() --> (t', _) :: ST _
+  
+  apply-rules(NR(), t, _, _) :: ST OK() --> ???
+  where
+    halt-error("(META) No rules applicable for term " ++ str(t)) --> _
+  
+  apply-rules(R(r, rs), t, ros, rws) :: ST OK() --> res :: ST
+  where
+    apply-rule(r, t, ros, rws) :: ST OK() --> res1 :: ST1;
+    case ST1 of {
+      OK() =>
+        res1 => res;
+        OK() => ST
+      otherwise =>
+        apply-rules(rs, t, ros, rws) :: ST OK() --> res2 :: ST2;
+        res2 => res;
+        ST2 => ST
+    }
+
+  apply-rule(r, _, _, _) :: ST OK() --> ??? :: ST F()
+  where
+    log("Trying rule " ++ str(r)) --> _
+
   
   
   

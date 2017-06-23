@@ -8,3 +8,11 @@ signature
   arrows
     T -type-> Type
     
+rules
+  
+  C |- ApplT(x, kids) -type-> C[(x, |kids|)]
+  
+  
+  
+  
+    
