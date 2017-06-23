@@ -54,6 +54,11 @@ rules
   where
     map-bld -build-> MapT(map);
     key-bld -build-> key
+  
+  MapHas(map-bld, key-bld) -build-> BoolT(map[key?])
+  where
+    map-bld -build-> MapT(map);
+    key-bld -build-> key
 
   String(s) -build-> StrT(s)
   
