@@ -20,7 +20,7 @@ rules
   Eval(aterm, spec) -init-> (t', R, S, C, A)
   where
     convert(aterm) --> t;
-    spec :: S {}, C {}, A {}, R {} -load-> _ :: S, C, A, R;
-    S, C, A, R |- eval(t) --> t'
+    spec :: S {}, C {}, A {}, R {}, NatC {} -load-> _ :: S, C, A, NatC, R;
+    S, C, A, NatC, R |- eval(t) --> t'
 
   

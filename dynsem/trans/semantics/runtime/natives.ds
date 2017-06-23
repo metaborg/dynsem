@@ -10,7 +10,7 @@ signature
   arrows
     halt-error(String) --> String
     log(String) --> String
-    
+       
 rules
 
   halt-error(s) --> error(s)

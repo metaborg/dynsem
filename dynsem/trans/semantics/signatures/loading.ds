@@ -14,14 +14,17 @@ signature
     ConsDecl -load-> U
     List(ArrowDecl) -load-> U
     ArrowDecl -load-> U
+    List(NativeOpDecl) -load-> U
+    NativeOpDecl -load-> U
 
 rules
 
-  Signatures([sortz, constructorz, nativeconstructorz, nativeoperatorz, arrowz, nativedatatypez, componentz, variableschemez]) -load-> U()
+  Signatures([srts, conss, natconss, natops, arrs, nattypes, comps, schemes]) -load-> U()
   where
-    sortz -load-> _;
-    constructorz -load-> _;
-    arrowz -load-> _
+    srts -load-> _;
+    conss -load-> _;
+    arrs -load-> _;
+    natops -load-> _
 
 rules // sorts
 
@@ -68,4 +71,17 @@ rules // arrows
 
   ArrowDecl(ros, in-ty, rw-ins, x, out-ty, rw-outs) :: A -load-> U() :: A { (x, in-ty) |--> out-ty, A} 
 
-
+rules // native operators
+  
+  NativeOperators(natops) -load-> U()
+  where
+    natops -load-> _
+  
+  [] : List(NativeOpDecl) -load-> U()
+  
+  [natop|natops] : List(NativeOpDecl) -load-> U()
+  where
+    natop -load-> _;
+    natops -load-> _
+  
+  NativeOpDecl(x, kid-tys, ty) :: NatC -load-> U() :: NatC { (x, |kid-tys|) |--> ty, NatC}

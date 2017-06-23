@@ -10,7 +10,8 @@ signature
     Arrows = Map((String * Type), Type)
   
   components
-    S : Sorts
-    C : Constructors
-    A : Arrows 
+    S    : Sorts
+    C    : Constructors
+    A    : Arrows 
+    NatC : Constructors
 
