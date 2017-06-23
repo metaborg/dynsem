@@ -1,0 +1,11 @@
+module semantics/rules/building
+
+imports
+  semantics/unit
+  semantics/terms
+  ds-signatures/ds-sig
+  
+signature
+  arrows
+    build(Term) --> T
+

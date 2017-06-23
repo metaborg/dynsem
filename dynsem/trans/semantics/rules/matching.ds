@@ -1,0 +1,45 @@
+module semantics/rules/matching
+
+imports
+  ds-signatures/ds-sig
+  semantics/unit
+  semantics/terms
+  semantics/rules/evaluation
+  
+signature
+  components
+    T : T
+  
+  arrows
+    match(Term) --> U
+    match-all(List(T), List(Term)) --> U
+    eq-name-arity((String * String), (Int * Int)) --> U
+rules
+  
+  T ApplT(x1, kids) |- match(Con(x2, kid-pats)) --> U()
+  where
+    eq-name-arity((x1, x2), (|kids|, |kid-pats|)) --> _;
+    match-all(kids, kid-pats) --> _
+
+  T |- match(VarRef(x)) :: E --> U() :: E {x |--> T, E}
+
+rules // helpers
+
+  match-all([], []) --> U()
+  
+  match-all([T | Ts], [pat | pats]) --> match-all(Ts, pats)
+  where
+    T |- match(pat) --> _
+
+  eq-name-arity((x1, x2), (i1, i2)) --> U()
+  where
+    x1 == x2;
+    i1 == i2
+  
+  eq-name-arity((x1, x2), _) --> ??? :: ST F()
+  where
+    x1 != x2
+  
+  eq-name-arity(_, (i1, i2)) --> ??? :: ST F()
+  where
+    i1 != i2

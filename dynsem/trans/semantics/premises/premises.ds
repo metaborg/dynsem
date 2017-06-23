@@ -1,0 +1,10 @@
+module semantics/premises/premises
+
+imports
+  ds-signatures/ds-sig
+  semantics/unit
+  
+signature
+  arrows
+    List(Premise) --> U
+    Premise --> U
