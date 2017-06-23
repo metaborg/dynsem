@@ -26,6 +26,8 @@ rules
   where
     log("Assign " ++ x ++ " = " ++ str(T)) --> _
   
+  __Cast2Term__(Cast(pat, _)) -match-> pat
+  
   T ApplT(x1, kids) |- Con(x2, kid-pats) -match-> U()
   where
       int2string(|kids|) => l-arity;
@@ -34,10 +36,6 @@ rules
     eq-name-arity((x1, x2), (|kids|, |kid-pats|)) --> true;
       log("Go ahead, superficial match") --> _;
     match-all(kids, kid-pats) --> _
-
-  __Cast2Term__(Cast(pat, _)) -match-> U()
-  where
-    pat -match-> _
 
   T ListT(kids) |- List_(kid-pats) -match-> match-all(kids, kid-pats)
   where
@@ -52,8 +50,14 @@ rules
     T kid |- pat -match-> _;
     T ListT(kids) |- ListTail(pats, tail-pat) -match-> _
   
+  T BoolT(true) |- True() -match-> U()
+  
+  T BoolT(false) |- False() -match-> U()
+  
   Wld() -match-> U()
   
+  
+
 
 rules // helpers
 
