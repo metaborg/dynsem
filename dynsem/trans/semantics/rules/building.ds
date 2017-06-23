@@ -26,18 +26,10 @@ rules
     C[(x, |kid-blds|)?] == true;
     kid-blds -build-> kids
   
-  NatC |- Con(x, kid-blds) -build-> ???
+  NatC |- Con(x, kid-blds) -build-> nat-opcall(x, |kid-blds|, ts)
   where
     NatC[(x, |kid-blds|)?] == true;
-    halt-error("Native operator call is not implemented") --> _
-  
-  
-//  C |- Con(x, kid-blds) -build-> ApplT(x, kids)
-//  where
-//    // ensure regular constructors (i.e. not native ops, or some other magic thing)
-//    C[(x, |kid-blds|)?] == false;
-//    halt-error("Unknown constructor " ++ x ++ "/" ++ int2string(|kid-blds|)) --> _;
-//    kid-blds -build-> kids
+    kid-blds -build-> ts
   
   [] : List(Term) -build-> []
   
@@ -93,5 +85,9 @@ rules
 signature
   arrows
     nat-opcall(String, Int, List(T)) --> T
+  
+  native operators
+    native-operator-call: String * Int * List(T) -> T
 
-
+rules
+  nat-opcall(x, i, ts) --> native-operator-call(x, i, ts)
