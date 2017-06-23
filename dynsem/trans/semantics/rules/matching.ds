@@ -30,11 +30,7 @@ rules
   
   T ApplT(x1, kids) |- Con(x2, kid-pats) -match-> U()
   where
-      int2string(|kids|) => l-arity;
-      int2string(|kid-pats|) => r-arity; 
-      log("Matching appl " ++ x1 ++ " " ++ x2 ++ " kids " ++ l-arity ++ " " ++ r-arity) --> _;
     eq-name-arity((x1, x2), (|kids|, |kid-pats|)) --> true;
-      log("Go ahead, superficial match") --> _;
     match-all(kids, kid-pats) --> _
 
   T ListT(kids) |- List_(kid-pats) -match-> match-all(kids, kid-pats)
