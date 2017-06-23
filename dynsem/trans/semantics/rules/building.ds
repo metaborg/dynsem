@@ -9,11 +9,50 @@ imports
 signature
   arrows
     Term -build-> T
-
+    List(Term) -build-> List(T)
+    Entry -build-> Map(T, T)
+    
 rules
   
   __Var2Term__(VarRef(x)) :: E -build-> E[x]
   where
     log("Reading var " ++ x) --> _ 
   
+  Con(x, kid-blds) -build-> ApplT(x, kids)
+  where
+    kid-blds -build-> kids
+  
+  [] : List(Term) -build-> []
+  
+  [bld|blds] : List(Term) -build-> [t|ts]
+  where
+    bld -build-> t;
+    blds -build-> ts
+  
+  List_(blds) -build-> ListT(kids)
+  where
+    blds -build-> kids
+  
   Map_([]) -build-> MapT({})
+  
+  Map_([bind | binds]) -build-> MapT({map1, map2})
+  where
+    bind -build-> map1;
+    Map_(binds) -build-> MapT(map2)
+    
+  MapExtend(map-bld1, map-bld2) -build-> MapT({map1, map2})
+  where
+    map-bld1 -build-> MapT(map1);
+    map-bld2 -build-> MapT(map2) 
+
+  Bind(key-bld, val-bld) -build-> {key |--> val}
+  where
+    key-bld -build-> key;
+    val-bld -build-> val
+  
+  
+  String(s) -build-> StrT(s)
+  
+  Fresh() -build-> IntT(fresh)
+
+  
