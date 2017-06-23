@@ -15,8 +15,6 @@ signature
 rules
   
   __Var2Term__(VarRef(x)) :: E -build-> E[x]
-  where
-    log("Reading var " ++ x) --> _ 
   
   __Cast2Term__(Cast(bld, _)) -build-> bld
   
@@ -41,6 +39,14 @@ rules
   List_(blds) -build-> ListT(kids)
   where
     blds -build-> kids
+  
+//  ListTail([__Var2Term__(VarRef(s))], __Var2Term__(VarRef(ss)))
+  ListTail([], tail-bld) -build-> tail-bld
+  
+  ListTail([bld|blds], tail-bld) -build-> ListT([t|ts])
+  where
+    bld -build-> t;
+    ListTail(blds, tail-bld) -build-> ListT(ts)
   
   ListConcat(bld1, bld2) -build-> ListT(l1 ++ l2)
   where

@@ -23,15 +23,14 @@ rules
   
   // the OK() flag check should not be necessary, but there is bug in the propagation transformation
   T |- __Var2Term__(VarRef(x)) :: ST OK(), E -match-> U() :: ST OK(), E {x |--> T, E}
-  where
-    log("Assign " ++ x ++ " = " ++ str(T)) --> _
   
   __Cast2Term__(Cast(pat, _)) -match-> pat
   
   T ApplT(x1, kids) |- Con(x2, kid-pats) -match-> U()
   where
     eq-name-arity((x1, x2), (|kids|, |kid-pats|)) --> true;
-    match-all(kids, kid-pats) --> _
+    match-all(kids, kid-pats) --> _;
+    log("Match success: " ++ str(ApplT(x1, kids)) ++ " ==> " ++ str(Con(x2, kid-pats))) --> _
 
   T ListT(kids) |- List_(kid-pats) -match-> match-all(kids, kid-pats)
   where
@@ -49,6 +48,10 @@ rules
   T BoolT(true) |- True() -match-> U()
   
   T BoolT(false) |- False() -match-> U()
+  
+  T StrT(s1) |- String(s2) -match-> U()
+  where
+    s1 == s2
   
   Wld() -match-> U()
   
