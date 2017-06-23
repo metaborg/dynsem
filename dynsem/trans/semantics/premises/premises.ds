@@ -1,7 +1,7 @@
 module semantics/premises/premises
 
 imports
-  ds-signatures/ds-sig
+  semantics/premises/representation
   semantics/unit
   semantics/rules/evaluation
   
