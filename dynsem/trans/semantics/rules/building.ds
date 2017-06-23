@@ -44,6 +44,11 @@ rules
   where
     blds -build-> kids
   
+  ListConcat(bld1, bld2) -build-> ListT(l1 ++ l2)
+  where
+    bld1 -build-> ListT(l1);
+    bld2 -build-> ListT(l2)
+  
   Map_([]) -build-> MapT({})
   
   Map_([bind | binds]) -build-> MapT({map1, map2})
@@ -74,5 +79,9 @@ rules
   String(s) -build-> StrT(s)
   
   Fresh() -build-> IntT(fresh)
+
+  True() -build-> BoolT(true)
+  
+  False() -build-> BoolT(false)
 
   
