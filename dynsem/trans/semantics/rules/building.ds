@@ -49,8 +49,12 @@ rules
   where
     key-bld -build-> key;
     val-bld -build-> val
-  
-  
+
+  DeAssoc(map-bld, key-bld) -build-> map[key]
+  where
+    map-bld -build-> MapT(map);
+    key-bld -build-> key
+
   String(s) -build-> StrT(s)
   
   Fresh() -build-> IntT(fresh)
