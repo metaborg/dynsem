@@ -1,2 +1,10 @@
 module semantics/signatures/query
 
+imports
+  semantics/signatures/representation
+  semantics/terms
+  
+signature
+  arrows
+    T -type-> Type
+    

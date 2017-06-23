@@ -1,0 +1,27 @@
+module semantics/rules/evaluation
+
+imports
+  semantics/terms
+  semantics/rules/representation
+  semantics/rules/query
+  semantics/signatures/query
+  
+signature
+  
+  sort aliases
+    Comps = Map(String, T)
+  
+  arrows
+    eval(T) --> T
+    apply-rule(RuleChain, T, Comps, Comps) --> (T * Comps)
+    
+rules
+  
+  eval(t) --> t'
+  where
+    t -type-> type;
+    lookup-rule("init", type) --> r;
+    apply-rule(r, t, {}, {}) --> (t', _)
+  
+  
+  

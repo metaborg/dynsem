@@ -28,6 +28,6 @@ rules
   
   init-R-table([]) --> U()
   
-  init-R-table([(x, ty) | rule-keys]) :: R --> U() :: R { (x, ty) |--> [] : List(Rule), R'}
+  init-R-table([(x, ty) | rule-keys]) :: R --> U() :: R { (x, ty) |--> NR(), R'}
   where
     init-R-table(rule-keys) :: R --> _ :: R'

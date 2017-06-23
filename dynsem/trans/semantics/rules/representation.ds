@@ -9,7 +9,14 @@ signature
     NamedDynamicEmitted : List(LabelComp) * String * Type -> Rel
 
   sort aliases
-    Rules = Map((String * Type), List(Rule))
+    Rules = Map((String * Type), RuleChain)
+  
+  sorts
+    RuleChain
+  
+  constructors
+    R: Rule * RuleChain -> RuleChain
+    NR: RuleChain
   
   components
     R : Rules

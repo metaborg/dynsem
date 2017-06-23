@@ -1,0 +1,8 @@
+module semantics/rules/query
+
+imports
+  semantics/rules/representation
+
+signature
+  arrows
+    lookup-rule(String, Type) --> RuleChain

@@ -3,3 +3,5 @@ module semantics/rules/rules
 imports
   semantics/rules/representation
   semantics/rules/loading
+  semantics/rules/evaluation
+  semantics/rules/query

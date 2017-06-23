@@ -2,8 +2,8 @@ module semantics/semantics
 
 imports
   semantics/aterm
-  semantics/terms
   semantics/module
+  semantics/terms
   
 signature
   sorts
@@ -17,9 +17,10 @@ signature
     
 rules
   
-  Eval(t, spec) -init-> (prog, R, S, C, A)
+  Eval(aterm, spec) -init-> (t', R, S, C, A)
   where
-    convert(t) --> prog;
-    spec :: S {}, C {}, A {}, R {} -load-> _ :: S, C, A, R
+    convert(aterm) --> t;
+    spec :: S {}, C {}, A {}, R {} -load-> _ :: S, C, A, R;
+    S, C, A, R |- eval(t) --> t'
 
   
