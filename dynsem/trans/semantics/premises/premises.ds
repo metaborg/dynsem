@@ -22,25 +22,21 @@ rules
   where
     prem --> _
 
-  Formula(Relation(Reads(ro-blds), Source(bld, rw-blds), arrow@NamedDynamicEmitted(_, x, _), Target(pat, rw-pats))) --> U()
+  Formula(Relation(Reads(ro-blds), Source(bld, rw-blds), arrow@NamedDynamicEmitted(_, _, _), Target(pat, rw-pats))) --> U()
   where
     lookup-rule(arrow) --> r;
     build-components(ro-blds) --> ro-ins;
     build-components(rw-blds) --> rw-ins;
     bld -build-> T;
     apply-rules(r, T, ro-ins, rw-ins) --> (T', rw-outs);
-    T' |- pat -match-> _;
+    T' |- pat -debugmatch-> _;
     match-components(rw-pats, rw-outs) --> _ 
 
   Formula(Match(bld, pat)) --> U()
   where
     bld -build-> T;
-    T |- pat -match-> _
+    T |- pat -debugmatch-> _
 
-//  Formula(TermNeq(__Var2Term__(VarRef(s1)), __Var2Term__(VarRef(s2))))
-//  Formula(TermEq(bld1, bld2)) --> U()
-//  where
-//    ...
 
 
   CaseMatch(bld, casepats) --> U()
@@ -63,7 +59,7 @@ rules
   
   T |- CasePattern(pat, prems) --> U()
   where
-    T |- pat -match-> _;
+    T |- pat -debugmatch-> _;
     prems --> _
   
   CaseOtherwise(prems) --> U()
