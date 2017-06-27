@@ -1,0 +1,29 @@
+module backend/main
+
+imports
+  backend/common/opts
+  backend/interpreter/main
+  backend/meta-interpreter/main
+rules
+
+
+  ds-backend-editor:
+    (_, position, ast, path, project-path) -> None()
+    with
+      local-project-path := $[[<prim("local_path")> project-path]/];
+      <ds-backend(|path, project-path, local-project-path)> ast
+
+  ds-backend(|path, proj-path, local-proj-path) =
+    ?ast;
+    ds-to-interp-init-options(|path, local-proj-path);
+    switch get-opt(|Backend())
+      case DsBackend():
+        <ds-to-interp(|path, proj-path, local-proj-path)> ast
+      case MetaDsBackend():
+        <ds-to-metainterp(|path, proj-path, local-proj-path)> ast
+      otherwise:
+        fatal-err(|$[Unknown backend [<id>]])
+    end
+
+
+

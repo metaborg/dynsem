@@ -7,7 +7,7 @@ imports
   analysis/lib-analysis
   analysis/mark-references
   ds2ds/-
-  backend/interpreter/utils
+  backend/common/opts
   pp
 
 rules
@@ -19,12 +19,6 @@ rules
       result := <pp-debug> Module($[[name].core], section*);
       filename := <guarantee-extension(|"core.ds")> path
   
-  module-to-core-nopp-editor:
-    (_, position, ast, path, project-path) -> (filename, Module($[[name].core.nosug], section*))
-    with
-      Module(name, section*) := <module-to-core(|path, project-path); unmark-vars> ast;
-      filename := <guarantee-extension(|"core.nosug.aterm")> path
-
 strategies
 
   module-to-core(|path, project-path) =

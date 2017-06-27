@@ -37,7 +37,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 </fileset>
                 <fileset>
                   <directory>${basedir}</directory>
-                  <includes>src/main/resources/specification.aterm</includes>
+                  <includes>src/main/resources/meta-specification.aterm</includes>
                 </fileset>
                 <fileset>
                   <directory>${basedir}</directory>

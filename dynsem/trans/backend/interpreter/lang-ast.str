@@ -645,7 +645,7 @@ rules /* Sort & Constructor classes */
       e_valcreate := <ds-to-interp-sorts-to-create-arg> (e |[ x_bindT.getSubterm(1) ]|, sval)
 
   ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@NativeType(_, _)) -> e |[ e_term ]|
+    (e_term, sref@NativeType(_, _)) -> e |[ null ]|
 
   ds-to-interp-sorts-to-create-arg:
     (e_term, sref@SimpleSort("String")) -> e |[ ((IStrategoString) e_term).stringValue() ]|

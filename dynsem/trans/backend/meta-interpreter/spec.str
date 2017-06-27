@@ -1,4 +1,4 @@
-module backend/meta-interpreter/desugar-for-metaspec
+module backend/meta-interpreter/spec
 
 imports
   signatures/ds-sig

@@ -1,0 +1,20 @@
+module backend/common/versions
+
+
+strategies
+
+  ver-maven-compiler-plugin = !"1.8"
+  
+  ver-maven-clean-plugin = !"3.0.0"
+  
+  ver-maven-surefire-plugin = !"2.19.1"
+  
+  ver-slf4j = !"1.7.10"
+  
+  ver-spoofax = !"2.3.0-SNAPSHOT"
+
+  ver-nailgun = !"0.9.1"
+  
+  ver-truffle = !"0.26"
+  
+  ver-logback = !"1.1.2"

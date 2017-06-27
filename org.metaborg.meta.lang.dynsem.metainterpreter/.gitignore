@@ -1,6 +1,6 @@
 
 /target/
-src/main/resources/specification.aterm
+src/main/resources/meta-specification.aterm
 src/main/resources/parsetable.tbl
 src/main/resources/logback.xml
 src/main/java/org/metaborg/dynsem/metainterpreter/generated

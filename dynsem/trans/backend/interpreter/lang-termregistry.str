@@ -3,7 +3,7 @@ module backend/interpreter/lang-termregistry
 imports
   signatures/-
   libjava-front
-  backend/interpreter/utils
+  backend/common/opts
   backend/interpreter/lang-ast
   backend/interpreter/lang-names
 
