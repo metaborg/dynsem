@@ -60,7 +60,8 @@ public abstract class native_operator_call_3 extends TermBuild {
 			final Method factoryMethod = theClass.getMethod("create", callParamTypes);
 
 			TermBuild opInst = (TermBuild) factoryMethod.invoke(null, callParams);
-			ITTerm result = TypesGen.asITTerm(opInst.executeGeneric(Truffle.getRuntime().createVirtualFrame(new Object[0], new FrameDescriptor())));
+			ITTerm result = TypesGen.asITTerm(opInst
+					.executeGeneric(Truffle.getRuntime().createVirtualFrame(new Object[0], new FrameDescriptor())));
 			return result;
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load native operator class", e);
