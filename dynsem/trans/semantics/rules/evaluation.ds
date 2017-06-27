@@ -62,11 +62,11 @@ rules
         ST2 => ST
     }
 
-  apply-rule(r@Rule(prems, _, Relation(Reads(ro-pat), Source(lhs, rw-pat), _, Target(rhs, rw-blds))), T, ro-ins, rw-ins) --> (T', rw-outs)
+  apply-rule(Rule(prems, _, Relation(Reads(ro-pat), Source(lhs, rw-pat), _, Target(rhs, rw-blds))), T, ro-ins, rw-ins) --> (T', rw-outs)
   where
-    match-components(ro-pat, ro-ins) :: E {} --> _ :: E1;
-    match-components(rw-pat, rw-ins) :: E1 --> _ :: E2;
-    T |- lhs :: E2 -debugmatch-> _ :: E3;
+    T |- lhs :: E {} -debugmatch-> _ :: E1;
+    match-components(ro-pat, ro-ins) :: E1 --> _ :: E2;
+    match-components(rw-pat, rw-ins) :: E2 --> _ :: E3;
     prems :: E3 --> _ :: E4;
     rhs :: E4 -build-> T' :: E5;
     build-components(rw-blds) :: E5 --> rw-outs :: E6
