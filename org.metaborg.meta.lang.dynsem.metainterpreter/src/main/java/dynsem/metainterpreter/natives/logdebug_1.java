@@ -17,8 +17,8 @@ public abstract class logdebug_1 extends TermBuild {
 	@Specialization
 	public String doString(String s) {
 		if (getContext().isDEBUG()) {
-			int currentStackDepth = InterpreterUtils.stackDepth();
 			final StringBuilder msgBuilder = new StringBuilder();
+			int currentStackDepth = InterpreterUtils.stackDepth();
 			for (; currentStackDepth > 0; currentStackDepth--) {
 				msgBuilder.append(" ");
 			}
