@@ -14,37 +14,43 @@ signature
     Term -match-> U
     match-all(List(T), List(Term)) --> U
     eq-name-arity((String * String), (Int * Int)) --> Bool
-    
+    Term -debugmatch-> U
+
+rules
+  T |- p : Term -debugmatch-> U()
+  where
+    log("> Match " ++ str(T) ++ " =?=> " ++ str(p)) --> _;
+    p -match-> _;
+    log("< ok match") --> _ 
+
 rules
 
-  T |- pat : Term :: ST OK() -match-> ??? :: ST F()
-  where
-    log("Match failure: " ++ str(T) ++ " =!=> " ++ str(pat)) --> _
+  _ : Term :: ST OK() -match-> ??? :: ST F()
   
   // the OK() flag check should not be necessary, but there is bug in the propagation transformation
   T |- __Var2Term__(VarRef(x)) :: ST OK(), E -match-> U() :: ST OK(), E {x |--> T, E}
   
-  __Cast2Term__(Cast(pat, _)) -match-> pat
+  cp@__Cast2Term__(Cast(pat, _)) -match-> pat
+  where
+    log("Unpack " ++ str(pat) ++ " from " ++ str(cp)) --> _
+  
   
   T ApplT(x1, kids) |- Con(x2, kid-pats) -match-> U()
   where
     eq-name-arity((x1, x2), (|kids|, |kid-pats|)) --> true;
-    match-all(kids, kid-pats) --> _;
-    log("Match success: " ++ str(ApplT(x1, kids)) ++ " ==> " ++ str(Con(x2, kid-pats))) --> _
+    match-all(kids, kid-pats) --> _
 
-  T ListT(kids) |- List_(kid-pats) -match-> match-all(kids, kid-pats)
-  where
-    eq-name-arity(("",""), (|kids|, |kid-pats|)) --> true
-
-  T ListT(kids) |- ListTail([], tail-pat) -match-> U()
-  where
-    T ListT(kids) |- tail-pat -match-> _
+  T ListT([]) |- List_([]) -match-> U()
   
-  T ListT([kid|kids]) |- ListTail([pat|pats], tail-pat) -match-> U()
+  T ListT([kid]) |- List_([pat]) -match-> U()
+  where
+    T kid |- pat -match-> _
+  
+  T ListT([kid|kids]) |- ListTail([pat], tpat) -match-> U()
   where
     T kid |- pat -match-> _;
-    T ListT(kids) |- ListTail(pats, tail-pat) -match-> _
-  
+    T ListT(kids) |- tpat -match-> _
+
   T BoolT(true) |- True() -match-> U()
   
   T BoolT(false) |- False() -match-> U()
