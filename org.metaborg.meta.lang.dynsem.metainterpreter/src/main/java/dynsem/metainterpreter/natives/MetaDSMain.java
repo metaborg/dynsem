@@ -7,7 +7,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
 
-public class DynSemCustomMain {
+public class MetaDSMain {
 
 	public static ITerm evaluate(IStrategoTerm programTerm, IStrategoTerm specTerm) throws Exception {
 		ITermFactory factory = new TermFactory();

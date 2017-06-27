@@ -16,22 +16,13 @@ imports
 
   
 rules
-//  module-to-typed-core-aterm:
-//    (_, position, ast, path, project-path) -> (filename, Module($[[name].typedcore], section*))
-//    with
-//      Module(name, section*) := <module-to-core(|path, project-path); sugar-for-metaspec; unmark-vars> ast;
-//      filename := <guarantee-extension(|"typedcore.aterm")> path
-  
   
   ds-to-metainterp(|path, project-path, local-project-path) =
     log-timed(
       ds-backend-copy-table;
       ds-backend-metainterp-spec(|path, project-path); ds-backend-write-spec;
-      ds-backend-metainterp-project
-//      ds-backend-metainterp-p
-      // project
-      // pom file
-      // launch configurations
+      ds-backend-metainterp-project;
+      ds-backend-metainterp-langmain-top
     |$[Generating meta-interpreter at: [<get-opt> GenProject()]])
 
   ds-backend-metainterp-spec(|path, project-path) =

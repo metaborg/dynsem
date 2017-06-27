@@ -12,21 +12,6 @@ imports
   analysis/-
   
 rules
-
-//  ds-to-interp-editor:
-//    (_, position, ast, path, project-path) -> None()
-//    with
-//      local-project-path := $[[<prim("local_path")> project-path]/];
-//      <ds-to-interp(|path, project-path, local-project-path)> ast
-//  
-//  ds-to-specification-editor:
-//    (_, _, ast, path, project-path) -> (filename, ast')
-//    with
-//      local-project-path := $[[<prim("local_path")> project-path]/];
-//      ds-to-interp-init-options(|path, local-project-path);
-//      ast' := <ds-to-interp-specification(|path, project-path)> ast;
-//      filename := <guarantee-extension(|"interpretable.aterm")> path
-//  
 //  ds-to-interp-specification-editor:
 //    (_, _, ast, path, project-path) -> None()
 //    where
