@@ -11,6 +11,8 @@ signature
     Premise --> U
     List(Case) --> U
     Case --> U
+    eqT(T, T) --> U
+    neqT(T, T) --> U
     
 rules
 
@@ -37,7 +39,33 @@ rules
     bld -build-> T;
     T |- pat -debugmatch-> _
 
+  Formula(TermEq(bld1, bld2)) --> U()
+  where
+    bld1 -build-> t1;
+    bld2 -build-> t2;
+    eqT(t1, t2) --> _
+    
+  Formula(TermNeq(bld1, bld2)) --> U()
+  where
+    bld1 -build-> t1;
+    bld2 -build-> t2;
+    neqT(t1, t2) --> _
 
+  eqT(t1, t2) :: ST OK() --> U() :: ST OK()
+  where
+    t1 == t2
+  
+  eqT(t1, t2) :: ST OK() --> U() :: ST F()
+  where
+    t1 != t2
+  
+  neqT(t1, t2) :: ST OK() --> U() :: ST F()
+  where
+    t1 == t2
+  
+  neqT(t1, t2) :: ST OK() --> U() :: ST OK()
+  where
+    t1 != t2
 
   CaseMatch(bld, casepats) --> U()
   where
