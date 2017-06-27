@@ -40,13 +40,10 @@ rules
   where
     blds -build-> kids
   
-//  ListTail([__Var2Term__(VarRef(s))], __Var2Term__(VarRef(ss)))
-  ListTail([], tail-bld) -build-> tail-bld
-  
-  ListTail([bld|blds], tail-bld) -build-> ListT([t|ts])
+  ListTail([bld], tbld) -build-> ListT([t|ts])
   where
     bld -build-> t;
-    ListTail(blds, tail-bld) -build-> ListT(ts)
+    tbld -build-> ListT(ts)
   
   ListConcat(bld1, bld2) -build-> ListT(l1 ++ l2)
   where
