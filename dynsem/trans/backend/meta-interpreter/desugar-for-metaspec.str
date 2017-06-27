@@ -13,7 +13,7 @@ rules
     m-in-analysis(
       explicate-arrow-types-noanalysis;
       desugar-concat-all;
-      resugar-and-typecast-lists;
+//      resugar-and-typecast-lists;
       unrename-all
     );
     unmark-vars
