@@ -91,34 +91,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-        <groupId>org.metaborg</groupId>
-        <artifactId>spoofax-maven-plugin</artifactId>
-        <version>${metaborg-version}</version>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <phase>test</phase>
-            <goals>
-              <goal>transform</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <language>ds</language>
-          <goal>Generate interpreter</goal>
-          <fileSets>
-            <fileSet>
-              <directory>${basedir}/trans</directory>
-              <includes>
-                <include>ds.ds</include>
-              </includes>
-            </fileSet>
-          </fileSets>
-          <!-- <pardonedLanguages combine.children="append"> <pardonedLanguage>ds</pardonedLanguage>
-            </pardonedLanguages> -->
-        </configuration>
-      </plugin>
 		</plugins>
 	</build>
 	<dependencies>
