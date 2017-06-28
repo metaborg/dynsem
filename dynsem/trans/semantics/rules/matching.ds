@@ -19,9 +19,9 @@ signature
 rules
   T |- p : Term -debugmatch-> U()
   where
-    log("> Match " ++ str(T) ++ " =?=> " ++ str(p)) --> _;
-    p -match-> _;
-    log("< ok match") --> _ 
+//    log("> Match " ++ str(T) ++ " =?=> " ++ str(p)) --> _;
+    p -match-> _
+//   ; log("< ok match") --> _ 
 
 rules
 
@@ -30,10 +30,7 @@ rules
   // the OK() flag check should not be necessary, but there is bug in the propagation transformation
   T |- __Var2Term__(VarRef(x)) :: ST OK(), E -match-> U() :: ST OK(), E {x |--> T, E}
   
-  cp@__Cast2Term__(Cast(pat, _)) -match-> pat
-  where
-    log("Unpack " ++ str(pat) ++ " from " ++ str(cp)) --> _
-  
+  __Cast2Term__(Cast(pat, _)) -match-> pat
   
   T ApplT(x1, kids) |- Con(x2, kid-pats) -match-> U()
   where
@@ -58,6 +55,10 @@ rules
   T StrT(s1) |- String(s2) -match-> U()
   where
     s1 == s2
+  
+  T IntT(i1) |- Int(i2) -match-> U()
+  where
+    i1 == parseI(i2)
   
   Wld() -match-> U()
   

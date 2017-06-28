@@ -6,6 +6,7 @@ signature
     str: AST -> String
     logdebug: String -> String
     int2string: Int -> String
+    parseI: String -> Int
     
   arrows
     halt-error(String) --> String
