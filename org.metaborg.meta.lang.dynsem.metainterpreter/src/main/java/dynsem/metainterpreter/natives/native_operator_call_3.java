@@ -7,15 +7,18 @@ import java.util.Arrays;
 import org.metaborg.dynsem.metainterpreter.generated.TypesGen;
 import org.metaborg.dynsem.metainterpreter.generated.terms.ITTerm;
 import org.metaborg.dynsem.metainterpreter.generated.terms.List_ITTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "name", type = TermBuild.class), @NodeChild(value = "arity", type = TermBuild.class),
@@ -59,10 +62,11 @@ public abstract class native_operator_call_3 extends TermBuild {
 			final Class<?> theClass = loader.loadClass(qClassName);
 			final Method factoryMethod = theClass.getMethod("create", callParamTypes);
 
-			TermBuild opInst = (TermBuild) factoryMethod.invoke(null, callParams);
-			ITTerm result = TypesGen.asITTerm(opInst
-					.executeGeneric(Truffle.getRuntime().createVirtualFrame(new Object[0], new FrameDescriptor())));
-			return result;
+			final TermBuild opInst = (TermBuild) factoryMethod.invoke(null, callParams);
+			final OpCallRoot opRoot = new OpCallRoot(getRootNode().getLanguage(DynSemLanguage.class), opInst);
+
+			return TypesGen.asITTerm(
+					opRoot.execute(Truffle.getRuntime().createVirtualFrame(new Object[0], new FrameDescriptor())));
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load native operator class", e);
 		} catch (NoSuchMethodException e) {
@@ -86,4 +90,23 @@ public abstract class native_operator_call_3 extends TermBuild {
 	public static TermBuild create(SourceSection source, TermBuild name, TermBuild arity, TermBuild args) {
 		return native_operator_call_3NodeGen.create(source, name, arity, args);
 	}
+
+	public class OpCallRoot extends RootNode {
+
+		@Child
+		private TermBuild op;
+
+		public OpCallRoot(DynSemLanguage language, TermBuild op) {
+			super(language);
+			this.op = op;
+			adoptChildren();
+		}
+
+		@Override
+		public Object execute(VirtualFrame frame) {
+			return op.executeGeneric(frame);
+		}
+
+	}
+
 }
