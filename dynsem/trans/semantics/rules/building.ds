@@ -79,6 +79,11 @@ rules
 
   String(s) -build-> StrT(s)
   
+  StrConcat(bld1, bld2) -build-> StrT(s1 ++ s2)
+  where
+    bld1 -build-> StrT(s1);
+    bld2 -build-> StrT(s2)
+  
   Fresh() -build-> IntT(fresh)
 
   True() -build-> BoolT(true)
