@@ -50,7 +50,7 @@ public abstract class GenericListMatch extends MatchPattern {
 	}
 
 	public static GenericListMatch create(IStrategoAppl t, FrameDescriptor fd) {
-		assert Tools.hasConstructor(t, "List", 1) || Tools.hasConstructor(t, "ListTail", 2);
+		assert Tools.hasConstructor(t, "List_", 1) || Tools.hasConstructor(t, "ListTail", 2);
 
 		final int numHeadElems = Tools.listAt(t, 0).size();
 
