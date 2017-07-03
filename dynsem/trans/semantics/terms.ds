@@ -1,0 +1,17 @@
+module semantics/terms
+
+signature
+  sorts
+    T
+    
+  constructors
+    ApplT: String * List(T) -> T
+    TuplT: List(T) -> T
+    ListT: List(T) -> T
+    MapT: Map(T, T) -> T
+    IntT: Int -> T
+//    LongT: Long -> T
+//    FloatT: Float -> T
+//    RealT: Real -> T
+    StrT: String -> T
+    BoolT: Bool -> T

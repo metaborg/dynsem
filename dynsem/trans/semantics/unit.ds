@@ -1,0 +1,8 @@
+module semantics/unit
+
+signature
+ sorts
+    U
+  
+  constructors
+    U: U

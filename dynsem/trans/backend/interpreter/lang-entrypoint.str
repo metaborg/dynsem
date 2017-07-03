@@ -3,7 +3,7 @@ module backend/interpreter/lang-entrypoint
 imports
   signatures/ds-sig
   libjava-front
-  backend/interpreter/utils
+  backend/common/opts
 
 rules /* language file. interpreter entry point */
 

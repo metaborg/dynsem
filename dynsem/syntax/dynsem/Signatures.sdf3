@@ -61,7 +61,7 @@ context-free syntax // constructor declarations
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
   Type.TupleSort = [([{Type " * "}+])]
-  Type = [[MapType]]
+  Type = MapType
     
   MapType.MapSort = [Map([Type],[Type])]
 
@@ -110,17 +110,15 @@ context-free syntax // internal constructor declarations
 
 context-free syntax
   
-  SignatureSection.ArrowDeclarations = <
+  SignatureSection.Arrows = <
     arrows
-      <{DeclaredArrow "\n"}*>>
+      <{ArrowDecl "\n"}*>>
   
-  DeclaredArrow = ArrowDeclaration
-  
-  ArrowDeclaration.DefaultArrowDecl = [[ArrowROs] [Type] [ArrowRWs] --> [Type] [ArrowRWs]]
+  ArrowDecl.DefaultArrowDecl = [[ArrowROs] [Type] [ArrowRWs] --> [Type] [ArrowRWs]]
 
-  ArrowDeclaration.ArrowDecl = [[ArrowROs] [Type] [ArrowRWs] -[IDNOHYPH]-> [Type] [ArrowRWs]]
+  ArrowDecl.ArrowDecl = [[ArrowROs] [Type] [ArrowRWs] -[IDNOHYPH]-> [Type] [ArrowRWs]]
   
-  ArrowDeclaration.MetaFunDecl = [[ArrowROs] [ID]([{Type ", "}*]) [ArrowRWs] --> [Type] [ArrowRWs]]
+  ArrowDecl.MetaFunDecl = [[ArrowROs] [ID]([{Type ", "}*]) [ArrowRWs] --> [Type] [ArrowRWs]]
   
   ArrowROs.NoArrowROs = []
   ArrowROs.ArrowROs = [[{Label ", "}+] |-]

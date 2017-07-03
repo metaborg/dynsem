@@ -1,0 +1,17 @@
+module semantics/signatures/representation
+
+imports
+  ds-signatures/ds-sig
+
+signature
+  sort aliases
+    Sorts = Map(Type, Type)
+    Constructors = Map((String * Int), Type)
+    Arrows = Map((String * Type), Type)
+  
+  components
+    S    : Sorts
+    C    : Constructors
+    A    : Arrows 
+    NatC : Constructors
+

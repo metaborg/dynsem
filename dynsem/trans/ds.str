@@ -18,7 +18,7 @@ imports
   lib-ds
 	analysis/main
 	ds2ds/core
-	backend/interpreter/main
+	backend/main
 
 signature
   constructors

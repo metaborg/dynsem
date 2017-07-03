@@ -215,8 +215,8 @@ rules // Replace sorts in arrow declarations with postified ones:
 				<bottomup(try({
 					ads, sort, x, y :
 						( // Replace sorts in arrow decls
-							?ArrowDeclarations(ads);
-							!ArrowDeclarations(<alltd({
+							?Arrows(ads);
+							!Arrows(<alltd({
 								sort :
 									?sort;
 									// If sort is a  cgen sort

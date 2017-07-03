@@ -209,7 +209,7 @@ rules
   explication-explicate-arrow-decls-module(|comps-table, imps-table):
     Module(name, section*) -> Module(name, section'*)
     where
-      section'* := <map(try(Signatures(map(try(ArrowDeclarations(map(explication-explicate-arrow-decl(|comps-table, imps-table))))))))> section*
+      section'* := <map(try(Signatures(map(try(Arrows(map(explication-explicate-arrow-decl(|comps-table, imps-table))))))))> section*
 
   explication-explicate-arrow-decl(|comps-table, imps-table):
     ArrowDecl(_, lhs-s, _, arrow-name, rhs-s, _) -> ArrowDecl(ArrowROs(ro*), lhs-s, ArrowRWs(rw*), arrow-name, rhs-s, ArrowRWs(rw*))
