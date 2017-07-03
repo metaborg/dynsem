@@ -276,6 +276,7 @@ rules
     basedir-test := <get-opt> TestJavaDir();
     <fputs> ($[
       /target/
+      [<get-opt> ResourceDirAbs()]/signatures-digest.cache
       [<get-opt> TargetSpecRel()]
       [<get-opt> TargetTableRel()]
       [<get-opt> TargetLogbackRel()]

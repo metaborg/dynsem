@@ -2,7 +2,8 @@ module backend/common/utils
 
 imports
   backend/common/opts
-
+  backend/utils/-
+  
 imports
   libstratego-aterm
 
@@ -26,9 +27,34 @@ rules
       <fclose> fout
     )
   
+  ds-backend-on-changed-signatures(s|t) =
+    ?input;
+    resource-dir := <get-opt; (file-exists <+ mkdir)> ResourceDirAbs();
+    digest-file := $[[resource-dir]/signatures-digest.cache];
+    term-digest := <digest-term> t;
+    if <ds-backend-on-changed-signatures-needs-update(|term-digest)> digest-file
+    then
+      output := <s> input;
+      <ds-backend-on-changed-signatures-update-digest(|term-digest)> digest-file
+    else
+      !input
+    end
+  
+  ds-backend-on-changed-signatures-needs-update(|term-digest):
+    digest-file -> digest-file
+    where not(
+      <file-exists> digest-file;
+      prev-digest := <ReadFromFile> digest-file;
+      <eq> (term-digest, prev-digest)
+    )
+  
+  ds-backend-on-changed-signatures-update-digest(|term-digest):
+    digest-file -> digest-file
+    where
+      <try(WriteToBinaryFile)> (digest-file, term-digest)
+  
   pkg-to-relpath(|basedir):
     pkg -> <concat-strings> [basedir, "/", <string-replace(|".", "/")> pkg]
-
     
   ds-backend-logbackxml =
     <get-opt ; (file-exists <+ mkdir)> ResourceDirAbs();
