@@ -6,7 +6,6 @@ imports
   
 imports
   libstratego-aterm
-  libspoofax/core/language
 
 rules
 
@@ -86,10 +85,4 @@ rules
         org.jboss.tools.maven.apt.mode=jdt_apt];
     <fputs> (apt-settings, apt-settings-file);
     <fclose> apt-settings-file
-
-  lang-groupid = language-implementation; ?(groupid, _, _); !groupid
-  
-  lang-artid = language-implementation; ?(_, artifactid, _); !artifactid
-  
-  lang-ver = language-implementation; ?(_, _, version); !version
 

@@ -113,11 +113,6 @@ rules
           </properties>
           <dependencies>
             <dependency>
-              <groupId>[<lang-groupid>]</groupId>
-              <artifactId>[<lang-artid>]</artifactId>
-              <version>[<lang-ver>]</version>
-            </dependency>
-            <dependency>
               <groupId>org.metaborg</groupId>
               <artifactId>org.metaborg.meta.lang.dynsem.interpreter</artifactId>
               <version>[<ver-spoofax>]</version>
