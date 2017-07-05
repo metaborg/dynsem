@@ -19,14 +19,14 @@ rules
       <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
       <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
       <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-      <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
-      ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      ds-to-interp-gen-test-harness
-    |sig*)
+      <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod
+    |sig*);
+    ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+    ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+    ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+    ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+    ds-to-interp-gen-test-harness
 
   ds-to-interp-clean-target =
     get-opt(|CleanProject()) <
