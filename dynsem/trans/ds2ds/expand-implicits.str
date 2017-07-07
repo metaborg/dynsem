@@ -93,6 +93,11 @@ rules /* lift and expand subterms on build sides */
     where
       ConstructorType(child-ty*, _) := <lookup-def(|Constructors()); lookup-prop(|Type())> (c, <length> child*);
       (child'*, p*) := <zip(lift-where-indirect <+ \ (_, t) -> (t, []) \); unzip; (id, concat)> (child-ty*, child*)
+  
+  expand-implicits-termbuild:
+    Tuple(child*) -> (Tuple(child'*), p*)
+    where
+      (child'*, p*) := <map(expand-implicits-termbuild <+ !(<id>, [])); unzip; (id, concat)> child*
 
   expand-implicits-termbuild:
     ListTail([hd], tl) -> (ListTail([hd], tl'), p*)
