@@ -53,6 +53,7 @@ public class DynSemVM {
 	}
 
 	public Callable<RuleResult> getCallable(IStrategoTerm term, Map<String, Object> properties) {
+		assert term != null;
 		assert engine.getLanguages().containsKey(ctx.getMimeTypeObjLanguage());
 		// FIXME: this is bad bad bad, because the properties are per-program but we are setting them per-VM
 		ctx.writeProperties(properties);
