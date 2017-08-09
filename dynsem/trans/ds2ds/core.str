@@ -7,7 +7,7 @@ imports
   analysis/lib-analysis
   analysis/mark-references
   ds2ds/-
-  backend/interpreter/utils
+  backend/common/opts
   pp
 
 rules
@@ -18,7 +18,7 @@ rules
       Module(name, section*) := <module-to-core(|path, project-path); unmark-vars; sugar-all> ast;
       result := <pp-debug> Module($[[name].core], section*);
       filename := <guarantee-extension(|"core.ds")> path
-
+  
 strategies
 
   module-to-core(|path, project-path) =

@@ -1,0 +1,9 @@
+module semantics/premises/representation
+
+imports
+  ds-signatures/ds-sig
+
+signature
+  constructors
+    StrConcat: Term * Term -> Term
+    ListConcat: Term * Term -> Term

@@ -19,6 +19,6 @@ menus
     action: "Core"   = module-to-core-editor (openeditor) (source)
     
   menu: "Interpreter"
-    action: "Generate interpreter" = ds-to-interp-editor (source)
-    action: "Generate spec only" = ds-to-interp-specification-editor (source) (meta)
-    action: "Spec" = ds-to-specification-editor (openeditor) (source) (meta)
+    action: "Generate interpreter" = ds-backend-editor (source)
+//    action: "Generate spec only" = ds-to-interp-specification-editor (source) (meta)
+//    action: "Spec" = ds-to-specification-editor (openeditor) (source) (meta)

@@ -1,4 +1,4 @@
-module backend/interpreter/utils
+module backend/interpreter/opts
 
 imports
   libspoofax/resource/path
@@ -52,7 +52,12 @@ signature
     TestJavaDirAbs : DSOpt
     TestsDir : DSOpt
     TestPkg : DSOpt
-    
+    Backend : DSOpt
+  
+  constructors
+    DsBackend: Term
+    MetaDsBackend: Term
+
 rules
 
   get-opt(|prop) = <DSOpt> prop
@@ -109,7 +114,8 @@ rules
       (TestJavaDir(), tests-java-dir),
       (TestJavaDirAbs(), tests-java-dir-abs),
       (TestsDir(), tests-dir),
-      (TestPkg(), tests-pkg)
+      (TestPkg(), tests-pkg),
+      (Backend(), backend)
     ]
     where
       local-project-path := <local-path> project-path;
@@ -159,7 +165,14 @@ rules
       do-generate-junit := <read-property(|"project.generatejunit", "false")> prop-file;
       tests-java-dir := <read-property(|"project.testjavapath", "src/test/java")> prop-file;
       tests-java-dir-abs := $[[genproject-path]/[tests-java-dir]];
-      tests-dir := <read-property(|"project.testspath", "src/test/resources")> prop-file
+      tests-dir := <read-property(|"project.testspath", "src/test/resources")> prop-file;
+      backend := <read-property(|"backend", "ds"); backendstr-to-backend> prop-file
+
+  backendstr-to-backend:
+    "ds" -> DsBackend()
+  
+  backendstr-to-backend:
+    "ds-in-ds" -> MetaDsBackend()
 
   ds-to-interp-read-prop-required(|prop) =
     read-property(|prop, "N/A"); not(?"N/A" + ?"")

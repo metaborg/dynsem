@@ -1,7 +1,7 @@
 module backend/interpreter/project
 
 imports
-  backend/interpreter/utils
+  backend/common/-
   backend/utils/-
   
 rules
@@ -15,8 +15,8 @@ rules
       ; ds-to-interp-gen-project-daemon-launchconfig
       ; ds-to-interp-gen-shell-scripts
       ; ds-to-interp-gen-project-pom
-      ; ds-to-interp-gen-logback-xml
-      ; ds-to-interp-gen-apt-settings
+      ; ds-backend-logbackxml
+      ; ds-backend-aptsettings
       ; ds-to-interp-gen-project-gitignore
       ; java-gendir := <get-opt> JavaGenDirAbs()
       ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> TopPkg()]
@@ -39,13 +39,13 @@ rules
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
+                  <source>[<ver-maven-compiler-plugin>]</source>
+                  <target>[<ver-maven-compiler-plugin>]</target>
                 </configuration>
               </plugin>
               <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>[<ver-maven-clean-plugin>]</version>
                 <executions>
                   <execution>
                     <id>auto-clean</id>
@@ -56,11 +56,11 @@ rules
                     <configuration>
                       <filesets>
                         <fileset>
-                          <directory>[<get-opt; get-rel-path(|<get-opt> JavaGenDirRel())> TopPkg()]</directory>
+                          <directory>[<get-opt; pkg-to-relpath(|<get-opt> JavaGenDirRel())> TopPkg()]</directory>
                           <includes>**/**</includes>
                         </fileset>
                         <fileset>
-                          <directory>[<get-opt; get-rel-path(|<get-opt> TestJavaDir())> TestPkg()]</directory>
+                          <directory>[<get-opt; pkg-to-relpath(|<get-opt> TestJavaDir())> TestPkg()]</directory>
                           <includes>**/**</includes>
                         </fileset>
                         <fileset>
@@ -79,7 +79,7 @@ rules
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
+                <version>[<ver-maven-surefire-plugin>]</version>
                 <configuration>
                   <argLine>[<get-opt> JVMArgs()]</argLine>
                 </configuration>
@@ -109,34 +109,34 @@ rules
             </repository>
           </repositories>
           <properties>
-            <slf4j.version>1.7.10</slf4j.version>
+            <slf4j.version>[<ver-slf4j>]</slf4j.version>
           </properties>
           <dependencies>
             <dependency>
               <groupId>org.metaborg</groupId>
               <artifactId>org.metaborg.meta.lang.dynsem.interpreter</artifactId>
-              <version>2.3.0-SNAPSHOT</version>
+              <version>[<ver-spoofax>]</version>
             </dependency>
             <dependency>
               <groupId>com.oracle.truffle</groupId>
               <artifactId>truffle-api</artifactId>
-              <version>0.26</version>
+              <version>[<ver-truffle>]</version>
               <type>jar</type>
             </dependency>
             <dependency>
               <groupId>com.oracle.truffle</groupId>
               <artifactId>truffle-dsl-processor</artifactId>
-              <version>0.26</version>
+              <version>[<ver-truffle>]</version>
             </dependency>
             <dependency>
               <groupId>org.metaborg</groupId>
               <artifactId>org.spoofax.terms</artifactId>
-              <version>2.3.0-SNAPSHOT</version>
+              <version>[<ver-spoofax>]</version>
             </dependency>
             <dependency>
               <groupId>com.martiansoftware</groupId>
               <artifactId>nailgun-server</artifactId>
-              <version>0.9.1</version>
+              <version>[<ver-nailgun>]</version>
             </dependency>
             <!-- Logging -->
             <dependency>
@@ -152,41 +152,11 @@ rules
             <dependency>
               <groupId>ch.qos.logback</groupId>
               <artifactId>logback-classic</artifactId>
-              <version>1.1.2</version>
+              <version>[<ver-logback>]</version>
             </dependency>
           </dependencies>
       </project>], pom-file);
     <fclose> pom-file
-  
-  ds-to-interp-gen-logback-xml =
-    <get-opt ; (file-exists <+ mkdir)> ResourceDirAbs();
-    logback-file := <fopen> (<get-opt> TargetLogbackAbs(), "w");
-    <fputs> (
-      $[<configuration>
-          <appender name="stderr"
-                    class="ch.qos.logback.core.ConsoleAppender">
-            <target>System.err</target>
-            <encoder>
-              <pattern>%date{HH:mm:ss.SSS} | %-12.12thread | %-5level | %-40.40logger{30} - %message%n</pattern>
-            </encoder>
-          </appender>
-
-          <root level="warn">
-            <appender-ref ref="stderr" />
-          </root>
-       </configuration>], logback-file);
-    <fclose> logback-file
-
-  ds-to-interp-gen-apt-settings =
-    settings-dir := $[[<get-opt> GenProject()]/.settings];
-    <file-exists <+ mkdir> settings-dir;
-    apt-settings-file := <fopen> ($[[settings-dir]/org.jboss.tools.maven.apt.prefs], "w");
-    apt-settings :=
-      $[eclipse.preferences.version=1
-        org.jboss.tools.maven.apt.aptProcessDuringReconcile=true
-        org.jboss.tools.maven.apt.mode=jdt_apt];
-    <fputs> (apt-settings, apt-settings-file);
-    <fclose> apt-settings-file
   
   ds-to-interp-gen-project-launchconfig =
     launch-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), ".launch"], "w");
@@ -306,14 +276,15 @@ rules
     basedir-test := <get-opt> TestJavaDir();
     <fputs> ($[
       /target/
+      [<get-opt> ResourceDirAbs()]/signatures-digest.cache
       [<get-opt> TargetSpecRel()]
       [<get-opt> TargetTableRel()]
       [<get-opt> TargetLogbackRel()]
-      [<get-opt; get-rel-path(|basedir-java)> TopPkg()]
-      [<get-opt; get-rel-path(|basedir-java)> TermPkg()]
-      [<get-opt; get-rel-path(|basedir-java)> BuildPkg()]
-      [<get-opt; get-rel-path(|basedir-java)> MatchPkg()]
-      [<get-opt; get-rel-path(|basedir-test)> TestPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> TopPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> TermPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> BuildPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> MatchPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-test)> TestPkg()]
       /[<get-opt> LangName()].launch
       /Test[<get-opt> LangName()].launch
       /[<get-opt> LangName()] (Core).launch
@@ -324,9 +295,5 @@ rules
       /[<get-opt> LangName()]
     ], gitignore);
     <fclose> gitignore
-
-
-  get-rel-path(|basedir):
-    pkg -> <concat-strings> [basedir, "/", <string-replace(|".", "/")> pkg]
 
     

@@ -114,7 +114,7 @@ context-free syntax // formulas
   Formula.TypeCheck = [[Var] <? [Type]]
   Formula.TypeCast = [[Var] <: [Type]]
   
-  Formula = [[Relation]]
+  Formula = Relation
   Relation.Relation = [[Reads][Source] [Rel] [Target]]
   
   Reads.NoReads = []
@@ -155,7 +155,7 @@ context-free syntax // terms
   Term.Real     = [[REAL]]
   Term.Con      = [[ID]([{Term ", "}*])]
   
-  Term.List     = <[ <{Term ", "}*> ]>
+  Term.List_     = <[ <{Term ", "}*> ]>
   Term.ListTail = <[ <{Term ", "}*> | <Term> ]>
   Term.ListLength = <|<Term>|>
   Term.Concat   = [[Term] ++ [Term]] {left}
@@ -169,7 +169,7 @@ context-free syntax // terms
   Term.True   = [true]
   Term.False  = [false]
   
-  Term.Map    = [{[{Entry  ", "}*]}]
+  Term.Map_    = [{[{Entry  ", "}*]}]
   Entry.Bind  = [[Term] |--> [Term]]
 
 //  Entry.Binds = [[Term] |*-> [Term]]

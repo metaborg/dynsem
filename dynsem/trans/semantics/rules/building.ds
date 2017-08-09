@@ -1,0 +1,101 @@
+module semantics/rules/building
+
+imports
+  semantics/rules/evaluation
+  semantics/unit
+  semantics/terms
+  ds-signatures/ds-sig
+  
+signature
+  arrows
+    Term -build-> T
+    List(Term) -build-> List(T)
+    Entry -build-> Map(T, T)
+    
+rules
+  
+  __Var2Term__(VarRef(x)) :: E -build-> E[x]
+  
+  __Cast2Term__(Cast(bld, _)) -build-> bld
+  
+  C |- Con(x, kid-blds) -build-> ApplT(x, kids)
+  where
+    // ensure regular constructors (i.e. not native ops, or some other magic thing)
+    C[(x, |kid-blds|)?] == true;
+    kid-blds -build-> kids
+  
+  NatC |- Con(x, kid-blds) -build-> nat-opcall(x, |kid-blds|, ts)
+  where
+    NatC[(x, |kid-blds|)?] == true;
+    kid-blds -build-> ts
+  
+  [] : List(Term) -build-> []
+  
+  [bld|blds] : List(Term) -build-> [t|ts]
+  where
+    bld -build-> t;
+    blds -build-> ts
+  
+  List_(blds) -build-> ListT(kids)
+  where
+    blds -build-> kids
+  
+  ListTail([bld], tbld) -build-> ListT([t|ts])
+  where
+    bld -build-> t;
+    tbld -build-> ListT(ts)
+  
+  ListConcat(bld1, bld2) -build-> ListT(l1 ++ l2)
+  where
+    bld1 -build-> ListT(l1);
+    bld2 -build-> ListT(l2)
+  
+  Map_([]) -build-> MapT({})
+  
+  Map_([bind | binds]) -build-> MapT({map1, map2})
+  where
+    bind -build-> map1;
+    Map_(binds) -build-> MapT(map2)
+    
+  MapExtend(map-bld1, map-bld2) -build-> MapT({map1, map2})
+  where
+    map-bld1 -build-> MapT(map1);
+    map-bld2 -build-> MapT(map2) 
+
+  Bind(key-bld, val-bld) -build-> {key |--> val}
+  where
+    key-bld -build-> key;
+    val-bld -build-> val
+
+  DeAssoc(map-bld, key-bld) -build-> map[key]
+  where
+    map-bld -build-> MapT(map);
+    key-bld -build-> key
+  
+  MapHas(map-bld, key-bld) -build-> BoolT(map[key?])
+  where
+    map-bld -build-> MapT(map);
+    key-bld -build-> key
+
+  String(s) -build-> StrT(s)
+  
+  StrConcat(bld1, bld2) -build-> StrT(s1 ++ s2)
+  where
+    bld1 -build-> StrT(s1);
+    bld2 -build-> StrT(s2)
+  
+  Fresh() -build-> IntT(fresh)
+
+  True() -build-> BoolT(true)
+  
+  False() -build-> BoolT(false)
+
+signature
+  arrows
+    nat-opcall(String, Int, List(T)) --> T
+  
+  native operators
+    native-operator-call: String * Int * List(T) -> T
+
+rules
+  nat-opcall(x, i, ts) --> native-operator-call(x, i, ts)

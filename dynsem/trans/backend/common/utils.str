@@ -1,0 +1,90 @@
+module backend/common/utils
+
+imports
+  backend/common/opts
+  backend/utils/-
+  
+imports
+  libstratego-aterm
+
+rules
+
+  ds-backend-copy-table =
+    where(
+      source := <get-opt> TableSource();
+      target := <get-opt> TargetTableAbs();
+      (
+        <copy-file> (source, target)
+        <+ fatal-err(|$[Cannot copy parse table: [source] --> [target]])
+      )
+    )
+
+  ds-backend-write-spec =
+    where(
+      ?spec;
+      fout := <fopen> (<get-opt> TargetSpecAbs(), "w");
+      <pp-aterm-stream(|fout)> spec;
+      <fclose> fout
+    )
+  
+  ds-backend-on-changed-signatures(s|t) = s
+  
+//  ds-backend-on-changed-signatures(s|t) =
+//    ?input;
+//    resource-dir := <get-opt; (file-exists <+ mkdir)> ResourceDirAbs();
+//    digest-file := $[[resource-dir]/signatures-digest.cache];
+//    term-digest := <digest-term> t;
+//    if <ds-backend-on-changed-signatures-needs-update(|term-digest)> digest-file
+//    then
+//      output := <s> input;
+//      <ds-backend-on-changed-signatures-update-digest(|term-digest)> digest-file
+//    else
+//      !input
+//    end
+//  
+//  ds-backend-on-changed-signatures-needs-update(|term-digest):
+//    digest-file -> digest-file
+//    where not(
+//      <file-exists> digest-file;
+//      prev-digest := <ReadFromFile> digest-file;
+//      <eq> (term-digest, prev-digest)
+//    )
+//  
+//  ds-backend-on-changed-signatures-update-digest(|term-digest):
+//    digest-file -> digest-file
+//    where
+//      <try(WriteToBinaryFile)> (digest-file, term-digest)
+  
+  pkg-to-relpath(|basedir):
+    pkg -> <concat-strings> [basedir, "/", <string-replace(|".", "/")> pkg]
+    
+  ds-backend-logbackxml =
+    <get-opt ; (file-exists <+ mkdir)> ResourceDirAbs();
+    logback-file := <fopen> (<get-opt> TargetLogbackAbs(), "w");
+    <fputs> (
+      $[<configuration>
+          <appender name="stderr"
+                    class="ch.qos.logback.core.ConsoleAppender">
+            <target>System.err</target>
+            <encoder>
+              <pattern>%date{HH:mm:ss.SSS} | %-12.12thread | %-5level | %-40.40logger{30} - %message%n</pattern>
+            </encoder>
+          </appender>
+
+          <root level="warn">
+            <appender-ref ref="stderr" />
+          </root>
+       </configuration>], logback-file);
+    <fclose> logback-file
+
+  ds-backend-aptsettings =
+    settings-dir := $[[<get-opt> GenProject()]/.settings];
+    <file-exists <+ mkdir> settings-dir;
+    apt-settings-file := <fopen> ($[[settings-dir]/org.jboss.tools.maven.apt.prefs], "w");
+    apt-settings :=
+      $[eclipse.preferences.version=1
+        org.jboss.tools.maven.apt.aptProcessDuringReconcile=true
+        org.jboss.tools.maven.apt.mode=jdt_apt];
+    <fputs> (apt-settings, apt-settings-file);
+    <fclose> apt-settings-file
+

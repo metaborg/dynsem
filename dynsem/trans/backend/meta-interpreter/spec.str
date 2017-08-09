@@ -1,0 +1,28 @@
+module backend/meta-interpreter/spec
+
+imports
+  signatures/ds-sig
+  lib-ds
+  ds
+  ds2ds/more-typeannos
+  ds2ds/explicate-arrow-types
+  ds2ds/desugar-concat
+rules
+
+  sugar-for-metaspec =
+    m-in-analysis(
+      explicate-arrow-types-noanalysis;
+      desugar-concat-all;
+//      resugar-and-typecast-lists;
+      unrename-all
+    );
+    unmark-vars
+    
+
+  
+  
+  
+  
+  
+  
+  

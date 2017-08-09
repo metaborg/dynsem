@@ -1,0 +1,31 @@
+module backend/meta-interpreter/main
+
+imports
+  signatures/ds-sig
+  lib-ds
+  ds
+
+imports
+  ds2ds/core
+  analysis/mark-references
+
+imports
+  backend/common/opts
+  backend/common/utils
+  backend/meta-interpreter/-
+
+  
+rules
+  
+  ds-to-metainterp(|path, project-path, local-project-path) =
+    log-timed(
+      ds-backend-copy-table;
+      ds-backend-metainterp-spec(|path, project-path); ds-backend-write-spec;
+      ds-backend-metainterp-project;
+      ds-backend-metainterp-langmain-top
+    |$[Generating meta-interpreter at: [<get-opt> GenProject()]])
+
+  ds-backend-metainterp-spec(|path, project-path) =
+    module-to-core(|path, project-path);
+    sugar-for-metaspec;
+    unmark-vars

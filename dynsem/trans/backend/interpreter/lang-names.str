@@ -3,7 +3,7 @@ module backend/interpreter/lang-names
 imports
   signatures/-
   backend/utils/utils
-  backend/interpreter/utils
+  backend/common/opts
   backend/interpreter/signature
   libjava-front
 

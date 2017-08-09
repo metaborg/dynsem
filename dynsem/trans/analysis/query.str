@@ -31,7 +31,7 @@ rules
       l-ty := <type-of> tl
   
   type-of:
-    List(elems) -> ListType(<fetch-elem(not(?Wld()); type-of)> elems)
+    List_(elems) -> ListType(<fetch-elem(not(?Wld()); type-of)> elems)
   
   type-of:
     Con(name, c*) -> c-ty

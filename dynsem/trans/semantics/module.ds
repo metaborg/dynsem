@@ -1,0 +1,33 @@
+module semantics/module
+
+imports
+  ds-signatures/ds-sig
+  semantics/unit
+  semantics/signatures/signatures
+  semantics/rules/rules
+  
+signature
+
+  arrows
+    Module -load-> U
+    ModuleSection -load-> U
+    init-R-table() --> U
+    init-R-table(List((String * Type))) --> U
+rules
+  
+  Module(_, [_, sigz, rulz]) -load-> U()
+  where
+    sigz -load-> _;
+    init-R-table() --> _;
+    rulz -load-> _
+
+  init-R-table() :: A --> U() :: A
+  where
+    allkeys(A) => rule-keys;
+    init-R-table(rule-keys) --> _
+  
+  init-R-table([]) --> U()
+  
+  init-R-table([(x, ty) | rule-keys]) :: R --> U() :: R { (x, ty) |--> NR(), R'}
+  where
+    init-R-table(rule-keys) :: R --> _ :: R'

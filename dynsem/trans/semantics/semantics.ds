@@ -1,0 +1,26 @@
+module semantics/semantics
+
+imports
+  semantics/aterm
+  semantics/module
+  semantics/terms
+  
+signature
+  sorts
+    Eval
+    
+  constructors
+    Eval : ATerm * Module -> Eval
+    
+  arrows
+    Eval -init-> (T * Rules * Sorts * Constructors * Arrows)
+    
+rules
+  
+  Eval(aterm, spec) -init-> (t', R, S, C, A)
+  where
+    convert(aterm) --> t;
+    spec :: S {}, C {}, A {}, R {}, NatC {} -load-> _ :: S, C, A, NatC, R;
+    S, C, A, NatC, R |- eval(t) --> t'
+
+  

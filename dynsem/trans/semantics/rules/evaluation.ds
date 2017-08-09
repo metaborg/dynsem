@@ -1,0 +1,87 @@
+module semantics/rules/evaluation
+
+imports
+  semantics/rules/representation
+  semantics/rules/matching
+  semantics/rules/building
+  semantics/rules/query
+  semantics/signatures/query
+  semantics/runtime/natives
+  semantics/unit
+  semantics/terms
+  semantics/premises/premises
+  
+signature
+  
+  sort aliases
+    Comps = Map(Label, T)
+    Env = Map(String, T)
+    
+  arrows
+    eval(T) --> T
+    apply-rules(RuleChain, T, Comps, Comps) --> (T * Comps)
+    apply-rule(Rule, T, Comps, Comps) --> (T * Comps)
+    
+    match-components(List(LabelComp), Comps) --> U
+    build-components(List(LabelComp)) --> Comps
+    
+  sorts
+    Status
+  
+  constructors
+    OK: Status
+    F : Status
+  
+  components
+    ST : Status = OK()
+    E : Env
+  
+rules
+  
+  eval(t) --> t'
+  where
+    log("Eval init") --> _;
+    t -type-> type;
+    lookup-rule("init", type) --> r;
+    apply-rules(r, t, {}, {}) :: ST OK() --> (t', _) :: ST _
+  
+  apply-rules(NR(), t, _, _) --> ???
+  where
+    halt-error("(META) No rules applicable for term " ++ str(t)) --> _
+  
+  apply-rules(R(r, rs), t, ros, rws) :: ST OK() --> res :: ST
+  where
+    apply-rule(r, t, ros, rws) :: ST OK() --> res1 :: ST1;
+    case ST1 of {
+      OK() =>
+        res1 => res;
+        OK() => ST
+      otherwise =>
+        apply-rules(rs, t, ros, rws) :: ST OK() --> res2 :: ST2;
+        res2 => res;
+        ST2 => ST
+    }
+
+  apply-rule(Rule(prems, _, Relation(Reads(ro-pat), Source(lhs, rw-pat), _, Target(rhs, rw-blds))), T, ro-ins, rw-ins) --> (T', rw-outs)
+  where
+    T |- lhs :: E {} -debugmatch-> _ :: E1;
+    match-components(ro-pat, ro-ins) :: E1 --> _ :: E2;
+    match-components(rw-pat, rw-ins) :: E2 --> _ :: E3;
+    prems :: E3 --> _ :: E4;
+    rhs :: E4 -build-> T' :: E5;
+    build-components(rw-blds) :: E5 --> rw-outs :: E6
+
+  match-components([], _) --> U()
+  
+  match-components([LabelComp(label, pat) | labels], comps) --> match-components(labels, comps)
+  where
+    comps[label] => T;
+    T |- pat -debugmatch-> _
+  
+  build-components([]) --> {}
+  
+  build-components([LabelComp(label, bld) | labels]) --> { label |--> T, comps}
+  where
+    bld -build-> T;
+    build-components(labels) --> comps
+  
