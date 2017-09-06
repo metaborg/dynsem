@@ -187,9 +187,7 @@ rules
     Module(module-name, _) -> <fail>
     where
       project-path := <OptProjectPath>;
-      local-project-path := <local-path> project-path;
-      prop-file := $[[project-path]/dynsem.properties];
-      if <not(read-property(|"source.langname", ""))> prop-file
+      if not(() := <ds-has-properties> project-path)
       then
         add-msg(|Warning(), module-name, "Could not find or read a dynsem.properties file")
       end  

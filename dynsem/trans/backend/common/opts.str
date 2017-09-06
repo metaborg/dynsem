@@ -71,6 +71,12 @@ rules
     filter(\ (opt,val) -> <rules(DSOpt:+ opt -> val)> where not("false" := val) \)
   )
  
+  ds-has-properties: project-path -> (local-project-path, prop-file)
+    where
+      local-project-path := <local-path> project-path;
+      prop-file := $[[project-path]/dynsem.properties];
+      <read-property(|"source.langname", "")> prop-file
+ 
   ds-to-interp-get-options:
     (path, project-path) -> [
       (FilePath(), path),
@@ -117,11 +123,8 @@ rules
       (TestPkg(), tests-pkg),
       (Backend(), backend)
     ]
-    where
-      local-project-path := <local-path> project-path;
-      prop-file := $[[project-path]/dynsem.properties]
     with
-      if <not(read-property(|"source.langname", ""))> prop-file
+      if not((local-project-path, prop-file) := <ds-has-properties> project-path)
       then
         fatal-err(|"Could not find/read a dynsem.properties file")
       end
