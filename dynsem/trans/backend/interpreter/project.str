@@ -275,7 +275,12 @@ rules
     basedir-java := <get-opt> JavaGenDirRel();
     basedir-test := <get-opt> TestJavaDir();
     <fputs> ($[
-      /target/
+      /bin
+      /target
+      /.project
+      /.classpath
+      /.settings
+      /.factorypath
       [<get-opt> ResourceDirAbs()]/signatures-digest.cache
       [<get-opt> TargetSpecRel()]
       [<get-opt> TargetTableRel()]
