@@ -2,7 +2,7 @@ module Syntax
 
 language
 
-  table         : target/metaborg/sdf-new.tbl
+  table         : target/metaborg/sdf.tbl
   start symbols : Module
 
   line comment  : "//"
