@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -29,7 +29,7 @@ public abstract class ListReverseTermBuild extends TermBuild {
 
 		TermBuild list = TermBuild.create(Tools.applAt(t, 0), fd);
 
-		return ListReverseTermBuildNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), list);
+		return ListReverseTermBuildNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), list);
 	}
 
 }

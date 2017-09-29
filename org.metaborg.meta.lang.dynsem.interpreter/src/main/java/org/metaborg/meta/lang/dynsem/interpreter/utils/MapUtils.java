@@ -13,8 +13,10 @@ public class MapUtils {
 
 	@TruffleBoundary
 	public static <K, V> PersistentMap<K, V> plus(PersistentMap<K, V> one, PersistentMap<K, V> other) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		TransientMap<K, V> tmp = ((PersistentHashMap) one).asTransient();
 
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Iterator<Map.Entry<K, V>> it = (Iterator<Entry<K, V>>) ((PersistentHashMap) other).entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<K, V> tuple = it.next();

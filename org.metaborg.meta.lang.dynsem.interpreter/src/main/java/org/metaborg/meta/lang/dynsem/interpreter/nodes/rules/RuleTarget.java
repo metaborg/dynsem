@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -56,6 +56,6 @@ public class RuleTarget extends Node {
 			componentNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(componentsT, i), fd);
 		}
 
-		return new RuleTarget(rhsNode, componentNodes, SourceSectionUtil.fromStrategoTerm(targetT));
+		return new RuleTarget(rhsNode, componentNodes, SourceUtils.dynsemSourceSectionFromATerm(targetT));
 	}
 }

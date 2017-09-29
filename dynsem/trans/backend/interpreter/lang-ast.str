@@ -4,22 +4,26 @@ imports
   signatures/-
   backend/interpreter/-
   backend/utils/-
+  backend/common/-
   libjava-front
 
 rules
   
   ds-to-interp-terms-module =
     ?mod@Module(_, <fetch-elem(?Signatures(sig*))>);
-    where(ds-to-interp-clean-target; ds-to-interp-gen-project);
-    <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> mod;
-    <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
-    <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-    <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
-    <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
-    <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-    <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
+    ds-backend-on-changed-signatures(
+      where(ds-to-interp-clean-target; ds-to-interp-gen-project);
+      <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> mod;
+      <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
+      <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+      <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
+      <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
+      <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+      <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod
+    |sig*);
     ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
     ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+    ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
     ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
     ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
     ds-to-interp-gen-test-harness
@@ -644,7 +648,12 @@ rules /* Sort & Constructor classes */
       e_valcreate := <ds-to-interp-sorts-to-create-arg> (e |[ x_bindT.getSubterm(1) ]|, sval)
 
   ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@NativeType(_, _)) -> e |[ null ]|
+    (e_term, sref@NativeType(_, "org.spoofax.interpreter.terms.IStrategoTerm")) -> e |[ e_term ]|
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@NativeType(_, qpath)) -> e |[ null ]|
+    where
+      <not(eq)> (qpath, "org.spoofax.interpreter.terms.IStrategoTerm") 
 
   ds-to-interp-sorts-to-create-arg:
     (e_term, sref@SimpleSort("String")) -> e |[ ((IStrategoString) e_term).stringValue() ]|
@@ -1098,7 +1107,6 @@ rules /* term matching */
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
         
-        import com.oracle.truffle.api.dsl.Fallback;
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.nodes.ExplodeLoop;
         import com.oracle.truffle.api.frame.VirtualFrame;
@@ -1140,6 +1148,15 @@ rules /* term matching */
         
             tailPattern.executeMatch(frame, list.drop(elemPatterns.length));
           }
+          
+          @Specialization(guards = "notAList(o)")
+          public void doFail(VirtualFrame frame, Object o) {
+            throw PatternMatchFailure.INSTANCE;
+          }
+          
+          protected static boolean notAList(Object o){
+            return !(o instanceof x_listclass);
+          }
         
           @ExplodeLoop
           private final void matchElemPatterns(VirtualFrame frame,
@@ -1148,11 +1165,6 @@ rules /* term matching */
             for (int idx = 0; idx < elemPatterns.length; idx++) {
               elemPatterns[idx].executeMatch(frame, elems[idx]);
             }
-          }
-        
-          @Fallback
-          public void doNotAList(VirtualFrame frame, Object other) {
-            throw PatternMatchFailure.INSTANCE;
           }
         
         }

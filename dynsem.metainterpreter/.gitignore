@@ -1,0 +1,18 @@
+
+/target/
+src/main/resources/meta-specification.aterm
+src/main/resources/parsetable.tbl
+src/main/resources/logback.xml
+src/main/java/org/metaborg/dynsem/metainterpreter/generated
+src/main/java/org/metaborg/dynsem/metainterpreter/generated/terms
+src/main/java/org/metaborg/dynsem/metainterpreter/generated/terms/build
+src/main/java/org/metaborg/dynsem/metainterpreter/generated/terms/match
+src/test/java/org/metaborg/dynsem/metainterpreter/generated/test
+/ds.launch
+/Testds.launch
+/ds (Core).launch
+/ds (Daemon).launch
+/ds-core
+/ds-server
+/ds-client
+/ds

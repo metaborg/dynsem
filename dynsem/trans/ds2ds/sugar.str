@@ -81,7 +81,7 @@ rules // desugaring
     NamedDynamic(n) -> NamedDynamicEmitted([], n)
   
   desugar :
-    List(x*) -> ListTail(x*, List([]))
+    List_(x*) -> ListTail(x*, List_([]))
     where <not(?[])> x*
 
   desugar :
@@ -108,10 +108,10 @@ rules // desugaring
     Axiom(form) -> Rule([], "---------", form)
     
   desugar :
-    Map([b | b*@[_|_]]) -> MapExtend(Map([b]), Map(b*))
+    Map_([b | b*@[_|_]]) -> MapExtend(Map_([b]), Map_(b*))
     
   desugar :
-    Map([MapEntry(x)]) -> x
+    Map_([MapEntry(x)]) -> x
 
   desugar :
     Strict(con,params1,params2) -> list
@@ -124,6 +124,12 @@ rules // desugaring
            list := <map( \ param -> Seqstrict(con,[param],params2) \)> params1
      // this converts a Rule into a list of Rules
      // so they must later be concatenated, post-desugaring:
+  
+  desugar :
+    RuleWDot(form, prem*) -> RuleW(form, prem*)
+  
+  desugar :
+    RuleDot(prem*, inf, form) -> Rule(prem*, inf, form)
   
   rules-concat :
   	 Rules(list) -> Rules(list1)

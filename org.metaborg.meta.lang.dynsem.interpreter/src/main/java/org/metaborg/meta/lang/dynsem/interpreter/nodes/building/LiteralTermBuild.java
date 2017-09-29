@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -26,7 +26,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 
 		public static StringLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			CompilerAsserts.neverPartOfCompilation();
-			return new StringLiteralTermBuild(Tools.javaStringAt(t, 0), SourceSectionUtil.fromStrategoTerm(t));
+			return new StringLiteralTermBuild(Tools.javaStringAt(t, 0), SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 
 		@Override
@@ -52,7 +52,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 		public static IntLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			CompilerAsserts.neverPartOfCompilation();
 			return new IntLiteralTermBuild(Integer.parseInt(Tools.javaStringAt(t, 0)),
-					SourceSectionUtil.fromStrategoTerm(t));
+					SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 
 		@Override
@@ -75,7 +75,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 
 		public static TrueLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "True", 0);
-			return new TrueLiteralTermBuild(SourceSectionUtil.fromStrategoTerm(t));
+			return new TrueLiteralTermBuild(SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 
 		@Override
@@ -98,7 +98,7 @@ public abstract class LiteralTermBuild extends TermBuild {
 
 		public static FalseLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "False", 0);
-			return new FalseLiteralTermBuild(SourceSectionUtil.fromStrategoTerm(t));
+			return new FalseLiteralTermBuild(SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 
 		@Override

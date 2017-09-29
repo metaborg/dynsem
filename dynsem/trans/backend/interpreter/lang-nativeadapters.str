@@ -3,7 +3,7 @@ module backend/interpreter/lang-nativeadapters
 imports
   signatures/ds-sig
   signatures/dynsem/Signatures-sig
-  backend/interpreter/utils
+  backend/common/opts
   backend/interpreter/lang-names
   libjava-front
 

@@ -1,92 +1,121 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Map;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
+import org.spoofax.interpreter.core.Tools;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
+import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.TermTransformer;
+import org.spoofax.terms.io.TAFTermReader;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.JointRuleRoot;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
-
+import com.oracle.truffle.api.CallTarget;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLanguage;
-import com.oracle.truffle.api.frame.MaterializedFrame;
-import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.Source;
 
 public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
-	// Keys for configuration parameters for a DynSemContext.
-	public static final String PARSER = "PARSER";
-	public static final String TERM_REGISTRY = "TERM_REGISTRY";
-	public static final String RULE_REGISTRY = "RULE_REGISTRY";
+	public static final String CONTEXT_OBJECT = "dynsemctx-object";
+	public static final String DYNSEM_MIME = "application/x-dynsem";
 
-	public DynSemLanguage() {
+	@CompilationFinal private DynSemContext ctx;
+
+	@Override
+	protected CallTarget parse(final ParsingRequest request) throws Exception {
+		// NOTE: the source is the AST of an object language program
+		Source code = request.getSource();
+
+		ITermFactory factory = new ImploderOriginTermFactory(new TermFactory());
+		IStrategoTerm programAST = new TAFTermReader(factory).parseFromStream(code.getInputStream());
+		
+		// convert origin annotations back to origin attachments
+		programAST = new TermTransformer(factory, true) {
+
+			@Override
+			public IStrategoTerm preTransform(IStrategoTerm term) {
+				IStrategoList annos = term.getAnnotations();
+				IStrategoList newAnnos = factory.makeList();
+				for (IStrategoTerm anno : annos) {
+					if (anno instanceof IStrategoAppl
+							&& Tools.hasConstructor((IStrategoAppl) anno, "ImploderAttachment")) {
+						ImploderAttachment attach = ImploderAttachment.TYPE.fromTerm((IStrategoAppl) anno);
+						term.putAttachment(attach);
+						continue;
+					}
+					newAnnos = factory.makeListCons(anno, newAnnos);
+				}
+
+				return factory.annotateTerm(term, newAnnos);
+			}
+		}.transform(programAST);
+
+		ITerm programTerm = ctx.getTermRegistry().parseProgramTerm(programAST);
+
+		RootNode startInterpretation = new RootNode(this) {
+
+			@Child private DispatchNode rootDispatch = DispatchNodeGen.create(SourceUtils
+					.getSyntheticSource("rootnote", "startinterpreter", ctx.getMimeTypeObjLanguage()).createSection(1),
+					"init");
+
+			@Override
+			public Object execute(VirtualFrame frame) {
+				return rootDispatch.execute(frame, programTerm.getClass(), new Object[] { programTerm });
+			}
+		};
+		return Truffle.getRuntime().createCallTarget(startInterpretation);
 	}
-
-	public abstract boolean isFullBacktrackingEnabled();
-
-	public abstract boolean isSafeComponentsEnabled();
-
-	public abstract boolean isTermCachingEnabled();
-
-	public abstract boolean isDEBUG();
 
 	@Override
 	protected DynSemContext createContext(Env env) {
-		Map<String, Object> config = env.getConfig();
-		IDynSemLanguageParser parser = (IDynSemLanguageParser) config.get(PARSER);
-		ITermRegistry termRegistry = (ITermRegistry) config.get(TERM_REGISTRY);
-		RuleRegistry ruleRegistry = (RuleRegistry) config.get(RULE_REGISTRY);
-		return new DynSemContext(parser, termRegistry, ruleRegistry, env.in(), new PrintStream(env.out()),
-				new PrintStream(env.err()), config);
-	}
-
-	public Node createFindContextNode0() {
-		return createFindContextNode();
-	}
-
-	public DynSemContext findContext0(Node n) {
-		return findContext(n);
+		ctx = (DynSemContext) env.getConfig().get(CONTEXT_OBJECT);
+		ctx.initialize(this);
+		return ctx;
 	}
 
 	public DynSemContext getContext() {
-		return findContext(createFindContextNode());
+		return ctx;
 	}
 
-	@Override
-	protected Object evalInContext(Source source, Node node, MaterializedFrame mFrame) throws IOException {
-		throw new IllegalStateException("evalInContext not supported");
+	public static DynSemContext getContext(final RootNode rootnode) {
+		return rootnode.getLanguage(DynSemLanguage.class).getContext();
 	}
 
 	@Override
 	protected Object findExportedSymbol(DynSemContext context, String globalName, boolean onlyExplicit) {
-		try {
-			String[] splitName = globalName.split("/", 3);
-			if (splitName.length != 3) {
-				return null;
-			}
-			String name = splitName[0];
-			String constr = splitName[1];
-			int arity = Integer.parseInt(splitName[2]);
-			Class<?> dispatchClass = context.getTermRegistry().getConstructorClass(constr, arity);
-			JointRuleRoot ruleUnionRoot = context.getRuleRegistry().lookupRules(name, dispatchClass);
-			return new DynSemRule(ruleUnionRoot);
-		} catch (Exception e) {
-			return null;
-		}
+		throw new UnsupportedOperationException();
+		// try {
+		// String[] splitName = globalName.split("/", 3);
+		// if (splitName.length != 3) {
+		// return null;
+		// }
+		// String name = splitName[0];
+		// String constr = splitName[1];
+		// int arity = Integer.parseInt(splitName[2]);
+		// Class<?> dispatchClass = context.getTermRegistry().getConstructorClass(constr, arity);
+		// JointRuleRoot ruleUnionRoot = context.getRuleRegistry().lookupRules(name, dispatchClass);
+		// return new DynSemRule(ruleUnionRoot);
+		// } catch (Exception e) {
+		// return null;
+		// }
 	}
 
 	@Override
 	protected boolean isObjectOfLanguage(Object obj) {
-		return obj instanceof DynSemRule;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected Object getLanguageGlobal(DynSemContext context) {
+	protected DynSemContext getLanguageGlobal(DynSemContext context) {
 		return context;
-	}
-
-	@Override
-	protected boolean isInstrumentable(Node node) {
-		return false;
 	}
 }

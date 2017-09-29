@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -35,8 +35,7 @@ public class ConBuild extends TermBuild {
 		for (int i = 0; i < children.length; i++) {
 			children[i] = TermBuild.create(Tools.applAt(childrenT, i), fd);
 		}
-
-		return new ConBuild(constr, children, SourceSectionUtil.fromStrategoTerm(t));
+		return new ConBuild(constr, children, SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 	@Override
@@ -45,7 +44,7 @@ public class ConBuild extends TermBuild {
 		final ITermRegistry termReg = getContext().getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
 
-		final TermBuild build = InterpreterUtils.notNull(termReg.lookupBuildFactory(termClass))
+		final TermBuild build = InterpreterUtils.notNull(getContext(), termReg.lookupBuildFactory(termClass))
 				.apply(getSourceSection(), cloneNodes(children));
 		return replace(build).executeGeneric(frame);
 	}

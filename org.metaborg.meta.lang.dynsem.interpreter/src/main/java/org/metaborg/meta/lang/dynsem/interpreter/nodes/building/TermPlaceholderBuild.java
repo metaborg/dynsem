@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.TermPlaceholder;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -16,7 +16,7 @@ public class TermPlaceholderBuild extends TermBuild {
 	}
 
 	public static TermPlaceholderBuild create(IStrategoAppl t, FrameDescriptor fd) {
-		return new TermPlaceholderBuild(SourceSectionUtil.fromStrategoTerm(t));
+		return new TermPlaceholderBuild(SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 module backend/interpreter/project
 
 imports
-  backend/interpreter/utils
+  backend/common/-
   backend/utils/-
   
 rules
@@ -11,10 +11,12 @@ rules
       project := <get-opt> GenProject()
       ; <file-exists + mkdir> project
       ; ds-to-interp-gen-project-launchconfig
+      ; ds-to-interp-gen-project-core-launchconfig
       ; ds-to-interp-gen-project-daemon-launchconfig
       ; ds-to-interp-gen-shell-scripts
       ; ds-to-interp-gen-project-pom
-      ; ds-to-interp-gen-apt-settings
+      ; ds-backend-logbackxml
+      ; ds-backend-aptsettings
       ; ds-to-interp-gen-project-gitignore
       ; java-gendir := <get-opt> JavaGenDirAbs()
       ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> TopPkg()]
@@ -37,13 +39,13 @@ rules
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
+                  <source>[<ver-maven-compiler-plugin>]</source>
+                  <target>[<ver-maven-compiler-plugin>]</target>
                 </configuration>
               </plugin>
               <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>[<ver-maven-clean-plugin>]</version>
                 <executions>
                   <execution>
                     <id>auto-clean</id>
@@ -54,11 +56,11 @@ rules
                     <configuration>
                       <filesets>
                         <fileset>
-                          <directory>[<get-opt; get-rel-path(|<get-opt> JavaGenDirRel())> TopPkg()]</directory>
+                          <directory>[<get-opt; pkg-to-relpath(|<get-opt> JavaGenDirRel())> TopPkg()]</directory>
                           <includes>**/**</includes>
                         </fileset>
                         <fileset>
-                          <directory>[<get-opt; get-rel-path(|<get-opt> TestJavaDir())> TestPkg()]</directory>
+                          <directory>[<get-opt; pkg-to-relpath(|<get-opt> TestJavaDir())> TestPkg()]</directory>
                           <includes>**/**</includes>
                         </fileset>
                         <fileset>
@@ -77,7 +79,7 @@ rules
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
+                <version>[<ver-maven-surefire-plugin>]</version>
                 <configuration>
                   <argLine>[<get-opt> JVMArgs()]</argLine>
                 </configuration>
@@ -106,47 +108,55 @@ rules
               </snapshots>
             </repository>
           </repositories>
+          <properties>
+            <slf4j.version>[<ver-slf4j>]</slf4j.version>
+          </properties>
           <dependencies>
             <dependency>
               <groupId>org.metaborg</groupId>
               <artifactId>org.metaborg.meta.lang.dynsem.interpreter</artifactId>
-              <version>2.3.0-SNAPSHOT</version>
+              <version>[<ver-spoofax>]</version>
             </dependency>
             <dependency>
               <groupId>com.oracle.truffle</groupId>
               <artifactId>truffle-api</artifactId>
-              <version>0.15</version>
+              <version>[<ver-truffle>]</version>
               <type>jar</type>
             </dependency>
             <dependency>
               <groupId>com.oracle.truffle</groupId>
               <artifactId>truffle-dsl-processor</artifactId>
-              <version>0.15</version>
+              <version>[<ver-truffle>]</version>
             </dependency>
             <dependency>
               <groupId>org.metaborg</groupId>
               <artifactId>org.spoofax.terms</artifactId>
-              <version>2.3.0-SNAPSHOT</version>
+              <version>[<ver-spoofax>]</version>
             </dependency>
             <dependency>
               <groupId>com.martiansoftware</groupId>
               <artifactId>nailgun-server</artifactId>
-              <version>0.9.1</version>
+              <version>[<ver-nailgun>]</version>
+            </dependency>
+            <!-- Logging -->
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-api</artifactId>
+              <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>jcl-over-slf4j</artifactId>
+              <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>ch.qos.logback</groupId>
+              <artifactId>logback-classic</artifactId>
+              <version>[<ver-logback>]</version>
             </dependency>
           </dependencies>
       </project>], pom-file);
     <fclose> pom-file
-  
-  ds-to-interp-gen-apt-settings =
-    settings-dir := $[[<get-opt> GenProject()]/.settings];
-    <file-exists <+ mkdir> settings-dir;
-    apt-settings-file := <fopen> ($[[settings-dir]/org.jboss.tools.maven.apt.prefs], "w");
-    apt-settings :=
-      $[eclipse.preferences.version=1
-        org.jboss.tools.maven.apt.aptProcessDuringReconcile=true
-        org.jboss.tools.maven.apt.mode=jdt_apt];
-    <fputs> (apt-settings, apt-settings-file);
-    <fclose> apt-settings-file
   
   ds-to-interp-gen-project-launchconfig =
     launch-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), ".launch"], "w");
@@ -154,14 +164,14 @@ rules
     $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]EntryPoint.java"/>
+          <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]Main.java"/>
         </listAttribute>
         <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-        <listEntry value="1"/>
+          <listEntry value="1"/>
         </listAttribute>
         <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
         <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
-        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<get-opt> TopPkg()].[<get-opt> LangName()]EntryPoint"/>
+        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<get-opt> TopPkg()].[<get-opt> LangName()]Main"/>
         <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${resource_loc}"/>
         <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<get-opt> MavenArtifactId()]"/>
         <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
@@ -192,11 +202,42 @@ rules
     <fputs> (daemon-cfg, launch-file);
     <fclose> launch-file
 
+  ds-to-interp-gen-project-core-launchconfig =
+    core-cfg :=
+      $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+          <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+              <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]Runner.java"/>
+          </listAttribute>
+          <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+            <listEntry value="1"/>
+          </listAttribute>
+          <mapAttribute key="org.eclipse.debug.core.environmentVariables">
+            <mapEntry key="SPOOFAXPATH" value="${workspace_project_locations}"/>
+          </mapAttribute>
+          <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+          <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
+          <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<get-opt> TopPkg()].[<get-opt> LangName()]Runner"/>
+          <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${resource_loc}"/>
+          <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<get-opt> MavenArtifactId()]"/>
+          <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
+          <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="[<get-opt> JVMArgs()]"/>
+        </launchConfiguration>
+      ];
+    core-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), " (Core).launch"], "w");
+    <fputs> (core-cfg, core-file);
+    <fclose> core-file
+
   ds-to-interp-gen-shell-scripts =
     local-sh :=
       $[#! /bin/sh
         
-        MAVEN_OPTS="[<get-opt> JVMArgs()]" mvn exec:java -Dexec.mainClass=[<get-opt> TopPkg()].[<get-opt> LangName()]EntryPoint -Dexec.args="$1"
+        MAVEN_OPTS="[<get-opt> JVMArgs()]" mvn exec:java -Dexec.mainClass=[<get-opt> TopPkg()].[<get-opt> LangName()]Main -Dexec.args="$1"
+      ];
+    core-sh :=
+      $[#! /bin/sh
+
+        MAVEN_OPTS="[<get-opt> JVMArgs()]" mvn exec:java -Dexec.mainClass=[<get-opt> TopPkg()].[<get-opt> LangName()]Runner -Dexec.args="$1"
       ];
     client-sh :=
       $[#! /bin/sh
@@ -213,6 +254,11 @@ rules
     <fputs> (local-sh, local-file);
     <fclose> local-file;
     <fmakeexecutable> local-fp;
+    core-fp := <concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), "-core"];
+    core-file := <fopen> (core-fp, "w");
+    <fputs> (core-sh, core-file);
+    <fclose> core-file;
+    <fmakeexecutable> core-fp;
     client-fp := <concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), "-client"];
     client-file := <fopen> (client-fp, "w");
     <fputs> (client-sh, client-file);
@@ -229,25 +275,30 @@ rules
     basedir-java := <get-opt> JavaGenDirRel();
     basedir-test := <get-opt> TestJavaDir();
     <fputs> ($[
-      /target/
+      /bin
+      /target
+      /.project
+      /.classpath
+      /.settings
+      /.factorypath
+      [<get-opt> ResourceDirAbs()]/signatures-digest.cache
       [<get-opt> TargetSpecRel()]
       [<get-opt> TargetTableRel()]
-      [<get-opt; get-rel-path(|basedir-java)> TopPkg()]
-      [<get-opt; get-rel-path(|basedir-java)> TermPkg()]
-      [<get-opt; get-rel-path(|basedir-java)> BuildPkg()]
-      [<get-opt; get-rel-path(|basedir-java)> MatchPkg()]
-      [<get-opt; get-rel-path(|basedir-test)> TestPkg()]
+      [<get-opt> TargetLogbackRel()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> TopPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> TermPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> BuildPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> MatchPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-test)> TestPkg()]
       /[<get-opt> LangName()].launch
       /Test[<get-opt> LangName()].launch
+      /[<get-opt> LangName()] (Core).launch
       /[<get-opt> LangName()] (Daemon).launch
+      /[<get-opt> LangName()]-core
       /[<get-opt> LangName()]-server
       /[<get-opt> LangName()]-client
       /[<get-opt> LangName()]
     ], gitignore);
     <fclose> gitignore
-
-
-  get-rel-path(|basedir):
-    pkg -> <concat-strings> [basedir, "/", <string-replace(|".", "/")> pkg]
 
     

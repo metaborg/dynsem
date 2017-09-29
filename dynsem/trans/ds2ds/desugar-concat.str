@@ -1,0 +1,27 @@
+module ds2ds/desugar-concat
+
+imports
+  signatures/-
+  analysis/-
+
+signature
+  constructors
+    StrConcat: Term * Term -> Term
+    ListConcat: Term * Term -> Term
+
+rules /* desugaring concat */
+
+  desugar-concat-all = alltd(desugar-concat)
+
+  desugar-concat:
+    Concat(t1, t2) -> StrConcat(<desugar-concat-all> t1, <desugar-concat-all> t2)
+    where
+      StringType() := <type-of> t1;
+      StringType() := <type-of> t2
+
+  desugar-concat:
+    Concat(t1, t2) -> ListConcat(<desugar-concat-all> t1, <desugar-concat-all> t2)
+    where
+      ListType(ty1) := <type-of> t1;
+      ListType(ty2) := <type-of> t2;
+      <eq> (ty1, ty2)

@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -70,7 +70,7 @@ public class CaseMatchPremise extends Premise {
 			cases[i] = Case.create(Tools.applAt(caseTs, i), fd);
 		}
 
-		return new CaseMatchPremise(SourceSectionUtil.fromStrategoTerm(t), tb, cases);
+		return new CaseMatchPremise(SourceUtils.dynsemSourceSectionFromATerm(t), tb, cases);
 	}
 
 	public static class CaseMatchFailure extends ControlFlowException {

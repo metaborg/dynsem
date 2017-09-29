@@ -4,7 +4,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -14,7 +14,6 @@ import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "left", type = TermBuild.class),
@@ -31,7 +30,7 @@ public abstract class DeAssoc extends TermBuild {
 		TermBuild left = TermBuild.create(Tools.applAt(t, 0), fd);
 		TermBuild right = TermBuild.create(Tools.applAt(t, 1), fd);
 
-		return DeAssocNodeGen.create(SourceSectionUtil.fromStrategoTerm(t), left, right);
+		return DeAssocNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), left, right);
 	}
 
 	@Specialization
@@ -48,12 +47,6 @@ public abstract class DeAssoc extends TermBuild {
 	@SuppressWarnings("rawtypes")
 	public Object doList(IListTerm list, int idx) {
 		return list.get(idx);
-	}
-
-	@Override
-	public Object executeGeneric(VirtualFrame frame) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

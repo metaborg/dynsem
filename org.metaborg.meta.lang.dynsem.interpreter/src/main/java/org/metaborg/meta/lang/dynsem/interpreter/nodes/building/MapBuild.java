@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -21,7 +21,7 @@ public abstract class MapBuild extends TermBuild {
 
 	public static MapBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "Map", 1);
+		assert Tools.hasConstructor(t, "Map_", 1);
 		IStrategoList bindsT = Tools.listAt(t, 0);
 		if (bindsT.size() == 0) {
 			return EmptyMapBuild.create(t);
@@ -40,9 +40,9 @@ public abstract class MapBuild extends TermBuild {
 		}
 
 		public static EmptyMapBuild create(IStrategoAppl t) {
-			assert Tools.hasConstructor(t, "Map", 1);
+			assert Tools.hasConstructor(t, "Map_", 1);
 			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
-			return new EmptyMapBuild(SourceSectionUtil.fromStrategoTerm(t));
+			return new EmptyMapBuild(SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 
 		@Override
@@ -73,7 +73,7 @@ public abstract class MapBuild extends TermBuild {
 		}
 
 		public static BindMapBuild create(IStrategoAppl t, FrameDescriptor fd) {
-			assert Tools.hasConstructor(t, "Map", 1);
+			assert Tools.hasConstructor(t, "Map_", 1);
 			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 1;
 			IStrategoAppl bind = Tools.applAt(Tools.listAt(t, 0), 0);
 
@@ -81,7 +81,7 @@ public abstract class MapBuild extends TermBuild {
 			TermBuild keyNode = TermBuild.create(Tools.applAt(bind, 0), fd);
 			TermBuild valNode = TermBuild.create(Tools.applAt(bind, 1), fd);
 
-			return new BindMapBuild(keyNode, valNode, SourceSectionUtil.fromStrategoTerm(t));
+			return new BindMapBuild(keyNode, valNode, SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 
 		@Override

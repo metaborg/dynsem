@@ -71,7 +71,7 @@ rules /* store signatures */
   consdef-get-name = def-get-name; ?(<id>, _)
   consdef-get-arity = def-get-name; ?(_, <id>)
 
-  store-arrows = ArrowDeclarations(map(store-arrow))
+  store-arrows = Arrows(map(store-arrow))
   
   store-arrow:
     d@ArrowDecl(ArrowROs(ro*), in-srt, ArrowRWs(rw*), arrow, out-srt, _) -> d
@@ -187,9 +187,7 @@ rules
     Module(module-name, _) -> <fail>
     where
       project-path := <OptProjectPath>;
-      local-project-path := <local-path> project-path;
-      prop-file := $[[project-path]/dynsem.properties];
-      if <not(read-property(|"source.langname", ""))> prop-file
+      if not(() := <ds-has-properties> project-path)
       then
         add-msg(|Warning(), module-name, "Could not find or read a dynsem.properties file")
       end  

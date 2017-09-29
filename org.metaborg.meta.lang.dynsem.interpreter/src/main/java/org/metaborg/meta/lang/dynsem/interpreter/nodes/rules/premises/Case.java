@@ -4,7 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.CaseMatchPremise.CaseMatchFailure;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -66,7 +66,7 @@ public abstract class Case extends DynSemNode {
 			for (int i = 0; i < premises.length; i++) {
 				premises[i] = Premise.create(Tools.applAt(premTs, i), fd);
 			}
-			return new CaseOtherwise(SourceSectionUtil.fromStrategoTerm(t), premises);
+			return new CaseOtherwise(SourceUtils.dynsemSourceSectionFromATerm(t), premises);
 		}
 
 	}
@@ -112,7 +112,7 @@ public abstract class Case extends DynSemNode {
 			for (int i = 0; i < premises.length; i++) {
 				premises[i] = Premise.create(Tools.applAt(premTs, i), fd);
 			}
-			return new CasePattern(SourceSectionUtil.fromStrategoTerm(t), pattern, premises);
+			return new CasePattern(SourceUtils.dynsemSourceSectionFromATerm(t), pattern, premises);
 		}
 
 	}

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -22,7 +22,7 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class Rule extends DynSemNode {
 
 	public final static String DEFAULT_NAME = "";
-	
+
 	private final FrameDescriptor fd;
 	private final String arrowName;
 	private final RuleKind kind;
@@ -111,8 +111,8 @@ public abstract class Rule extends DynSemNode {
 
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 
-			return new ReductionRule(SourceSectionUtil.fromStrategoTerm(ruleT), fd, kind, arrowName, dispatchClass,
-					RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
+			return new ReductionRule(SourceUtils.dynsemSourceSectionFromATerm(ruleT), fd, kind, arrowName,
+					dispatchClass, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
 		}
 
 		throw new NotImplementedException("Unsupported rule term: " + ruleT);

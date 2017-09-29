@@ -6,20 +6,20 @@ import org.spoofax.interpreter.terms.ITermFactory;
 
 public class NaBL2Context {
 
-    private final ISolution solution;
-    private final StrategoTerms strategoTerms;
+	private final ISolution solution;
+	private final StrategoTerms strategoTerms;
 
-    public NaBL2Context(ISolution solution, ITermFactory termFactory) {
-        this.solution = solution;
-        this.strategoTerms = new StrategoTerms(termFactory);
-    }
+	public NaBL2Context(ISolution solution, ITermFactory termFactory) {
+		this.solution = solution;
+		this.strategoTerms = new StrategoTerms(termFactory);
+	}
 
-    public StrategoTerms getStrategoTerms() {
-        return strategoTerms;
-    }
+	public StrategoTerms getStrategoTerms() {
+		return strategoTerms;
+	}
 
-    public ISolution getSolution() {
-        return solution;
-    }
+	public ISolution getSolution() {
+		return solution;
+	}
 
 }

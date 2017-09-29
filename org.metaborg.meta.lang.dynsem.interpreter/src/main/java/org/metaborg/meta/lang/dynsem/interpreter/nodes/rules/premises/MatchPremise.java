@@ -1,10 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheOptionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -22,7 +21,7 @@ public class MatchPremise extends Premise {
 
 	public MatchPremise(TermBuild term, MatchPattern pattern, SourceSection source) {
 		super(source);
-		this.term = DynSemContext.LANGUAGE.isTermCachingEnabled() ? TermBuildCacheNode.create(term) : term;
+		this.term = new TermBuildCacheOptionNode(term);
 		this.patt = pattern;
 	}
 
@@ -41,7 +40,7 @@ public class MatchPremise extends Premise {
 		assert Tools.hasConstructor(t, "Match", 2);
 		TermBuild lhs = TermBuild.create(Tools.applAt(t, 0), fd);
 		MatchPattern rhs = MatchPattern.create(Tools.applAt(t, 1), fd);
-		return new MatchPremise(lhs, rhs, SourceSectionUtil.fromStrategoTerm(t));
+		return new MatchPremise(lhs, rhs, SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 	@Override

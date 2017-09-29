@@ -55,7 +55,7 @@ rules // Accumulate information about declared arrows, rules, and AST constructo
       // Sort constructors
       sort_constrs := <filter(?Constructors(<id>)); concat> sigs*;
       // Arrow declarations
-      arrow_decls := <filter(?ArrowDeclarations(<id>)); concat> sigs*
+      arrow_decls := <filter(?Arrows(<id>)); concat> sigs*
 
 rules // Store accumulated information in maps for easy dereferencing
 

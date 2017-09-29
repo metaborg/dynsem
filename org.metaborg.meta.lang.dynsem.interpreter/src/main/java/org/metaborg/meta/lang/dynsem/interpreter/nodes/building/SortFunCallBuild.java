@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceSectionUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -38,14 +37,14 @@ public class SortFunCallBuild extends TermBuild {
 			children[i + 1] = TermBuild.create(Tools.applAt(argsT, i), fd);
 		}
 
-		return new SortFunCallBuild(sort, function, children, SourceSectionUtil.fromStrategoTerm(t));
+		return new SortFunCallBuild(sort, function, children, SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
-		TermBuild build = InterpreterUtils.notNull(
-				getContext().getTermRegistry().lookupNativeTypeAdapterBuildFactory(sort, function, children.length - 1))
+		TermBuild build = getContext().getTermRegistry()
+				.lookupNativeTypeAdapterBuildFactory(sort, function, children.length - 1)
 				.apply(getSourceSection(), children);
 		return replace(build).executeGeneric(frame);
 	}
