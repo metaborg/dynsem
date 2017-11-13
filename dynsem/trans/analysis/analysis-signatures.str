@@ -4,6 +4,7 @@ imports
   signatures/-
   analysis/-
   backend/utils/utils
+  backend/common/opts
 
 rules /* store signatures */
   
@@ -187,7 +188,7 @@ rules
     Module(module-name, _) -> <fail>
     where
       project-path := <OptProjectPath>;
-      if not(() := <ds-has-properties> project-path)
+      if not(<ds-has-properties> project-path)
       then
         add-msg(|Warning(), module-name, "Could not find or read a dynsem.properties file")
       end  
