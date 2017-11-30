@@ -159,7 +159,7 @@ rules /* language file. interpreter entry point */
         }
       
         public static void main(String[] args) throws Exception {
-          RuleResult result = evaluate(args[0], System.getProperty("user.dir"));
+          RuleResult result = evaluate(String.join(" ", args), System.getProperty("user.dir"));
           System.out.println(result.result);
         }
       
