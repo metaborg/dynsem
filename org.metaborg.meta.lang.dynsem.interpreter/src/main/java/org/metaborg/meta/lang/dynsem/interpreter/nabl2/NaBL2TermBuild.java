@@ -10,23 +10,30 @@ import org.metaborg.meta.nabl2.terms.ITerm;
 import org.metaborg.meta.nabl2.terms.generic.TB;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class NaBL2TermBuild extends TermBuild {
 
-	private final NaBL2Context context;
+	@CompilationFinal private NaBL2Context context;
 
 	public NaBL2TermBuild(SourceSection source) {
 		super(source);
-		context = (NaBL2Context) getContext().readProperty(NaBL2Context.class.getName(), null);
+	}
+
+	private NaBL2Context nabl2Context() {
 		if (context == null) {
-			throw new IllegalStateException("No NaBL2 context available. "
-					+ "Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
+			context = (NaBL2Context) getContext().readProperty(NaBL2Context.class.getName(), null);
+			if (context == null) {
+				throw new IllegalStateException("No NaBL2 context available. "
+						+ "Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
+			}
 		}
+		return context;
 	}
 
 	protected IStrategoTerm getSolution() {
-		return context.getStrategoTerms().toStratego(InterpreterTerms.context(context.getSolution()));
+		return nabl2Context().getStrategoTerms().toStratego(InterpreterTerms.context(context.getSolution()));
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
@@ -36,7 +43,7 @@ public abstract class NaBL2TermBuild extends TermBuild {
 		if (!val.isPresent()) {
 			throw new IllegalArgumentException("Node has no type.");
 		}
-		return context.getStrategoTerms().toStratego(val.get());
+		return nabl2Context().getStrategoTerms().toStratego(val.get());
 	}
 
 	protected TermIndex getTermIndex(IStrategoTerm sterm) {
