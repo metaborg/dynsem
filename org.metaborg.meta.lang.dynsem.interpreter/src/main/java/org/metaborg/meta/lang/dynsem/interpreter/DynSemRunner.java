@@ -8,6 +8,8 @@ import org.apache.commons.vfs2.FileObject;
 import org.metaborg.core.MetaborgConstants;
 import org.metaborg.core.MetaborgException;
 import org.metaborg.core.MetaborgRuntimeException;
+import org.metaborg.core.action.EndNamedGoal;
+import org.metaborg.core.action.ITransformGoal;
 import org.metaborg.core.context.IContext;
 import org.metaborg.core.language.ILanguage;
 import org.metaborg.core.language.ILanguageImpl;
@@ -122,7 +124,16 @@ public class DynSemRunner {
 					});
 				}
 				props = propBuilder.build();
-				program = analyzed.hasAst() ? analyzed.ast() : parsed.ast();
+				if (analyzed.hasAst()) {
+					ITransformGoal mkoccgoal = new EndNamedGoal("Make Occurrences");
+					if (S.transformService.available(context, mkoccgoal)) {
+						program = S.transformService.transform(analyzed, context, mkoccgoal).iterator().next().ast();
+					} else {
+						program = analyzed.ast();
+					}
+				} else {
+					program = parsed.ast();
+				}
 			} else {
 				program = parsed.ast();
 				props = ImmutableMap.of();
