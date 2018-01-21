@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 import java.util.Optional;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.nabl2.constraints.ast.AstProperties;
 import org.metaborg.meta.nabl2.interpreter.InterpreterTerms;
 import org.metaborg.meta.nabl2.stratego.StrategoTermIndices;
 import org.metaborg.meta.nabl2.stratego.TermIndex;
@@ -37,11 +38,14 @@ public abstract class NaBL2TermBuild extends TermBuild {
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
+		return getAstProperty(sterm, TB.newAppl(key));
+	}
+
+	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, ITerm key) {
 		TermIndex index = getTermIndex(sterm);
-		ITerm keyterm = TB.newAppl(key);
-		Optional<ITerm> val = nabl2Context().getSolution().getAstProperties().getValue(index, keyterm);
+		Optional<ITerm> val = nabl2Context().getSolution().getAstProperties().getValue(index, key);
 		if (!val.isPresent()) {
-			throw new IllegalArgumentException("Node has no type.");
+			throw new IllegalArgumentException("Node has no " + key + " parameter");
 		}
 		return nabl2Context().getStrategoTerms().toStratego(val.get());
 	}
