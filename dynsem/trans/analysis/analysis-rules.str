@@ -248,7 +248,7 @@ rules
       <zip(type-check-build-expect-wrap)> (fparam-ty*, aparam*)
 
   type-check-build-list:
-    List([]) -> ListType(ALPHATYPE())
+    List_([]) -> ListType(ALPHATYPE())
 
   type-check-build-list:
     ListTail([h], t) -> <type-coerce-sym(type-coerce-full(fail))> (ListType(h-ty), t-ty)
@@ -273,14 +273,20 @@ rules
     where
       ty@ListType(_) := <type-check-build; get-alias-base> t
   
+  type-check-build-list:
+    ListLength(t) -> IntType()
+    where
+      t-ty := <type-check-build> t;
+      <type-coerce-full(fail)> (t-ty, ListType(ALPHATYPE()))
+  
   type-check-build-tuple:
     Tuple(t*) -> TupleType(<map(type-check-build)> t*)
 
   type-check-build-map:
-    Map([]) -> MapType(ALPHATYPE(), ALPHATYPE())
+    Map_([]) -> MapType(ALPHATYPE(), ALPHATYPE())
 
   type-check-build-map:
-    Map([Bind(k-t, v-t)]) -> MapType(k-ty, v-ty)
+    Map_([Bind(k-t, v-t)]) -> MapType(k-ty, v-ty)
     where
       k-ty := <type-check-build> k-t;
       v-ty := <type-check-build> v-t
@@ -446,7 +452,7 @@ rules // type rules for match-sides
       end
   
   type-check-match-list(|in-ty):
-  	List([]) -> <type-coerce-full(id)> (ListType(ALPHATYPE()), in-ty)
+  	List_([]) -> <type-coerce-full(id)> (ListType(ALPHATYPE()), in-ty)
   
   type-check-match-list(|in-ty):
     ListTail([h], t) -> <type-coerce-full(id)> (l-ty, in-ty')

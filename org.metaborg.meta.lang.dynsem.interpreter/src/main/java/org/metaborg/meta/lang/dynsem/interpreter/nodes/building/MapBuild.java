@@ -21,7 +21,7 @@ public abstract class MapBuild extends TermBuild {
 
 	public static MapBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "Map", 1);
+		assert Tools.hasConstructor(t, "Map_", 1);
 		IStrategoList bindsT = Tools.listAt(t, 0);
 		if (bindsT.size() == 0) {
 			return EmptyMapBuild.create(t);
@@ -40,7 +40,7 @@ public abstract class MapBuild extends TermBuild {
 		}
 
 		public static EmptyMapBuild create(IStrategoAppl t) {
-			assert Tools.hasConstructor(t, "Map", 1);
+			assert Tools.hasConstructor(t, "Map_", 1);
 			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
 			return new EmptyMapBuild(SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
@@ -73,7 +73,7 @@ public abstract class MapBuild extends TermBuild {
 		}
 
 		public static BindMapBuild create(IStrategoAppl t, FrameDescriptor fd) {
-			assert Tools.hasConstructor(t, "Map", 1);
+			assert Tools.hasConstructor(t, "Map_", 1);
 			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 1;
 			IStrategoAppl bind = Tools.applAt(Tools.listAt(t, 0), 0);
 

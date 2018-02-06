@@ -271,7 +271,7 @@ rules // Term generation
       end
 
   term-to-coq(|c_aliases):
-    Map(bindings) -> map
+    Map_(bindings) -> map
     with
       bindings' := <map(term-to-coq(|c_aliases))> bindings;
       nil := <coq-map-nil>;
@@ -296,7 +296,7 @@ rules // Term generation
     MapExtend(m1, m2) ->
       Apply(Apply(Apply(mu, m2'), x'), y')
     with
-      ((Map([Bind(x, y)]) := m1)
+      ((Map_([Bind(x, y)]) := m1)
         <+ <debug> "Please use map updates of the form {x |--> y, m}. Other kinds of updates are currently not supported."; fail);
       mu := <coq-map-update>;
       m2' := <term-to-coq(|c_aliases)> m2;
@@ -500,7 +500,7 @@ rules // Extracting variables
   
   // Maps
   extract-variables:
-    Map(r) -> xs
+    Map_(r) -> xs
     with
       xs := <extract-variables> r
   

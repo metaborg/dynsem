@@ -1,0 +1,87 @@
+module semantics/rules/matching
+
+imports
+  ds-signatures/ds-sig
+  semantics/unit
+  semantics/terms
+  semantics/rules/evaluation
+  
+signature
+  components
+    T : T
+  
+  arrows
+    Term -match-> U
+    match-all(List(T), List(Term)) --> U
+    eq-name-arity((String * String), (Int * Int)) --> Bool
+    Term -debugmatch-> U
+
+rules
+  T |- p : Term -debugmatch-> U()
+  where
+//    log("> Match " ++ str(T) ++ " =?=> " ++ str(p)) --> _;
+    p -match-> _
+//   ; log("< ok match") --> _ 
+
+rules
+
+  _ : Term :: ST OK() -match-> ??? :: ST F()
+  
+  // the OK() flag check should not be necessary, but there is bug in the propagation transformation
+  T |- __Var2Term__(VarRef(x)) :: ST OK(), E -match-> U() :: ST OK(), E {x |--> T, E}
+  
+  __Cast2Term__(Cast(pat, _)) -match-> pat
+  
+  T ApplT(x1, kids) |- Con(x2, kid-pats) -match-> U()
+  where
+    eq-name-arity((x1, x2), (|kids|, |kid-pats|)) --> true;
+    match-all(kids, kid-pats) --> _
+
+  T ListT([]) |- List_([]) -match-> U()
+  
+  T ListT([kid]) |- List_([pat]) -match-> U()
+  where
+    T kid |- pat -match-> _
+  
+  T ListT([kid|kids]) |- ListTail([pat], tpat) -match-> U()
+  where
+    T kid |- pat -match-> _;
+    T ListT(kids) |- tpat -match-> _
+
+  T BoolT(true) |- True() -match-> U()
+  
+  T BoolT(false) |- False() -match-> U()
+  
+  T StrT(s1) |- String(s2) -match-> U()
+  where
+    s1 == s2
+  
+  T IntT(i1) |- Int(i2) -match-> U()
+  where
+    i1 == parseI(i2)
+  
+  Wld() -match-> U()
+  
+  
+
+
+rules // helpers
+
+  match-all([], []) --> U()
+  
+  match-all([T | Ts], [pat | pats]) --> match-all(Ts, pats)
+  where
+    T |- pat -match-> _
+
+  eq-name-arity((x1, x2), (i1, i2)) --> true
+  where
+    x1 == x2;
+    i1 == i2
+  
+  eq-name-arity((x1, x2), _) --> false
+  where
+    x1 != x2
+  
+  eq-name-arity(_, (i1, i2)) --> false
+  where
+    i1 != i2

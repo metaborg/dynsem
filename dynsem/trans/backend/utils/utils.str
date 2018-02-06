@@ -9,6 +9,8 @@ rules
   
   external fmakeexecutable(|)
   
+  external digest-term(|)
+  
 rules
 
   ds-utils-java-emit-classes(createdir|outputpkg, basedir) =

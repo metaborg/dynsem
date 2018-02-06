@@ -1,0 +1,95 @@
+module semantics/premises/premises
+
+imports
+  semantics/premises/representation
+  semantics/unit
+  semantics/rules/evaluation
+  
+signature
+  arrows
+    List(Premise) --> U
+    Premise --> U
+    List(Case) --> U
+    Case --> U
+    eqT(T, T) --> U
+    neqT(T, T) --> U
+    
+rules
+
+  x : List(Premise) --> U()
+  where
+    x => [] // work around missing type annotated list in this case (in combination with default components)
+  
+  [prem | prems] : List(Premise) --> prems
+  where
+    prem --> _
+
+  Formula(Relation(Reads(ro-blds), Source(bld, rw-blds), arrow@NamedDynamicEmitted(_, _, _), Target(pat, rw-pats))) --> U()
+  where
+    lookup-rule(arrow) --> r;
+    build-components(ro-blds) --> ro-ins;
+    build-components(rw-blds) --> rw-ins;
+    bld -build-> T;
+    apply-rules(r, T, ro-ins, rw-ins) --> (T', rw-outs);
+    T' |- pat -debugmatch-> _;
+    match-components(rw-pats, rw-outs) --> _ 
+
+  Formula(Match(bld, pat)) --> U()
+  where
+    bld -build-> T;
+    T |- pat -debugmatch-> _
+
+  Formula(TermEq(bld1, bld2)) --> U()
+  where
+    bld1 -build-> t1;
+    bld2 -build-> t2;
+    eqT(t1, t2) --> _
+    
+  Formula(TermNeq(bld1, bld2)) --> U()
+  where
+    bld1 -build-> t1;
+    bld2 -build-> t2;
+    neqT(t1, t2) --> _
+
+  eqT(t1, t2) :: ST OK() --> U() :: ST OK()
+  where
+    t1 == t2
+  
+  eqT(t1, t2) :: ST OK() --> U() :: ST F()
+  where
+    t1 != t2
+  
+  neqT(t1, t2) :: ST OK() --> U() :: ST F()
+  where
+    t1 == t2
+  
+  neqT(t1, t2) :: ST OK() --> U() :: ST OK()
+  where
+    t1 != t2
+
+  CaseMatch(bld, casepats) --> U()
+  where
+    bld -build-> T;
+    T |- casepats --> _
+    
+  [] : List(Case) :: ST OK() --> ??? :: ST F()
+  
+  [cas|cases] : List(Case) :: ST OK() --> U() :: ST
+  where
+    cas :: ST OK() --> _ :: ST1;
+    case ST1 of {
+      OK() =>
+        OK() => ST
+      otherwise =>
+        cases :: ST OK() --> _ :: ST2;
+        ST2 => ST
+    }
+  
+  T |- CasePattern(pat, prems) --> U()
+  where
+    T |- pat -debugmatch-> _;
+    prems --> _
+  
+  CaseOtherwise(prems) --> U()
+  where
+    prems --> _ 

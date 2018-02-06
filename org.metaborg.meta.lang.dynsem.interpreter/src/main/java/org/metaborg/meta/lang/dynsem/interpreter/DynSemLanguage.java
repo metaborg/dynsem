@@ -4,8 +4,15 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
+import org.spoofax.interpreter.core.Tools;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
 import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.TermTransformer;
 import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.CallTarget;
@@ -27,7 +34,31 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	protected CallTarget parse(final ParsingRequest request) throws Exception {
 		// NOTE: the source is the AST of an object language program
 		Source code = request.getSource();
-		IStrategoTerm programAST = new TAFTermReader(new TermFactory()).parseFromStream(code.getInputStream());
+
+		ITermFactory factory = new ImploderOriginTermFactory(new TermFactory());
+		IStrategoTerm programAST = new TAFTermReader(factory).parseFromStream(code.getInputStream());
+		
+		// convert origin annotations back to origin attachments
+		programAST = new TermTransformer(factory, true) {
+
+			@Override
+			public IStrategoTerm preTransform(IStrategoTerm term) {
+				IStrategoList annos = term.getAnnotations();
+				IStrategoList newAnnos = factory.makeList();
+				for (IStrategoTerm anno : annos) {
+					if (anno instanceof IStrategoAppl
+							&& Tools.hasConstructor((IStrategoAppl) anno, "ImploderAttachment")) {
+						ImploderAttachment attach = ImploderAttachment.TYPE.fromTerm((IStrategoAppl) anno);
+						term.putAttachment(attach);
+						continue;
+					}
+					newAnnos = factory.makeListCons(anno, newAnnos);
+				}
+
+				return factory.annotateTerm(term, newAnnos);
+			}
+		}.transform(programAST);
+
 		ITerm programTerm = ctx.getTermRegistry().parseProgramTerm(programAST);
 
 		RootNode startInterpretation = new RootNode(this) {

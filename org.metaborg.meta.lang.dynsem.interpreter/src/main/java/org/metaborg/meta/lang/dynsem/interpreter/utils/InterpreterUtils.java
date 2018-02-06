@@ -26,6 +26,9 @@ public final class InterpreterUtils {
 	}
 
 	public static Object getComponent(DynSemContext ctx, Object[] arguments, int idx) {
+		if(ctx.isSafeComponentsEnabled() && idx >= arguments.length) {
+			throw new ReductionFailure("Attempted access to unbound component at index " + idx, createStacktrace());
+		}
 		final Object val = arguments[idx];
 		if (ctx.isSafeComponentsEnabled() && val == null) {
 			throw new ReductionFailure("Attempted access to null component at index " + idx, createStacktrace());

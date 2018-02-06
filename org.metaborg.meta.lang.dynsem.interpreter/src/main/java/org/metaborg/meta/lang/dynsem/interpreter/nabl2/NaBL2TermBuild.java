@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 import java.util.Optional;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.nabl2.constraints.ast.AstProperties;
 import org.metaborg.meta.nabl2.interpreter.InterpreterTerms;
 import org.metaborg.meta.nabl2.stratego.StrategoTermIndices;
 import org.metaborg.meta.nabl2.stratego.TermIndex;
@@ -10,33 +11,43 @@ import org.metaborg.meta.nabl2.terms.ITerm;
 import org.metaborg.meta.nabl2.terms.generic.TB;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class NaBL2TermBuild extends TermBuild {
 
-	private final NaBL2Context context;
+	@CompilationFinal private NaBL2Context context;
 
 	public NaBL2TermBuild(SourceSection source) {
 		super(source);
-		context = (NaBL2Context) getContext().readProperty(NaBL2Context.class.getName(), null);
+	}
+
+	private NaBL2Context nabl2Context() {
 		if (context == null) {
-			throw new IllegalStateException("No NaBL2 context available. "
-					+ "Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
+			context = (NaBL2Context) getContext().readProperty(NaBL2Context.class.getName(), null);
+			if (context == null) {
+				throw new IllegalStateException("No NaBL2 context available. "
+						+ "Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
+			}
 		}
+		return context;
 	}
 
 	protected IStrategoTerm getSolution() {
-		return context.getStrategoTerms().toStratego(InterpreterTerms.context(context.getSolution()));
+		return nabl2Context().getStrategoTerms().toStratego(InterpreterTerms.context(context.getSolution()));
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
+		return getAstProperty(sterm, TB.newAppl(key));
+	}
+
+	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, ITerm key) {
 		TermIndex index = getTermIndex(sterm);
-		ITerm keyterm = TB.newAppl(key);
-		Optional<ITerm> val = context.getSolution().getAstProperties().getValue(index, keyterm);
+		Optional<ITerm> val = nabl2Context().getSolution().getAstProperties().getValue(index, key);
 		if (!val.isPresent()) {
-			throw new IllegalArgumentException("Node has no type.");
+			throw new IllegalArgumentException("Node has no " + key + " parameter");
 		}
-		return context.getStrategoTerms().toStratego(val.get());
+		return nabl2Context().getStrategoTerms().toStratego(val.get());
 	}
 
 	protected TermIndex getTermIndex(IStrategoTerm sterm) {

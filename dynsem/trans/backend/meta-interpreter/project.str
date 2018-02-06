@@ -1,0 +1,211 @@
+module backend/meta-interpreter/project
+
+imports
+  backend/common/-
+
+rules
+  
+  ds-backend-metainterp-project =
+    if get-opt(|CreateProject()) then
+      project := <get-opt> GenProject();
+      <file-exists <+ mkdir> project;
+      ds-backend-metainterp-pom;
+      ds-backend-logbackxml;
+      ds-backend-aptsettings;
+      ds-backend-metainterp-gitignore;
+      ds-backend-metainterp-launchconfig
+//      ds-backend-metainterp-launchconfigcore;
+//      ds-backend-metainterp-launchconfigdaemon
+//      ; ds-to-interp-gen-project-launchconfig
+//      ; ds-to-interp-gen-project-core-launchconfig
+//      ; ds-to-interp-gen-project-daemon-launchconfig
+//      ; ds-to-interp-gen-shell-scripts
+//      ; ds-to-interp-gen-project-pom
+//      ; ds-to-interp-gen-logback-xml
+//      ; ds-to-interp-gen-apt-settings
+//      ; ds-to-interp-gen-project-gitignore
+      ; java-gendir := <get-opt> JavaGenDirAbs()
+      ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> TopPkg()]
+      ; <file-exists + mkdir> <concat-strings> [java-gendir, "/", <string-replace(|".", "/")> <get-opt> NativePkg()]
+    end
+  
+  ds-backend-metainterp-pom =
+    pom-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/pom.xml"], "w");
+    <fputs> (
+      $[<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
+          <name>[<get-opt> LangName()] Interpreter</name>
+          <groupId>[<get-opt> MavenGroupId()]</groupId>
+          <artifactId>[<get-opt> MavenArtifactId()]</artifactId>
+          <version>[<get-opt> LangVersion()]</version>
+          <build>
+            <plugins>
+              <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                  <source>[<ver-maven-compiler-plugin>]</source>
+                  <target>[<ver-maven-compiler-plugin>]</target>
+                </configuration>
+              </plugin>
+              <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>[<ver-maven-clean-plugin>]</version>
+                <executions>
+                  <execution>
+                    <id>auto-clean</id>
+                    <phase>clean</phase>
+                    <goals>
+                      <goal>clean</goal>
+                    </goals>
+                    <configuration>
+                      <filesets>
+                        <fileset>
+                          <directory>[<get-opt; pkg-to-relpath(|<get-opt> JavaGenDirRel())> TopPkg()]</directory>
+                          <includes>**/**</includes>
+                        </fileset>
+                        <fileset>
+                          <directory>[<get-opt; pkg-to-relpath(|<get-opt> TestJavaDir())> TestPkg()]</directory>
+                          <includes>**/**</includes>
+                        </fileset>
+                        <fileset>
+                          <directory>${basedir}</directory>
+                          <includes>[<get-opt> TargetSpecRel()]</includes>
+                        </fileset>
+                        <fileset>
+                          <directory>${basedir}</directory>
+                          <includes>[<get-opt> TargetTableRel()]</includes>
+                        </fileset>
+                      </filesets>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>[<ver-maven-surefire-plugin>]</version>
+                <configuration>
+                  <argLine>[<get-opt> JVMArgs()]</argLine>
+                </configuration>
+              </plugin>
+            </plugins>
+          </build>
+          <repositories>
+            <repository>
+              <id>metaborg-release-repo</id>
+              <url>https://artifacts.metaborg.org/content/repositories/releases/</url>
+              <releases>
+                <enabled>true</enabled>
+              </releases>
+              <snapshots>
+                <enabled>false</enabled>
+              </snapshots>
+            </repository>
+            <repository>
+              <id>metaborg-snapshot-repo</id>
+              <url>https://artifacts.metaborg.org/content/repositories/snapshots/</url>
+              <releases>
+                <enabled>false</enabled>
+              </releases>
+              <snapshots>
+                <enabled>true</enabled>
+              </snapshots>
+            </repository>
+          </repositories>
+          <properties>
+            <slf4j.version>[<ver-slf4j>]</slf4j.version>
+          </properties>
+          <dependencies>
+            <dependency>
+              <groupId>org.metaborg</groupId>
+              <artifactId>dynsem.metainterpreter</artifactId>
+              <version>2.5.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+              <groupId>com.oracle.truffle</groupId>
+              <artifactId>truffle-api</artifactId>
+              <version>[<ver-truffle>]</version>
+              <type>jar</type>
+            </dependency>
+            <dependency>
+              <groupId>com.oracle.truffle</groupId>
+              <artifactId>truffle-dsl-processor</artifactId>
+              <version>[<ver-truffle>]</version>
+            </dependency>
+            <dependency>
+              <groupId>org.metaborg</groupId>
+              <artifactId>org.spoofax.terms</artifactId>
+              <version>[<ver-spoofax>]</version>
+            </dependency>
+            <dependency>
+              <groupId>com.martiansoftware</groupId>
+              <artifactId>nailgun-server</artifactId>
+              <version>[<ver-nailgun>]</version>
+            </dependency>
+            <!-- Logging -->
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-api</artifactId>
+              <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>jcl-over-slf4j</artifactId>
+              <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>ch.qos.logback</groupId>
+              <artifactId>logback-classic</artifactId>
+              <version>[<ver-logback>]</version>
+            </dependency>
+          </dependencies>
+      </project>], pom-file);
+    <fclose> pom-file
+
+ ds-backend-metainterp-gitignore =
+    gitignore := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", ".gitignore"], "w");
+    basedir-java := <get-opt> JavaGenDirRel();
+    basedir-test := <get-opt> TestJavaDir();
+    <fputs> ($[
+      /target/
+      [<get-opt> TargetSpecRel()]
+      [<get-opt> TargetTableRel()]
+      [<get-opt> TargetLogbackRel()]
+      [<get-opt; pkg-to-relpath(|basedir-java)> TopPkg()]
+      [<get-opt; pkg-to-relpath(|basedir-test)> TestPkg()]
+      /[<get-opt> LangName()].launch
+      /Test[<get-opt> LangName()].launch
+      /[<get-opt> LangName()] (Core).launch
+      /[<get-opt> LangName()] (Daemon).launch
+      /[<get-opt> LangName()]-core
+      /[<get-opt> LangName()]-server
+      /[<get-opt> LangName()]-client
+      /[<get-opt> LangName()]
+    ], gitignore);
+    <fclose> gitignore
+  
+  ds-backend-metainterp-launchconfig =
+    launch-file := <fopen> (<concat-strings> [<get-opt> GenProject(), "/", <get-opt> LangName(), ".launch"], "w");
+    <fputs> (
+    $[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+        <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+          <listEntry value="/[<get-opt> MavenArtifactId()]/[<get-opt> JavaGenDirRel()]/[<get-opt; string-replace(|".", "/")> TopPkg()]/[<get-opt> LangName()]Main.java"/>
+        </listAttribute>
+        <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+          <listEntry value="1"/>
+        </listAttribute>
+        <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+        <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
+        <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="[<get-opt> TopPkg()].[<get-opt> LangName()]Main"/>
+        <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${resource_loc}"/>
+        <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="[<get-opt> MavenArtifactId()]"/>
+        <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
+        <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="[<get-opt> JVMArgs()]"/>
+      </launchConfiguration>
+    ], launch-file);
+    <fclose> launch-file
+
+

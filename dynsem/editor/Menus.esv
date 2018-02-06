@@ -17,8 +17,9 @@ menus
     action: "Explicate components" = explication-explicate-editor (openeditor) (source)
     action: "Lift implicits" = expand-implicits-editor (openeditor) (source)
     action: "Core"   = module-to-core-editor (openeditor) (source)
+    action: "Core (AST)"   = module-to-core-ast-editor (openeditor) (source)
     
   menu: "Interpreter"
-    action: "Generate interpreter" = ds-to-interp-editor (source)
-    action: "Generate spec only" = ds-to-interp-specification-editor (source) (meta)
-    action: "Spec" = ds-to-specification-editor (openeditor) (source) (meta)
+    action: "Generate interpreter" = ds-backend-editor (source)
+//    action: "Generate spec only" = ds-to-interp-specification-editor (source) (meta)
+//    action: "Spec" = ds-to-specification-editor (openeditor) (source) (meta)

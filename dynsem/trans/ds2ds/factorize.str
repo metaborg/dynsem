@@ -229,7 +229,7 @@ rules
       (!success1 <+ !success2)
   
   factorize-map-in-build:
-    Map([Bind(k, v)]) -> ([prem1*, prem2*], Map([Bind(k', v')]))
+    Map_([Bind(k, v)]) -> ([prem1*, prem2*], Map_([Bind(k', v')]))
     where
       (prem1*, k') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> k;
       (prem2*, v') := <lift-build-on-cond(is-build-nonprime-factor, ?success)> v;
@@ -261,9 +261,9 @@ rules
       (prem*, t2) := <lift-build-on-cond(is-build-nonprime-factor, ?success)> t1;
       !success
   
-  is-build-nonprime-factor = not(is-prime-factor <+ ?List([])) 
+  is-build-nonprime-factor = not(is-prime-factor <+ ?List_([])) 
   
-  is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List([])
+  is-constant = ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False() + ?List_([])
   
   is-prime-factor = ?VarRef(_)
 

@@ -36,7 +36,7 @@ public abstract class MatchPattern extends DynSemNode {
 			return ListMatch.create(t, fd);
 		}
 
-		if (Tools.hasConstructor(t, "List", 1) || Tools.hasConstructor(t, "ListTail", 2)) {
+		if (Tools.hasConstructor(t, "List_", 1) || Tools.hasConstructor(t, "ListTail", 2)) {
 			return GenericListMatch.create(t, fd);
 		}
 
