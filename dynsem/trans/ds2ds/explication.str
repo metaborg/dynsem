@@ -78,7 +78,7 @@ strategies
     (arrow-def, new-compo*) -> compo*
     where
       old-compo* := <hashtable-get(|arrow-def)> comps;
-      compo* := <nub; explication-util-qsort-comps> [new-compo*, old-compo*];
+      compo* := <explication-components-nub; explication-util-qsort-comps> [new-compo*, old-compo*];
       <hashtable-put(|arrow-def, compo*)> comps
   
   explication-api-get-imports(|comps, imps):
@@ -90,6 +90,39 @@ strategies
       old-imp* := <hashtable-get(|arrow-def)> imps;
       imp* := <nub> [new-imp*, old-imp*];
       <hashtable-put(|arrow-def, imp*)> imps
+  
+  
+  explication-components-nub:
+    comps -> comps'
+    with
+      tbl := <new-hashtable>;
+      comps' := <explication-components-nub(|tbl)> comps;
+      <hashtable-destroy> tbl
+  
+  explication-components-nub(|buff):
+    [] -> <map(\ compdef -> Comp(compdef, <hashtable-get(|compdef)> buff) \)> compdefs
+    with
+      compdefs := <hashtable-keys> buff
+      
+  
+  explication-components-nub(|buff):
+    [Comp(compdef, kind') | comps] -> <explication-components-nub(|buff)> comps
+    where
+      if kind := <hashtable-get(|compdef)> buff
+      then
+        <hashtable-put(|compdef, <explication-compkind-union> (kind, kind'))> buff
+      else
+        <hashtable-put(|compdef, kind')> buff
+      end
+  
+  explication-compkind-union =
+    if ?(RW(), _) <+ ?(_, RW())
+    then
+      !RW()
+    else
+      !RO()
+    end
+ 
   
 rules
 
