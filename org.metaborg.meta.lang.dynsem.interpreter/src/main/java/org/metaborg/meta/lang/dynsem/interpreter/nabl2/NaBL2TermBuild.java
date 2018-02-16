@@ -1,14 +1,14 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 
+import static org.metaborg.meta.nabl2.terms.build.TermBuild.B;
+
 import java.util.Optional;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.nabl2.constraints.ast.AstProperties;
 import org.metaborg.meta.nabl2.interpreter.InterpreterTerms;
 import org.metaborg.meta.nabl2.stratego.StrategoTermIndices;
 import org.metaborg.meta.nabl2.stratego.TermIndex;
 import org.metaborg.meta.nabl2.terms.ITerm;
-import org.metaborg.meta.nabl2.terms.generic.TB;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -38,7 +38,7 @@ public abstract class NaBL2TermBuild extends TermBuild {
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
-		return getAstProperty(sterm, TB.newAppl(key));
+		return getAstProperty(sterm, B.newAppl(key));
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, ITerm key) {
