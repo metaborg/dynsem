@@ -21,7 +21,7 @@ public abstract class StringLiteralTermMatchPattern extends LiteralMatchPattern 
 		}
 	}
 
-	@Specialization(contains = "doCachedString")
+	@Specialization(replaces = "doCachedString")
 	public void doUncachedString(String s) {
 		if (!isStringEq(s)) {
 			throw PatternMatchFailure.INSTANCE;

@@ -72,7 +72,7 @@ public abstract class TermEqPremise extends Premise {
 		}
 	}
 
-	@Specialization(contains = "doITermDirect")
+	@Specialization(replaces = "doITermDirect")
 	public void doITermIndirect(IApplTerm left, IApplTerm right,
 			@Cached("getTypeProfile()") ValueProfile leftTypeProfile,
 			@Cached("getTypeProfile()") ValueProfile rightTypeProfile) {

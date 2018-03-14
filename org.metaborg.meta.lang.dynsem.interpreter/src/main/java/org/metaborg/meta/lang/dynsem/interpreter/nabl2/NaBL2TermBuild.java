@@ -3,7 +3,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 import java.util.Optional;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.nabl2.constraints.ast.AstProperties;
 import org.metaborg.meta.nabl2.interpreter.InterpreterTerms;
 import org.metaborg.meta.nabl2.stratego.StrategoTermIndices;
 import org.metaborg.meta.nabl2.stratego.TermIndex;
