@@ -33,7 +33,7 @@ public abstract class DispatchNode extends DynSemNode {
 		return (RuleResult) callNode.call(args);
 	}
 
-	@Specialization(contains = "doDirect")
+	@Specialization(replaces = "doDirect")
 	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args,
 			@Cached("createVariableUnionNode()") PolymorphicUnionNode dispatchNode) {
 		return dispatchNode.execute(args);

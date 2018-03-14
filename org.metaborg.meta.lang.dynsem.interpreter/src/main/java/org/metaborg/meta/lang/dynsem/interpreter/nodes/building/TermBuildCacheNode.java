@@ -64,7 +64,7 @@ public abstract class TermBuildCacheNode extends TermBuild {
 		return cachedTerm;
 	}
 
-	@Specialization(contains = "doCached")
+	@Specialization(replaces = "doCached")
 	public Object doEvaluated(VirtualFrame frame, Object term) {
 		return term;
 	}
