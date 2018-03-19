@@ -1,17 +1,19 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 
+import static mb.nabl2.terms.build.TermBuild.B;
+
 import java.util.Optional;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.nabl2.interpreter.InterpreterTerms;
-import org.metaborg.meta.nabl2.stratego.StrategoTermIndices;
-import org.metaborg.meta.nabl2.stratego.TermIndex;
-import org.metaborg.meta.nabl2.terms.ITerm;
-import org.metaborg.meta.nabl2.terms.generic.TB;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.source.SourceSection;
+
+import mb.nabl2.interpreter.InterpreterTerms;
+import mb.nabl2.stratego.StrategoTermIndices;
+import mb.nabl2.stratego.TermIndex;
+import mb.nabl2.terms.ITerm;
 
 public abstract class NaBL2TermBuild extends TermBuild {
 
@@ -37,12 +39,12 @@ public abstract class NaBL2TermBuild extends TermBuild {
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
-		return getAstProperty(sterm, TB.newAppl(key));
+		return getAstProperty(sterm, B.newAppl(key));
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, ITerm key) {
 		TermIndex index = getTermIndex(sterm);
-		Optional<ITerm> val = nabl2Context().getSolution().getAstProperties().getValue(index, key);
+		Optional<ITerm> val = nabl2Context().getSolution().astProperties().getValue(index, key);
 		if (!val.isPresent()) {
 			throw new IllegalArgumentException("Node has no " + key + " parameter");
 		}
