@@ -281,7 +281,7 @@ rules
       /.classpath
       /.settings
       /.factorypath
-      [<get-opt> ResourceDirAbs()]/signatures-digest.cache
+      [<get-opt> ResourceDirRel()]/signatures-digest.cache
       [<get-opt> TargetSpecRel()]
       [<get-opt> TargetTableRel()]
       [<get-opt> TargetLogbackRel()]
