@@ -11,6 +11,7 @@ import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.source.SourceSection;
 
 import mb.nabl2.interpreter.InterpreterTerms;
+import mb.nabl2.stratego.ConstraintTerms;
 import mb.nabl2.stratego.StrategoTermIndices;
 import mb.nabl2.stratego.TermIndex;
 import mb.nabl2.terms.ITerm;
@@ -35,7 +36,7 @@ public abstract class NaBL2TermBuild extends TermBuild {
 	}
 
 	protected IStrategoTerm getSolution() {
-		return nabl2Context().getStrategoTerms().toStratego(InterpreterTerms.context(context.getSolution()));
+		return safeToStratego(InterpreterTerms.context(context.getSolution()));
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
@@ -48,7 +49,7 @@ public abstract class NaBL2TermBuild extends TermBuild {
 		if (!val.isPresent()) {
 			throw new IllegalArgumentException("Node has no " + key + " parameter");
 		}
-		return nabl2Context().getStrategoTerms().toStratego(val.get());
+		return safeToStratego(val.get());
 	}
 
 	protected TermIndex getTermIndex(IStrategoTerm sterm) {
@@ -56,6 +57,11 @@ public abstract class NaBL2TermBuild extends TermBuild {
 			throw new IllegalArgumentException("Primitive must be called on an AST node.");
 		}
 		return StrategoTermIndices.get(sterm).orElseThrow(() -> new IllegalArgumentException("Node has no index."));
+	}
+
+	private IStrategoTerm safeToStratego(ITerm term) {
+		term = ConstraintTerms.explicate(term);
+		return nabl2Context().getStrategoTerms().toStratego(term);
 	}
 
 }
