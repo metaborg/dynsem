@@ -9,7 +9,8 @@ imports
 	analysis/mark-references
 	analysis/query
 	analysis/info-implicit-conversions
-	signatures/-
+	signatures/ds-sig
+	signatures/dynsem/-
   lib-ds
 	libstratego-sglr
 	libspoofax/stratego/dynrule
