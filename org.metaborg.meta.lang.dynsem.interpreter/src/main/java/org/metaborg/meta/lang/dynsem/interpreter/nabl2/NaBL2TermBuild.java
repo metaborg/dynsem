@@ -36,7 +36,7 @@ public abstract class NaBL2TermBuild extends TermBuild {
 	}
 
 	protected IStrategoTerm getSolution() {
-		return safeToStratego(InterpreterTerms.context(context.getSolution()));
+		return safeToStratego(InterpreterTerms.context(nabl2Context().getSolution()));
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
