@@ -24,10 +24,11 @@ rules
 
   debug-show-analyzed:
     (_, _, ast, path, project-path) -> (filename, result)
-    with {| MyCurrentFile:
+    with {| MyCurrentFile, OptFilePath:
       filename := <guarantee-extension(|"analyzed.ds")> path;
       f-path := $[[project-path]/[path]];
       rules(MyCurrentFile: _ -> f-path);
+      rules(OptFilePath: _ -> path);
       reset-dynamic-rules;
       result := <in-project-path(m-in-analysis(id)|project-path); unmark-vars; sugar-all; pp-debug> ast
     |}
@@ -138,11 +139,6 @@ rules /* helpers for import handling */
     s -> s
     where
       add-msg(|Error(), s, $[Import [s] cannot be resolved])
- 
-  editor-module-name-error:
-    s -> s
-    where
-      add-msg(|Error(), s, $[Module name [s] does not match file name and path])
   
   console-file-not-found-error =
     fatal-err(|"File not found: ")
