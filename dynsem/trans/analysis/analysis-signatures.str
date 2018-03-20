@@ -1,8 +1,7 @@
 module analysis/analysis-signatures
 
 imports
-  signatures/ds-sig
-  signatures/dynsem/-
+  signatures/-
   analysis/-
   backend/utils/utils
   backend/common/opts
@@ -183,12 +182,7 @@ rules
   check-signature:
     Module(module-name, _) -> <fail>
     where
-      path := <OptFilePath>;
-      rel-path := <current-language-relative-source-or-include-path> path;
-      rel-name := <remove-extension> rel-path;
-      if <not(eq)> (rel-name, module-name) then
-        add-msg(|Error(), module-name, $[Module [module-name] does not agree with relative filename [rel-name]])        
-      end
+      <resolve-path(editor-module-name-error)> module-name
   
   check-signature:
     Module(module-name, _) -> <fail>

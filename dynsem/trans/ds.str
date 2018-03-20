@@ -36,10 +36,9 @@ rules // Analysis
     (ast, path, project-path) -> (analyzed-ast, error*, warning*, note*)
     where
       <not(?() <+ ?Module-Plhdr())> ast
-		with {| MyCurrentFile, OptFilePath:
+		with {| MyCurrentFile:
 		  f-path := $[[project-path]/[path]];
 		  rules(MyCurrentFile: _ -> f-path);
-		  rules(OptFilePath: _ -> path);
 		  reset-dynamic-rules;
 		  f := <origin-file> ast;
 			<in-project-path(m-in-analysis(
