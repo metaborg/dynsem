@@ -72,7 +72,7 @@ public class DynSemRunner {
 					ISpoofaxScopeGraphContext<?> scopeGraphContext = (ISpoofaxScopeGraphContext<?>) context;
 					scopeGraphContext.unit(file.getName().getURI()).solution().ifPresent(solution -> {
 						propBuilder.put(NaBL2Context.class.getName(),
-								new NaBL2Context(solution, S.termFactoryService.getGeneric()));
+								new NaBL2Context(solution.findAndLock(), S.termFactoryService.getGeneric()));
 					});
 				}
 				props = propBuilder.build();
