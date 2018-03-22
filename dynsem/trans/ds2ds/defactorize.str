@@ -114,14 +114,9 @@ rules
   
   eliminate-patternmatch-premise =
     (?Formula(Match(VarRef(v), rhs)) <+ ?Formula(Match(Cast(VarRef(v), _), rhs)));
-    <not(?Wld())> rhs;
     <ReadCount> v => 1;
     rules(PropagatePatternMatch: Var(v) -> rhs)
   
-  eliminate-patternmatch-premise =
-    (?Formula(Match(VarRef(v), Wld())) <+ ?Formula(Match(Cast(VarRef(v), _), Wld())));
-    reads := <ReadCount; dec> v;
-    rules(ReadCount: v -> reads)
   
   replace-singletonwrite(record-progress):
     var@Var(v) -> t

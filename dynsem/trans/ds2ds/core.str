@@ -45,8 +45,8 @@ strategies
       ; expand-defaultcomponents-module-top
       ; explication-explicate-module
       ; copy-propagation-module
+      ; eliminate-dead-premises-module
       ; insert-wildcards-module
-      ; defactorize-module
-      ; insert-wildcards-module
+//      ; defactorize-module
       ; prettify-vars-module
     |project-path)
