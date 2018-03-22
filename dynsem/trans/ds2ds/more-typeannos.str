@@ -50,6 +50,11 @@ rules
       list-sort := <lookup-def(|Components()); lookup-prop(|Type()); derw-type> l
   
   add-typeanno-to-list-tuples:
+    LabelComp(Label(l), tup@Tuple(_)) -> LabelComp(Label(l), Cast(tup, tup-sort))
+    where
+      tup-sort := <lookup-def(|Components()); lookup-prop(|Type()); derw-type> l
+  
+  add-typeanno-to-list-tuples:
     tup@Tuple(t*) -> Cast(Tuple(t*), tuple-sort)
     where
       tuple-sort := <type-of; derw-type> tup
