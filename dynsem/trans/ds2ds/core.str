@@ -45,6 +45,7 @@ strategies
       ; expand-defaultcomponents-module-top
       ; explication-explicate-module
       ; copy-propagation-module
+      ; insert-wildcards-module
       ; defactorize-module
       ; insert-wildcards-module
       ; prettify-vars-module
