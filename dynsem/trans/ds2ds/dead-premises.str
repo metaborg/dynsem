@@ -1,0 +1,47 @@
+module ds2ds/dead-premises
+
+imports
+  ds
+  signatures/-
+  signatures/dynsem/-
+  ds2ds/sugar
+  analysis/mark-references
+  lib-ds
+  pp
+
+strategies
+
+  eliminate-dead-premises-module =
+    m-in-analysis(
+      Module(id, alltd(eliminate-dead-premises-rule));
+      unrename-all
+    ); unmark-vars
+  
+rules
+
+  eliminate-dead-premises-rule:
+    Rule(prem*, infer, rel) -> Rule(prem'*, infer, rel)
+    with
+      prem'* := <filter(not(is-dead-premise))> prem*
+  
+  is-dead-premise =
+    ?Formula(Match(t, rhs));
+    <not(is-mandatory-lhs)> t;
+    <is-dead-rhs> rhs
+  
+  is-dead-rhs = ?Wld()
+  
+  is-dead-rhs =
+    ?Var(<id>);
+    lookup-def(|Vars());
+    not(lookup-prop(|Use()))
+  
+  is-mandatory-lhs =
+    ?Con(c, k*);
+    <lookup-def(|Constructors()); lookup-prop(|ConsKind())> (c, <length> k*);
+    ?NativeOpCons() 
+    
+  
+   
+      
+
