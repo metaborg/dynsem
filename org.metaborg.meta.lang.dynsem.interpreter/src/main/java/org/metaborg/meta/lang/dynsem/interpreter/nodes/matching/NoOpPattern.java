@@ -4,22 +4,22 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class NoOpPattern extends MatchPattern {
+public abstract class NoOpPattern extends MatchPattern {
 
 	public NoOpPattern(SourceSection source) {
 		super(source);
 	}
 
-	@Override
-	public void executeMatch(VirtualFrame frame, Object term) {
+	@Specialization
+	public void executeMatch() {
 	}
 
 	public static NoOpPattern create(IStrategoAppl t) {
 		CompilerAsserts.neverPartOfCompilation();
-		return new NoOpPattern(SourceUtils.dynsemSourceSectionFromATerm(t));
+		return NoOpPatternNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 }

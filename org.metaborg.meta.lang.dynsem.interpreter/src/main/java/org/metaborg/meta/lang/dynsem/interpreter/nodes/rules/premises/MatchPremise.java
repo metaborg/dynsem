@@ -1,7 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.SortFunCallBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.NoOpPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -10,8 +13,11 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.nodes.NodeUtil.NodeCountFilter;
 import com.oracle.truffle.api.source.SourceSection;
+
 /*
  * TODO: specialize. cases:
  * 1. left is not a native op and right is WLD --> remove this node
@@ -27,12 +33,22 @@ public class MatchPremise extends Premise {
 		this.patt = pattern;
 	}
 
+	private static final NodeCountFilter non_elidable_termbuild = new NodeCountFilter() {
+
+		@Override
+		public boolean isCounted(Node node) {
+			return node instanceof SortFunCallBuild || node instanceof NativeOpBuild;
+		}
+	};
+
 	@Override
 	public void execute(VirtualFrame frame) {
-		// evaluate LHS
 		final Object t = term.executeGeneric(frame);
-
-		// evaluate match
+		if (patt instanceof NoOpPattern && NodeUtil.countNodes(term, non_elidable_termbuild) == 0) {
+			replace(NoOpPremiseNodeGen.create(getSourceSection()));
+		} else {
+			replace(new NonElidableMatchPremise(term, patt, getSourceSection())).doEvaluated(t, frame);
+		}
 		patt.executeMatch(frame, t);
 	}
 
@@ -48,5 +64,22 @@ public class MatchPremise extends Premise {
 	@TruffleBoundary
 	public String toString() {
 		return NodeUtil.printCompactTreeToString(this);
+	}
+
+	public class NonElidableMatchPremise extends MatchPremise {
+
+		public NonElidableMatchPremise(TermBuild term, MatchPattern pattern, SourceSection source) {
+			super(term, pattern, source);
+		}
+
+		@Override
+		public void execute(VirtualFrame frame) {
+			patt.executeMatch(frame, term.executeGeneric(frame));
+		}
+
+		public void doEvaluated(Object t, VirtualFrame frame) {
+			patt.executeMatch(frame, t);
+		}
+
 	}
 }

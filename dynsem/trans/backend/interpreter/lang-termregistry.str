@@ -224,7 +224,7 @@ rules /* term registry */
         nativeFactories.put(~x:<get-opt> NativePkg().x_natop.class, new ITermBuildFactory() {
     
           @Override
-          public TermBuild apply(SourceSection source,
+          public NativeOpBuild apply(SourceSection source,
               TermBuild... children) {
             return ~x:<get-opt> NativePkg().x_natop.create(source, e1*);
           }

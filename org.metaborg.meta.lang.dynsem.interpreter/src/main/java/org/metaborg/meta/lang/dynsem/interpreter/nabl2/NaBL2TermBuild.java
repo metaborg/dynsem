@@ -4,7 +4,7 @@ import static mb.nabl2.terms.build.TermBuild.B;
 
 import java.util.Optional;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -16,7 +16,7 @@ import mb.nabl2.stratego.StrategoTermIndices;
 import mb.nabl2.stratego.TermIndex;
 import mb.nabl2.terms.ITerm;
 
-public abstract class NaBL2TermBuild extends TermBuild {
+public abstract class NaBL2TermBuild extends NativeOpBuild {
 
 	@CompilationFinal private NaBL2Context context;
 

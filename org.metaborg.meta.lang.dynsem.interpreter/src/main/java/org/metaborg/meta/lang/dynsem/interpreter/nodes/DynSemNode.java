@@ -3,11 +3,14 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class DynSemNode extends Node {
 	private final SourceSection sourceSection;
+
+	@CompilationFinal DynSemContext ctx;
 
 	public DynSemNode(SourceSection source) {
 		super();
@@ -20,6 +23,9 @@ public abstract class DynSemNode extends Node {
 	}
 
 	protected DynSemContext getContext() {
-		return DynSemLanguage.getContext(getRootNode());
+		if (ctx == null) {
+			ctx = DynSemLanguage.getContext(getRootNode());
+		}
+		return ctx;
 	}
 }
