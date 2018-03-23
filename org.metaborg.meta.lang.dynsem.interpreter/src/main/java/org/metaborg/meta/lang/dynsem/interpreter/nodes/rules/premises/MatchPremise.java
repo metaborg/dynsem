@@ -13,7 +13,10 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
-
+/*
+ * TODO: specialize. cases:
+ * 1. left is not a native op and right is WLD --> remove this node
+ */
 public class MatchPremise extends Premise {
 
 	@Child protected TermBuild term;

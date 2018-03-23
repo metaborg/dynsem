@@ -819,13 +819,14 @@ rules /* term building */
       tuple-build* := <map(ds-to-interp-terms-building-tuple)> tuple-dec*
 
   ds-to-interp-terms-building-con:
-    dec@ConsDecl(_, kid*, s, _) ->
+    dec@ConsDecl(_, kid*@[_|_], s, _) ->
       compilation-unit |[
         package ~x:<get-opt> BuildPkg();
       
         import ~x:$[[<get-opt> TermPkg()].*];
         import ~x:<get-opt> NativePkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import com.oracle.truffle.api.dsl.Cached;
         import com.oracle.truffle.api.dsl.NodeChild;
         import com.oracle.truffle.api.dsl.NodeChildren;
         import com.oracle.truffle.api.dsl.Specialization;
@@ -838,8 +839,20 @@ rules /* term building */
             super(source);
           }
           
-          @Specialization
+          @Specialization(limit = "1", guards = e_cacheguard)
+          public x_termclass doCached(
+              param0*,
+              param1*,
+              @Cached(~e:Lit(String([Chars(str_cachegen)]))) x_termclass cachedTerm) {
+            return cachedTerm;
+          }
+          
+          @Specialization(replaces = "doCached")
           public x_termclass doTyped(param0*) {
+            return buildTerm(e0*);
+          }
+          
+          protected final x_termclass buildTerm(param0*) {
             return e_term;
           }
           
@@ -850,7 +863,10 @@ rules /* term building */
       child* := <ds-to-interp-terms-building-childannos> kid*;
       x_termclass := <ds-to-interp-terms-types-name> dec;
       param0* := <ds-to-interp-terms-building-params> kid*;
-      e0* := <ds-to-interp-terms-building-exprs> kid*
+      param1* := <ds-to-interp-terms-building-cachedparams> kid*;
+      e_cacheguard := <ds-to-interp-terms-cachedparam-cacheguards> kid*;
+      e0* := <ds-to-interp-terms-building-exprs> kid*;
+      str_cachegen := <ds-utils-debugged-java-pp> e |[ doTyped(e0*) ]|
     where
       if [] := kid*
       then
@@ -858,6 +874,44 @@ rules /* term building */
       else
         e_term := e |[ new x_termclass(e0*) ]|
       end
+  
+  ds-to-interp-terms-building-con:
+    dec@ConsDecl(_, [], s, _) ->
+      compilation-unit |[
+        package ~x:<get-opt> BuildPkg();
+      
+        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import com.oracle.truffle.api.dsl.Cached;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.source.SourceSection;
+
+        @NodeChildren({ })
+        public abstract class x_class extends ~x:$[A[<ds-to-interp-terms-types-name> s]Build] {
+
+          public x_class(SourceSection source) {
+            super(source);
+          }
+          
+          @Specialization(limit = "1")
+          public x_termclass doCached(
+              @Cached("buildTerm()") x_termclass cachedTerm) {
+            return cachedTerm;
+          }
+          
+          protected final x_termclass buildTerm() {
+            return x_termclass.SINGLETON;
+          }
+          
+        }
+      ]|
+    where
+      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
+      x_termclass := <ds-to-interp-terms-types-name> dec
+
 
   ds-to-interp-terms-building-tuple:
     dec@TupleSort(s*) ->
@@ -897,12 +951,23 @@ rules /* term building */
   ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
   
   ds-to-interp-terms-building-childanno:
-    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]|
+    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]| 
   
   ds-to-interp-terms-building-params = map-with-index(ds-to-interp-terms-building-param)
   
   ds-to-interp-terms-building-param:
     (i, s) -> param |[ final ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
+
+  ds-to-interp-terms-cachedparam-cacheguards = !ElemValArrayInit(<map-with-index(ds-to-interp-terms-cachedparam-cacheguard)>)
+  
+  ds-to-interp-terms-cachedparam-cacheguard:
+    (i, s) -> Lit(String([Chars($[tb_[i] == tb_[i]_cached])]))
+
+
+  ds-to-interp-terms-building-cachedparams = map-with-index(ds-to-interp-terms-building-cachedparam)
+  
+  ds-to-interp-terms-building-cachedparam:
+    (i, s) -> param |[ @Cached(~e:Lit(String([Chars($[tb_[i]])]))) ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]_cached] ]|
 
   ds-to-interp-terms-building-exprs = map-with-index(ds-to-interp-terms-building-expr)
   

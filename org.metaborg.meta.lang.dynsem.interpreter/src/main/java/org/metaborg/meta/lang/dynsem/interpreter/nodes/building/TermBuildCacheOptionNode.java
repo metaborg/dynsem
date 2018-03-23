@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 
+@Deprecated
 public class TermBuildCacheOptionNode extends TermBuild {
 
 	@Child private TermBuild buildNode;
