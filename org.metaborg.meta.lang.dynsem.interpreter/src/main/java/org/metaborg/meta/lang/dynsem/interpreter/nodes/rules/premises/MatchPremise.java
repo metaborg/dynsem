@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheOptionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -24,7 +23,7 @@ public class MatchPremise extends Premise {
 
 	public MatchPremise(TermBuild term, MatchPattern pattern, SourceSection source) {
 		super(source);
-		this.term = new TermBuildCacheOptionNode(term);
+		this.term = term;
 		this.patt = pattern;
 	}
 
@@ -35,7 +34,6 @@ public class MatchPremise extends Premise {
 
 		// evaluate match
 		patt.executeMatch(frame, t);
-
 	}
 
 	public static MatchPremise create(IStrategoAppl t, FrameDescriptor fd) {

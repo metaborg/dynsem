@@ -7,20 +7,19 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class WldMatchPattern extends MatchPattern {
+public class NoOpPattern extends MatchPattern {
 
-	public WldMatchPattern(SourceSection source) {
+	public NoOpPattern(SourceSection source) {
 		super(source);
 	}
 
 	@Override
 	public void executeMatch(VirtualFrame frame, Object term) {
-
 	}
 
-	public static WldMatchPattern create(IStrategoAppl t) {
+	public static NoOpPattern create(IStrategoAppl t) {
 		CompilerAsserts.neverPartOfCompilation();
-		return new WldMatchPattern(SourceUtils.dynsemSourceSectionFromATerm(t));
+		return new NoOpPattern(SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 }
