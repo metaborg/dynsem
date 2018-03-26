@@ -10,11 +10,10 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
+import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class DispatchNode extends DynSemNode {
-
-	protected static final int INLINE_CACHE_SIZE = 5;
 
 	private final String arrowName;
 
@@ -25,26 +24,22 @@ public abstract class DispatchNode extends DynSemNode {
 
 	public abstract RuleResult execute(VirtualFrame frame, Class<?> dispatchClass, Object[] args);
 
-	@Specialization(limit = "INLINE_CACHE_SIZE", guards = "dispatchClass == cachedDispatchClass")
+	@Specialization(limit = "4", guards = "dispatchClass == cachedDispatchClass")
 	public RuleResult doDirect(VirtualFrame frame, Class<?> dispatchClass, Object[] args,
 			@Cached("dispatchClass") Class<?> cachedDispatchClass,
 			@Cached("create(getUnionRootNode(cachedDispatchClass).getCallTarget())") DirectCallNode callNode) {
-		getRootNode();
 		return (RuleResult) callNode.call(args);
 	}
 
 	@Specialization(replaces = "doDirect")
-	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args,
-			@Cached("createVariableUnionNode()") PolymorphicUnionNode dispatchNode) {
-		return dispatchNode.execute(args);
+	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args, @Cached("create()") IndirectCallNode callNode) {
+//		System.out.println("Polymorphic: " + dispatchClass.getName() + "---> " + arrowName);
+//		System.out.println(InterpreterUtils.createStacktrace());
+		return (RuleResult) callNode.call(getUnionRootNode(dispatchClass).getCallTarget(), args);
 	}
 
 	protected final JointRuleRoot getUnionRootNode(Class<?> dispatchClass) {
 		return getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
-	}
-
-	protected final PolymorphicUnionNode createVariableUnionNode() {
-		return new PolymorphicUnionNode(getSourceSection(), arrowName);
 	}
 
 	public static DispatchNode create(IStrategoAppl source, IStrategoAppl arrow, FrameDescriptor fd) {
