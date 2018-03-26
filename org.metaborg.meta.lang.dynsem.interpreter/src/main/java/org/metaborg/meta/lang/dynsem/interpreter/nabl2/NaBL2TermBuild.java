@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -26,6 +27,7 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 
 	private NaBL2Context nabl2Context() {
 		if (context == null) {
+			CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 			context = (NaBL2Context) getContext().readProperty(NaBL2Context.class.getName(), null);
 			if (context == null) {
 				throw new IllegalStateException("No NaBL2 context available. "
@@ -36,14 +38,17 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 	}
 
 	protected IStrategoTerm getSolution() {
+		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		return safeToStratego(InterpreterTerms.context(nabl2Context().getSolution()));
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
+		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		return getAstProperty(sterm, B.newAppl(key));
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, ITerm key) {
+		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		TermIndex index = getTermIndex(sterm);
 		Optional<ITerm> val = nabl2Context().getSolution().astProperties().getValue(index, key);
 		if (!val.isPresent()) {
@@ -53,6 +58,7 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 	}
 
 	protected TermIndex getTermIndex(IStrategoTerm sterm) {
+		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		if (sterm == null) {
 			throw new IllegalArgumentException("Primitive must be called on an AST node.");
 		}
@@ -60,6 +66,7 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 	}
 
 	private IStrategoTerm safeToStratego(ITerm term) {
+		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		term = ConstraintTerms.explicate(term);
 		return nabl2Context().getStrategoTerms().toStratego(term);
 	}
