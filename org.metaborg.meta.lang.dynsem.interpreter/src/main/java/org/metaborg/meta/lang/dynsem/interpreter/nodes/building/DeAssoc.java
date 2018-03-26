@@ -4,6 +4,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.MapUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -14,6 +15,7 @@ import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "left", type = TermBuild.class),
@@ -33,14 +35,16 @@ public abstract class DeAssoc extends TermBuild {
 		return DeAssocNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), left, right);
 	}
 
+	private final ConditionProfile profile = ConditionProfile.createBinaryProfile();
+
 	@Specialization
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object doMap(PersistentMap map, Object key) {
-		Object res = map.get(key);
-		if (res != null) {
-			return res;
+		Object res = MapUtils.get(map, key);
+		if (profile.profile(res == null)) {
+			throw new IllegalStateException("No map entry for key: " + key);
 		}
-		throw new IllegalStateException("No map entry for key: " + key);
+		return res;
 	}
 
 	@Specialization
