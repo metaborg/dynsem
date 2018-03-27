@@ -25,7 +25,7 @@ rules
     unmark-vars
 
   expand-defaultcomponents-module(|comps-table, imps-table):
-    mod@Module(_, _) -> <expand-exncomponents-module(|comps-table, imps-table)> (mod, exncomps)
+    mod@Module(_, _) -> <debug(!"d1 "); expand-exncomponents-module(|comps-table, imps-table); debug(!"d2 ")> (mod, exncomps)
     where
       exncomps := <expand-defaultcomponents-get-exceptionalcomps>
       

@@ -129,6 +129,8 @@ context-free syntax
   
   ArrowDecl.MetaFunDecl = [[ArrowROs] [ID]([{Type ", "}*]) [ArrowRWs] --> [Type] [ArrowRWs]]
   
+  ArrowDecl.NativeFunDecl = [[ArrowROs] [ID]([{Type ", "}*]) [ArrowRWs] --> [Type] [ArrowRWs] {native}]
+  
   ArrowROs.NoArrowROs = []
   ArrowROs.ArrowROs = [[{Label ", "}+] |-]
   

@@ -58,9 +58,9 @@ strategies
     arr-decls := Arrows([
                   ArrowDecl(ArrowROs([]), SimpleSort(<abruptions-name-sort-throwing>), ArrowRWs([]), "", SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
                   ArrowDecl(ArrowROs([]), SimpleSort(<abruptions-name-sort-catching>), ArrowRWs([]), "", SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
-                  MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
-                  MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>), SimpleSort(<abruptions-name-sort-throwing>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
-                  MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-unit>), ArrowRWs([]))
+                  NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
+                  NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>), SimpleSort(<abruptions-name-sort-throwing>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
+                  NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-unit>), ArrowRWs([]))
                   ]);
     !Signatures([srt-decls, ctr-decls, cmp-decls, arr-decls])
   

@@ -83,17 +83,35 @@ rules /* store signatures */
     with
       <store-def(|Arrows())> arrow => arrow-def;
       <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> in-srt, <rw-type> out-srt);
+      <store-prop(|ArrowKind(), arrow-def)> LanguageArrow();
       <store-prop(|ROs(), arrow-def)> ro*;
       <store-prop(|RWs(), arrow-def)> rw*
   
   store-arrow:
-    d@MetaFunDecl(ro, cname, kid-srt*, rw, out-srt, rw) -> d
+    d@MetaFunDecl(ArrowROs(ro*), cname, kid-srt*, ArrowRWs(rw*), out-srt, _) -> d
     where
       t_name := $[[cname]__Meta];
       t_source := SimpleSort(t_name);
       <store-sort> SortDecl(t_name);
       <store-constructor> ConsDecl(cname, kid-srt*, t_source, Annos([MetafunAnno()]));
-      <store-arrow> ArrowDecl(ro, t_source, rw, "", out-srt, rw)
+      <store-def(|Arrows())> "" => arrow-def;
+      <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> t_source, <rw-type> out-srt);
+      <store-prop(|ArrowKind(), arrow-def)> MetaFunction();
+      <store-prop(|ROs(), arrow-def)> ro*;
+      <store-prop(|RWs(), arrow-def)> rw*
+  
+  store-arrow:
+    d@NativeFunDecl(ArrowROs(ro*), cname, kid-srt*, ArrowRWs(rw*), out-srt, _) -> d
+    where
+      t_name := $[[cname]__Native];
+      t_source := SimpleSort(t_name);
+      <store-sort> SortDecl(t_name);
+      <store-constructor> ConsDecl(cname, kid-srt*, t_source, Annos([MetafunAnno()]));
+      <store-def(|Arrows())> "" => arrow-def;
+      <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> t_source, <rw-type> out-srt);
+      <store-prop(|ArrowKind(), arrow-def)> NativeArrow();
+      <store-prop(|ROs(), arrow-def)> ro*;
+      <store-prop(|RWs(), arrow-def)> rw*
   
   store-semantic-components = Components(map(store-semantic-component))
   

@@ -52,20 +52,26 @@ signature
   sorts
     SortKind
     ConsKind
+    ArrowKind
   
   constructors
     SortKind: Property
     LanguageSort: SortKind
-  	NativeSort: SortKind
-  	SystemSort: SortKind
-  	AliasSort: SortKind
+  	  NativeSort: SortKind
+  	  SystemSort: SortKind
+  	  AliasSort: SortKind
   	
-  	ConsKind: Property
-  	LanguageCons: ConsKind
-  	ImplicitCons: ConsKind
-  	Metafunc: ConsKind
-  	NativeCons: ConsKind
-  	NativeOpCons: ConsKind
+    ConsKind: Property
+    LanguageCons: ConsKind
+    ImplicitCons: ConsKind
+    Metafunc: ConsKind
+    NativeCons: ConsKind
+    NativeOpCons: ConsKind
+    
+    ArrowKind: Property
+    LanguageArrow: ArrowKind
+    NativeArrow: ArrowKind
+    MetaFunction: ArrowKind
 
 signature
   sorts
