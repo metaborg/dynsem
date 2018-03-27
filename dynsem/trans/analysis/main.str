@@ -9,6 +9,7 @@ imports
 	analysis/mark-references
 	analysis/query
 	analysis/info-implicit-conversions
+	ds2ds/abruptions/-
 	signatures/ds-sig
 	signatures/dynsem/-
   lib-ds
@@ -38,8 +39,10 @@ rules
     new-analysis-scope(
       in-rename-scope(
         new-type-transitions-scope(
-          analyze-top;
-          s
+          abruptions-new-scope(
+            analyze-top;
+            s
+          )
         )
       )
     )

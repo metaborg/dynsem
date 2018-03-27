@@ -60,6 +60,9 @@ rules // desugaring
     NullaryConsDecl(c, s, annos) -> ConsDecl(c, [], s, annos)
   
   desugar :
+    NullaryExDecl(name) -> ExDecl(name, [])
+  
+  desugar :
     NoAnnos() -> Annos([])
   
   desugar :

@@ -2,7 +2,9 @@ module analysis/analysis-signatures
 
 imports
   signatures/-
+  signatures/dynsem/-
   analysis/-
+  ds2ds/abruptions/-
   backend/utils/utils
   backend/common/opts
 
@@ -18,10 +20,12 @@ rules /* store signatures */
       <+ store-native-datatypes
       <+ store-variable-schemes
       <+ store-aliases
+      <+ abruptions-store
     ))
   
   store-built-ins =
-    <store-def(|Types())> IntType() => def-int; <store-prop(|SortKind(), def-int)> SystemSort()
+    abruptions-store-built-ins
+    ; <store-def(|Types())> IntType() => def-int; <store-prop(|SortKind(), def-int)> SystemSort()
     ; <store-def(|Types())> LongType() => def-long; <store-prop(|SortKind(), def-long)> SystemSort()
     ; <store-def(|Types())> FloatType() => def-float; <store-prop(|SortKind(), def-float)> SystemSort()
     ; <store-def(|Types())> RealType() => def-real; <store-prop(|SortKind(), def-real)> SystemSort()

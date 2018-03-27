@@ -7,6 +7,7 @@ imports
   analysis/lib-analysis
   analysis/mark-references
   ds2ds/-
+  ds2ds/abruptions/abruptions
   backend/common/opts
   pp
 
@@ -33,8 +34,13 @@ strategies
     in-project-path(
       include-imports
       ; desugar-top
-      ; desugar-meta-functions-top
       ; fuse-sections
+      ; abruptions-new-scope(
+          abruptions-enable-module
+          ; abruptions-inject-definitions-top
+      )
+      ; desugar-meta-functions-top
+      ; fuse-sections      
       ; desugar-guarded-binds-module
       ; desugar-varschemes-module
       ; add-extra-typeannos-module

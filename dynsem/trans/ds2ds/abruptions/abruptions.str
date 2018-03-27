@@ -1,0 +1,103 @@
+module ds2ds/abruptions/abruptions
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  ds2ds/fuse-sections
+
+strategies
+
+  abruptions-enable-module =
+    try(
+      UsesAbruptions <+
+      where(
+        ?Module(_, <id>);
+        fetch-elem(?Signatures(<id>));
+        fetch-elem(?Exceptions(_));
+        rules(UsesAbruptions: t -> t)
+      )
+    )
+    
+  abruptions-new-scope(s) = {| UsesAbruptions:
+    s
+  |}
+  
+  abruptions-are-enabled = where(UsesAbruptions)
+  
+//  abruptions-are-builtins-injected = not(AbruptionsInjected)
+//  
+//  abruptions-
+  
+strategies
+  
+  abruptions-name-sort-thrown   = !"_Thrown"
+  abruptions-name-sort-throwing = !"_Throwing"
+  abruptions-name-sort-catching = !"_Catching"
+  abruptions-name-sort-val      = !"_ExcVal"
+  abruptions-name-sort-unit     = !"U"
+  abruptions-name-component     = !"_Exc"
+  abruptions-name-arrow-handle  = !"handle"
+  abruptions-name-arrow-raise   = !"raise"
+  abruptions-name-ctr-ok        = !"OK"
+  
+  
+  abruptions-builtin-signatures-gen =
+    srt-decls := Sorts([
+                  SortDecl(<abruptions-name-sort-thrown>),
+                  SortDecl(<abruptions-name-sort-throwing>),
+                  SortDecl(<abruptions-name-sort-catching>),
+                  SortDecl(<abruptions-name-sort-val>)
+                  ]);
+    ctr-decls := Constructors([
+                  ConsDecl(<abruptions-name-ctr-ok>, [], SimpleSort(<abruptions-name-sort-thrown>), Annos([]))
+                 ]);
+    cmp-decls := Components([
+                  CompDeclDefault(<abruptions-name-component>, SimpleSort(<abruptions-name-sort-thrown>), Con(<abruptions-name-ctr-ok>, []))
+                  ]);
+    arr-decls := Arrows([
+                  ArrowDecl(ArrowROs([]), SimpleSort(<abruptions-name-sort-throwing>), ArrowRWs([]), "", SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
+                  ArrowDecl(ArrowROs([]), SimpleSort(<abruptions-name-sort-catching>), ArrowRWs([]), "", SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
+                  MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
+                  MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>), SimpleSort(<abruptions-name-sort-throwing>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
+                  MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-unit>), ArrowRWs([]))
+                  ]);
+    !Signatures([srt-decls, ctr-decls, cmp-decls, arr-decls])
+  
+  abruptions-store-built-ins =
+    abruptions-enable-module; abruptions-are-enabled
+    < abruptions-builtin-signatures-gen; store-signatures
+    + id 
+  
+  abruptions-store = Exceptions(map(abruptions-store-exception))
+  
+  abruptions-store-exception:
+    e@ExDecl(name, kid*) -> e
+    with
+      arity := <length> kid*;
+      c-def := <store-def(|Constructors())> (name, arity);
+      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> kid*, <abruptions-name-sort-thrown>);
+      <store-prop(|ConsKind(), c-def)> LanguageCons()
+ 
+  abruptions-inject-definitions-top =
+    abruptions-are-enabled
+      < abruptions-inject-definitions
+      + id
+  
+  abruptions-inject-definitions:
+    Module(name, section*) -> Module(name, section'*)
+    where
+      section'* := <map(try(abruptions-inject-definitions))> section*
+
+  abruptions-inject-definitions =
+    Signatures(partition(abruptions-inject-definitions); (Hd, id); conc)
+  
+  abruptions-inject-definitions:
+    e@Exceptions(exc) -> sig-part*
+    with
+      Signatures(sig-part*) := <abruptions-builtin-signatures-gen>
+      
+
+    
+  
+  
