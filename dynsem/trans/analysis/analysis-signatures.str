@@ -90,7 +90,7 @@ rules /* store signatures */
   store-arrow:
     d@MetaFunDecl(ArrowROs(ro*), cname, kid-srt*, ArrowRWs(rw*), out-srt, _) -> d
     where
-      t_name := $[[cname]__Meta];
+      t_name := $[[cname]_[<length; int-to-string> kid-srt*]_Meta];
       t_source := SimpleSort(t_name);
       <store-sort> SortDecl(t_name);
       <store-constructor> ConsDecl(cname, kid-srt*, t_source, Annos([MetafunAnno()]));
@@ -103,7 +103,7 @@ rules /* store signatures */
   store-arrow:
     d@NativeFunDecl(ArrowROs(ro*), cname, kid-srt*, ArrowRWs(rw*), out-srt, _) -> d
     where
-      t_name := $[[cname]__Native];
+      t_name := $[[cname]_[<length; int-to-string> kid-srt*]_Native];
       t_source := SimpleSort(t_name);
       <store-sort> SortDecl(t_name);
       <store-constructor> ConsDecl(cname, kid-srt*, t_source, Annos([MetafunAnno()]));
