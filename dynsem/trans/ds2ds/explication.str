@@ -127,19 +127,19 @@ strategies
 rules
 
   explication-api-explicate(s) = 
-    debug(!"e1 ");
+    debug(!"x1 ");
     where(explication-api-init-storage(?comps-table, ?imps-table));
-    debug(!"e2 ");
+    debug(!"x2 ");
     where(explication-gather-data-arrowdecl(|comps-table, imps-table));
-    debug(!"e3 ");
+    debug(!"x3 ");
     where(alltd(explication-gather-data-rule(|comps-table, imps-table)));
-    debug(!"e4 ");
+    debug(!"x4 ");
     where(explication-compute-explicated-arrows(|comps-table, imps-table));
-    debug(!"e5 ");
+    debug(!"x5 ");
     s(|comps-table, imps-table);
-    debug(!"e6 ");
+    debug(!"x6 ");
     where(explication-api-destroy-storage(|comps-table, imps-table))
-    ;debug(!"e7 ")
+    ;debug(!"x7 ")
 
   explication-api-explicate(pre, post) =
     let
@@ -160,26 +160,17 @@ rules
     end
   
   explication-gather-data-arrowdecl(|comps-table, imps-table) =
-      debug(!"e1a1 ");
       lookup-def-all(|Arrows());
-      debug(!"e1a2 ");
-      map(debug(!"e1a2a1 "); explication-associate-decl-components(|comps-table, imps-table); debug(!"e1a2a2 "))
-      ;debug(!"e1a3 ")
+      map(explication-associate-decl-components(|comps-table, imps-table));
+      try(explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table))
+
+  explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) = fail
 
   explication-associate-decl-components(|comps-table, imps-table) =
-    debug(!"e1a2a2a1 ");
     ?arrow-def;
-    debug(!"e1a2a2a2 ");
-    <lookup-prop(|Type()) <+ debug(!" NO TYPE ")> arrow-def;
-    debug(!"e1a2a2a3 ");
-    <lookup-prop(|ArrowKind())  <+ debug(!" NO KIND ")> arrow-def;
-    debug(!"e1a2a2a4 ");
     ro* := <lookup-prop(|ROs()); map(\ Label(x) -> Comp(<lookup-def(|Components())> x, RO()) \)> arrow-def;
-    debug(!"e1a2a2a5 ");
     rw* := <lookup-prop(|RWs()); map(\ Label(x) -> Comp(<lookup-def(|Components())> x, RW()) \)> arrow-def;
-    debug(!"e1a2a2a6 ");
     <explication-api-add-components(|comps-table, imps-table)> (arrow-def, [ro*, rw*])
-    ;debug(!"e1a2a2a7 ")
 
   explication-gather-data-rule(|comps-table, imps-table):
     r@Rule(prem*, infer, Relation(reads, src@Source(lhs, _), arr, _)) -> r
@@ -271,33 +262,12 @@ rules
       (ro*, rw*) := <(map(explication-util-comp-to-label), map(explication-util-comp-to-label))> (ro-comp*, rw-comp*)
 
   explication-explicate-arrow-decl(|comps-table, imps-table):
-    d@NativeFunDecl(ro, cname, kid-srt*, rw, out-srt, rw) -> d
+    NativeFunDecl(_, cname, kid-srt*, _, out-srt, _) -> NativeFunDecl(ArrowROs(ro*), cname, kid-srt*, ArrowRWs(rw*), out-srt, ArrowRWs(rw*))
     where
-      debug(!">>>>>>>> UNHANDLED: native fun declaration during explication ")
-      /*
-      we have to dispatch here to the modules that provide those native implementations
-      as they are the ones that know which of the kid-srt* will be reduced.
-      those modules will give back the components used by each of the kid-srt* reductions
-      we nub and add these components to the arrow decl
-      
-      at runtime we're still gonna have to figure out which components to pass INTO the kids
-      and which components to take OUT of the kids' reductions
-      
-      */
-
-//store-arrow:
-//    d@NativeFunDecl(ro, cname, kid-srt*, rw, out-srt, rw) -> d
-//    where
-//      t_name := $[[cname]__Native];
-//      t_source := SimpleSort(t_name);
-//      <store-sort> SortDecl(t_name);
-//      <store-constructor> ConsDecl(cname, kid-srt*, t_source, Annos([MetafunAnno()]));
-//      <store-def(|Arrows())> "" => arrow-def;
-//      <store-prop(|Type(), arrow-def)> ArrowType(<rw-type> t_source, <rw-type> out-srt);
-//      <store-prop(|ArrowKind(), arrow-def)> NativeArrow();
-//      <store-prop(|ROs(), arrow-def)> ro;
-//      <store-prop(|RWs(), arrow-def)> rw
-
+      t_sort := SimpleSort($[[cname]_[<length; int-to-string> kid-srt*]_Native]);
+      arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> t_sort);
+      (ro-comp*, rw-comp*) := <explication-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
+      (ro*, rw*) := <(map(explication-util-comp-to-label), map(explication-util-comp-to-label))> (ro-comp*, rw-comp*)
 
   explication-explicate-rules-module(|comps-table, imps-table):
     Module(name, section*) -> Module(name, section'*)

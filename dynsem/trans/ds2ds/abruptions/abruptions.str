@@ -4,8 +4,9 @@ imports
   signatures/-
   signatures/dynsem/-
   analysis/-
-  ds2ds/fuse-sections
-
+//  ds2ds/fuse-sections
+  ds2ds/explication
+  
 strategies
 
   abruptions-enable-module =
@@ -24,10 +25,6 @@ strategies
   |}
   
   abruptions-are-enabled = where(UsesAbruptions)
-  
-//  abruptions-are-builtins-injected = not(AbruptionsInjected)
-//  
-//  abruptions-
   
 strategies
   
@@ -96,8 +93,78 @@ strategies
     e@Exceptions(exc) -> sig-part*
     with
       Signatures(sig-part*) := <abruptions-builtin-signatures-gen>
-      
-
-    
   
+  explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) =
+    abruptions-are-enabled < abruptions-explicate-arrow-imports(|comps-table, imps-table) + fail
+  
+  abruptions-explicate-arrow-imports(|comps-table, imps-table) =
+    // get handle/2 arrow definition
+    throwing-ty := <abruptions-name-sort-throwing>;
+    catching-ty := <abruptions-name-sort-catching>;
+    t_sort := SimpleSort($[[<abruptions-name-arrow-handle>]_2_Native]);
+    arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> t_sort);
+    throwing-def := <resolve-applicable-arrow-defsite> ("", throwing-ty);
+    <explication-api-get-components(|comps-table, imps-table)> throwing-def;
+    throwing-import := Impo(throwing-def, []);
+    catching-def := <resolve-applicable-arrow-defsite> ("", catching-ty);
+    catching-import := Impo(catching-def, []);
+    imp* := [throwing-import, catching-import];
+    <explication-api-add-imports(|comps-table, imps-table)> (arrow-def, imp*);
+    fail
+
+  abruptions-explicate-arrow-imports(|comps-table, imps-table) =
+    // get handle/3 arrow definition
+    throwing-ty := <abruptions-name-sort-throwing>;
+    catching-ty := <abruptions-name-sort-catching>;
+    t_sort := SimpleSort($[[<abruptions-name-arrow-handle>]_3_Native]);
+    arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> t_sort);
+    throwing-def := <resolve-applicable-arrow-defsite> ("", throwing-ty);
+    throwing-import := Impo(throwing-def, []);
+    catching-def := <resolve-applicable-arrow-defsite> ("", catching-ty);
+    catching-import := Impo(catching-def, []);
+    imp* := [throwing-import, catching-import];
+    <explication-api-add-imports(|comps-table, imps-table)> (arrow-def, imp*);
+    fail
+    
+//  explication-explicate-arrow-decl-extend-api(|comps-table, imps-table) = abruptions-explicate-nativefun(|comps-table, imps-table)
+
+  
+  
+  // the handle/2 and handle/3 native functions
+//  abruptions-explicate-nativefun(|comps-table, imps-table):
+//    NativeFunDecl(_, cname, kid-srt*@[throwing, catching|_], _, out-srt, _) -> 
+//      NativeFunDecl(ArrowROs(ro*), cname, kid-srt*, ArrowRWs(rw*), out-srt, ArrowRWs(rw*))
+//    where
+//      debug(!"handle1 --> ");
+//      abruptions-name-arrow-handle => cname;
+//      debug(!"handle2 --> ");
+//      throwing-ty := <rw-type> throwing;
+//      debug(!"handle3 --> ");
+//      abruptions-name-sort-throwing => throwing-ty;
+//      debug(!"handle4 --> ");
+//      catching-ty := <rw-type> catching;
+//      debug(!"handle5 --> ");
+//      abruptions-name-sort-catching => catching-ty;
+//      t_sort := SimpleSort($[[cname]_[<length; int-to-string> kid-srt*]_Native]);
+//      arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> t_sort)
+//    with
+//      debug(!"handle6 --> ");
+//      throwing-arow-def := <resolve-applicable-arrow-defsite> ("", throwing-ty);
+//      debug(!"handle7 --> ");
+//      throwing-comp* := <explication-api-get-components(|comps-table, imps-table)> throwing-arow-def;
+//      debug(!"handle8 --> ");
+//      catching-arow-def := <resolve-applicable-arrow-defsite> ("", catching-ty);
+//      debug(!"handle9 --> ");
+//      catching-comp* := <explication-api-get-components(|comps-table, imps-table)> catching-arow-def;
+//      // FIXME: remove the _Exc component from the catching arrow?
+//      debug(!"handle10 --> ");
+//      (comp-ro*, comp-rw*) := <explication-components-nub; partition(?Comp(_, RO()))> [throwing-comp*, catching-comp*];
+//      debug(!"handle11 --> ");
+//      (ro*, rw*) := <(map(explication-util-comp-to-label), map(explication-util-comp-to-label))> (comp-ro*, comp-rw*);
+//      debug(!"handle12 --> ");
+//      <explication-api-add-components(|comps-table, imps-table)> (arrow-def, [comp-ro*, comp-rw*]);
+//      debug(!"handle13 --> ")
+//      
+//  abruptions-explicate-nativefun(|comps-table, imps-table):
+//    d@NativeFunDecl(ro, cname, kid-srt*, rw, out-srt, rw) -> d
   
