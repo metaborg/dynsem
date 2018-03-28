@@ -115,5 +115,15 @@ strategies
     <explication-api-add-imports(|comps-table, imps-table)> (arrow-handle-2-def, imp*);
     <explication-api-add-imports(|comps-table, imps-table)> (arrow-handle-3-def, imp*);
     fail
+  
+  abruptions-explicate-arrow-imports(|comps-table, imps-table) =
+    // the raise arrow will consume all components
+    // that were passed into handle/2 and handle/3
+    // ==> because in the native implementation it needs to capture them in the exception it is throwing
+    arrow-handle-2-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handle>]_2_Native]));
+    arrow-handle-3-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handle>]_3_Native]));
+    arrow-raise-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-raise>]_1_Native]));
+    <explication-api-add-imports(|comps-table, imps-table)> (arrow-raise-def, [Impo(arrow-handle-2-def, []), Impo(arrow-handle-3-def, [])]);
+    fail
 
     
