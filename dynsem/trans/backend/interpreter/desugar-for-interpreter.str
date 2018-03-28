@@ -7,6 +7,7 @@ imports
   ds2ds/explicate-arrow-types
   ds2ds/more-typeannos
   ds2ds/desugar-concat
+  ds2ds/abruptions/abruptions
   ds
 
 rules
@@ -17,7 +18,8 @@ rules
       <m-in-analysis(desugar-for-interpreter; unrename-all); unmark-vars> m => Module(name, section*)
 
   desugar-for-interpreter =
-    explicate-arrow-types-noanalysis
+    abruptions-rewrite-natives-module
+    ;explicate-arrow-types-noanalysis
     ; add-rulekind-flags-module
     ; desugar-semantic-components
     ; mark-rule-arguments

@@ -26,7 +26,7 @@ strategies
   
   abruptions-are-enabled = where(UsesAbruptions)
   
-strategies
+strategies // name definitions
   
   abruptions-name-sort-thrown   = !"_Thrown"
   abruptions-name-sort-throwing = !"_Throwing"
@@ -39,7 +39,8 @@ strategies
   abruptions-name-arrow-handler = !"handler"
   abruptions-name-ctr-ok        = !"OK"
   
-  
+strategies // signature generation
+
   abruptions-builtin-signatures-gen =
     srt-decls := Sorts([
                   SortDecl(<abruptions-name-sort-thrown>),
@@ -61,7 +62,30 @@ strategies
                   MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-handler>, [SimpleSort(<abruptions-name-sort-thrown>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([]))
                   ]);
     !Signatures([srt-decls, ctr-decls, cmp-decls, arr-decls])
+
+  abruptions-is-handler-2-decl =
+    where(
+     ?NativeFunDecl(_, <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>)], _, SimpleSort(<abruptions-name-sort-val>), _)
+    )
+
+
+  abruptions-is-handler-3-decl =
+    where(
+      ?NativeFunDecl(_, <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>), SimpleSort(<abruptions-name-sort-throwing>)], _, SimpleSort(<abruptions-name-sort-val>), _)
+    )
   
+  abruptions-is-raise-decl =
+    where(
+      ?NativeFunDecl(_, <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], _, SimpleSort(<abruptions-name-sort-unit>), _)
+    )
+  
+  abruptions-is-handler-decl =
+    where(
+      ?MetaFunDecl(_, <abruptions-name-arrow-handler>, [SimpleSort(<abruptions-name-sort-thrown>), SimpleSort(<abruptions-name-sort-catching>)], _, SimpleSort(<abruptions-name-sort-val>), _)
+    )
+
+strategies // analysis
+
   abruptions-store-built-ins =
     abruptions-enable-module; abruptions-are-enabled
     < abruptions-builtin-signatures-gen; store-signatures
@@ -94,7 +118,9 @@ strategies
     e@Exceptions(exc) -> sig-part*
     with
       Signatures(sig-part*) := <abruptions-builtin-signatures-gen>
-  
+
+strategies // explication
+
   explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) =
     abruptions-are-enabled < abruptions-explicate-arrow-imports(|comps-table, imps-table) + fail
   
@@ -126,4 +152,80 @@ strategies
     <explication-api-add-imports(|comps-table, imps-table)> (arrow-raise-def, [Impo(arrow-handle-2-def, []), Impo(arrow-handle-3-def, [])]);
     fail
 
+strategies // backend
+
+signature
+  sorts ReduceWithComps Handler ComponentSnapshot
+  
+  constructors
+    NativeRelation: NativeCall * Target -> Relation
+    Raise : List(LabelComp) * Term -> NativeCall
+    Handle: List(LabelComp) * Term * Term -> NativeCall  
     
+    
+//    ComponentSnapshot: List(LabelComp) * List(LabelComp) -> ComponentSnapshot
+//    Handle: List(Var) * NULL * List(Var) -> NativeCall
+//    ReduceWithComps: List(String) * Term * List(String) -> ReduceWithComps
+//    Handler: List(Var) * Term * Term * List(Var) -> Handler
+//    Handle: List(Var) * ReduceWithComps * Handler * Term * List(Var) -> Relation
+//    Handle: List(Var) * ReduceWithComps * Handler * ReduceWithComps * Term * List(Var) -> Relation
+    //              in comps     call       matchpat  out comps
+    Foobar: String -> NativeCall 
+    
+//  NaBL2, F |- handle(_Throwing, _Catching) :: H --> U :: H {native}
+//  NaBL2, F |- _Throwing :: H --> U :: H
+//              handler_2_Meta  --> U
+  
+strategies
+
+  abruptions-rewrite-natives-module =
+    where(
+        ?Module(_, <id>);
+        fetch-elem(?Signatures(<id>));
+        fetch-elem(?Arrows(<id>));
+        fetch-elem(abruptions-is-handler-2-decl <+ abruptions-is-handler-3-decl <+ abruptions-is-raise-decl <+ abruptions-is-handler-decl)
+    ) <
+        alltd(abruptions-rewrite-native-relation)
+      +
+        id
+  
+  abruptions-rewrite-native-relation:
+    Formula(Relation(Reads(ro*), Source(Con(cname, [raised]), rw*), NamedDynamicEmitted([], ""), _))
+      -> Formula(NativeRelation(Raise(comp*, raised), Target(Wld(), [])))
+    where
+      abruptions-name-arrow-raise => cname
+    with
+      comp* := <map(\ LabelComp(_, t) -> t \)> [ro*, rw*]
+      
+//Formula(
+//  Relation(
+//    Reads(
+//      [ LabelComp(Label("NaBL2"), VarRef("NaBL21"))
+//      , LabelComp(Label("F"), VarRef("F1"))
+//      ]
+//    )
+//  , Source(
+//      Con(
+//        "handle"
+//      , [VarRef("_3"), VarRef("_1"), VarRef("_5")]
+//      )
+//    , [LabelComp(Label("H"), VarRef("H2"))]
+//    )
+//  , NamedDynamicEmitted([], "", SimpleSort("handle_3_Native"))
+//  , Target(Wld(), [LabelComp(Label("H"), VarRef("H4"))])
+//  )
+//)
+//NativeRelation: List(Term) * NativeCall * Target -> Relation
+
+  abruptions-rewrite-native-relation:
+    Relation(Reads(ro*), Source(Con(cname, [throwing1, catching, throwing2]), rw-in*), NamedDynamicEmitted([], ""), tgt) ->
+      NativeRelation(comp-var-in*, Foobar(cname), tgt)
+//      Handle(comp-var-in*, throws-with-comps, handler, continue-with-comps, term-out, comp-var-out*)
+    where
+      abruptions-name-arrow-handle => cname
+    with
+      comp-in* := [ro*, rw-in*];
+      comp-var-in* := <map(\ LabelComp(Label(x), _) -> VarRef(x) \)> comp-in*
+
+
+
