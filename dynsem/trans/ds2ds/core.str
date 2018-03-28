@@ -39,36 +39,20 @@ strategies
           abruptions-enable-module
           ; abruptions-inject-definitions-top
           ; desugar-meta-functions-top
-          ; debug(!1)
           ; fuse-sections      
-          ; debug(!2)
           ; desugar-guarded-binds-module
-          ; debug(!3)
           ; desugar-varschemes-module
-          ; debug(!4)
           ; add-extra-typeannos-module
-          ; debug(!5)
           ; desugar-aliases-module
-          ; debug(!6)
           ; factorize-module
-          ; debug(!7)
           ; expand-implicits-module
-          ; debug(!8)
           ; factorize-module
-          ; debug(!9)
           ; expand-defaultcomponents-module-top
-          ; debug(!10)
           ; explication-explicate-module
-          ; debug(!11)
           ; copy-propagation-module
-          ; debug(!12)
           ; eliminate-dead-premises-module
-          ; debug(!13)
           ; insert-wildcards-module
-          ; debug(!14)
           ; defactorize-module
-          ; debug(!15)
           ; prettify-vars-module
-          ; debug(!16)
         )
     |project-path)

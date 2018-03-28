@@ -36,6 +36,7 @@ strategies
   abruptions-name-component     = !"_Exc"
   abruptions-name-arrow-handle  = !"handle"
   abruptions-name-arrow-raise   = !"raise"
+  abruptions-name-arrow-handler = !"handler"
   abruptions-name-ctr-ok        = !"OK"
   
   
@@ -54,10 +55,10 @@ strategies
                   ]);
     arr-decls := Arrows([
                   ArrowDecl(ArrowROs([]), SimpleSort(<abruptions-name-sort-throwing>), ArrowRWs([]), "", SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
-                  ArrowDecl(ArrowROs([]), SimpleSort(<abruptions-name-sort-catching>), ArrowRWs([]), "", SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
                   NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
                   NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>), SimpleSort(<abruptions-name-sort-throwing>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
-                  NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-unit>), ArrowRWs([]))
+                  NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-unit>), ArrowRWs([])),
+                  MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-handler>, [SimpleSort(<abruptions-name-sort-thrown>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([]))
                   ]);
     !Signatures([srt-decls, ctr-decls, cmp-decls, arr-decls])
   
@@ -98,73 +99,21 @@ strategies
     abruptions-are-enabled < abruptions-explicate-arrow-imports(|comps-table, imps-table) + fail
   
   abruptions-explicate-arrow-imports(|comps-table, imps-table) =
-    // get handle/2 arrow definition
-    throwing-ty := <abruptions-name-sort-throwing>;
-    catching-ty := <abruptions-name-sort-catching>;
-    t_sort := SimpleSort($[[<abruptions-name-arrow-handle>]_2_Native]);
-    arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> t_sort);
-    throwing-def := <resolve-applicable-arrow-defsite> ("", throwing-ty);
-    <explication-api-get-components(|comps-table, imps-table)> throwing-def;
-    throwing-import := Impo(throwing-def, []);
-    catching-def := <resolve-applicable-arrow-defsite> ("", catching-ty);
-    catching-import := Impo(catching-def, []);
-    imp* := [throwing-import, catching-import];
-    <explication-api-add-imports(|comps-table, imps-table)> (arrow-def, imp*);
-    fail
-
-  abruptions-explicate-arrow-imports(|comps-table, imps-table) =
-    // get handle/3 arrow definition
-    throwing-ty := <abruptions-name-sort-throwing>;
-    catching-ty := <abruptions-name-sort-catching>;
-    t_sort := SimpleSort($[[<abruptions-name-arrow-handle>]_3_Native]);
-    arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> t_sort);
-    throwing-def := <resolve-applicable-arrow-defsite> ("", throwing-ty);
-    throwing-import := Impo(throwing-def, []);
-    catching-def := <resolve-applicable-arrow-defsite> ("", catching-ty);
-    catching-import := Impo(catching-def, []);
-    imp* := [throwing-import, catching-import];
-    <explication-api-add-imports(|comps-table, imps-table)> (arrow-def, imp*);
+    // store component imports for handler/2
+    // nothing to do here because handler/2 is actually builtin but not native
     fail
     
-//  explication-explicate-arrow-decl-extend-api(|comps-table, imps-table) = abruptions-explicate-nativefun(|comps-table, imps-table)
+  abruptions-explicate-arrow-imports(|comps-table, imps-table) =
+    // store component imports for handle/2 and handle/3
+    // add dependency of handle/2 and handle/3 on the components of _Throwing --> ... and handler/2 --> ...
+    throwing-ty := <abruptions-name-sort-throwing>;
+    throwing-arrow-def := <resolve-applicable-arrow-defsite> ("", throwing-ty);
+    handler-arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handler>]_2_Meta]));
+    imp* := [Impo(throwing-arrow-def, []), Impo(handler-arrow-def, [])];
+    arrow-handle-2-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handle>]_2_Native]));
+    arrow-handle-3-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handle>]_3_Native]));
+    <explication-api-add-imports(|comps-table, imps-table)> (arrow-handle-2-def, imp*);
+    <explication-api-add-imports(|comps-table, imps-table)> (arrow-handle-3-def, imp*);
+    fail
 
-  
-  
-  // the handle/2 and handle/3 native functions
-//  abruptions-explicate-nativefun(|comps-table, imps-table):
-//    NativeFunDecl(_, cname, kid-srt*@[throwing, catching|_], _, out-srt, _) -> 
-//      NativeFunDecl(ArrowROs(ro*), cname, kid-srt*, ArrowRWs(rw*), out-srt, ArrowRWs(rw*))
-//    where
-//      debug(!"handle1 --> ");
-//      abruptions-name-arrow-handle => cname;
-//      debug(!"handle2 --> ");
-//      throwing-ty := <rw-type> throwing;
-//      debug(!"handle3 --> ");
-//      abruptions-name-sort-throwing => throwing-ty;
-//      debug(!"handle4 --> ");
-//      catching-ty := <rw-type> catching;
-//      debug(!"handle5 --> ");
-//      abruptions-name-sort-catching => catching-ty;
-//      t_sort := SimpleSort($[[cname]_[<length; int-to-string> kid-srt*]_Native]);
-//      arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> t_sort)
-//    with
-//      debug(!"handle6 --> ");
-//      throwing-arow-def := <resolve-applicable-arrow-defsite> ("", throwing-ty);
-//      debug(!"handle7 --> ");
-//      throwing-comp* := <explication-api-get-components(|comps-table, imps-table)> throwing-arow-def;
-//      debug(!"handle8 --> ");
-//      catching-arow-def := <resolve-applicable-arrow-defsite> ("", catching-ty);
-//      debug(!"handle9 --> ");
-//      catching-comp* := <explication-api-get-components(|comps-table, imps-table)> catching-arow-def;
-//      // FIXME: remove the _Exc component from the catching arrow?
-//      debug(!"handle10 --> ");
-//      (comp-ro*, comp-rw*) := <explication-components-nub; partition(?Comp(_, RO()))> [throwing-comp*, catching-comp*];
-//      debug(!"handle11 --> ");
-//      (ro*, rw*) := <(map(explication-util-comp-to-label), map(explication-util-comp-to-label))> (comp-ro*, comp-rw*);
-//      debug(!"handle12 --> ");
-//      <explication-api-add-components(|comps-table, imps-table)> (arrow-def, [comp-ro*, comp-rw*]);
-//      debug(!"handle13 --> ")
-//      
-//  abruptions-explicate-nativefun(|comps-table, imps-table):
-//    d@NativeFunDecl(ro, cname, kid-srt*, rw, out-srt, rw) -> d
-  
+    

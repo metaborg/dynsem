@@ -127,19 +127,12 @@ strategies
 rules
 
   explication-api-explicate(s) = 
-    debug(!"x1 ");
     where(explication-api-init-storage(?comps-table, ?imps-table));
-    debug(!"x2 ");
     where(explication-gather-data-arrowdecl(|comps-table, imps-table));
-    debug(!"x3 ");
     where(alltd(explication-gather-data-rule(|comps-table, imps-table)));
-    debug(!"x4 ");
     where(explication-compute-explicated-arrows(|comps-table, imps-table));
-    debug(!"x5 ");
     s(|comps-table, imps-table);
-    debug(!"x6 ");
     where(explication-api-destroy-storage(|comps-table, imps-table))
-    ;debug(!"x7 ")
 
   explication-api-explicate(pre, post) =
     let
