@@ -5,8 +5,14 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
+import org.spoofax.interpreter.core.Tools;
+import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -52,6 +58,24 @@ public class DispatchInteropNode extends DynSemNode {
 		for (int i = 0; i < resultComps.length; i++) {
 			components.setObject(outputComponents[i], resultComps[i]);
 		}
+	}
+
+	public static DispatchInteropNode create(IStrategoList inLabels, IStrategoList outLabels,
+			FrameDescriptor componentsFD) {
+		CompilerAsserts.neverPartOfCompilation();
+		return new DispatchInteropNode(SourceUtils.dynsemSourceSectionFromATerm(inLabels),
+				findSlots(inLabels, componentsFD), findSlots(outLabels, componentsFD));
+	}
+
+	private static FrameSlot[] findSlots(IStrategoList labels, FrameDescriptor componentsFD) {
+		CompilerAsserts.neverPartOfCompilation();
+		FrameSlot[] slots = new FrameSlot[labels.size()];
+		int i = 0;
+		for (IStrategoTerm label : labels) {
+			slots[i] = componentsFD.findFrameSlot(Tools.javaStringAt(label, 0));
+			i++;
+		}
+		return slots;
 	}
 
 }

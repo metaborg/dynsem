@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeRelationPremise;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
@@ -32,6 +33,9 @@ public abstract class Premise extends DynSemNode {
 		}
 		if (Tools.hasConstructor(premT, "Match", 2)) {
 			return MatchPremise.create(premT, fd);
+		}
+		if (Tools.hasConstructor(premT, "NativeRelation", 4)) {
+			return NativeRelationPremise.create(premT, fd);
 		}
 		if (Tools.hasConstructor(premT, "TermEq", 2)) {
 			return TermEqPremise.create(premT, fd);
