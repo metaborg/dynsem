@@ -18,8 +18,7 @@ rules
       <m-in-analysis(desugar-for-interpreter; unrename-all); unmark-vars> m => Module(name, section*)
 
   desugar-for-interpreter =
-    abruptions-rewrite-natives-module
-    ;explicate-arrow-types-noanalysis
+    explicate-arrow-types-noanalysis
     ; add-rulekind-flags-module
     ; desugar-semantic-components
     ; mark-rule-arguments
@@ -31,6 +30,7 @@ rules
     ; desugar-concat-all
     ; resugar-and-typecast-lists
     ; jtype-lists
+    ; abruptions-rewrite-natives-module
 
 rules
 

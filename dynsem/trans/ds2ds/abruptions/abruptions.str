@@ -6,6 +6,7 @@ imports
   analysis/-
 //  ds2ds/fuse-sections
   ds2ds/explication
+  backend/interpreter/signature
   
 strategies
 
@@ -158,23 +159,12 @@ signature
   sorts ReduceWithComps Handler ComponentSnapshot
   
   constructors
-    NativeRelation: NativeCall * Target -> Relation
-    Raise : List(LabelComp) * Term -> NativeCall
-    Handle: List(LabelComp) * Term * Term -> NativeCall  
-    
-    
-//    ComponentSnapshot: List(LabelComp) * List(LabelComp) -> ComponentSnapshot
-//    Handle: List(Var) * NULL * List(Var) -> NativeCall
-//    ReduceWithComps: List(String) * Term * List(String) -> ReduceWithComps
-//    Handler: List(Var) * Term * Term * List(Var) -> Handler
-//    Handle: List(Var) * ReduceWithComps * Handler * Term * List(Var) -> Relation
-//    Handle: List(Var) * ReduceWithComps * Handler * ReduceWithComps * Term * List(Var) -> Relation
-    //              in comps     call       matchpat  out comps
-    Foobar: String -> NativeCall 
-    
-//  NaBL2, F |- handle(_Throwing, _Catching) :: H --> U :: H {native}
-//  NaBL2, F |- _Throwing :: H --> U :: H
-//              handler_2_Meta  --> U
+
+    NativeRelation: List(LabelComp) * NativeCall * Term * List(LabelComp) -> Relation
+    Raise: Term -> NativeCall
+ 
+    Handle2: (List(Label), Term , List(Label)) * (List(Label), Term, List(Label)) -> NativeCall
+    Handle3: (List(Label), Term , List(Label)) * (List(Label), Term, List(Label)) * (List(Label), Term, List(Label)) -> NativeCall
   
 strategies
 
@@ -188,44 +178,50 @@ strategies
         alltd(abruptions-rewrite-native-relation)
       +
         id
-  
+ 
   abruptions-rewrite-native-relation:
-    Formula(Relation(Reads(ro*), Source(Con(cname, [raised]), rw*), NamedDynamicEmitted([], ""), _))
-      -> Formula(NativeRelation(Raise(comp*, raised), Target(Wld(), [])))
+    Formula(Relation(Source(Con(cname, [raised]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
+      -> Formula(NativeRelation(comp-in*, Raise(raised), rhs, rw-out*))
     where
       abruptions-name-arrow-raise => cname
-    with
-      comp* := <map(\ LabelComp(_, t) -> t \)> [ro*, rw*]
-      
-//Formula(
-//  Relation(
-//    Reads(
-//      [ LabelComp(Label("NaBL2"), VarRef("NaBL21"))
-//      , LabelComp(Label("F"), VarRef("F1"))
-//      ]
-//    )
-//  , Source(
-//      Con(
-//        "handle"
-//      , [VarRef("_3"), VarRef("_1"), VarRef("_5")]
-//      )
-//    , [LabelComp(Label("H"), VarRef("H2"))]
-//    )
-//  , NamedDynamicEmitted([], "", SimpleSort("handle_3_Native"))
-//  , Target(Wld(), [LabelComp(Label("H"), VarRef("H4"))])
-//  )
-//)
-//NativeRelation: List(Term) * NativeCall * Target -> Relation
 
   abruptions-rewrite-native-relation:
-    Relation(Reads(ro*), Source(Con(cname, [throwing1, catching, throwing2]), rw-in*), NamedDynamicEmitted([], ""), tgt) ->
-      NativeRelation(comp-var-in*, Foobar(cname), tgt)
-//      Handle(comp-var-in*, throws-with-comps, handler, continue-with-comps, term-out, comp-var-out*)
+    Formula(Relation(Source(Con(cname, [throwing, catching, continuing]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
+      -> Formula(NativeRelation(comp-in*, Handle3(throwing-node, continuing-node, handler-node), rhs, rw-out*))
     where
       abruptions-name-arrow-handle => cname
     with
-      comp-in* := [ro*, rw-in*];
-      comp-var-in* := <map(\ LabelComp(Label(x), _) -> VarRef(x) \)> comp-in*
+      throwing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> throwing);
+      throwing-ro* := <lookup-prop(|ROs())> throwing-arr-def;
+      throwing-rw* := <lookup-prop(|RWs())> throwing-arr-def;
+      throwing-node := ([throwing-ro*, throwing-rw*], throwing, throwing-rw*)
+    with
+      continuing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> continuing);
+      continuing-ro* := <lookup-prop(|ROs())> continuing-arr-def;
+      continuing-rw* := <lookup-prop(|RWs())> continuing-arr-def;
+      continuing-node := ([continuing-ro*, continuing-rw*], continuing, continuing-rw*)
+    with // handling node
+      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handler>]_2_Meta]));
+      handler-ro* := <lookup-prop(|ROs())> handler-arr-def;
+      handler-rw* := <lookup-prop(|RWs())> handler-arr-def;
+      handler-node := ([handler-ro*, handler-rw*], catching, handler-rw*)
+
+  abruptions-rewrite-native-relation:
+    Formula(Relation(Source(Con(cname, [throwing, catching]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
+      -> Formula(NativeRelation(comp-in*, Handle2(throwing-node, handler-node), rhs, rw-out*))
+    where
+      abruptions-name-arrow-handle => cname
+    with
+      throwing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> throwing);
+      throwing-ro* := <lookup-prop(|ROs())> throwing-arr-def;
+      throwing-rw* := <lookup-prop(|RWs())> throwing-arr-def;
+      throwing-node := ([throwing-ro*, throwing-rw*], throwing, throwing-rw*)
+    with // handling node
+      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handler>]_2_Meta]));
+      handler-ro* := <lookup-prop(|ROs())> handler-arr-def;
+      handler-rw* := <lookup-prop(|RWs())> handler-arr-def;
+      handler-node := ([handler-ro*, handler-rw*], catching, handler-rw*)
+      
 
 
 
