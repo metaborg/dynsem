@@ -4,6 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 
 import com.oracle.truffle.api.CallTarget;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.Truffle;
@@ -19,18 +20,23 @@ import com.oracle.truffle.api.nodes.RootNode;
 public final class InterpreterUtils {
 
 	public static void setComponent(DynSemContext ctx, Object[] arguments, int idx, Object val) {
+		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
+			CompilerAsserts.neverPartOfCompilation();
 			throw new ReductionFailure("Attempted to write null component at index " + idx, createStacktrace());
 		}
 		arguments[idx] = val;
 	}
 
 	public static Object getComponent(DynSemContext ctx, Object[] arguments, int idx) {
+		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if(ctx.isSafeComponentsEnabled() && idx >= arguments.length) {
+			CompilerAsserts.neverPartOfCompilation();
 			throw new ReductionFailure("Attempted access to unbound component at index " + idx, createStacktrace());
 		}
 		final Object val = arguments[idx];
 		if (ctx.isSafeComponentsEnabled() && val == null) {
+			CompilerAsserts.neverPartOfCompilation();
 			throw new ReductionFailure("Attempted access to null component at index " + idx, createStacktrace());
 		}
 		return val;
@@ -38,7 +44,9 @@ public final class InterpreterUtils {
 
 	public static Object readSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot) {
 		final Object val = frame.getValue(slot);
+		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
+			CompilerAsserts.neverPartOfCompilation();
 			throw new ReductionFailure("Accessed null value for slot " + slot.getIdentifier(), createStacktrace());
 		}
 
@@ -46,7 +54,9 @@ public final class InterpreterUtils {
 	}
 
 	public static void writeSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot, Object val) {
+		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
+			CompilerAsserts.neverPartOfCompilation();
 			throw new ReductionFailure("Attempted to write null value for slot " + slot.getIdentifier(),
 					createStacktrace());
 		}
@@ -54,7 +64,9 @@ public final class InterpreterUtils {
 	}
 
 	public static <T> T notNull(DynSemContext ctx, T val) {
+		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
+			CompilerAsserts.neverPartOfCompilation();
 			throw new ReductionFailure("Null value encountered", createStacktrace());
 		}
 		return val;
@@ -62,6 +74,7 @@ public final class InterpreterUtils {
 
 	@TruffleBoundary
 	public static String createStacktrace() {
+		CompilerAsserts.neverPartOfCompilation();
 		final StringBuilder str = new StringBuilder();
 
 		Truffle.getRuntime().iterateFrames(new FrameInstanceVisitor<Integer>() {
@@ -90,7 +103,9 @@ public final class InterpreterUtils {
 		return str.toString();
 	}
 
+	@TruffleBoundary
 	public static int stackDepth() {
+		CompilerAsserts.neverPartOfCompilation();
 		final StringBuilder str = new StringBuilder();
 		Truffle.getRuntime().iterateFrames(new FrameInstanceVisitor<Integer>() {
 

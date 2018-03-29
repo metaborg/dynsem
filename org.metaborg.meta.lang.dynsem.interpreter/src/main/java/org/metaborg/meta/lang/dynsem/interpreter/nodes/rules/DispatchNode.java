@@ -33,8 +33,6 @@ public abstract class DispatchNode extends DynSemNode {
 
 	@Specialization(replaces = "doDirect")
 	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args, @Cached("create()") IndirectCallNode callNode) {
-//		System.out.println("Polymorphic: " + dispatchClass.getName() + "---> " + arrowName);
-//		System.out.println(InterpreterUtils.createStacktrace());
 		return (RuleResult) callNode.call(getUnionRootNode(dispatchClass).getCallTarget(), args);
 	}
 
