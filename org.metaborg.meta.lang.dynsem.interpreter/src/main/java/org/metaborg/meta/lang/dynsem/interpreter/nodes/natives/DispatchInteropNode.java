@@ -33,9 +33,9 @@ public class DispatchInteropNode extends DynSemNode {
 	public Object executeInterop(VirtualFrame frame, VirtualFrame components, Object inputTerm) {
 		RuleResult result = dispatchInvokeNode.execute(frame, inputTerm.getClass(),
 				createArgumentsArray(components, inputTerm));
-
+		
 		updateComponentSnapshot(components, result.components);
-
+		
 		return result.result;
 	}
 

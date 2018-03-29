@@ -11,6 +11,7 @@ import org.spoofax.interpreter.terms.IStrategoTuple;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -35,6 +36,7 @@ public class InvokeHandlerNode extends DynSemNode {
 		try {
 			Constructor<?> constructor = handlerTermClass.getConstructor(thrown.getClass().getSuperclass(), catching.getClass().getSuperclass());
 			Object handler = constructor.newInstance(thrown, catching);
+			
 			return dispatchHandlerNode.executeInterop(frame, components, handler);
 		} catch (ReflectiveOperationException e) {
 			CompilerAsserts.neverPartOfCompilation();

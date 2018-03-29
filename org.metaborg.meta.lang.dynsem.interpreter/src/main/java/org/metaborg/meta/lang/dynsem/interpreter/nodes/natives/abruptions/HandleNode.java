@@ -11,7 +11,11 @@ import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.FrameSlot;
+import com.oracle.truffle.api.frame.FrameUtil;
+import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
@@ -40,6 +44,7 @@ public class HandleNode extends NativeOperationNode {
 	private final ConditionProfile continueExistsCondition = ConditionProfile.createBinaryProfile();
 
 	@Override
+	@ExplodeLoop
 	public Object execute(VirtualFrame frame, VirtualFrame components) {
 		Object throwingBranchResult = null;
 		try {
@@ -48,8 +53,14 @@ public class HandleNode extends NativeOperationNode {
 					throwingTBNode.executeGeneric(frame));
 		} catch (AbortedEvaluationException abort) {
 			catchEntered.enter();
+			VirtualFrame abortedComponents = abort.getComponents();
+			Object handleResult = handlingNode.execute(frame, abortedComponents, abort.getThrown());
+			// update the components frame with changed from the aborted computation
+			for (FrameSlot compSlot : abortedComponents.getFrameDescriptor().getSlots()) {
+				components.setObject(compSlot, abortedComponents.getValue(compSlot));
+			}
 			// branch must return
-			return handlingNode.execute(frame, abort.getComponents(), abort.getThrown());
+			return handleResult;
 		}
 
 		if (continueExistsCondition.profile(continuingTBNode == null)) {

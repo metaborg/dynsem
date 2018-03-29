@@ -10,6 +10,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -39,7 +40,7 @@ public class NativeRelationPremise extends Premise {
 
 		// evaluate the RHS pattern match
 		rhsNode.executeMatch(frame, callResult);
-
+		
 		// update component variables from the component frame
 		restoreComponents.executeRestore(frame, components);
 	}
