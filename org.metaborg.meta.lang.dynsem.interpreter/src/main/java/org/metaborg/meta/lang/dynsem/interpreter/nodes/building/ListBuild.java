@@ -26,11 +26,11 @@ public class ListBuild extends TermBuild {
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		final ITermBuildFactory tbFactory = getContext().getTermRegistry().lookupBuildFactory(listClass);
 		final TermBuild concreteListBuild = tbFactory.apply(getSourceSection(), cloneNodes(elemNodes),
 				cloneNode(tailNode));
 
+		CompilerDirectives.transferToInterpreterAndInvalidate();
 		return replace(concreteListBuild).executeGeneric(frame);
 	}
 

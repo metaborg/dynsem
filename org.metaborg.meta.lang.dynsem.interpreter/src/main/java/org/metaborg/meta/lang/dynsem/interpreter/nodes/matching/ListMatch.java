@@ -26,10 +26,11 @@ public class ListMatch extends MatchPattern {
 
 	@Override
 	public void executeMatch(VirtualFrame frame, Object term) {
-		CompilerDirectives.transferToInterpreterAndInvalidate();
+		
 		final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(listClass)
 				.apply(getSourceSection(), cloneNodes(elemPatterns), cloneNode(tailPattern));
-
+		
+		CompilerDirectives.transferToInterpreterAndInvalidate();
 		replace(concreteMatch).executeMatch(frame, term);
 	}
 

@@ -34,12 +34,12 @@ public class NativeOpTermBuild extends TermBuild {
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		final DynSemContext ctx = getContext();
 		final ITermRegistry termReg = ctx.getTermRegistry();
 		final Class<?> termClass = termReg.getNativeOperatorClass(constr, children.length);
 
 		TermBuild build = termReg.lookupNativeOpBuildFactory(termClass).apply(getSourceSection(), children);
+		CompilerDirectives.transferToInterpreterAndInvalidate();
 		return replace(build).executeGeneric(frame);
 	}
 

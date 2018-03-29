@@ -40,12 +40,12 @@ public class ConBuild extends TermBuild {
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		final ITermRegistry termReg = getContext().getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
 
 		final TermBuild build = InterpreterUtils.notNull(getContext(), termReg.lookupBuildFactory(termClass))
 				.apply(getSourceSection(), cloneNodes(children));
+		CompilerDirectives.transferToInterpreterAndInvalidate();
 		return replace(build).executeGeneric(frame);
 	}
 

@@ -25,9 +25,9 @@ public class TupleBuild extends TermBuild {
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		final TermBuild concreteListBuild = getContext().getTermRegistry().lookupBuildFactory(tupleClass)
 				.apply(getSourceSection(), cloneNodes(elemNodes));
+		CompilerDirectives.transferToInterpreterAndInvalidate();
 		return replace(concreteListBuild).executeGeneric(frame);
 	}
 

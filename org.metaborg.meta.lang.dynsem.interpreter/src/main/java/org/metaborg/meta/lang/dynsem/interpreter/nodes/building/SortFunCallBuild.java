@@ -42,10 +42,10 @@ public class SortFunCallBuild extends TermBuild {
 
 	@Override
 	public Object executeGeneric(VirtualFrame frame) {
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		TermBuild build = getContext().getTermRegistry()
 				.lookupNativeTypeAdapterBuildFactory(sort, function, children.length - 1)
 				.apply(getSourceSection(), children);
+		CompilerDirectives.transferToInterpreterAndInvalidate();
 		return replace(build).executeGeneric(frame);
 	}
 }

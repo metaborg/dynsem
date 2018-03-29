@@ -25,10 +25,10 @@ public class TupleMatch extends MatchPattern {
 
 	@Override
 	public void executeMatch(VirtualFrame frame, Object term) {
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(tupleClass)
 				.apply(getSourceSection(), cloneNodes(elemPatterns));
 
+		CompilerDirectives.transferToInterpreterAndInvalidate();
 		replace(concreteMatch).executeMatch(frame, term);
 	}
 

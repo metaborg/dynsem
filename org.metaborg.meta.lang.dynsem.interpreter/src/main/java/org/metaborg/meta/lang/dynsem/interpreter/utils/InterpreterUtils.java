@@ -23,7 +23,6 @@ public final class InterpreterUtils {
 	public static void setComponent(DynSemContext ctx, Object[] arguments, int idx, Object val) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Attempted to write null component at index " + idx, createStacktrace());
 		}
 		arguments[idx] = val;
@@ -32,12 +31,10 @@ public final class InterpreterUtils {
 	public static Object getComponent(DynSemContext ctx, Object[] arguments, int idx) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if(ctx.isSafeComponentsEnabled() && idx >= arguments.length) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Attempted access to unbound component at index " + idx, createStacktrace());
 		}
 		final Object val = arguments[idx];
 		if (ctx.isSafeComponentsEnabled() && val == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Attempted access to null component at index " + idx, createStacktrace());
 		}
 		return val;
@@ -47,7 +44,6 @@ public final class InterpreterUtils {
 		final Object val = frame.getValue(slot);
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Accessed null value for slot " + slot.getIdentifier(), createStacktrace());
 		}
 
@@ -57,7 +53,6 @@ public final class InterpreterUtils {
 	public static void writeSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot, Object val) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Attempted to write null value for slot " + slot.getIdentifier(),
 					createStacktrace());
 		}
@@ -67,7 +62,6 @@ public final class InterpreterUtils {
 	public static <T> T notNull(DynSemContext ctx, T val) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Null value encountered", createStacktrace());
 		}
 		return val;
