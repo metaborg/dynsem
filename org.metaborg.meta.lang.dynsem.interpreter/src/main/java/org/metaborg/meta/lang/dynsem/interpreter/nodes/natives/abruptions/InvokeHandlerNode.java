@@ -10,37 +10,36 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoTuple;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class InvokeHandlerNode extends DynSemNode {
 
-	public final static String HANDLER_NAME = "handler";
-	public final static int HANDLER_ARITY = 2;
-
 	@Child private TermBuild catchingTermBuildNode;
 	@Child private DispatchInteropNode dispatchHandlerNode;
+	@Child private ReflectiveHandlerInitLookup handlerInitLookupNode;
 
 	public InvokeHandlerNode(SourceSection source, TermBuild catchingNode, DispatchInteropNode dispatchHandlerNode) {
 		super(source);
 		this.catchingTermBuildNode = catchingNode;
 		this.dispatchHandlerNode = dispatchHandlerNode;
+		this.handlerInitLookupNode = ReflectiveHandlerInitLookupNodeGen.create(getSourceSection());
 	}
 
 	public Object execute(VirtualFrame frame, VirtualFrame components, Object thrown) {
-		CompilerAsserts.neverPartOfCompilation();
 		Object catching = catchingTermBuildNode.executeGeneric(frame);
-		Class<?> handlerTermClass = getContext().getTermRegistry().getConstructorClass(HANDLER_NAME, HANDLER_ARITY);
+		Constructor<?> constructor = handlerInitLookupNode.execute(catching.getClass(), thrown.getClass());
+		Object handler;
 		try {
-			Constructor<?> constructor = handlerTermClass.getConstructor(thrown.getClass().getSuperclass(), catching.getClass().getSuperclass());
-			Object handler = constructor.newInstance(thrown, catching);
-			
-			return dispatchHandlerNode.executeInterop(frame, components, handler);
+			handler = constructor.newInstance(thrown, catching);
 		} catch (ReflectiveOperationException e) {
-			CompilerAsserts.neverPartOfCompilation();
-			throw new RuntimeException("Failed to construct handler term", e);
+			CompilerDirectives.transferToInterpreterAndInvalidate();
+			throw new RuntimeException("Failed to instantiate handler term", e);
 		}
+
+		return dispatchHandlerNode.executeInterop(frame, components, handler);
 	}
 
 	public static InvokeHandlerNode create(IStrategoTuple t, FrameDescriptor ruleFD, FrameDescriptor componentsFD) {
