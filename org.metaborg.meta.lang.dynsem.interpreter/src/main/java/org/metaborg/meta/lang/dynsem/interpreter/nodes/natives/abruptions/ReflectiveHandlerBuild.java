@@ -33,7 +33,8 @@ public abstract class ReflectiveHandlerBuild extends DynSemNode {
 		return doInvoke(cachedCtrHandle, thrown, catching);
 	}
 
-	 @TruffleBoundary
+	// FIXME: somehow we should allow inlining of the method invocation
+	@TruffleBoundary
 	private Object doInvoke(MethodHandle ctrHandle, Object thrown, Object catching) {
 		try {
 			return ctrHandle.invoke(thrown, catching);
