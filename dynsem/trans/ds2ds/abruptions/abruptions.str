@@ -34,7 +34,6 @@ strategies // name definitions
   abruptions-name-sort-catching = !"_Catching"
   abruptions-name-sort-val      = !"_ExcVal"
   abruptions-name-sort-unit     = !"U"
-  abruptions-name-component     = !"_Exc"
   abruptions-name-arrow-handle  = !"handle"
   abruptions-name-arrow-raise   = !"raise"
   abruptions-name-arrow-handler = !"handler"
@@ -52,9 +51,6 @@ strategies // signature generation
     ctr-decls := Constructors([
                   ConsDecl(<abruptions-name-ctr-ok>, [], SimpleSort(<abruptions-name-sort-thrown>), Annos([]))
                  ]);
-    cmp-decls := Components([
-                  CompDeclDefault(<abruptions-name-component>, SimpleSort(<abruptions-name-sort-thrown>), Con(<abruptions-name-ctr-ok>, []))
-                  ]);
     arr-decls := Arrows([
                   ArrowDecl(ArrowROs([]), SimpleSort(<abruptions-name-sort-throwing>), ArrowRWs([]), "", SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
                   NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
@@ -62,7 +58,7 @@ strategies // signature generation
                   NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-unit>), ArrowRWs([])),
                   MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-handler>, [SimpleSort(<abruptions-name-sort-thrown>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([]))
                   ]);
-    !Signatures([srt-decls, ctr-decls, cmp-decls, arr-decls])
+    !Signatures([srt-decls, ctr-decls, arr-decls])
 
   abruptions-is-handler-2-decl =
     where(
