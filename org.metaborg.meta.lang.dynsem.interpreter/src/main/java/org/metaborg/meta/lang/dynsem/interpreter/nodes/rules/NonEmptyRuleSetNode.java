@@ -11,7 +11,7 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class NonEmptyRuleSetNode extends RuleSetNode {
+public class NonEmptyRuleSetNode extends RulesNode {
 
 	@Children private final Rule[] rules;
 

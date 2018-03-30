@@ -15,12 +15,12 @@ import com.oracle.truffle.api.source.SourceSection;
  * @author vladvergu
  *
  */
-public abstract class RuleSetNode extends DynSemNode {
+public abstract class RulesNode extends DynSemNode {
 
 	private final String arrowName;
 	private final Class<?> dispatchClass;
 
-	public RuleSetNode(SourceSection source, String arrowName, Class<?> dispatchClass) {
+	public RulesNode(SourceSection source, String arrowName, Class<?> dispatchClass) {
 		super(source);
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;

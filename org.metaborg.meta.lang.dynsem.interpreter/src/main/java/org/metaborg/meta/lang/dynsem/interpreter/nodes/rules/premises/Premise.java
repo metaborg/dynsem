@@ -28,9 +28,6 @@ public abstract class Premise extends DynSemNode {
 		if (Tools.hasConstructor(premT, "Relation", 3)) {
 			return RelationPremise.create(premT, fd);
 		}
-		if (Tools.hasConstructor(premT, "RecRelation", 3)) {
-			return RecursiveRelationPremise.create(premT, fd);
-		}
 		if (Tools.hasConstructor(premT, "Match", 2)) {
 			return MatchPremise.create(premT, fd);
 		}

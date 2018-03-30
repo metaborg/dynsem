@@ -8,7 +8,7 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class JointRuleNode extends DynSemNode {
 
-	@Child private RuleSetNode primaryRulesNode;
+	@Child private RulesNode primaryRulesNode;
 
 	@Child private AlternativeRuleCallNode alternativeRulesNode;
 
@@ -27,20 +27,6 @@ public class JointRuleNode extends DynSemNode {
 	}
 
 	public RuleResult execute(Object[] arguments) {
-		RuleResult res = null;
-		boolean repeat = true;
-		while (repeat) {
-			try {
-				return executeRules(arguments);
-			} catch (RecurException recex) {
-				repeat = true;
-			}
-		}
-		assert res != null;
-		return res;
-	}
-
-	private RuleResult executeRules(Object[] arguments) {
 		try {
 			return primaryRulesNode.execute(arguments);
 		} catch (PatternMatchFailure pmfx) {
@@ -48,7 +34,7 @@ public class JointRuleNode extends DynSemNode {
 		}
 	}
 
-	public RuleSetNode getUnionNode() {
+	public RulesNode getUnionNode() {
 		return primaryRulesNode;
 	}
 

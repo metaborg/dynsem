@@ -69,7 +69,7 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 			@Override
 			public Object execute(VirtualFrame frame) {
-				return rootDispatch.execute(frame, programTerm.getClass(), new Object[] { programTerm });
+				return rootDispatch.execute(programTerm.getClass(), new Object[] { programTerm });
 			}
 		};
 		return Truffle.getRuntime().createCallTarget(startInterpretation);

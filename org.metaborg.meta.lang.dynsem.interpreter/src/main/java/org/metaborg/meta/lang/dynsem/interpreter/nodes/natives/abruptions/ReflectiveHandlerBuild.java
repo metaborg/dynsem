@@ -8,7 +8,6 @@ import java.lang.invoke.MethodHandles;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;

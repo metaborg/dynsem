@@ -31,11 +31,11 @@ public class DispatchInteropNode extends DynSemNode {
 	}
 
 	public Object executeInterop(VirtualFrame frame, VirtualFrame components, Object inputTerm) {
-		RuleResult result = dispatchInvokeNode.execute(frame, inputTerm.getClass(),
+		RuleResult result = dispatchInvokeNode.execute(inputTerm.getClass(),
 				createArgumentsArray(components, inputTerm));
-		
+
 		updateComponentSnapshot(components, result.components);
-		
+
 		return result.result;
 	}
 

@@ -10,6 +10,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.nodes.NodeUtil;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class AlternativeRuleCallNode extends DynSemNode {
@@ -28,6 +29,8 @@ public abstract class AlternativeRuleCallNode extends DynSemNode {
 
 	public abstract RuleResult execute(Object[] arguments);
 
+	
+	
 	@Specialization(limit = "1", guards = "nextDispatchClass == getNextDispatchClass(reductionTerm(arguments))")
 	public RuleResult doCached(Object[] arguments,
 			@Cached("getNextDispatchClass(reductionTerm(arguments))") Class<?> nextDispatchClass,

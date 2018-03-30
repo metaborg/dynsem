@@ -8,7 +8,6 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.source.SourceSection;
@@ -22,10 +21,10 @@ public abstract class DispatchNode extends DynSemNode {
 		this.arrowName = arrowName;
 	}
 
-	public abstract RuleResult execute(VirtualFrame frame, Class<?> dispatchClass, Object[] args);
+	public abstract RuleResult execute(Class<?> dispatchClass, Object[] args);
 
 	@Specialization(limit = "4", guards = "dispatchClass == cachedDispatchClass")
-	public RuleResult doDirect(VirtualFrame frame, Class<?> dispatchClass, Object[] args,
+	public RuleResult doDirect(Class<?> dispatchClass, Object[] args,
 			@Cached("dispatchClass") Class<?> cachedDispatchClass,
 			@Cached("create(getUnionRootNode(cachedDispatchClass).getCallTarget())") DirectCallNode callNode) {
 		return (RuleResult) callNode.call(args);
