@@ -5,12 +5,10 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.Frame;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameInstance;
 import com.oracle.truffle.api.frame.FrameInstance.FrameAccess;
 import com.oracle.truffle.api.frame.FrameInstanceVisitor;
@@ -78,6 +76,7 @@ public final class InterpreterUtils {
 			public Integer visitFrame(FrameInstance frameInstance) {
 				CallTarget callTarget = frameInstance.getCallTarget();
 				Frame frame = frameInstance.getFrame(FrameAccess.READ_ONLY);
+
 				RootNode rn = ((RootCallTarget) callTarget).getRootNode();
 				if (rn.getClass().getName().contains("DynSemRuleForeignAccess")) {
 					return 1;
@@ -85,11 +84,15 @@ public final class InterpreterUtils {
 				if (str.length() > 0) {
 					str.append(System.getProperty("line.separator"));
 				}
-				str.append("Frame: ").append(rn.toString());
-				FrameDescriptor frameDescriptor = frame.getFrameDescriptor();
-				for (FrameSlot s : frameDescriptor.getSlots()) {
-					str.append("\n\t ").append(s.getIdentifier()).append("=").append(frame.getValue(s));
+				str.append(rn.toString());
+				Object[] arguments = frame.getArguments();
+				if(arguments.length > 0) {
+					str.append(" ").append(arguments[0].toString());	
 				}
+//				FrameDescriptor frameDescriptor = frame.getFrameDescriptor();
+//				for (FrameSlot s : frameDescriptor.getSlots()) {
+//					str.append("\n\t ").append(s.getIdentifier()).append("=").append(frame.getValue(s));
+//				}
 				return null;
 			}
 
