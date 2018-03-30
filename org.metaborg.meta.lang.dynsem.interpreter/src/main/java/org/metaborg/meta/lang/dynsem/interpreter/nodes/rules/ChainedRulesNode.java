@@ -14,7 +14,7 @@ public abstract class ChainedRulesNode extends DynSemNode {
 
 	public abstract int ruleCount();
 
-	public static ChainedRulesNode createFromRules(SourceSection source, RuleKind kind, String arrowName,
+	public static ChainedRulesNode createDeepFromRules(SourceSection source, RuleKind kind, String arrowName,
 			Class<?> dispatchClass, Rule[] rules) {
 		ChainedRulesNode seq = CallAltRuleNodeGen.create(source, dispatchClass, kind, arrowName);
 		for (int i = rules.length - 1; i >= 0; i--) {
@@ -23,4 +23,9 @@ public abstract class ChainedRulesNode extends DynSemNode {
 		}
 		return seq;
 	}
+	
+//	public static ChainedRulesNode createShallowFromRules(SourceSection source, RuleKind kind, String arrowName,
+//			Class<?> dispatchClass, Rule[] rules) {
+//		// FIXME implement
+//	}
 }

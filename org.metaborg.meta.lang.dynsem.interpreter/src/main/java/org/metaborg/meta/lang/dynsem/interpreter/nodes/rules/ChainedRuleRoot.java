@@ -15,7 +15,7 @@ public class ChainedRuleRoot extends DynSemRootNode {
 	public ChainedRuleRoot(DynSemLanguage lang, SourceSection source, RuleKind kind, String arrowName,
 			Class<?> dispatchClass, Rule[] rules) {
 		super(lang);
-		this.rules = ChainedRulesNode.createFromRules(source, kind, arrowName, dispatchClass, rules);
+		this.rules = ChainedRulesNode.createDeepFromRules(source, kind, arrowName, dispatchClass, rules);
 
 		Truffle.getRuntime().createCallTarget(this);
 	}

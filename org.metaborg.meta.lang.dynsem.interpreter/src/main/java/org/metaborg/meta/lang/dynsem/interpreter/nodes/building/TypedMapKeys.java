@@ -11,6 +11,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -42,6 +43,14 @@ public abstract class TypedMapKeys extends TermBuild {
 	@Specialization
 	public IListTerm<?> doCached(@SuppressWarnings("rawtypes") PersistentMap map,
 			@SuppressWarnings("rawtypes") @Cached("getListClassConstructor()") Constructor<IListTerm> constr) {
+		return mkList(constr, map);
+
+	}
+
+	@TruffleBoundary
+	// FIXME: reflection is really bad for speed.
+	private IListTerm<?> mkList(@SuppressWarnings("rawtypes") Constructor<IListTerm> constr,
+			@SuppressWarnings("rawtypes") PersistentMap map) {
 		try {
 			return constr.newInstance(new Object[] { map.keySet() });
 		} catch (ReflectiveOperationException e) {
