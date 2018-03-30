@@ -8,30 +8,30 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class JointRuleRoot extends DynSemRootNode {
+public class ChainedRuleRoot extends DynSemRootNode {
 
-	@Child private JointRuleNode jointNode;
+	@Child private ChainedRulesNode rules;
 
-	public JointRuleRoot(DynSemLanguage lang, SourceSection source, RuleKind kind, String arrowName,
+	public ChainedRuleRoot(DynSemLanguage lang, SourceSection source, RuleKind kind, String arrowName,
 			Class<?> dispatchClass, Rule[] rules) {
 		super(lang);
-		this.jointNode = new JointRuleNode(source, kind, arrowName, dispatchClass, rules);
+		this.rules = ChainedRulesNode.createFromRules(source, kind, arrowName, dispatchClass, rules);
 
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
-	public JointRuleNode getJointNode() {
-		return jointNode;
+	public ChainedRulesNode getChainedRules() {
+		return rules;
 	}
-
+	
 	@Override
 	public RuleResult execute(VirtualFrame frame) {
-		return jointNode.execute(frame.getArguments());
+		return rules.execute(frame.getArguments());
 	}
 
 	@TruffleBoundary
 	public String toString() {
-		return jointNode.toString();
+		return rules.toString();
 	}
 
 }

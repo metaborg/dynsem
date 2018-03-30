@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
@@ -10,31 +9,25 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.nodes.NodeUtil;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class AlternativeRuleCallNode extends DynSemNode {
+public abstract class CallAltRuleNode extends ChainedRulesNode {
 
 	private final RuleKind parentRuleKind;
 	private final String arrowName;
 	private final Class<?> dispatchClass;
 
-	public AlternativeRuleCallNode(SourceSection source, Class<?> dispatchClass, RuleKind parentRuleKind,
-			String arrowName) {
+	public CallAltRuleNode(SourceSection source, Class<?> dispatchClass, RuleKind parentRuleKind, String arrowName) {
 		super(source);
 		this.dispatchClass = dispatchClass;
 		this.parentRuleKind = parentRuleKind;
 		this.arrowName = arrowName;
 	}
 
-	public abstract RuleResult execute(Object[] arguments);
-
-	
-	
 	@Specialization(limit = "1", guards = "nextDispatchClass == getNextDispatchClass(reductionTerm(arguments))")
 	public RuleResult doCached(Object[] arguments,
 			@Cached("getNextDispatchClass(reductionTerm(arguments))") Class<?> nextDispatchClass,
-			@Cached("createUnionNode(nextDispatchClass)") JointRuleNode targetRuleNode) {
+			@Cached("createUnionNode(nextDispatchClass)") ChainedRulesNode targetRuleNode) {
 		if (nextDispatchClass == null) {
 			if (getContext().isFullBacktrackingEnabled()) {
 				throw PatternMatchFailure.INSTANCE;
@@ -44,6 +37,11 @@ public abstract class AlternativeRuleCallNode extends DynSemNode {
 			}
 		}
 		return targetRuleNode.execute(arguments);
+	}
+
+	@Override
+	public int ruleCount() {
+		return 0;
 	}
 
 	protected Object reductionTerm(Object[] arguments) {
@@ -90,9 +88,9 @@ public abstract class AlternativeRuleCallNode extends DynSemNode {
 
 	}
 
-	protected JointRuleNode createUnionNode(Class<?> nextDispatchClass) {
+	protected ChainedRulesNode createUnionNode(Class<?> nextDispatchClass) {
 		return NodeUtil
-				.cloneNode(getContext().getRuleRegistry().lookupRules(arrowName, nextDispatchClass).getJointNode());
+				.cloneNode(getContext().getRuleRegistry().lookupRules(arrowName, nextDispatchClass).getChainedRules());
 	}
 
 }

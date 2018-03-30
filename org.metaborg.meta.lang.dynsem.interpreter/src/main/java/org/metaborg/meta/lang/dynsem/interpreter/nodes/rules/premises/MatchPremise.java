@@ -30,7 +30,7 @@ public class MatchPremise extends Premise {
 		this.patt = pattern;
 	}
 
-	private static final NodeCountFilter non_elidable_termbuild = new NodeCountFilter() {
+	private static final NodeCountFilter is_non_elidable_termbuild = new NodeCountFilter() {
 
 		@Override
 		public boolean isCounted(Node node) {
@@ -41,7 +41,7 @@ public class MatchPremise extends Premise {
 	@Override
 	public void execute(VirtualFrame frame) {
 		final Object t = term.executeGeneric(frame);
-		if (patt instanceof NoOpPattern && NodeUtil.countNodes(term, non_elidable_termbuild) == 0) {
+		if (patt instanceof NoOpPattern && NodeUtil.countNodes(term, is_non_elidable_termbuild) == 0) {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
 			replace(NoOpPremiseNodeGen.create(getSourceSection()));
 		} else {

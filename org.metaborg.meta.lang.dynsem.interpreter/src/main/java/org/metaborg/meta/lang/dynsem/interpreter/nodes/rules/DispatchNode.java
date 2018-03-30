@@ -35,7 +35,7 @@ public abstract class DispatchNode extends DynSemNode {
 		return (RuleResult) callNode.call(getUnionRootNode(dispatchClass).getCallTarget(), args);
 	}
 
-	protected final JointRuleRoot getUnionRootNode(Class<?> dispatchClass) {
+	protected final ChainedRuleRoot getUnionRootNode(Class<?> dispatchClass) {
 		return getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
 	}
 

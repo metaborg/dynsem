@@ -24,7 +24,7 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class RuleRegistry {
 
-	private final Map<String, Map<Class<?>, JointRuleRoot>> rules = new HashMap<>();
+	private final Map<String, Map<Class<?>, ChainedRuleRoot>> rules = new HashMap<>();
 
 	private boolean isInit;
 
@@ -44,17 +44,17 @@ public class RuleRegistry {
 	@TruffleBoundary
 	public int ruleCount() {
 		int i = 0;
-		for (Map<?, JointRuleRoot> val : rules.values()) {
-			for (JointRuleRoot root : val.values()) {
-				i += root.getJointNode().getUnionNode().getRules().size();
+		for (Map<?, ChainedRuleRoot> val : rules.values()) {
+			for (ChainedRuleRoot root : val.values()) {
+				i += root.getChainedRules().ruleCount();
 			}
 		}
 		return i;
 	}
 
 	@TruffleBoundary
-	public void registerJointRule(String arrowName, Class<?> dispatchClass, JointRuleRoot jointRuleRoot) {
-		Map<Class<?>, JointRuleRoot> rulesForName = rules.get(arrowName);
+	public void registerJointRule(String arrowName, Class<?> dispatchClass, ChainedRuleRoot jointRuleRoot) {
+		Map<Class<?>, ChainedRuleRoot> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			rulesForName = new HashMap<>();
@@ -64,14 +64,14 @@ public class RuleRegistry {
 	}
 
 	@TruffleBoundary
-	public JointRuleRoot lookupRules(String arrowName, Class<?> dispatchClass) {
+	public ChainedRuleRoot lookupRules(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
-		JointRuleRoot jointRuleForClass = null;
+		ChainedRuleRoot jointRuleForClass = null;
 
-		Map<Class<?>, JointRuleRoot> jointRulesForName = rules.get(arrowName);
+		Map<Class<?>, ChainedRuleRoot> jointRulesForName = rules.get(arrowName);
 
 		if (jointRulesForName != null) {
 			jointRuleForClass = jointRulesForName.get(dispatchClass);
@@ -131,10 +131,10 @@ public class RuleRegistry {
 		}
 	}
 
-	protected final JointRuleRoot createJointRoot(RuleKind kind, String arrowName, Class<?> dispatchClass,
+	protected final ChainedRuleRoot createJointRoot(RuleKind kind, String arrowName, Class<?> dispatchClass,
 			Rule[] rules) {
-		return new JointRuleRoot(language, SourceUtils.dynsemSourceSectionUnvailable(), kind, arrowName, dispatchClass,
-				rules);
+		return new ChainedRuleRoot(language, SourceUtils.dynsemSourceSectionUnvailable(), kind, arrowName,
+				dispatchClass, rules);
 	}
 
 	private static IStrategoList ruleListTerm(IStrategoTerm topSpecTerm) {

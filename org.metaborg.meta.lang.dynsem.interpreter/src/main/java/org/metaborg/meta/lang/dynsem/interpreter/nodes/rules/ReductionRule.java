@@ -3,6 +3,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.NodeChild;
+import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -12,6 +14,7 @@ import com.oracle.truffle.api.source.SourceSection;
  * 
  * @author vladvergu
  *
+ * TODO: rewrite to use annotations for children. pushdown premises into a separate node
  */
 public class ReductionRule extends Rule {
 
