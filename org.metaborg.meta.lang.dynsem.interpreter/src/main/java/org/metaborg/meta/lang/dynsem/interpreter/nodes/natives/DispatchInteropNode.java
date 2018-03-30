@@ -54,7 +54,7 @@ public class DispatchInteropNode extends DynSemNode {
 	 * it turns out that resultComps.length is NOT compilation constant
 	 * FIXME: why is that?! this would suggest that sometimes the rule is that invoked differs in the number of output components
 	 */
-	public void updateComponentSnapshot(VirtualFrame components, Object[] resultComps) {
+	private void updateComponentSnapshot(VirtualFrame components, Object[] resultComps) {
 		assert resultComps.length == outputComponents.length;
 //		CompilerAsserts.compilationConstant(resultComps.length);
 		for (int i = 0; i < resultComps.length; i++) {

@@ -44,7 +44,6 @@ public class NativeRelationPremise extends Premise {
 		restoreComponents.executeRestore(frame, components);
 	}
 
-	// NativeRelation([LabelComp(Label("NaBL2"),VarRef("NaBL21")),LabelComp(Label("F"),VarRef("F1")),LabelComp(Label("H"),VarRef("H1"))],Raise(Con("BR",[])),VarRef("u1"),[LabelComp(Label("H"),VarRef("H2"))])
 	public static NativeRelationPremise create(IStrategoAppl t, FrameDescriptor ruleFD) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "NativeRelation", 4);

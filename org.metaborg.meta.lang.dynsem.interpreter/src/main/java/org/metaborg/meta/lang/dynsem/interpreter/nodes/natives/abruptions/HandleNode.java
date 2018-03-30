@@ -10,7 +10,7 @@ import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -42,9 +42,15 @@ public class HandleNode extends NativeOperationNode {
 	private final BranchProfile catchEntered = BranchProfile.create();
 	private final ConditionProfile continueExistsCondition = ConditionProfile.createBinaryProfile();
 
+	@CompilationFinal(dimensions = 1) private FrameSlot[] componentSlots;
+
 	@Override
-//	FIXME @ExplodeLoop
+	@ExplodeLoop
 	public Object execute(VirtualFrame frame, VirtualFrame components) {
+		if (componentSlots == null) {
+			componentSlots = components.getFrameDescriptor().getSlots().toArray(new FrameSlot[0]);
+		}
+		CompilerAsserts.compilationConstant(componentSlots.length);
 		Object throwingBranchResult = null;
 		try {
 			// not returning because we need for continue
@@ -54,10 +60,9 @@ public class HandleNode extends NativeOperationNode {
 			catchEntered.enter();
 			VirtualFrame abortedComponents = abort.getComponents();
 			Object handleResult = handlingNode.execute(frame, abortedComponents, abort.getThrown());
-			// update the components frame with changed from the aborted computation
-//			CompilerAsserts.compilationConstant(abortedComponents.getFrameDescriptor().getSlots());
-			for (FrameSlot compSlot : abortedComponents.getFrameDescriptor().getSlots()) {
-				components.setObject(compSlot, abortedComponents.getValue(compSlot));
+			 // update the components frame with changed from the aborted computation
+			for (FrameSlot frameSlot : componentSlots) {
+				components.setObject(frameSlot, abortedComponents.getValue(frameSlot));
 			}
 			// branch must return
 			return handleResult;
