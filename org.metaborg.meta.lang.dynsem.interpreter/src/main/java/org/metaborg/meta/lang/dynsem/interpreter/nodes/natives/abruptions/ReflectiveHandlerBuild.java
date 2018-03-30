@@ -7,6 +7,8 @@ import java.lang.invoke.MethodHandles;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 
+import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -28,14 +30,13 @@ public abstract class ReflectiveHandlerBuild extends DynSemNode {
 	public Object executeCached(Object thrown, Object catching, @Cached("thrown.getClass()") Class<?> cachedThrownClass,
 			@Cached("catching.getClass()") Class<?> cachedCatchingClass,
 			@Cached("findConstructorHandle(cachedThrownClass, cachedCatchingClass)") MethodHandle cachedCtrHandle) {
-
 		return doInvoke(cachedCtrHandle, thrown, catching);
 	}
 
-	@TruffleBoundary
-	private Object doInvoke(MethodHandle cachedCtrHandle, Object thrown, Object catching) {
+	 @TruffleBoundary
+	private Object doInvoke(MethodHandle ctrHandle, Object thrown, Object catching) {
 		try {
-			return cachedCtrHandle.invoke(thrown, catching);
+			return ctrHandle.invoke(thrown, catching);
 		} catch (Throwable e) {
 			throw new RuntimeException("Failed to instantiate handler term", e);
 		}
@@ -46,7 +47,9 @@ public abstract class ReflectiveHandlerBuild extends DynSemNode {
 		return doInvoke(findConstructorHandle(thrown.getClass(), catching.getClass()), thrown, catching);
 	}
 
+	@TruffleBoundary
 	protected MethodHandle findConstructorHandle(Class<?> thrownClass, Class<?> catchingClass) {
+		CompilerAsserts.neverPartOfCompilation();
 		Class<?> handlerTermClass = getContext().getTermRegistry().getConstructorClass(HANDLER_CTOR_NAME,
 				HANDLER_CTOR_ARITY);
 		MethodHandle constructorHandle;
@@ -54,7 +57,7 @@ public abstract class ReflectiveHandlerBuild extends DynSemNode {
 		try {
 			constructorHandle = lookup.findConstructor(handlerTermClass,
 					methodType(void.class, thrownClass.getSuperclass(), catchingClass.getSuperclass()));
-			return constructorHandle;
+			return constructorHandle.asFixedArity();
 		} catch (NoSuchMethodException | IllegalAccessException e) {
 			throw new RuntimeException("Failed to find constructors for handler class", e);
 		}

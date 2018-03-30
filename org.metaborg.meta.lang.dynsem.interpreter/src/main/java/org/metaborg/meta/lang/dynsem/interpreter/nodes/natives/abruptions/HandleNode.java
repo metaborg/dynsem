@@ -10,6 +10,7 @@ import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -42,7 +43,7 @@ public class HandleNode extends NativeOperationNode {
 	private final ConditionProfile continueExistsCondition = ConditionProfile.createBinaryProfile();
 
 	@Override
-	@ExplodeLoop
+//	FIXME @ExplodeLoop
 	public Object execute(VirtualFrame frame, VirtualFrame components) {
 		Object throwingBranchResult = null;
 		try {
@@ -54,6 +55,7 @@ public class HandleNode extends NativeOperationNode {
 			VirtualFrame abortedComponents = abort.getComponents();
 			Object handleResult = handlingNode.execute(frame, abortedComponents, abort.getThrown());
 			// update the components frame with changed from the aborted computation
+//			CompilerAsserts.compilationConstant(abortedComponents.getFrameDescriptor().getSlots());
 			for (FrameSlot compSlot : abortedComponents.getFrameDescriptor().getSlots()) {
 				components.setObject(compSlot, abortedComponents.getValue(compSlot));
 			}
