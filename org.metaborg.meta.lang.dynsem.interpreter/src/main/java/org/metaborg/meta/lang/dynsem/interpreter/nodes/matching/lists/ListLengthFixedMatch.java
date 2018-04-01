@@ -32,15 +32,9 @@ public abstract class ListLengthFixedMatch extends MatchPattern {
 			throw PatternMatchFailure.INSTANCE;
 		}
 	}
-	
+
 	public int getExpectedLength() {
 		return expectedLength;
 	}
-
-//	@Fallback
-//	public void executeFail(VirtualFrame frame, Object t) {
-//		assert !(t instanceof IListTerm<?>);
-//		throw PatternMatchFailure.INSTANCE;
-//	}
 
 }

@@ -21,7 +21,6 @@ public abstract class GenericListMatch extends MatchPattern {
 		super(source);
 		this.numHeadElems = numHeadElems;
 		this.tailPattern = tailPattern;
-		System.out.println("Generic list match");
 	}
 
 	@Specialization(guards = "tailPattern == null")
