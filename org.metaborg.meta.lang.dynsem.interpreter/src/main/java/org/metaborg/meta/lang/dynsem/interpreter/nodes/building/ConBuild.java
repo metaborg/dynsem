@@ -45,7 +45,7 @@ public class ConBuild extends TermBuild {
 
 		final TermBuild build = InterpreterUtils.notNull(getContext(), termReg.lookupBuildFactory(termClass))
 				.apply(getSourceSection(), cloneNodes(children));
-		CompilerDirectives.transferToInterpreterAndInvalidate();
+
 		return replace(build).executeGeneric(frame);
 	}
 

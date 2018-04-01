@@ -6,7 +6,6 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -30,7 +29,6 @@ public class ListBuild extends TermBuild {
 		final TermBuild concreteListBuild = tbFactory.apply(getSourceSection(), cloneNodes(elemNodes),
 				cloneNode(tailNode));
 
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		return replace(concreteListBuild).executeGeneric(frame);
 	}
 

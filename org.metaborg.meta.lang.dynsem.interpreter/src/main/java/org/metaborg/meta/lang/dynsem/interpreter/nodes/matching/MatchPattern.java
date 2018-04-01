@@ -1,6 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.GenericListMatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListMatch;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 

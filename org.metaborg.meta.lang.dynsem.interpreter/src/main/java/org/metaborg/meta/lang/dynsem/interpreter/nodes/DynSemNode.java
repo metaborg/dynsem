@@ -10,7 +10,6 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class DynSemNode extends Node {
 	private final SourceSection sourceSection;
 
-	@CompilationFinal DynSemContext ctx;
 
 	public DynSemNode(SourceSection source) {
 		super();
@@ -22,10 +21,13 @@ public abstract class DynSemNode extends Node {
 		return sourceSection;
 	}
 
+	@CompilationFinal DynSemContext ctx;
+
 	protected DynSemContext getContext() {
 		if (ctx == null) {
 			ctx = DynSemLanguage.getContext(getRootNode());
 		}
 		return ctx;
 	}
+	
 }

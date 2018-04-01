@@ -9,82 +9,260 @@ imports
   libjava-front
   
 rules
-
-    ds-to-interp-terms-matching-list:
-    ls@ListSort(es) -> 
-      compilation-unit |[
+  ds-to-interp-terms-matching-list:
+    ls@ListSort(es) -> compilation-unit |[
         package ~x:<get-opt> MatchPkg();
-  
+       
         import ~x:$[[<get-opt> TermPkg()].*];
-        
-        import java.util.Iterator;
-        
+        import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.*;
+        import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.x_listmatchclassnotailuninitng.*;
+        import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.x_listmatchclasswithtailuninitng.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.NoOpPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthFixedMatch;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthFixedMatchNodeGen;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthLongerMatch;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthLongerMatchNodeGen;
         
+        import com.oracle.truffle.api.CompilerAsserts;
+        import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
         import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.nodes.ExplodeLoop;
         import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.nodes.ExplodeLoop;
+        import com.oracle.truffle.api.profiles.ConditionProfile;
         import com.oracle.truffle.api.source.SourceSection;
         
         public abstract class x_listmatchclass extends MatchPattern {
-        
-          @Children
-          protected final MatchPattern[] elemPatterns;
-        
-          @Child
-          protected MatchPattern tailPattern;
-        
-          public x_listmatchclass(SourceSection source, MatchPattern[] patterns, MatchPattern tailPattern) {
+          
+          public x_listmatchclass(SourceSection source) {
             super(source);
-            this.elemPatterns = patterns;
-            this.tailPattern = tailPattern;
-          }
-          
-          @Specialization(guards = "tailPattern == null")
-          public void doGenericNoTail(VirtualFrame frame, x_listclass list) {
-            assert tailPattern == null;
-            if (elemPatterns.length != list.size()) {
-              throw PatternMatchFailure.INSTANCE;
-            }
-        
-            matchElemPatterns(frame, list);
           }
         
-          @Specialization(guards = "tailPattern != null")
-          public void doGenericWithTail(VirtualFrame frame, x_listclass list) {
-            assert tailPattern != null;
-        
-            if (elemPatterns.length > list.size()) {
-              throw PatternMatchFailure.INSTANCE;
-            }
-        
-            matchElemPatterns(frame, list);
-        
-            tailPattern.executeMatch(frame, list.drop(elemPatterns.length));
-          }
-          
-          @Specialization(guards = "notAList(o)")
-          public void doFail(VirtualFrame frame, Object o) {
-            throw PatternMatchFailure.INSTANCE;
-          }
-          
-          protected static boolean notAList(Object o){
-            return !(o instanceof x_listclass);
-          }
-        
-          @ExplodeLoop
-          private final void matchElemPatterns(VirtualFrame frame,
-              x_listclass list) {
-            final x_elemclass[] elems = list.take(elemPatterns.length);
-            for (int idx = 0; idx < elemPatterns.length; idx++) {
-              elemPatterns[idx].executeMatch(frame, elems[idx]);
+          public static MatchPattern createUninitialized(SourceSection source, MatchPattern[] patterns,
+              MatchPattern tailPattern) {
+            if (tailPattern == null) {
+              return x_listmatchclassnotailuninitng.create(source, patterns);
+            } else {
+              return x_listmatchclasswithtailuninitng.create(source, patterns, tailPattern);
             }
           }
         
+          public static abstract class x_listmatchclassnotailuninit extends x_listmatchclass {
+        
+            @Children
+            protected final MatchPattern[] elemPatterns;
+        
+            public x_listmatchclassnotailuninit(SourceSection source, MatchPattern[] patterns) {
+              super(source);
+              this.elemPatterns = patterns;
+            }
+        
+            private static boolean elemPattsAreNoOps(MatchPattern[] elemPatterns) {
+              CompilerAsserts.neverPartOfCompilation();
+              for (MatchPattern patt : elemPatterns) {
+                if (!(patt instanceof NoOpPattern)) {
+                  return false;
+                }
+              }
+              return true;
+            }
+        
+            @Specialization
+            public void executeSpecific(VirtualFrame frame, x_listclass l) {
+              if (elemPattsAreNoOps(elemPatterns)) {
+                // we will know statically whether the elemPatterns are NoOps
+                // in that case we specialize to a fixed length check
+//                System.out.println("-> to fixed length: " + this.getClass());
+                replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length)).executeMatch(frame,
+                    l);
+              } else {
+//                System.out.println("-> to full head match no tail: " + this.getClass());
+                replace(x_listmatchclassnotailng.create(getSourceSection(), elemPatterns));
+              }
+            }
+        
+            public static abstract class x_listmatchclassnotail extends x_listmatchclassnotailuninit {
+        
+              public x_listmatchclassnotail(SourceSection source, MatchPattern[] patterns) {
+                super(source, patterns);
+              }
+        
+              private final ConditionProfile eqLen = ConditionProfile.createCountingProfile();
+        
+              @Specialization
+              @ExplodeLoop
+              public void executeSpecific(VirtualFrame frame, x_listclass l) {
+                if (eqLen.profile(l.size() != elemPatterns.length)) {
+                  throw PatternMatchFailure.INSTANCE;
+                } else {
+                  for (MatchPattern patt : elemPatterns) {
+                    patt.executeMatch(frame, l.head());
+                    l = l.tail();
+                  }
+                }
+              }
+        
+            }
+        
+          }
+        
+          public static abstract class x_listmatchclasswithtailuninit extends x_listmatchclass {
+        
+            @Children
+            protected final MatchPattern[] elemPatterns;
+        
+            @Child
+            protected MatchPattern tailPattern;
+        
+            public x_listmatchclasswithtailuninit(SourceSection source, MatchPattern[] patterns,
+                MatchPattern tailPattern) {
+              super(source);
+              this.elemPatterns = patterns;
+              this.tailPattern = tailPattern;
+            }
+        
+            @CompilationFinal
+            private boolean hasRun;
+        
+            @CompilationFinal
+            private boolean elemPattsAreNoOps;
+        
+            private boolean elemPattsAreNoOps() {
+              if (!hasRun) {
+                hasRun = true;
+                for (MatchPattern patt : elemPatterns) {
+                  if (!(patt instanceof NoOpPattern)) {
+                    elemPattsAreNoOps = false;
+                    break;
+                  }
+                }
+              }
+              return elemPattsAreNoOps;
+            }
+        
+            protected final ConditionProfile gtLen = ConditionProfile.createCountingProfile();
+        
+            @Specialization
+            public void executeSpecific(VirtualFrame frame, x_listclass l) {
+              CompilerAsserts.neverPartOfCompilation("Should have already specialized. Untested code!");
+              if (elemPattsAreNoOps()) {
+//                System.out.println("-> optimizable tail with noop heads: " + this.getClass());
+                // alright, there's a chance that we can specialize, but we need to take care of
+                // match failures.
+                // there is also a real chance that we may get here in compiled code. this will
+                // happen if the pattern match keeps failing and we never get to specialize
+                // further
+                if (gtLen.profile(l.size() >= elemPatterns.length)) {
+                  try {
+                    tailPattern.executeMatch(frame, l.drop(elemPatterns.length));
+                  } catch (PatternMatchFailure pmfx) {
+                    throw pmfx;
+                  } finally {
+                    if (tailPattern instanceof NoOpPattern) {
+                      // specialize to list length fixed
+//                      System.out.println("-> to fixed length 1: " + this.getClass());
+                      replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length));
+                    } else if (tailPattern instanceof ListLengthFixedMatch) {
+//                      System.out.println("-> to fixed length 2: " + this.getClass());
+                      // specialize to list length fixed
+                      replace(ListLengthFixedMatchNodeGen.create(getSourceSection(),
+                          elemPatterns.length + ((ListLengthFixedMatch) tailPattern).getExpectedLength()));
+                    } else if (tailPattern instanceof ListLengthLongerMatch) {
+                      // specialize to list length longer than
+//                      System.out.println("-> to longer than length: " + this.getClass());
+                      replace(ListLengthLongerMatchNodeGen.create(getSourceSection(),
+                          elemPatterns.length + ((ListLengthLongerMatch) tailPattern).getMinimalLength()));
+                    } else {
+//                      System.out.println("-> to dead head: " + this.getClass());
+                      // specialize to list match with dead head
+                      replace(x_listmatchclassdeadheadng.create(getSourceSection(),
+                          elemPatterns.length, tailPattern));
+                    }
+                  }
+                  /*
+                   * we can optimize if the tail pattern specialized to either one of: - NoOp -
+                   * ListFixedLength - ListLongerThan
+                   */
+                } else {
+                  // list ain't big enough
+                  throw PatternMatchFailure.INSTANCE;
+                }
+        
+              } else {
+//                System.out.println("-> to full match: " + this.getClass());
+                replace(x_listmatchclassfullng.create(getSourceSection(), elemPatterns, tailPattern))
+                    .executeSpecific(frame, l);
+              }
+            }
+        
+            public static abstract class x_listmatchclassfull extends x_listmatchclasswithtailuninit {
+        
+              public x_listmatchclassfull(SourceSection source, MatchPattern[] patterns,
+                  MatchPattern tailPattern) {
+                super(source, patterns, tailPattern);
+              }
+        
+              @Specialization
+              @ExplodeLoop
+              public void executeSpecific(VirtualFrame frame, x_listclass l) {
+                if (gtLen.profile(l.size() < elemPatterns.length)) {
+                  throw PatternMatchFailure.INSTANCE;
+                } else {
+                  x_listclass tail = l;
+                  for (MatchPattern patt : elemPatterns) {
+                    patt.executeMatch(frame, tail.head());
+                    tail = tail.tail();
+                  }
+                  tailPattern.executeMatch(frame, tail);
+                }
+              }
+        
+            }
+
+            public static abstract class x_listmatchclassdeadhead extends x_listmatchclass {
+        
+              private final int deadHeadSize;
+        
+              @Child
+              private MatchPattern tailPattern;
+        
+              public x_listmatchclassdeadhead(SourceSection source, int deadHeadSize,
+                  MatchPattern tailPattern) {
+                super(source);
+                this.deadHeadSize = deadHeadSize;
+                this.tailPattern = tailPattern;
+              }
+        
+              private final ConditionProfile ltLen = ConditionProfile.createCountingProfile();
+        
+              @Specialization
+              public void executeSpecific(VirtualFrame frame, x_listclass l) {
+                if (ltLen.profile(l.size() < deadHeadSize)) {
+                  throw PatternMatchFailure.INSTANCE;
+                } else {
+                  tailPattern.executeMatch(frame, l.drop(deadHeadSize));
+                }
+              }
+        
+            }
+        
+          }
         }
-      ]|
-    where
-      x_listclass := <ds-to-interp-terms-types-name> ls;
-      x_listmatchclass := $[[x_listclass]MatchPattern];
-      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es
+    ]|
+  where
+    x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es;
+    x_listclass := <ds-to-interp-terms-types-name> ls;
+    x_listmatchclass := $[[x_listclass]MatchPattern];
+    x_listmatchclassnotailuninit := $[[x_listmatchclass]_NoTail_Uninitialized];
+    x_listmatchclassnotailuninitng := $[[x_listmatchclassnotailuninit]NodeGen];
+    x_listmatchclassnotail := $[[x_listmatchclass]_NoTail];
+    x_listmatchclassnotailng := $[[x_listmatchclassnotail]NodeGen];
+    x_listmatchclasswithtailuninit := $[[x_listmatchclass]_WithTail_Uninitialized];
+    x_listmatchclasswithtailuninitng := $[[x_listmatchclasswithtailuninit]NodeGen];
+    x_listmatchclassdeadhead := $[[x_listmatchclass]_DeadHead];
+    x_listmatchclassdeadheadng := $[[x_listmatchclassdeadhead]NodeGen];
+    x_listmatchclassfull := $[[x_listmatchclass]_Full];
+    x_listmatchclassfullng := $[[x_listmatchclassfull]NodeGen];
+    x_listmatchclassfactory := $[[x_listmatchclass]Factory]
+    

@@ -1,5 +1,7 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -19,6 +21,7 @@ public abstract class GenericListMatch extends MatchPattern {
 		super(source);
 		this.numHeadElems = numHeadElems;
 		this.tailPattern = tailPattern;
+		System.out.println("Generic list match");
 	}
 
 	@Specialization(guards = "tailPattern == null")
@@ -38,15 +41,6 @@ public abstract class GenericListMatch extends MatchPattern {
 		}
 
 		tailPattern.executeMatch(frame, list.drop(numHeadElems));
-	}
-
-	@Specialization(guards = "notAList(t)")
-	public void doFail(VirtualFrame frame, Object t) {
-		throw PatternMatchFailure.INSTANCE;
-	}
-
-	protected static boolean notAList(Object t) {
-		return !(t instanceof IListTerm<?>);
 	}
 
 	public static GenericListMatch create(IStrategoAppl t, FrameDescriptor fd) {

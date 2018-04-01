@@ -1,12 +1,12 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -26,12 +26,10 @@ public class ListMatch extends MatchPattern {
 
 	@Override
 	public void executeMatch(VirtualFrame frame, Object term) {
-		
-		final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(listClass)
-				.apply(getSourceSection(), cloneNodes(elemPatterns), cloneNode(tailPattern));
-		
-		CompilerDirectives.transferToInterpreterAndInvalidate();
-		replace(concreteMatch).executeMatch(frame, term);
+			final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(listClass)
+					.apply(getSourceSection(), cloneNodes(elemPatterns), cloneNode(tailPattern));
+
+			replace(concreteMatch).executeMatch(frame, term);
 	}
 
 	public static ListMatch create(IStrategoAppl t, FrameDescriptor fd) {

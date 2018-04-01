@@ -1,0 +1,68 @@
+module backend/interpreter/lists/building
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+  
+rules
+
+  ds-to-interp-terms-building-list:
+    ls@ListSort(es) ->
+      compilation-unit |[
+        package ~x:<get-opt> BuildPkg();
+  
+        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:$[[<get-opt> TopPkg()].TypesGen];
+        
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+        
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.nodes.ExplodeLoop;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_listbuildclass extends TermBuild {
+        
+          @Children protected final TermBuild[] elemNodes;
+        
+          @Child protected TermBuild tailNode;
+        
+          public x_listbuildclass(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode) {
+            super(source);
+            this.elemNodes = elemNodes;
+            this.tailNode = tailNode;
+          }
+        
+          @ExplodeLoop
+          private final x_elemclass[] executeElems(VirtualFrame frame) {
+            final x_elemclass[] elems = new x_elemclass[elemNodes.length];
+            for (int idx = 0; idx < elems.length; idx++) {
+              elems[idx] = (x_elemclass) elemNodes[idx].executeGeneric(frame);
+            }
+            return elems;
+          }
+        
+          @Specialization(guards = "tailNode == null")
+          public x_listclass doNoTail(VirtualFrame frame) {
+            return new x_listclass(executeElems(frame));
+          }
+        
+          @Specialization
+          public x_listclass doTail(VirtualFrame frame) {
+            final x_listclass tailList = TypesGen.x_aslistfun(tailNode.executeGeneric(frame));
+            return tailList.addAll(executeElems(frame));
+          }
+        
+        }
+      ]|
+    where
+      x_listclass := <ds-to-interp-terms-types-name> ls;
+      x_listbuildclass := $[[x_listclass]Build];
+      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es;
+      x_aslistfun := $[as[x_listclass]]
+
+    
