@@ -3,6 +3,7 @@ module backend/interpreter/lang-ast
 imports
   signatures/-
   backend/interpreter/-
+  backend/interpreter/lists/-
   backend/utils/-
   backend/common/-
   libjava-front
@@ -1160,82 +1161,5 @@ rules /* term matching */
       (~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()));
     ]|
 
-  ds-to-interp-terms-matching-list:
-    ls@ListSort(es) -> 
-      compilation-unit |[
-        package ~x:<get-opt> MatchPkg();
-  
-        import ~x:$[[<get-opt> TermPkg()].*];
-        
-        import java.util.Iterator;
-        
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-        
-        import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.nodes.ExplodeLoop;
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.source.SourceSection;
-        
-        public abstract class x_listmatchclass extends MatchPattern {
-        
-          @Children
-          protected final MatchPattern[] elemPatterns;
-        
-          @Child
-          protected MatchPattern tailPattern;
-        
-          public x_listmatchclass(SourceSection source, MatchPattern[] patterns, MatchPattern tailPattern) {
-            super(source);
-            this.elemPatterns = patterns;
-            this.tailPattern = tailPattern;
-          }
-          
-          @Specialization(guards = "tailPattern == null")
-          public void doGenericNoTail(VirtualFrame frame, x_listclass list) {
-            assert tailPattern == null;
-            if (elemPatterns.length != list.size()) {
-              throw PatternMatchFailure.INSTANCE;
-            }
-        
-            matchElemPatterns(frame, list);
-          }
-        
-          @Specialization(guards = "tailPattern != null")
-          public void doGenericWithTail(VirtualFrame frame, x_listclass list) {
-            assert tailPattern != null;
-        
-            if (elemPatterns.length > list.size()) {
-              throw PatternMatchFailure.INSTANCE;
-            }
-        
-            matchElemPatterns(frame, list);
-        
-            tailPattern.executeMatch(frame, list.drop(elemPatterns.length));
-          }
-          
-          @Specialization(guards = "notAList(o)")
-          public void doFail(VirtualFrame frame, Object o) {
-            throw PatternMatchFailure.INSTANCE;
-          }
-          
-          protected static boolean notAList(Object o){
-            return !(o instanceof x_listclass);
-          }
-        
-          @ExplodeLoop
-          private final void matchElemPatterns(VirtualFrame frame,
-              x_listclass list) {
-            final x_elemclass[] elems = list.take(elemPatterns.length);
-            for (int idx = 0; idx < elemPatterns.length; idx++) {
-              elemPatterns[idx].executeMatch(frame, elems[idx]);
-            }
-          }
-        
-        }
-      ]|
-    where
-      x_listclass := <ds-to-interp-terms-types-name> ls;
-      x_listmatchclass := $[[x_listclass]MatchPattern];
-      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es
+
 
