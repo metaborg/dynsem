@@ -1,7 +1,13 @@
 package org.metaborg.meta.lang.dynsem.interpreter.utils;
 
+import java.io.File;
+
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.jsglr.client.imploder.IToken;
+import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
@@ -28,7 +34,7 @@ public final class InterpreterUtils {
 
 	public static Object getComponent(DynSemContext ctx, Object[] arguments, int idx) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
-		if(ctx.isSafeComponentsEnabled() && idx >= arguments.length) {
+		if (ctx.isSafeComponentsEnabled() && idx >= arguments.length) {
 			throw new ReductionFailure("Attempted access to unbound component at index " + idx, createStacktrace());
 		}
 		final Object val = arguments[idx];
@@ -84,21 +90,42 @@ public final class InterpreterUtils {
 				if (str.length() > 0) {
 					str.append(System.getProperty("line.separator"));
 				}
-				str.append(rn.toString());
 				Object[] arguments = frame.getArguments();
-				if(arguments.length > 0) {
-					str.append(" ").append(arguments[0].toString());	
+				if (arguments.length > 0) {
+					Object inputTerm = arguments[0];
+					str.append(findProgramLocation(inputTerm));
 				}
-//				FrameDescriptor frameDescriptor = frame.getFrameDescriptor();
-//				for (FrameSlot s : frameDescriptor.getSlots()) {
-//					str.append("\n\t ").append(s.getIdentifier()).append("=").append(frame.getValue(s));
-//				}
+				str.append(" ").append(rn.toString());
+				if (arguments.length > 0) {
+					str.append(" | AST: ").append(arguments[0].toString());
+				}
 				return null;
 			}
 
 		});
 
 		return str.toString();
+	}
+
+	private static Object findProgramLocation(Object inputTerm) {
+		if (inputTerm instanceof ITerm) {
+			IStrategoTerm t = ((ITerm) inputTerm).getStrategoTerm();
+			if (t != null) {
+				ImploderAttachment imploder = ImploderAttachment.get(t);
+				if (imploder != null) {
+					IToken ltoken = imploder.getLeftToken();
+					if (ltoken != null) {
+						return string2filename(ltoken.getFilename()) + ":" + (ltoken.getLine() + 1) + ":"
+								+ (ltoken.getColumn() + 1);
+					}
+				}
+			}
+		}
+		return "<unavailable>";
+	}
+
+	private static String string2filename(String path) {
+		return new File(path).getName();
 	}
 
 	@TruffleBoundary
