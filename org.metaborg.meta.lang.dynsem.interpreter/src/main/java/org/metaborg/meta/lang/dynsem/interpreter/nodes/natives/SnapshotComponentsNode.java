@@ -16,6 +16,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
+@Deprecated
 public class SnapshotComponentsNode extends DynSemNode {
 
 	private final FrameDescriptor componentsFD;

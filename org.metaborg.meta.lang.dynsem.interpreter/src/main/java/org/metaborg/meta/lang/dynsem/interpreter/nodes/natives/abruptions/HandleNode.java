@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.DispatchInteropNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeOperationNode;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -60,7 +61,7 @@ public class HandleNode extends NativeOperationNode {
 			catchEntered.enter();
 			VirtualFrame abortedComponents = abort.getComponents();
 			Object handleResult = handlingNode.execute(frame, abortedComponents, abort.getThrown());
-			 // update the components frame with changed from the aborted computation
+			// update the components frame with changed from the aborted computation
 			for (FrameSlot frameSlot : componentSlots) {
 				components.setObject(frameSlot, abortedComponents.getValue(frameSlot));
 			}

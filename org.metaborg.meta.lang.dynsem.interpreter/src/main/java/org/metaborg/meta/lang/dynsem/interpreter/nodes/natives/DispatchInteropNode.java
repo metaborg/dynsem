@@ -17,6 +17,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
+@Deprecated
 public class DispatchInteropNode extends DynSemNode {
 
 	private final FrameSlot[] inputComponents;

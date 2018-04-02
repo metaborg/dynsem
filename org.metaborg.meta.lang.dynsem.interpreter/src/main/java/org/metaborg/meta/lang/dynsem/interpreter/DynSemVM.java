@@ -22,6 +22,7 @@ import org.spoofax.terms.TermTransformer;
 import org.spoofax.terms.attachments.OriginAttachment;
 import org.spoofax.terms.io.TAFTermReader;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.vm.PolyglotEngine;
 import com.oracle.truffle.api.vm.PolyglotEngine.Builder;
@@ -53,6 +54,7 @@ public class DynSemVM {
 	}
 
 	public Callable<RuleResult> getCallable(IStrategoTerm term, Map<String, Object> properties) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert term != null;
 		assert engine.getLanguages().containsKey(ctx.getMimeTypeObjLanguage());
 		// FIXME: this is bad bad bad, because the properties are per-program but we are setting them per-VM

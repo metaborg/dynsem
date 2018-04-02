@@ -8,6 +8,7 @@ imports
   ds2ds/more-typeannos
   ds2ds/desugar-concat
   ds2ds/abruptions/abruptions
+  ds2ds/nativeloops/nativeloops
   ds
 
 rules
@@ -20,6 +21,7 @@ rules
   desugar-for-interpreter =
     explicate-arrow-types-noanalysis
     ; add-rulekind-flags-module
+    ; loops-rewrite-natives-module
     ; desugar-semantic-components
     ; mark-rule-arguments
     ; desugar-natives
@@ -30,7 +32,7 @@ rules
     ; desugar-concat-all
     ; resugar-and-typecast-lists
     ; jtype-lists
-    ; abr-rewrite-natives-module
+//    ; abr-rewrite-natives-module
 
 rules
 

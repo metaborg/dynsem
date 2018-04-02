@@ -22,6 +22,7 @@ import org.metaborg.util.concurrent.IClosableLock;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.google.common.collect.ImmutableMap;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class DynSemRunner {
 	private final Spoofax S;
@@ -38,6 +39,19 @@ public class DynSemRunner {
 	}
 
 	public Object run(FileObject file) throws MetaborgException {
+		final RunConfig runCfg = prepareForEvaluation(file);
+		try {
+			Callable<RuleResult> runner = vm.getCallable(runCfg.program, runCfg.props);
+			RuleResult result = runner.call();
+			return result.result;
+		} catch (Exception e) {
+			throw new MetaborgException("Evaluation failed.", e);
+		}
+	}
+	
+	@TruffleBoundary
+	private RunConfig prepareForEvaluation(FileObject file) throws MetaborgException {
+
 		IStrategoTerm program;
 		ImmutableMap<String, Object> props;
 		try {
@@ -93,12 +107,16 @@ public class DynSemRunner {
 		} catch (IOException e) {
 			throw new MetaborgException("Analysis failed.", e);
 		}
-		try {
-			Callable<RuleResult> runner = vm.getCallable(program, props);
-			RuleResult result = runner.call();
-			return result.result;
-		} catch (Exception e) {
-			throw new MetaborgException("Evaluation failed.", e);
+		return new RunConfig(program, props);
+	}
+	
+	private class RunConfig {
+		protected final IStrategoTerm program;
+		protected final ImmutableMap<String, Object> props;
+		
+		public RunConfig(IStrategoTerm program, ImmutableMap<String, Object> props) {
+			this.program = program;
+			this.props = props;
 		}
 	}
 

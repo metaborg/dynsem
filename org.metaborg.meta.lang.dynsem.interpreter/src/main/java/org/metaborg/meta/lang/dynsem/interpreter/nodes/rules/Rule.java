@@ -3,7 +3,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -16,10 +15,9 @@ import org.spoofax.terms.util.NotImplementedException;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class Rule extends DynSemNode {
+public abstract class Rule extends DynSemRuleNode {
 
 	public final static String DEFAULT_NAME = "";
 
@@ -48,8 +46,6 @@ public abstract class Rule extends DynSemNode {
 	public Class<?> getDispatchClass() {
 		return dispatchClass;
 	}
-
-	public abstract RuleResult execute(VirtualFrame frame);
 
 	public FrameDescriptor getFrameDescriptor() {
 		return fd;

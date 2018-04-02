@@ -15,6 +15,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
+@Deprecated
 public class RestoreComponentsFromSnapshotNode extends DynSemNode {
 
 	@Children private final RestoreComponentFromSnapshotNode[] restoreNodes;

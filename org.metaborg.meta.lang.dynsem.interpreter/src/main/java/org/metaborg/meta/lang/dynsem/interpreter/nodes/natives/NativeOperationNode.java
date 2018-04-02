@@ -12,6 +12,7 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
+@Deprecated
 public abstract class NativeOperationNode extends DynSemNode {
 
 	public NativeOperationNode(SourceSection source) {

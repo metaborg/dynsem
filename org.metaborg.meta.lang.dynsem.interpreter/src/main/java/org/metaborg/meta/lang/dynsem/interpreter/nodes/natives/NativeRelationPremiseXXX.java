@@ -13,7 +13,8 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class NativeRelationPremise extends Premise {
+@Deprecated
+public class NativeRelationPremiseXXX extends Premise {
 
 	@Child private NativeOperationNode nativeCallNode;
 
@@ -23,7 +24,7 @@ public class NativeRelationPremise extends Premise {
 
 	@Child private RestoreComponentsFromSnapshotNode restoreComponents;
 
-	public NativeRelationPremise(SourceSection source, NativeOperationNode nativeCallNode, MatchPattern rhsNode,
+	public NativeRelationPremiseXXX(SourceSection source, NativeOperationNode nativeCallNode, MatchPattern rhsNode,
 			SnapshotComponentsNode snapshotComponents, RestoreComponentsFromSnapshotNode restoreComponents) {
 		super(source);
 		this.nativeCallNode = nativeCallNode;
@@ -44,7 +45,7 @@ public class NativeRelationPremise extends Premise {
 		restoreComponents.executeRestore(frame, components);
 	}
 
-	public static NativeRelationPremise create(IStrategoAppl t, FrameDescriptor ruleFD) {
+	public static NativeRelationPremiseXXX create(IStrategoAppl t, FrameDescriptor ruleFD) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "NativeRelation", 4);
 		IStrategoList labelComps = Tools.listAt(t, 0);
@@ -56,7 +57,7 @@ public class NativeRelationPremise extends Premise {
 		MatchPattern rhsNode = MatchPattern.create(Tools.applAt(t, 2), ruleFD);
 		RestoreComponentsFromSnapshotNode restoreComponents = RestoreComponentsFromSnapshotNode
 				.create(Tools.listAt(t, 3), ruleFD, componentsFD);
-		return new NativeRelationPremise(SourceUtils.dynsemSourceSectionFromATerm(t), nativeCallNode, rhsNode,
+		return new NativeRelationPremiseXXX(SourceUtils.dynsemSourceSectionFromATerm(t), nativeCallNode, rhsNode,
 				snapshotComponents, restoreComponents);
 	}
 

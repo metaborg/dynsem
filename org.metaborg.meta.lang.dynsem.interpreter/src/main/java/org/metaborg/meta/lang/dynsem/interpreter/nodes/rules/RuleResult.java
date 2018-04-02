@@ -11,5 +11,4 @@ public class RuleResult {
 		this.result = result;
 		this.components = components;
 	}
-
 }
