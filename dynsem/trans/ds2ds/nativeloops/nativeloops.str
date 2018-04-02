@@ -1,0 +1,175 @@
+module ds2ds/nativeloops/nativeloops
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  ds2ds/explication
+  backend/interpreter/signature
+  
+strategies // name definitions
+
+  loops-name-sort-val       = !"Val"
+  loops-name-sort-unit      = !"U"
+  loops-name-sort-condition = !"Condition"
+  loops-name-sort-eval      = !"Evaluatable"
+  loops-name-while          = !"_native_while"
+  loops-name-break          = !"_native_loop_break"
+  loops-name-continue       = !"_native_loop_continue"
+
+  loops-name-mk-sort = !SimpleSort(<id>)
+  
+strategies // selective enabling
+
+  loops-are-enabled = where(UsesLoops)
+
+  loops-enable-module =
+    try(
+      UsesLoops <+
+      where(
+        ?Module(_, <id>);
+        fetch-elem(?Signatures(<id>));
+        fetch-elem(?Arrows(<id>));
+        fetch-elem(loops-is-while-decl + loops-is-break-decl + loops-is-continue-decl);
+        rules(UsesLoops: t -> t)
+      )
+    )
+    
+  loops-new-scope(s) = {| UsesLoops:
+    s
+  |}
+  
+strategies // signature detection
+
+  loops-is-while-decl =
+    where(
+     ?NativeFunDecl(_, <loops-name-while>, [SimpleSort(<loops-name-sort-condition>), SimpleSort(<loops-name-sort-eval>), SimpleSort(<loops-name-sort-val>)], _, SimpleSort(<loops-name-sort-val>), _)
+    )
+  
+  loops-is-break-decl =
+    where(
+     ?NativeFunDecl(_, <loops-name-break>, [SimpleSort(<loops-name-sort-val>)], _, SimpleSort(<loops-name-sort-unit>), _)
+    )
+  
+  loops-is-continue-decl =
+    where(
+     ?NativeFunDecl(_, <loops-name-continue>, [SimpleSort(<loops-name-sort-val>)], _, SimpleSort(<loops-name-sort-unit>), _)
+    )
+  
+strategies // explication
+
+  explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) =
+    loops-are-enabled < loops-explicate-arrow-imports(|comps-table, imps-table) + fail
+  
+  loops-explicate-arrow-imports(|comps-table, imps-table) =
+    // native while loop imports all components from Condition and Evaluatable
+    condition-arr := <resolve-applicable-arrow-defsite> ("", <loops-name-sort-condition>);
+    eval-arr := <resolve-applicable-arrow-defsite> ("", <loops-name-sort-eval>);
+    imp* := [Impo(condition-arr, []), Impo(eval-arr, [])];
+    while-native-ty := $[[<loops-name-while>]_3_Native];
+    while-arr := <resolve-applicable-arrow-defsite> ("", while-native-ty);
+    <explication-api-add-imports(|comps-table, imps-table)> (while-arr, imp*);
+    fail
+  
+//  
+//  abr-explicate-arrow-imports(|comps-table, imps-table) =
+//    // store component imports for handler/2
+//    // nothing to do here because handler/2 is actually builtin but not native
+//    fail
+//    
+//  abr-explicate-arrow-imports(|comps-table, imps-table) =
+//    //  the native handle arrows need to import all components
+//    //  from the Evaluatable and handler arrows 
+//    // ---> store dependency of handle arrows to the Evaluatable and handler arrows
+//    throwing-arr := <resolve-applicable-arrow-defsite> ("", <abr-name-sort-throwing>);
+//    handler-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
+//    imp* := [Impo(throwing-arr, []), Impo(handler-arr, [])];
+//    handle-2-native-ty := $[[<abr-name-handle>]_2_Native];
+//    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", handle-2-native-ty);
+//    <explication-api-add-imports(|comps-table, imps-table)> (handle-2-native-arr, imp*);
+//    handle-3-native-ty := $[[<abr-name-handle>]_3_Native];
+//    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", handle-3-native-ty);
+//    <explication-api-add-imports(|comps-table, imps-table)> (handle-3-native-arr, imp*);
+//    fail
+//  
+//  abr-explicate-arrow-imports(|comps-table, imps-table) =
+//    // the raise arrow will consume all components
+//    // that were passed into handle/2 and handle/3
+//    // ---> because in the native implementation it needs to capture them in the exception it is throwing
+//    raise-native-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-raise>]_1_Native]));
+//    handle-2-native-ty := $[[<abr-name-handle>]_2_Native];
+//    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", handle-2-native-ty);
+//    handle-3-native-ty := $[[<abr-name-handle>]_3_Native];
+//    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", handle-3-native-ty);
+//    <explication-api-add-imports(|comps-table, imps-table)> (raise-native-arr, [Impo(handle-2-native-arr, []), Impo(handle-3-native-arr, [])]);
+//    fail
+//
+//strategies // backend
+//
+//signature
+//  sorts ReduceWithComps Handler ComponentSnapshot
+//  
+//  constructors
+//
+//    NativeRelation: List(LabelComp) * NativeCall * Term * List(LabelComp) -> Relation
+//    Raise: Term -> NativeCall
+// 
+//    Handle2: (List(Label), Term , List(Label)) * (List(Label), Term, List(Label)) -> NativeCall
+//    Handle3: (List(Label), Term , List(Label)) * (List(Label), Term, List(Label)) * (List(Label), Term, List(Label)) -> NativeCall
+//  
+//strategies
+//  abr-rewrite-natives-module = 
+//    abr-new-scope(
+//      abr-enable-module;
+//      abr-are-enabled <
+//      alltd(abr-rewrite-native-relation)
+//      + id
+//    )
+// 
+// 
+//  abr-rewrite-native-relation:
+//    Formula(Relation(Source(Con(cname, [raised]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
+//      -> Formula(NativeRelation(comp-in*, Raise(raised), rhs, rw-out*))
+//    where
+//      abr-name-raise => cname
+//
+//  abr-rewrite-native-relation:
+//    Formula(Relation(Source(Con(cname, [throwing, catching, continuing]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
+//      -> Formula(NativeRelation(comp-in*, Handle3(throwing-node, continuing-node, handler-node), rhs, rw-out*))
+//    where
+//      abr-name-handle => cname
+//    with
+//      throwing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> throwing);
+//      throwing-ro* := <lookup-prop(|ROs())> throwing-arr-def;
+//      throwing-rw* := <lookup-prop(|RWs())> throwing-arr-def;
+//      throwing-node := ([throwing-ro*, throwing-rw*], throwing, throwing-rw*)
+//    with
+//      continuing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> continuing);
+//      continuing-ro* := <lookup-prop(|ROs())> continuing-arr-def;
+//      continuing-rw* := <lookup-prop(|RWs())> continuing-arr-def;
+//      continuing-node := ([continuing-ro*, continuing-rw*], continuing, continuing-rw*)
+//    with // handling node
+//      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
+//      handler-ro* := <lookup-prop(|ROs())> handler-arr-def;
+//      handler-rw* := <lookup-prop(|RWs())> handler-arr-def;
+//      handler-node := ([handler-ro*, handler-rw*], catching, handler-rw*)
+//
+//  abruptions-rewrite-native-relation:
+//    Formula(Relation(Source(Con(cname, [throwing, catching]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
+//      -> Formula(NativeRelation(comp-in*, Handle2(throwing-node, handler-node), rhs, rw-out*))
+//    where
+//      abr-name-handle => cname
+//    with
+//      throwing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> throwing);
+//      throwing-ro* := <lookup-prop(|ROs())> throwing-arr-def;
+//      throwing-rw* := <lookup-prop(|RWs())> throwing-arr-def;
+//      throwing-node := ([throwing-ro*, throwing-rw*], throwing, throwing-rw*)
+//    with // handling node
+//      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
+//      handler-ro* := <lookup-prop(|ROs())> handler-arr-def;
+//      handler-rw* := <lookup-prop(|RWs())> handler-arr-def;
+//      handler-node := ([handler-ro*, handler-rw*], catching, handler-rw*)
+      
+
+
+

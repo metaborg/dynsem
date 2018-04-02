@@ -8,6 +8,7 @@ imports
   analysis/mark-references
   ds2ds/-
   ds2ds/abruptions/abruptions
+  ds2ds/nativeloops/nativeloops
   backend/common/opts
   pp
 
@@ -37,21 +38,24 @@ strategies
       ; fuse-sections
       ; abr-new-scope(
           abr-enable-module
-          ; desugar-meta-functions-top
-          ; fuse-sections      
-          ; desugar-guarded-binds-module
-          ; desugar-varschemes-module
-          ; add-extra-typeannos-module
-          ; desugar-aliases-module
-          ; factorize-module
-          ; expand-implicits-module
-          ; factorize-module
-          ; expand-defaultcomponents-module-top
-          ; explication-explicate-module
-          ; copy-propagation-module
-          ; eliminate-dead-premises-module
-          ; insert-wildcards-module
-          ; defactorize-module
-          ; prettify-vars-module
+          ; loops-new-scope(
+              loops-enable-module
+              ; desugar-meta-functions-top
+              ; fuse-sections      
+              ; desugar-guarded-binds-module
+              ; desugar-varschemes-module
+              ; add-extra-typeannos-module
+              ; desugar-aliases-module
+              ; factorize-module
+              ; expand-implicits-module
+              ; factorize-module
+              ; expand-defaultcomponents-module-top
+              ; explication-explicate-module
+              ; copy-propagation-module
+              ; eliminate-dead-premises-module
+              ; insert-wildcards-module
+              ; defactorize-module
+              ; prettify-vars-module
+            )
         )
     |project-path)
