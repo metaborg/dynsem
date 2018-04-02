@@ -35,9 +35,8 @@ strategies
       include-imports
       ; desugar-top
       ; fuse-sections
-      ; abruptions-new-scope(
-          abruptions-enable-module
-          ; abruptions-inject-definitions-top
+      ; abr-new-scope(
+          abr-enable-module
           ; desugar-meta-functions-top
           ; fuse-sections      
           ; desugar-guarded-binds-module

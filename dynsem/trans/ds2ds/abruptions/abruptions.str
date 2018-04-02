@@ -4,149 +4,96 @@ imports
   signatures/-
   signatures/dynsem/-
   analysis/-
-//  ds2ds/fuse-sections
   ds2ds/explication
   backend/interpreter/signature
   
-strategies
+strategies // name definitions
+  
+  abr-name-sort-thrown   = !"Thrown"
+  abr-name-sort-throwing = !"Evaluatable"
+  abr-name-sort-catching = !"Catching"
+  abr-name-sort-val      = !"Val"
+  abr-name-sort-unit     = !"U"
+  
+  abr-name-handler = !"handler"
+  abr-name-handle  = !"_native_handle"
+  abr-name-raise   = !"_native_raise"
+  
+  abr-name-mk-sort = !SimpleSort(<id>)
 
-  abruptions-enable-module =
+strategies // selective enabling
+
+  abr-are-enabled = where(UsesAbruptions)
+
+  abr-enable-module =
     try(
-      UsesAbruptions <+
+      UsesAbruptions; debug(!"Abruptions already enabled ") <+
       where(
         ?Module(_, <id>);
         fetch-elem(?Signatures(<id>));
-        fetch-elem(?Exceptions(_));
+        fetch-elem(?Arrows(<id>));
+        fetch-elem(abr-is-handle-decl + abr-is-raise-decl);
         rules(UsesAbruptions: t -> t)
       )
     )
     
-  abruptions-new-scope(s) = {| UsesAbruptions:
+  abr-new-scope(s) = {| UsesAbruptions:
     s
   |}
   
-  abruptions-are-enabled = where(UsesAbruptions)
-  
-strategies // name definitions
-  
-  abruptions-name-sort-thrown   = !"_Thrown"
-  abruptions-name-sort-throwing = !"_Throwing"
-  abruptions-name-sort-catching = !"_Catching"
-  abruptions-name-sort-val      = !"_ExcVal"
-  abruptions-name-sort-unit     = !"U"
-  abruptions-name-arrow-handle  = !"handle"
-  abruptions-name-arrow-raise   = !"raise"
-  abruptions-name-arrow-handler = !"handler"
-  abruptions-name-ctr-ok        = !"OK"
-  
 strategies // signature generation
 
-  abruptions-builtin-signatures-gen =
-    srt-decls := Sorts([
-                  SortDecl(<abruptions-name-sort-thrown>),
-                  SortDecl(<abruptions-name-sort-throwing>),
-                  SortDecl(<abruptions-name-sort-catching>),
-                  SortDecl(<abruptions-name-sort-val>)
-                  ]);
-    ctr-decls := Constructors([
-                  ConsDecl(<abruptions-name-ctr-ok>, [], SimpleSort(<abruptions-name-sort-thrown>), Annos([]))
-                 ]);
-    arr-decls := Arrows([
-                  ArrowDecl(ArrowROs([]), SimpleSort(<abruptions-name-sort-throwing>), ArrowRWs([]), "", SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
-                  NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
-                  NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>), SimpleSort(<abruptions-name-sort-throwing>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([])), 
-                  NativeFunDecl(ArrowROs([]), <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-unit>), ArrowRWs([])),
-                  MetaFunDecl(ArrowROs([]), <abruptions-name-arrow-handler>, [SimpleSort(<abruptions-name-sort-thrown>), SimpleSort(<abruptions-name-sort-catching>)], ArrowRWs([]), SimpleSort(<abruptions-name-sort-val>), ArrowRWs([]))
-                  ]);
-    !Signatures([srt-decls, ctr-decls, arr-decls])
-
-  abruptions-is-handler-2-decl =
+  abr-is-handle-decl =
     where(
-     ?NativeFunDecl(_, <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>)], _, SimpleSort(<abruptions-name-sort-val>), _)
+     ?NativeFunDecl(_, <abr-name-handle>, [SimpleSort(<abr-name-sort-throwing>), SimpleSort(<abr-name-sort-catching>)], _, SimpleSort(<abr-name-sort-val>), _)
     )
 
 
-  abruptions-is-handler-3-decl =
+  abr-is-handle-decl =
     where(
-      ?NativeFunDecl(_, <abruptions-name-arrow-handle>, [SimpleSort(<abruptions-name-sort-throwing>), SimpleSort(<abruptions-name-sort-catching>), SimpleSort(<abruptions-name-sort-throwing>)], _, SimpleSort(<abruptions-name-sort-val>), _)
+      ?NativeFunDecl(_, <abr-name-handle>, [SimpleSort(<abr-name-sort-throwing>), SimpleSort(<abr-name-sort-catching>), SimpleSort(<abr-name-sort-throwing>)], _, SimpleSort(<abr-name-sort-val>), _)
     )
   
-  abruptions-is-raise-decl =
+  abr-is-raise-decl =
     where(
-      ?NativeFunDecl(_, <abruptions-name-arrow-raise>, [SimpleSort(<abruptions-name-sort-thrown>)], _, SimpleSort(<abruptions-name-sort-unit>), _)
+      ?NativeFunDecl(_, <abr-name-raise >, [SimpleSort(<abr-name-sort-thrown>)], _, SimpleSort(<abr-name-sort-unit>), _)
     )
   
-  abruptions-is-handler-decl =
-    where(
-      ?MetaFunDecl(_, <abruptions-name-arrow-handler>, [SimpleSort(<abruptions-name-sort-thrown>), SimpleSort(<abruptions-name-sort-catching>)], _, SimpleSort(<abruptions-name-sort-val>), _)
-    )
-
-strategies // analysis
-
-  abruptions-store-built-ins =
-    abruptions-enable-module; abruptions-are-enabled
-    < abruptions-builtin-signatures-gen; store-signatures
-    + id 
-  
-  abruptions-store = Exceptions(map(abruptions-store-exception))
-  
-  abruptions-store-exception:
-    e@ExDecl(name, kid*) -> e
-    with
-      arity := <length> kid*;
-      c-def := <store-def(|Constructors())> (name, arity);
-      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> kid*, <abruptions-name-sort-thrown>);
-      <store-prop(|ConsKind(), c-def)> LanguageCons()
- 
-  abruptions-inject-definitions-top =
-    abruptions-are-enabled
-      < abruptions-inject-definitions
-      + id
-  
-  abruptions-inject-definitions:
-    Module(name, section*) -> Module(name, section'*)
-    where
-      section'* := <map(try(abruptions-inject-definitions))> section*
-
-  abruptions-inject-definitions =
-    Signatures(partition(abruptions-inject-definitions); (Hd, id); conc)
-  
-  abruptions-inject-definitions:
-    e@Exceptions(exc) -> sig-part*
-    with
-      Signatures(sig-part*) := <abruptions-builtin-signatures-gen>
-
 strategies // explication
 
   explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) =
-    abruptions-are-enabled < abruptions-explicate-arrow-imports(|comps-table, imps-table) + fail
+    abr-are-enabled < abr-explicate-arrow-imports(|comps-table, imps-table) + fail
   
-  abruptions-explicate-arrow-imports(|comps-table, imps-table) =
+  abr-explicate-arrow-imports(|comps-table, imps-table) =
     // store component imports for handler/2
     // nothing to do here because handler/2 is actually builtin but not native
     fail
     
-  abruptions-explicate-arrow-imports(|comps-table, imps-table) =
-    // store component imports for handle/2 and handle/3
-    // add dependency of handle/2 and handle/3 on the components of _Throwing --> ... and handler/2 --> ...
-    throwing-ty := <abruptions-name-sort-throwing>;
-    throwing-arrow-def := <resolve-applicable-arrow-defsite> ("", throwing-ty);
-    handler-arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handler>]_2_Meta]));
-    imp* := [Impo(throwing-arrow-def, []), Impo(handler-arrow-def, [])];
-    arrow-handle-2-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handle>]_2_Native]));
-    arrow-handle-3-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handle>]_3_Native]));
-    <explication-api-add-imports(|comps-table, imps-table)> (arrow-handle-2-def, imp*);
-    <explication-api-add-imports(|comps-table, imps-table)> (arrow-handle-3-def, imp*);
+  abr-explicate-arrow-imports(|comps-table, imps-table) =
+    //  the native handle arrows need to import all components
+    //  from the Evaluatable and handler arrows 
+    // ---> store dependency of handle arrows to the Evaluatable and handler arrows
+    throwing-arr := <resolve-applicable-arrow-defsite> ("", <abr-name-sort-throwing>);
+    handler-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
+    imp* := [Impo(throwing-arr, []), Impo(handler-arr, [])];
+    handle-2-native-ty := $[[<abr-name-handle>]_2_Native];
+    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", handle-2-native-ty);
+    <explication-api-add-imports(|comps-table, imps-table)> (handle-2-native-arr, imp*);
+    handle-3-native-ty := $[[<abr-name-handle>]_3_Native];
+    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", handle-3-native-ty);
+    <explication-api-add-imports(|comps-table, imps-table)> (handle-3-native-arr, imp*);
     fail
   
-  abruptions-explicate-arrow-imports(|comps-table, imps-table) =
+  abr-explicate-arrow-imports(|comps-table, imps-table) =
     // the raise arrow will consume all components
     // that were passed into handle/2 and handle/3
-    // ==> because in the native implementation it needs to capture them in the exception it is throwing
-    arrow-handle-2-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handle>]_2_Native]));
-    arrow-handle-3-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handle>]_3_Native]));
-    arrow-raise-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-raise>]_1_Native]));
-    <explication-api-add-imports(|comps-table, imps-table)> (arrow-raise-def, [Impo(arrow-handle-2-def, []), Impo(arrow-handle-3-def, [])]);
+    // ---> because in the native implementation it needs to capture them in the exception it is throwing
+    raise-native-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-raise>]_1_Native]));
+    handle-2-native-ty := $[[<abr-name-handle>]_2_Native];
+    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", handle-2-native-ty);
+    handle-3-native-ty := $[[<abr-name-handle>]_3_Native];
+    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", handle-3-native-ty);
+    <explication-api-add-imports(|comps-table, imps-table)> (raise-native-arr, [Impo(handle-2-native-arr, []), Impo(handle-3-native-arr, [])]);
     fail
 
 strategies // backend
@@ -163,29 +110,26 @@ signature
     Handle3: (List(Label), Term , List(Label)) * (List(Label), Term, List(Label)) * (List(Label), Term, List(Label)) -> NativeCall
   
 strategies
-
-  abruptions-rewrite-natives-module =
-    where(
-        ?Module(_, <id>);
-        fetch-elem(?Signatures(<id>));
-        fetch-elem(?Arrows(<id>));
-        fetch-elem(abruptions-is-handler-2-decl <+ abruptions-is-handler-3-decl <+ abruptions-is-raise-decl <+ abruptions-is-handler-decl)
-    ) <
-        alltd(abruptions-rewrite-native-relation)
-      +
-        id
+  abr-rewrite-natives-module = 
+    abr-new-scope(
+      abr-enable-module;
+      abr-are-enabled <
+      alltd(abr-rewrite-native-relation)
+      + id
+    )
  
-  abruptions-rewrite-native-relation:
+ 
+  abr-rewrite-native-relation:
     Formula(Relation(Source(Con(cname, [raised]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
       -> Formula(NativeRelation(comp-in*, Raise(raised), rhs, rw-out*))
     where
-      abruptions-name-arrow-raise => cname
+      abr-name-raise => cname
 
-  abruptions-rewrite-native-relation:
+  abr-rewrite-native-relation:
     Formula(Relation(Source(Con(cname, [throwing, catching, continuing]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
       -> Formula(NativeRelation(comp-in*, Handle3(throwing-node, continuing-node, handler-node), rhs, rw-out*))
     where
-      abruptions-name-arrow-handle => cname
+      abr-name-handle => cname
     with
       throwing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> throwing);
       throwing-ro* := <lookup-prop(|ROs())> throwing-arr-def;
@@ -197,7 +141,7 @@ strategies
       continuing-rw* := <lookup-prop(|RWs())> continuing-arr-def;
       continuing-node := ([continuing-ro*, continuing-rw*], continuing, continuing-rw*)
     with // handling node
-      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handler>]_2_Meta]));
+      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
       handler-ro* := <lookup-prop(|ROs())> handler-arr-def;
       handler-rw* := <lookup-prop(|RWs())> handler-arr-def;
       handler-node := ([handler-ro*, handler-rw*], catching, handler-rw*)
@@ -206,14 +150,14 @@ strategies
     Formula(Relation(Source(Con(cname, [throwing, catching]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
       -> Formula(NativeRelation(comp-in*, Handle2(throwing-node, handler-node), rhs, rw-out*))
     where
-      abruptions-name-arrow-handle => cname
+      abr-name-handle => cname
     with
       throwing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> throwing);
       throwing-ro* := <lookup-prop(|ROs())> throwing-arr-def;
       throwing-rw* := <lookup-prop(|RWs())> throwing-arr-def;
       throwing-node := ([throwing-ro*, throwing-rw*], throwing, throwing-rw*)
     with // handling node
-      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abruptions-name-arrow-handler>]_2_Meta]));
+      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
       handler-ro* := <lookup-prop(|ROs())> handler-arr-def;
       handler-rw* := <lookup-prop(|RWs())> handler-arr-def;
       handler-node := ([handler-ro*, handler-rw*], catching, handler-rw*)

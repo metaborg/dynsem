@@ -39,10 +39,8 @@ rules
     new-analysis-scope(
       in-rename-scope(
         new-type-transitions-scope(
-          abruptions-new-scope(
-            analyze-top;
-            s
-          )
+          analyze-top;
+          s
         )
       )
     )

@@ -43,15 +43,6 @@ context-free syntax // semantic components
   CompDecl.CompDecl = [[ID] : [Type]]
   CompDecl.CompDeclDefault = [[ID] : [Type] = [Term]]
 
-context-free syntax // abruptions
-
-  SignatureSection.Exceptions = <
-    exceptions
-      <{ExceptionDecl "\n"}*>>
-  
-  ExceptionDecl.NullaryExDecl = [[ID]]
-  ExceptionDecl.ExDecl = [[ID] : [{Type " * "}+] ]
-
 context-free syntax // constructor declarations
 
   SignatureSection.Constructors = <

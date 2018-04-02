@@ -30,7 +30,7 @@ rules
     ; desugar-concat-all
     ; resugar-and-typecast-lists
     ; jtype-lists
-    ; abruptions-rewrite-natives-module
+    ; abr-rewrite-natives-module
 
 rules
 

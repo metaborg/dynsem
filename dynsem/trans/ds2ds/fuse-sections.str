@@ -19,8 +19,7 @@ rules
       semcomps-decls := <collect-all(?Components(<id>)); concat; !Components(<id>)> body*;
       varschemes-decl := <collect-all(?VariableSchemes(<id>)); concat; !VariableSchemes(<id>)> body*;
       aliases-decl := <collect-all(?Aliases(<id>)); concat; !Aliases(<id>)> body*;
-      exceptions-decl* := <collect-all(?Exceptions(_)); not(?[]); mapconcat(?Exceptions(<id>));![Exceptions(<id>)] <+ ![]> body*;
-      signatures    := [ sort-decl, cons-decl, natcons-decl, natops-decl, arrow-decl, natty-decl, semcomps-decls, varschemes-decl, aliases-decl, exceptions-decl* ];
+      signatures    := [ sort-decl, cons-decl, natcons-decl, natops-decl, arrow-decl, natty-decl, semcomps-decls, varschemes-decl, aliases-decl];
       rule-decl*    := <collect-all(?Rules(<id>)); concat; sort-rules> body*
   
   sort-rules = qsort((rule-con-name, rule-con-name); string-gt)
