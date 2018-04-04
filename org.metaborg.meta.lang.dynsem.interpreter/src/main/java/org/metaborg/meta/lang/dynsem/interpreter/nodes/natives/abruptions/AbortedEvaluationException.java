@@ -2,8 +2,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.StatefulControlFlowException;
 
-import com.oracle.truffle.api.frame.MaterializedFrame;
-
 public final class AbortedEvaluationException extends StatefulControlFlowException {
 
 
@@ -13,7 +11,7 @@ public final class AbortedEvaluationException extends StatefulControlFlowExcepti
 	 */
 	private static final long serialVersionUID = -283186208089661555L;
 
-	public AbortedEvaluationException(Object thrown, MaterializedFrame components) {
+	public AbortedEvaluationException(Object thrown, Object[] components) {
 		super(thrown, components);
 	}
 

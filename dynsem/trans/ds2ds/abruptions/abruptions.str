@@ -5,6 +5,7 @@ imports
   signatures/dynsem/-
   analysis/-
   ds2ds/explication
+  ds2ds/explicate-arrow-types
   backend/interpreter/signature
   
 strategies // name definitions
@@ -63,31 +64,44 @@ strategies // explication
 
   explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) =
     abr-are-enabled < abr-explicate-arrow-imports(|comps-table, imps-table) + fail
+  /*
+  The handler invokation should receive all of the RO components
+  from where the handle was invoked
+  It should also receive the RW components from where the exception was thrown
+  
+  */
   
   abr-explicate-arrow-imports(|comps-table, imps-table) =
-    // store component imports for handler/2
-    // nothing to do here because handler/2 is actually builtin but not native
-    fail
-    
-  abr-explicate-arrow-imports(|comps-table, imps-table) =
-    //  the native handle arrows need to import all components
-    //  from the Evaluatable and handler arrows 
-    // ---> store dependency of handle arrows to the Evaluatable and handler arrows
+    // explication for handle/2 and handle/3
+    // it receives all of the RO and RW components required by the 
+    // Evaluatable and Catching reductions
     throwing-arr := <resolve-applicable-arrow-defsite> ("", <abr-name-sort-throwing>);
-    handler-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
+    handler-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handler>]_2_Meta]);
     imp* := [Impo(throwing-arr, []), Impo(handler-arr, [])];
-    handle-2-native-ty := $[[<abr-name-handle>]_2_Native];
-    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", handle-2-native-ty);
+    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handle>]_2_Native]);
     <explication-api-add-imports(|comps-table, imps-table)> (handle-2-native-arr, imp*);
-    handle-3-native-ty := $[[<abr-name-handle>]_3_Native];
-    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", handle-3-native-ty);
+    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handle>]_3_Native]);
     <explication-api-add-imports(|comps-table, imps-table)> (handle-3-native-arr, imp*);
     fail
   
   abr-explicate-arrow-imports(|comps-table, imps-table) =
-    // the raise arrow will consume all components
-    // that were passed into handle/2 and handle/3
-    // ---> because in the native implementation it needs to capture them in the exception it is throwing
+    // explication for handler/2
+    // it should receive the RO components from the handle
+    // it should receive the RW components from the raise
+    // but we cannot do this fine-grained explication
+    // so we'll just make the handler/2 depend on the handle/2 and handle/3 components
+    handler-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
+    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handle>]_2_Native]);
+    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handle>]_3_Native]);
+    <explication-api-add-imports(|comps-table, imps-table)> (handler-arr, [Impo(handle-2-native-arr, []), Impo(handle-3-native-arr, [])]);
+    fail
+  
+  abr-explicate-arrow-imports(|comps-table, imps-table) =
+    // explication for raise/1
+    // it receives the RW components from handle/2 and handle/3
+    // it should not receive RO components, but we have no way of filtering them
+    // at this point because explication has not been performed so we don't
+    // actually know what the components are
     raise-native-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-raise>]_1_Native]));
     handle-2-native-ty := $[[<abr-name-handle>]_2_Native];
     handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", handle-2-native-ty);
@@ -95,19 +109,14 @@ strategies // explication
     handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", handle-3-native-ty);
     <explication-api-add-imports(|comps-table, imps-table)> (raise-native-arr, [Impo(handle-2-native-arr, []), Impo(handle-3-native-arr, [])]);
     fail
-
+  
 strategies // backend
 
 signature
-  sorts ReduceWithComps Handler ComponentSnapshot
-  
   constructors
-
-    NativeRelation: List(LabelComp) * NativeCall * Term * List(LabelComp) -> Relation
-    Raise: Term -> NativeCall
- 
-    Handle2: (List(Label), Term , List(Label)) * (List(Label), Term, List(Label)) -> NativeCall
-    Handle3: (List(Label), Term , List(Label)) * (List(Label), Term, List(Label)) * (List(Label), Term, List(Label)) -> NativeCall
+    Raise: List(Term) * Term -> NativeRule
+    Handle: Term * Term -> NativeRule
+    Handle: Term * Term * Term -> NativeRule
   
 strategies
   abr-rewrite-natives-module = 
@@ -117,50 +126,31 @@ strategies
       alltd(abr-rewrite-native-relation)
       + id
     )
+  
+  abr-rewrite-native-relation: // handle/3
+    Formula(Relation(Reads(ro*), Source(Con(cname, [throwing, catching, continuing]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(Handle(throwing, catching, continuing), rhs, rw-out-var*))
+    where
+      abr-name-handle => cname
+    with
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
+  
+  abr-rewrite-native-relation: // handle/2
+    Formula(Relation(Reads(ro*), Source(Con(cname, [throwing, catching]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(Handle(throwing, catching), rhs, rw-out-var*))
+    where
+      abr-name-handle => cname
+    with
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
  
- 
-  abr-rewrite-native-relation:
-    Formula(Relation(Source(Con(cname, [raised]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
-      -> Formula(NativeRelation(comp-in*, Raise(raised), rhs, rw-out*))
+  abr-rewrite-native-relation: // raise/1
+    Formula(Relation(Reads(ro*), Source(Con(cname, [thrown]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(Raise(rw-in-var*, thrown), rhs, rw-out-var*))
     where
       abr-name-raise => cname
-
-  abr-rewrite-native-relation:
-    Formula(Relation(Source(Con(cname, [throwing, catching, continuing]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
-      -> Formula(NativeRelation(comp-in*, Handle3(throwing-node, continuing-node, handler-node), rhs, rw-out*))
-    where
-      abr-name-handle => cname
     with
-      throwing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> throwing);
-      throwing-ro* := <lookup-prop(|ROs())> throwing-arr-def;
-      throwing-rw* := <lookup-prop(|RWs())> throwing-arr-def;
-      throwing-node := ([throwing-ro*, throwing-rw*], throwing, throwing-rw*)
-    with
-      continuing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> continuing);
-      continuing-ro* := <lookup-prop(|ROs())> continuing-arr-def;
-      continuing-rw* := <lookup-prop(|RWs())> continuing-arr-def;
-      continuing-node := ([continuing-ro*, continuing-rw*], continuing, continuing-rw*)
-    with // handling node
-      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
-      handler-ro* := <lookup-prop(|ROs())> handler-arr-def;
-      handler-rw* := <lookup-prop(|RWs())> handler-arr-def;
-      handler-node := ([handler-ro*, handler-rw*], catching, handler-rw*)
-
-  abruptions-rewrite-native-relation:
-    Formula(Relation(Source(Con(cname, [throwing, catching]), comp-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*)))
-      -> Formula(NativeRelation(comp-in*, Handle2(throwing-node, handler-node), rhs, rw-out*))
-    where
-      abr-name-handle => cname
-    with
-      throwing-arr-def := <resolve-applicable-arrow-defsite> ("", <type-of> throwing);
-      throwing-ro* := <lookup-prop(|ROs())> throwing-arr-def;
-      throwing-rw* := <lookup-prop(|RWs())> throwing-arr-def;
-      throwing-node := ([throwing-ro*, throwing-rw*], throwing, throwing-rw*)
-    with // handling node
-      handler-arr-def := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
-      handler-ro* := <lookup-prop(|ROs())> handler-arr-def;
-      handler-rw* := <lookup-prop(|RWs())> handler-arr-def;
-      handler-node := ([handler-ro*, handler-rw*], catching, handler-rw*)
+      rw-in-var* := <map(\ LabelComp(_, t) -> t\)> rw-in*;
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
       
 
 

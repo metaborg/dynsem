@@ -22,6 +22,7 @@ rules
     explicate-arrow-types-noanalysis
     ; add-rulekind-flags-module
     ; loops-rewrite-natives-module
+    ; abr-rewrite-natives-module
     ; desugar-semantic-components
     ; mark-rule-arguments
     ; desugar-natives
@@ -32,7 +33,6 @@ rules
     ; desugar-concat-all
     ; resugar-and-typecast-lists
     ; jtype-lists
-//    ; abr-rewrite-natives-module
 
 rules
 

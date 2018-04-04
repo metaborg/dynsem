@@ -5,6 +5,7 @@ imports
   signatures/dynsem/-
   analysis/-
   ds2ds/explication
+  ds2ds/explicate-arrow-types
   backend/interpreter/signature
   
 strategies // name definitions
@@ -84,7 +85,7 @@ strategies // backend
 
 signature
   constructors
-    NativeRelationPremise: NativeRule * Term * List(Term) -> Relation
+//    NativeRelationPremise: NativeRule * Term * List(Term) -> Relation
 //  WhileNode: condition * body * defaultvalue * List(RO) * List(RW) -> NativeRule
     WhileNode: Term * Term * Term * List(Term) * List(Term) -> NativeRule
     BreakNode: Term * List(Term) -> NativeRule

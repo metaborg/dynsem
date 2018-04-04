@@ -24,6 +24,8 @@ public abstract class ChainedRulesNode extends DynSemNode {
 		return seq;
 	}
 	
+//	public abstract void insertOrReplaceAltCall(ChainedRulesNode altCall);
+	
 //	public static ChainedRulesNode createShallowFromRules(SourceSection source, RuleKind kind, String arrowName,
 //			Class<?> dispatchClass, Rule[] rules) {
 //		// FIXME implement
