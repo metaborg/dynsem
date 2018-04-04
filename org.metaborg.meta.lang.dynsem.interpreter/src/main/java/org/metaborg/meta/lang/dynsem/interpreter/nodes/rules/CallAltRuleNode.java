@@ -4,6 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFail
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -28,12 +29,12 @@ public abstract class CallAltRuleNode extends ChainedRulesNode {
 			@Cached("getNextDispatchClass(reductionTerm(arguments))") Class<?> nextDispatchClass,
 			@Cached("createUnionNode(nextDispatchClass)") ChainedRulesNode targetRuleNode) {
 		if (nextDispatchClass == null) {
-//			if (getContext().isFullBacktrackingEnabled()) {
+			if (getContext().isFullBacktrackingEnabled()) {
 				throw PatternMatchFailure.INSTANCE;
-//			} else {
-//				throw new ReductionFailure("No rules applicable for term " + reductionTerm(arguments),
-//						InterpreterUtils.createStacktrace());
-//			}
+			} else {
+				throw new ReductionFailure("No rules applicable for term " + reductionTerm(arguments),
+						InterpreterUtils.createStacktrace());
+			}
 		}
 		return targetRuleNode.execute(arguments);
 	}
