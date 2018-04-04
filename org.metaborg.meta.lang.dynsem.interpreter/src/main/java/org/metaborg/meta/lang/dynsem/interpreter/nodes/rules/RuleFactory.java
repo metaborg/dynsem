@@ -14,8 +14,6 @@ public class RuleFactory {
 		CompilerAsserts.neverPartOfCompilation();
 		if (rules.size() == 0) {
 			return new FallbackRule(lang, source, arrowName, dispatchClass);
-		} else if (rules.size() == 1) {
-			return rules.get(0);
 		} else {
 			Rule tail = createRule(lang, source, rules.subList(1, rules.size()), arrowName, dispatchClass);
 			return new Rules(lang, source, rules.get(0), tail);
