@@ -93,20 +93,6 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	@Override
 	protected Object findExportedSymbol(DynSemContext context, String globalName, boolean onlyExplicit) {
 		throw new UnsupportedOperationException();
-		// try {
-		// String[] splitName = globalName.split("/", 3);
-		// if (splitName.length != 3) {
-		// return null;
-		// }
-		// String name = splitName[0];
-		// String constr = splitName[1];
-		// int arity = Integer.parseInt(splitName[2]);
-		// Class<?> dispatchClass = context.getTermRegistry().getConstructorClass(constr, arity);
-		// JointRuleRoot ruleUnionRoot = context.getRuleRegistry().lookupRules(name, dispatchClass);
-		// return new DynSemRule(ruleUnionRoot);
-		// } catch (Exception e) {
-		// return null;
-		// }
 	}
 
 	@Override
