@@ -15,7 +15,6 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
@@ -83,7 +82,8 @@ public class HandleNode extends Rule {
 				args[i + numRoComps + 1] = rwComps[i];
 			}
 			// return getHandlerRules(handlerT.getClass()).execute(args);
-			return handlerDispatchNode.execute(handlerT.getClass(), args);
+			RuleResult handlerResult = handlerDispatchNode.execute(handlerT.getClass(), args);
+			return handlerResult;
 		}
 
 		if (continueExistsCondition.profile(continueBuildNode == null)) {
