@@ -2,11 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.StatefulControlFlowException;
 
-import com.oracle.truffle.api.frame.MaterializedFrame;
-
 public final class LoopBreakException extends StatefulControlFlowException {
 
-	
 	/**
 	 * 
 	 */

@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 
 import com.oracle.truffle.api.CompilerAsserts;
@@ -8,13 +9,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-/**
- * 
- * @author vladvergu
- *
- * TODO: rewrite to use annotations for children. pushdown premises into a separate node
- */
-public class ReductionRule extends Rule {
+public class ReductionRule extends DynSemRule {
 
 	@Child protected RuleInputsNode inputsNode;
 
@@ -22,12 +17,13 @@ public class ReductionRule extends Rule {
 
 	@Child protected RuleTarget target;
 
-	public ReductionRule(SourceSection source, FrameDescriptor fd, RuleKind kind, String arrowName,
+	public ReductionRule(DynSemLanguage lang, SourceSection source, FrameDescriptor fd, String arrowName,
 			Class<?> dispatchClass, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output) {
-		super(source, fd, kind, arrowName, dispatchClass);
+		super(lang, source, fd, arrowName, dispatchClass);
 		this.inputsNode = inputsNode;
 		this.premises = premises;
 		this.target = output;
+		adoptChildren();
 	}
 
 	@Override

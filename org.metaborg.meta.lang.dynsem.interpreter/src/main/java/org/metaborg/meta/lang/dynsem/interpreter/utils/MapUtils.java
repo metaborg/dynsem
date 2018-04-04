@@ -42,7 +42,7 @@ public class MapUtils {
 	public static <K, V> V get(PersistentMap<K, V> map, K key) {
 		return map.get(key);
 	}
-	
+
 	@TruffleBoundary
 	public static <K, V> boolean has(PersistentMap<K, V> map, K key) {
 		return map.containsKey(key);

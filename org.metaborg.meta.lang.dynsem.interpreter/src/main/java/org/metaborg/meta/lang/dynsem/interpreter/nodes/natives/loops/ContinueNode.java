@@ -1,7 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRuleNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -14,14 +15,14 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class ContinueNode extends DynSemRuleNode {
+public class ContinueNode extends Rule {
 
 	@Child private TermBuild valBuildnode;
 
 	@Children private final TermBuild[] rwCompNodes;
 
-	public ContinueNode(SourceSection source, TermBuild valBuildNode, TermBuild[] rwCompNodes) {
-		super(source);
+	public ContinueNode(DynSemLanguage lang, SourceSection source, TermBuild valBuildNode, TermBuild[] rwCompNodes) {
+		super(lang, source);
 		this.valBuildnode = valBuildNode;
 		this.rwCompNodes = rwCompNodes;
 	}
@@ -38,7 +39,7 @@ public class ContinueNode extends DynSemRuleNode {
 		throw new LoopContinueException(val, components);
 	}
 
-	public static ContinueNode create(IStrategoAppl t, FrameDescriptor fd) {
+	public static ContinueNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		// ContinueNode: Term * List(Term) -> NativeRule
 		assert Tools.hasConstructor(t, "ContinueNode", 2);
@@ -51,7 +52,7 @@ public class ContinueNode extends DynSemRuleNode {
 			rwCompBuilds[i] = TermBuild.create(Tools.applAt(rwCompsT, i), fd);
 		}
 
-		return new ContinueNode(SourceUtils.dynsemSourceSectionFromATerm(t), valBuildNode, rwCompBuilds);
+		return new ContinueNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), valBuildNode, rwCompBuilds);
 	}
 
 }

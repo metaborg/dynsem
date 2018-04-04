@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -46,7 +46,7 @@ public class TupleMatch extends MatchPattern {
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = Rule.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = DynSemRule.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}

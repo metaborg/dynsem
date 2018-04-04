@@ -24,9 +24,9 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class RuleRegistry {
 
-	private final Map<String, Map<Class<?>, ChainedRuleRoot>> rules = new HashMap<>();
+	private final Map<String, Map<Class<?>, Rule>> rules = new HashMap<>();
 
-	private boolean isInit;
+	@CompilationFinal private boolean isInit;
 
 	@CompilationFinal private DynSemLanguage language;
 
@@ -41,20 +41,9 @@ public class RuleRegistry {
 		return language;
 	}
 
-	@TruffleBoundary
-	public int ruleCount() {
-		int i = 0;
-		for (Map<?, ChainedRuleRoot> val : rules.values()) {
-			for (ChainedRuleRoot root : val.values()) {
-				i += root.getChainedRules().ruleCount();
-			}
-		}
-		return i;
-	}
-
-	@TruffleBoundary
-	public void registerJointRule(String arrowName, Class<?> dispatchClass, ChainedRuleRoot jointRuleRoot) {
-		Map<Class<?>, ChainedRuleRoot> rulesForName = rules.get(arrowName);
+	public void registerRule(String arrowName, Class<?> dispatchClass, Rule jointRuleRoot) {
+		CompilerAsserts.neverPartOfCompilation();
+		Map<Class<?>, Rule> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			rulesForName = new HashMap<>();
@@ -64,22 +53,23 @@ public class RuleRegistry {
 	}
 
 	@TruffleBoundary
-	public ChainedRuleRoot lookupRules(String arrowName, Class<?> dispatchClass) {
+	public Rule lookupRule(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
-		ChainedRuleRoot jointRuleForClass = null;
+		Rule jointRuleForClass = null;
 
-		Map<Class<?>, ChainedRuleRoot> jointRulesForName = rules.get(arrowName);
+		Map<Class<?>, Rule> jointRulesForName = rules.get(arrowName);
 
 		if (jointRulesForName != null) {
 			jointRuleForClass = jointRulesForName.get(dispatchClass);
 		}
 
 		if (jointRuleForClass == null) {
-			jointRuleForClass = createJointRoot(RuleKind.PLACEHOLDER, arrowName, dispatchClass, new Rule[0]);
-			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
+			jointRuleForClass = new FallbackRule(language, SourceUtils.dynsemSourceSectionUnvailable(), arrowName,
+					dispatchClass);
+			registerRule(arrowName, dispatchClass, jointRuleForClass);
 		}
 		return jointRuleForClass;
 	}
@@ -95,18 +85,18 @@ public class RuleRegistry {
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 
-			Map<String, Map<Class<?>, List<Rule>>> rules = new HashMap<>();
+			Map<String, Map<Class<?>, List<DynSemRule>>> rules = new HashMap<>();
 
 			for (IStrategoTerm ruleTerm : rulesTerm) {
-				Rule r = Rule.create(ruleTerm);
+				DynSemRule r = DynSemRule.create(language, ruleTerm);
 
-				Map<Class<?>, List<Rule>> rulesForName = rules.get(r.getArrowName());
+				Map<Class<?>, List<DynSemRule>> rulesForName = rules.get(r.getArrowName());
 				if (rulesForName == null) {
 					rulesForName = new HashMap<>();
 					rules.put(r.getArrowName(), rulesForName);
 				}
 
-				List<Rule> rulesForClass = rulesForName.get(r.getDispatchClass());
+				List<DynSemRule> rulesForClass = rulesForName.get(r.getDispatchClass());
 
 				if (rulesForClass == null) {
 					rulesForClass = new LinkedList<>();
@@ -116,25 +106,19 @@ public class RuleRegistry {
 				rulesForClass.add(r);
 			}
 
-			for (Entry<String, Map<Class<?>, List<Rule>>> rulesForNameEntry : rules.entrySet()) {
+			for (Entry<String, Map<Class<?>, List<DynSemRule>>> rulesForNameEntry : rules.entrySet()) {
 				final String arrowName = rulesForNameEntry.getKey();
-				for (Entry<Class<?>, List<Rule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
+				for (Entry<Class<?>, List<DynSemRule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
-					RuleKind kind = rulesForClass.getValue().get(0).getKind();
-					registerJointRule(arrowName, dispatchClass, createJointRoot(kind, arrowName, dispatchClass,
-							rulesForClass.getValue().toArray(new Rule[] {})));
+					registerRule(arrowName, dispatchClass,
+							RuleFactory.createRule(language, SourceUtils.dynsemSourceSectionUnvailable(),
+									rulesForClass.getValue(), arrowName, dispatchClass));
 				}
 			}
 
 		} catch (IOException ioex) {
 			throw new RuntimeException("Could not load specification ATerm", ioex);
 		}
-	}
-
-	protected final ChainedRuleRoot createJointRoot(RuleKind kind, String arrowName, Class<?> dispatchClass,
-			Rule[] rules) {
-		return new ChainedRuleRoot(language, SourceUtils.dynsemSourceSectionUnvailable(), kind, arrowName,
-				dispatchClass, rules);
 	}
 
 	private static IStrategoList ruleListTerm(IStrategoTerm topSpecTerm) {

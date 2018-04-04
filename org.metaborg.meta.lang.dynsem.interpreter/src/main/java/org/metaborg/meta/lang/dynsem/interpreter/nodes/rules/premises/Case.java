@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
@@ -32,12 +33,12 @@ public abstract class Case extends DynSemNode {
 		return NodeUtil.printCompactTreeToString(this);
 	}
 
-	public static Case create(IStrategoAppl t, FrameDescriptor fd) {
+	public static Case create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		if (Tools.hasConstructor(t, "CaseOtherwise", 1)) {
-			return CaseOtherwise.create(t, fd);
+			return CaseOtherwise.create(lang, t, fd);
 		}
 		if (Tools.hasConstructor(t, "CasePattern", 2)) {
-			return CasePattern.create(t, fd);
+			return CasePattern.create(lang, t, fd);
 		}
 		throw new NotImplementedException("Unsupported case: " + t);
 	}
@@ -59,12 +60,12 @@ public abstract class Case extends DynSemNode {
 			}
 		}
 
-		public static CaseOtherwise create(IStrategoAppl t, FrameDescriptor fd) {
+		public static CaseOtherwise create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "CaseOtherwise", 1);
 			IStrategoList premTs = Tools.listAt(t, 0);
 			Premise[] premises = new Premise[premTs.size()];
 			for (int i = 0; i < premises.length; i++) {
-				premises[i] = Premise.create(Tools.applAt(premTs, i), fd);
+				premises[i] = Premise.create(lang, Tools.applAt(premTs, i), fd);
 			}
 			return new CaseOtherwise(SourceUtils.dynsemSourceSectionFromATerm(t), premises);
 		}
@@ -102,7 +103,7 @@ public abstract class Case extends DynSemNode {
 			}
 		}
 
-		public static CasePattern create(IStrategoAppl t, FrameDescriptor fd) {
+		public static CasePattern create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 			assert Tools.hasConstructor(t, "CasePattern", 2);
 
 			MatchPattern pattern = MatchPattern.create(Tools.applAt(t, 0), fd);
@@ -110,7 +111,7 @@ public abstract class Case extends DynSemNode {
 			IStrategoList premTs = Tools.listAt(t, 1);
 			Premise[] premises = new Premise[premTs.size()];
 			for (int i = 0; i < premises.length; i++) {
-				premises[i] = Premise.create(Tools.applAt(premTs, i), fd);
+				premises[i] = Premise.create(lang, Tools.applAt(premTs, i), fd);
 			}
 			return new CasePattern(SourceUtils.dynsemSourceSectionFromATerm(t), pattern, premises);
 		}

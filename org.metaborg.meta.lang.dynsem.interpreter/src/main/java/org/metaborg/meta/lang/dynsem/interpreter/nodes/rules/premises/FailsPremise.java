@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -35,8 +36,9 @@ public class FailsPremise extends Premise {
 
 	}
 
-	public static FailsPremise create(IStrategoAppl t, FrameDescriptor fd) {
+	public static FailsPremise create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "Fails", 1);
-		return new FailsPremise(SourceUtils.dynsemSourceSectionFromATerm(t), Premise.create(Tools.termAt(t, 0), fd));
+		return new FailsPremise(SourceUtils.dynsemSourceSectionFromATerm(t),
+				Premise.create(lang, Tools.termAt(t, 0), fd));
 	}
 }

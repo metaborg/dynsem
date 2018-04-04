@@ -2,12 +2,11 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions;
 
 import java.util.Arrays;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ChainedRuleRoot;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ChainedRulesNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRuleNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -17,12 +16,11 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class HandleNode extends DynSemRuleNode {
+public class HandleNode extends Rule {
 
 	@Child private TermBuild evalBuildNode;
 	@Child private DispatchNode evalDispatchNode;
@@ -37,9 +35,9 @@ public class HandleNode extends DynSemRuleNode {
 
 	@Child private DispatchNode handlerDispatchNode;
 
-	public HandleNode(SourceSection source, TermBuild evalBuildNode, TermBuild catchBuildNode,
+	public HandleNode(DynSemLanguage language, SourceSection source, TermBuild evalBuildNode, TermBuild catchBuildNode,
 			TermBuild continueBuildNode) {
-		super(source);
+		super(language, source);
 		this.evalBuildNode = evalBuildNode;
 		this.catchBuildNode = catchBuildNode;
 		this.continueBuildNode = continueBuildNode;
@@ -53,7 +51,7 @@ public class HandleNode extends DynSemRuleNode {
 	private final ConditionProfile continueExistsCondition = ConditionProfile.createBinaryProfile();
 
 	@Override
-	@ExplodeLoop
+//	FIXME: @ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
 		final Object[] handleArgs = frame.getArguments();
 		Object evalT = evalBuildNode.executeGeneric(frame);
@@ -125,7 +123,7 @@ public class HandleNode extends DynSemRuleNode {
 	//
 	// }
 
-	public static HandleNode create(IStrategoAppl t, FrameDescriptor fd) {
+	public static HandleNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "Handle", 2) || Tools.hasConstructor(t, "Handle", 3);
 		// Handle: Term * Term * Term -> NativeRule
@@ -134,7 +132,7 @@ public class HandleNode extends DynSemRuleNode {
 		TermBuild continueBuildNode = t.getConstructor().getArity() == 3 ? TermBuild.create(Tools.applAt(t, 2), fd)
 				: null;
 
-		return new HandleNode(SourceUtils.dynsemSourceSectionFromATerm(t), evalBuildNode, catchBuildNode,
+		return new HandleNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), evalBuildNode, catchBuildNode,
 				continueBuildNode);
 	}
 

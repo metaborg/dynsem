@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -26,10 +26,10 @@ public class ListMatch extends MatchPattern {
 
 	@Override
 	public void executeMatch(VirtualFrame frame, Object term) {
-			final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(listClass)
-					.apply(getSourceSection(), cloneNodes(elemPatterns), cloneNode(tailPattern));
+		final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(listClass)
+				.apply(getSourceSection(), cloneNodes(elemPatterns), cloneNode(tailPattern));
 
-			replace(concreteMatch).executeMatch(frame, term);
+		replace(concreteMatch).executeMatch(frame, term);
 	}
 
 	public static ListMatch create(IStrategoAppl t, FrameDescriptor fd) {
@@ -50,7 +50,7 @@ public class ListMatch extends MatchPattern {
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = Rule.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = DynSemRule.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}

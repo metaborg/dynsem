@@ -10,7 +10,6 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class DynSemNode extends Node {
 	private final SourceSection sourceSection;
 
-
 	public DynSemNode(SourceSection source) {
 		super();
 		this.sourceSection = source;
@@ -29,5 +28,5 @@ public abstract class DynSemNode extends Node {
 		}
 		return ctx;
 	}
-	
+
 }

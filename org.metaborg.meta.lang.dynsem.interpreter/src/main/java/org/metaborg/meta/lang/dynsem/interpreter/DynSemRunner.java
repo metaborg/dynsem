@@ -48,7 +48,7 @@ public class DynSemRunner {
 			throw new MetaborgException("Evaluation failed.", e);
 		}
 	}
-	
+
 	@TruffleBoundary
 	private RunConfig prepareForEvaluation(FileObject file) throws MetaborgException {
 
@@ -109,11 +109,11 @@ public class DynSemRunner {
 		}
 		return new RunConfig(program, props);
 	}
-	
+
 	private class RunConfig {
 		protected final IStrategoTerm program;
 		protected final ImmutableMap<String, Object> props;
-		
+
 		public RunConfig(IStrategoTerm program, ImmutableMap<String, Object> props) {
 			this.program = program;
 			this.props = props;

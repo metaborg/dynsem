@@ -1,7 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRuleNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -14,14 +15,15 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class RaiseNode extends DynSemRuleNode {
+public class RaiseNode extends Rule {
 
 	@Children private final TermBuild[] rwCompBuildNodes;
 
 	@Child private TermBuild thrownBuildNode;
 
-	public RaiseNode(SourceSection source, TermBuild[] rwCompBuildNodes, TermBuild thrownBuildNode) {
-		super(source);
+	public RaiseNode(DynSemLanguage lang, SourceSection source, TermBuild[] rwCompBuildNodes,
+			TermBuild thrownBuildNode) {
+		super(lang, source);
 		this.rwCompBuildNodes = rwCompBuildNodes;
 		this.thrownBuildNode = thrownBuildNode;
 	}
@@ -37,7 +39,7 @@ public class RaiseNode extends DynSemRuleNode {
 		throw new AbortedEvaluationException(thrownT, rwCompsT);
 	}
 
-	public static RaiseNode create(IStrategoAppl t, FrameDescriptor fd) {
+	public static RaiseNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "Raise", 2);
 		IStrategoList rwCompTerms = Tools.listAt(t, 0);
@@ -46,7 +48,7 @@ public class RaiseNode extends DynSemRuleNode {
 			rwCompBuildNodes[i] = TermBuild.create(Tools.applAt(rwCompTerms, i), fd);
 		}
 		TermBuild thrownBuldNode = TermBuild.create(Tools.applAt(t, 1), fd);
-		return new RaiseNode(SourceUtils.dynsemSourceSectionFromATerm(t), rwCompBuildNodes, thrownBuldNode);
+		return new RaiseNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), rwCompBuildNodes, thrownBuldNode);
 	}
 
 }

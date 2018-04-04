@@ -1,7 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRuleNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
@@ -17,13 +18,13 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class NativeCallPremise extends Premise {
-	@Child private DynSemRuleNode ruleNode;
+	@Child private Rule ruleNode;
 
 	@Child private MatchPattern rhsNode;
 
 	@Children private final MatchPattern[] rhsRwNodes;
 
-	public NativeCallPremise(SourceSection source, DynSemRuleNode ruleNode, MatchPattern rhsNode,
+	public NativeCallPremise(SourceSection source, Rule ruleNode, MatchPattern rhsNode,
 			MatchPattern[] rhsComponentNodes) {
 		super(source);
 		this.ruleNode = ruleNode;
@@ -46,11 +47,11 @@ public class NativeCallPremise extends Premise {
 		}
 	}
 
-	public static NativeCallPremise create(IStrategoAppl t, FrameDescriptor ruleFD) {
+	public static NativeCallPremise create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor ruleFD) {
 		CompilerAsserts.neverPartOfCompilation();
 		// NativeRelationPremise: NativeRule * Term * List(Term) -> Relation
 		assert Tools.hasConstructor(t, "NativeRelationPremise", 3);
-		DynSemRuleNode ruleNode = DynSemRuleNode.create(Tools.applAt(t, 0), ruleFD);
+		Rule ruleNode = Rule.create(lang, Tools.applAt(t, 0), ruleFD);
 		MatchPattern rhsNode = MatchPattern.create(Tools.applAt(t, 1), ruleFD);
 
 		IStrategoList rhsRwsT = Tools.listAt(t, 2);

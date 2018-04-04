@@ -1,7 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRuleNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -14,14 +15,14 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class BreakNode extends DynSemRuleNode {
+public class BreakNode extends Rule {
 
 	@Child private TermBuild valBuildnode;
 
 	@Children private final TermBuild[] rwCompNodes;
 
-	public BreakNode(SourceSection source, TermBuild valBuildNode, TermBuild[] rwCompNodes) {
-		super(source);
+	public BreakNode(DynSemLanguage lang, SourceSection source, TermBuild valBuildNode, TermBuild[] rwCompNodes) {
+		super(lang, source);
 		this.valBuildnode = valBuildNode;
 		this.rwCompNodes = rwCompNodes;
 	}
@@ -38,7 +39,7 @@ public class BreakNode extends DynSemRuleNode {
 		throw new LoopBreakException(val, components);
 	}
 
-	public static BreakNode create(IStrategoAppl t, FrameDescriptor fd) {
+	public static BreakNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		// BreakNode: Term * List(Term) -> NativeRule
 		assert Tools.hasConstructor(t, "BreakNode", 2);
@@ -51,7 +52,7 @@ public class BreakNode extends DynSemRuleNode {
 			rwCompBuilds[i] = TermBuild.create(Tools.applAt(rwCompsT, i), fd);
 		}
 
-		return new BreakNode(SourceUtils.dynsemSourceSectionFromATerm(t), valBuildNode, rwCompBuilds);
+		return new BreakNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), valBuildNode, rwCompBuilds);
 	}
 
 }

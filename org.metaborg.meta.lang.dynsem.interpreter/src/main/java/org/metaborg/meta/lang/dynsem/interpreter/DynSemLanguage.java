@@ -37,7 +37,7 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 		ITermFactory factory = new ImploderOriginTermFactory(new TermFactory());
 		IStrategoTerm programAST = new TAFTermReader(factory).parseFromStream(code.getInputStream());
-		
+
 		// convert origin annotations back to origin attachments
 		programAST = new TermTransformer(factory, true) {
 

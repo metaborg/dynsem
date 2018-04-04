@@ -1,7 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRuleNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -9,7 +10,6 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
@@ -18,7 +18,7 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.LoopNode;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class WhileNode extends DynSemRuleNode {
+public class WhileNode extends Rule {
 
 	private static final byte ID_CONDITION = 1;
 	private static final byte ID_BODY = 2;
@@ -41,9 +41,9 @@ public class WhileNode extends DynSemRuleNode {
 	private final FrameSlot[] roCompSlots;
 	private final FrameSlot[] rwCompSlots;
 
-	public WhileNode(SourceSection source, TermBuild conditionBuildNode, TermBuild bodyBuildNode,
+	public WhileNode(DynSemLanguage lang, SourceSection source, TermBuild conditionBuildNode, TermBuild bodyBuildNode,
 			TermBuild defaultValBuildNode, TermBuild[] roCompBuilds, TermBuild[] rwCompBuilds) {
-		super(source);
+		super(lang, source);
 		this.conditionBuildNode = conditionBuildNode;
 		this.bodyBuildNode = bodyBuildNode;
 		this.defaultValBuildNode = defaultValBuildNode;
@@ -98,7 +98,7 @@ public class WhileNode extends DynSemRuleNode {
 
 	}
 
-	public static WhileNode create(IStrategoAppl t, FrameDescriptor fd) {
+	public static WhileNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		// WhileNode: Term * Term * Term * List(Term) * List(Term) -> NativeRule
 		assert Tools.hasConstructor(t, "WhileNode", 5);
@@ -119,7 +119,7 @@ public class WhileNode extends DynSemRuleNode {
 			rwCompBuilds[i] = TermBuild.create(Tools.applAt(rwCompsT, i), fd);
 		}
 
-		return new WhileNode(SourceUtils.dynsemSourceSectionFromATerm(t), conditionBuildNode, bodyBuildNode,
+		return new WhileNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), conditionBuildNode, bodyBuildNode,
 				defaultValBuildNode, roCompBuilds, rwCompBuilds);
 	}
 

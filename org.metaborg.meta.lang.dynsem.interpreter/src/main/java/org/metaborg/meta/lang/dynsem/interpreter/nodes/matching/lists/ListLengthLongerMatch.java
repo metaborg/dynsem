@@ -5,10 +5,8 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFail
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 
 import com.oracle.truffle.api.dsl.Cached;
-import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class ListLengthLongerMatch extends MatchPattern {
@@ -38,16 +36,16 @@ public abstract class ListLengthLongerMatch extends MatchPattern {
 	public int getMinimalLength() {
 		return minimalLength;
 	}
-	
-//	private final ConditionProfile onListProfile = ConditionProfile.createCountingProfile();
-//
-//	@Fallback
-//	public void executeFail(VirtualFrame frame, Object t) {
-//		if (onListProfile.profile(t instanceof IListTerm<?>)) {
-//			executeList(frame, (IListTerm<?>) t);
-//		} else {
-//			throw PatternMatchFailure.INSTANCE;
-//		}
-//	}
+
+	// private final ConditionProfile onListProfile = ConditionProfile.createCountingProfile();
+	//
+	// @Fallback
+	// public void executeFail(VirtualFrame frame, Object t) {
+	// if (onListProfile.profile(t instanceof IListTerm<?>)) {
+	// executeList(frame, (IListTerm<?>) t);
+	// } else {
+	// throw PatternMatchFailure.INSTANCE;
+	// }
+	// }
 
 }

@@ -63,17 +63,19 @@ public class DynSemContext {
 
 	public DynSemContext(Map<String, Object> config) {
 		// TODO: there must be a smell here...
-		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermTransformer) config.get(CONFIG_TERMTRANSFORMER), (ITermRegistry) config.get(CONFIG_TERMREGISTRY),
-				(RuleRegistry) config.get(CONFIG_RULEREG), (InputStream) config.get(CONFIG_STDIN),
-				(PrintStream) config.get(CONFIG_STDOUT), (PrintStream) config.get(CONFIG_STDERR),
-				(InputStream) config.get(CONFIG_DSSPEC), (String) config.get(CONFIG_MIMETYPE),
-				(boolean) config.get(CONFIG_BACKTRACK), (boolean) config.get(CONFIG_SAFECOMPS),
-				(boolean) config.get(CONFIG_TERMCACHE), (boolean) config.get(CONFIG_DEBUG), config);
+		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermTransformer) config.get(CONFIG_TERMTRANSFORMER),
+				(ITermRegistry) config.get(CONFIG_TERMREGISTRY), (RuleRegistry) config.get(CONFIG_RULEREG),
+				(InputStream) config.get(CONFIG_STDIN), (PrintStream) config.get(CONFIG_STDOUT),
+				(PrintStream) config.get(CONFIG_STDERR), (InputStream) config.get(CONFIG_DSSPEC),
+				(String) config.get(CONFIG_MIMETYPE), (boolean) config.get(CONFIG_BACKTRACK),
+				(boolean) config.get(CONFIG_SAFECOMPS), (boolean) config.get(CONFIG_TERMCACHE),
+				(boolean) config.get(CONFIG_DEBUG), config);
 	}
 
-	private DynSemContext(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry, RuleRegistry ruleRegistry,
-			InputStream input, PrintStream output, PrintStream err, InputStream specification, String mimetype_lang,
-			boolean backtracking, boolean safecomponents, boolean caching, boolean debug, Map<String, Object> config) {
+	private DynSemContext(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry,
+			RuleRegistry ruleRegistry, InputStream input, PrintStream output, PrintStream err,
+			InputStream specification, String mimetype_lang, boolean backtracking, boolean safecomponents,
+			boolean caching, boolean debug, Map<String, Object> config) {
 		this.parser = parser;
 		this.termTransformer = transformer;
 		this.termRegistry = termRegistry;
@@ -132,7 +134,7 @@ public class DynSemContext {
 	public ITermTransformer getTermTransformer() {
 		return termTransformer;
 	}
-	
+
 	/**
 	 * Read property from the custom property store maintained by this {@link DynSemContext}.
 	 * 

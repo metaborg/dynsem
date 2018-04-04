@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeCallPremise;
 import org.spoofax.interpreter.core.Tools;
@@ -19,10 +20,10 @@ public abstract class Premise extends DynSemNode {
 
 	public abstract void execute(VirtualFrame frame);
 
-	public static Premise create(IStrategoAppl t, FrameDescriptor fd) {
+	public static Premise create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		if (Tools.hasConstructor(t, "CaseMatch", 2)) {
-			return CaseMatchPremise.create(t, fd);
+			return CaseMatchPremise.create(lang, t, fd);
 		}
 		IStrategoAppl premT = Tools.applAt(t, 0);
 		if (Tools.hasConstructor(premT, "Relation", 3)) {
@@ -32,13 +33,13 @@ public abstract class Premise extends DynSemNode {
 			return MatchPremise.create(premT, fd);
 		}
 		if (Tools.hasConstructor(premT, "NativeRelationPremise", 3)) {
-			return NativeCallPremise.create(premT, fd);
+			return NativeCallPremise.create(lang, premT, fd);
 		}
 		if (Tools.hasConstructor(premT, "TermEq", 2)) {
 			return TermEqPremise.create(premT, fd);
 		}
 		if (Tools.hasConstructor(premT, "Fails", 1)) {
-			return FailsPremise.create(premT, fd);
+			return FailsPremise.create(lang, premT, fd);
 		}
 
 		throw new NotImplementedException("Unsupported premise: " + t);

@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -58,7 +59,7 @@ public class CaseMatchPremise extends Premise {
 		return NodeUtil.printCompactTreeToString(this);
 	}
 
-	public static CaseMatchPremise create(IStrategoAppl t, FrameDescriptor fd) {
+	public static CaseMatchPremise create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "CaseMatch", 2);
 		TermBuild tb = TermBuild.create(Tools.applAt(t, 0), fd);
@@ -67,7 +68,7 @@ public class CaseMatchPremise extends Premise {
 		Case[] cases = new Case[caseTs.size()];
 
 		for (int i = 0; i < cases.length; i++) {
-			cases[i] = Case.create(Tools.applAt(caseTs, i), fd);
+			cases[i] = Case.create(lang, Tools.applAt(caseTs, i), fd);
 		}
 
 		return new CaseMatchPremise(SourceUtils.dynsemSourceSectionFromATerm(t), tb, cases);

@@ -51,7 +51,7 @@ public abstract class TermEqPremise extends Premise {
 		}
 	}
 
-	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" }, limit="1")
+	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" }, limit = "1")
 	public void doString(String left, String right, @Cached("left") String cachedLeft,
 			@Cached("right") String cachedRight, @Cached("doStringEq(cachedLeft, cachedRight)") boolean isEqual) {
 		if (!isEqual) {
@@ -82,7 +82,7 @@ public abstract class TermEqPremise extends Premise {
 	}
 
 	@SuppressWarnings("rawtypes")
-	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" }, limit="1")
+	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" }, limit = "1")
 	public void doListDirect(PersistentList left, PersistentList right, @Cached("left") PersistentList cachedLeft,
 			@Cached("right") PersistentList cachedRight, @Cached("doListEq(cachedLeft, cachedRight)") boolean isEqual) {
 		if (!isEqual) {

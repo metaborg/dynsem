@@ -48,9 +48,9 @@ public class RelationPremise extends Premise {
 
 		// evaluate the RHS pattern match
 		rhsNode.executeMatch(frame, res.result);
-		
-//		CompilerAsserts.compilationConstant(res.components.length);
-		
+
+		// CompilerAsserts.compilationConstant(res.components.length);
+
 		// evaluate the RHS component pattern matches
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);

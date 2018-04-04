@@ -4,8 +4,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.StatefulControlFl
 
 public final class AbortedEvaluationException extends StatefulControlFlowException {
 
-
-	
 	/**
 	 * 
 	 */
