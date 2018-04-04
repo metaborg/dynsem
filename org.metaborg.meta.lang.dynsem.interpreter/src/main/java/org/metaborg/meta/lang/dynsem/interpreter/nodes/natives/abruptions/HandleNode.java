@@ -3,6 +3,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions;
 import java.util.Arrays;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ChainedRuleRoot;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ChainedRulesNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRuleNode;
@@ -15,6 +17,7 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
@@ -29,6 +32,9 @@ public class HandleNode extends DynSemRuleNode {
 	@Child private DispatchNode continueDispatchNode;
 
 	@Child private ReflectiveHandlerBuild handlerBuildNode;
+
+	// @Child private ChainedRulesNode handlerRules;
+
 	@Child private DispatchNode handlerDispatchNode;
 
 	public HandleNode(SourceSection source, TermBuild evalBuildNode, TermBuild catchBuildNode,
@@ -78,8 +84,7 @@ public class HandleNode extends DynSemRuleNode {
 			for (int i = 0; i < numRwComps; i++) {
 				args[i + numRoComps + 1] = rwComps[i];
 			}
-			// FIXME: directly inline the handler dispatch node
-			// and rewrite the CallAltRule
+			// return getHandlerRules(handlerT.getClass()).execute(args);
 			return handlerDispatchNode.execute(handlerT.getClass(), args);
 		}
 
@@ -107,6 +112,18 @@ public class HandleNode extends DynSemRuleNode {
 			return continueDispatchNode.execute(continueT.getClass(), args);
 		}
 	}
+
+	// private ChainedRulesNode getHandlerRules(Class<?> handlerClass) {
+	// CompilerAsserts.compilationConstant(handlerClass);
+	// if(handlerRules == null) {
+	// ChainedRuleRoot handlerRoot = getContext().getRuleRegistry().lookupRules("", handlerClass);
+	// ChainedRulesNode handlerRules = NodeUtil.cloneNode(handlerRoot.getChainedRules());
+	//// handlerRules.repl
+	// }
+	// // TODO Auto-generated method stub
+	// return null;
+	//
+	// }
 
 	public static HandleNode create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
