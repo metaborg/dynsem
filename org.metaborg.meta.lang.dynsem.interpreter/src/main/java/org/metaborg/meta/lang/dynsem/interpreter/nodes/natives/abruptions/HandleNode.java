@@ -4,22 +4,28 @@ import java.util.Arrays;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rules;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class HandleNode extends Rule {
+public class HandleNode extends NativeExecutableNode {
 
 	@Child private TermBuild evalBuildNode;
 	@Child private DispatchNode evalDispatchNode;
@@ -32,25 +38,27 @@ public class HandleNode extends Rule {
 
 	// @Child private ChainedRulesNode handlerRules;
 
-	@Child private DispatchNode handlerDispatchNode;
+	// @Child private DispatchNode handlerDispatchNode;
 
-	public HandleNode(DynSemLanguage language, SourceSection source, TermBuild evalBuildNode, TermBuild catchBuildNode,
+	@CompilationFinal private CallTarget handlerCallTarget;
+
+	public HandleNode(SourceSection source, TermBuild evalBuildNode, TermBuild catchBuildNode,
 			TermBuild continueBuildNode) {
-		super(language, source);
+		super(source);
 		this.evalBuildNode = evalBuildNode;
 		this.catchBuildNode = catchBuildNode;
 		this.continueBuildNode = continueBuildNode;
 		this.handlerBuildNode = ReflectiveHandlerBuildNodeGen.create(source);
 		this.evalDispatchNode = DispatchNodeGen.create(source, "");
 		this.continueDispatchNode = DispatchNodeGen.create(source, "");
-		this.handlerDispatchNode = DispatchNodeGen.create(source, "");
 	}
 
 	private final BranchProfile catchTaken = BranchProfile.create();
+	private final BranchProfile handlerFails = BranchProfile.create();
 	private final ConditionProfile continueExistsCondition = ConditionProfile.createBinaryProfile();
 
+	// FIXME: @ExplodeLoop
 	@Override
-//	FIXME: @ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
 		final Object[] handleArgs = frame.getArguments();
 		Object evalT = evalBuildNode.executeGeneric(frame);
@@ -81,9 +89,22 @@ public class HandleNode extends Rule {
 			for (int i = 0; i < numRwComps; i++) {
 				args[i + numRoComps + 1] = rwComps[i];
 			}
-			// return getHandlerRules(handlerT.getClass()).execute(args);
-			RuleResult handlerResult = handlerDispatchNode.execute(handlerT.getClass(), args);
-			return handlerResult;
+
+			if (handlerCallTarget == null) {
+				CompilerDirectives.transferToInterpreterAndInvalidate();
+				Rule handlerRule = getContext().getRuleRegistry().lookupRule("", handlerT.getClass());
+				if (handlerRule instanceof Rules) {
+					handlerCallTarget = ((Rules) handlerRule).makeUninitializedCloneWithoutFallback().getCallTarget();
+				} else {
+					handlerCallTarget = handlerRule.makeUninitializedClone().getCallTarget();
+				}
+			}
+			try {
+				return (RuleResult) handlerCallTarget.call(args);
+			} catch (PatternMatchFailure pmf) {
+				handlerFails.enter();
+				throw abex;
+			}
 		}
 
 		if (continueExistsCondition.profile(continueBuildNode == null)) {
@@ -132,7 +153,7 @@ public class HandleNode extends Rule {
 		TermBuild continueBuildNode = t.getConstructor().getArity() == 3 ? TermBuild.create(Tools.applAt(t, 2), fd)
 				: null;
 
-		return new HandleNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), evalBuildNode, catchBuildNode,
+		return new HandleNode(SourceUtils.dynsemSourceSectionFromATerm(t), evalBuildNode, catchBuildNode,
 				continueBuildNode);
 	}
 

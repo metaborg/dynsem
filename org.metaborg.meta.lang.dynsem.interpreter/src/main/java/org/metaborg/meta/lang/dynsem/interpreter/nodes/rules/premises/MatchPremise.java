@@ -10,7 +10,6 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -42,10 +41,8 @@ public class MatchPremise extends Premise {
 	public void execute(VirtualFrame frame) {
 		final Object t = term.executeGeneric(frame);
 		if (patt instanceof NoOpPattern && NodeUtil.countNodes(term, is_non_elidable_termbuild) == 0) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
 			replace(NoOpPremiseNodeGen.create(getSourceSection()));
 		} else {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
 			replace(new NonElidableMatchPremise(term, patt, getSourceSection())).doEvaluated(t, frame);
 		}
 		patt.executeMatch(frame, t);

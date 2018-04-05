@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -13,16 +13,18 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.Node.Child;
+import com.oracle.truffle.api.nodes.Node.Children;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class BreakNode extends Rule {
+public class BreakNode extends NativeExecutableNode {
 
 	@Child private TermBuild valBuildnode;
 
 	@Children private final TermBuild[] rwCompNodes;
 
-	public BreakNode(DynSemLanguage lang, SourceSection source, TermBuild valBuildNode, TermBuild[] rwCompNodes) {
-		super(lang, source);
+	public BreakNode(SourceSection source, TermBuild valBuildNode, TermBuild[] rwCompNodes) {
+		super(source);
 		this.valBuildnode = valBuildNode;
 		this.rwCompNodes = rwCompNodes;
 	}
@@ -52,7 +54,7 @@ public class BreakNode extends Rule {
 			rwCompBuilds[i] = TermBuild.create(Tools.applAt(rwCompsT, i), fd);
 		}
 
-		return new BreakNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), valBuildNode, rwCompBuilds);
+		return new BreakNode(SourceUtils.dynsemSourceSectionFromATerm(t), valBuildNode, rwCompBuilds);
 	}
 
 }

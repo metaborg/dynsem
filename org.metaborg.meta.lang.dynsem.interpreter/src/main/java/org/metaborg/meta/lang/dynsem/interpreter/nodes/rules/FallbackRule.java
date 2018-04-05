@@ -11,8 +11,6 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-import mb.nabl2.terms.ITerm;
-
 public class FallbackRule extends Rule {
 
 	@Child private DispatchNode dispatchNode;
@@ -29,6 +27,7 @@ public class FallbackRule extends Rule {
 
 	@CompilationFinal private Class<?> nextDispatchClass;
 
+	@Override
 	public RuleResult execute(VirtualFrame frame) {
 		if (nextDispatchClass == null) {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
@@ -51,6 +50,11 @@ public class FallbackRule extends Rule {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	protected Rule cloneUninitialized() {
+		return new FallbackRule(language(), getSourceSection(), arrowName, fallbackOfClass);
 	}
 
 	@Override

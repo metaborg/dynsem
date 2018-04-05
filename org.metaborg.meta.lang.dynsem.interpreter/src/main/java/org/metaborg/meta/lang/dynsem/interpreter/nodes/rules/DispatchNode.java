@@ -32,6 +32,7 @@ public abstract class DispatchNode extends DynSemNode {
 
 	@Specialization(replaces = "doDirect")
 	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args, @Cached("create()") IndirectCallNode callNode) {
+//		System.out.println("Cache miss dispatching on " + dispatchClass.getSimpleName() + " from " + getRootNode());
 		return (RuleResult) callNode.call(getUnionRootNode(dispatchClass).getCallTarget(), args);
 	}
 

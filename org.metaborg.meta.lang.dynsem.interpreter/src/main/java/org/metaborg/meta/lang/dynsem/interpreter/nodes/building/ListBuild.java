@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -50,7 +50,7 @@ public class ListBuild extends TermBuild {
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = DynSemRule.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = ReductionRule.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}

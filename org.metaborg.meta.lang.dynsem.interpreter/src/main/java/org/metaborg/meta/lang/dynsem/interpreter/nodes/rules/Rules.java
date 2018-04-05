@@ -1,69 +1,76 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.dsl.Cached;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class Rules extends Rule {
+public abstract class Rules extends Rule {
 
-	private final Rule primaryRule;
-	private final Rule alternativeRule;
-
-	@Child private DirectCallNode primaryCallNode;
-	@Child private DirectCallNode alternativeCallNode;
+	@CompilationFinal protected Rule primaryRule;
+	@CompilationFinal protected Rule alternativeRule;
 
 	public Rules(DynSemLanguage lang, SourceSection source, Rule primaryRule, Rule alternativeRule) {
 		super(lang, source);
 		this.primaryRule = primaryRule;
 		this.alternativeRule = alternativeRule;
-		this.primaryCallNode = DirectCallNode.create(primaryRule.getCallTarget());
-		this.alternativeCallNode = DirectCallNode.create(alternativeRule.getCallTarget());
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
 	private final BranchProfile alternativeTaken = BranchProfile.create();
 
-	@Override
-	public RuleResult execute(VirtualFrame frame) {
+	@Specialization
+	public RuleResult executeCached(VirtualFrame frame,
+			@Cached("create(primaryRule.getCallTarget())") DirectCallNode primaryCallNode,
+			@Cached("create(alternativeRule.getCallTarget())") DirectCallNode alternativeCallNode) {
+
 		try {
-			// TODO: use CompilerDirectives.castExact introduced in Truffle 0.33
+			// TODO: 0.33 use CompilerDirectives.castExact introduced in Truffle 0.33
 			return (RuleResult) primaryCallNode.call(frame.getArguments());
 		} catch (PatternMatchFailure pmfx) {
 			alternativeTaken.enter();
-			// TODO: use CompilerDirectives.castExact introduced in Truffle 0.33
+			// TODO: 0.33 use CompilerDirectives.castExact introduced in Truffle 0.33
 			return (RuleResult) alternativeCallNode.call(frame.getArguments());
 		}
 	}
 
-	public Rule getPrimaryRule() {
-		return primaryRule;
+	@Override
+	protected Rule cloneUninitialized() {
+		return RulesNodeGen.create(language(), getSourceSection(), primaryRule.cloneUninitialized(),
+				alternativeRule.cloneUninitialized());
 	}
 
-	public Rule getAlternative() {
-		return alternativeRule;
-	}
-
-	public List<Rule> getRules() {
+	public Rule makeUninitializedCloneWithoutFallback() {
 		CompilerAsserts.neverPartOfCompilation();
-		List<Rule> rules = new LinkedList<>();
-		rules.add(primaryRule);
-		if (alternativeRule instanceof Rules) {
-			rules.addAll(((Rules) alternativeRule).getRules());
+		if (alternativeRule instanceof FallbackRule) {
+			return primaryRule.cloneUninitialized();
+		} else if (alternativeRule instanceof Rules) {
+			return RulesNodeGen.create(language(), getSourceSection(), primaryRule.cloneUninitialized(),
+					((Rules) alternativeRule).makeUninitializedCloneWithoutFallback());
 		} else {
-			rules.add(alternativeRule);
+			return cloneUninitialized();
 		}
-		return rules;
 	}
+
+	// public void replaceFallbackWith(Rule replacement) {
+	// CompilerAsserts.neverPartOfCompilation();
+	// if (alternativeRule instanceof FallbackRule) {
+	// this.alternativeRule = replacement;
+	// } else if (alternativeRule instanceof Rules) {
+	// ((Rules) alternativeRule).replaceFallbackWith(replacement);
+	// } else {
+	// throw new IllegalStateException("Rules do not contain a fallback rule");
+	// }
+	// }
 
 	public int count() {
 		CompilerAsserts.neverPartOfCompilation();

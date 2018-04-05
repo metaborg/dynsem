@@ -2,58 +2,45 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions.HandleNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions.RaiseNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops.BreakNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops.ContinueNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops.WhileNode;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.terms.util.NotImplementedException;
 
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class Rule extends DynSemRootNode {
 
+	private final DynSemLanguage lang;
+
 	public Rule(DynSemLanguage lang, SourceSection source, FrameDescriptor fd) {
 		super(lang, source, fd);
+		this.lang = lang;
 	}
 
 	public Rule(DynSemLanguage lang, SourceSection source) {
-		super(lang, source);
+		this(lang, source, null);
+	}
+
+	protected DynSemLanguage language() {
+		return lang;
 	}
 
 	@Override
 	public abstract RuleResult execute(VirtualFrame frame);
 
-	public static Rule create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor ruleFD) {
-		CompilerAsserts.neverPartOfCompilation();
-		// WhileNode: Term * Term * Term * List(Term) * List(Term) -> NativeRule
-		if (Tools.hasConstructor(t, "WhileNode", 5)) {
-			return WhileNode.create(lang, t, ruleFD);
-		}
-		// BreakNode: Term * List(Term) -> NativeRule
-		if (Tools.hasConstructor(t, "BreakNode", 2)) {
-			return BreakNode.create(lang, t, ruleFD);
-		}
-		// ContinueNode: Term * List(Term) -> NativeRule
-		if (Tools.hasConstructor(t, "ContinueNode", 2)) {
-			return ContinueNode.create(lang, t, ruleFD);
-		}
-		// Raise: List(Term) * Term -> NativeRule
-		if (Tools.hasConstructor(t, "Raise", 2)) {
-			return RaiseNode.create(lang, t, ruleFD);
-		}
-		// Handle: Term * Term -> NativeRule
-		// Handle: Term * Term * Term -> NativeRule
-		if (Tools.hasConstructor(t, "Handle", 2) || Tools.hasConstructor(t, "Handle", 3)) {
-			return HandleNode.create(lang, t, ruleFD);
-		}
-
-		throw new NotImplementedException("Unsupported dynsemrulenode: " + t);
+	@Override
+	public boolean isCloningAllowed() {
+		return true;
 	}
 
+	@Override
+	protected boolean isCloneUninitializedSupported() {
+		return true;
+	}
+
+	@Override
+	protected abstract Rule cloneUninitialized();
+
+	public Rule makeUninitializedClone() {
+		return cloneUninitialized();
+	}
 }

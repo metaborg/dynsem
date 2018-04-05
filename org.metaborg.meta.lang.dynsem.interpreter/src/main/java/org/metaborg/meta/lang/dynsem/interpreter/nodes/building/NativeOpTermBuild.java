@@ -8,7 +8,6 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -39,7 +38,6 @@ public class NativeOpTermBuild extends TermBuild {
 		final Class<?> termClass = termReg.getNativeOperatorClass(constr, children.length);
 
 		TermBuild build = termReg.lookupNativeOpBuildFactory(termClass).apply(getSourceSection(), children);
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		return replace(build).executeGeneric(frame);
 	}
 

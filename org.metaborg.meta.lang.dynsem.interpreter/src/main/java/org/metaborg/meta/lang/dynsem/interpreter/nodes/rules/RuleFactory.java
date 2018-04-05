@@ -16,7 +16,7 @@ public class RuleFactory {
 			return new FallbackRule(lang, source, arrowName, dispatchClass);
 		} else {
 			Rule tail = createRule(lang, source, rules.subList(1, rules.size()), arrowName, dispatchClass);
-			return new Rules(lang, source, rules.get(0), tail);
+			return RulesNodeGen.create(lang, source, rules.get(0), tail);
 		}
 	}
 

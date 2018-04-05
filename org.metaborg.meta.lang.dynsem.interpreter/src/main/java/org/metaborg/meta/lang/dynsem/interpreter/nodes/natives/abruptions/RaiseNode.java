@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -15,15 +16,15 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class RaiseNode extends Rule {
+public class RaiseNode extends NativeExecutableNode {
 
 	@Children private final TermBuild[] rwCompBuildNodes;
 
 	@Child private TermBuild thrownBuildNode;
 
-	public RaiseNode(DynSemLanguage lang, SourceSection source, TermBuild[] rwCompBuildNodes,
+	public RaiseNode(SourceSection source, TermBuild[] rwCompBuildNodes,
 			TermBuild thrownBuildNode) {
-		super(lang, source);
+		super(source);
 		this.rwCompBuildNodes = rwCompBuildNodes;
 		this.thrownBuildNode = thrownBuildNode;
 	}
@@ -48,7 +49,7 @@ public class RaiseNode extends Rule {
 			rwCompBuildNodes[i] = TermBuild.create(Tools.applAt(rwCompTerms, i), fd);
 		}
 		TermBuild thrownBuldNode = TermBuild.create(Tools.applAt(t, 1), fd);
-		return new RaiseNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), rwCompBuildNodes, thrownBuldNode);
+		return new RaiseNode(SourceUtils.dynsemSourceSectionFromATerm(t), rwCompBuildNodes, thrownBuldNode);
 	}
 
 }

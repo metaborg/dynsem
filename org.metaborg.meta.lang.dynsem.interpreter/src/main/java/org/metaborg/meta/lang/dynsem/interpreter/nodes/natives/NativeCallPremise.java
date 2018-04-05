@@ -18,16 +18,16 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class NativeCallPremise extends Premise {
-	@Child private Rule ruleNode;
+	@Child private NativeExecutableNode execNode;
 
 	@Child private MatchPattern rhsNode;
 
 	@Children private final MatchPattern[] rhsRwNodes;
 
-	public NativeCallPremise(SourceSection source, Rule ruleNode, MatchPattern rhsNode,
+	public NativeCallPremise(SourceSection source, NativeExecutableNode execNode, MatchPattern rhsNode,
 			MatchPattern[] rhsComponentNodes) {
 		super(source);
-		this.ruleNode = ruleNode;
+		this.execNode = execNode;
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}
@@ -35,7 +35,7 @@ public class NativeCallPremise extends Premise {
 	@Override
 	@ExplodeLoop
 	public void execute(VirtualFrame frame) {
-		final RuleResult res = ruleNode.execute(frame);
+		final RuleResult res = execNode.execute(frame);
 
 		rhsNode.executeMatch(frame, res.result);
 
@@ -51,7 +51,7 @@ public class NativeCallPremise extends Premise {
 		CompilerAsserts.neverPartOfCompilation();
 		// NativeRelationPremise: NativeRule * Term * List(Term) -> Relation
 		assert Tools.hasConstructor(t, "NativeRelationPremise", 3);
-		Rule ruleNode = Rule.create(lang, Tools.applAt(t, 0), ruleFD);
+		NativeExecutableNode ruleNode = NativeExecutableNode.create(lang, Tools.applAt(t, 0), ruleFD);
 		MatchPattern rhsNode = MatchPattern.create(Tools.applAt(t, 1), ruleFD);
 
 		IStrategoList rhsRwsT = Tools.listAt(t, 2);

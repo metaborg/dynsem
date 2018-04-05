@@ -85,18 +85,18 @@ public class RuleRegistry {
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 
-			Map<String, Map<Class<?>, List<DynSemRule>>> rules = new HashMap<>();
+			Map<String, Map<Class<?>, List<ReductionRule>>> rules = new HashMap<>();
 
 			for (IStrategoTerm ruleTerm : rulesTerm) {
-				DynSemRule r = DynSemRule.create(language, ruleTerm);
+				ReductionRule r = ReductionRule.create(language, (IStrategoAppl) ruleTerm);
 
-				Map<Class<?>, List<DynSemRule>> rulesForName = rules.get(r.getArrowName());
+				Map<Class<?>, List<ReductionRule>> rulesForName = rules.get(r.getArrowName());
 				if (rulesForName == null) {
 					rulesForName = new HashMap<>();
 					rules.put(r.getArrowName(), rulesForName);
 				}
 
-				List<DynSemRule> rulesForClass = rulesForName.get(r.getDispatchClass());
+				List<ReductionRule> rulesForClass = rulesForName.get(r.getDispatchClass());
 
 				if (rulesForClass == null) {
 					rulesForClass = new LinkedList<>();
@@ -106,9 +106,9 @@ public class RuleRegistry {
 				rulesForClass.add(r);
 			}
 
-			for (Entry<String, Map<Class<?>, List<DynSemRule>>> rulesForNameEntry : rules.entrySet()) {
+			for (Entry<String, Map<Class<?>, List<ReductionRule>>> rulesForNameEntry : rules.entrySet()) {
 				final String arrowName = rulesForNameEntry.getKey();
-				for (Entry<Class<?>, List<DynSemRule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
+				for (Entry<Class<?>, List<ReductionRule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
 					registerRule(arrowName, dispatchClass,
 							RuleFactory.createRule(language, SourceUtils.dynsemSourceSectionUnvailable(),

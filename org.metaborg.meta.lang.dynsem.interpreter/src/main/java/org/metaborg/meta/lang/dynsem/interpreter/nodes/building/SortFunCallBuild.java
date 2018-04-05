@@ -5,7 +5,6 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -45,7 +44,6 @@ public class SortFunCallBuild extends TermBuild {
 		TermBuild build = getContext().getTermRegistry()
 				.lookupNativeTypeAdapterBuildFactory(sort, function, children.length - 1)
 				.apply(getSourceSection(), children);
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		return replace(build).executeGeneric(frame);
 	}
 }

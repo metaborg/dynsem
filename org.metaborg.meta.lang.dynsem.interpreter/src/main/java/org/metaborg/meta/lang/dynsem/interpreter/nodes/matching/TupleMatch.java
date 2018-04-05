@@ -1,13 +1,12 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynSemRule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -28,7 +27,6 @@ public class TupleMatch extends MatchPattern {
 		final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(tupleClass)
 				.apply(getSourceSection(), cloneNodes(elemPatterns));
 
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		replace(concreteMatch).executeMatch(frame, term);
 	}
 
@@ -46,7 +44,7 @@ public class TupleMatch extends MatchPattern {
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = DynSemRule.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = ReductionRule.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}

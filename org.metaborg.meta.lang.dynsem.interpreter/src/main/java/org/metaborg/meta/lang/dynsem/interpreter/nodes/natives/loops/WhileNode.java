@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -16,9 +16,11 @@ import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.LoopNode;
+import com.oracle.truffle.api.nodes.Node.Child;
+import com.oracle.truffle.api.nodes.Node.Children;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class WhileNode extends Rule {
+public class WhileNode extends NativeExecutableNode {
 
 	private static final byte ID_CONDITION = 1;
 	private static final byte ID_BODY = 2;
@@ -41,9 +43,9 @@ public class WhileNode extends Rule {
 	private final FrameSlot[] roCompSlots;
 	private final FrameSlot[] rwCompSlots;
 
-	public WhileNode(DynSemLanguage lang, SourceSection source, TermBuild conditionBuildNode, TermBuild bodyBuildNode,
+	public WhileNode(SourceSection source, TermBuild conditionBuildNode, TermBuild bodyBuildNode,
 			TermBuild defaultValBuildNode, TermBuild[] roCompBuilds, TermBuild[] rwCompBuilds) {
-		super(lang, source);
+		super(source);
 		this.conditionBuildNode = conditionBuildNode;
 		this.bodyBuildNode = bodyBuildNode;
 		this.defaultValBuildNode = defaultValBuildNode;
@@ -119,7 +121,7 @@ public class WhileNode extends Rule {
 			rwCompBuilds[i] = TermBuild.create(Tools.applAt(rwCompsT, i), fd);
 		}
 
-		return new WhileNode(lang, SourceUtils.dynsemSourceSectionFromATerm(t), conditionBuildNode, bodyBuildNode,
+		return new WhileNode(SourceUtils.dynsemSourceSectionFromATerm(t), conditionBuildNode, bodyBuildNode,
 				defaultValBuildNode, roCompBuilds, rwCompBuilds);
 	}
 
