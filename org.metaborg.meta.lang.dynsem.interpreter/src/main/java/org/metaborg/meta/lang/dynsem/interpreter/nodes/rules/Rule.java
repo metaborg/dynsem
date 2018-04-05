@@ -29,12 +29,12 @@ public abstract class Rule extends DynSemRootNode {
 
 	@Override
 	public boolean isCloningAllowed() {
-		return true;
+		return false;
 	}
 
 	@Override
 	protected boolean isCloneUninitializedSupported() {
-		return true;
+		return false;
 	}
 
 	@Override
