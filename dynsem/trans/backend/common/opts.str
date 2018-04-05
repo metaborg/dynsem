@@ -34,6 +34,7 @@ signature
     TopPkg : DSOpt
     TermPkg : DSOpt
     MatchPkg : DSOpt
+    ChecksPkg: DSOpt
     BuildPkg : DSOpt
     NativePkg : DSOpt
     RuleRegistry : DSOpt
@@ -104,6 +105,7 @@ rules
       (TermPkg(), terms-pkg),
       (BuildPkg(), tbuild-pkg),
       (MatchPkg(), tmatch-pkg),
+      (ChecksPkg(), tchecks-pkg),
       (NativePkg(), native-pkg),
       (RuleRegistry(), rulereg-class),
       (PreProcessor(), preprocess-class),
@@ -152,6 +154,7 @@ rules
       terms-pkg := $[[gen-pkg].terms];
       tbuild-pkg := $[[terms-pkg].build];
       tmatch-pkg := $[[terms-pkg].match];
+      tchecks-pkg := $[[terms-pkg].checks];
       native-pkg := <read-property(|"project.nativepackage", $[[langname].interpreter.natives])> prop-file;
       tests-pkg := $[[gen-pkg].test];
       rulereg-class := <read-property(|"project.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")> prop-file;

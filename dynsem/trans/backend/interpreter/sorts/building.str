@@ -1,0 +1,45 @@
+module backend/interpreter/sorts/building
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-inter-terms-sortbuilding = is-list; fetch-elem(?Sorts(<id>)); map(ds-to-interp-terms-sortbuilding)
+  
+  ds-to-interp-terms-sortbuilding:
+    dec@SortDecl(s) -> 
+      compilation-unit |[
+        package ~x:<get-opt> BuildPkg();
+  
+        import ~x:$[[<get-opt> TermPkg()].[<ds-to-interp-terms-types-name> dec]];
+        import ~x:$[[<get-opt> TopPkg()].TypesGen];
+        
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_class extends TermBuild {
+        
+          public x_class(SourceSection source) {
+            super(source);
+          }
+          
+          @Override
+          public x_sortclass executeGeneric(VirtualFrame frame) {
+            return x_execmethod(frame);
+          }
+          
+          public abstract x_sortclass x_execmethod(VirtualFrame frame);
+        
+        }
+      ]|
+    where
+      x_class := $[A[<ds-to-interp-terms-types-name> dec]Build];
+      x_sortclass := <ds-to-interp-terms-types-name> dec;
+      x_execmethod := $[execute[x_sortclass]]

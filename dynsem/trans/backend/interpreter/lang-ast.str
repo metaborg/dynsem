@@ -4,6 +4,7 @@ imports
   signatures/-
   backend/interpreter/-
   backend/interpreter/lists/-
+  backend/interpreter/sorts/-
   backend/utils/-
   backend/common/-
   libjava-front
@@ -17,6 +18,7 @@ rules
       <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> mod;
       <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
       <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+      <ds-to-interp-terms-sortmatching; ds-to-interp-write-classes(|<get-opt> ChecksPkg())> sig*;
       <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
       <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
       <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
@@ -575,40 +577,6 @@ rules /* type system class */
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
 
 rules /* term building */
-
-  ds-to-inter-terms-sortbuilding = is-list; fetch-elem(?Sorts(<id>)); map(ds-to-interp-terms-sortbuilding)
-  
-  ds-to-interp-terms-sortbuilding:
-    dec@SortDecl(s) -> 
-      compilation-unit |[
-        package ~x:<get-opt> BuildPkg();
-  
-        import ~x:$[[<get-opt> TermPkg()].[<ds-to-interp-terms-types-name> dec]];
-        import ~x:$[[<get-opt> TopPkg()].TypesGen];
-        
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.nodes.UnexpectedResultException;
-        import com.oracle.truffle.api.source.SourceSection;
-        
-        public abstract class x_class extends TermBuild {
-        
-          public x_class(SourceSection source) {
-            super(source);
-          }
-        
-          public x_sortclass x_execmethod(VirtualFrame frame)
-              throws UnexpectedResultException {
-            return TypesGen.x_expectmethod(executeGeneric(frame));
-          }
-        
-        }
-      ]|
-    where
-      x_class := $[A[<ds-to-interp-terms-types-name> dec]Build];
-      x_sortclass := <ds-to-interp-terms-types-name> dec;
-      x_execmethod := $[execute[x_sortclass]];
-      x_expectmethod := $[expect[x_sortclass]]
 
   ds-to-interp-terms-building:
     mod@Module(_, section*) -> [con-build*, list-build*, tuple-build*]

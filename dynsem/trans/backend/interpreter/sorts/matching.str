@@ -1,0 +1,102 @@
+module backend/interpreter/sorts/matching
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-interp-terms-sortmatching = is-list; constr-by-sorts; map(ds-to-interp-terms-sortmatching)
+  
+  constr-by-sorts:
+    sig* -> <map(\ SortDecl(s) -> (SortDecl(s), <filter(?ConsDecl(_, _, SimpleSort(s), _))> cons-decl*) \)> sort-decl*
+    where
+      sort-decl* := <fetch-elem(?Sorts(<id>))> sig*;
+      cons-decl* := <fetch-elem(?Constructors(<id>))> sig*
+  
+  ds-to-interp-terms-sortmatching:
+    (dec@SortDecl(s), []) -> 
+      compilation-unit |[
+        package ~x:<get-opt> ChecksPkg();
+        
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> NativePkg().*;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.nodes.Node;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+        
+        @NodeChild(value = "tb", type = TermBuild.class)
+        public abstract class x_issortclass extends Node {
+          
+          public x_issortclass() {
+          }
+          
+          public abstract x_sortclass x_execgeneric(VirtualFrame frame);
+        
+          public abstract x_sortclass executeEvaluated(x_sortclass term);
+          
+          @Specialization
+          public final x_sortclass x_specialization(x_sortclass term) {
+            return term;
+          }
+        
+        }
+      ]|
+    where
+      x_sortclass := <ds-to-interp-terms-types-name> dec;
+      x_issortclass := $[IS_[x_sortclass]];
+      x_execgeneric := $[execute[x_sortclass]];
+      x_specialization := $[executeSingular[x_sortclass]]
+  
+  
+  ds-to-interp-terms-sortmatching:
+    (dec@SortDecl(s), cons-decl*@[_|_]) -> 
+      compilation-unit |[
+        package ~x:<get-opt> ChecksPkg();
+        
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.nodes.Node;
+        
+        @NodeChild(value = "tb", type = TermBuild.class)
+        public abstract class x_issortclass extends Node {
+          
+          public x_issortclass() {
+          }
+          
+          public abstract x_sortclass x_execgeneric(VirtualFrame frame);
+        
+          public abstract x_sortclass executeEvaluated(x_sortclass term);
+          
+          ~meth0*
+        
+        }
+      ]|
+    where
+      x_sortclass := <ds-to-interp-terms-types-name> dec;
+      x_issortclass := $[IS_[x_sortclass]];
+      x_execgeneric := $[execute[x_sortclass]];
+      meth0* := <map(ds-to-interp-terms-sortmatching-con-check)> cons-decl*
+   
+    ds-to-interp-terms-sortmatching-con-check:
+      dec@ConsDecl(_, _, _, _) ->
+        class-body-dec |[
+          @Specialization
+          public final x_termclass x_method(x_termclass term) {
+            return term;
+          }
+        ]|
+      where
+        x_termclass := <ds-to-interp-terms-types-name> dec;
+        x_method := $[execute[x_termclass]]
+
