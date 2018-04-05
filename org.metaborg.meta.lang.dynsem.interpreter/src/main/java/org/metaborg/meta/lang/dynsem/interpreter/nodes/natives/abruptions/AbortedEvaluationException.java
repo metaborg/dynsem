@@ -13,4 +13,9 @@ public final class AbortedEvaluationException extends StatefulControlFlowExcepti
 		super(thrown, components);
 	}
 
+	@Override
+	public String getMessage() {
+		return "Aborted evaluation: " + getThrown().toString();
+	}
+
 }
