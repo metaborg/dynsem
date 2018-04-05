@@ -132,18 +132,6 @@ public class HandleNode extends NativeExecutableNode {
 		}
 	}
 
-	// private ChainedRulesNode getHandlerRules(Class<?> handlerClass) {
-	// CompilerAsserts.compilationConstant(handlerClass);
-	// if(handlerRules == null) {
-	// ChainedRuleRoot handlerRoot = getContext().getRuleRegistry().lookupRules("", handlerClass);
-	// ChainedRulesNode handlerRules = NodeUtil.cloneNode(handlerRoot.getChainedRules());
-	//// handlerRules.repl
-	// }
-	// // TODO Auto-generated method stub
-	// return null;
-	//
-	// }
-
 	public static HandleNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "Handle", 2) || Tools.hasConstructor(t, "Handle", 3);
