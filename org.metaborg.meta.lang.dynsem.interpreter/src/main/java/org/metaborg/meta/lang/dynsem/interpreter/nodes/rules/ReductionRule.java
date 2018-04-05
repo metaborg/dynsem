@@ -46,13 +46,12 @@ public class ReductionRule extends Rule {
 		this.premises = premises;
 		this.target = output;
 		this.sourceCode = sourceCode;
-		adoptChildren();
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
 	@Override
 	public RuleResult execute(VirtualFrame frame) {
-		printmessage();
+		// printmessage();
 		/* evaluate the inputs node */
 		inputsNode.execute(frame);
 
@@ -65,7 +64,7 @@ public class ReductionRule extends Rule {
 
 	@TruffleBoundary
 	private void printmessage() {
-		System.out.println(">>>>>>>> Rule exec");
+		System.out.println(this.toString());
 	}
 
 	@ExplodeLoop

@@ -37,11 +37,13 @@ rules
             this(elems, null);
           }
  
+          @TruffleBoundary
           public x_listclass(Collection<x_elemclass> elemSet) {
             this(elemSet.toArray(new x_elemclass[0]));
           }
         
           @SuppressWarnings("unchecked")
+          @TruffleBoundary
           private x_listclass(x_elemclass[] elems, IStrategoTerm strategoTerm) {
             this((IPersistentStack<x_elemclass>) PersistentList.create(elems), strategoTerm);
           }
@@ -109,6 +111,7 @@ rules
           }
         
           @Override
+          @TruffleBoundary
           public x_listclass drop(int numElems) {
             IPersistentStack<x_elemclass> tail = backend;
             for (int idx = 0; idx < numElems; idx++) {

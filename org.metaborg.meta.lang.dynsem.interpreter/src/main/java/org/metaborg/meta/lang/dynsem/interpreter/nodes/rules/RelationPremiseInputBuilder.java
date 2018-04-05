@@ -39,8 +39,9 @@ public class RelationPremiseInputBuilder extends TermBuild {
 		return new RelationPremiseInputBuilder(lhsNode, rwNodes, SourceUtils.dynsemSourceSectionFromATerm(source));
 	}
 
+	@Override
 	@ExplodeLoop
-	public Object[] executeObjectArray(VirtualFrame frame) {
+	public Object[] executeGeneric(VirtualFrame frame) {
 		Object term = termNode.executeGeneric(frame);
 
 		Object[] args = new Object[componentNodes.length + 1];
@@ -53,11 +54,6 @@ public class RelationPremiseInputBuilder extends TermBuild {
 		}
 
 		return args;
-	}
-
-	@Override
-	public Object[] executeGeneric(VirtualFrame frame) {
-		return executeObjectArray(frame);
 	}
 
 }

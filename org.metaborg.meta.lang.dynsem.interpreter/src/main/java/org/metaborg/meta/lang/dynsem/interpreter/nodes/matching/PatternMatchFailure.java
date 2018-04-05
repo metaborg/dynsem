@@ -8,7 +8,7 @@ import com.oracle.truffle.api.nodes.ControlFlowException;
  * @author vladvergu
  *
  */
-public class PatternMatchFailure extends ControlFlowException {
+public final class PatternMatchFailure extends ControlFlowException {
 
 	/**
 	 * 
