@@ -8,6 +8,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -20,6 +21,7 @@ public abstract class Premise extends DynSemNode {
 
 	public abstract void execute(VirtualFrame frame);
 
+	@TruffleBoundary
 	public static Premise create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		if (Tools.hasConstructor(t, "CaseMatch", 2)) {

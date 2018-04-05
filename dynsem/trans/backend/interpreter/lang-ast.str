@@ -70,6 +70,7 @@ rules /* Sort & Constructor classes */
         
         import org.spoofax.interpreter.core.Tools;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         import org.spoofax.interpreter.terms.*;
         import com.oracle.truffle.api.CompilerAsserts;
         
@@ -80,6 +81,7 @@ rules /* Sort & Constructor classes */
             return x_class.class;
           }
         
+          @TruffleBoundary
           public static x_class create(IStrategoTerm term) {
             CompilerAsserts.neverPartOfCompilation();
             assert term != null;
@@ -141,19 +143,22 @@ rules /* Sort & Constructor classes */
         import com.oracle.truffle.api.CompilerAsserts;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         import org.apache.commons.lang3.builder.HashCodeBuilder;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         
         public final class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
 
           public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
           public final static int ARITY = ~i:<length; int-to-string> kid*;
-          private final IStrategoTerm strategoTerm;
           
           ~finit*
 
           ~fdec0*
 
           ~fget0*
-
+          
+          private final IStrategoTerm strategoTerm;
+          
+          @TruffleBoundary
           public static x_classname create(IStrategoTerm term) {
             CompilerAsserts.neverPartOfCompilation();
             assert term != null;
@@ -270,11 +275,11 @@ rules /* Sort & Constructor classes */
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         import org.apache.commons.lang3.builder.HashCodeBuilder;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITupleTerm;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         
         public final class x_classname implements ITupleTerm {
 
           public final static int ARITY = ~i:<length; int-to-string> c-ty*;
-          private final IStrategoTerm strategoTerm;
           
           ~finit*
 
@@ -282,6 +287,9 @@ rules /* Sort & Constructor classes */
 
           ~fget0*
 
+          private final IStrategoTerm strategoTerm;
+          
+          @TruffleBoundary
           public static x_classname create(IStrategoTerm term) {
             CompilerAsserts.neverPartOfCompilation();
             assert term != null;

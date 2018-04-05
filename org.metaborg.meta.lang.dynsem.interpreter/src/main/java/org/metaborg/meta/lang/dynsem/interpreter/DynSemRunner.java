@@ -22,6 +22,7 @@ import org.metaborg.util.concurrent.IClosableLock;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.google.common.collect.ImmutableMap;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class DynSemRunner {
@@ -30,6 +31,7 @@ public class DynSemRunner {
 	private final ILanguageImpl language;
 	private final DynSemVM vm;
 
+	@TruffleBoundary
 	public DynSemRunner(Spoofax S, String languageName, DynSemVM vm) throws MetaborgException {
 		this.S = S;
 		this.cli = new CLIUtils(S);
@@ -51,7 +53,7 @@ public class DynSemRunner {
 
 	@TruffleBoundary
 	private RunConfig prepareForEvaluation(FileObject file) throws MetaborgException {
-
+		CompilerAsserts.neverPartOfCompilation();
 		IStrategoTerm program;
 		ImmutableMap<String, Object> props;
 		try {

@@ -38,6 +38,7 @@ rules
             super(source);
           }
           
+          @TruffleBoundary
           public static x_adapter create(param2*) {
             return ~x:$[[x_adapter]NodeGen].create(e3*);
           }

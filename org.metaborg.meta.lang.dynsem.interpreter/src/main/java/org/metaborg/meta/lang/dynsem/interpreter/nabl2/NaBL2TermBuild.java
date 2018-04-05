@@ -9,6 +9,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.SourceSection;
 
 import mb.nabl2.interpreter.InterpreterTerms;
@@ -25,6 +26,7 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 		super(source);
 	}
 
+	@TruffleBoundary
 	private NaBL2Context nabl2Context() {
 		if (context == null) {
 			CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
@@ -37,16 +39,19 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 		return context;
 	}
 
+	@TruffleBoundary
 	protected IStrategoTerm getSolution() {
 		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		return safeToStratego(InterpreterTerms.context(nabl2Context().getSolution()));
 	}
 
+	@TruffleBoundary
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, String key) {
 		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		return getAstProperty(sterm, B.newAppl(key));
 	}
 
+	@TruffleBoundary
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, ITerm key) {
 		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		TermIndex index = getTermIndex(sterm);
@@ -57,6 +62,7 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 		return safeToStratego(val.get());
 	}
 
+	@TruffleBoundary
 	protected TermIndex getTermIndex(IStrategoTerm sterm) {
 		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		if (sterm == null) {
@@ -65,6 +71,7 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 		return StrategoTermIndices.get(sterm).orElseThrow(() -> new IllegalArgumentException("Node has no index."));
 	}
 
+	@TruffleBoundary
 	private IStrategoTerm safeToStratego(ITerm term) {
 		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		term = ConstraintTerms.explicate(term);

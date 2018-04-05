@@ -52,6 +52,7 @@ public class ReductionRule extends Rule {
 
 	@Override
 	public RuleResult execute(VirtualFrame frame) {
+		printmessage();
 		/* evaluate the inputs node */
 		inputsNode.execute(frame);
 
@@ -60,6 +61,11 @@ public class ReductionRule extends Rule {
 
 		/* evaluate the rule target */
 		return target.execute(frame);
+	}
+
+	@TruffleBoundary
+	private void printmessage() {
+		System.out.println(">>>>>>>> Rule exec");
 	}
 
 	@ExplodeLoop
@@ -89,11 +95,13 @@ public class ReductionRule extends Rule {
 		return dispatchClass.getSimpleName() + " -" + getArrowName() + "->";
 	}
 
+	@TruffleBoundary
 	public static ReductionRule create(DynSemLanguage lang, IStrategoAppl ruleT) {
 		CompilerAsserts.neverPartOfCompilation();
 		return createWithFrameDescriptor(lang, ruleT, createFrameDescriptor(ruleT));
 	}
 
+	@TruffleBoundary
 	public static ReductionRule createWithFrameDescriptor(DynSemLanguage lang, IStrategoAppl ruleT,
 			FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
@@ -144,6 +152,7 @@ public class ReductionRule extends Rule {
 		throw new NotImplementedException("Unsupported rule term: " + ruleT);
 	}
 
+	@TruffleBoundary
 	protected static FrameDescriptor createFrameDescriptor(IStrategoTerm t) {
 		Set<String> vars = new HashSet<>();
 		TermVisitor visitor = new TermVisitor() {

@@ -62,6 +62,7 @@ rules
           }
           
           @Override
+          @TruffleBoundary
           public int size() {
             return backend.count();
           }
@@ -194,6 +195,7 @@ rules
             return iter.next();
           }
           
+          @TruffleBoundary
           public static x_listclass create(IStrategoTerm term) {
             CompilerAsserts.neverPartOfCompilation();
             assert term != null;

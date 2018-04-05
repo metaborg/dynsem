@@ -23,6 +23,7 @@ import org.spoofax.terms.attachments.OriginAttachment;
 import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.vm.PolyglotEngine;
 import com.oracle.truffle.api.vm.PolyglotEngine.Builder;
@@ -33,12 +34,14 @@ public class DynSemVM {
 
 	private final PolyglotEngine engine;
 
+	@TruffleBoundary
 	public DynSemVM(Map<String, Object> config) {
 		this.ctx = new DynSemContext(config);
 
 		engine = createPolyglotBuilder(config).build();
 	}
 
+	@TruffleBoundary
 	public Callable<RuleResult> getCallable(String file, String workingDirectory, Map<String, Object> properties) {
 		try {
 			File f = new File(file);
@@ -53,6 +56,7 @@ public class DynSemVM {
 		}
 	}
 
+	@TruffleBoundary
 	public Callable<RuleResult> getCallable(IStrategoTerm term, Map<String, Object> properties) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert term != null;
@@ -66,6 +70,7 @@ public class DynSemVM {
 			IStrategoTerm aTerm = new TermTransformer(factory, false) {
 
 				@Override
+				@TruffleBoundary
 				public IStrategoTerm preTransform(IStrategoTerm term) {
 					OriginAttachment orig = OriginAttachment.get(term);
 					IStrategoList annos = null;
@@ -102,6 +107,7 @@ public class DynSemVM {
 
 	}
 
+	@TruffleBoundary
 	private Builder createPolyglotBuilder(Map<String, Object> config) {
 		final Builder builder = PolyglotEngine.newBuilder();
 		builder.setIn((InputStream) config.get(DynSemContext.CONFIG_STDIN));

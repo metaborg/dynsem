@@ -5,10 +5,12 @@ import java.util.List;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class RuleFactory {
 
+	@TruffleBoundary
 	public static Rule createRule(DynSemLanguage lang, SourceSection source, List<? extends Rule> rules,
 			String arrowName, Class<?> dispatchClass) {
 		CompilerAsserts.neverPartOfCompilation();

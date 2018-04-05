@@ -74,6 +74,7 @@ public class RuleRegistry {
 		return jointRuleForClass;
 	}
 
+	@TruffleBoundary
 	public void populate(InputStream specStream) {
 		CompilerAsserts.neverPartOfCompilation();
 		try {

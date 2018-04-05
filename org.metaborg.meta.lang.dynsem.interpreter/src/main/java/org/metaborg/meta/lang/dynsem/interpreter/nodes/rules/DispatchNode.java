@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -32,10 +33,14 @@ public abstract class DispatchNode extends DynSemNode {
 
 	@Specialization(replaces = "doDirect")
 	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args, @Cached("create()") IndirectCallNode callNode) {
-//		System.out.println("Cache miss dispatching on " + dispatchClass.getSimpleName() + " from " + getRootNode());
+		// printmiss(dispatchClass);
 		return (RuleResult) callNode.call(getUnionRootNode(dispatchClass).getCallTarget(), args);
 	}
 
+	@TruffleBoundary
+	private void printmiss(Class<?> dispatchClass) {
+		System.out.println("Cache miss dispatching on " + dispatchClass.getSimpleName() + " from " + getRootNode());
+	}
 	protected final Rule getUnionRootNode(Class<?> dispatchClass) {
 		return getContext().getRuleRegistry().lookupRule(arrowName, dispatchClass);
 	}
