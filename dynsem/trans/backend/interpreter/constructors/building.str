@@ -18,6 +18,7 @@ strategies
       
         import ~x:$[[<get-opt> TermPkg()].*];
         import ~x:<get-opt> NativePkg().*;
+        import ~x:<get-opt> ChecksPkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         import com.oracle.truffle.api.dsl.Cached;
         import com.oracle.truffle.api.dsl.NodeChild;
@@ -31,6 +32,7 @@ strategies
           public x_class(SourceSection source) {
             super(source);
           }
+         
           
           @Specialization(limit = "1", guards = e_cacheguard)
           public x_termclass doCached(
@@ -57,9 +59,10 @@ strategies
       x_termclass := <ds-to-interp-terms-types-name> dec;
       param0* := <ds-to-interp-terms-building-params> kid*;
       param1* := <ds-to-interp-terms-building-cachedparams> kid*;
+//      param2* := <ds-to-interp-terms-build-params> kid*;
       e_cacheguard := <ds-to-interp-terms-cachedparam-cacheguards> kid*;
       e0* := <ds-to-interp-terms-building-exprs> kid*;
-      str_cachegen := <ds-utils-debugged-java-pp> e |[ doTyped(e0*) ]|
+      str_cachegen := <ds-utils-debugged-java-pp> e |[ buildTerm(e0*) ]|
     where
       if [] := kid*
       then

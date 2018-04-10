@@ -16,6 +16,7 @@ rules
         package ~x:<get-opt> BuildPkg();
   
         import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:<get-opt> ChecksPkg().*;
         import ~x:$[[<get-opt> TopPkg()].TypesGen];
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;

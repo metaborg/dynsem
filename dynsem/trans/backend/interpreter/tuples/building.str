@@ -1,0 +1,48 @@
+module backend/interpreter/tuples/building
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/interpreter/terms/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-interp-terms-building-tuple:
+    dec@TupleSort(s*) ->
+      compilation-unit |[
+        package ~x:<get-opt> BuildPkg();
+      
+        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:<get-opt> ChecksPkg().*;
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.source.SourceSection;
+
+        @NodeChildren({ ~child* })
+        public abstract class x_class extends TermBuild {
+
+          public x_class(SourceSection source) {
+            super(source);
+          }
+          
+          @Specialization
+          public x_termclass doTyped(param0*) {
+            return e_term;
+          }
+          
+        }
+      ]|
+    where
+      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
+      child* := <ds-to-interp-terms-building-childannos> s*;
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      param0* := <ds-to-interp-terms-building-params> s*;
+      e0* := <ds-to-interp-terms-building-exprs> s*;
+      e_term := e |[ new x_termclass(e0*) ]|

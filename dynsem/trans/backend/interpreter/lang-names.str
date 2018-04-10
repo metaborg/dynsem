@@ -2,12 +2,21 @@ module backend/interpreter/lang-names
 
 imports
   signatures/-
+  signatures/dynsem/-
   backend/utils/utils
   backend/common/opts
   backend/interpreter/signature
   libjava-front
 
 rules
+
+  ds-to-interp-terms-type-nocasting =
+    if where((is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _)))
+    then
+      ds-to-interp-terms-types-name
+    else
+      !$[Object]
+    end
 
   ds-to-interp-terms-types-name:
     SortDecl(s) -> $[I[<ds-utils-java-escape-id> s]Term]

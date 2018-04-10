@@ -1,0 +1,60 @@
+module backend/interpreter/tuples/matching
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/interpreter/terms/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-interp-terms-matching-tuple:
+    dec@TupleSort(s*) -> 
+      compilation-unit |[
+        package ~x:<get-opt> MatchPkg();
+        
+        import ~x:<get-opt> TermPkg().x_termclass;
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
+        
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.dsl.Fallback;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_matcherclass extends MatchPattern {
+        
+          ~fdec*
+        
+          public x_matcherclass(SourceSection source, param0*) {
+            super(source);
+            bstm0*
+          }
+        
+          @Specialization
+          public void doTyped(VirtualFrame frame, x_termclass term) {
+            bstm1*
+          }
+
+          @Fallback
+          public void doGeneric(VirtualFrame frame, Object term) {
+            if (term instanceof x_termclass) {
+              doTyped(frame, (x_termclass) term);
+            } else {
+              throw PatternMatchFailure.INSTANCE;
+            }
+          }
+          
+        }
+      ]|
+    where
+      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_matcherclass := $[[x_termclass]MatchPattern];
+      fdec* := <ds-to-interp-terms-matching-fdecs> s*; 
+      param0* := <ds-to-interp-terms-matching-initparams> s*;
+      bstm0* := <ds-to-interp-terms-matching-finits> s*;
+      bstm1* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> s*)

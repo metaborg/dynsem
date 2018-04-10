@@ -37,9 +37,9 @@ strategies
           public x_issortclass() {
           }
           
-          public abstract x_sortclass x_execgeneric(VirtualFrame frame);
+          public abstract Object executeGeneric(VirtualFrame frame);
         
-          public abstract x_sortclass executeEvaluated(x_sortclass term);
+          public abstract x_sortclass executeEvaluated(Object term);
           
           @Specialization
           public final x_sortclass x_specialization(x_sortclass term) {
@@ -51,7 +51,6 @@ strategies
     where
       x_sortclass := <ds-to-interp-terms-types-name> dec;
       x_issortclass := $[IS_[x_sortclass]];
-      x_execgeneric := $[execute[x_sortclass]];
       x_specialization := $[executeSingular[x_sortclass]]
   
   

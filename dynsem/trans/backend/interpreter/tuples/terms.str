@@ -1,0 +1,125 @@
+module backend/interpreter/tuples/terms
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/common/-
+  backend/interpreter/-
+  
+rules
+
+  ds-to-interp-terms-tupledecl:
+    srt@TupleSort(c-ty*) ->
+      compilation-unit |[
+        package ~x:<get-opt> TermPkg();
+        
+        import org.spoofax.interpreter.core.Tools;
+        import org.spoofax.interpreter.terms.*;
+        import ~x:<get-opt> NativePkg().*;
+        import ~x:<get-opt> TopPkg().TypesGen;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
+        import com.oracle.truffle.api.CompilerAsserts;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        import org.apache.commons.lang3.builder.HashCodeBuilder;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.ITupleTerm;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        
+        public final class x_classname implements ITupleTerm {
+
+          public final static int ARITY = ~i:<length; int-to-string> c-ty*;
+          
+          ~finit*
+
+          ~fdec0*
+
+          ~fget0*
+
+          private final IStrategoTerm strategoTerm;
+          
+          @TruffleBoundary
+          public static x_classname create(IStrategoTerm term) {
+            CompilerAsserts.neverPartOfCompilation();
+            assert term != null;
+            assert Tools.isTermTuple(term);
+            assert term.getSubtermCount() == ARITY;
+            return new x_classname(e1*, term);
+          }
+          
+          @Override
+          public int size() {
+            return ARITY;
+          }
+          
+          @Override
+          public boolean equals(Object obj) {
+            if (this == obj)
+              return true;
+            if (obj == null)
+              return false;
+            if (getClass() != obj.getClass())
+              return false;
+            x_classname other = (x_classname) obj;
+            bstm2*
+            return true;
+          }
+          
+          @Override
+          public boolean hasStrategoTerm() {
+              return strategoTerm != null;
+          }
+          
+          @Override
+          public IStrategoTerm getStrategoTerm() {
+              return strategoTerm;
+          }
+          
+          @TruffleBoundary
+          @Override
+          public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("(");
+            bstm3*
+            sb.append(")");
+            return sb.toString();
+          }
+          
+          @Override
+          @TruffleBoundary
+          public int hashCode() {
+            return e_hash.toHashCode();
+          }
+          
+          @Override
+          public ITermInstanceChecker getCheck() {
+            return new ITermInstanceChecker() {
+        
+              @Override
+              public boolean isInstance(Object obj) {
+                return TypesGen.~x:$[is[x_classname]](obj);
+              }
+            };
+          }
+        }
+      ]|
+    where
+      x_classname := <ds-to-interp-terms-types-name> srt;
+      param0* := <ds-to-interp-sorts-to-params> c-ty*;
+      bstm0* := <ds-to-interp-sorts-to-finits> c-ty*;
+      fdec0* := <ds-to-interp-sorts-to-fdecs> c-ty*;
+      fget0* := <ds-to-interp-sorts-to-fgets> c-ty*;
+      e0* := <range; map(\ i -> e |[ ~x:<int-to-string; mkidx> ]| \)> (1, <length; inc> c-ty*);
+      e1* := <map-with-index((\ i -> e |[ term.getSubterm(~i:<dec; int-to-string>) ]| \, id); ds-to-interp-sorts-to-create-arg)> c-ty*;
+      bstm2* := <map-with-index(ds2java-field-eq-check)> c-ty*;
+      e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds-to-interp-hashcode-append)> <range> (1, <length; inc> c-ty*);
+      bstm3* := <map-with-index(Fst; !bstm |[ sb.append(~x:<int-to-string; mkidx>); ]|); separate-by(|bstm |[ sb.append(", "); ]|)> c-ty*
+    where
+      finit* := class-body-dec* |[
+        public x_classname(param0*) {
+          this(e0*, null);
+        }
+        
+        private x_classname(param0*, IStrategoTerm strategoTerm) {
+          bstm0*
+          this.strategoTerm = strategoTerm;
+        }
+      ]|

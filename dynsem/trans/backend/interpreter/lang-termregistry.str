@@ -21,6 +21,7 @@ rules /* term registry */
         import ~x:<get-opt> TermPkg().*;
         import ~x:<get-opt> BuildPkg().*;
         import ~x:<get-opt> MatchPkg().*;
+        import ~x:<get-opt> ChecksPkg().*;
         
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
         import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -159,8 +160,19 @@ rules /* term registry */
       x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
       x_termclass := <ds-to-interp-terms-types-name> dec;
       x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
-      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*;
+      e1* := <map-with-index(ds-to-interp-termbuild-access)> kid*;
       e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+
+  ds-to-interp-termbuild-access:
+    (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]|
+    where
+      <is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _)> s
+  
+  ds-to-interp-termbuild-access:
+    (i, s) -> e |[ x_issortNODEGEN.create(children[~i:<dec; int-to-string> i]) ]|
+    where
+      <not(is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _))> s;
+      x_issortNODEGEN := $[IS_[<ds-to-interp-terms-types-name> s]NodeGen]
 
   ds-to-interp-tuples-registry-inits = mapconcat(ds-to-interp-tuples-registry-init)
 
@@ -191,7 +203,7 @@ rules /* term registry */
       x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
       x_termclass := <ds-to-interp-terms-types-name> dec;
       x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
-      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> s*;
+      e1* := <map-with-index(ds-to-interp-termbuild-access)> s*;
       e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> s*
 
 
@@ -212,7 +224,7 @@ rules /* term registry */
       ]|
     where
       x_natop := <concat-strings> [<ds-utils-java-escape-id> name, "_", <length; int-to-string> kid*];
-      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+      e1* := <map-with-index(ds-to-interp-termbuild-access)> kid*
 
   ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
   

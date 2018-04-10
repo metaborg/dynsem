@@ -21,7 +21,6 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.NodeUtil;
-import com.oracle.truffle.api.nodes.UnexpectedResultException;
 import com.oracle.truffle.api.source.SourceSection;
 
 @TypeSystemReference(BuiltinTypes.class)
@@ -34,36 +33,36 @@ public abstract class TermBuild extends DynSemNode {
 
 	public abstract Object executeGeneric(VirtualFrame frame);
 
-	public String executeString(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectString(executeGeneric(frame));
+	public String executeString(VirtualFrame frame) {
+		return BuiltinTypesGen.asString(executeGeneric(frame));
 	}
 
-	public int executeInteger(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectInteger(executeGeneric(frame));
+	public int executeInteger(VirtualFrame frame) {
+		return BuiltinTypesGen.asInteger(executeGeneric(frame));
 	}
 
-	public ITerm executeITerm(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectITerm(executeGeneric(frame));
+	public ITerm executeITerm(VirtualFrame frame) {
+		return BuiltinTypesGen.asITerm(executeGeneric(frame));
 	}
 
-	public IApplTerm executeIApplTerm(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectIApplTerm(executeGeneric(frame));
+	public IApplTerm executeIApplTerm(VirtualFrame frame) {
+		return BuiltinTypesGen.asIApplTerm(executeGeneric(frame));
 	}
 
-	public PersistentMap<?, ?> executeMap(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectPersistentMap(executeGeneric(frame));
+	public PersistentMap<?, ?> executeMap(VirtualFrame frame) {
+		return BuiltinTypesGen.asPersistentMap(executeGeneric(frame));
 	}
 
-	public boolean executeBoolean(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectBoolean(executeGeneric(frame));
+	public boolean executeBoolean(VirtualFrame frame) {
+		return BuiltinTypesGen.asBoolean(executeGeneric(frame));
 	}
 
-	public Object[] executeObjectArray(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectObjectArray(executeGeneric(frame));
+	public Object[] executeObjectArray(VirtualFrame frame) {
+		return BuiltinTypesGen.asObjectArray(executeGeneric(frame));
 	}
 
-	public IListTerm<?> executeIList(VirtualFrame frame) throws UnexpectedResultException {
-		return BuiltinTypesGen.expectIListTerm(executeGeneric(frame));
+	public IListTerm<?> executeIList(VirtualFrame frame) {
+		return BuiltinTypesGen.asIListTerm(executeGeneric(frame));
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
@@ -74,7 +73,7 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "NativeOp", 2)) {
 			return NativeOpTermBuild.create(t, fd);
 		}
-		if (Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)) {
+		if (Tools.hasConstructor(t, "VarRef", 1)) {
 			return VarRead.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "ArgRead", 1)) {
