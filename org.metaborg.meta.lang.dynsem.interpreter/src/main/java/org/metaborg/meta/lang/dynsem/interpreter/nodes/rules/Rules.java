@@ -4,7 +4,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.dsl.Cached;
@@ -16,8 +15,8 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class Rules extends Rule {
 
-	@CompilationFinal protected Rule primaryRule;
-	@CompilationFinal protected Rule alternativeRule;
+	protected final Rule primaryRule;
+	protected final Rule alternativeRule;
 
 	public Rules(DynSemLanguage lang, SourceSection source, Rule primaryRule, Rule alternativeRule) {
 		super(lang, source);
