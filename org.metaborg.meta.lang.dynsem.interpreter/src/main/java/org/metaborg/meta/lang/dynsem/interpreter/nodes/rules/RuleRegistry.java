@@ -53,7 +53,7 @@ public class RuleRegistry {
 		rulesForName.put(dispatchClass, jointRuleRoot);
 	}
 
-	// FIXME: should this be a boundary? @TruffleBoundary
+	@TruffleBoundary
 	public CallTarget lookupRule(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
