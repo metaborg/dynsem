@@ -3,6 +3,7 @@ module backend/interpreter/constructors/matching
 imports
   signatures/-
   signatures/dynsem/-
+  backend/interpreter/terms/-
   backend/interpreter/-
   backend/utils/-
   backend/common/-
@@ -35,17 +36,17 @@ strategies
           }
         
           @Specialization
-          public void doTyped(VirtualFrame frame, x_termclass term) {
+          public void doDeepMatch(VirtualFrame frame, x_termclass term) {
             bstm1*
           }
 
           @Fallback
-          public void doGeneric(VirtualFrame frame, Object term) {
-            if (term instanceof x_termclass) {
-              doTyped(frame, (x_termclass) term);
-            } else {
+          public void doShallowFail(VirtualFrame frame, Object term) {
+//            if (term instanceof x_termclass) {
+//              doTyped(frame, (x_termclass) term);
+//            } else {
               throw PatternMatchFailure.INSTANCE;
-            }
+//            }
           }
           
         }
