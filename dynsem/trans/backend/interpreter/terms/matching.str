@@ -1,0 +1,32 @@
+module backend/interpreter/terms/matching
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-interp-terms-matching-initparams = map-with-index(ds-to-interp-terms-matching-initparam)
+  
+  ds-to-interp-terms-matching-initparam:
+    (i, s) -> param |[ MatchPattern ~x:$[p_[i]] ]|
+
+  ds-to-interp-terms-matching-fdecs = map-with-index(ds-to-interp-terms-matching-fdec)
+  
+  ds-to-interp-terms-matching-fdec:
+    (i, _) -> class-body-dec |[ @Child protected MatchPattern ~x:$[p_[i]]; ]|
+
+  ds-to-interp-terms-matching-finits = map-with-index(ds-to-interp-terms-matching-finit)
+  
+  ds-to-interp-terms-matching-finit:
+    (i, s) -> bstm |[ this.~x:$[p_[i]] = ~x:$[p_[i]]; ]|
+
+  ds-to-interp-terms-matching-matchdescend:
+    (i, bstm0*) -> bstm* |[
+      bstm0*
+      (~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()));
+    ]|

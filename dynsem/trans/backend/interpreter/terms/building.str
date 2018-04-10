@@ -1,0 +1,36 @@
+module backend/interpreter/terms/building
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-interp-terms-building-params = map-with-index(ds-to-interp-terms-building-param)
+  
+  ds-to-interp-terms-building-param:
+    (i, s) -> param |[ final ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
+  
+  ds-to-interp-terms-cachedparam-cacheguards = !ElemValArrayInit(<map-with-index(ds-to-interp-terms-cachedparam-cacheguard)>)
+  
+  ds-to-interp-terms-cachedparam-cacheguard:
+    (i, s) -> Lit(String([Chars($[tb_[i] == tb_[i]_cached])]))
+
+  ds-to-interp-terms-building-cachedparams = map-with-index(ds-to-interp-terms-building-cachedparam)
+  
+  ds-to-interp-terms-building-cachedparam:
+    (i, s) -> param |[ @Cached(~e:Lit(String([Chars($[tb_[i]])]))) ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]_cached] ]|
+ 
+  ds-to-interp-terms-building-exprs = map-with-index(ds-to-interp-terms-building-expr)
+  
+  ds-to-interp-terms-building-expr:
+    (i, _) -> e |[ ~x:$[tb_[i]] ]|
+  
+  ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
+  
+  ds-to-interp-terms-building-childanno:
+    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]| 

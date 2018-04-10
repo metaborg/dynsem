@@ -3,6 +3,7 @@ module backend/interpreter/lang-ast
 imports
   signatures/-
   backend/interpreter/-
+  backend/interpreter/terms/-
   backend/interpreter/lists/-
   backend/interpreter/sorts/-
   backend/interpreter/constructors/-
@@ -493,34 +494,6 @@ rules /* term building */
       param0* := <ds-to-interp-terms-building-params> s*;
       e0* := <ds-to-interp-terms-building-exprs> s*;
       e_term := e |[ new x_termclass(e0*) ]|
-
-  ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
-  
-  ds-to-interp-terms-building-childanno:
-    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]| 
-  
-  ds-to-interp-terms-building-params = map-with-index(ds-to-interp-terms-building-param)
-  
-  ds-to-interp-terms-building-param:
-    (i, s) -> param |[ final ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
-
-  ds-to-interp-terms-cachedparam-cacheguards = !ElemValArrayInit(<map-with-index(ds-to-interp-terms-cachedparam-cacheguard)>)
-  
-  ds-to-interp-terms-cachedparam-cacheguard:
-    (i, s) -> Lit(String([Chars($[tb_[i] == tb_[i]_cached])]))
-
-
-  ds-to-interp-terms-building-cachedparams = map-with-index(ds-to-interp-terms-building-cachedparam)
-  
-  ds-to-interp-terms-building-cachedparam:
-    (i, s) -> param |[ @Cached(~e:Lit(String([Chars($[tb_[i]])]))) ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]_cached] ]|
-
-  ds-to-interp-terms-building-exprs = map-with-index(ds-to-interp-terms-building-expr)
-  
-  ds-to-interp-terms-building-expr:
-    (i, _) -> e |[ ~x:$[tb_[i]] ]|
-
-
       
 
 rules /* term matching */
@@ -584,26 +557,7 @@ rules /* term matching */
       bstm0* := <ds-to-interp-terms-matching-finits> s*;
       bstm1* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> s*)
       
-  ds-to-interp-terms-matching-initparams = map-with-index(ds-to-interp-terms-matching-initparam)
-  
-  ds-to-interp-terms-matching-initparam:
-    (i, s) -> param |[ MatchPattern ~x:$[p_[i]] ]|
 
-  ds-to-interp-terms-matching-fdecs = map-with-index(ds-to-interp-terms-matching-fdec)
-  
-  ds-to-interp-terms-matching-fdec:
-    (i, _) -> class-body-dec |[ @Child protected MatchPattern ~x:$[p_[i]]; ]|
-
-  ds-to-interp-terms-matching-finits = map-with-index(ds-to-interp-terms-matching-finit)
-  
-  ds-to-interp-terms-matching-finit:
-    (i, s) -> bstm |[ this.~x:$[p_[i]] = ~x:$[p_[i]]; ]|
-
-  ds-to-interp-terms-matching-matchdescend:
-    (i, bstm0*) -> bstm* |[
-      bstm0*
-      (~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()));
-    ]|
 
 
 
