@@ -35,6 +35,7 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 		this.rwCompSlots = rwCompSlots;
 		this.conditionEvalNode = DispatchNodeGen.create(getSourceSection(), "");
 		this.bodyEvalNode = DispatchNodeGen.create(getSourceSection(), "");
+		adoptChildren();
 	}
 
 	private final BranchProfile continueTaken = BranchProfile.create();

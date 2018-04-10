@@ -8,16 +8,13 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFail
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rules;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -91,13 +88,15 @@ public class HandleNode extends NativeExecutableNode {
 			}
 
 			if (handlerCallTarget == null) {
-				CompilerDirectives.transferToInterpreterAndInvalidate();
-				Rule handlerRule = getContext().getRuleRegistry().lookupRule("", handlerT.getClass());
-				if (handlerRule instanceof Rules) {
-					handlerCallTarget = ((Rules) handlerRule).makeUninitializedCloneWithoutFallback().getCallTarget();
-				} else {
-					handlerCallTarget = handlerRule.makeUninitializedClone().getCallTarget();
-				}
+				// CompilerDirectives.transferToInterpreterAndInvalidate();
+				// FIXME: this is broken because it will throw a ReductionFailure if the handler fails to match, instead
+				handlerCallTarget = getContext().getRuleRegistry().lookupRule("", handlerT.getClass());
+				// of rethrowing
+				// if (handlerRule instanceof Rules) {
+				// handlerCallTarget = ((Rules) handlerRule).makeUninitializedCloneWithoutFallback().getCallTarget();
+				// } else {
+				// handlerCallTarget = handlerRule.makeUninitializedClone().getCallTarget();
+				// }
 			}
 			try {
 				return (RuleResult) handlerCallTarget.call(args);

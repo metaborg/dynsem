@@ -27,20 +27,5 @@ public abstract class Rule extends DynSemRootNode {
 	@Override
 	public abstract RuleResult execute(VirtualFrame frame);
 
-	@Override
-	public boolean isCloningAllowed() {
-		return true;
-	}
 
-	@Override
-	protected boolean isCloneUninitializedSupported() {
-		return true;
-	}
-
-	@Override
-	protected abstract Rule cloneUninitialized();
-
-	public Rule makeUninitializedClone() {
-		return cloneUninitialized();
-	}
 }

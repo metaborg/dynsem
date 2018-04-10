@@ -18,13 +18,14 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
+import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class RuleRegistry {
 
-	private final Map<String, Map<Class<?>, Rule>> rules = new HashMap<>();
+	private final Map<String, Map<Class<?>, CallTarget>> rules = new HashMap<>();
 
 	@CompilationFinal private boolean isInit;
 
@@ -41,9 +42,9 @@ public class RuleRegistry {
 		return language;
 	}
 
-	public void registerRule(String arrowName, Class<?> dispatchClass, Rule jointRuleRoot) {
+	public void registerRule(String arrowName, Class<?> dispatchClass, CallTarget jointRuleRoot) {
 		CompilerAsserts.neverPartOfCompilation();
-		Map<Class<?>, Rule> rulesForName = rules.get(arrowName);
+		Map<Class<?>, CallTarget> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			rulesForName = new HashMap<>();
@@ -52,15 +53,15 @@ public class RuleRegistry {
 		rulesForName.put(dispatchClass, jointRuleRoot);
 	}
 
-	@TruffleBoundary
-	public Rule lookupRule(String arrowName, Class<?> dispatchClass) {
+	// FIXME: should this be a boundary? @TruffleBoundary
+	public CallTarget lookupRule(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
-		Rule jointRuleForClass = null;
+		CallTarget jointRuleForClass = null;
 
-		Map<Class<?>, Rule> jointRulesForName = rules.get(arrowName);
+		Map<Class<?>, CallTarget> jointRulesForName = rules.get(arrowName);
 
 		if (jointRulesForName != null) {
 			jointRuleForClass = jointRulesForName.get(dispatchClass);
@@ -68,7 +69,7 @@ public class RuleRegistry {
 
 		if (jointRuleForClass == null) {
 			jointRuleForClass = new FallbackRule(language, SourceUtils.dynsemSourceSectionUnvailable(), arrowName,
-					dispatchClass);
+					dispatchClass).getCallTarget();
 			registerRule(arrowName, dispatchClass, jointRuleForClass);
 		}
 		return jointRuleForClass;
@@ -113,7 +114,7 @@ public class RuleRegistry {
 					Class<?> dispatchClass = rulesForClass.getKey();
 					registerRule(arrowName, dispatchClass,
 							RuleFactory.createRule(language, SourceUtils.dynsemSourceSectionUnvailable(),
-									rulesForClass.getValue(), arrowName, dispatchClass));
+									rulesForClass.getValue(), arrowName, dispatchClass).getCallTarget());
 				}
 			}
 

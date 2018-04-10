@@ -76,6 +76,16 @@ public class ReductionRule extends Rule {
 	}
 
 	@Override
+	public boolean isCloningAllowed() {
+		return true;
+	}
+
+	@Override
+	protected boolean isCloneUninitializedSupported() {
+		return true;
+	}
+
+	@Override
 	protected ReductionRule cloneUninitialized() {
 		return createWithFrameDescriptor(language(), sourceCode, getFrameDescriptor());
 	}

@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -27,21 +28,22 @@ public abstract class DispatchNode extends DynSemNode {
 	@Specialization(limit = "4", guards = "dispatchClass == cachedDispatchClass")
 	public RuleResult doDirect(Class<?> dispatchClass, Object[] args,
 			@Cached("dispatchClass") Class<?> cachedDispatchClass,
-			@Cached("create(getUnionRootNode(cachedDispatchClass).getCallTarget())") DirectCallNode callNode) {
+			@Cached("create(getUnifiedCallTarget(cachedDispatchClass))") DirectCallNode callNode) {
 		return (RuleResult) callNode.call(args);
 	}
 
 	@Specialization(replaces = "doDirect")
 	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args, @Cached("create()") IndirectCallNode callNode) {
 		// printmiss(dispatchClass);
-		return (RuleResult) callNode.call(getUnionRootNode(dispatchClass).getCallTarget(), args);
+		return (RuleResult) callNode.call(getUnifiedCallTarget(dispatchClass), args);
 	}
 
 	@TruffleBoundary
 	private void printmiss(Class<?> dispatchClass) {
 		System.out.println("Cache miss dispatching on " + dispatchClass.getSimpleName() + " from " + getRootNode());
 	}
-	protected final Rule getUnionRootNode(Class<?> dispatchClass) {
+
+	protected final CallTarget getUnifiedCallTarget(Class<?> dispatchClass) {
 		return getContext().getRuleRegistry().lookupRule(arrowName, dispatchClass);
 	}
 

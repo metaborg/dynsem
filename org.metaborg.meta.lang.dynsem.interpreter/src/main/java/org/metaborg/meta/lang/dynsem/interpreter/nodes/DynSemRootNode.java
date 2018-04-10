@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.nodes.RootNode;
@@ -27,6 +28,19 @@ public abstract class DynSemRootNode extends RootNode {
 	@Override
 	public SourceSection getSourceSection() {
 		return sourceSection;
+	}
+
+	@Override
+	public abstract boolean isCloningAllowed();
+
+	@Override
+	protected abstract boolean isCloneUninitializedSupported();
+
+	@Override
+	protected abstract Rule cloneUninitialized();
+
+	public Rule makeUninitializedClone() {
+		return cloneUninitialized();
 	}
 
 }

@@ -53,6 +53,16 @@ public class FallbackRule extends Rule {
 	}
 
 	@Override
+	public boolean isCloningAllowed() {
+		return true;
+	}
+
+	@Override
+	protected boolean isCloneUninitializedSupported() {
+		return true;
+	}
+
+	@Override
 	protected Rule cloneUninitialized() {
 		return new FallbackRule(language(), getSourceSection(), arrowName, fallbackOfClass);
 	}
