@@ -56,7 +56,6 @@ public class DynSemContext {
 	private Map<String, Object> properties;
 
 	@CompilationFinal private boolean initialized;
-	private final boolean backtracking;
 	private final boolean safecomponents;
 	private final boolean caching;
 	private final boolean debug;
@@ -85,7 +84,6 @@ public class DynSemContext {
 		this.err = err;
 		this.specification = specification;
 		this.mimetype_lang = mimetype_lang;
-		this.backtracking = backtracking;
 		this.safecomponents = safecomponents;
 		this.caching = caching;
 		this.debug = debug;
@@ -212,10 +210,6 @@ public class DynSemContext {
 
 	public String getMimeTypeObjLanguage() {
 		return mimetype_lang;
-	}
-
-	public boolean isFullBacktrackingEnabled() {
-		return backtracking;
 	}
 
 	public boolean isSafeComponentsEnabled() {
