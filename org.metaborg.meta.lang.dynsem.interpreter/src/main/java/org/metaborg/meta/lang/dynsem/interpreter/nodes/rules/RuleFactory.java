@@ -13,8 +13,8 @@ public class RuleFactory {
 
 	public static Rule createRule(DynSemLanguage lang, SourceSection source, List<? extends Rule> rules,
 			String arrowName, Class<?> dispatchClass) {
-		// return createDeep(lang, source, rules, arrowName, dispatchClass);
-		return createShallow(lang, source, rules, arrowName, dispatchClass);
+		return createDeep(lang, source, rules, arrowName, dispatchClass);
+		// return createShallow(lang, source, rules, arrowName, dispatchClass);
 	}
 
 	@TruffleBoundary
