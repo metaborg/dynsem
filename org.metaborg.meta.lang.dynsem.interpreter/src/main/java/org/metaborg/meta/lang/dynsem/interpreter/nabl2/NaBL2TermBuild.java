@@ -8,6 +8,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.SourceSection;
@@ -26,10 +27,9 @@ public abstract class NaBL2TermBuild extends NativeOpBuild {
 		super(source);
 	}
 
-	@TruffleBoundary
 	private NaBL2Context nabl2Context() {
 		if (context == null) {
-			CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
+			CompilerDirectives.transferToInterpreter();
 			context = (NaBL2Context) getContext().readProperty(NaBL2Context.class.getName(), null);
 			if (context == null) {
 				throw new IllegalStateException("No NaBL2 context available. "

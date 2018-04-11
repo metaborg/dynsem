@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InitEvalNode;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -17,9 +16,7 @@ import org.spoofax.terms.io.TAFTermReader;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
-import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLanguage;
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.Source;
 
@@ -61,18 +58,19 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 
 		ITerm programTerm = ctx.getTermRegistry().parseProgramTerm(programAST);
 
-		RootNode startInterpretation = new RootNode(this) {
+		// RootNode startInterpretation = new RootNode(this) {
+		//
+		// @Child private DispatchNode rootDispatch = DispatchNodeGen.create(SourceUtils
+		// .getSyntheticSource("rootnote", "startinterpreter", ctx.getMimeTypeObjLanguage()).createSection(1),
+		// "init");
+		//
+		// @Override
+		// public Object execute(VirtualFrame frame) {
+		// return rootDispatch.execute(programTerm.getClass(), new Object[] { programTerm });
+		// }
+		// };
 
-			@Child private DispatchNode rootDispatch = DispatchNodeGen.create(SourceUtils
-					.getSyntheticSource("rootnote", "startinterpreter", ctx.getMimeTypeObjLanguage()).createSection(1),
-					"init");
-
-			@Override
-			public Object execute(VirtualFrame frame) {
-				return rootDispatch.execute(programTerm.getClass(), new Object[] { programTerm });
-			}
-		};
-		return Truffle.getRuntime().createCallTarget(startInterpretation);
+		return new InitEvalNode(this, SourceUtils.dynsemSourceSectionFromATerm(programAST), programTerm).getCallTarget();
 	}
 
 	@Override
