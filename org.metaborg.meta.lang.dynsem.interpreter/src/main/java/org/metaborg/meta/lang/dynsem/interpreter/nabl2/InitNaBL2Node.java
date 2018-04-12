@@ -16,10 +16,14 @@ public class InitNaBL2Node extends DynSemNode {
 	}
 
 	public void execute(VirtualFrame frame) {
-		final DynSemContext ctx = getContext();
-		IStrategoTerm solution = NaBL2SolutionUtils.getSolution(nabl2Context());
-		DynamicObject nabl2 = ObjectFactories.createNaBL2((IStrategoAppl) solution, ctx);
-		ctx.setNabl2(nabl2);
+		NaBL2Context nabl2ctx = nabl2Context();
+		if (nabl2ctx != null) {
+			IStrategoTerm solution = NaBL2SolutionUtils.getSolution(nabl2ctx);
+			DynSemContext ctx = getContext();
+			DynamicObject nabl2 = ObjectFactories.createNaBL2((IStrategoAppl) solution, ctx);
+			ctx.setNabl2(nabl2);
+		}
+
 	}
 
 }

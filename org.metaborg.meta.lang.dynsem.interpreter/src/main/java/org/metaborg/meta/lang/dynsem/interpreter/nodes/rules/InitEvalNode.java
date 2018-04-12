@@ -30,11 +30,6 @@ public class InitEvalNode extends DynSemRootNode {
 	public Object execute(VirtualFrame frame) {
 		initNabl2.execute(frame);
 		initFrames.execute(frame);
-		// System.out.println(((DynamicObjectFactory) getContext().getFrameFactories()
-		// .get(new ScopeIdentifier("xmpl/fac.tig", "s_body-2"))).newInstance(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-		// 12));
-		// System.err.println("Early exist from InitEvalNode");
-		System.exit(1);
 		return initDispatch.execute(program.getClass(), new Object[] { program });
 	}
 

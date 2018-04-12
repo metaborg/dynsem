@@ -1,5 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes;
 
+import java.util.Objects;
+
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2SolutionUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
@@ -39,7 +41,9 @@ public abstract class GetScopeIdentifierOfITermNode extends DynSemNode {
 
 	@TruffleBoundary
 	private ScopeIdentifier getScopeIdentifier(ITerm t) {
-		IStrategoAppl scopeIdentT = (IStrategoAppl) NaBL2SolutionUtils.getAstProperty(nabl2Context(),
+		IStrategoAppl scopeIdentT = (IStrategoAppl) NaBL2SolutionUtils.getAstProperty(Objects.requireNonNull(
+				nabl2Context(),
+				"No NaBL2 context available. Does the language use NaBL2, and was the interpreter invoked using the correct runner?"),
 				t.getStrategoTerm(), AstProperties.key("bodyScope"));
 		return ScopeIdentifier.create(scopeIdentT);
 	}

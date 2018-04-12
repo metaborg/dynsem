@@ -32,7 +32,9 @@ public class InitFrameFactoriesNode extends DynSemNode {
 
 	public void execute(VirtualFrame frame) {
 		DynSemContext ctx = getContext();
-
+		if (!ctx.hasNaBL2()) {
+			return;
+		}
 		DynamicObject sg = NaBL2LayoutImpl.INSTANCE.getScopeGraph(ctx.getNaBL2());
 		DynamicObject scopes = ScopeGraphLayoutImpl.INSTANCE.getScopes(sg);
 		Class<? extends DynamicObject> scopeEntryClass = LayoutUtils.getScopeEntryLayout().getType();

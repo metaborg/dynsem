@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameFactoriesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
@@ -233,7 +234,12 @@ public final class DynSemContext {
 	}
 
 	public DynamicObject getNaBL2() {
-		return nabl2;
+		return Objects.requireNonNull(nabl2,
+				"No NaBL2 context available. Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
+	}
+
+	public boolean hasNaBL2() {
+		return nabl2 != null;
 	}
 
 	private final DynamicObject frameFactories = FrameFactoriesLayoutImpl.INSTANCE.createFrameFactories();

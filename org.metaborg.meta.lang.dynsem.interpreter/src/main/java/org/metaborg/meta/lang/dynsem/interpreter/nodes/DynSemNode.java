@@ -38,10 +38,6 @@ public abstract class DynSemNode extends Node {
 		if (context == null) {
 			CompilerDirectives.transferToInterpreter();
 			context = (NaBL2Context) getContext().readProperty(NaBL2Context.class.getName(), null);
-			if (context == null) {
-				throw new IllegalStateException("No NaBL2 context available. "
-						+ "Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
-			}
 		}
 		return context;
 	}
