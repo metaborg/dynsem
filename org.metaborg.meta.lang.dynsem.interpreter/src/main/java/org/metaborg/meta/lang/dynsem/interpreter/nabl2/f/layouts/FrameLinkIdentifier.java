@@ -35,23 +35,7 @@ public final class FrameLinkIdentifier {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
-			return false;
-		}
-		final FrameLinkIdentifier other = (FrameLinkIdentifier) obj;
-		if (!this.linkLabel.equals(other.linkLabel)) {
-			return false;
-		}
-		if (!this.toScope.equals(other.toScope)) {
-			return false;
-		}
-		return true;
+		return obj instanceof FrameLinkIdentifier && this.hashCode() == obj.hashCode();
 	}
 
 	@Override

@@ -46,26 +46,7 @@ public final class Occurrence {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
-			return false;
-		}
-		final Occurrence other = (Occurrence) obj;
-		if (!this.namespace.equals(other.namespace)) {
-			return false;
-		}
-		if (!this.name.equals(other.name)) {
-			return false;
-		}
-		if (!this.index.equals(other.index)) {
-			return false;
-		}
-		return true;
+		return obj instanceof Occurrence && this.hashCode() == obj.hashCode();
 	}
 
 	@Override

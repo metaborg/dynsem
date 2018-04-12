@@ -43,23 +43,7 @@ public final class TermIndex {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
-			return false;
-		}
-		final TermIndex other = (TermIndex) obj;
-		if (this.offset != other.offset) {
-			return false;
-		}
-		if (!this.resource.equals(other.resource)) {
-			return false;
-		}
-		return true;
+		return obj instanceof TermIndex && this.hashCode() == obj.hashCode();
 	}
 
 	@Override

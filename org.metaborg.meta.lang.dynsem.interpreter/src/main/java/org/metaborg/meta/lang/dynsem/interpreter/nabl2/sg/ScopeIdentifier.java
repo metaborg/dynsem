@@ -43,23 +43,7 @@ public final class ScopeIdentifier {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
-			return false;
-		}
-		final ScopeIdentifier other = (ScopeIdentifier) obj;
-		if (!this.name.equals(other.name)) {
-			return false;
-		}
-		if (!this.resource.equals(other.resource)) {
-			return false;
-		}
-		return true;
+		return obj instanceof ScopeIdentifier && this.hashCode() == obj.hashCode();
 	}
 
 	@Override
