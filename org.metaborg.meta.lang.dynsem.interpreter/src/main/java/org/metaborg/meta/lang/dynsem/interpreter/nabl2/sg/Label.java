@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph;
+package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;

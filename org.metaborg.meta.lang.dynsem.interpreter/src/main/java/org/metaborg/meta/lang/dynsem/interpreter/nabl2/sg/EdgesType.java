@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph;
+package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 
 import com.oracle.truffle.api.object.ObjectType;
 

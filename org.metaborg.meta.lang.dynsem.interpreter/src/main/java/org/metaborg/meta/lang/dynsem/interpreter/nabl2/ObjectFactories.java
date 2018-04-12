@@ -6,21 +6,21 @@ import java.util.EnumSet;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.DeclEntryLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.DeclarationsLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.EdgesType;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ImportsType;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.Label;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.NaBL2LayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.NameResolutionLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.Occurrence;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.PathStep;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ReferencesLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ScopeEntryLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ScopeGraphLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ScopeIdentifier;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ScopesLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.TypesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.EdgesType;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ImportsType;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.PathStep;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.DeclEntryLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.DeclarationsLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NameResolutionLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ReferencesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeGraphLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.TypesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -37,7 +37,7 @@ import com.oracle.truffle.api.object.Shape.Allocator;
 
 public class ObjectFactories {
 
-	public ObjectFactories() {
+	private ObjectFactories() {
 	}
 
 	public static DynamicObject createNaBL2(IStrategoAppl solution, DynSemContext ctx) {
@@ -148,8 +148,10 @@ public class ObjectFactories {
 		DynamicObject scopes = ScopesLayoutImpl.INSTANCE.createScopes();
 		for (IStrategoTerm scopeTerm : scopesTerm) {
 			assert Tools.isTermTuple(scopeTerm) && scopeTerm.getSubtermCount() == 2;
-			DynamicObject scope = createScopeEntry(Tools.applAt(scopeTerm, 1));
-			scopes.define(ScopeIdentifier.create(Tools.applAt(scopeTerm, 0)), scope);
+			ScopeIdentifier identifier = ScopeIdentifier.create(Tools.applAt(scopeTerm, 0));
+			System.out.println(identifier);
+			DynamicObject scope = createScopeEntry(identifier, Tools.applAt(scopeTerm, 1));
+			scopes.define(identifier, scope);
 		}
 		return scopes;
 	}
@@ -160,7 +162,7 @@ public class ObjectFactories {
 	private final static Layout LAYOUT_IMPORTS = Layout.createLayout();
 	private final static Allocator LAYOUT_IMPORTS_ALLOCATOR = LAYOUT_IMPORTS.createAllocator();
 
-	private static DynamicObject createScopeEntry(IStrategoAppl scopeTerm) {
+	private static DynamicObject createScopeEntry(ScopeIdentifier identifier, IStrategoAppl scopeTerm) {
 		assert Tools.hasConstructor(scopeTerm, "SE", 4);
 		Occurrence[] decs = createOccurrences(Tools.listAt(scopeTerm, 0));
 		Occurrence[] refs = createOccurrences(Tools.listAt(scopeTerm, 1));
@@ -201,7 +203,7 @@ public class ObjectFactories {
 			importedOccs[i] = occs;
 		}
 		DynamicObject imports = importsShape.createFactory().newInstance((Object[]) importedOccs);
-		return ScopeEntryLayoutImpl.INSTANCE.createScopeEntry(decs, refs, edges, imports);
+		return ScopeEntryLayoutImpl.INSTANCE.createScopeEntry(identifier, decs, refs, edges, imports);
 	}
 
 	private static Occurrence[] createOccurrences(IStrategoList occurrencesTerm) {

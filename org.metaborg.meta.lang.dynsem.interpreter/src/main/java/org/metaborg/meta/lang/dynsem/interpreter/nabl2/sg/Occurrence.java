@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph;
+package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.spoofax.interpreter.core.Tools;

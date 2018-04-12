@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph;
+package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -32,11 +32,6 @@ public abstract class PathStep {
 		}
 		return path;
 	}
-
-	// sorts Step constructors
-	// D : Scope * Occurrence -> Step
-	// E : Scope * Label -> Step
-	// N : Scope * Label * Occurrence * Path -> Step
 
 	public static class D extends PathStep {
 		private final Occurrence decl;

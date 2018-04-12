@@ -3,14 +3,26 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameFactoriesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl.ScopeEntryType;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.object.DynamicObject;
+import com.oracle.truffle.api.object.DynamicObjectFactory;
+import com.oracle.truffle.api.object.Layout;
+import com.oracle.truffle.api.object.LocationModifier;
+import com.oracle.truffle.api.object.Property;
+import com.oracle.truffle.api.object.Shape.Allocator;
 
 /**
  * Interpreter context which maintains runtime-specific entities. Instances of {@link DynSemContext} are primarily
@@ -24,7 +36,7 @@ import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
  */
 // FIXME: the DynSemContext should be split in (1) static context --- reusable across multiple programs and (2) a
 // dynamic (per-program run) context
-public class DynSemContext {
+public final class DynSemContext {
 
 	public static final String CONFIG_DSSPEC = "DYNSEMSPEC";
 	public static final String CONFIG_STDIN = "STDIN";
@@ -210,6 +222,42 @@ public class DynSemContext {
 
 	public String getMimeTypeObjLanguage() {
 		return mimetype_lang;
+	}
+
+	@CompilationFinal private DynamicObject nabl2;
+
+	public void setNabl2(DynamicObject nabl2) {
+		CompilerDirectives.transferToInterpreter();
+		assert NaBL2LayoutImpl.INSTANCE.isNaBL2(nabl2);
+		this.nabl2 = nabl2;
+	}
+
+	public DynamicObject getNaBL2() {
+		return nabl2;
+	}
+
+	private final DynamicObject frameFactories = FrameFactoriesLayoutImpl.INSTANCE.createFrameFactories();
+
+	public void addFrameFactory(ScopeIdentifier ident, DynamicObjectFactory factory) {
+		frameFactories.define(ident, factory);
+	}
+
+	public DynamicObjectFactory getFrameFactory(ScopeIdentifier ident) {
+		return (DynamicObjectFactory) frameFactories.get(ident);
+	}
+
+	private final Layout FRAME_LAYOUT = Layout.createLayout();
+	private final Allocator FRAME_ALLOCATOR = FRAME_LAYOUT.createAllocator();
+	public final Property SCOPE_OF_FRAME_PROPERTY = Property.create("__scope__", FRAME_ALLOCATOR
+			.locationForType(ScopeEntryType.class, EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0);
+
+	public Layout getFrameLayout() {
+
+		return FRAME_LAYOUT;
+	}
+
+	public Allocator getFrameAllocator() {
+		return FRAME_ALLOCATOR;
 	}
 
 	public boolean isSafeComponentsEnabled() {

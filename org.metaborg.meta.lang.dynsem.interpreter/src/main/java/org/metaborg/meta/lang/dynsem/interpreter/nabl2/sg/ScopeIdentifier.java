@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph;
+package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.spoofax.interpreter.core.Tools;
@@ -10,19 +10,19 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.CompilerDirectives.ValueType;
 
 @ValueType
-public final class TermIndex {
+public final class ScopeIdentifier {
 
-	private final String resource;
-	private final int offset;
+	public final String name;
+	public final String resource;
 
-	public TermIndex(String resource, int offset) {
+	public ScopeIdentifier(String resource, String name) {
+		this.name = name;
 		this.resource = resource;
-		this.offset = offset;
 	}
 
-	public static TermIndex create(IStrategoAppl termIndexT) {
-		assert Tools.hasConstructor(termIndexT, "TermIndex", 2);
-		return new TermIndex(Tools.javaStringAt(termIndexT, 0), Tools.javaIntAt(termIndexT, 1));
+	public static final ScopeIdentifier create(IStrategoAppl identTerm) {
+		assert Tools.hasConstructor(identTerm, "Scope", 2);
+		return new ScopeIdentifier(Tools.javaStringAt(identTerm, 0), Tools.javaStringAt(identTerm, 1));
 	}
 
 	@CompilationFinal private int hashcode = -1;
@@ -37,8 +37,8 @@ public final class TermIndex {
 	}
 
 	@TruffleBoundary
-	private static int computeHashCode(TermIndex ti) {
-		return new HashCodeBuilder().append(ti.resource).append(ti.offset).toHashCode();
+	private static int computeHashCode(ScopeIdentifier si) {
+		return new HashCodeBuilder().append(si.name).append(si.resource).toHashCode();
 	}
 
 	@Override
@@ -52,8 +52,8 @@ public final class TermIndex {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		final TermIndex other = (TermIndex) obj;
-		if (this.offset != other.offset) {
+		final ScopeIdentifier other = (ScopeIdentifier) obj;
+		if (!this.name.equals(other.name)) {
 			return false;
 		}
 		if (!this.resource.equals(other.resource)) {
@@ -63,10 +63,8 @@ public final class TermIndex {
 	}
 
 	@Override
-	@TruffleBoundary
 	public String toString() {
-		return new StringBuilder().append("TermIndex(").append(resource).append(", ").append(offset).append(")")
-				.toString();
+		return new StringBuilder().append("Scope(").append(resource).append(", ").append(name).append(")").toString();
 	}
 
 }
