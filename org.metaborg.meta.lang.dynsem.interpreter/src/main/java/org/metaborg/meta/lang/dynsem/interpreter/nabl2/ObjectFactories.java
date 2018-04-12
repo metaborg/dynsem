@@ -10,6 +10,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.EdgesType;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ImportsType;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Path;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.PathStep;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.DeclEntryLayoutImpl;
@@ -78,8 +79,8 @@ public class ObjectFactories {
 		for (IStrategoTerm resolutionTerm : resolutionsTerm) {
 			assert Tools.isTermTuple(resolutionTerm);
 			Occurrence ref = Occurrence.create(Tools.applAt(resolutionTerm, 0));
-			PathStep[] path = PathStep.createPath(Tools.listAt(resolutionTerm.getSubterm(1), 1));
-			resolution.define(ref, path);
+			PathStep[] steps = PathStep.createPath(Tools.listAt(resolutionTerm.getSubterm(1), 1));
+			resolution.define(ref, new Path(steps));
 		}
 		return resolution;
 	}
