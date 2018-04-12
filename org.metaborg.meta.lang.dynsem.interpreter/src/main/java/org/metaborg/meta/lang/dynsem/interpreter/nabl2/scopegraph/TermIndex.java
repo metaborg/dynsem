@@ -62,4 +62,11 @@ public final class TermIndex {
 		return true;
 	}
 
+	@Override
+	@TruffleBoundary
+	public String toString() {
+		return new StringBuilder().append("TermIndex(").append(resource).append(", ").append(offset).append(")")
+				.toString();
+	}
+
 }

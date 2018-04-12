@@ -68,4 +68,11 @@ public final class Occurrence {
 		return true;
 	}
 
+	@Override
+	@TruffleBoundary
+	public String toString() {
+		return new StringBuilder().append("Occurrence(Namespace(").append(namespace).append("), ").append(name)
+				.append(", ").append(index).append(")").toString();
+	}
+
 }

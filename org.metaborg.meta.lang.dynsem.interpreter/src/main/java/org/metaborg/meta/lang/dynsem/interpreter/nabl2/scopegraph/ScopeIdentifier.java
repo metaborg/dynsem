@@ -62,4 +62,9 @@ public final class ScopeIdentifier {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuilder().append("Scope(").append(resource).append(", ").append(name).append(")").toString();
+	}
+
 }

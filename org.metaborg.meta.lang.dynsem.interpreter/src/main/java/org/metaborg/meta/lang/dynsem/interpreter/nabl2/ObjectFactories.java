@@ -1,19 +1,30 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.EnumSet;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.DeclEntryLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.DeclarationsLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.EdgesType;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ImportsType;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.NaBL2LayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.NameResolutionLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.Occurrence;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.PathStep;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ReferencesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ScopeEntryLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ScopeGraphLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.ScopesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.scopegraph.TypesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -29,16 +40,48 @@ public class ObjectFactories {
 	public ObjectFactories() {
 	}
 
-	public static DynamicObject createNaBL2(IStrategoAppl solution) {
+	public static DynamicObject createNaBL2(IStrategoAppl solution, DynSemContext ctx) {
 		assert Tools.isTermAppl(solution);
 		IStrategoAppl nabl2Appl = solution;
 		assert Tools.hasConstructor(nabl2Appl, "NaBL2", 3);
 
-		// DynamicObject scopes = ScopesLayoutImpl.INSTANCE.createScopes();
 		DynamicObject scopeGraph = createScopeGraph(Tools.applAt(solution, 0));
-		// DynamicObject nameResolution = null;
-		// DynamicObject types = null;
-		return NaBL2LayoutImpl.INSTANCE.createNaBL2(scopeGraph);
+		DynamicObject nameResolution = createNameResolution(Tools.listAt(solution, 1));
+		DynamicObject types = createTypes(Tools.listAt(solution, 2), ctx);
+		return NaBL2LayoutImpl.INSTANCE.createNaBL2(scopeGraph, nameResolution, types);
+	}
+
+	private static DynamicObject createTypes(IStrategoList typesTerm, DynSemContext ctx) {
+		ITermRegistry termRegistry = ctx.getTermRegistry();
+		DynamicObject types = TypesLayoutImpl.INSTANCE.createTypes();
+		for (IStrategoTerm typeEntry : typesTerm) {
+			assert Tools.isTermTuple(typeEntry);
+			Occurrence decl = Occurrence.create(Tools.applAt(typeEntry, 0));
+			IStrategoAppl typeTerm = Tools.applAt(typeEntry, 1);
+			IStrategoConstructor typeConstructor = typeTerm.getConstructor();
+			Class<?> typeTermClass = termRegistry.getConstructorClass(typeConstructor.getName(),
+					typeConstructor.getArity());
+			try {
+				Method creationMethod = typeTermClass.getDeclaredMethod("create", IStrategoTerm.class);
+				ITerm type = (ITerm) creationMethod.invoke(null, typeTerm);
+				types.define(decl, type);
+			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				throw new RuntimeException("Failed to construct type term", e);
+			}
+		}
+		return types;
+	}
+
+	private static DynamicObject createNameResolution(IStrategoList resolutionsTerm) {
+		DynamicObject resolution = NameResolutionLayoutImpl.INSTANCE.createNameResolution();
+		for (IStrategoTerm resolutionTerm : resolutionsTerm) {
+			assert Tools.isTermTuple(resolutionTerm);
+			Occurrence ref = Occurrence.create(Tools.applAt(resolutionTerm, 0));
+			PathStep[] path = PathStep.createPath(Tools.listAt(resolutionTerm.getSubterm(1), 1));
+			resolution.define(ref, path);
+		}
+		return resolution;
 	}
 
 	public static DynamicObject createScopeGraph(IStrategoAppl graph) {
@@ -46,7 +89,24 @@ public class ObjectFactories {
 
 		DynamicObject scopes = createScopes(Tools.listAt(graph, 0));
 		DynamicObject decls = createDeclarations(Tools.listAt(graph, 1));
-		return ScopeGraphLayoutImpl.INSTANCE.createScopeGraph(scopes, decls);
+		DynamicObject refs = createReferences(Tools.listAt(graph, 2));
+		return ScopeGraphLayoutImpl.INSTANCE.createScopeGraph(scopes, decls, refs);
+	}
+
+	private static DynamicObject createReferences(IStrategoList refsTerm) {
+		DynamicObject references = ReferencesLayoutImpl.INSTANCE.createReferences();
+		for (IStrategoTerm refTerm : refsTerm) {
+			assert Tools.isTermTuple(refTerm) && refTerm.getSubtermCount() == 2;
+			IStrategoAppl refEntryTerm = Tools.applAt(refTerm, 1);
+			assert Tools.hasConstructor(refEntryTerm, "RE", 1);
+			IStrategoList refEntryScopesTerm = Tools.listAt(refEntryTerm, 0);
+			ScopeIdentifier[] scopes = new ScopeIdentifier[refEntryScopesTerm.size()];
+			for (int i = 0; i < scopes.length; i++) {
+				scopes[i] = ScopeIdentifier.create(Tools.applAt(refEntryScopesTerm, i));
+			}
+			references.define(Occurrence.create(Tools.applAt(refTerm, 0)), scopes);
+		}
+		return references;
 	}
 
 	private static DynamicObject createDeclarations(IStrategoList declsTerm) {
