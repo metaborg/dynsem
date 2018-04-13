@@ -241,17 +241,17 @@ rules /* term registry */
   ds-to-interp-natopterms-registry-init:
     d@NativeOpDeclWJClass(name, kid*, _, class) -> 
       bstm* |[
-        nativeFactories.put(~x:<get-opt> NativePkg().x_natop.class, new ITermBuildFactory() {
+        nativeFactories.put(x_natop.class, new ITermBuildFactory() {
     
           @Override
           public NativeOpBuild apply(SourceSection source,
               TermBuild... children) {
-            return ~x:<get-opt> NativePkg().x_natop.create(source, e1*);
+            return x_natop.create(source, e1*);
           }
         });
       ]|
     where
-      x_natop := <concat-strings> [<ds-utils-java-escape-id> name, "_", <length; int-to-string> kid*];
+      x_natop := <unquote(?'"')> class;
       e1* := <map-with-index(ds-to-interp-termbuild-access)> kid*
   
 
