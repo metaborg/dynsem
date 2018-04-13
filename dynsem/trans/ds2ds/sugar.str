@@ -69,6 +69,9 @@ rules // desugaring
     NullaryNativeOpDecl(c, s) -> NativeOpDecl(c, [], s)
   
   desugar :
+    NullaryNativeOpDeclWJClass(c, s, class) -> NativeOpDeclWJClass(c, [], s, class)
+  
+  desugar :
     DefaultArrowDecl(ros, l-ty, rwsin, r-ty, rwsout) -> ArrowDecl(ros, l-ty, rwsin, "", r-ty, rwsout)
   
   desugar :

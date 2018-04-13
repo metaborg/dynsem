@@ -134,6 +134,14 @@ rules /* store signatures */
       <store-def(|Constructors())> (c, <length> child*) => c-def;
       <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
       <store-prop(|ConsKind(), c-def)> NativeOpCons()
+  
+  store-native-operator:
+    d@NativeOpDeclWJClass(c, child*, s, class) -> d
+    where
+      <store-def(|Constructors())> (c, <length> child*) => c-def;
+      <store-prop(|Type(), c-def)> ConstructorType(<rw-type> child*, <rw-type> s);
+      <store-prop(|ConsKind(), c-def)> NativeOpCons();
+      <store-prop(|JClass(), c-def)> class
 
   store-native-datatypes = NativeDataTypes(map(store-native-datatype))
 

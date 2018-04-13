@@ -96,7 +96,10 @@ context-free syntax // native operator declarations
       <{NativeOpDecl "\n"}*>>
   
   NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}+] -> [Type]]
+  NativeOpDecl.NativeOpDeclWJClass = [[ID] : [{Type " * "}+] -> [Type] ([JSNIPPET])]
+  
   NativeOpDecl.NullaryNativeOpDecl = [[ID] : [Type]]
+  NativeOpDecl.NullaryNativeOpDeclWJClass = [[ID] : [Type] ([JSNIPPET])]
 
 context-free syntax // internal constructor declarations
 

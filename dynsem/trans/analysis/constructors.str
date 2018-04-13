@@ -53,6 +53,7 @@ signature
     SortKind
     ConsKind
     ArrowKind
+    JClass
   
   constructors
     SortKind: Property
@@ -72,6 +73,8 @@ signature
     LanguageArrow: ArrowKind
     NativeArrow: ArrowKind
     MetaFunction: ArrowKind
+    
+    JClass: Property
 
 signature
   sorts

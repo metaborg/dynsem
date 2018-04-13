@@ -59,7 +59,6 @@ strategies
       x_termclass := <ds-to-interp-terms-types-name> dec;
       param0* := <ds-to-interp-terms-building-params> kid*;
       param1* := <ds-to-interp-terms-building-cachedparams> kid*;
-//      param2* := <ds-to-interp-terms-build-params> kid*;
       e_cacheguard := <ds-to-interp-terms-cachedparam-cacheguards> kid*;
       e0* := <ds-to-interp-terms-building-exprs> kid*;
       str_cachegen := <ds-utils-debugged-java-pp> e |[ buildTerm(e0*) ]|

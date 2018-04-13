@@ -38,7 +38,6 @@ rules
             super(source);
           }
           
-          @TruffleBoundary
           public static x_adapter create(param2*) {
             return ~x:$[[x_adapter]NodeGen].create(e3*);
           }
@@ -48,7 +47,6 @@ rules
             return doLogic(e2*);
           }
           
-          @TruffleBoundary
           private x_res doLogic(param1*) {
             return receiver.~x:fun(e1*);
           }          

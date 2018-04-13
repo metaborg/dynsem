@@ -25,14 +25,21 @@ rules
   
   ds-to-interp(|path, project-path, local-project-path) =
     log-timed(
-      ds-backend-copy-table;
-      ds-to-interp-specification(|path, project-path); ds-backend-write-spec;
-      ds-to-interp-terms(|path, local-project-path)
+      debug(!"A0 ");
+      where(ds-backend-copy-table);
+      debug(!"A1 ");
+      module-to-core(|path, project-path);
+      debug(!"A2 ");
+      where(in-project-path(desugar-for-interpreter-module|project-path); ds-backend-write-spec);
+      debug(!"A3 ");
+      where(ds-to-interp-terms(|path, local-project-path))
+      ;debug(!"A4 ")
     |$[Generating interpreter at: [<get-opt> GenProject()]])
   
-  ds-to-interp-specification(|path, project-path) =
-    module-to-core(|path, project-path);
-    in-project-path(desugar-for-interpreter-module|project-path)
+ 
+//  ds-to-interp-specification(|path, project-path) =
+//    module-to-core(|path, project-path);
+//    in-project-path(desugar-for-interpreter-module|project-path)
   
   ds-to-interp-terms(|path, local-project-path) = 
     in-project-path(ds-to-interp-terms-module|local-project-path)
