@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -20,7 +21,9 @@ public final class Occurrence {
 		this.index = index;
 	}
 
-	public static Occurrence create(IStrategoAppl occT) {
+	public static Occurrence create(IStrategoTerm t) {
+		assert Tools.isTermAppl(t);
+		IStrategoAppl occT = (IStrategoAppl) t;
 		assert Tools.hasConstructor(occT, "Occurrence", 3);
 		String namespace = Tools.javaStringAt(Tools.applAt(occT, 0), 0);
 		String name = Tools.javaStringAt(occT, 1);

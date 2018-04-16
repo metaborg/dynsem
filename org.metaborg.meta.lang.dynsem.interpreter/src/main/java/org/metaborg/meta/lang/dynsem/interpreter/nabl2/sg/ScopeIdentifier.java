@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -20,7 +21,9 @@ public final class ScopeIdentifier {
 		this.resource = resource;
 	}
 
-	public static final ScopeIdentifier create(IStrategoAppl identTerm) {
+	public static final ScopeIdentifier create(IStrategoTerm t) {
+		assert Tools.isTermAppl(t);
+		IStrategoAppl identTerm = (IStrategoAppl) t;
 		assert Tools.hasConstructor(identTerm, "Scope", 2);
 		return new ScopeIdentifier(Tools.javaStringAt(identTerm, 0), Tools.javaStringAt(identTerm, 1));
 	}
