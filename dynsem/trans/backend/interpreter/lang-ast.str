@@ -18,38 +18,21 @@ rules
   ds-to-interp-terms-module =
     m-in-analysis(
       ?mod@Module(_, <fetch-elem(?Signatures(sig*))>);
-  //    debug(!1);
       where(ds-to-interp-clean-target; ds-to-interp-gen-project);
-  //    debug(!2);
       <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> mod;
-  //    debug(!3);
       <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
-  //    debug(!4);
       <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-  //    debug(!5);
       <ds-to-interp-terms-sortmatching; ds-to-interp-write-classes(|<get-opt> ChecksPkg())> sig*;
-  //    debug(!6);
       <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
-  //    debug(!7);
       <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
-  //    debug(!8);
       <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-      debug(!9);
       <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
-      debug(!10);
-  //    ;debug(!11);
       ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-  //      debug(!12);
       ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-  //      debug(!13);
       ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-  //      debug(!14);
       ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-  //      debug(!15);
       ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-  //      debug(!16);
       ds-to-interp-gen-test-harness
-  //      ;debug(!17)
     )
 
   ds-to-interp-clean-target =
@@ -146,11 +129,6 @@ rules /* Sort & Constructor classes */
     sref@SimpleSort(s) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(term) ]|
     where
       <not(is-builtin-type)> s
-
-//  ds-to-interp-terms-sortdec-impldisp-constr:
-//    nt@NativeType(_, class) -> e |[ 42 ]|
-//    where
-//      <debug(!"TODO:")> nt 
 
   ds-to-interp-terms-sortdec-impldisp-constr:
     sref@SimpleSort("String") -> e |[ ((IStrategoString) term).stringValue() ]|

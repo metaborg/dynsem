@@ -119,29 +119,17 @@ rules /* term registry */
       }
       ]|
     where
-      debug(!"t1 ");
       <fetch-elem(?Signatures(sig*))> section*;
-      debug(!"t2 ");
       decl* := <filter(?Constructors(<id>) + ?NativeOperators(<id>) + ?NativeDataTypes(<id>)); concat> sig*;
-      debug(!"t3 ");
       (consdecl*, (natopdecl*, nattydecl*)) := <partition(?ConsDecl(_, _, _, _)); (id, partition(?NativeOpDecl(_, _, _) + ?NativeOpDeclWJClass(_, _, _, _)))> decl*;
-      debug(!"t4 ");
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
-      debug(!"t5 ");
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      debug(!"t6 ");
       x_classname := $[[<get-opt> LangName()]TermRegistry]; 
-      debug(!"t7 ");
       bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
-      debug(!"t8 ");
       bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
-      debug(!"t9 ");
       bstm2* := <ds-to-interp-nattyterms-registry-inits> nattydecl*;
-      debug(!"t10 ");
       bstm3* := <ds-to-interp-lists-registry-inits> list-dec*;
-      debug(!"t11 ");
       bstm4* := <ds-to-interp-tuples-registry-inits> tuple-dec*
-      ;debug(!"t12 ")
 
   ds-to-interp-terms-registry-inits = mapconcat(ds-to-interp-terms-registry-init)
   
@@ -255,10 +243,10 @@ rules /* term registry */
       e1* := <map-with-index(ds-to-interp-termbuild-access)> kid*
   
 
-  ds-to-interp-nattyterms-registry-inits = mapconcat(debug(!"a "); ds-to-interp-nattyterms-registry-init; debug(!"z "))
+  ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
   
   ds-to-interp-nattyterms-registry-init:
-    NativeBaseTypeDecl(jstring, s, func*) -> <mapconcat(debug(!"c "); ds-to-interp-nattyterms-registry-init(|s); debug(!"y "))> func*
+    NativeBaseTypeDecl(jstring, s, func*) -> <mapconcat(ds-to-interp-nattyterms-registry-init(|s))> func*
   
   ds-to-interp-nattyterms-registry-init(|s):
     NativeFunctionDecl(fun, kid*, _) ->
@@ -272,12 +260,8 @@ rules /* term registry */
         });
       ]|
     where
-      debug(!"c "); 
       e_adaptkey := Lit(String([Chars(<concat-strings> [s, "/", fun, "/", <length; int-to-string> kid*])]));
-      debug(!"d "); 
       x_adapter := <concat-strings> ["_adapt_", s, "_", fun, "_", <length; int-to-string> kid*];
-      debug(!"e "); 
-      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<int-to-string> i] ]| \)> kid*;
-      debug(!"f ")
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<int-to-string> i] ]| \)> kid*
   
     

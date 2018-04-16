@@ -38,25 +38,17 @@ rules
     SimpleSort(s) -> $[I[<ds-utils-java-escape-id> s]Term]
     where
       <not(is-builtin-type)> s;
-      debug(!"1 ");
       s-def := <lookup-def(|Types())> s;
-      debug(!"2 ");
       s-kind := <lookup-prop(|SortKind())> s-def;
-      debug(!"3 ");
       <not(?NativeSort())> s-kind
-      ;debug(!"4 ")
 
   ds-to-interp-terms-types-name:
     SimpleSort(s) -> <unquote(?'"')> jstring
     where
       <not(is-builtin-type)> s;
-      debug(!"5 ");
       s-def := <lookup-def(|Types())> s;
-      debug(!"6 ");
       NativeSort() := <lookup-prop(|SortKind())> s-def;
-      debug(!"7 ");
       jstring := <lookup-prop(|NativeTypeJString())> s-def
-      ;debug(!"8 ")
   
   ds-to-interp-terms-types-name:
     SimpleSort("AST") -> $[org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm]
