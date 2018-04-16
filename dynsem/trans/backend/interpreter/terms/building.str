@@ -3,6 +3,7 @@ module backend/interpreter/terms/building
 imports
   signatures/-
   signatures/dynsem/-
+  analysis/-
   backend/interpreter/-
   backend/utils/-
   backend/common/-
@@ -40,10 +41,16 @@ strategies
   ds-to-interp-terms-building-childanno:
     (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]|
     where
-      <is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _)> s
+      <is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _) <+ is-native-datatype> s
 
   ds-to-interp-terms-building-childanno:
     (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = x_buildandcheck.class) ]|
     where
-      <not(is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _))> s;
+      <not(is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _) <+ is-native-datatype)> s;
       x_buildandcheck := $[IS_[<ds-to-interp-terms-types-name> s]]
+
+  is-native-datatype =
+    ?SimpleSort(<id>);
+    lookup-def(|Types());
+    lookup-prop(|SortKind());
+    ?NativeSort()
