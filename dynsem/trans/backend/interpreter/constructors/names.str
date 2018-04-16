@@ -21,7 +21,7 @@ strategies // builder for sorts
   jclass-termbuilder:
     dec@ConsDecl(name, kid*, _, _) -> $[[<ds-utils-java-escape-id> name]_[<length> kid*]Build]
 
-  jclass-termbuider-ng:
+  jclass-termbuilder-ng:
     dec@ConsDecl(_, _, _, _) -> $[[<jclass-termbuilder> dec]NodeGen]
   
 strategies // checked builders

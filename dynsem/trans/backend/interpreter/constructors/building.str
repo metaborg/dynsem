@@ -54,22 +54,35 @@ strategies
         }
       ]|
     where
-      ConstructorType(_, s) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, <length> kid*);
-      x_sortbuilder := <jclass-termbuilder> SimpleSort(s);
+      debug(!"conbld1 ");
+      x_sortbuilder := <jclass-termbuilder> s;
+      debug(!"conbld2 ");
       x_class := <jclass-termbuilder> dec;
+      debug(!"conbld3 ");
       child* := <ds-to-interp-terms-building-childannos> kid*;
+      debug(!"conbld4 ");
       x_termclass := <jclass-term> dec;
+      debug(!"conbld5 ");
       param0* := <ds-to-interp-terms-building-params> kid*;
+      debug(!"conbld6 ");
       param1* := <ds-to-interp-terms-building-cachedparams> kid*;
+      debug(!"conbld7 ");
       e_cacheguard := <ds-to-interp-terms-cachedparam-cacheguards> kid*;
+      debug(!"conbld8 ");
       e0* := <ds-to-interp-terms-building-exprs> kid*;
+      debug(!"conbld9 ");
       str_cachegen := <ds-utils-debugged-java-pp> e |[ buildTerm(e0*) ]|
+      ;debug(!"conbld10 ")
     where
       if [] := kid*
       then
+        debug(!"conbld11 ");
         e_term := e |[ x_termclass.SINGLETON ]|
+        ;debug(!"conbld12 ")
       else
+        debug(!"conbld13 ");
         e_term := e |[ new x_termclass(e0*) ]|
+        ;debug(!"conbld14 ")
       end
   
   ds-to-interp-terms-building-con:
@@ -106,9 +119,12 @@ strategies
         }
       ]|
     where
-      ConstructorType(_, s) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, 0);
-      x_sortbuilder := <jclass-termbuilder> SimpleSort(s);
+      debug(!"conbld15 ");
+      x_sortbuilder := <jclass-termbuilder> s;
+      debug(!"conbld16 ");
       x_class := <jclass-termbuilder> dec;
+      debug(!"conbld17 ");
       x_termclass := <jclass-term> dec
+      ;debug(!"conbld18 ")
 
 

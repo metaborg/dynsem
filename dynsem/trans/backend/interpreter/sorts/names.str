@@ -74,6 +74,9 @@ strategies // checked builders
     where
       <not(type-is-builtin)> s;
       <lookup-def(|Types()); lookup-prop(|JClass())> s
+  
+  jclass-checkedbuilder-ng:
+    ss@SimpleSort(s) -> $[[<jclass-checkedbuilder> ss]NodeGen]
 
 strategies // matcher for sorts
   

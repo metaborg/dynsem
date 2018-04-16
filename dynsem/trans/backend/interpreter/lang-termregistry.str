@@ -2,11 +2,14 @@ module backend/interpreter/lang-termregistry
 
 imports
   signatures/-
+  signatures/dynsem/-
   libjava-front
   backend/common/opts
   backend/interpreter/lang-ast
   backend/interpreter/names
   backend/interpreter/lists/registering
+  backend/utils/-
+  analysis/-
 
 rules /* term registry */
 
@@ -167,15 +170,19 @@ rules /* term registry */
         });
       ]|
     with
+      debug(!"reginit1 ");
       x_conclass := <jclass-term> dec;
-//      x_termbuildclass := $[[x_conclass]Build];
+      debug(!"reginit2 ");
       x_termbuildclass := <jclass-termbuilder> dec;
-//      x_termbuildNODEGEN := $[[x_termbuildclass]NodeGen];
+      debug(!"reginit3 ");
       x_termbuildNG := <jclass-termbuilder-ng> dec;
-//      x_termmatchNODEGEN := $[[x_termclass]MatchPatternNodeGen];
+      debug(!"reginit4 ");
       x_matchNG := <jclass-matcher-ng> dec;
+      debug(!"reginit5 ");
       e1* := <map-with-index(ds-to-interp-termbuild-access)> kid*;
+      debug(!"reginit6 ");
       e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+      ;debug(!"reginit7 ")
 
   ds-to-interp-termbuild-access:
     (i, s) -> e |[ children[~i:<dec; int-to-string> i] ]|
@@ -226,7 +233,8 @@ rules /* term registry */
 
 
   ds-to-interp-natopterms-registry-inits = mapconcat(ds-to-interp-natopterms-registry-init)
-
+  
+  // FIXME extract
   ds-to-interp-natopterms-registry-init:
     d@NativeOpDecl(name, kid*, _, _) -> 
       bstm* |[

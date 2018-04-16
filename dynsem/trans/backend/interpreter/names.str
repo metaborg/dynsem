@@ -24,7 +24,7 @@ rules
   
   jclass-checkedbuilder = debug(!"jclass-checkedbuilder "); fail
 
-  jclass-checkedbuilder-ng = debug(!"jclass-checkedbuilder "); fail
+  jclass-checkedbuilder-ng = debug(!"jclass-checkedbuilder-ng "); fail
   
   jclass-matcher = debug(!"jclass-matcher "); fail
 
