@@ -49,11 +49,15 @@ strategies
         }
       ]|
     where
+      debug(!"srtmtc1 ");
       x_sortclass := <jclass-term> dec;
+      debug(!"srtmtc2 ");
       x_issortclass := <jclass-checkedbuilder> dec;
       x_specialization := $[executeSingular[x_sortclass]]
+      ;debug(!"srtmtc4 ")
   
   
+
   ds-to-interp-terms-sortmatching:
     (dec@SortDecl(s, _), cons-decl*@[_|_]) -> 
       compilation-unit |[
@@ -82,10 +86,15 @@ strategies
         }
       ]|
     where
+      debug(!"srtmtc4 ");
       x_sortclass := <jclass-term> dec;
+      debug(!"srtmtc5 ");
       x_issortclass := <jclass-checkedbuilder> dec;
+      debug(!"srtmtc6 ");
       x_execgeneric := $[execute[x_sortclass]];
+      debug(!"srtmtc7 ");
       meth0* := <map(ds-to-interp-terms-sortmatching-con-check)> cons-decl*
+      ;debug(!"srtmtc8 ")
    
     ds-to-interp-terms-sortmatching-con-check:
       dec@ConsDecl(_, _, _, _) ->
@@ -96,6 +105,9 @@ strategies
           }
         ]|
       where
+        debug(!"srtmtc9 ");
         x_termclass := <jclass-term> dec;
+        debug(!"srtmtc10 ");
         x_method := $[execute[x_termclass]]
+        ;debug(!"srtmtc11 ")
 

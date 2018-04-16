@@ -40,6 +40,10 @@ strategies
         }
       ]|
     where
+      debug(!"srtbld1 ");
       x_class := <jclass-termbuilder> dec;
+      debug(!"srtbld2 ");
       x_sortclass := <jclass-term> dec;
+      debug(!"srtbld3 ");
       x_execmethod := $[execute[x_class]]
+      ;debug(!"srtbld4 ")

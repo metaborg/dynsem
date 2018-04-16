@@ -17,22 +17,39 @@ rules
   
   ds-to-interp-terms-module =
     m-in-analysis(
+      debug(!"gen1 ");
       ?mod@Module(_, <fetch-elem(?Signatures(sig*))>);
+      debug(!"gen2 ");
       where(ds-to-interp-clean-target; ds-to-interp-gen-project);
+      debug(!"gen3 ");
       <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> mod;
+      debug(!"gen4 ");
       <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
+      debug(!"gen5 ");
       <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+      debug(!"gen6 ");
       <ds-to-interp-terms-sortmatching; ds-to-interp-write-classes(|<get-opt> ChecksPkg())> sig*;
+      debug(!"gen7 ");
       <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
+      debug(!"gen8 ");
       <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
+      debug(!"gen9 ");
       <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+      debug(!"gen10 ");
       <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
+      debug(!"gen11 ");
       ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      debug(!"gen12 ");
       ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      debug(!"gen13 ");
       ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      debug(!"gen14 ");
       ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      debug(!"gen15 ");
       ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      debug(!"gen16 ");
       ds-to-interp-gen-test-harness
+      ;debug(!"gen17 ")
     )
 
   ds-to-interp-clean-target =
