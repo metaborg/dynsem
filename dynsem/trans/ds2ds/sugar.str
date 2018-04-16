@@ -38,7 +38,7 @@ rules // desugaring
 		  <alltd(desugar-fundecl)> sigs1 => sigs2
   
   extract-fun-sorts-constructors:
-    MetaFunDecl(_, x, lhs-s*, _, _, _) -> (SortDecl(t_name), ConsDecl(x, lhs-s*, t_source, Annos([MetafunAnno()])))
+    MetaFunDecl(_, x, lhs-s*, _, _, _) -> (SortDecl(t_name, []), ConsDecl(x, lhs-s*, t_source, Annos([MetafunAnno()])))
     where
       t_name := $[[x]_[<length; int-to-string> lhs-s*]_Meta];
       t_source := SimpleSort(t_name)
@@ -54,6 +54,9 @@ rules // desugaring
   	alltd(rules-concat)
   
   desugar :
+    SortDeclNoAnnos(s) -> SortDecl(s, [])
+  
+  desugar :
     NativeNoArgFunctionDecl(name, type) -> NativeFunctionDecl(name, [], type)
   
   desugar :
@@ -66,10 +69,13 @@ rules // desugaring
     NullaryNativeConsDecl(c, s) -> NativeConsDecl(c, [], s)
 
   desugar :
-    NullaryNativeOpDecl(c, s) -> NativeOpDecl(c, [], s)
+    NullaryNativeOpDeclNoAnnos(c, s) -> NullaryNativeOpDecl(c, s, [])
   
   desugar :
-    NullaryNativeOpDeclWJClass(c, s, class) -> NativeOpDeclWJClass(c, [], s, class)
+    NullaryNativeOpDecl(c, s, annos) -> NativeOpDecl(c, [], s, annos) 
+  
+  desugar :
+    NativeOpDeclNoAnnos(c, k*, s) -> NativeOpDecl(c, k*, s, [])
   
   desugar :
     DefaultArrowDecl(ros, l-ty, rwsin, r-ty, rwsout) -> ArrowDecl(ros, l-ty, rwsin, "", r-ty, rwsout)
@@ -160,10 +166,19 @@ rules // sugaring
     Annos([]) -> NoAnnos()
   
   sugar :
+    SortDecl(s, []) -> SortDeclNoAnnos(s)
+  
+  sugar :
     NativeConsDecl(c, [], s) -> NullaryNativeConsDecl(c, s)
 
   sugar :
-    NativeOpDecl(c, [], s) -> NullaryNativeOpDecl(c, s)
+    NativeOpDecl(c, k*, s, []) -> NativeOpDeclNoAnnos(c, k*, s)
+  
+  sugar :
+    NativeOpDecl(c, [], s, annos) -> NullaryNativeOpDecl(c, s, annos)
+  
+  sugar :
+    NullaryNativeOpDecl(c, s, []) -> NullaryNativeOpDeclNoAnnos(c, s)
   
   sugar :
   	Rule([],infer,conc) -> Axiom(conc)

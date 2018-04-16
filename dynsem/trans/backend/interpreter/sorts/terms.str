@@ -1,0 +1,99 @@
+module backend/interpreter/sorts/terms
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+rules
+
+  ds-to-interp-terms-sortdecls(|cons-dec*) = 
+    // skip sorts for which the user has specified an explicit class
+    filter(where(?SortDecl(<id>, _); lookup-def(|Types()); not(lookup-prop(|JClass())))); 
+    map(ds-to-interp-terms-sortdecl(|cons-dec*))
+
+  ds-to-interp-terms-sortdecl(|cons-dec*):
+    dec@SortDecl(s, _) ->
+      compilation-unit |[
+        package ~x:<get-opt> TermPkg();
+        
+        import org.spoofax.interpreter.core.Tools;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        import org.spoofax.interpreter.terms.*;
+        import com.oracle.truffle.api.CompilerAsserts;
+        
+        public abstract class x_class implements IApplTerm {
+        
+          @Override
+          public Class<? extends IApplTerm> getSortClass() {
+            return x_class.class;
+          }
+        
+          ~mcreate0*
+        
+        }
+      ]|
+    where
+      x_class := <jclass-term> dec;
+      appl-cons-dec* := <filter(?ConsDecl(_, _, SimpleSort(s),_))> cons-dec*; 
+      if ValueSort() := <lookup-def(|Types());lookup-prop(|SortProp())> s
+      then
+        mcreate0* := [
+          class-body-dec |[
+              @TruffleBoundary
+              public static x_class create(IStrategoTerm term) {
+                return null;
+              }
+          ]| ]
+      else
+        bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> appl-cons-dec*;
+        impl-consdec* := <filter(?ConsDecl(_, [_], SimpleSort(s), Annos([ImplicitAnno()])))> cons-dec*;
+        bstm1 := <foldr(! bstm |[ throw new IllegalStateException("Unsupported term: " + term); ]|, ds-to-interp-terms-sortdec-impldisp)> impl-consdec*;
+        mcreate0* := [
+          class-body-dec |[
+              @TruffleBoundary
+              public static x_class create(IStrategoTerm term) {
+                CompilerAsserts.neverPartOfCompilation();
+                assert term != null;
+                bstm0*
+                bstm1
+              }
+          ]| ]
+      end
+      
+
+  ds-to-interp-terms-sortdec-createdisp:
+    dec@ConsDecl(name, kid*, _, _) ->
+      bstm |[
+        if (Tools.isTermAppl(term) && Tools.hasConstructor((IStrategoAppl) term, ~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*)) {
+          return ~x:<jclass-term> dec.create(term);
+        }
+      ]| 
+
+  ds-to-interp-terms-sortdec-impldisp:
+    (dec@ConsDecl(name, [sref@SimpleSort(_)], _, _), bstm0) ->
+      bstm |[
+        try {
+          return new x_class(e_create);
+        } catch (IllegalStateException ~x:<newname>) {
+          bstm0
+        }
+      ]|
+    where
+      x_class := <jclass-term> dec;
+      e_create := <ds-to-interp-terms-sortdec-impldisp-constr> sref 
+  
+  ds-to-interp-terms-sortdec-impldisp-constr:
+    sref@SimpleSort(s) -> e |[ ~x:<jclass-term> sref.create(term) ]|
+    where
+      <not(type-is-builtin)> s
+
+  ds-to-interp-terms-sortdec-impldisp-constr:
+    sref@SimpleSort("String") -> e |[ ((IStrategoString) term).stringValue() ]|
+
+  ds-to-interp-terms-sortdec-impldisp-constr:
+    sref@SimpleSort("Int") -> e |[ ((IStrategoInt) term).intValue() ]|

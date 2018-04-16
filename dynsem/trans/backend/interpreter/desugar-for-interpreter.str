@@ -53,36 +53,35 @@ rules
     As(_, t) -> <get-relation-kind-class> t
   
   get-relation-kind-class:
-    con@Con(c, k*) -> (TermKind(), <ds-to-interp-terms-types-name; qualify-term-class> con)
+    con@Con(c, k*) -> (TermKind(), <jclass-term-qual> con)
   
   get-relation-kind-class:
-    Cast(_, srt@SimpleSort(s)) -> (SortKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
-    where
-      <not(is-builtin-type)> s
+    Cast(_, srt@SimpleSort(s)) -> (SortKind(), <jclass-term-qual> srt)
+    where <not(type-is-builtin)> s
 
   get-relation-kind-class:
-    Cast(_, SimpleSort("AST")) -> (ASTKind(), "org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm")
+    Cast(_, ss@SimpleSort("AST")) -> (ASTKind(), <jclass-term-qual> ss)
   
   get-relation-kind-class:
-    Cast(_, SimpleSort("String")) -> (PrimitiveKind(), "java.lang.String")
+    Cast(_, ss@SimpleSort("String")) -> (PrimitiveKind(), <jclass-term-qual> ss)
 
   get-relation-kind-class:
-    Cast(_, SimpleSort("Int")) -> (PrimitiveKind(), "java.lang.Integer")
+    Cast(_, ss@SimpleSort("Int")) -> (PrimitiveKind(), <jclass-term-qual> ss)
 
   get-relation-kind-class:
-    Cast(_, SimpleSort("Bool")) -> (PrimitiveKind(), "java.lang.Boolean")
+    Cast(_, ss@SimpleSort("Bool")) -> (PrimitiveKind(), <jclass-term-qual> ss)
 
   get-relation-kind-class:
     Cast(_, MapSort(_, _)) -> (MapKind(), "MAP REDUCTION NOT SUPPORTED")
   
   get-relation-kind-class:
-    Cast(_, srt@ListSort(_)) -> (ListKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
+    Cast(_, srt@ListSort(_)) -> (ListKind(), <jclass-term-qual> srt)
   
   get-relation-kind-class:
-    Cast(_, srt@TupleSort(_)) -> (TupleKind(), <ds-to-interp-terms-types-name; qualify-term-class> srt)
+    Cast(_, srt@TupleSort(_)) -> (TupleKind(), <jclass-term-qual> srt)
 
-  qualify-term-class:
-    class -> $[[<get-opt> TermPkg()].[class]]
+//  qualify-term-class:
+//    class -> $[[<get-opt> TermPkg()].[class]]
 
 rules /* rename arguments */
 
@@ -127,7 +126,7 @@ rules /* native operators */
     where
       ty-def := <lookup-def(|Types())> s;
       NativeSort() := <lookup-prop(|SortKind())> ty-def;
-      ty-str := <lookup-prop(|NativeTypeJString()); unquote(?'"')> ty-def
+      ty-str := <lookup-prop(|JClass()); unquote(?'"')> ty-def
 
   desugar-native-types:
     SortFunCall(name, recv, arg*) -> NativeFunCall(<type-of> recv, name, recv, arg*)
@@ -238,27 +237,27 @@ rules /* resugar list construction */
   list-to-jtypedlist:
     Cast(List_(elems), list-sort) -> TypedList(elems, list-class)
     where
-       list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+       list-class := <jclass-term-qual> list-sort
   
   list-to-jtypedlist:
     Cast(ListTail(elems, tail), list-sort) -> TypedListTail(elems, tail, list-class)
     where
-      list-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+      list-class := <jclass-term-qual> list-sort
   
   list-to-jtypedlist:
     Cast(Tuple(elems), tuple-sort) -> TypedTuple(elems, tuple-class)
     where
-       tuple-class := <ds-to-interp-terms-types-name; qualify-term-class> tuple-sort
+       tuple-class := <jclass-term-qual> tuple-sort
   
   list-to-jtypedlist:
     Cast(MapKeys(t), list-sort) -> TypedMapKeys(t, keylist-class)
     where
-      keylist-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+      keylist-class := <jclass-term-qual> list-sort
   
   list-to-jtypedlist:
     Cast(MapValues(t), list-sort) -> TypedMapValues(t, vallist-class)
     where
-      vallist-class := <ds-to-interp-terms-types-name; qualify-term-class> list-sort
+      vallist-class := <jclass-term-qual> list-sort
 
 //rules /* desugaring concat */
 //

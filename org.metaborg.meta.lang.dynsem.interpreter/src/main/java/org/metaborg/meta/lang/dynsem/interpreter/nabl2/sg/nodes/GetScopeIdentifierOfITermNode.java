@@ -40,7 +40,7 @@ public abstract class GetScopeIdentifierOfITermNode extends DynSemNode {
 	}
 
 	@TruffleBoundary
-	private ScopeIdentifier getScopeIdentifier(ITerm t) {
+	protected ScopeIdentifier getScopeIdentifier(ITerm t) {
 		IStrategoAppl scopeIdentT = (IStrategoAppl) NaBL2SolutionUtils.getAstProperty(Objects.requireNonNull(
 				nabl2Context(),
 				"No NaBL2 context available. Does the language use NaBL2, and was the interpreter invoked using the correct runner?"),

@@ -12,7 +12,7 @@ imports
 strategies
 
   ds-to-interp-terms-building-con:
-    dec@ConsDecl(_, kid*@[_|_], s, _) ->
+    dec@ConsDecl(name, kid*@[_|_], s, _) ->
       compilation-unit |[
         package ~x:<get-opt> BuildPkg();
       
@@ -27,7 +27,7 @@ strategies
         import com.oracle.truffle.api.source.SourceSection;
 
         @NodeChildren({ ~child* })
-        public abstract class x_class extends ~x:$[A[<ds-to-interp-terms-types-name> s]Build] {
+        public abstract class x_class extends x_sortbuilder {
 
           public x_class(SourceSection source) {
             super(source);
@@ -54,9 +54,11 @@ strategies
         }
       ]|
     where
-      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
+      ConstructorType(_, s) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, <length> kid*);
+      x_sortbuilder := <jclass-termbuilder> SimpleSort(s);
+      x_class := <jclass-termbuilder> dec;
       child* := <ds-to-interp-terms-building-childannos> kid*;
-      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_termclass := <jclass-term> dec;
       param0* := <ds-to-interp-terms-building-params> kid*;
       param1* := <ds-to-interp-terms-building-cachedparams> kid*;
       e_cacheguard := <ds-to-interp-terms-cachedparam-cacheguards> kid*;
@@ -71,7 +73,7 @@ strategies
       end
   
   ds-to-interp-terms-building-con:
-    dec@ConsDecl(_, [], s, _) ->
+    dec@ConsDecl(name, [], s, _) ->
       compilation-unit |[
         package ~x:<get-opt> BuildPkg();
       
@@ -85,7 +87,7 @@ strategies
         import com.oracle.truffle.api.source.SourceSection;
 
         @NodeChildren({ })
-        public abstract class x_class extends ~x:$[A[<ds-to-interp-terms-types-name> s]Build] {
+        public abstract class x_class extends x_sortbuilder {
 
           public x_class(SourceSection source) {
             super(source);
@@ -104,7 +106,9 @@ strategies
         }
       ]|
     where
-      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
-      x_termclass := <ds-to-interp-terms-types-name> dec
+      ConstructorType(_, s) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, 0);
+      x_sortbuilder := <jclass-termbuilder> SimpleSort(s);
+      x_class := <jclass-termbuilder> dec;
+      x_termclass := <jclass-term> dec
 
 

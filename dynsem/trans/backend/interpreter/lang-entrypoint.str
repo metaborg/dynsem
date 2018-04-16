@@ -9,10 +9,6 @@ rules /* language file. interpreter entry point */
 
   ds-to-interp-language =
     x_language := $[[<get-opt> LangName()]Language];
-//    e_dobacktrack := <if <get-opt> EnableBacktracking() then !e |[ true ]| else !e |[ false ]| end>;
-//    e_safecomponents := <if get-opt(|EnableSafeComponents()) then !e |[ true ]| else !e |[ false ]| end>;
-//    e_termcaching := <if get-opt(|EnableTermCaching()) then !e |[ true ]| else !e |[ false ]| end>;
-//    e_debugging := <if get-opt(|EnableDebug()) then !e |[ true ]| else !e |[ false ]| end>;
     !compilation-unit |[
       package ~x:<get-opt> TopPkg();
       
@@ -21,53 +17,7 @@ rules /* language file. interpreter entry point */
 
       @TruffleLanguage.Registration(name = ~e:Lit(String([Chars(<get-opt> LangName())])), version = ~e:Lit(String([Chars(<get-opt> LangVersion())])), mimeType = ~e:Lit(String([Chars(<get-opt> MimeType())])))
       public class x_language extends DynSemLanguage {
-//        public final static String START_CONSTR_NAME = ~e:Lit(String([Chars(<get-opt> StartConstrName())]));
-//        public final static int START_CONSTR_ARITY = ~i:<get-opt> StartConstrArity();
-//        
-//        public final static x_language INSTANCE = new x_language();
-//
-//        @Override protected CallTarget parse(Source code, Node context, String ... argumentNames) throws IOException
-//        {
-//          DynSemContext ctx = getContext();
-//          InputStream specInput = code.getInputStream();
-//          RuleRegistry.populate(ctx.getRuleRegistry(), specInput);
-//
-//          RootNode rootNode = new RootNode(x_language.class, null, null) {
-//            @Override public Object execute(VirtualFrame frame) {
-//              CompilerDirectives.transferToInterpreter();
-//              // Return the init rule by default.
-//              Class<?> dispatchClass = ctx.getTermRegistry().getConstructorClass(START_CONSTR_NAME, START_CONSTR_ARITY);
-//              JointRuleRoot initJointRoot = ctx.getRuleRegistry().lookupRules("init", dispatchClass);
-//              return new DynSemRule(initJointRoot);
-//            }
-//          };
-//          return Truffle.getRuntime().createCallTarget(rootNode);
-//        }
-//        
-//        public static final boolean ENABLE_BACKTRACKING = e_dobacktrack;
-//        public static final boolean ENABLE_SAFECOMPONENTS = e_safecomponents;
-//        public static final boolean ENABLE_TERMCACHING = e_termcaching;
-//        public final static boolean ENABLE_DEBUG = e_debugging;
-//        
-//        @Override
-//        public boolean isFullBacktrackingEnabled() {
-//          return ENABLE_BACKTRACKING;
-//        }
-//
-//        @Override
-//        public boolean isSafeComponentsEnabled() {
-//          return ENABLE_SAFECOMPONENTS;
-//        }
-//
-//        @Override
-//        public boolean isTermCachingEnabled() {
-//          return ENABLE_TERMCACHING;
-//        }
-//        
-//        @Override
-//        public boolean isDEBUG() {
-//          return ENABLE_DEBUG;
-//        }
+
         
       }
     ]|

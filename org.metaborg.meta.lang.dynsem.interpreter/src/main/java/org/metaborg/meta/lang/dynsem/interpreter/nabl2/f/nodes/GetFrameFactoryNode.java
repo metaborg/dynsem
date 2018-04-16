@@ -29,7 +29,7 @@ public abstract class GetFrameFactoryNode extends DynSemNode {
 		return getFactory(scopeIdent);
 	}
 
-	private DynamicObjectFactory getFactory(ScopeIdentifier scopeIdent) {
+	protected DynamicObjectFactory getFactory(ScopeIdentifier scopeIdent) {
 		return getContext().getFrameFactory(scopeIdent);
 	}
 

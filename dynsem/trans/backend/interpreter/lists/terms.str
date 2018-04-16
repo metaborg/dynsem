@@ -216,7 +216,6 @@ rules
         }
       ]|
     where
-      x_listclass := <ds-to-interp-terms-types-name> s;
-      x_elemclassunboxed := <ds-to-interp-terms-types-name> es;
-      x_elemclass := <ds-box-java-type> x_elemclassunboxed;
+      x_listclass := <jclass-term> s;
+      x_elemclass := <jclass-term; jclass-box> es;
       e_elemcreate := <ds-to-interp-sortelem-to-create-arg(|e |[ l.getSubterm(final_idx) ]|)> es

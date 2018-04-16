@@ -1,0 +1,79 @@
+module backend/interpreter/terms/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+
+strategies
+
+  jclass-term:
+    MapSort(_, _) -> $[com.github.krukow.clj_lang.IPersistentMap]
+  
+  jclass-term:
+    NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
+  
+  jclass-term:
+    NativeSubTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
+
+//  jclass-term:
+//    NativeType(_, ty-str) -> ty-str
+  
+  jclass-term:
+    SimpleSort("AST") -> $[org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm]
+  
+  jclass-term:
+    SimpleSort("String") -> $[String]
+
+  jclass-term:
+    SimpleSort("Int") -> $[int]
+
+  jclass-term:
+    SimpleSort("Bool") -> $[boolean]
+
+  jclass-term-qual:
+    ss@SimpleSort("AST") -> <jclass-term> ss
+  
+  jclass-term-qual:
+    SimpleSort("String") -> $[java.lang.String]
+
+  jclass-term-qual:
+    SimpleSort("Int") -> $[java.lang.Integer]
+
+  jclass-term-qual:
+    SimpleSort("Bool") -> $[java.lang.Boolean]
+
+strategies
+  
+  type-is-builtin:
+    ss@SimpleSort(s) -> ss
+    where <type-is-builtin> s
+  
+  type-is-builtin:
+    ss@ListSort(s) -> ss
+    where <type-is-builtin> s
+  
+  type-is-builtin =
+    ?"String"
+    + ?"Int"
+    + ?"Bool"
+    + ?"AST"
+
+  type-is-primitive:
+    ss@SimpleSort(s) -> ss
+    where <type-is-primitive> s 
+
+  type-is-primitive =
+    ?"Int"
+    + ?"Bool"
+
+strategies
+
+  jclass-box = try(_jclass-box)
+  
+  _jclass-box:
+    "int" -> $[Integer]
+  
+  _jclass-box:
+    "boolean" -> $[Boolean]
+

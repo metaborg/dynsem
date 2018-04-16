@@ -48,14 +48,23 @@ rules /* Sort & Constructor classes */
     where
       <fetch-elem(?Signatures(sig*))> section*
     where
+      debug(!"sig1 ");
       sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
+      debug(!"sig2 ");
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
+      debug(!"sig3 ");
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
+      debug(!"sig4 ");
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
+      debug(!"sig5 ");
+      sort-class* := <ds-to-interp-terms-sortdecls(|cons-dec*)> sort-dec*;
+      debug(!"sig6 ");
       cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*;
+      debug(!"sig7 ");
       tuple-class* := <map(ds-to-interp-terms-tupledecl)> tuple-dec*;
+      debug(!"sig8 ");
       list-class* := <map(ds-to-interp-terms-listdecl)> list-dec*
+      ;debug(!"sig9 ")
   
   get-languagelist-usage-in-signatures:
     sig -> [explicit-list*, implicit-map-key*, implicit-map-val*]
@@ -69,102 +78,32 @@ rules /* Sort & Constructor classes */
     collect-all(?TupleSort(_));
     nub
   
-  ds-to-interp-terms-sortdecl(|cons-dec*):
-    dec@SortDecl(s) ->
-      compilation-unit |[
-        package ~x:<get-opt> TermPkg();
-        
-        import org.spoofax.interpreter.core.Tools;
-        import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
-        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-        import org.spoofax.interpreter.terms.*;
-        import com.oracle.truffle.api.CompilerAsserts;
-        
-        public abstract class x_class implements IApplTerm {
-        
-          @Override
-          public Class<? extends IApplTerm> getSortClass() {
-            return x_class.class;
-          }
-        
-          @TruffleBoundary
-          public static x_class create(IStrategoTerm term) {
-            CompilerAsserts.neverPartOfCompilation();
-            assert term != null;
-            bstm0*
-            bstm1
-          }
-          
-        }
-      ]|
-    where
-      x_class := <ds-to-interp-terms-types-name> dec;
-      appl-cons-dec* := <filter(?ConsDecl(_, _, SimpleSort(s),_))> cons-dec*; 
-      bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> appl-cons-dec*;
-      impl-consdec* := <filter(?ConsDecl(_, [_], SimpleSort(s), Annos([ImplicitAnno()])))> cons-dec*;
-      bstm1 := <foldr(! bstm |[ throw new IllegalStateException("Unsupported term: " + term); ]|, ds-to-interp-terms-sortdec-impldisp)> impl-consdec*
-
-  ds-to-interp-terms-sortdec-createdisp:
-    dec@ConsDecl(name, kid*, _, _) ->
-      bstm |[
-        if (Tools.isTermAppl(term) && Tools.hasConstructor((IStrategoAppl) term, ~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*)) {
-          return ~x:<ds-to-interp-terms-types-name> dec.create(term);
-        }
-      ]| 
-
-  ds-to-interp-terms-sortdec-impldisp:
-    (dec@ConsDecl(name, [sref@SimpleSort(_)], _, _), bstm0) ->
-      bstm |[
-        try {
-          return new x_class(e_create);
-        } catch (IllegalStateException ~x:<newname>) {
-          bstm0
-        }
-      ]|
-    where
-      x_class := <ds-to-interp-terms-types-name> dec;
-      e_create := <ds-to-interp-terms-sortdec-impldisp-constr> sref 
-  
-  ds-to-interp-terms-sortdec-impldisp-constr:
-    sref@SimpleSort(s) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(term) ]|
-    where
-      <not(is-builtin-type)> s
-
-  ds-to-interp-terms-sortdec-impldisp-constr:
-    sref@SimpleSort("String") -> e |[ ((IStrategoString) term).stringValue() ]|
-
-  ds-to-interp-terms-sortdec-impldisp-constr:
-    sref@SimpleSort("Int") -> e |[ ((IStrategoInt) term).intValue() ]|
-
-
-      
   ds-to-interp-hashcode-append:
     (idx, e) -> e |[ e.append(~x:$[_[idx]]) ]|
-  
   
   
   ds-to-interp-sorts-to-create-arg:
     (e_term, sref@SimpleSort(s)) ->
       e |[ x_ttype.create(e_term) ]|
     where
-      <not(is-builtin-type)> s;
-      x_ttype := <ds-to-interp-terms-types-name> sref
+      <not(type-is-builtin)> s;
+      x_ttype := <jclass-term> sref
 
   ds-to-interp-sorts-to-create-arg:
     (e_term, ls@ListSort(_)) -> e |[ x_listclass.create(e_term) ]|
     where
-      x_listclass := <ds-to-interp-terms-types-name> ls
+      x_listclass := <jclass-term> ls
   
   ds-to-interp-sorts-to-create-arg:
     (e_term, ts@TupleSort(_)) -> e |[ x_tupleclass.create(e_term) ]|
     where
-      x_tupleclass := <ds-to-interp-terms-types-name> ts
+      x_tupleclass := <jclass-term> ts
 
   ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
     s@SimpleSort(_) -> e |[ x_elemclass.create(e_tmpelem) ]|
     where
-      <not(is-builtin-type)> s;
-      x_elemclass := <ds-to-interp-terms-types-name> s
+      <not(type-is-builtin)> s;
+      x_elemclass := <jclass-term> s
 
   ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
     l@ListSort(_) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, l)
@@ -206,8 +145,8 @@ rules /* Sort & Constructor classes */
       x_bindsT := $[_[<newname>]];
       x_map := $[_[<newname>]];
       x_bindT := $[_[<newname>]];
-      x_keyclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> skey;
-      x_valclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> sval;
+      x_keyclass := <jclass-term; jclass-box> skey;
+      x_valclass := <jclass-term; jclass-box> sval;
       e_keycreate := <ds-to-interp-sorts-to-create-arg> (e |[ x_bindT.getSubterm(0) ]|, skey);
       e_valcreate := <ds-to-interp-sorts-to-create-arg> (e |[ x_bindT.getSubterm(1) ]|, sval)
 
@@ -251,7 +190,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      <is-primitive-type> ty;
+      <type-is-primitive> ty;
       x_idx := $[_[idx]]
   
   // generate equality check for a field that is of user type
@@ -267,7 +206,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      <not(is-primitive-type)> ty;
+      <not(type-is-primitive)> ty;
       x_idx := $[_[idx]]
   
   ds-to-interp-sorts-to-params = is-list; map-with-index(ds-to-interp-sort-to-param)
@@ -275,7 +214,7 @@ rules /* Sort & Constructor classes */
   ds-to-interp-sort-to-param:
     (i, s) -> param |[ x_sortclass x_name ]|
     where
-      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_sortclass := <jclass-term> s;
       x_name := $[_[i]]
   
   ds-to-interp-sorts-to-finits = is-list; map-with-index(ds-to-interp-sort-to-finit)
@@ -290,7 +229,7 @@ rules /* Sort & Constructor classes */
   ds-to-interp-sort-to-fdec:
     (i, s) -> class-body-dec |[ private final x_sortclass x_name; ]|
     where
-      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_sortclass := <jclass-term> s;
       x_name := $[_[i]]
 
   ds-to-interp-sorts-to-fgets = is-list; map-with-index(ds-to-interp-sort-to-fget)
@@ -303,7 +242,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_sortclass := <jclass-term> s;
       x_getname := $[get_[i]];
       x_name := $[_[i]]
 
@@ -328,11 +267,11 @@ rules /* type system class */
     where
       <fetch-elem(?Signatures(sig-sec*))> section*;
       decl* := <filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>)); concat;
-        qsort(?(ConsDecl(_, _, _, _), SortDecl(_)) + ?(SortDecl(_), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
+        qsort(?(ConsDecl(_, _, _, _), SortDecl(_, _)) + ?(SortDecl(_, _), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
       list* := <get-languagelist-usage-in-signatures> sig-sec*;
       tuple* := <get-languagetuple-usage-in-module> mod;
       ![decl*, tuple*, list*];
-      map(ds-to-interp-terms-types-name);
+      map(jclass-term);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
 
 rules /* term building */

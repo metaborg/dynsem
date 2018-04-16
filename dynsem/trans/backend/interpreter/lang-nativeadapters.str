@@ -4,7 +4,7 @@ imports
   signatures/ds-sig
   signatures/dynsem/Signatures-sig
   backend/common/opts
-  backend/interpreter/lang-names
+  backend/interpreter/names
   libjava-front
 
 rules
@@ -55,7 +55,7 @@ rules
     where
       x_adapter := <concat-strings> ["_adapt_", sort_nat, "_", fun, "_", <length; int-to-string> kid*];
       child* := <ds-to-interp-nattype-func-adapter-childannos> kid*;
-      x_res := <ds-to-interp-terms-types-name> sort_res;
+      x_res := <jclass-term> sort_res;
       x_recvtype := <unquote(?'"')> jstring; 
       param0* := <ds-to-interp-nattype-func-adapter-eval-params> kid*;
       param1* := [ param |[ x_recvtype receiver ]|, param0*];
@@ -73,7 +73,7 @@ rules
   ds-to-interp-nattype-func-adapter-eval-params = map-with-index(ds-to-interp-nattype-func-adapter-eval-param)
   
   ds-to-interp-nattype-func-adapter-eval-param:
-    (i, s) -> param |[ ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
+    (i, s) -> param |[ ~x:<jclass-term> s ~x:$[tb_[i]] ]|
 
   ds-to-interp-nattype-func-adapter-eval-exprs = map-with-index(ds-to-interp-nattype-func-adapter-eval-expr)
   

@@ -126,7 +126,7 @@ strategies
   
 rules
 
-  explication-api-explicate(s) = 
+  explication-api-explicate(s) =
     where(explication-api-init-storage(?comps-table, ?imps-table));
     where(explication-gather-data-arrowdecl(|comps-table, imps-table));
     where(alltd(explication-gather-data-rule(|comps-table, imps-table)));

@@ -1,0 +1,76 @@
+module backend/interpreter/sorts/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/common/-
+  
+strategies // classes for sorts
+  
+  jclass-term:
+    SimpleSort(s) -> classname
+    where
+      <not(type-is-builtin)> s;
+      if jclass := <lookup-def(|Types()); lookup-prop(|JClass()); unquote(?'"')> s
+      then
+        classname := jclass
+      else
+        classname := $[I[<jclass-term> s]Term]
+      end
+  
+  jclass-term-qual:
+    ss@SimpleSort(s) -> classname
+    where
+      <not(type-is-builtin)> s;
+      if <lookup-def(|Types()); lookup-prop(|JClass())> s
+      then
+        classname := <jclass-term> ss
+      else
+        classname := $[[<get-opt> TermPkg()].[<jclass-term> ss]]
+      end 
+  
+strategies // builder for sorts
+
+  jclass-termbuilder:
+    SortDecl(s, _) -> <jclass-termbuilder> SimpleSort(s)
+  
+  jclass-termbuilder:
+    ss@SimpleSort(s) -> <with(fail|$[No builder can exist for builtin type [s]])>
+    where <type-is-builtin> s
+  
+  jclass-termbuilder:
+    SimpleSort(s) -> classname
+    where
+      <not(type-is-builtin)> s;
+      if jclass := <lookup-def(|Types()); lookup-prop(|JClass()); unquote(?'"')> s
+      then
+        classname := $[[jclass].Build]
+      else
+        classname := $[A[<jclass-term> s]Build]
+      end
+
+strategies // checked builders
+  
+  jclass-checkedbuilder:
+    SortDecl(s, _) -> <jclass-checkedbuilder> s
+  
+  jclass-checkedbuilder:
+    SimpleSort(s) -> <with(fail|$[No checked builder can exist for builtin type [s]])>
+    where <type-is-builtin> s
+  
+  jclass-checkedbuilder:
+    SimpleSort(s) -> $[IS_[<jclass-term> s]]
+    where
+      <not(type-is-builtin)> s;
+      <not(lookup-def(|Types()); lookup-prop(|JClass()))> s
+  
+  jclass-checkedbuilder:
+    ss@SimpleSort(s) -> <jclass-termbuilder> ss
+    where
+      <not(type-is-builtin)> s;
+      <lookup-def(|Types()); lookup-prop(|JClass())> s
+
+strategies // matcher for sorts
+  

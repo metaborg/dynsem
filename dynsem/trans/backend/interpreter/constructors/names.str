@@ -1,0 +1,38 @@
+module backend/interpreter/constructors/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/utils/utils
+  backend/common/-
+    
+strategies // classes for sorts
+  
+  jclass-term:
+    ConsDecl(name, kid*, _, _) -> $[[<ds-utils-java-escape-id> name]_[<length> kid*]Term]
+  
+  jclass-term-qual:
+    dec@ConsDecl(name, kid*, _, _) -> $[[<get-opt> TermPkg()].[<jclass-term> dec]]
+    
+strategies // builder for sorts
+
+  jclass-termbuilder:
+    dec@ConsDecl(name, kid*, _, _) -> $[[<ds-utils-java-escape-id> name]_[<length> kid*]Build]
+
+  jclass-termbuider-ng:
+    dec@ConsDecl(_, _, _, _) -> $[[<jclass-termbuilder> dec]NodeGen]
+  
+strategies // checked builders
+  
+  jclass-checkedbuilder = fail
+
+strategies // matcher for sorts
+  
+  jclass-matcher:
+    dec@ConsDecl(name, kid*, _, _) -> $[[<ds-utils-java-escape-id> name]_[<length> kid*]Match]
+  
+  jclass-matcher-ng:
+    dec@ConsDecl(_, _, _, _) -> $[[<jclass-matcher> dec]NodeGen]
+  

@@ -699,7 +699,7 @@ rules /* support for implicit conversions */
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths =
     lookup-def-all(|Constructors());
-    filter(where(lookup-prop(|ConsKind()) => ImplicitCons()));
+    filter(where(lookup-prop(|ImplicitCons()) => ImplicitCons()));
     map(store-prime-conspath);
     lookup-def-all(|Arrows());
     map(store-prime-arrowpath)

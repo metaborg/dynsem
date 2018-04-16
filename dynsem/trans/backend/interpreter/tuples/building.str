@@ -40,9 +40,9 @@ strategies
         }
       ]|
     where
-      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
+      x_class := <jclass-termbuilder> dec;
       child* := <ds-to-interp-terms-building-childannos> s*;
-      x_termclass := <ds-to-interp-terms-types-name> dec;
+      x_termclass := <jclass-term> dec;
       param0* := <ds-to-interp-terms-building-params> s*;
       e0* := <ds-to-interp-terms-building-exprs> s*;
       e_term := e |[ new x_termclass(e0*) ]|

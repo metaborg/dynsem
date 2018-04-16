@@ -26,6 +26,8 @@ rules
         });
       ]|
     where
-      x_listclass := <ds-to-interp-terms-types-name> ls;
-      x_listbuildgenclass := $[[x_listclass]BuildNodeGen];
-      x_listmatchclass := $[[x_listclass]MatchPattern]
+      x_listclass := <jclass-term> ls;
+//      x_listbuildgenclass := $[[x_listclass]BuildNodeGen];
+      x_listbuildgenclass := <jclass-termbuilder-ng> ls;
+//      x_listmatchclass := $[[x_listclass]MatchPattern]
+      x_listmatchclass := <jclass-matcher> ls

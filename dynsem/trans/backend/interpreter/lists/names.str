@@ -1,0 +1,38 @@
+module backend/interpreter/lists/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/common/-
+  
+strategies // classes for sorts
+  
+  jclass-term:
+    ListSort(s) -> $[List_[<jclass-term; shorten-uniqueify-string> s]]
+   
+   
+  jclass-term-qual:
+    ss@ListSort(s) -> $[[<get-opt> TermPkg()].[<jclass-term> ss]]
+
+strategies // builder for sorts
+
+  jclass-termbuilder:
+    dec@ListSort(s) -> $[[<jclass-term> dec]Build]
+  
+  jclass-termbuilder-ng:
+    dec@ListSort(_) -> $[[<jclass-termbuilder> dec]NodeGen]
+
+strategies // checked builders
+  
+  jclass-checkedbuilder = fail
+
+strategies // matcher for sorts
+  
+  jclass-matcher:
+    dec@ListSort(s) -> $[[<jclass-term> dec]Match]
+  
+  jclass-matcher-ng:
+    dec@ListSort(_) -> $[[<jclass-matcher> dec]NodeGen]
+  

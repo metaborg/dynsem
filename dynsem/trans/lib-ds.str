@@ -21,7 +21,7 @@ rules // utils for deterministic variable name generation
 rules // projections for sorts
   
   get-sort-name =
-    ?SortDecl(<id>)
+    ?SortDecl(<id>, _)
     + ?SimpleSort(<id>)
     + ?ListSort(s); !$[L_[<get-sort-name> s]]
     + ?MapSort(k-s, v-s); !$[M_[<get-sort-name> k-s]_[<get-sort-name> v-s]]

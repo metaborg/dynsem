@@ -42,18 +42,14 @@ strategies
 
           @Fallback
           public void doShallowFail(VirtualFrame frame, Object term) {
-//            if (term instanceof x_termclass) {
-//              doTyped(frame, (x_termclass) term);
-//            } else {
               throw PatternMatchFailure.INSTANCE;
-//            }
           }
           
         }
       ]|
     where
-      x_termclass := <ds-to-interp-terms-types-name> dec;
-      x_matcherclass := $[[x_termclass]MatchPattern];
+      x_termclass := <jclass-term> dec;
+      x_matcherclass := <jclass-matcher> dec;
       fdec* := <ds-to-interp-terms-matching-fdecs> kid*; 
       param0* := <ds-to-interp-terms-matching-initparams> kid*;
       bstm0* := <ds-to-interp-terms-matching-finits> kid*;

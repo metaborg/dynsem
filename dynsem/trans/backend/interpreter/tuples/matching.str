@@ -52,8 +52,8 @@ strategies
         }
       ]|
     where
-      x_termclass := <ds-to-interp-terms-types-name> dec;
-      x_matcherclass := $[[x_termclass]MatchPattern];
+      x_termclass := <jclass-term> dec;
+      x_matcherclass := <jclass-matcher> dec;
       fdec* := <ds-to-interp-terms-matching-fdecs> s*; 
       param0* := <ds-to-interp-terms-matching-initparams> s*;
       bstm0* := <ds-to-interp-terms-matching-finits> s*;

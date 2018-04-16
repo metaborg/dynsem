@@ -71,13 +71,9 @@ rules
             @Specialization
             public void executeSpecific(VirtualFrame frame, x_listclass l) {
               if (elemPattsAreNoOps(elemPatterns)) {
-                // we will know statically whether the elemPatterns are NoOps
-                // in that case we specialize to a fixed length check
-//                System.out.println("-> to fixed length: " + this.getClass());
                 replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length)).executeMatch(frame,
                     l);
               } else {
-//                System.out.println("-> to full head match no tail: " + this.getClass());
                 replace(x_listmatchclassnotailng.create(getSourceSection(), elemPatterns));
               }
             }
@@ -147,12 +143,6 @@ rules
             public void executeSpecific(VirtualFrame frame, x_listclass l) {
               CompilerAsserts.neverPartOfCompilation("Should have already specialized. Untested code!");
               if (elemPattsAreNoOps()) {
-//                System.out.println("-> optimizable tail with noop heads: " + this.getClass());
-                // alright, there's a chance that we can specialize, but we need to take care of
-                // match failures.
-                // there is also a real chance that we may get here in compiled code. this will
-                // happen if the pattern match keeps failing and we never get to specialize
-                // further
                 if (gtLen.profile(l.size() >= elemPatterns.length)) {
                   try {
                     tailPattern.executeMatch(frame, l.drop(elemPatterns.length));
@@ -160,22 +150,14 @@ rules
                     throw pmfx;
                   } finally {
                     if (tailPattern instanceof NoOpPattern) {
-                      // specialize to list length fixed
-//                      System.out.println("-> to fixed length 1: " + this.getClass());
                       replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length));
                     } else if (tailPattern instanceof ListLengthFixedMatch) {
-//                      System.out.println("-> to fixed length 2: " + this.getClass());
-                      // specialize to list length fixed
                       replace(ListLengthFixedMatchNodeGen.create(getSourceSection(),
                           elemPatterns.length + ((ListLengthFixedMatch) tailPattern).getExpectedLength()));
                     } else if (tailPattern instanceof ListLengthLongerMatch) {
-                      // specialize to list length longer than
-//                      System.out.println("-> to longer than length: " + this.getClass());
                       replace(ListLengthLongerMatchNodeGen.create(getSourceSection(),
                           elemPatterns.length + ((ListLengthLongerMatch) tailPattern).getMinimalLength()));
                     } else {
-//                      System.out.println("-> to dead head: " + this.getClass());
-                      // specialize to list match with dead head
                       replace(x_listmatchclassdeadheadng.create(getSourceSection(),
                           elemPatterns.length, tailPattern));
                     }
@@ -190,7 +172,6 @@ rules
                 }
         
               } else {
-//                System.out.println("-> to full match: " + this.getClass());
                 replace(x_listmatchclassfullng.create(getSourceSection(), elemPatterns, tailPattern))
                     .executeSpecific(frame, l);
               }
@@ -251,9 +232,9 @@ rules
         }
     ]|
   where
-    x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es;
-    x_listclass := <ds-to-interp-terms-types-name> ls;
-    x_listmatchclass := $[[x_listclass]MatchPattern];
+    x_elemclass := <jclass-term> es;
+    x_listclass := <jclass-term> ls;
+    x_listmatchclass := <jclass-matcher> ls;
     x_listmatchclassnotailuninit := $[[x_listmatchclass]_NoTail_Uninitialized];
     x_listmatchclassnotailuninitng := $[[x_listmatchclassnotailuninit]NodeGen];
     x_listmatchclassnotail := $[[x_listmatchclass]_NoTail];

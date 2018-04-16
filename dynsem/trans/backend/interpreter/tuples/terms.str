@@ -102,7 +102,7 @@ rules
         }
       ]|
     where
-      x_classname := <ds-to-interp-terms-types-name> srt;
+      x_classname := <jclass-term> srt;
       param0* := <ds-to-interp-sorts-to-params> c-ty*;
       bstm0* := <ds-to-interp-sorts-to-finits> c-ty*;
       fdec0* := <ds-to-interp-sorts-to-fdecs> c-ty*;

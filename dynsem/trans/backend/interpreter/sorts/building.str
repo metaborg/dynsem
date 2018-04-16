@@ -13,11 +13,11 @@ strategies
   ds-to-inter-terms-sortbuilding = is-list; fetch-elem(?Sorts(<id>)); map(ds-to-interp-terms-sortbuilding)
   
   ds-to-interp-terms-sortbuilding:
-    dec@SortDecl(s) -> 
+    dec@SortDecl(s, _) -> 
       compilation-unit |[
         package ~x:<get-opt> BuildPkg();
   
-        import ~x:$[[<get-opt> TermPkg()].[<ds-to-interp-terms-types-name> dec]];
+        import ~x:$[[<get-opt> TermPkg()].*];
         import ~x:$[[<get-opt> TopPkg()].TypesGen];
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -40,6 +40,6 @@ strategies
         }
       ]|
     where
-      x_class := $[A[<ds-to-interp-terms-types-name> dec]Build];
-      x_sortclass := <ds-to-interp-terms-types-name> dec;
-      x_execmethod := $[execute[x_sortclass]]
+      x_class := <jclass-termbuilder> dec;
+      x_sortclass := <jclass-term> dec;
+      x_execmethod := $[execute[x_class]]

@@ -61,9 +61,9 @@ rules
         }
       ]|
     where
-      x_listclass := <ds-to-interp-terms-types-name> ls;
-      x_listbuildclass := $[[x_listclass]Build];
-      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es;
+      x_listclass := <jclass-term> ls;
+      x_listbuildclass := <jclass-termbuilder> ls;
+      x_elemclass := <jclass-term> es;
       x_aslistfun := $[as[x_listclass]]
 
     
