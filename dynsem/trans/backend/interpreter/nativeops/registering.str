@@ -1,0 +1,30 @@
+module backend/interpreter/nativeops/registering
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/interpreter/nativeops/util
+  backend/interpreter/terms/registering
+
+rules
+
+  ds-to-interp-natopterms-registry-inits =
+    mapconcat(require(ds-to-interp-natopterms-registry-init, debug-decl-name|"Registry init generation failed for native operator"))
+  
+  ds-to-interp-natopterms-registry-init:
+    d@NativeOpDecl(name, kid*, _, _) -> 
+      bstm* |[
+        nativeFactories.put(x_natop.class, new ITermBuildFactory() {
+    
+          @Override
+          public NativeOpBuild apply(SourceSection source,
+              TermBuild... children) {
+            return x_natop.create(source, e1*);
+          }
+        });
+      ]|
+    where
+      e1* := <map-with-index(ds-to-interp-termbuild-access(|"children"))> kid*;
+      x_natop := <jclass-termbuilder> d
+      

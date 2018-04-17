@@ -10,6 +10,7 @@ imports
   backend/interpreter/lists/-
   backend/interpreter/tuples/-
   backend/interpreter/maps/-
+  backend/interpreter/nativeops/-
   backend/utils/-
   backend/common/-
   libjava-front

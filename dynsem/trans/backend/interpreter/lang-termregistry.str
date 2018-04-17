@@ -8,6 +8,8 @@ imports
   backend/interpreter/lang-ast
   backend/interpreter/names
   backend/interpreter/lists/registering
+  backend/interpreter/tuples/registering
+  backend/interpreter/nativeops/registering
   backend/utils/-
   analysis/-
 
@@ -25,6 +27,7 @@ rules /* term registry */
         import ~x:<get-opt> BuildPkg().*;
         import ~x:<get-opt> MatchPkg().*;
         import ~x:<get-opt> ChecksPkg().*;
+        import ~x:<get-opt> NativePkg().*;
         
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
         import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -186,31 +189,6 @@ rules /* term registry */
       ;debug(!"reginit7 ")
 
 
-  ds-to-interp-natopterms-registry-inits = mapconcat(ds-to-interp-natopterms-registry-init)
-  
-  // FIXME extract
-  ds-to-interp-natopterms-registry-init:
-    d@NativeOpDecl(name, kid*, _, _) -> 
-      bstm* |[
-        nativeFactories.put(x_natop.class, new ITermBuildFactory() {
-    
-          @Override
-          public NativeOpBuild apply(SourceSection source,
-              TermBuild... children) {
-            return x_natop.create(source, e1*);
-          }
-        });
-      ]|
-    where
-      e1* := <map-with-index(ds-to-interp-termbuild-access)> kid*;
-      if class := <lookup-def(|Constructors()); lookup-prop(|JClass())> (name, <length> kid*)
-      then
-        x_natop := <unquote(?'"')> class
-      else
-        classname := <concat-strings> [<ds-utils-java-escape-id> name, "_", <length; int-to-string> kid*];
-        x_natop := $[[<get-opt> NativePkg()].[classname]]
-      end
-  
   ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
   
   ds-to-interp-nattyterms-registry-init:
