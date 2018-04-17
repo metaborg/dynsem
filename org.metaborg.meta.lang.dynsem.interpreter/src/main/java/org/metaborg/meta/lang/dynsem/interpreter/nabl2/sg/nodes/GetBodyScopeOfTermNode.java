@@ -16,7 +16,7 @@ import com.oracle.truffle.api.object.DynamicObject;
 import com.oracle.truffle.api.source.SourceSection;
 
 @Deprecated
-@NodeChildren({ @NodeChild(value = "scopeId", type = GetScopeIdentifierOfITermNode.class) })
+@NodeChildren({ @NodeChild(value = "scopeId", type = ScopeIdentifierOfTerm.class) })
 public abstract class GetBodyScopeOfTermNode extends DynSemNode {
 
 	public GetBodyScopeOfTermNode(SourceSection source) {

@@ -1,15 +1,17 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
 
-public class FrameLink {
+import com.oracle.truffle.api.object.DynamicObject;
 
-	public FrameLink() {
-		// TODO Auto-generated constructor stub
-	}
+public final class FrameLink {
 
-	public static FrameLink create(IStrategoTerm t) {
-		throw new RuntimeException("Not implemented");
+	private final Label label;
+	private final DynamicObject frame;
+
+	public FrameLink(Label label, DynamicObject frame) {
+		this.label = label;
+		this.frame = frame;
 	}
 
 }

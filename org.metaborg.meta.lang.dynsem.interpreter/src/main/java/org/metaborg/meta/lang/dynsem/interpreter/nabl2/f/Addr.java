@@ -1,14 +1,17 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f;
 
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import com.oracle.truffle.api.object.DynamicObject;
+import com.oracle.truffle.api.object.Location;
 
-public class Addr {
+public final class Addr {
 
-	public Addr() {
-		// TODO Auto-generated constructor stub
+	private final DynamicObject frame;
+	private final Location location;
+
+	public Addr(DynamicObject frame, Location location) {
+		this.frame = frame;
+		this.location = location;
 	}
 
-	public static Addr create(IStrategoTerm t) {
-		throw new RuntimeException("Not implemented");
-	}
+
 }

@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2SolutionUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -20,9 +20,9 @@ import com.oracle.truffle.api.source.SourceSection;
 import mb.nabl2.constraints.ast.AstProperties;
 
 @NodeChildren({ @NodeChild(value = "t", type = TermBuild.class) })
-public abstract class GetScopeIdentifierOfITermNode extends DynSemNode {
+public abstract class ScopeIdentifierOfTerm extends NativeOpBuild {
 
-	public GetScopeIdentifierOfITermNode(SourceSection source) {
+	public ScopeIdentifierOfTerm(SourceSection source) {
 		super(source);
 	}
 
@@ -46,5 +46,9 @@ public abstract class GetScopeIdentifierOfITermNode extends DynSemNode {
 				"No NaBL2 context available. Does the language use NaBL2, and was the interpreter invoked using the correct runner?"),
 				t.getStrategoTerm(), AstProperties.key("bodyScope"));
 		return ScopeIdentifier.create(scopeIdentT);
+	}
+
+	public static ScopeIdentifierOfTerm create(SourceSection source, TermBuild t) {
+		return ScopeIdentifierOfTermNodeGen.create(source, t);
 	}
 }
