@@ -26,12 +26,19 @@ rules
 
   jclass-checkedbuilder-ng = debug(!"jclass-checkedbuilder-ng "); fail
   
+  jclass-has-checkedbuilder = debug(!"has jclass-checkedbuilder "); fail
+  
   jclass-matcher = debug(!"jclass-matcher "); fail
 
   jclass-matcher-ng = debug(!"jclass-matcher-ng "); fail
   
   jclass-termbuilder-generic = !"TermBuild"
   
+  external shorten-uniqueify-string(|)
+  
+  external pkg-of(|)
+  
+  external classname-of(|)
   
 //  ds-to-interp-terms-type-nocasting =
 //    if where((is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _)))
@@ -91,7 +98,6 @@ rules
 //  ds-to-interp-terms-types-name:
 //    ListSort(s) -> $[List_[<ds-to-interp-terms-types-name; shorten-uniqueify-string> s]]
 //  
-  external shorten-uniqueify-string(|)
 //  
 //  ds-to-interp-terms-types-name:
 //    TupleSort(s*) -> $[Tuple_[<map(ds-to-interp-terms-types-name; shorten-uniqueify-string); separate-by(|"_"); concat-strings> s*]]

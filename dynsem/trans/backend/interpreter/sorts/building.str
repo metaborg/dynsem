@@ -4,13 +4,17 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/-
+  backend/interpreter/sorts/util
   backend/utils/-
   backend/common/-
   libjava-front
 
 strategies
 
-  ds-to-inter-terms-sortbuilding = is-list; fetch-elem(?Sorts(<id>)); map(ds-to-interp-terms-sortbuilding)
+  ds-to-inter-terms-sortbuilding =
+    is-list;
+    fetch-elem(?Sorts(<id>));
+    filter(is-generatable-sortdecl; require(ds-to-interp-terms-sortbuilding, debug-sortdecl-name|"Build generation failed for sort"))
   
   ds-to-interp-terms-sortbuilding:
     dec@SortDecl(s, _) -> 

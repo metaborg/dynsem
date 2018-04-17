@@ -4,13 +4,17 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/-
+  backend/interpreter/sorts/util
   backend/utils/-
   backend/common/-
   libjava-front
 
 strategies
 
-  ds-to-interp-terms-sortmatching = is-list; constr-by-sorts; map(ds-to-interp-terms-sortmatching)
+  ds-to-interp-terms-sortmatching =
+    is-list;
+    constr-by-sorts;
+    filter((is-generatable-sortdecl, id); require(ds-to-interp-terms-sortmatching, Fst; debug-sortdecl-name|"Matching generation failed for sort"))
   
   constr-by-sorts:
     sig* -> <map(\ SortDecl(s, a) -> (SortDecl(s, a), <filter(?ConsDecl(_, _, SimpleSort(s), _))> cons-decl*) \)> sort-decl*
@@ -108,6 +112,6 @@ strategies
         debug(!"srtmtc9 ");
         x_termclass := <jclass-term> dec;
         debug(!"srtmtc10 ");
-        x_method := $[execute[x_termclass]]
+        x_method := $[execute[<shorten-uniqueify-string> x_termclass]]
         ;debug(!"srtmtc11 ")
 

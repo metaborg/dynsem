@@ -4,6 +4,7 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/-
+  backend/interpreter/sorts/util
   backend/utils/-
   backend/common/-
   libjava-front
@@ -12,8 +13,7 @@ rules
 
   ds-to-interp-terms-sortdecls(|cons-dec*) = 
     // skip sorts for which the user has specified an explicit class
-    filter(where(?SortDecl(<id>, _); lookup-def(|Types()); not(lookup-prop(|JClass())))); 
-    map(ds-to-interp-terms-sortdecl(|cons-dec*))
+    filter(is-generatable-sortdecl; require(ds-to-interp-terms-sortdecl(|cons-dec*), debug-sortdecl-name|"Term generation failed for sort"))
 
   ds-to-interp-terms-sortdecl(|cons-dec*):
     dec@SortDecl(s, _) ->

@@ -1,5 +1,31 @@
 module backend/interpreter/constructors/registering
 
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/utils/utils
+  backend/common/-
 
+rules
 
+//  ds-to-interp-termbuild-access(|x_children):
+//    (i, ss@SimpleSort(s)) -> e |[ x_checkedbuilderng.create(x_children[~i:<dec; int-to-string> i]) ]|
+//    where
+//      <jclass-has-checkedbuilder> ss;
+//      x_checkedbuilderng := <jclass-checkedbuilder-ng> ss
+//  
+//    ds-to-interp-termbuild-access(|x_children):
+//    (i, ss@SimpleSort(s)) -> e |[ x_children[~i:<dec; int-to-string> i] ]|
+//    where
+//      <not(jclass-has-checkedbuilder)> ss
 
+//  ds-to-interp-termbuild-access:
+//    (i, s) -> e |[ x_issortNG.create(children[~i:<dec; int-to-string> i]) ]|
+//    where
+//      <not(type-is-builtin <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _))> s;
+////      x_issortNODEGEN := $[IS_[<ds-to-interp-terms-types-name> s]NodeGen]
+//      x_issortNG := <jclass-checkedbuilder-ng> s
+  
+  

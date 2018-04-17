@@ -1,15 +1,20 @@
-module backend/interpreter/contructors/building
+module backend/interpreter/constructors/building
 
 imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/terms/-
+  backend/interpreter/constructors/util
   backend/interpreter/-
   backend/utils/-
   backend/common/-
   libjava-front
 
 strategies
+
+  ds-to-interp-terms-building-cons = 
+    is-list;
+    filter(is-generatable-consdecl; require(ds-to-interp-terms-building-con, debug-consdecl-name|"Build generation failed for constructor"))
 
   ds-to-interp-terms-building-con:
     dec@ConsDecl(name, kid*@[_|_], s, _) ->

@@ -1,0 +1,17 @@
+module backend/interpreter/constructors/util
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  
+strategies
+  
+  is-generatable-sortdecl:
+    dec@SortDecl(s, _) -> dec
+    where
+      sdef := <lookup-def(|Types())> s;
+      <not(has-prop(|JClass()))> sdef
+  
+  debug-sortdecl-name:
+    SortDecl(s, _) -> s

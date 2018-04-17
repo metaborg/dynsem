@@ -18,7 +18,7 @@ strategies // classes for sorts
 strategies // builder for sorts
 
   jclass-termbuilder:
-    dec@TupleSort(s*) -> $[[<jclass-term> dec]Build]
+    dec@TupleSort(s*) -> $[[<jclass-term> dec]_B]
   
   jclass-termbuilder-ng:
     dec@TupleSort(s*) -> $[[<jclass-termbuilder> dec]NodeGen]
@@ -30,7 +30,7 @@ strategies // checked builders
 strategies // matcher for sorts
   
   jclass-matcher:
-    dec@TupleSort(s*) -> $[[<jclass-term> dec]Match] 
+    dec@TupleSort(s*) -> $[[<jclass-term> dec]_M] 
 
   jclass-matcher-ng:
     dec@TupleSort(s*) -> $[[<jclass-matcher> dec]NodeGen]

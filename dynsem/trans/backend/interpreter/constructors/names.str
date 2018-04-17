@@ -11,18 +11,46 @@ imports
 strategies // classes for sorts
   
   jclass-term:
-    ConsDecl(name, kid*, _, _) -> $[[<ds-utils-java-escape-id> name]_[<length> kid*]Term]
+    ConsDecl(name, kid*, _, _) -> classname
+    where
+      if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, <length> kid*)
+      then
+        classname := jclass
+      else
+        classname := $[[<ds-utils-java-escape-id> name]_[<length> kid*]]
+      end
   
   jclass-term-qual:
-    dec@ConsDecl(name, kid*, _, _) -> $[[<get-opt> TermPkg()].[<jclass-term> dec]]
+    dec@ConsDecl(name, kid*, _, _) -> classname
+    where
+      if <lookup-def(|Constructors()); has-prop(|JClass())> (name, <length> kid*)
+      then
+        classname := <jclass-term> dec
+      else
+        classname := $[[<get-opt> TermPkg()].[<jclass-term> dec]]
+      end
     
 strategies // builder for sorts
 
   jclass-termbuilder:
-    dec@ConsDecl(name, kid*, _, _) -> $[[<ds-utils-java-escape-id> name]_[<length> kid*]Build]
+    dec@ConsDecl(name, kid*, _, _) -> classname
+    where
+      if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, <length> kid*)
+      then
+        classname := $[[jclass].Build]
+      else
+        classname := $[[<ds-utils-java-escape-id> name]_[<length> kid*]_B]
+      end
 
   jclass-termbuilder-ng:
-    dec@ConsDecl(_, _, _, _) -> $[[<jclass-termbuilder> dec]NodeGen]
+    dec@ConsDecl(name, kid*, _, _) -> classname
+    where
+      if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, <length> kid*)
+      then
+        classname := $[[<pkg-of> jclass].[<jclass-term; classname-of> dec]Factory.BuildNodeGen]
+      else
+        classname := $[[<jclass-termbuilder> dec]NodeGen]
+      end
   
 strategies // checked builders
   
@@ -31,8 +59,22 @@ strategies // checked builders
 strategies // matcher for sorts
   
   jclass-matcher:
-    dec@ConsDecl(name, kid*, _, _) -> $[[<ds-utils-java-escape-id> name]_[<length> kid*]Match]
+    dec@ConsDecl(name, kid*, _, _) -> classname
+    where
+      if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, <length> kid*)
+      then
+        classname := $[[jclass].Match]
+      else
+        classname := $[[<ds-utils-java-escape-id> name]_[<length> kid*]_M]
+      end
   
   jclass-matcher-ng:
-    dec@ConsDecl(_, _, _, _) -> $[[<jclass-matcher> dec]NodeGen]
+    dec@ConsDecl(name, kid*, _, _) -> classname
+    where
+      if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, <length> kid*)
+      then
+        classname := $[[<pkg-of> jclass].[<jclass-term; classname-of> dec]Factory.MatchNodeGen]
+      else
+        classname := $[[<jclass-matcher> dec]NodeGen]
+      end
   

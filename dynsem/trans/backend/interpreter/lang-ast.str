@@ -5,10 +5,11 @@ imports
   analysis/-
   backend/interpreter/-
   backend/interpreter/terms/-
-  backend/interpreter/lists/-
-  backend/interpreter/tuples/-
   backend/interpreter/sorts/-
   backend/interpreter/constructors/-
+  backend/interpreter/lists/-
+  backend/interpreter/tuples/-
+  backend/interpreter/maps/-
   backend/utils/-
   backend/common/-
   libjava-front
@@ -76,7 +77,7 @@ rules /* Sort & Constructor classes */
       debug(!"sig5 ");
       sort-class* := <ds-to-interp-terms-sortdecls(|cons-dec*)> sort-dec*;
       debug(!"sig6 ");
-      cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*;
+      cons-class* := <ds-to-interp-terms-consdecls> cons-dec*;
       debug(!"sig7 ");
       tuple-class* := <map(ds-to-interp-terms-tupledecl)> tuple-dec*;
       debug(!"sig8 ");
@@ -282,14 +283,22 @@ rules /* type system class */
         }
       ]|
     where
+      debug(!"types1 ");
       <fetch-elem(?Signatures(sig-sec*))> section*;
+      debug(!"types2 ");
       decl* := <filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>)); concat;
         qsort(?(ConsDecl(_, _, _, _), SortDecl(_, _)) + ?(SortDecl(_, _), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
+      debug(!"types3 ");
       list* := <get-languagelist-usage-in-signatures> sig-sec*;
+      debug(!"types4 ");
       tuple* := <get-languagetuple-usage-in-module> mod;
+      debug(!"types5 ");
       ![decl*, tuple*, list*];
+      debug(!"types6 ");
       map(jclass-term);
+      debug(!"types7 ");
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
+      ;debug(!"types8 ")
 
 rules /* term building */
 
@@ -300,7 +309,7 @@ rules /* term building */
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      con-build* := <map(ds-to-interp-terms-building-con)> con-dec*;
+      con-build* := <ds-to-interp-terms-building-cons> con-dec*;
       list-build* := <map(ds-to-interp-terms-building-list)> list-dec*;
       tuple-build* := <map(ds-to-interp-terms-building-tuple)> tuple-dec*
 
@@ -316,7 +325,7 @@ rules /* term matching */
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      con-match* := <map(ds-to-interp-terms-matching-con)> con-dec*;
+      con-match* := <ds-to-interp-terms-matching-cons> con-dec*;
       list-match* := <map(ds-to-interp-terms-matching-list)> list-dec*;
       tuple-match* := <map(ds-to-interp-terms-matching-tuple)> tuple-dec*
 

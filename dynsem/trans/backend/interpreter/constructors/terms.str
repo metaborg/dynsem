@@ -5,7 +5,14 @@ imports
   signatures/dynsem/-
   backend/common/-
   backend/interpreter/-
-  
+  backend/interpreter/constructors/util
+
+strategies
+
+  ds-to-interp-terms-consdecls =
+    is-list;
+    filter(is-generatable-consdecl; require(ds-to-interp-terms-consdecl, debug-consdecl-name|"Term generation failed for constructor"))
+
 rules
 
   ds-to-interp-terms-consdecl:

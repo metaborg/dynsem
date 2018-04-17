@@ -1,0 +1,14 @@
+module backend/interpreter/maps/registering
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/utils/utils
+  backend/common/-
+
+rules
+
+  ds-to-interp-termbuild-access(|x_children):
+    (i, MapSort(_, _)) -> e |[ x_children[~i:<dec; int-to-string> i] ]|

@@ -27,7 +27,8 @@ rules
       ]|
     where
       x_listclass := <jclass-term> ls;
-//      x_listbuildgenclass := $[[x_listclass]BuildNodeGen];
       x_listbuildgenclass := <jclass-termbuilder-ng> ls;
-//      x_listmatchclass := $[[x_listclass]MatchPattern]
       x_listmatchclass := <jclass-matcher> ls
+  
+  ds-to-interp-termbuild-access(|x_children):
+    (i, ListSort(s)) -> e |[ children[~i:<dec; int-to-string> i] ]|

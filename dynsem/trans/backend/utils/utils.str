@@ -18,14 +18,23 @@ rules
   
   ds-utils-java-emit-class(createdir|outputpkg, basedir) =
     ?ast;
+    debug(!"emit1 ");
     filename := <ds-utils-java-extractname; guarantee-extension(|"java")> ast;
+    debug(!"emit2 ");
     if createdir then
+      debug(!"emit3 ");
       outputdir := <concat-strings> [basedir, "/", <string-replace(|".", "/")> outputpkg];
+      debug(!"emit4 ");
       (<file-exists <+ mkdir> outputdir)
+      ;debug(!"emit5 ")
     else
+      debug(!"emit6 ");
       outputdir := basedir
+      ;debug(!"emit7 ")
     end;
+    debug(!"emit8 ");
     filepath := <concat-strings> [outputdir, "/", filename];
+    <debug(!"EMIT: ")> filepath;
     pp-java := <ds-utils-debugged-java-pp> ast;
     fout     := <fopen> (filepath, "w");
     <fputs> (pp-java, fout);

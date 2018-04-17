@@ -19,7 +19,7 @@ strategies // classes for sorts
 strategies // builder for sorts
 
   jclass-termbuilder:
-    dec@ListSort(s) -> $[[<jclass-term> dec]Build]
+    dec@ListSort(s) -> $[[<jclass-term> dec]_B]
   
   jclass-termbuilder-ng:
     dec@ListSort(_) -> $[[<jclass-termbuilder> dec]NodeGen]
@@ -31,7 +31,7 @@ strategies // checked builders
 strategies // matcher for sorts
   
   jclass-matcher:
-    dec@ListSort(s) -> $[[<jclass-term> dec]Match]
+    dec@ListSort(s) -> $[[<jclass-term> dec]_M]
   
   jclass-matcher-ng:
     dec@ListSort(_) -> $[[<jclass-matcher> dec]NodeGen]
