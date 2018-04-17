@@ -1,0 +1,31 @@
+module backend/interpreter/nativetypes/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/common/-
+  
+strategies // classes for sorts
+  
+  jclass-term:
+    NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
+  
+  jclass-term:
+    NativeSubTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
+
+strategies // builder for sorts
+
+  jclass-termbuilder = fail
+      
+  jclass-termbuilder-ng = fail
+  
+strategies // checked builders
+  
+  jclass-checkedbuilder = fail
+
+strategies // matcher for sorts
+  
+  jclass-matcher = fail
+  

@@ -7,15 +7,6 @@ imports
 
 strategies
 
-  jclass-term:
-    MapSort(_, _) -> $[com.github.krukow.clj_lang.IPersistentMap]
-  
-  jclass-term:
-    NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
-  
-  jclass-term:
-    NativeSubTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
-
 //  jclass-term:
 //    NativeType(_, ty-str) -> ty-str
   

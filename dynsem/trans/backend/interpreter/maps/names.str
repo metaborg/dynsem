@@ -1,0 +1,28 @@
+module backend/interpreter/maps/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/common/-
+  
+strategies // classes for sorts
+  
+  jclass-term:
+    MapSort(_, _) -> $[com.github.krukow.clj_lang.IPersistentMap]
+  
+strategies // builder for sorts
+
+  jclass-termbuilder = fail
+      
+  jclass-termbuilder-ng = fail
+  
+strategies // checked builders
+  
+  jclass-checkedbuilder = fail
+
+strategies // matcher for sorts
+  
+  jclass-matcher = fail
+  

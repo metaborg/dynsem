@@ -10,6 +10,7 @@ imports
   backend/interpreter/lists/registering
   backend/interpreter/tuples/registering
   backend/interpreter/nativeops/registering
+  backend/interpreter/nativetypes/registering
   backend/utils/-
   analysis/-
 
@@ -189,25 +190,6 @@ rules /* term registry */
       ;debug(!"reginit7 ")
 
 
-  ds-to-interp-nattyterms-registry-inits = mapconcat(ds-to-interp-nattyterms-registry-init)
   
-  ds-to-interp-nattyterms-registry-init:
-    NativeBaseTypeDecl(jstring, s, func*) -> <mapconcat(ds-to-interp-nattyterms-registry-init(|s))> func*
-  
-  ds-to-interp-nattyterms-registry-init(|s):
-    NativeFunctionDecl(fun, kid*, _) ->
-      bstm* |[
-        nativeAdapterFactories.put(e_adaptkey, new ITermBuildFactory() {
-    
-          @Override
-          public TermBuild apply(SourceSection source, TermBuild... children) {
-            return x_adapter.create(source, children[0], e1*);
-          }
-        });
-      ]|
-    where
-      e_adaptkey := Lit(String([Chars(<concat-strings> [s, "/", fun, "/", <length; int-to-string> kid*])]));
-      x_adapter := <concat-strings> ["_adapt_", s, "_", fun, "_", <length; int-to-string> kid*];
-      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<int-to-string> i] ]| \)> kid*
   
     
