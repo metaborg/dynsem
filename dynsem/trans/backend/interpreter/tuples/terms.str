@@ -128,3 +128,8 @@ rules
           this.strategoTerm = strategoTerm;
         }
       ]|
+
+rules // creation from aterms
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, ts@TupleSort(_)) -> e |[ ~x:<jclass-term> ts.create(e_term) ]|

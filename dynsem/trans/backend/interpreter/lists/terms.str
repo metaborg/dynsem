@@ -225,4 +225,34 @@ rules
     where
       x_listclass := <jclass-term> s;
       x_elemclass := <jclass-term; jclass-box> es;
-      e_elemcreate := <ds-to-interp-sortelem-to-create-arg(|e |[ l.getSubterm(final_idx) ]|)> es
+//      e_elemcreate := <ds-to-interp-sortelem-to-create-arg(|e |[ l.getSubterm(final_idx) ]|)> es
+      e_elemcreate := <ds-to-interp-sorts-to-create-arg> (e |[ l.getSubterm(final_idx) ]|, es)
+
+rules // creation from aterms
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, ls@ListSort(_)) -> e |[ ~x:<jclass-term> ls.create(e_term) ]|
+
+//  ds-to-interp
+  
+//  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+//    s@SimpleSort(_) -> e |[ x_elemclass.create(e_tmpelem) ]|
+//    where
+//      <not(type-is-builtin)> s;
+//      x_elemclass := <jclass-term> s
+
+//  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+//    l@ListSort(_) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, l)
+//  
+//  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+//    t@TupleSort(_) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, t)
+//
+//  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+//    m@MapSort(_, _) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, m)
+      
+//  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+//    SimpleSort("String") -> e |[ Tools.asJavaString(e_tmpelem) ]|
+//
+//  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
+//    SimpleSort("Int") -> e |[ Tools.asJavaInt(e_tmpelem) ]|
+

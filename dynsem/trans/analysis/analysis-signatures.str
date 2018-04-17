@@ -41,7 +41,7 @@ rules /* store signatures */
       <map(store-sortanno(|ty-def))> sort-annos
   
   store-sortanno(|ty-def):
-    ValueSort() -> <store-prop(|SortProp(), ty-def)> ValueSort()
+    ValueSort() -> <store-prop(|ValueSort(), ty-def)> ValueSort()
   
   store-sortanno(|ty-def):
     ClassSource(s) -> <store-prop(|JClass(), ty-def)> s 

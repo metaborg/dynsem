@@ -39,7 +39,7 @@ rules
     where
       x_class := <jclass-term> dec;
       appl-cons-dec* := <filter(?ConsDecl(_, _, SimpleSort(s),_))> cons-dec*; 
-      if ValueSort() := <lookup-def(|Types()); lookup-prop(|SortProp())> s
+      if <lookup-def(|Types()); has-prop(|ValueSort())> s
       then
         mcreate0* := [
           class-body-dec |[
@@ -96,3 +96,22 @@ rules
 
   ds-to-interp-terms-sortdec-impldisp-constr:
     sref@SimpleSort("Int") -> e |[ ((IStrategoInt) term).intValue() ]|
+
+rules // creation
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@SimpleSort(s)) -> e |[ ~x:<jclass-term> sref.create(e_term) ]|
+    where
+      <not(type-is-builtin)> s;
+      s-def := <lookup-def(|Types())> s;
+      <lookup-prop(|SortKind())> s-def => LanguageSort();
+      <not(has-prop(|ValueSort()))> s-def
+  
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@SimpleSort(s)) -> e |[ null ]|
+    where
+      <not(type-is-builtin)> s;
+      s-def := <lookup-def(|Types())> s;
+      <lookup-prop(|SortKind())> s-def => LanguageSort();
+      <has-prop(|ValueSort())> s-def
+

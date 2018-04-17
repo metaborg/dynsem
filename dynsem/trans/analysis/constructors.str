@@ -50,7 +50,6 @@ signature
 
   sorts
     SortKind
-    SortProp
     ConsKind
     ArrowKind
     JClass
@@ -62,8 +61,6 @@ signature
   	  SystemSort: SortKind
   	  AliasSort: SortKind
 
-    SortProp: Property
-  	
     ConsKind: Property
     LanguageCons: ConsKind
     NativeCons: ConsKind

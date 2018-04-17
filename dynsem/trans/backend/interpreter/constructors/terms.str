@@ -6,6 +6,7 @@ imports
   backend/common/-
   backend/interpreter/-
   backend/interpreter/constructors/util
+  backend/interpreter/terms/-
 
 strategies
 
@@ -109,8 +110,7 @@ rules
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
       e0* := <range; map(\ i -> e |[ ~x:<int-to-string; mkidx> ]| \)> (1, <length; inc> kid*);
-      ConstructorType(_, c-srt) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, <length> kid*);
-      if ValueSort() := <lookup-def(|Types());lookup-prop(|SortProp())> c-srt
+      if <lookup-def(|Types()); has-prop(|ValueSort())> s
       then
         mcreate0* := [ class-body-dec |[
           @TruffleBoundary
@@ -158,3 +158,4 @@ rules
           }
         ]|
       end
+

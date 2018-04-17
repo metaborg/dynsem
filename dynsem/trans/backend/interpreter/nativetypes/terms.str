@@ -1,0 +1,24 @@
+module backend/interpreter/maps/terms
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/common/-
+  backend/interpreter/-
+  backend/interpreter/terms/-
+  
+rules // creation from aterms
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@SimpleSort(s)) -> e |[ null ]|
+    where
+      <not(type-is-builtin)> s;
+      <lookup-def(|Types()); lookup-prop(|SortKind())> s => NativeSort()
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@NativeType(_, "org.spoofax.interpreter.terms.IStrategoTerm")) -> e |[ e_term ]|
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@NativeType(_, qpath)) -> e |[ null ]|
+    where
+      <not(eq)> (qpath, "org.spoofax.interpreter.terms.IStrategoTerm") 
