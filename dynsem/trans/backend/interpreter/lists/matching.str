@@ -4,10 +4,16 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/-
+  backend/interpreter/lists/util
   backend/utils/-
   backend/common/-
   libjava-front
+
+strategies
   
+  ds-to-interp-terms-matching-lists =
+    map(require(ds-to-interp-terms-matching-list, debug-listsort-name|"List match generation failed for"))
+
 rules
   ds-to-interp-terms-matching-list:
     ls@ListSort(es) -> compilation-unit |[

@@ -1,0 +1,12 @@
+module backend/interpreter/constructors/util
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  backend/interpreter/sorts/util
+  
+strategies
+  
+  debug-listsort-name:
+    ListSort(es) -> $[List([<debug-sortdecl-name> es])]

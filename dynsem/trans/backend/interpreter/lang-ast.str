@@ -81,7 +81,7 @@ rules /* Sort & Constructor classes */
       debug(!"sig7 ");
       tuple-class* := <map(ds-to-interp-terms-tupledecl)> tuple-dec*;
       debug(!"sig8 ");
-      list-class* := <map(ds-to-interp-terms-listdecl)> list-dec*
+      list-class* := <ds-to-interp-terms-listdecls> list-dec*
       ;debug(!"sig9 ")
   
   get-languagelist-usage-in-signatures:
@@ -310,7 +310,7 @@ rules /* term building */
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
       con-build* := <ds-to-interp-terms-building-cons> con-dec*;
-      list-build* := <map(ds-to-interp-terms-building-list)> list-dec*;
+      list-build* := <ds-to-interp-terms-building-lists> list-dec*;
       tuple-build* := <map(ds-to-interp-terms-building-tuple)> tuple-dec*
 
 
@@ -326,7 +326,7 @@ rules /* term matching */
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
       con-match* := <ds-to-interp-terms-matching-cons> con-dec*;
-      list-match* := <map(ds-to-interp-terms-matching-list)> list-dec*;
+      list-match* := <ds-to-interp-terms-matching-lists> list-dec*;
       tuple-match* := <map(ds-to-interp-terms-matching-tuple)> tuple-dec*
 
 

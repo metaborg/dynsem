@@ -4,10 +4,12 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/-
+  backend/interpreter/lists/util
 
 rules
 
-  ds-to-interp-lists-registry-inits = mapconcat(ds-to-interp-lists-registry-init)
+  ds-to-interp-lists-registry-inits =
+    mapconcat(require(ds-to-interp-lists-registry-init, debug-listsort-name|"List registry init generation failed for"))
   
   ds-to-interp-lists-registry-init:
     ls@ListSort(es) ->

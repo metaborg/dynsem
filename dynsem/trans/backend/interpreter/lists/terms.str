@@ -5,6 +5,13 @@ imports
   signatures/dynsem/-
   backend/common/-
   backend/interpreter/-
+  backend/interpreter/lists/util
+  backend/interpreter/terms/-
+
+strategies
+
+  ds-to-interp-terms-listdecls = 
+    map(require(ds-to-interp-terms-listdecl, debug-listsort-name|"List term generation failed for"))
   
 rules
 

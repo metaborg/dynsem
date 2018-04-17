@@ -4,9 +4,14 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/-
+  backend/interpreter/lists/util
   backend/utils/-
   backend/common/-
   libjava-front
+
+strategies
+  ds-to-interp-terms-building-lists = 
+    map(require(ds-to-interp-terms-building-list, debug-listsort-name|"List build generation failed for"))
   
 rules
 
