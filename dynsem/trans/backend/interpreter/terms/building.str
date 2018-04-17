@@ -39,9 +39,15 @@ strategies
   ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
   
   ds-to-interp-terms-building-childanno:
-    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = x_checkedbuilder.class) ]|
+    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = ~x:<jclass-checkedbuilder> s.class) ]|
     where
-      x_checkedbuilder := <jclass-checkedbuilder> s
+      <jclass-has-checkedbuilder> s
+  
+  ds-to-interp-terms-building-childanno:
+    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = ~x:<jclass-termbuilder-generic> s.class) ]|
+    where
+      <not(jclass-has-checkedbuilder)> s
+  
   
 //  ds-to-interp-terms-building-childanno:
 //    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]|
