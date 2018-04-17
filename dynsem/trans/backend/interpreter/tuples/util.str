@@ -4,9 +4,9 @@ imports
   signatures/-
   signatures/dynsem/-
   analysis/-
-  backend/interpreter/sorts/util
   
 strategies
   
   debug-decl-name:
-    ListSort(es) -> $[List([<debug-decl-name> es])]
+    TupleSort(ss) -> $[([<map(debug-decl-name); separate-by(|", "); concat-strings> ss])]
+

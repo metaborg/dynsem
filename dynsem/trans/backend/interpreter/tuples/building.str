@@ -11,6 +11,9 @@ imports
 
 strategies
 
+  ds-to-interp-terms-building-tuples =
+    map(require(ds-to-interp-terms-building-tuple, debug-decl-name|"Tuple build generation failed for"))
+
   ds-to-interp-terms-building-tuple:
     dec@TupleSort(s*) ->
       compilation-unit |[

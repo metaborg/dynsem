@@ -13,5 +13,5 @@ strategies
       sdef := <lookup-def(|Types())> s;
       <not(has-prop(|JClass()))> sdef
   
-  debug-sortdecl-name:
+  debug-decl-name:
     SortDecl(s, _) -> s

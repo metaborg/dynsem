@@ -14,7 +14,7 @@ strategies
   ds-to-interp-terms-sortmatching =
     is-list;
     constr-by-sorts;
-    filter((is-generatable-sortdecl, id); require(ds-to-interp-terms-sortmatching, Fst; debug-sortdecl-name|"Matching generation failed for sort"))
+    filter((is-generatable-sortdecl, id); require(ds-to-interp-terms-sortmatching, Fst; debug-decl-name|"Matching generation failed for sort"))
   
   constr-by-sorts:
     sig* -> <map(\ SortDecl(s, a) -> (SortDecl(s, a), <filter(?ConsDecl(_, _, SimpleSort(s), _))> cons-decl*) \)> sort-decl*

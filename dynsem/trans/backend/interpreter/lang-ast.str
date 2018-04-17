@@ -79,7 +79,7 @@ rules /* Sort & Constructor classes */
       debug(!"sig6 ");
       cons-class* := <ds-to-interp-terms-consdecls> cons-dec*;
       debug(!"sig7 ");
-      tuple-class* := <map(ds-to-interp-terms-tupledecl)> tuple-dec*;
+      tuple-class* := <ds-to-interp-terms-tupledecls> tuple-dec*;
       debug(!"sig8 ");
       list-class* := <ds-to-interp-terms-listdecls> list-dec*
       ;debug(!"sig9 ")
@@ -327,7 +327,7 @@ rules /* term matching */
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
       con-match* := <ds-to-interp-terms-matching-cons> con-dec*;
       list-match* := <ds-to-interp-terms-matching-lists> list-dec*;
-      tuple-match* := <map(ds-to-interp-terms-matching-tuple)> tuple-dec*
+      tuple-match* := <ds-to-interp-terms-matching-tuples> tuple-dec*
 
 
       

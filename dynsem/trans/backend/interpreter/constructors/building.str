@@ -14,7 +14,7 @@ strategies
 
   ds-to-interp-terms-building-cons = 
     is-list;
-    filter(is-generatable-consdecl; require(ds-to-interp-terms-building-con, debug-consdecl-name|"Build generation failed for constructor"))
+    filter(is-generatable-consdecl; require(ds-to-interp-terms-building-con, debug-decl-name|"Build generation failed for constructor"))
 
   ds-to-interp-terms-building-con:
     dec@ConsDecl(name, kid*@[_|_], s, _) ->

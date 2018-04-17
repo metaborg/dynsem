@@ -14,7 +14,7 @@ strategies
 
   ds-to-interp-terms-matching-cons =
     is-list;
-    filter(is-generatable-consdecl; require(ds-to-interp-terms-matching-con, debug-consdecl-name|"Match generation failed for constructor"))
+    filter(is-generatable-consdecl; require(ds-to-interp-terms-matching-con, debug-decl-name|"Match generation failed for constructor"))
 
   ds-to-interp-terms-matching-con:
     dec@ConsDecl(_, kid*, _, _) -> 

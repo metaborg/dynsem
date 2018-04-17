@@ -2,6 +2,7 @@ module analysis/lib-analysis
 
 imports
   signatures/-
+  signatures/dynsem/-
   analysis/-
 
 rules

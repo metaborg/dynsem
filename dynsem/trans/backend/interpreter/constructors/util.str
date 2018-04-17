@@ -13,6 +13,6 @@ strategies
       cdef := <lookup-def(|Constructors())> (name, <length> kid*);
       <not(has-prop(|JClass()))> cdef
   
-  debug-consdecl-name:
+  debug-decl-name:
     ConsDecl(name, kid*, _, _) -> $[[name]/[<length> kid*]]
   

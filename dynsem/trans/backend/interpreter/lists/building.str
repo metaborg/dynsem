@@ -11,7 +11,7 @@ imports
 
 strategies
   ds-to-interp-terms-building-lists = 
-    map(require(ds-to-interp-terms-building-list, debug-listsort-name|"List build generation failed for"))
+    map(require(ds-to-interp-terms-building-list, debug-decl-name|"List build generation failed for"))
   
 rules
 

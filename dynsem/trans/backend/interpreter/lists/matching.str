@@ -12,7 +12,7 @@ imports
 strategies
   
   ds-to-interp-terms-matching-lists =
-    map(require(ds-to-interp-terms-matching-list, debug-listsort-name|"List match generation failed for"))
+    map(require(ds-to-interp-terms-matching-list, debug-decl-name|"List match generation failed for"))
 
 rules
   ds-to-interp-terms-matching-list:

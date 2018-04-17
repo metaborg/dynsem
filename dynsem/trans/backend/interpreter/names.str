@@ -34,6 +34,8 @@ rules
   
   jclass-termbuilder-generic = !"TermBuild"
   
+  debug-decl-name = fail
+  
   external shorten-uniqueify-string(|)
   
   external pkg-of(|)

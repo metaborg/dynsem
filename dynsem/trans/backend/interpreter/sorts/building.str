@@ -14,7 +14,7 @@ strategies
   ds-to-inter-terms-sortbuilding =
     is-list;
     fetch-elem(?Sorts(<id>));
-    filter(is-generatable-sortdecl; require(ds-to-interp-terms-sortbuilding, debug-sortdecl-name|"Build generation failed for sort"))
+    filter(is-generatable-sortdecl; require(ds-to-interp-terms-sortbuilding, debug-decl-name|"Build generation failed for sort"))
   
   ds-to-interp-terms-sortbuilding:
     dec@SortDecl(s, _) -> 

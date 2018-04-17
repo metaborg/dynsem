@@ -5,7 +5,12 @@ imports
   signatures/dynsem/-
   backend/common/-
   backend/interpreter/-
-  
+
+strategies
+
+  ds-to-interp-terms-tupledecls =
+    map(require(ds-to-interp-terms-tupledecl, debug-decl-name|"Tuple term generation failed for"))
+
 rules
 
   ds-to-interp-terms-tupledecl:
