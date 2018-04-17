@@ -5,10 +5,42 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/names
+  backend/interpreter/terms/registering
   backend/utils/utils
   backend/common/-
-
+  lib-ds
+  
 rules
 
+  ds-to-interp-terms-registry-inits =
+    mapconcat(require(ds-to-interp-terms-registry-init, debug-decl-name|"Registry init failed for constructor"))
   
+  ds-to-interp-terms-registry-init:
+    dec@ConsDecl(name, kid*, _, _) ->
+      bstm* |[
+       builderFactories.put(x_conclass.class, new ITermBuildFactory() {
+    
+          @Override
+          public x_termbuildclass apply(SourceSection source,
+              TermBuild... children) {
+            return x_termbuildNG.create(source, e1*);
+          }
+        });
+
+        matcherFactories.put(x_conclass.class, new ITermMatchPatternFactory() {
+    
+          @Override
+          public MatchPattern apply(SourceSection source,
+              MatchPattern... children) {
+            return x_matchNG.create(source, e2*);
+          }
+        });
+      ]|
+    with
+      x_conclass := <jclass-term> dec;
+      x_termbuildclass := <jclass-termbuilder> dec;
+      x_termbuildNG := <jclass-termbuilder-ng> dec;
+      x_matchNG := <jclass-matcher-ng> dec;
+      e1* := <map-with-index(ds-to-interp-termbuild-access(|"children"))> kid*;
+      e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
   

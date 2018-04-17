@@ -37,14 +37,10 @@ rules
         }
       ]|
     where
-      debug(!"srt1 ");
       x_class := <jclass-term> dec;
-      debug(!"srt2 ");
       appl-cons-dec* := <filter(?ConsDecl(_, _, SimpleSort(s),_))> cons-dec*; 
-      debug(!"srt3 ");
       if ValueSort() := <lookup-def(|Types()); lookup-prop(|SortProp())> s
       then
-        debug(!"srt4 ");
         mcreate0* := [
           class-body-dec |[
               @TruffleBoundary
@@ -52,15 +48,10 @@ rules
                 return null;
               }
           ]| ]
-        ;debug(!"srt5 ")
       else
-        debug(!"srt6 ");
         bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> appl-cons-dec*;
-        debug(!"srt7 ");
         impl-consdec* := <filter(?ConsDecl(_, [_], SimpleSort(s), Annos([ImplicitAnno()])))> cons-dec*;
-        debug(!"srt8 ");
         bstm1 := <foldr(! bstm |[ throw new IllegalStateException("Unsupported term: " + term); ]|, ds-to-interp-terms-sortdec-impldisp)> impl-consdec*;
-        debug(!"srt9 ");
         mcreate0* := [
           class-body-dec |[
               @TruffleBoundary
@@ -71,7 +62,6 @@ rules
                 bstm1
               }
           ]| ]
-        ;debug(!"srt10 ")
       end
       
 

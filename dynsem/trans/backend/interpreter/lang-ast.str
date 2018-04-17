@@ -20,39 +20,22 @@ rules
   
   ds-to-interp-terms-module =
     m-in-analysis(
-      debug(!"gen1 ");
       ?mod@Module(_, <fetch-elem(?Signatures(sig*))>);
-      debug(!"gen2 ");
       where(ds-to-interp-clean-target; ds-to-interp-gen-project);
-      debug(!"gen3 ");
       <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> mod;
-      debug(!"gen4 ");
       <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
-      debug(!"gen5 ");
       <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-      debug(!"gen6 ");
       <ds-to-interp-terms-sortmatching; ds-to-interp-write-classes(|<get-opt> ChecksPkg())> sig*;
-      debug(!"gen7 ");
       <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
-      debug(!"gen8 ");
       <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
-      debug(!"gen9 ");
       <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-      debug(!"gen10 ");
       <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
-      debug(!"gen11 ");
       ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      debug(!"gen12 ");
       ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      debug(!"gen13 ");
       ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      debug(!"gen14 ");
       ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      debug(!"gen15 ");
       ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      debug(!"gen16 ");
       ds-to-interp-gen-test-harness
-      ;debug(!"gen17 ")
     )
 
   ds-to-interp-clean-target =
@@ -68,23 +51,14 @@ rules /* Sort & Constructor classes */
     where
       <fetch-elem(?Signatures(sig*))> section*
     where
-      debug(!"sig1 ");
       sort-dec* := <fetch-elem(?Sorts(<id>))> sig*;
-      debug(!"sig2 ");
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
-      debug(!"sig3 ");
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
-      debug(!"sig4 ");
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      debug(!"sig5 ");
       sort-class* := <ds-to-interp-terms-sortdecls(|cons-dec*)> sort-dec*;
-      debug(!"sig6 ");
       cons-class* := <ds-to-interp-terms-consdecls> cons-dec*;
-      debug(!"sig7 ");
       tuple-class* := <ds-to-interp-terms-tupledecls> tuple-dec*;
-      debug(!"sig8 ");
       list-class* := <ds-to-interp-terms-listdecls> list-dec*
-      ;debug(!"sig9 ")
   
   get-languagelist-usage-in-signatures:
     sig -> [explicit-list*, implicit-map-key*, implicit-map-val*]
@@ -285,22 +259,14 @@ rules /* type system class */
         }
       ]|
     where
-      debug(!"types1 ");
       <fetch-elem(?Signatures(sig-sec*))> section*;
-      debug(!"types2 ");
       decl* := <filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>)); concat;
         qsort(?(ConsDecl(_, _, _, _), SortDecl(_, _)) + ?(SortDecl(_, _), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
-      debug(!"types3 ");
       list* := <get-languagelist-usage-in-signatures> sig-sec*;
-      debug(!"types4 ");
       tuple* := <get-languagetuple-usage-in-module> mod;
-      debug(!"types5 ");
       ![decl*, tuple*, list*];
-      debug(!"types6 ");
       map(jclass-term);
-      debug(!"types7 ");
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
-      ;debug(!"types8 ")
 
 rules /* term building */
 

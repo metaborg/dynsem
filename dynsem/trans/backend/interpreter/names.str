@@ -10,27 +10,26 @@ imports
   libjava-front
   
 rules
-  ds-to-interp-terms-type-nocasting = with(fail|"oops 1")
   
-  type-is-builtin = debug(!"is-builtin? "); fail
+  type-is-builtin = fail
   
-  jclass-term = debug(!"jclass-term "); fail
+  jclass-term = fail
   
-  jclass-term-qual = debug(!"jclass-term-qual "); fail
+  jclass-term-qual = fail
   
-  jclass-termbuilder = debug(!"jclass-termbuilder "); fail
+  jclass-termbuilder = fail
   
-  jclass-termbuilder-ng = debug(!"jclass-termbuilder-ng "); fail
+  jclass-termbuilder-ng = fail
   
-  jclass-checkedbuilder = debug(!"jclass-checkedbuilder "); fail
+  jclass-checkedbuilder = fail
 
-  jclass-checkedbuilder-ng = debug(!"jclass-checkedbuilder-ng "); fail
+  jclass-checkedbuilder-ng = fail
   
-  jclass-has-checkedbuilder = debug(!"has jclass-checkedbuilder "); fail
+  jclass-has-checkedbuilder = fail
   
-  jclass-matcher = debug(!"jclass-matcher "); fail
+  jclass-matcher = fail
 
-  jclass-matcher-ng = debug(!"jclass-matcher-ng "); fail
+  jclass-matcher-ng = fail
   
   jclass-termbuilder-generic = !"TermBuild"
   
@@ -41,82 +40,6 @@ rules
   external pkg-of(|)
   
   external classname-of(|)
-  
-//  ds-to-interp-terms-type-nocasting =
-//    if where((is-builtin-type <+ ?ListSort(_) <+ ?TupleSort(_) <+ ?MapSort(_, _)))
-//    then
-//      ds-to-interp-terms-types-name
-//    else
-//      !$[Object]
-//    end
-//
-//  ds-to-interp-terms-types-name:
-//    SortDecl(s, _) -> <ds-to-interp-terms-types-name> SimpleSort(s)
-//
-//  ds-to-interp-terms-types-name:
-//    MapSort(skey, sval) -> $[com.github.krukow.clj_lang.IPersistentMap]
-//    where
-//      key := <ds-to-interp-terms-types-name> skey;
-//      val := <ds-to-interp-terms-types-name> sval
-//
-//  ds-to-interp-terms-types-name:
-//    NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
-//  
-//  ds-to-interp-terms-types-name:
-//    NativeType(_, ty-str) -> ty-str
-//
-//  ds-to-interp-terms-types-name:
-//    SimpleSort(s) -> class_name
-//    where
-//      <not(is-builtin-type)> s;
-//      if jclass := <lookup-def(|Types()); lookup-prop(|JClass())> s
-//      then
-//        class_name := <unquote(?'"')> jclass
-//      else
-//        class_name := $[I[<ds-utils-java-escape-id> s]Term]
-//      end
-//
-//  ds-to-interp-terms-types-name:
-//    SimpleSort("AST") -> $[org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm]
-//  
-//  ds-to-interp-terms-types-name:
-//    SimpleSort("String") -> $[String]
-//
-//  ds-to-interp-terms-types-name:
-//    SimpleSort("Int") -> $[int]
-//
-//  ds-to-interp-terms-types-name:
-//    SimpleSort("Bool") -> $[boolean]
-//  
-//  ds-to-interp-terms-types-name:
-//    Con(name, child*) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
-//      
-//  ds-to-interp-terms-types-name:
-//    ConsDecl(name, child*, _, _) -> <ds-to-interp-terms-types-con-name> (name, <length> child*)
-//
-//  ds-to-interp-terms-types-con-name:
-//    (name, arity) -> $[[<ds-utils-java-escape-id> name]_[arity]_Term]
-//  
-//  ds-to-interp-terms-types-name:
-//    ListSort(s) -> $[List_[<ds-to-interp-terms-types-name; shorten-uniqueify-string> s]]
-//  
-//  
-//  ds-to-interp-terms-types-name:
-//    TupleSort(s*) -> $[Tuple_[<map(ds-to-interp-terms-types-name; shorten-uniqueify-string); separate-by(|"_"); concat-strings> s*]]
-//
-//  ds-box-java-type = try(internal-ds-box-java-type)
-//  
-//  internal-ds-box-java-type:
-//    "int" -> $[Integer]
-//
-//  internal-ds-box-java-type:
-//    "boolean" -> $[Boolean]
-//    
-//  is-primitive-type = try(?SimpleSort(<id>)); (?"Int" + ?"Bool")
-//  
-//  is-builtin-type = try(?SimpleSort(<id>)); (?"String" + ?"Int" + ?"Bool" + ?"AST")
-//  
-//  is-builtin-type = ?ListSort(<is-builtin-type>)
   
 
 
