@@ -28,7 +28,7 @@ public abstract class ScopeIdentifierOfTerm extends NativeOpBuild {
 
 	public abstract ScopeIdentifier execute(VirtualFrame frame);
 
-	@Specialization(guards = { "t == t_cached" })
+	@Specialization(limit = "1000", guards = { "t == t_cached" })
 	public ScopeIdentifier executeCached(ITerm t, @Cached("t") ITerm t_cached,
 			@Cached("getScopeIdentifier(t_cached)") ScopeIdentifier sid_cached) {
 		return sid_cached;
