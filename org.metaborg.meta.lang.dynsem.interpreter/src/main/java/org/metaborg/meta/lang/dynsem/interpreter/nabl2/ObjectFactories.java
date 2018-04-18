@@ -150,7 +150,6 @@ public class ObjectFactories {
 		for (IStrategoTerm scopeTerm : scopesTerm) {
 			assert Tools.isTermTuple(scopeTerm) && scopeTerm.getSubtermCount() == 2;
 			ScopeIdentifier identifier = ScopeIdentifier.create(Tools.applAt(scopeTerm, 0));
-			System.out.println(identifier);
 			DynamicObject scope = createScopeEntry(identifier, Tools.applAt(scopeTerm, 1));
 			scopes.define(identifier, scope);
 		}
