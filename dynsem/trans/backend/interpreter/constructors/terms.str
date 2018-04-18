@@ -44,6 +44,8 @@ rules
                     
           ~mcreate0*
 
+          ~mequals0*
+
           private final IStrategoTerm strategoTerm;
           
           @Override
@@ -51,18 +53,6 @@ rules
             return ARITY;
           }
           
-          @Override
-          public boolean equals(Object obj) {
-            if (this == obj)
-              return true;
-            if (obj == null)
-              return false;
-            if (getClass() != obj.getClass())
-              return false;
-            x_classname other = (x_classname) obj;
-            bstm2*
-            return true;
-          }
           
           @Override
           public boolean hasStrategoTerm() {
@@ -130,7 +120,6 @@ rules
             return new x_classname(e1*, term);
           } ]| ]
       end;
-      bstm2* := <map-with-index(ds2java-field-eq-check)> kid*;
       e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds-to-interp-hashcode-append)> <range> (1, <length; inc> kid*);
       bstm3* := <map-with-index(Fst; !bstm |[ sb.append(~x:<int-to-string; mkidx>); ]|); separate-by(|bstm |[ sb.append(", "); ]|)> kid*
     where
@@ -145,6 +134,12 @@ rules
           private x_classname(IStrategoTerm strategoTerm){
             this.strategoTerm = strategoTerm;
           }
+        ]|;
+        mequals0* := class-body-dec* |[
+          @Override
+          public boolean equals(Object obj) {
+            return (this == obj);
+          }
         ]|
       else
         finit* := class-body-dec* |[
@@ -155,6 +150,21 @@ rules
           private x_classname(param0*, IStrategoTerm strategoTerm) {
             bstm0*
             this.strategoTerm = strategoTerm;
+          }
+        ]|;
+        bstm2* := <map-with-index(ds2java-field-eq-check)> kid*;
+        mequals0* := class-body-dec* |[
+          @Override
+          public boolean equals(Object obj) {
+            if (this == obj)
+              return true;
+            if (obj == null)
+              return false;
+            if (getClass() != obj.getClass())
+              return false;
+            x_classname other = (x_classname) obj;
+            bstm2*
+            return true;
           }
         ]|
       end
