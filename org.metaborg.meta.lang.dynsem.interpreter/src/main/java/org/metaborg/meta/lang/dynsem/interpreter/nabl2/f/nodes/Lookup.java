@@ -21,7 +21,7 @@ public abstract class Lookup extends NativeOpBuild {
 
 	@Specialization
 	public Addr executeLookup(DynamicObject frm, Occurrence occurrence) {
-		throw new RuntimeException("Lookup not implemented");
+		throw new IllegalStateException("Lookup not implemented");
 	}
 
 	public static Lookup create(SourceSection source, TermBuild frm, TermBuild occurrence) {

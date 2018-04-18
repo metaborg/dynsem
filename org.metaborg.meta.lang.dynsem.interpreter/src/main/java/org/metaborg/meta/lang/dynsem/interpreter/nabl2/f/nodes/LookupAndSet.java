@@ -21,7 +21,7 @@ public abstract class LookupAndSet extends NativeOpBuild {
 
 	@Specialization
 	public ValSort executeLookup(DynamicObject frm, Occurrence occurrence, ValSort val) {
-		throw new RuntimeException("LookupAndSet not implemented");
+		throw new IllegalStateException("LookupAndSet not implemented");
 	}
 
 	public static LookupAndSet create(SourceSection source, TermBuild frm, TermBuild occurrence, TermBuild val) {

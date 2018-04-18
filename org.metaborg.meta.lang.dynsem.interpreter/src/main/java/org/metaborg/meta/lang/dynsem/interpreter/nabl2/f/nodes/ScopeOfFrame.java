@@ -19,7 +19,7 @@ public abstract class ScopeOfFrame extends NativeOpBuild {
 
 	@Specialization
 	public ScopeIdentifier executeScopeOf(DynamicObject frm) {
-		throw new RuntimeException("Scope of frame NOT IMPLEMENTED");
+		throw new IllegalStateException("Scope of frame NOT IMPLEMENTED");
 	}
 
 	public static ScopeOfFrame create(SourceSection source, TermBuild frm) {

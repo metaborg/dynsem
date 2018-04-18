@@ -19,7 +19,7 @@ public abstract class AddFrameLink extends NativeOpBuild {
 
 	@Specialization
 	public DynamicObject executeLink(DynamicObject frm, FrameLink link) {
-		throw new RuntimeException("AddFrameLink not implemented");
+		throw new IllegalStateException("AddFrameLink not implemented");
 	}
 
 	public static AddFrameLink create(SourceSection source, TermBuild frm, TermBuild link) {

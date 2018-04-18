@@ -18,7 +18,7 @@ public abstract class mkLabel extends NativeOpBuild {
 
 	@Specialization
 	public Label executeString(String l) {
-		throw new RuntimeException("Custom label is not supported: " + l);
+		throw new IllegalStateException("Custom label is not supported: " + l);
 	}
 
 	public static NativeOpBuild create(SourceSection source, TermBuild labelstring) {

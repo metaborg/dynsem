@@ -17,7 +17,7 @@ public abstract class CloneFrame extends NativeOpBuild {
 
 	@Specialization
 	public DynamicObject executeClone(DynamicObject frm) {
-		throw new RuntimeException("CloneFrame not implemented");
+		throw new IllegalStateException("CloneFrame not implemented");
 	}
 
 	public static CloneFrame create(SourceSection source, TermBuild frm) {

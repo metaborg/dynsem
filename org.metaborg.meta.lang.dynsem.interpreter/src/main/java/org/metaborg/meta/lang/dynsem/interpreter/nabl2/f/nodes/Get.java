@@ -18,7 +18,7 @@ public abstract class Get extends NativeOpBuild {
 
 	@Specialization
 	public ValSort executeGet(Addr addr) {
-		throw new RuntimeException("Get not implemented");
+		throw new IllegalStateException("Get not implemented");
 	}
 
 	public static Get create(SourceSection source, TermBuild addr) {

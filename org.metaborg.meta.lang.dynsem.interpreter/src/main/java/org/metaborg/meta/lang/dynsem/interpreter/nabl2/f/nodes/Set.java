@@ -19,7 +19,7 @@ public abstract class Set extends NativeOpBuild {
 
 	@Specialization
 	public ValSort executeGet(Addr addr, ValSort val) {
-		throw new RuntimeException("Set not implemented");
+		throw new IllegalStateException("Set not implemented");
 	}
 
 	public static Set create(SourceSection source, TermBuild addr, TermBuild val) {

@@ -23,7 +23,7 @@ public abstract class CreateScope extends NativeOpBuild {
 	@Specialization
 	public DynamicObject executeCreate(ScopeIdentifier scopeIdent, IListTerm<?> decs, IListTerm<?> refs,
 			IPersistentMap<?, ?> edges, IPersistentMap<?, ?> imports) {
-		throw new RuntimeException("Scope creation not implemented");
+		throw new IllegalStateException("Scope creation not implemented");
 	}
 
 	public static CreateScope create(SourceSection source, TermBuild scopeIdent, TermBuild decs, TermBuild refs,

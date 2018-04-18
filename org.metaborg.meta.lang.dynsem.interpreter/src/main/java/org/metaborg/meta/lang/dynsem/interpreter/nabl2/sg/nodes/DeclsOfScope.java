@@ -20,7 +20,7 @@ public abstract class DeclsOfScope extends NativeOpBuild {
 
 	@Specialization
 	public IListTerm<Occurrence> executeGetDecls(ScopeIdentifier scope) {
-		throw new RuntimeException("Decls of scope not implemented");
+		throw new IllegalStateException("Decls of scope not implemented");
 	}
 
 	public static DeclsOfScope create(SourceSection source, TermBuild scope) {

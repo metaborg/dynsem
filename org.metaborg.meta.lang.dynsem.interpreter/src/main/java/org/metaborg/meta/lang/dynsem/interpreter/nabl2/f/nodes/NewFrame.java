@@ -21,7 +21,7 @@ public abstract class NewFrame extends NativeOpBuild {
 
 	@Specialization
 	public DynamicObject executeCreateFrame(ScopeIdentifier scopeident, IListTerm<?> links) {
-		throw new RuntimeException("Frame creation not implemented");
+		throw new IllegalStateException("Frame creation not implemented");
 	}
 
 	public static NewFrame create(SourceSection source, TermBuild scope, TermBuild links) {
