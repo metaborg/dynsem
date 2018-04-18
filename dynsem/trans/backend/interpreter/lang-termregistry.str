@@ -92,7 +92,7 @@ rules /* term registry */
           public Class<?> getConstructorClass(String constr, int arity) {
             CompilerAsserts.neverPartOfCompilation();
             Class<?> clazz = constructorClasses.get(constr + "/" + arity);
-            if (clazz != null) {
+            if (clazz == null) {
               throw new RuntimeException("Failed to load class for constructor " + constr + "/" + arity);
             }
             return clazz;
