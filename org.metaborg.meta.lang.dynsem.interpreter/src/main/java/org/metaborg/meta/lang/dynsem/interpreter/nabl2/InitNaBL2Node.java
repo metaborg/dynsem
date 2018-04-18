@@ -21,7 +21,7 @@ public class InitNaBL2Node extends DynSemNode {
 			IStrategoTerm solution = NaBL2SolutionUtils.getSolution(nabl2ctx);
 			DynSemContext ctx = getContext();
 			DynamicObject nabl2 = ObjectFactories.createNaBL2((IStrategoAppl) solution, ctx);
-			ctx.setNabl2(nabl2);
+			ctx.setNabl2Solution(nabl2);
 		}
 
 	}

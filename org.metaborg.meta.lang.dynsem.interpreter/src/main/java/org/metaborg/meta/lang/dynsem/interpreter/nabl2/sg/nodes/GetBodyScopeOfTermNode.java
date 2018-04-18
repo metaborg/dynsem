@@ -34,7 +34,7 @@ public abstract class GetBodyScopeOfTermNode extends DynSemNode {
 
 	@Specialization(replaces = "executeCached")
 	public DynamicObject executeUncached(ScopeIdentifier sid) {
-		return getScopeEntry(getContext().getNaBL2(), sid);
+		return getScopeEntry(getContext().getNaBL2Solution(), sid);
 	}
 
 	protected DynamicObject getScopeEntry(DynamicObject nabl2, ScopeIdentifier scopeIdent) {

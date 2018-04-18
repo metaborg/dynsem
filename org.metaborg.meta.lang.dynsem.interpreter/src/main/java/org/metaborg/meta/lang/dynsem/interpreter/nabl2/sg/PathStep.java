@@ -66,9 +66,9 @@ public abstract class PathStep {
 	public static class N extends PathStep {
 		private final Label importLabel;
 		private final Occurrence importRef;
-		private final PathStep[] path;
+		private final Path path;
 
-		public N(ScopeIdentifier scope, Label importLabel, Occurrence importRef, PathStep[] path) {
+		public N(ScopeIdentifier scope, Label importLabel, Occurrence importRef, Path path) {
 			super(scope);
 			this.importLabel = importLabel;
 			this.importRef = importRef;
@@ -78,7 +78,7 @@ public abstract class PathStep {
 		public static N create(IStrategoAppl nTerm) {
 			assert Tools.hasConstructor(nTerm, "N", 4);
 			return new N(ScopeIdentifier.create(Tools.applAt(nTerm, 0)), Label.create(Tools.applAt(nTerm, 1)),
-					Occurrence.create(Tools.applAt(nTerm, 2)), PathStep.createPath(Tools.listAt(nTerm, 3)));
+					Occurrence.create(Tools.applAt(nTerm, 2)), new Path(PathStep.createPath(Tools.listAt(nTerm, 3))));
 		}
 
 	}

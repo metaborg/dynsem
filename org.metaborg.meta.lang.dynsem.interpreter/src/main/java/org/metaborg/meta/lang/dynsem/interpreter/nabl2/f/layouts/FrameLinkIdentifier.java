@@ -35,7 +35,7 @@ public final class FrameLinkIdentifier {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof FrameLinkIdentifier && this.hashCode() == obj.hashCode();
+		return (this == obj);
 	}
 
 	@Override

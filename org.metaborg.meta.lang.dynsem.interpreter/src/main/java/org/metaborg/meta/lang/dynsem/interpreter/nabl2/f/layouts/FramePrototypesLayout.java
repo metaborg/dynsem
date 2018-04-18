@@ -5,12 +5,12 @@ import com.oracle.truffle.api.object.ObjectType;
 import com.oracle.truffle.api.object.dsl.Layout;
 
 @Layout
-public interface FrameFactoriesLayout {
-	DynamicObject createFrameFactories();
+public interface FramePrototypesLayout {
+	DynamicObject createFramePrototypes();
 
-	boolean isFrameFactories(DynamicObject object);
+	boolean isFramePrototypes(DynamicObject object);
 
-	boolean isFrameFactories(Object object);
+	boolean isFramePrototypes(Object object);
 
-	boolean isFrameFactories(ObjectType objectType);
+	boolean isFramePrototypes(ObjectType objectType);
 }

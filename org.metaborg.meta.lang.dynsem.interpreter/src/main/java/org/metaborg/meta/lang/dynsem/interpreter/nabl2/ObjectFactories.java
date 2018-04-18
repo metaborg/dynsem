@@ -6,8 +6,6 @@ import java.util.EnumSet;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.EdgesType;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ImportsType;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Path;
@@ -18,8 +16,10 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.DeclarationsLa
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NameResolutionLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ReferencesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEdges;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeGraphLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeImports;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.TypesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
@@ -30,7 +30,6 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.object.DynamicObject;
-import com.oracle.truffle.api.object.Layout;
 import com.oracle.truffle.api.object.LocationModifier;
 import com.oracle.truffle.api.object.Property;
 import com.oracle.truffle.api.object.Shape;
@@ -126,13 +125,15 @@ public class ObjectFactories {
 		ScopeIdentifier[] decs = createScopeIdentifiers(Tools.listAt(deTerm, 0));
 
 		IStrategoList edgesTerm = Tools.listAt(deTerm, 1);
-		Shape edgesShape = LAYOUT_EDGES.createShape(EdgesType.INSTANCE);
+		Allocator edgeAllocator = ScopeEdges.SINGLETON.allocator();
+		Shape edgesShape = ScopeEdges.SINGLETON.createShape();
 		ScopeIdentifier[][] edgeScopes = new ScopeIdentifier[edgesTerm.size()][];
 		for (int i = 0; i < edgeScopes.length; i++) {
 			IStrategoTerm edgeTerm = edgesTerm.getSubterm(i);
 			assert Tools.isTermTuple(edgeTerm);
 			Label edgeLabel = Label.create(Tools.applAt(edgeTerm, 0));
-			edgesShape = edgesShape.addProperty(Property.create(edgeLabel, LAYOUT_EDGES_ALLOCATOR.locationForType(
+			edgesShape = edgesShape
+					.addProperty(Property.create(edgeLabel, edgeAllocator.locationForType(
 					ScopeIdentifier[].class, EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
 			IStrategoList scopeListT = Tools.listAt(edgeTerm, 1);
 			ScopeIdentifier[] scopes = new ScopeIdentifier[scopeListT.size()];
@@ -156,25 +157,21 @@ public class ObjectFactories {
 		return scopes;
 	}
 
-	private final static Layout LAYOUT_EDGES = Layout.createLayout();
-	private final static Allocator LAYOUT_EDGES_ALLOCATOR = LAYOUT_EDGES.createAllocator();
-
-	private final static Layout LAYOUT_IMPORTS = Layout.createLayout();
-	private final static Allocator LAYOUT_IMPORTS_ALLOCATOR = LAYOUT_IMPORTS.createAllocator();
-
 	private static DynamicObject createScopeEntry(ScopeIdentifier identifier, IStrategoAppl scopeTerm) {
 		assert Tools.hasConstructor(scopeTerm, "SE", 4);
 		Occurrence[] decs = createOccurrences(Tools.listAt(scopeTerm, 0));
 		Occurrence[] refs = createOccurrences(Tools.listAt(scopeTerm, 1));
 
 		IStrategoList edgesTerm = Tools.listAt(scopeTerm, 2);
-		Shape edgesShape = LAYOUT_EDGES.createShape(EdgesType.INSTANCE);
+		Shape edgesShape = ScopeEdges.SINGLETON.createShape();
+		Allocator edgeAllocator = ScopeEdges.SINGLETON.allocator();
 		ScopeIdentifier[][] edgeScopes = new ScopeIdentifier[edgesTerm.size()][];
 		for (int i = 0; i < edgeScopes.length; i++) {
 			IStrategoTerm edgeTerm = edgesTerm.getSubterm(i);
 			assert Tools.isTermTuple(edgeTerm);
 			Label edgeLabel = Label.create(Tools.applAt(edgeTerm, 0));
-			edgesShape = edgesShape.addProperty(Property.create(edgeLabel, LAYOUT_EDGES_ALLOCATOR.locationForType(
+			edgesShape = edgesShape
+					.addProperty(Property.create(edgeLabel, edgeAllocator.locationForType(
 					ScopeIdentifier[].class, EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
 			IStrategoList scopeListT = Tools.listAt(edgeTerm, 1);
 			ScopeIdentifier[] scopes = new ScopeIdentifier[scopeListT.size()];
@@ -186,14 +183,15 @@ public class ObjectFactories {
 		DynamicObject edges = edgesShape.createFactory().newInstance((Object[]) edgeScopes);
 
 		IStrategoList importsTerm = Tools.listAt(scopeTerm, 3);
-		Shape importsShape = LAYOUT_IMPORTS.createShape(ImportsType.INSTANCE);
+		Allocator importAllocator = ScopeImports.SINGLETON.allocator();
+		Shape importsShape = ScopeImports.SINGLETON.createShape();
 		Occurrence[][] importedOccs = new Occurrence[importsTerm.size()][];
 		for (int i = 0; i < importedOccs.length; i++) {
 			IStrategoTerm importTerm = importsTerm.getSubterm(i);
 			assert Tools.isTermTuple(importTerm);
 			Label importLabel = Label.create(Tools.applAt(importTerm, 0));
 			importsShape = importsShape.addProperty(
-					Property.create(importLabel, LAYOUT_IMPORTS_ALLOCATOR.locationForType(Occurrence[].class,
+					Property.create(importLabel, importAllocator.locationForType(Occurrence[].class,
 							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
 			IStrategoList occListT = Tools.listAt(importsTerm, 1);
 			Occurrence[] occs = new Occurrence[occListT.size()];

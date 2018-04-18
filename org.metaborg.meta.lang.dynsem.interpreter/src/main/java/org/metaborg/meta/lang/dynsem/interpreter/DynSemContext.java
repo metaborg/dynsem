@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameFactoriesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FramePrototypesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl.ScopeEntryType;
@@ -19,7 +19,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.object.DynamicObject;
-import com.oracle.truffle.api.object.DynamicObjectFactory;
 import com.oracle.truffle.api.object.Layout;
 import com.oracle.truffle.api.object.LocationModifier;
 import com.oracle.truffle.api.object.Property;
@@ -225,35 +224,28 @@ public final class DynSemContext {
 		return mimetype_lang;
 	}
 
-	@CompilationFinal private DynamicObject nabl2;
+	@CompilationFinal private DynamicObject nabl2solution;
 
-	public void setNabl2(DynamicObject nabl2) {
-		CompilerDirectives.transferToInterpreter();
-		assert NaBL2LayoutImpl.INSTANCE.isNaBL2(nabl2);
-		this.nabl2 = nabl2;
+	public boolean hasNaBL2Solution() {
+		return nabl2solution != null;
 	}
 
-	public DynamicObject getNaBL2() {
-		return Objects.requireNonNull(nabl2,
+	public void setNabl2Solution(DynamicObject nabl2) {
+		CompilerDirectives.transferToInterpreterAndInvalidate();
+		assert NaBL2LayoutImpl.INSTANCE.isNaBL2(nabl2);
+		this.nabl2solution = nabl2;
+	}
+
+	public DynamicObject getNaBL2Solution() {
+		return Objects.requireNonNull(nabl2solution,
 				"No NaBL2 context available. Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
 	}
 
-	public boolean hasNaBL2() {
-		return nabl2 != null;
-	}
-
-	private final DynamicObject frameFactories = FrameFactoriesLayoutImpl.INSTANCE.createFrameFactories();
-
-	public void addFrameFactory(ScopeIdentifier ident, DynamicObjectFactory factory) {
-		frameFactories.define(ident, factory);
-	}
-
-	public DynamicObjectFactory getFrameFactory(ScopeIdentifier ident) {
-		return (DynamicObjectFactory) frameFactories.get(ident);
-	}
-
+	// FIXME: should a single layout be shared for all frames??
 	private final Layout FRAME_LAYOUT = Layout.createLayout();
+
 	private final Allocator FRAME_ALLOCATOR = FRAME_LAYOUT.createAllocator();
+
 	public final Property SCOPE_OF_FRAME_PROPERTY = Property.create("__scope__", FRAME_ALLOCATOR
 			.locationForType(ScopeEntryType.class, EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0);
 
@@ -265,6 +257,18 @@ public final class DynSemContext {
 	public Allocator getFrameAllocator() {
 		return FRAME_ALLOCATOR;
 	}
+
+	private final DynamicObject frameFactories = FramePrototypesLayoutImpl.INSTANCE.createFramePrototypes();
+
+	public void addProtoFrame(ScopeIdentifier ident, DynamicObject frameProto) {
+		assert FRAME_LAYOUT.getType().isInstance(frameProto);
+		frameFactories.define(ident, frameProto);
+	}
+
+	public DynamicObject getProtoFrame(ScopeIdentifier ident) {
+		return FRAME_LAYOUT.getType().cast(frameFactories.get(ident));
+	}
+
 
 	public boolean isSafeComponentsEnabled() {
 		return safecomponents;

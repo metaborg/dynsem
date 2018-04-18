@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
+package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f;
 
 import java.util.EnumSet;
 
@@ -8,50 +8,24 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameType;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.LayoutUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayout;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeGraphLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.object.DynamicObject;
 import com.oracle.truffle.api.object.DynamicObjectFactory;
 import com.oracle.truffle.api.object.LocationModifier;
 import com.oracle.truffle.api.object.Property;
 import com.oracle.truffle.api.object.Shape;
 import com.oracle.truffle.api.object.Shape.Allocator;
-import com.oracle.truffle.api.source.SourceSection;
 
 @Deprecated
-public class InitFrameFactoriesNode extends DynSemNode {
+public final class FrameFactory {
 
-	public InitFrameFactoriesNode(SourceSection source) {
-		super(source);
+	private FrameFactory() {
 	}
 
-	public void execute(VirtualFrame frame) {
-		DynSemContext ctx = getContext();
-		if (!ctx.hasNaBL2Solution()) {
-			return;
-		}
-		DynamicObject sg = NaBL2LayoutImpl.INSTANCE.getScopeGraph(ctx.getNaBL2Solution());
-		DynamicObject scopes = ScopeGraphLayoutImpl.INSTANCE.getScopes(sg);
-		Class<? extends DynamicObject> scopeEntryClass = LayoutUtils.getScopeEntryLayout().getType();
-
-		// for all scopes
-		for (Property scopeProperty : scopes.getShape().getProperties()) {
-			DynamicObject scopeEntry = scopeEntryClass.cast(scopes.get(scopeProperty.getKey()));
-
-			ctx.addFrameFactory((ScopeIdentifier) scopeProperty.getKey(), frameFactoryForScopeEntry(scopeEntry));
-		}
-	}
-
-	private DynamicObjectFactory frameFactoryForScopeEntry(DynamicObject scopeEntry) {
+	private DynamicObjectFactory createProtoFrame(DynSemContext ctx, DynamicObject scopeEntry) {
 		ScopeEntryLayout layout = ScopeEntryLayoutImpl.INSTANCE;
-		// ScopeIdentifier identifier = layout.getIdentifier(scopeEntry);
-		DynSemContext ctx = getContext();
 
 		Occurrence[] decs = layout.getDeclarations(scopeEntry);
 		DynamicObject edges = layout.getEdges(scopeEntry);
@@ -75,7 +49,8 @@ public class InitFrameFactoriesNode extends DynSemNode {
 				frameShape = frameShape.addProperty(linkProp);
 			}
 		}
+		// FIXME: handle import edges!!
+
 		return frameShape.createFactory();
 	}
-
 }
