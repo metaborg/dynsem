@@ -39,7 +39,7 @@ strategies // classes for sorts
       then
         classname := <jclass-for-cons> (name, arity)
       else
-        classname := $[[<get-opt> TermPkg()].[arity]]
+        classname := $[[<get-opt> TermPkg()].[<jclass-for-cons> (name, arity)]]
       end
   
 strategies // builder for sorts
