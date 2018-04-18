@@ -11,25 +11,37 @@ imports
 strategies // classes for sorts
   
   jclass-term:
-    ConsDecl(name, kid*, _, _) -> classname
+    ConsDecl(name, kid*, _, _) -> <jclass-for-cons> (name, <length> kid*)
+  
+  jclass-term:
+    Con(c, k*) -> <jclass-for-cons> (c, <length> k*)
+  
+  jclass-for-cons:
+    (name, arity) -> classname
     where
-      if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, <length> kid*)
+      if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, arity)
       then
         classname := jclass
       else
-        classname := $[[<ds-utils-java-escape-id> name]_[<length> kid*]]
-      end
-  
-  jclass-term-qual:
-    dec@ConsDecl(name, kid*, _, _) -> classname
-    where
-      if <lookup-def(|Constructors()); has-prop(|JClass())> (name, <length> kid*)
-      then
-        classname := <jclass-term> dec
-      else
-        classname := $[[<get-opt> TermPkg()].[<jclass-term> dec]]
+        classname := $[[<ds-utils-java-escape-id> name]_[arity]]
       end
     
+  jclass-term-qual:
+    ConsDecl(name, kid*, _, _) -> <jclass-for-cons-qual> (name, <length> kid*)
+  
+  jclass-term-qual:
+    Con(c, k*) -> <jclass-for-cons-qual> (c, <length> k*)
+  
+  jclass-for-cons-qual:
+    (name, arity) -> classname
+    where
+      if <lookup-def(|Constructors()); has-prop(|JClass())> (name, arity)
+      then
+        classname := <jclass-for-cons> (name, arity)
+      else
+        classname := $[[<get-opt> TermPkg()].[arity]]
+      end
+  
 strategies // builder for sorts
 
   jclass-termbuilder:
