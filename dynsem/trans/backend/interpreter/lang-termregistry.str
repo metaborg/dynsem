@@ -40,7 +40,7 @@ rules /* term registry */
         import com.oracle.truffle.api.source.SourceSection;
         
         public class x_classname implements ITermRegistry {
-        
+          private final Map<String, Class<?>> constructorClasses = new HashMap<String, Class<?>>();
           private final Map<Class<?>, ITermBuildFactory> builderFactories = new HashMap<Class<?>, ITermBuildFactory>();
           private final Map<Class<?>, ITermMatchPatternFactory> matcherFactories = new HashMap<Class<?>, ITermMatchPatternFactory>();
           private final Map<Class<?>, ITermBuildFactory> nativeFactories = new HashMap<Class<?>, ITermBuildFactory>();
@@ -91,11 +91,11 @@ rules /* term registry */
           @Override
           public Class<?> getConstructorClass(String constr, int arity) {
             CompilerAsserts.neverPartOfCompilation();
-            try {
-              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> TermPkg()].])])) + constr.replace("-", "_") + "_" + arity + "_Term");
-            } catch (ClassNotFoundException cnfe) {
-              throw new RuntimeException("Failed to load constructor class", cnfe);
+            Class<?> clazz = constructorClasses.get(constr + "/" + arity);
+            if (clazz != null) {
+              throw new RuntimeException("Failed to load class for constructor " + constr + "/" + arity);
             }
+            return clazz;
           }
 
           @Override

@@ -15,7 +15,7 @@ strategies
     filter(is-generatable-consdecl; require(ds-to-interp-terms-consdecl, debug-decl-name|"Term generation failed for constructor"))
 
 rules
-
+  
   ds-to-interp-terms-consdecl:
     dec@ConsDecl(name, kid*, s, _) ->
       compilation-unit |[
