@@ -11,7 +11,10 @@ public class classname_of_0_0 extends Strategy {
 	@Override
 	public IStrategoTerm invoke(Context context, IStrategoTerm current) {
 		final String str = Tools.asJavaString(current);
-
-		return context.getFactory().makeString(str.substring(str.lastIndexOf(".") + 1, str.length()));
+		if(str.contains(".")) {
+			return context.getFactory().makeString(str.substring(str.lastIndexOf(".") + 1, str.length()));
+		}else {
+			return current;
+		}
 	}
 }
