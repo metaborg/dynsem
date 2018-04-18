@@ -33,10 +33,6 @@ public class HandleNode extends NativeExecutableNode {
 
 	@Child private ReflectiveHandlerBuild handlerBuildNode;
 
-	// @Child private ChainedRulesNode handlerRules;
-
-	// @Child private DispatchNode handlerDispatchNode;
-
 	@CompilationFinal private CallTarget handlerCallTarget;
 
 	public HandleNode(SourceSection source, TermBuild evalBuildNode, TermBuild catchBuildNode,
@@ -68,7 +64,8 @@ public class HandleNode extends NativeExecutableNode {
 		} catch (AbortedEvaluationException abex) {
 			catchTaken.enter();
 			Object catchingT = catchBuildNode.executeGeneric(frame);
-			Object handlerT = handlerBuildNode.execute(abex.getThrown(), catchingT);
+
+			Object handlerT = handlerBuildNode.execute(frame, abex.getThrown(), catchingT);
 			// handler gets the ROs from the handle
 			// and the RW from the exception
 			Object[] rwComps = abex.getComponents();
