@@ -62,10 +62,10 @@ public class ReductionRule extends Rule {
 		return target.execute(frame);
 	}
 
-	@TruffleBoundary
-	private void printmessage() {
-		System.out.println(this.toString());
-	}
+	// @TruffleBoundary
+	// private void printmessage() {
+	// System.out.println(this.toString());
+	// }
 
 	@ExplodeLoop
 	private void evaluatePremises(VirtualFrame frame) {

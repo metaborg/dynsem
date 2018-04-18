@@ -6,7 +6,6 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CallTarget;
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -38,10 +37,10 @@ public abstract class DispatchNode extends DynSemNode {
 		return (RuleResult) callNode.call(getUnifiedCallTarget(dispatchClass), args);
 	}
 
-	@TruffleBoundary
-	private void printmiss(Class<?> dispatchClass) {
-		System.out.println("Cache miss dispatching on " + dispatchClass.getSimpleName() + " from " + getRootNode());
-	}
+	// @TruffleBoundary
+	// private void printmiss(Class<?> dispatchClass) {
+	// System.out.println("Cache miss dispatching on " + dispatchClass.getSimpleName() + " from " + getRootNode());
+	// }
 
 	protected final CallTarget getUnifiedCallTarget(Class<?> dispatchClass) {
 		return getContext().getRuleRegistry().lookupRule(arrowName, dispatchClass);
