@@ -8,28 +8,37 @@ imports
   backend/interpreter/signature
   analysis/-
   libjava-front
+  lib-ds
   
 rules
   
   type-is-builtin = fail
   
-  jclass-term = fail
+  jclass-term-api = fail
+  jclass-term = require(jclass-term-api|"Term name generation failed")
   
-  jclass-term-qual = fail
+  jclass-term-qual-api = fail  
+  jclass-term-qual = require(jclass-term-qual-api|"Qualified term name generation failed")
   
-  jclass-termbuilder = fail
+  jclass-termbuilder-api = fail
+  jclass-termbuilder = require(jclass-termbuilder-api|"Build name generation failed")
   
-  jclass-termbuilder-ng = fail
+  jclass-termbuilder-ng-api = fail
+  jclass-termbuilder-ng = require(jclass-termbuilder-ng-api|"Build name (NodeGen) generation failed")
   
-  jclass-checkedbuilder = fail
-
-  jclass-checkedbuilder-ng = fail
+  jclass-checkedbuilder-api = fail
+  jclass-checkedbuilder = require(jclass-checkedbuilder-api|"Checked build name generation failed")
+  
+  jclass-checkedbuilder-ng-api = fail
+  jclass-checkedbuilder-ng = require(jclass-checkedbuilder-ng-api|"Checked build name (NodeGen) generation failed")
   
   jclass-has-checkedbuilder = fail
   
-  jclass-matcher = fail
+  jclass-matcher-api = fail
+  jclass-matcher = require(jclass-matcher-api|"Match name generation failed")
 
-  jclass-matcher-ng = fail
+  jclass-matcher-ng-api = fail
+  jclass-matcher-ng = require(jclass-matcher-ng-api|"Match name (NodeGen) generation failed")
   
   jclass-termbuilder-generic = !"TermBuild"
   

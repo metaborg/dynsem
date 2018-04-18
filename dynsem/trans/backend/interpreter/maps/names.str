@@ -8,21 +8,22 @@ imports
   backend/common/-
   
 strategies // classes for sorts
+  jclass-term-api = jclass-map
   
-  jclass-term:
+  jclass-map:
     MapSort(_, _) -> $[com.github.krukow.clj_lang.IPersistentMap]
   
 strategies // builder for sorts
 
-  jclass-termbuilder = fail
+  jclass-termbuilder-api = fail
       
-  jclass-termbuilder-ng = fail
+  jclass-termbuilder-ng-api = fail
   
 strategies // checked builders
   
-  jclass-checkedbuilder = fail
+  jclass-checkedbuilder-api = fail
 
 strategies // matcher for sorts
   
-  jclass-matcher = fail
+  jclass-matcher-api = fail
   

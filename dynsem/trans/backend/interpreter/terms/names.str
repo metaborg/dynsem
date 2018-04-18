@@ -7,31 +7,32 @@ imports
 
 strategies
 
-//  jclass-term:
-//    NativeType(_, ty-str) -> ty-str
-  
-  jclass-term:
+  jclass-term-api = jclass-base
+
+  jclass-base:
     SimpleSort("AST") -> $[org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm]
   
-  jclass-term:
+  jclass-base:
     SimpleSort("String") -> $[String]
 
-  jclass-term:
+  jclass-base:
     SimpleSort("Int") -> $[int]
 
-  jclass-term:
+  jclass-base:
     SimpleSort("Bool") -> $[boolean]
 
-  jclass-term-qual:
-    ss@SimpleSort("AST") -> <jclass-term> ss
+  jclass-term-qual-api = jclass-base-qual
+
+  jclass-base-qual:
+    ss@SimpleSort("AST") -> <jclass-base> ss
   
-  jclass-term-qual:
+  jclass-base-qual:
     SimpleSort("String") -> $[java.lang.String]
 
-  jclass-term-qual:
+  jclass-base-qual:
     SimpleSort("Int") -> $[java.lang.Integer]
 
-  jclass-term-qual:
+  jclass-base-qual:
     SimpleSort("Bool") -> $[java.lang.Boolean]
 
 strategies

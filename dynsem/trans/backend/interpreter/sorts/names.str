@@ -9,10 +9,12 @@ imports
   
 strategies // classes for sorts
   
-  jclass-term:
-    SortDecl(s, _) -> <jclass-term> SimpleSort(s)
+  jclass-term-api = jclass-srt
   
-  jclass-term:
+  jclass-srt:
+    SortDecl(s, _) -> <jclass-srt> SimpleSort(s)
+  
+  jclass-srt:
     SimpleSort(s) -> classname
     where
       <not(type-is-builtin)> s;
@@ -23,27 +25,31 @@ strategies // classes for sorts
         classname := $[A_[<ds-utils-java-escape-id> s]_Sort]
       end
   
-  jclass-term-qual:
+  jclass-term-qual-api = jclass-srt-qual
+  
+  jclass-srt-qual:
     ss@SimpleSort(s) -> classname
     where
       <not(type-is-builtin)> s;
       if <lookup-def(|Types()); has-prop(|JClass())> s
       then
-        classname := <jclass-term> ss
+        classname := <jclass-srt> ss
       else
-        classname := $[[<get-opt> TermPkg()].[<jclass-term> ss]]
+        classname := $[[<get-opt> TermPkg()].[<jclass-srt> ss]]
       end 
   
 strategies // builder for sorts
 
-  jclass-termbuilder:
-    SortDecl(s, _) -> <jclass-termbuilder> SimpleSort(s)
+  jclass-termbuilder-api = jclass-srtbuilder
+
+  jclass-srtbuilder:
+    SortDecl(s, _) -> <jclass-srtbuilder> SimpleSort(s)
   
-  jclass-termbuilder:
+  jclass-srtbuilder:
     ss@SimpleSort(s) -> <with(fail|$[No builder can exist for builtin type [s]])>
     where <type-is-builtin> s
   
-  jclass-termbuilder:
+  jclass-srtbuilder:
     ss@SimpleSort(s) -> classname
     where
       <not(type-is-builtin)> s;
@@ -51,32 +57,36 @@ strategies // builder for sorts
       then
         classname := $[[jclass].Build]
       else
-        classname := $[[<jclass-term> ss]_B]
+        classname := $[[<jclass-srt> ss]_B]
       end
 
 strategies // checked builders
   
-  jclass-checkedbuilder:
-    SortDecl(s, _) -> <jclass-checkedbuilder> SimpleSort(s)
+  jclass-checkedbuilder-api = jclass-srtcheckedbuilder
   
-  jclass-checkedbuilder:
+  jclass-srtcheckedbuilder:
+    SortDecl(s, _) -> <jclass-srtcheckedbuilder> SimpleSort(s)
+  
+  jclass-srtcheckedbuilder:
     SimpleSort(s) -> <with(fail|$[No checked builder can exist for builtin type [s]])>
     where <type-is-builtin> s
   
-  jclass-checkedbuilder:
-    ss@SimpleSort(s) -> $[Is_[<jclass-term> ss]]
+  jclass-srtcheckedbuilder:
+    ss@SimpleSort(s) -> $[Is_[<jclass-srt> ss]]
     where
       <not(type-is-builtin)> s;
       <not(lookup-def(|Types()); lookup-prop(|JClass()))> s
   
-  jclass-checkedbuilder:
+  jclass-srtcheckedbuilder:
     ss@SimpleSort(s) -> <jclass-termbuilder-generic>
     where
       <not(type-is-builtin)> s;
       <lookup-def(|Types()); lookup-prop(|JClass())> s
 
-  jclass-checkedbuilder-ng:
-    ss@SimpleSort(s) -> $[[<jclass-checkedbuilder> ss]NodeGen]
+  jclass-checkedbuilder-ng-api = jclass-srtcheckedbuilder-ng
+
+  jclass-srtcheckedbuilder-ng:
+    ss@SimpleSort(s) -> $[[<jclass-srtcheckedbuilder> ss]NodeGen]
     
   jclass-has-checkedbuilder:
     ss@SimpleSort(s) -> ss
@@ -86,6 +96,6 @@ strategies // checked builders
 
 strategies // matcher for sorts
   
-  jclass-matcher = fail
+  jclass-matcher-api = fail
   
-  jclass-matcher-ng = fail
+  jclass-matcher-ng-api = fail

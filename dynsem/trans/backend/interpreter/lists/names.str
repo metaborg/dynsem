@@ -9,30 +9,41 @@ imports
   
 strategies // classes for sorts
   
-  jclass-term:
+  jclass-term-api = jclass-list
+  
+  jclass-list:
     ListSort(s) -> $[List_[<jclass-term; shorten-uniqueify-string> s]]
+  
+  jclass-term-qual-api = jclass-list-qual 
    
-   
-  jclass-term-qual:
-    ss@ListSort(s) -> $[[<get-opt> TermPkg()].[<jclass-term> ss]]
+  jclass-list-qual:
+    ss@ListSort(s) -> $[[<get-opt> TermPkg()].[<jclass-list> ss]]
 
 strategies // builder for sorts
 
-  jclass-termbuilder:
-    dec@ListSort(s) -> $[[<jclass-term> dec]_B]
+  jclass-termbuilder-api = jclass-listbuilder
+
+  jclass-listbuilder:
+    dec@ListSort(s) -> $[[<jclass-list> dec]_B]
   
-  jclass-termbuilder-ng:
-    dec@ListSort(_) -> $[[<jclass-termbuilder> dec]NodeGen]
+  jclass-termbuilder-ng-api = jclass-listbuilder-ng
+  
+  jclass-listbuilder-ng:
+    dec@ListSort(_) -> $[[<jclass-listbuilder> dec]NodeGen]
 
 strategies // checked builders
   
-  jclass-checkedbuilder = fail
+  jclass-checkedbuilder-api = fail
 
 strategies // matcher for sorts
   
-  jclass-matcher:
-    dec@ListSort(s) -> $[[<jclass-term> dec]_M]
+  jclass-matcher-api = jclass-listmatcher
   
-  jclass-matcher-ng:
-    dec@ListSort(_) -> $[[<jclass-matcher> dec]NodeGen]
+  jclass-listmatcher:
+    dec@ListSort(s) -> $[[<jclass-list> dec]_M]
+  
+  jclass-matcher-ng-api = jclass-listmatcher-ng
+  
+  jclass-listmatcher-ng:
+    dec@ListSort(_) -> $[[<jclass-listmatcher> dec]NodeGen]
   

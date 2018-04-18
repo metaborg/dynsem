@@ -5,30 +5,33 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/names
+  backend/interpreter/signature
   backend/common/-
   
 strategies // classes for sorts
   
-  jclass-term:
+  jclass-term-api = jclass-nativety
+  
+  jclass-nativety:
     NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
   
-  jclass-term:
+  jclass-nativety:
     NativeSubTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
 
-  jclass-term:
+  jclass-nativety:
     NativeType(_, jstring) -> jstring
 
 strategies // builder for sorts
 
-  jclass-termbuilder = fail
+  jclass-termbuilder-api = fail
       
-  jclass-termbuilder-ng = fail
+  jclass-termbuilder-ng-api = fail
   
 strategies // checked builders
   
-  jclass-checkedbuilder = fail
+  jclass-checkedbuilder-api = fail
 
 strategies // matcher for sorts
   
-  jclass-matcher = fail
+  jclass-matcher-api = fail
   

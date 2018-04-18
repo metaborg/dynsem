@@ -7,13 +7,15 @@ imports
   backend/interpreter/names
   backend/common/-
   
-strategies // classes for sorts
+strategies
   
-  jclass-term = fail
+  jclass-term-api = fail
 
-strategies // builder for sorts
+strategies
 
-  jclass-termbuilder:
+  jclass-termbuilder-api = jclass-nativeopbuilder
+
+  jclass-nativeopbuilder:
     NativeOpDecl(name, kid*, _, _) -> classname
     where
       if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, <length> kid*)
@@ -22,25 +24,14 @@ strategies // builder for sorts
       else
         classname := <concat-strings> [<ds-utils-java-escape-id> name, "_", <length; int-to-string> kid*]
       end
-
-//  jclass-termbuilder-qual:
-//    d@NativeOpDecl(name, kid*, _, _) -> qclassname
-//    where
-//      classname := <jclass-termbuilder> d;
-//      if <lookup-def(|Constructors()); has-prop(|JClass())> (name, <length> kid*)
-//      then
-//        qclassname := classname
-//      else
-//        qclassname := $[[<get-opt> NativePkg()].[classname]]
-//      end
-      
-  jclass-termbuilder-ng = fail
+  
+  jclass-termbuilder-ng-api = fail
   
 strategies // checked builders
   
-  jclass-checkedbuilder = fail
+  jclass-checkedbuilder-api = fail
 
 strategies // matcher for sorts
   
-  jclass-matcher = fail
+  jclass-matcher-api = fail
   
