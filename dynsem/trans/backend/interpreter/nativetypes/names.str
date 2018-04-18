@@ -15,6 +15,9 @@ strategies // classes for sorts
   jclass-term:
     NativeSubTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
 
+  jclass-term:
+    NativeType(_, jstring) -> jstring
+
 strategies // builder for sorts
 
   jclass-termbuilder = fail
