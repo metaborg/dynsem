@@ -1,15 +1,30 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.arrays;
 
+import java.util.Arrays;
+
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.Addr;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.shared.ValSort;
 
-public abstract class Array {
+public final class Array {
 
-	public abstract Addr lookup(int idx);
+	private final Object[] data;
 
-	public abstract ValSort get(int idx);
+	public Array(int length, Object fillValue) {
+		this.data = new Object[length];
+		Arrays.fill(this.data, fillValue);
+	}
 
-	public abstract ValSort set(int idx, ValSort val);
+	public Addr lookup(int idx) {
+		return new ArrayAddr(this, idx);
+	}
+
+	public Object get(int idx) {
+		return data[idx];
+	}
+
+	public Object set(int idx, Object val) {
+		data[idx] = val;
+		return val;
+	}
 
 	@Override
 	public boolean equals(Object obj) {

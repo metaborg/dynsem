@@ -35,6 +35,7 @@ public class NativeOpTermBuild extends TermBuild {
 	public Object executeGeneric(VirtualFrame frame) {
 		final DynSemContext ctx = getContext();
 		final ITermRegistry termReg = ctx.getTermRegistry();
+		// FIXME: this is now broken with support for native operators from different packages
 		final Class<?> termClass = termReg.getNativeOperatorClass(constr, children.length);
 
 		TermBuild build = termReg.lookupNativeOpBuildFactory(termClass).apply(getSourceSection(), children);
