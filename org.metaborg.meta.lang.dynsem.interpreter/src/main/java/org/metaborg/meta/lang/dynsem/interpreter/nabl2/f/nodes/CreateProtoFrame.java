@@ -1,6 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLinkIdentifier;
@@ -47,11 +49,11 @@ public class CreateProtoFrame extends DynSemNode {
 
 		Shape frameShape = ctx.getFrameLayout().createShape(FrameType.INSTANCE)
 				.addProperty(ctx.SCOPE_OF_FRAME_PROPERTY);
-		Property[] decs = getDeclarationProperties(scopeLayout.getDeclarations(scopeEntry));
+		Property[] decs = getDeclarationProperties(scopeLayout.getDeclarations(scopeEntry), frameShape.allocator());
 		for (Property decProp : decs) {
 			frameShape = frameShape.addProperty(decProp);
 		}
-		Property[] edges = getEdgeProperties(scopeLayout.getEdges(scopeEntry));
+		Property[] edges = getEdgeProperties(scopeLayout.getEdges(scopeEntry), frameShape.allocator());
 		for (Property edgeProp : edges) {
 			frameShape = frameShape.addProperty(edgeProp);
 		}
@@ -74,53 +76,32 @@ public class CreateProtoFrame extends DynSemNode {
 		return protoFrameFactory.newInstance(initArgs);
 	}
 
-	private DynamicObjectFactory createProtoFrame(DynSemContext ctx, DynamicObject scopeEntry) {
-		ScopeEntryLayout layout = ScopeEntryLayoutImpl.INSTANCE;
-
-		Occurrence[] decs = layout.getDeclarations(scopeEntry);
-		DynamicObject edges = layout.getEdges(scopeEntry);
-
-		Allocator allocator = ctx.getFrameAllocator();
-		Shape frameShape = ctx.getFrameLayout().createShape(FrameType.INSTANCE)
-				.addProperty(ctx.SCOPE_OF_FRAME_PROPERTY);
-		// register declaration properties -- what about default values?
-		for (Occurrence dec : decs) {
-			Property decProp = Property.create(dec,
+	private Property[] getDeclarationProperties(Occurrence[] decs, Allocator allocator) {
+		Property[] props = new Property[decs.length];
+		for (int i = 0; i < decs.length; i++) {
+			props[i] = Property.create(decs[i],
 					allocator.locationForType(Object.class, EnumSet.of(LocationModifier.NonNull)), 0);
-			frameShape = frameShape.addProperty(decProp);
 		}
-		// register link properties
-		for (Property edgeProp : edges.getShape().getProperties()) {
-			Label label = (Label) edgeProp.getKey();
+		return props;
+	}
+
+	private Property[] getEdgeProperties(DynamicObject edges, Allocator allocator) {
+		List<Object> labels = edges.getShape().getKeyList();
+		List<Property> res = new ArrayList<>();
+		for (Object keyObj : labels) {
+			Label label = (Label) keyObj;
 			ScopeIdentifier[] scopes = (ScopeIdentifier[]) edges.get(label);
 			for (ScopeIdentifier scope : scopes) {
-				FrameLinkIdentifier flk = new FrameLinkIdentifier(label, scope);
-				Property linkProp = Property.create(flk, allocator.locationForType(FrameType.class), 0);
-				frameShape = frameShape.addProperty(linkProp);
+				FrameLinkIdentifier linkIdent = new FrameLinkIdentifier(label, scope);
+				res.add(Property.create(linkIdent, allocator.locationForType(FrameType.class), 0));
 			}
 		}
-		// FIXME: handle import edges!!
-
-		return frameShape.createFactory();
-	}
-
-	private Property[] getDeclarationProperties(Occurrence[] decs) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private Property[] getEdgeProperties(DynamicObject edges) {
-		// TODO Auto-generated method stub
-		return null;
+		return res.toArray(new Property[0]);
 	}
 
 	private Property[] getImportProperties(DynamicObject imports) {
 		// FIXME: implement import property support
 		return new Property[0];
-	}
-
-	public Object defaultValueForType(Object ty) {
-		throw new IllegalStateException("default value not implemented");
 	}
 
 }
