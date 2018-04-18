@@ -8,7 +8,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "namespace", type = TermBuild.class),
@@ -20,7 +19,7 @@ public abstract class MakeOccurrence_3 extends NativeOpBuild {
 	}
 
 	@Specialization
-	public Occurrence execBuild(VirtualFrame frame, String namespace, String name, TermIndex index) {
+	public Occurrence execBuild(String namespace, String name, TermIndex index) {
 		return new Occurrence(namespace, name, index);
 	}
 

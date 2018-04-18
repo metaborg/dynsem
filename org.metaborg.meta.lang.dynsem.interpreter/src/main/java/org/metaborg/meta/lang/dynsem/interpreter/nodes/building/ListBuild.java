@@ -1,16 +1,18 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class ListBuild extends TermBuild {
+public abstract class ListBuild extends TermBuild {
 
 	@Children private final TermBuild[] elemNodes;
 	@Child private TermBuild tailNode;
@@ -23,13 +25,13 @@ public class ListBuild extends TermBuild {
 		this.listClass = listClass;
 	}
 
-	@Override
-	public Object executeGeneric(VirtualFrame frame) {
+	@Specialization
+	public IListTerm<?> executeSpecialize(VirtualFrame frame) {
 		final ITermBuildFactory tbFactory = getContext().getTermRegistry().lookupBuildFactory(listClass);
 		final TermBuild concreteListBuild = tbFactory.apply(getSourceSection(), cloneNodes(elemNodes),
 				cloneNode(tailNode));
 
-		return replace(concreteListBuild).executeGeneric(frame);
+		return replace(concreteListBuild).executeIList(frame);
 	}
 
 	public static ListBuild create(IStrategoAppl t, FrameDescriptor fd) {
@@ -55,7 +57,8 @@ public class ListBuild extends TermBuild {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
 
-		return new ListBuild(SourceUtils.dynsemSourceSectionFromATerm(t), elemNodes, tailNodes, dispatchClass);
+		return ListBuildNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), elemNodes, tailNodes,
+				dispatchClass);
 	}
 
 }

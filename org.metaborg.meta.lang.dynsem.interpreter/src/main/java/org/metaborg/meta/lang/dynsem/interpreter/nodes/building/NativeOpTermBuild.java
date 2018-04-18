@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -8,6 +7,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -20,7 +20,7 @@ import com.oracle.truffle.api.source.SourceSection;
  * @author vladvergu
  *
  */
-public class NativeOpTermBuild extends TermBuild {
+public abstract class NativeOpTermBuild extends TermBuild {
 
 	protected final String constr;
 	@Children protected final TermBuild[] children;
@@ -32,10 +32,9 @@ public class NativeOpTermBuild extends TermBuild {
 	}
 
 	@Override
+	@Specialization
 	public Object executeGeneric(VirtualFrame frame) {
-		final DynSemContext ctx = getContext();
-		final ITermRegistry termReg = ctx.getTermRegistry();
-		// FIXME: this is now broken with support for native operators from different packages
+		final ITermRegistry termReg = getContext().getTermRegistry();
 		final Class<?> termClass = termReg.getNativeOperatorClass(constr, children.length);
 
 		TermBuild build = termReg.lookupNativeOpBuildFactory(termClass).apply(getSourceSection(), children);
@@ -53,7 +52,7 @@ public class NativeOpTermBuild extends TermBuild {
 			children[i] = TermBuild.create(Tools.applAt(childrenT, i), fd);
 		}
 
-		return new NativeOpTermBuild(constr, children, SourceUtils.dynsemSourceSectionFromATerm(t));
+		return NativeOpTermBuildNodeGen.create(constr, children, SourceUtils.dynsemSourceSectionFromATerm(t));
 
 	}
 

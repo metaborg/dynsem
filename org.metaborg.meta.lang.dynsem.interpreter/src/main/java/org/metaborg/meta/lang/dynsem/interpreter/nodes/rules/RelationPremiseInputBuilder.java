@@ -8,13 +8,13 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-// TODO experiment with dissolving this node into its parent
-public class RelationPremiseInputBuilder extends TermBuild {
+public abstract class RelationPremiseInputBuilder extends TermBuild {
 
 	@Child protected TermBuild termNode;
 	@Children protected final TermBuild[] componentNodes;
@@ -36,12 +36,14 @@ public class RelationPremiseInputBuilder extends TermBuild {
 			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
 		}
 
-		return new RelationPremiseInputBuilder(lhsNode, rwNodes, SourceUtils.dynsemSourceSectionFromATerm(source));
+		return RelationPremiseInputBuilderNodeGen.create(lhsNode, rwNodes,
+				SourceUtils.dynsemSourceSectionFromATerm(source));
 	}
 
 	@Override
 	@ExplodeLoop
-	public Object[] executeGeneric(VirtualFrame frame) {
+	@Specialization
+	public Object[] executeObjectArray(VirtualFrame frame) {
 		Object term = termNode.executeGeneric(frame);
 
 		Object[] args = new Object[componentNodes.length + 1];

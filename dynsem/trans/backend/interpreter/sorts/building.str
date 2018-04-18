@@ -35,12 +35,10 @@ strategies
           }
           
           @Override
-          public x_sortclass executeGeneric(VirtualFrame frame) {
-            return x_execmethod(frame);
-          }
-          
-          public abstract x_sortclass x_execmethod(VirtualFrame frame);
-        
+          public abstract x_sortclass executeGeneric(VirtualFrame frame);
+  
+          @Override
+          public abstract x_sortclass executeEvaluated(VirtualFrame frame, Object...terms);
         }
       ]|
     where

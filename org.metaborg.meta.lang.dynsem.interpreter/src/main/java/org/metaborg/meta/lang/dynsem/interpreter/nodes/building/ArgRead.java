@@ -5,10 +5,11 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class ArgRead extends TermBuild {
+public abstract class ArgRead extends TermBuild {
 
 	private final int index;
 
@@ -17,14 +18,16 @@ public class ArgRead extends TermBuild {
 		this.index = index;
 	}
 
-	@Override
-	public Object executeGeneric(VirtualFrame frame) {
+	// FIXME: we should introduce types here
+	@Specialization
+	public Object executeRead(VirtualFrame frame) {
 		return frame.getArguments()[index];
 	}
 
 	public static TermBuild create(IStrategoAppl t) {
 		assert Tools.hasConstructor(t, "ArgRead", 1);
-		return new ArgRead(Tools.intAt(t, 0).intValue(), SourceUtils.dynsemSourceSectionFromATerm(t));
+		return ArgReadNodeGen.create(Tools.intAt(t, 0).intValue(), SourceUtils.dynsemSourceSectionFromATerm(t));
+
 	}
 
 	@Override

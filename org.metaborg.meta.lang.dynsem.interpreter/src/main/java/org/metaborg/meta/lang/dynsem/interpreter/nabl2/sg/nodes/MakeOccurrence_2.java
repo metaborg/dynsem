@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.TermIndex;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.Fresh;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.FreshNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
@@ -16,11 +17,11 @@ import com.oracle.truffle.api.source.SourceSection;
 		@NodeChild(value = "name", type = TermBuild.class) })
 public abstract class MakeOccurrence_2 extends NativeOpBuild {
 
-	@Child private TermBuild freshGen;
+	@Child private Fresh freshGen;
 
 	public MakeOccurrence_2(SourceSection source) {
 		super(source);
-		this.freshGen = new Fresh(source);
+		this.freshGen = FreshNodeGen.create(source);
 	}
 
 	@Specialization

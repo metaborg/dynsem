@@ -3,11 +3,11 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class Fresh extends TermBuild {
+public abstract class Fresh extends TermBuild {
 
 	private static int next = 0;
 
@@ -16,16 +16,11 @@ public class Fresh extends TermBuild {
 	}
 
 	public static Fresh create(IStrategoAppl t, FrameDescriptor fd) {
-		return new Fresh(SourceUtils.dynsemSourceSectionFromATerm(t));
+		return FreshNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
-	@Override
-	public Integer executeGeneric(VirtualFrame frame) {
-		return executeInteger(frame);
-	}
-
-	@Override
-	public int executeInteger(VirtualFrame frame) {
+	@Specialization
+	public int execIncrement() {
 		return next++;
 	}
 

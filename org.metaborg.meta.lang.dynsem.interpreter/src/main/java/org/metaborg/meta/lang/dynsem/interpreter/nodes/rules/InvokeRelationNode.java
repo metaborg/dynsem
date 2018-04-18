@@ -17,9 +17,8 @@ public class InvokeRelationNode extends DynSemNode {
 		this.dispatchNode = dispatchNode;
 	}
 
-	// TODO: specialize to type of Object[]?
 	public RuleResult execute(VirtualFrame frame) {
-		Object[] args = inputBuilder.executeGeneric(frame);
+		Object[] args = inputBuilder.executeObjectArray(frame);
 		return dispatchNode.execute(args[0].getClass(), args);
 	}
 }

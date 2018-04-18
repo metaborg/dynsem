@@ -1,17 +1,19 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITupleTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class TupleBuild extends TermBuild {
+public abstract class TupleBuild extends TermBuild {
 
 	@Children private final TermBuild[] elemNodes;
 	private final Class<?> tupleClass;
@@ -22,11 +24,11 @@ public class TupleBuild extends TermBuild {
 		this.tupleClass = tupleClass;
 	}
 
-	@Override
-	public Object executeGeneric(VirtualFrame frame) {
+	@Specialization
+	public ITupleTerm executeSpecialize(VirtualFrame frame) {
 		final TermBuild concreteListBuild = getContext().getTermRegistry().lookupBuildFactory(tupleClass)
 				.apply(getSourceSection(), cloneNodes(elemNodes));
-		return replace(concreteListBuild).executeGeneric(frame);
+		return replace(concreteListBuild).executeITuple(frame);
 	}
 
 	public static TupleBuild create(IStrategoAppl t, FrameDescriptor fd) {
@@ -47,7 +49,7 @@ public class TupleBuild extends TermBuild {
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
-		return new TupleBuild(SourceUtils.dynsemSourceSectionFromATerm(t), children, dispatchClass);
+		return TupleBuildNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), children, dispatchClass);
 	}
 
 }

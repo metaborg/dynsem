@@ -1,15 +1,12 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.FalseLiteralTermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.IntLiteralTermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.StringLiteralTermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.LiteralTermBuild.TrueLiteralTermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITupleTerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.terms.util.NotImplementedException;
@@ -23,6 +20,7 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
+// FIXME: add functions for SG-FRAMES-ARRAY related classes
 @TypeSystemReference(BuiltinTypes.class)
 @NodeInfo(description = "The abstract base node for all term construction")
 public abstract class TermBuild extends DynSemNode {
@@ -32,6 +30,8 @@ public abstract class TermBuild extends DynSemNode {
 	}
 
 	public abstract Object executeGeneric(VirtualFrame frame);
+
+	public abstract Object executeEvaluated(VirtualFrame frame, Object... terms);
 
 	public String executeString(VirtualFrame frame) {
 		return BuiltinTypesGen.asString(executeGeneric(frame));
@@ -63,6 +63,10 @@ public abstract class TermBuild extends DynSemNode {
 
 	public IListTerm<?> executeIList(VirtualFrame frame) {
 		return BuiltinTypesGen.asIListTerm(executeGeneric(frame));
+	}
+
+	public ITupleTerm executeITuple(VirtualFrame frame) {
+		return BuiltinTypesGen.asITupleTerm(executeGeneric(frame));
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
