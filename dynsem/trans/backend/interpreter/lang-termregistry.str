@@ -41,9 +41,11 @@ rules /* term registry */
         
         public class x_classname implements ITermRegistry {
           private final Map<String, Class<?>> constructorClasses = new HashMap<String, Class<?>>();
+          private final Map<String, Class<?>> nativeOpClasses = new HashMap<String, Class<?>>();
+          private final Map<Class<?>, Class<?>> listClasses = new HashMap<Class<?>, Class<?>>();
           private final Map<Class<?>, ITermBuildFactory> builderFactories = new HashMap<Class<?>, ITermBuildFactory>();
           private final Map<Class<?>, ITermMatchPatternFactory> matcherFactories = new HashMap<Class<?>, ITermMatchPatternFactory>();
-          private final Map<Class<?>, ITermBuildFactory> nativeFactories = new HashMap<Class<?>, ITermBuildFactory>();
+          private final Map<Class<?>, ITermBuildFactory> nativeOpFactories = new HashMap<Class<?>, ITermBuildFactory>();
           private final Map<String, ITermBuildFactory> nativeAdapterFactories = new HashMap<String, ITermBuildFactory>();
           
           public x_classname() {
@@ -78,7 +80,7 @@ rules /* term registry */
           @Override
           public ITermBuildFactory lookupNativeOpBuildFactory(Class<?> termClass) {
             CompilerAsserts.neverPartOfCompilation();
-            return nativeFactories.get(termClass);
+            return nativeOpFactories.get(termClass);
           }
           
           @Override
@@ -101,21 +103,21 @@ rules /* term registry */
           @Override
           public Class<?> getNativeOperatorClass(String constr, int arity) {
             CompilerAsserts.neverPartOfCompilation();
-            try {
-              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> NativePkg()].])])) + constr.replace("-", "_") + "_" + arity);
-            } catch (ClassNotFoundException cnfe) {
-              throw new RuntimeException("Failed to load native operator class", cnfe);
+            Class<?> clazz = nativeOpClasses.get(constr + "/" + arity);
+            if (clazz == null) {
+              throw new RuntimeException("Failed to load class for native operator " + constr + "/" + arity);
             }
+            return clazz;
           }
   
           @Override
           public Class<?> getListClass(Class<?> elemClass) {
             CompilerAsserts.neverPartOfCompilation();
-            try {
-              return x_classname.class.getClassLoader().loadClass(~e:Lit(String([Chars($[[<get-opt> TermPkg()].List_])])) + elemClass.getName());
-            } catch (ClassNotFoundException cnfe) {
-              throw new RuntimeException("Failed to load constructor class", cnfe);
+            Class<?> clazz = listClasses.get(elemClass);
+            if(clazz == null) {
+              throw new RuntimeException("Failed to load list class for element class " + elemClass.getName());
             }
+            return clazz;
           }
 
           @Override  

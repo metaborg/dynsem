@@ -14,6 +14,7 @@ rules
   ds-to-interp-lists-registry-init:
     ls@ListSort(es) ->
       bstm* |[
+        listClasses.put(x_elemclass.class, x_listclass.class);
         builderFactories.put(x_listclass.class, new ITermBuildFactory() {
           @Override
           public TermBuild apply(SourceSection source, Object... objects) {
@@ -28,6 +29,7 @@ rules
         });
       ]|
     where
+      x_elemclass := <jclass-term> es;
       x_listclass := <jclass-term> ls;
       x_listbuildgenclass := <jclass-termbuilder-ng> ls;
       x_listmatchclass := <jclass-matcher> ls

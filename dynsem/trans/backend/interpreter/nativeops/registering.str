@@ -15,7 +15,8 @@ rules
   ds-to-interp-natopterms-registry-init:
     d@NativeOpDecl(name, kid*, _, _) -> 
       bstm* |[
-        nativeFactories.put(x_natop.class, new ITermBuildFactory() {
+        nativeOpClasses.put(~e:Lit(String([Chars(con-name)])), x_natop.class);
+        nativeOpFactories.put(x_natop.class, new ITermBuildFactory() {
     
           @Override
           public NativeOpBuild apply(SourceSection source,
@@ -25,6 +26,7 @@ rules
         });
       ]|
     where
+      con-name := <concat-strings> [name, "/", <length; int-to-string> kid*];
       e1* := <map-with-index(ds-to-interp-termbuild-access(|"children"))> kid*;
       x_natop := <jclass-termbuilder> d
       
