@@ -5,11 +5,11 @@ import java.lang.reflect.Method;
 import java.util.EnumSet;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.lookup.Path;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Path;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.PathStep;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.DeclEntryLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.DeclarationsLayoutImpl;
@@ -29,6 +29,7 @@ import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.object.DynamicObject;
 import com.oracle.truffle.api.object.LocationModifier;
 import com.oracle.truffle.api.object.Property;
@@ -40,13 +41,14 @@ public class ObjectFactories {
 	private ObjectFactories() {
 	}
 
-	public static DynamicObject createNaBL2(IStrategoAppl solution, DynSemContext ctx) {
+	public static DynamicObject createNaBL2(IStrategoAppl solution, DynSemContext ctx, DynSemLanguage lang) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.isTermAppl(solution);
 		IStrategoAppl nabl2Appl = solution;
 		assert Tools.hasConstructor(nabl2Appl, "NaBL2", 3);
 
 		DynamicObject scopeGraph = createScopeGraph(Tools.applAt(solution, 0));
-		DynamicObject nameResolution = createNameResolution(Tools.listAt(solution, 1));
+		DynamicObject nameResolution = createNameResolution(Tools.listAt(solution, 1), lang);
 		DynamicObject types = createTypes(Tools.listAt(solution, 2), ctx);
 		return NaBL2LayoutImpl.INSTANCE.createNaBL2(scopeGraph, nameResolution, types);
 	}
@@ -73,13 +75,13 @@ public class ObjectFactories {
 		return types;
 	}
 
-	private static DynamicObject createNameResolution(IStrategoList resolutionsTerm) {
+	private static DynamicObject createNameResolution(IStrategoList resolutionsTerm, DynSemLanguage lang) {
 		DynamicObject resolution = NameResolutionLayoutImpl.INSTANCE.createNameResolution();
 		for (IStrategoTerm resolutionTerm : resolutionsTerm) {
 			assert Tools.isTermTuple(resolutionTerm);
 			Occurrence ref = Occurrence.create(Tools.applAt(resolutionTerm, 0));
-			PathStep[] steps = PathStep.createPath(Tools.listAt(resolutionTerm.getSubterm(1), 1));
-			resolution.define(ref, new Path(steps));
+			Path path = Path.create(Tools.listAt(resolutionTerm.getSubterm(1), 1), lang);
+			resolution.define(ref, path);
 		}
 		return resolution;
 	}

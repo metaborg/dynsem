@@ -6,6 +6,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
+@Deprecated
 public abstract class PathStep {
 
 	private final ScopeIdentifier scope;

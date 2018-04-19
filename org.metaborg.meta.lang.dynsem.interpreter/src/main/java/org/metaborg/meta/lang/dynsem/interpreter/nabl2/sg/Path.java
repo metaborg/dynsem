@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
+@Deprecated
 public final class Path {
 	private final PathStep[] steps;
 
