@@ -23,14 +23,14 @@ public abstract class N extends PathStep {
 	private final Occurrence importRef;
 	protected final FrameLinkIdentifier linkIdent;
 
-	@Child private PathStep p;
+	@Child private PathStep next;
 
-	public N(ScopeIdentifier scopeIdent, Label importLabel, Occurrence importRef, PathStep p) {
+	public N(ScopeIdentifier scopeIdent, Label importLabel, Occurrence importRef, PathStep next) {
 		super(scopeIdent);
 		this.importLabel = importLabel;
 		this.importRef = importRef;
-		this.p = p;
-		this.linkIdent = new FrameLinkIdentifier(importLabel, scopeIdent);
+		this.next = next;
+		this.linkIdent = new FrameLinkIdentifier(importLabel, next.scopeIdent);
 	}
 
 	// FIXME: this feels like the wrong semantics
@@ -38,8 +38,8 @@ public abstract class N extends PathStep {
 	public FrameAddr lookupCached(DynamicObject frm, @Cached("lookupShape(frm)") Shape frm_shape,
 			@Cached("lookupLocation(frm_shape, linkIdent)") Location loc) {
 		DynamicObject nextFrame = FrameLayoutUtil.layout().getType().cast(loc.get(frm, frm_shape));
-		assert FrameLayoutImpl.INSTANCE.getScope(nextFrame).equals(scopeIdent);
-		return p.executeLookup(nextFrame);
+		assert FrameLayoutImpl.INSTANCE.getScope(nextFrame).equals(next.scopeIdent);
+		return next.executeLookup(nextFrame);
 	}
 
 	@Specialization(replaces = "lookupCached")
@@ -50,7 +50,7 @@ public abstract class N extends PathStep {
 	@TruffleBoundary
 	@Override
 	public String toString() {
-		return "N(" + scopeIdent + ", " + importLabel + ", " + importRef + ", " + p + ")";
+		return "N(" + scopeIdent + ", " + importLabel + ", " + importRef + ", " + next + ")";
 	}
 
 	public static N create(IStrategoAppl nTerm) {

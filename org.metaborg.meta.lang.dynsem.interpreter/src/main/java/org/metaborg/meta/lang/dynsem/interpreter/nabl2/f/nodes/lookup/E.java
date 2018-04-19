@@ -27,14 +27,14 @@ public abstract class E extends PathStep {
 		super(scopeIdent);
 		this.edgeLabel = edgeLabel;
 		this.next = next;
-		this.linkIdent = new FrameLinkIdentifier(edgeLabel, scopeIdent);
+		this.linkIdent = new FrameLinkIdentifier(edgeLabel, next.scopeIdent);
 	}
 
 	@Specialization(guards = { "shapeCheck(frm_shape, frm)" })
 	public FrameAddr lookupCached(DynamicObject frm, @Cached("lookupShape(frm)") Shape frm_shape,
 			@Cached("lookupLocation(frm_shape, linkIdent)") Location loc) {
 		DynamicObject nextFrame = FrameLayoutUtil.layout().getType().cast(loc.get(frm, frm_shape));
-		assert FrameLayoutImpl.INSTANCE.getScope(nextFrame).equals(scopeIdent);
+		assert FrameLayoutImpl.INSTANCE.getScope(nextFrame).equals(next.scopeIdent);
 		return next.executeLookup(nextFrame);
 	}
 
