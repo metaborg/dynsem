@@ -4,12 +4,18 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+
 public abstract class PathStep {
 
 	private final ScopeIdentifier scope;
 
 	public PathStep(ScopeIdentifier scope) {
 		this.scope = scope;
+	}
+
+	public ScopeIdentifier scope() {
+		return scope;
 	}
 
 	public static PathStep create(IStrategoAppl stepTerm) {
@@ -41,6 +47,12 @@ public abstract class PathStep {
 			this.decl = decl;
 		}
 
+		@TruffleBoundary
+		@Override
+		public String toString() {
+			return "D(" + scope() + ", " + decl + ")";
+		}
+
 		public static D create(IStrategoAppl dTerm) {
 			assert Tools.hasConstructor(dTerm, "D", 2);
 			return new D(ScopeIdentifier.create(Tools.applAt(dTerm, 0)), Occurrence.create(Tools.applAt(dTerm, 1)));
@@ -54,6 +66,12 @@ public abstract class PathStep {
 		public E(ScopeIdentifier scope, Label edgeLabel) {
 			super(scope);
 			this.edgeLabel = edgeLabel;
+		}
+
+		@TruffleBoundary
+		@Override
+		public String toString() {
+			return "E(" + edgeLabel + ", " + scope() + ")";
 		}
 
 		public static E create(IStrategoAppl eTerm) {
@@ -73,6 +91,12 @@ public abstract class PathStep {
 			this.importLabel = importLabel;
 			this.importRef = importRef;
 			this.path = path;
+		}
+
+		@TruffleBoundary
+		@Override
+		public String toString() {
+			return "N(" + scope() + ", " + importLabel + ", " + importRef + ", " + path + ")";
 		}
 
 		public static N create(IStrategoAppl nTerm) {
