@@ -26,7 +26,7 @@ public abstract class ReflectiveHandlerBuild extends DynSemNode {
 		return buildNode.executeEvaluated(frame, thrown, catching);
 	}
 
-	public TermBuild getHandlerBuildNode() {
+	protected TermBuild getHandlerBuildNode() {
 		ITermRegistry registry = getContext().getTermRegistry();
 		return registry.lookupBuildFactory(registry.getConstructorClass(HANDLER_CTOR_NAME, HANDLER_CTOR_ARITY))
 				.apply(getSourceSection(), null, null);
