@@ -1,6 +1,9 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
+package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2Context;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2SolutionUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.ObjectFactories;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;

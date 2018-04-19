@@ -1,5 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -19,7 +20,7 @@ public abstract class ScopeOfFrame extends NativeOpBuild {
 
 	@Specialization
 	public ScopeIdentifier executeScopeOf(DynamicObject frm) {
-		throw new IllegalStateException("Scope of frame NOT IMPLEMENTED");
+		return FrameLayoutImpl.INSTANCE.getScope(frm);
 	}
 
 	public static ScopeOfFrame create(SourceSection source, TermBuild frm) {

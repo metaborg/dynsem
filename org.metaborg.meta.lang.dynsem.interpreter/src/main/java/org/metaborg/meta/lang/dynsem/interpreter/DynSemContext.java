@@ -3,26 +3,21 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FramePrototypesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl.ScopeEntryType;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.object.DynamicObject;
-import com.oracle.truffle.api.object.Layout;
-import com.oracle.truffle.api.object.LocationModifier;
-import com.oracle.truffle.api.object.Property;
-import com.oracle.truffle.api.object.Shape.Allocator;
 
 /**
  * Interpreter context which maintains runtime-specific entities. Instances of {@link DynSemContext} are primarily
@@ -241,32 +236,15 @@ public final class DynSemContext {
 				"No NaBL2 context available. Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
 	}
 
-	// FIXME: should a single layout be shared for all frames??
-	private final Layout FRAME_LAYOUT = Layout.createLayout();
-
-	private final Allocator FRAME_ALLOCATOR = FRAME_LAYOUT.createAllocator();
-
-	public final Property SCOPE_OF_FRAME_PROPERTY = Property.create("__scope__", FRAME_ALLOCATOR
-			.locationForType(ScopeEntryType.class, EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0);
-
-	public Layout getFrameLayout() {
-
-		return FRAME_LAYOUT;
-	}
-
-	public Allocator getFrameAllocator() {
-		return FRAME_ALLOCATOR;
-	}
-
 	private final DynamicObject frameFactories = FramePrototypesLayoutImpl.INSTANCE.createFramePrototypes();
 
 	public void addProtoFrame(ScopeIdentifier ident, DynamicObject frameProto) {
-		assert FRAME_LAYOUT.getType().isInstance(frameProto);
+		assert FrameLayoutImpl.INSTANCE.isFrame(frameProto);
 		frameFactories.define(ident, frameProto);
 	}
 
 	public DynamicObject getProtoFrame(ScopeIdentifier ident) {
-		return FRAME_LAYOUT.getType().cast(frameFactories.get(ident));
+		return (DynamicObject) frameFactories.get(ident);
 	}
 
 
