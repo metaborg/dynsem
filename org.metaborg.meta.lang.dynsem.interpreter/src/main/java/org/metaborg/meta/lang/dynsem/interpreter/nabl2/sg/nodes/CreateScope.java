@@ -61,7 +61,7 @@ public abstract class CreateScope extends NativeOpBuild {
 			edgesShape = edgesShape
 					.addProperty(Property.create(edgeLabel, edgeAllocator.locationForType(ScopeIdentifier[].class,
 							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
-			edgeScopes[i] = (ScopeIdentifier[]) edgeEntry.getValue();
+			edgeScopes[i] = ((IListTerm<ScopeIdentifier>) edgeEntry.getValue()).toArray();
 			i++;
 		}
 		DynamicObject edges = edgesShape.createFactory().newInstance((Object[]) edgeScopes);
@@ -75,7 +75,7 @@ public abstract class CreateScope extends NativeOpBuild {
 			importsShape = importsShape
 					.addProperty(Property.create(importLabel, importAllocator.locationForType(Occurrence[].class,
 							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
-			importedOccs[j] = (Occurrence[]) importEntry.getValue();
+			importedOccs[j] = ((IListTerm<Occurrence>) importEntry.getValue()).toArray();
 			j++;
 		}
 		DynamicObject imports = importsShape.createFactory().newInstance((Object[]) importedOccs);
@@ -101,8 +101,9 @@ public abstract class CreateScope extends NativeOpBuild {
 		return scopeIdent;
 	}
 
-	public static CreateScope create(SourceSection source, TermBuild scopeIdent, TermBuild decs, TermBuild refs,
+	public static CreateScope create(SourceSection source, TermBuild scopeIdent, TermBuild decs, TermBuild decTypes,
+			TermBuild refs,
 			TermBuild edges, TermBuild imports) {
-		return CreateScopeNodeGen.create(source, scopeIdent, decs, refs, edges, imports);
+		return CreateScopeNodeGen.create(source, scopeIdent, decs, decTypes, refs, edges, imports);
 	}
 }
