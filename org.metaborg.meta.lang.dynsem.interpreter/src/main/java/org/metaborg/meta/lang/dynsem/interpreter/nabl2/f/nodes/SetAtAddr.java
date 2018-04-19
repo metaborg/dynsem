@@ -11,18 +11,20 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "addr", type = TermBuild.class), @NodeChild(value = "val", type = TermBuild.class) })
-public abstract class Set extends NativeOpBuild {
+public abstract class SetAtAddr extends NativeOpBuild {
 
-	public Set(SourceSection source) {
+	public SetAtAddr(SourceSection source) {
 		super(source);
 	}
+
+	// TODO: 2 cases: arrayaddr and frameaddr
 
 	@Specialization
 	public ValSort executeGet(Addr addr, ValSort val) {
 		throw new IllegalStateException("Set not implemented");
 	}
 
-	public static Set create(SourceSection source, TermBuild addr, TermBuild val) {
-		return SetNodeGen.create(source, addr, val);
+	public static SetAtAddr create(SourceSection source, TermBuild addr, TermBuild val) {
+		return SetAtAddrNodeGen.create(source, addr, val);
 	}
 }

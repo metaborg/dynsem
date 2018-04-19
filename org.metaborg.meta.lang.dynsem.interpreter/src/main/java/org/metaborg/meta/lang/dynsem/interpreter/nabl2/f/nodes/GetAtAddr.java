@@ -10,18 +10,20 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChild(value = "addr", type = TermBuild.class)
-public abstract class Get extends NativeOpBuild {
+public abstract class GetAtAddr extends NativeOpBuild {
 
-	public Get(SourceSection source) {
+	public GetAtAddr(SourceSection source) {
 		super(source);
 	}
+
+	// TODO: 2 cases: arrayaddr and frameaddr
 
 	@Specialization
 	public ValSort executeGet(Addr addr) {
 		throw new IllegalStateException("Get not implemented");
 	}
 
-	public static Get create(SourceSection source, TermBuild addr) {
-		return GetNodeGen.create(source, addr);
+	public static GetAtAddr create(SourceSection source, TermBuild addr) {
+		return GetAtAddrNodeGen.create(source, addr);
 	}
 }
