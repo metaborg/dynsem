@@ -15,9 +15,10 @@ public abstract class CloneFrame extends NativeOpBuild {
 		super(source);
 	}
 
+	// FIXME: consider caching locations to improve cloning speed
 	@Specialization
 	public DynamicObject executeClone(DynamicObject frm) {
-		throw new IllegalStateException("CloneFrame not implemented");
+		return frm.copy(frm.getShape());
 	}
 
 	public static CloneFrame create(SourceSection source, TermBuild frm) {
