@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
  * @param <T>
  *            type of the elements in this list
  */
-public interface IListTerm<T> extends ITerm {
+public interface IListTerm<T> extends ITerm, Iterable<T> {
 
 	/**
 	 * @return the n-th element of this list, or <code>null</code> if the list is too short.
@@ -83,6 +83,7 @@ public interface IListTerm<T> extends ITerm {
 	 * 
 	 * @return an iterator for this {@link IListTerm}
 	 */
+	@Override
 	public Iterator<T> iterator();
 
 	/**
