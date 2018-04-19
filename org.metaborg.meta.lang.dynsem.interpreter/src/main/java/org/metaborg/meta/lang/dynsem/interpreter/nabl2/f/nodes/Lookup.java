@@ -30,6 +30,8 @@ public abstract class Lookup extends NativeOpBuild {
 	// FIXME: this is where we need to be very careful w.r.t. object languages because the Path stored in resolution may
 	// not be correct (method overriding)
 
+	// FIXME: this is the place to cache the lookup. if the ref is constant and the frame shape is constant then teh
+	// Location part of teh frameaddr will also be constant and then we don't need to reevaluate the entire chain
 	@Specialization(guards = { "ref.equals(ref_cached)" })
 	public FrameAddr executeCachedDirect(DynamicObject frm, Occurrence ref, @Cached("ref") Occurrence ref_cached,
 			@Cached("create(lookupPathResolver(ref_cached))") DirectCallNode resolverNode) {
