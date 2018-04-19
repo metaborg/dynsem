@@ -12,4 +12,12 @@ public class ArrayAddr implements Addr {
 		this.idx = idx;
 	}
 
+	public Array arr() {
+		return arr;
+	}
+
+	public int idx() {
+		return idx;
+	}
+
 }

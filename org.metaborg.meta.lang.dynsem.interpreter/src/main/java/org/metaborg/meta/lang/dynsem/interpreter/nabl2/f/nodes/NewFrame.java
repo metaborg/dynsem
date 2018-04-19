@@ -42,6 +42,7 @@ public abstract class NewFrame extends NativeOpBuild {
 
 		DynamicObject frame = protoFrame.copy(protoFrame.getShape());
 		for (FrameLink link : links) {
+			// FIXME: investigate optimizing this with location caches
 			frame.set(link.link(), link.frame());
 		}
 

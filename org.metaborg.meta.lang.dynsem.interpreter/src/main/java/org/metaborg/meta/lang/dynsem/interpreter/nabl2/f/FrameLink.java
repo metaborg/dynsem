@@ -13,9 +13,13 @@ public final class FrameLink {
 	private final FrameLinkIdentifier linkIdent;
 
 	public FrameLink(Label label, DynamicObject frame) {
+		this(label, frame, new FrameLinkIdentifier(label, FrameLayoutImpl.INSTANCE.getScope(frame)));
+	}
+
+	public FrameLink(Label label, DynamicObject frame, FrameLinkIdentifier linkIdent) {
 		this.label = label;
 		this.frame = frame;
-		this.linkIdent = new FrameLinkIdentifier(label, FrameLayoutImpl.INSTANCE.getScope(frame));
+		this.linkIdent = linkIdent;
 	}
 
 	public Label label() {

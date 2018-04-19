@@ -13,5 +13,12 @@ public final class FrameAddr implements Addr {
 		this.location = location;
 	}
 
+	public Location location() {
+		return location;
+	}
+
+	public DynamicObject frame() {
+		return frame;
+	}
 
 }
