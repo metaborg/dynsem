@@ -49,7 +49,7 @@ public final class Occurrence {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof Occurrence && this.hashCode() == obj.hashCode();
+		return (this == obj) || (obj instanceof Occurrence && this.hashCode() == obj.hashCode());
 	}
 
 	@Override

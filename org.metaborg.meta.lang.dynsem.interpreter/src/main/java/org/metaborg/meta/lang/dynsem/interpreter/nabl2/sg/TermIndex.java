@@ -43,7 +43,7 @@ public final class TermIndex {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof TermIndex && this.hashCode() == obj.hashCode();
+		return (this == obj) || (obj instanceof TermIndex && this.hashCode() == obj.hashCode());
 	}
 
 	@Override

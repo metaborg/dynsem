@@ -46,7 +46,7 @@ public final class ScopeIdentifier {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (this == obj);
+		return (this == obj) || (obj instanceof ScopeIdentifier && this.hashCode() == obj.hashCode());
 	}
 
 	@Override

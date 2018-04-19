@@ -236,15 +236,15 @@ public final class DynSemContext {
 				"No NaBL2 context available. Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
 	}
 
-	private final DynamicObject frameFactories = FramePrototypesLayoutImpl.INSTANCE.createFramePrototypes();
+	private final DynamicObject protoFrames = FramePrototypesLayoutImpl.INSTANCE.createFramePrototypes();
 
 	public void addProtoFrame(ScopeIdentifier ident, DynamicObject frameProto) {
 		assert FrameLayoutImpl.INSTANCE.isFrame(frameProto);
-		frameFactories.define(ident, frameProto);
+		protoFrames.define(ident, frameProto);
 	}
 
 	public DynamicObject getProtoFrame(ScopeIdentifier ident) {
-		return (DynamicObject) frameFactories.get(ident);
+		return (DynamicObject) protoFrames.get(ident);
 	}
 
 
