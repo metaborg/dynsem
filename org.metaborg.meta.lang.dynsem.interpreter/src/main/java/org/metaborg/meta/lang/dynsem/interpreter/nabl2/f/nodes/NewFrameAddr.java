@@ -26,8 +26,7 @@ public abstract class NewFrameAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "dec == dec_cached", "shapeCheck(shape, frm)" }, assumptions = {
-			"shape.getValidAssumption()" })
+	@Specialization(guards = { "dec == dec_cached", "shapeCheck(shape, frm)" })
 	public FrameAddr createCached(DynamicObject frm, Occurrence dec, @Cached("dec") Occurrence dec_cached,
 			@Cached("lookupShape(frm)") Shape shape, @Cached("lookupLocation(shape, dec)") Location loc) {
 		return new FrameAddr(frm, loc);
