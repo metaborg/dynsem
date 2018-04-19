@@ -31,6 +31,7 @@ rules /* term registry */
         import ~x:<get-opt> NativePkg().*;
         
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
         import org.spoofax.interpreter.terms.IStrategoTerm;
         import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
