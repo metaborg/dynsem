@@ -1,9 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.Addr;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameAddr;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.arrays.ArrayAddr;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.shared.ValSort;
 
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -16,11 +16,14 @@ public abstract class GetAtAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	// TODO: 2 cases: arrayaddr and frameaddr
+	@Specialization
+	public Object executeFrameGet(FrameAddr addr) {
+		return addr.location().get(addr.frame());
+	}
 
 	@Specialization
-	public ValSort executeGet(Addr addr) {
-		throw new IllegalStateException("Get not implemented");
+	public Object executeArrayGet(ArrayAddr addr) {
+		return addr.arr().get(addr.idx());
 	}
 
 	public static GetAtAddr create(SourceSection source, TermBuild addr) {
