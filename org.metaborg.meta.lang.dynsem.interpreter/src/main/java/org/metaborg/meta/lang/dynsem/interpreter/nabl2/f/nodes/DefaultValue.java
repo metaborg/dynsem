@@ -24,7 +24,12 @@ public abstract class DefaultValue extends DynSemNode {
 
 	public abstract Object execute(VirtualFrame frame, Object type);
 
-	@Specialization
+	@Specialization(guards = { "type == null" })
+	public Object executeNull(VirtualFrame frame, Object type) {
+		return null;
+	}
+
+	@Specialization(guards = { "type != null" })
 	public Object executeDefault(VirtualFrame frame, Object type,
 			@Cached("getDefaultBuilder()") TermBuild defaultBuilder) {
 		Object defaultTerm = defaultBuilder.executeEvaluated(frame, type);
