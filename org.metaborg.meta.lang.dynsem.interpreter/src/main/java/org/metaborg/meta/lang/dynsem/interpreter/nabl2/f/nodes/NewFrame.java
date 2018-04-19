@@ -1,6 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameLink;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -22,9 +24,19 @@ public abstract class NewFrame extends NativeOpBuild {
 
 	@Specialization
 	public DynamicObject executeCreateFrame(ScopeIdentifier scopeident, IListTerm<?> links) {
-		assert getContext().getTermRegistry().getListClass(FrameLink.class).isInstance(links);
+		DynSemContext ctx = getContext();
 
-		throw new IllegalStateException("Frame creation not implemented");
+		IListTerm<FrameLink> actualLinks = ctx.getTermRegistry().getListClass(FrameLink.class).cast(links);
+
+		DynamicObject protoFrame = ctx.getProtoFrame(scopeident);
+		assert FrameLayoutImpl.INSTANCE.isFrame(protoFrame);
+
+		DynamicObject frame = protoFrame.copy(protoFrame.getShape());
+		for (FrameLink link : actualLinks) {
+			frame.set(link.link(), link.frame());
+		}
+
+		return frame;
 	}
 
 	public static NewFrame create(SourceSection source, TermBuild scope, TermBuild links) {
