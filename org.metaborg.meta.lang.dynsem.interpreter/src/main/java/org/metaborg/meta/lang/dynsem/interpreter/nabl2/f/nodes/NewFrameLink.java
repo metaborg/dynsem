@@ -13,9 +13,9 @@ import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "label", type = TermBuild.class),
 		@NodeChild(value = "frm", type = TermBuild.class) })
-public abstract class mkFrameLink extends NativeOpBuild {
+public abstract class NewFrameLink extends NativeOpBuild {
 
-	public mkFrameLink(SourceSection source) {
+	public NewFrameLink(SourceSection source) {
 		super(source);
 	}
 
@@ -24,8 +24,8 @@ public abstract class mkFrameLink extends NativeOpBuild {
 		return new FrameLink(label, f);
 	}
 
-	public static mkFrameLink create(SourceSection source, TermBuild label, TermBuild frm) {
-		return mkFrameLinkNodeGen.create(source, label, frm);
+	public static NewFrameLink create(SourceSection source, TermBuild label, TermBuild frm) {
+		return NewFrameLinkNodeGen.create(source, label, frm);
 	}
 
 }
