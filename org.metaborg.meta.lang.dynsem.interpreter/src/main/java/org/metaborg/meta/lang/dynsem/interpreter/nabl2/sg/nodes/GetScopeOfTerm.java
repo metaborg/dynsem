@@ -20,9 +20,9 @@ import com.oracle.truffle.api.source.SourceSection;
 import mb.nabl2.constraints.ast.AstProperties;
 
 @NodeChildren({ @NodeChild(value = "t", type = TermBuild.class) })
-public abstract class ScopeIdentifierOfTerm extends NativeOpBuild {
+public abstract class GetScopeOfTerm extends NativeOpBuild {
 
-	public ScopeIdentifierOfTerm(SourceSection source) {
+	public GetScopeOfTerm(SourceSection source) {
 		super(source);
 	}
 
@@ -48,7 +48,7 @@ public abstract class ScopeIdentifierOfTerm extends NativeOpBuild {
 		return ScopeIdentifier.create(scopeIdentT);
 	}
 
-	public static ScopeIdentifierOfTerm create(SourceSection source, TermBuild t) {
-		return ScopeIdentifierOfTermNodeGen.create(source, t);
+	public static GetScopeOfTerm create(SourceSection source, TermBuild t) {
+		return GetScopeOfTermNodeGen.create(source, t);
 	}
 }

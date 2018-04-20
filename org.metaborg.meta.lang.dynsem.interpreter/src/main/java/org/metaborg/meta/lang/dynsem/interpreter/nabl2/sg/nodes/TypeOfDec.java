@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImp
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
@@ -16,10 +17,17 @@ public abstract class TypeOfDec extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization
-	public Object executeGetType(Occurrence dec) {
+	@Specialization(guards = { "dec == dec_cached" })
+	public Object getTypeCached(Occurrence dec, @Cached("dec") Occurrence dec_cached,
+			@Cached("getTypeUncached(dec)") Object type) {
+		return type;
+	}
+
+	@Specialization(replaces = "getTypeCached")
+	public Object getTypeUncached(Occurrence dec) {
 		return NaBL2LayoutImpl.INSTANCE.getTypes(getContext().getNaBL2Solution()).get(dec);
 	}
+
 
 	public static TypeOfDec create(SourceSection source, TermBuild dec) {
 		return TypeOfDecNodeGen.create(source, dec);
