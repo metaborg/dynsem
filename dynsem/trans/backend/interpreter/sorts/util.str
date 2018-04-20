@@ -13,5 +13,10 @@ strategies
       sdef := <lookup-def(|Types())> s;
       <not(has-prop(|JClass()))> sdef
   
+  is-value-sort: 
+    ss@SimpleSort(s) -> ss
+    where
+      <lookup-def(|Types()); has-prop(|ValueSort())> s  
+  
   debug-decl-name:
     SortDecl(s, _) -> s

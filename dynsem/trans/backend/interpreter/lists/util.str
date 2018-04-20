@@ -10,3 +10,8 @@ strategies
   
   debug-decl-name:
     ListSort(es) -> $[List([<debug-decl-name> es])]
+  
+  is-value-sort:
+    ls@ListSort(es) -> ls
+    where
+      <is-value-sort> es

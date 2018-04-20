@@ -100,12 +100,13 @@ rules
       fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
       fget0* := <ds-to-interp-sorts-to-fgets> kid*;
       e0* := <range; map(\ i -> e |[ ~x:<int-to-string; mkidx> ]| \)> (1, <length; inc> kid*);
-      if <lookup-def(|Types()); has-prop(|ValueSort())> s
+      if <?SimpleSort(<id>); lookup-def(|Types()); has-prop(|ValueSort())> s
+         <+ <lookup-def(|Constructors()); has-prop(|Metafunc())> (name, <length> kid*)
       then
         mcreate0* := [ class-body-dec |[
           @TruffleBoundary
           public static x_classname create(IStrategoTerm term) {
-            return null;
+            throw new IllegalStateException("Value terms and metafunctions cannot be created from Stratego terms");
           }
         ]|]
       else

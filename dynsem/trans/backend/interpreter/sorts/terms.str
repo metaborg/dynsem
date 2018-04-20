@@ -39,13 +39,13 @@ rules
     where
       x_class := <jclass-term> dec;
       appl-cons-dec* := <filter(?ConsDecl(_, _, SimpleSort(s),_))> cons-dec*; 
-      if <lookup-def(|Types()); has-prop(|ValueSort())> s
+      if <is-value-sort> s
       then
         mcreate0* := [
           class-body-dec |[
               @TruffleBoundary
               public static x_class create(IStrategoTerm term) {
-                return null;
+                throw new IllegalStateException("Value sorts cannot be created from Stratego terms");
               }
           ]| ]
       else
@@ -114,4 +114,6 @@ rules // creation
       s-def := <lookup-def(|Types())> s;
       <lookup-prop(|SortKind())> s-def => LanguageSort();
       <has-prop(|ValueSort())> s-def
+
+
 

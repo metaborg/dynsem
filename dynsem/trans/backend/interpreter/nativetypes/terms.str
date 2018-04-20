@@ -10,15 +10,32 @@ imports
 rules // creation from aterms
 
   ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@SimpleSort(s)) -> e |[ null ]|
-    where
-      <not(type-is-builtin)> s;
-      <lookup-def(|Types()); lookup-prop(|SortKind())> s => NativeSort()
-
-  ds-to-interp-sorts-to-create-arg:
     (e_term, sref@NativeType(_, "org.spoofax.interpreter.terms.IStrategoTerm")) -> e |[ e_term ]|
 
   ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@NativeType(_, qpath)) -> e |[ null ]|
+    (e_term, sref@NativeType(s, x_classname)) -> e |[ x_classname.create(e_term) ]|
     where
-      <not(eq)> (qpath, "org.spoofax.interpreter.terms.IStrategoTerm") 
+      <not(eq)> (x_classname, "org.spoofax.interpreter.terms.IStrategoTerm");
+      <lookup-def(|Types()); has-prop(|Creatable())> s
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@NativeType(s, x_classname)) -> e |[ null ]|
+    where
+      <not(eq)> (x_classname, "org.spoofax.interpreter.terms.IStrategoTerm");
+      <lookup-def(|Types()); not(has-prop(|Creatable()))> s
+  
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@SimpleSort(s)) -> e |[ ~x:<jclass-term> sref.create(e_term) ]|
+    where
+      <not(type-is-builtin)> s;
+      s-def := <lookup-def(|Types())> s;
+      <lookup-prop(|SortKind())> s-def => NativeSort();
+      <has-prop(|Creatable())> s-def
+    
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@SimpleSort(s)) -> e |[ null ]|
+    where
+      <not(type-is-builtin)> s;
+      s-def := <lookup-def(|Types())> s;
+      <lookup-prop(|SortKind())> s-def => NativeSort();
+      <not(has-prop(|Creatable()))> s-def

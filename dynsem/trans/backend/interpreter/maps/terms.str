@@ -10,7 +10,19 @@ imports
 rules // creation from aterms
 
   ds-to-interp-sorts-to-create-arg:
-    (e_term, MapSort(skey, sval)) ->
+    (e_term, ms@MapSort(skey, sval)) ->
+      e |[
+        new Object() {
+          public com.github.krukow.clj_lang.PersistentHashMap apply() {
+            throw new IllegalStateException("Maps of value terms cannot be created from Stratego terms");
+          }
+        }.apply()
+      ]|
+    where
+      <is-value-sort> ms
+      
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, ms@MapSort(skey, sval)) ->
       e |[
         new Object() {
           public com.github.krukow.clj_lang.PersistentHashMap apply() {
@@ -30,6 +42,7 @@ rules // creation from aterms
         }.apply()
       ]|
     where
+      <not(is-value-sort)> ms;
       x_mapT := $[_[<newname>]];
       x_bindsT := $[_[<newname>]];
       x_map := $[_[<newname>]];
