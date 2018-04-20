@@ -18,7 +18,8 @@ public abstract class SetAtAddr extends NativeOpBuild {
 	public SetAtAddr(SourceSection source) {
 		super(source);
 	}
-	@Specialization
+
+	@Specialization // (guards = { "canSetInFrame(addr, val)" })
 	public Object executeFrameSet(FrameAddr addr, Object val) {
 		try {
 			addr.location().set(addr.frame(), val);
@@ -33,6 +34,10 @@ public abstract class SetAtAddr extends NativeOpBuild {
 		addr.arr().set(addr.idx(), val);
 		return val;
 	}
+
+	// protected static boolean canSetInFrame(FrameAddr addr, Object val) {
+	// return addr.location().canSet(val);
+	// }
 
 	public static SetAtAddr create(SourceSection source, TermBuild addr, TermBuild val) {
 		return SetAtAddrNodeGen.create(source, addr, val);
