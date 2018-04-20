@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.lookup;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameAddr;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -11,7 +12,7 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.RootNode;
 
-public class Path extends RootNode {
+public final class Path extends RootNode {
 
 	@Child private PathStep p;
 
@@ -21,13 +22,16 @@ public class Path extends RootNode {
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
+	public Occurrence getTargetDec() {
+		return p.getTargetDec();
+	}
+
 	@Override
 	public FrameAddr execute(VirtualFrame frame) {
 		return p.executeLookup(FrameLayoutUtil.layout().getType().cast(frame.getArguments()[0]));
 	}
 
 	public static Path create(IStrategoList steps, DynSemLanguage lang) {
-
 		return new Path(lang, createSteps(steps));
 	}
 

@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutUtil;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLinkIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -23,11 +24,17 @@ public abstract class E extends PathStep {
 
 	@Child private PathStep next;
 
+
 	public E(ScopeIdentifier scopeIdent, Label edgeLabel, PathStep next) {
 		super(scopeIdent);
 		this.edgeLabel = edgeLabel;
 		this.next = next;
 		this.linkIdent = new FrameLinkIdentifier(edgeLabel, next.scopeIdent);
+	}
+
+	@Override
+	public Occurrence getTargetDec() {
+		return next.getTargetDec();
 	}
 
 	@Specialization(guards = { "shapeCheck(frm_shape, frm)" })

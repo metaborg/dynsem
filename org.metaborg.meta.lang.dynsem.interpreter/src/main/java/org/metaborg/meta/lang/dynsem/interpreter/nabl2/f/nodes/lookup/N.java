@@ -33,6 +33,11 @@ public abstract class N extends PathStep {
 		this.linkIdent = new FrameLinkIdentifier(importLabel, next.scopeIdent);
 	}
 
+	@Override
+	public Occurrence getTargetDec() {
+		return next.getTargetDec();
+	}
+
 	// FIXME: this feels like the wrong semantics
 	@Specialization(guards = { "shapeCheck(frm_shape, frm)" })
 	public FrameAddr lookupCached(DynamicObject frm, @Cached("lookupShape(frm)") Shape frm_shape,

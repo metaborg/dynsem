@@ -23,6 +23,11 @@ public abstract class D extends PathStep {
 		this.dec = dec;
 	}
 
+	@Override
+	public Occurrence getTargetDec() {
+		return dec;
+	}
+
 	/*
 	 * we cache the location. our BIG TIME assumption is that this instance of the node will only ever be called on
 	 * frames of the same scopes!!!

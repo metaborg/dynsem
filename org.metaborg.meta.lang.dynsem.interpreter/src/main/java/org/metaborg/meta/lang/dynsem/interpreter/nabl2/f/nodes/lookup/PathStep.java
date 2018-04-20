@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.lookup;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameAddr;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
@@ -19,6 +20,8 @@ public abstract class PathStep extends Node {
 	public PathStep(ScopeIdentifier scopeIdent) {
 		this.scopeIdent = scopeIdent;
 	}
+
+	public abstract Occurrence getTargetDec();
 
 	public abstract FrameAddr executeLookup(DynamicObject frm);
 
