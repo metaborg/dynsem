@@ -162,7 +162,7 @@ rules /* type system class */
     where
       <fetch-elem(?Signatures(sig-sec*))> section*;
       decl* := <filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>)); concat;
-        qsort(?(ConsDecl(_, _, _, _), SortDecl(_, _)) + ?(SortDecl(_, _), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
+        qsort(?(ConsDecl(_, _, _, _), SortDecl(_, _)) + ?(SortDecl(_, _), NativeBaseTypeDecl(_, _, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _, _)))> sig-sec*;
       list* := <get-languagelist-usage-in-signatures> sig-sec*;
       tuple* := <get-languagetuple-usage-in-module> mod;
       ![decl*, tuple*, list*];

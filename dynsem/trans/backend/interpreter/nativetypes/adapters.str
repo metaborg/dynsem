@@ -5,6 +5,7 @@ imports
   signatures/dynsem/Signatures-sig
   backend/common/opts
   backend/interpreter/names
+  analysis/-
   libjava-front
 
 rules
@@ -14,7 +15,7 @@ rules
     mapconcat(ds-to-interp-nattypes-adapter)
   
   ds-to-interp-nattypes-adapter:
-    NativeBaseTypeDecl(jstring, s, func*) -> <map(ds-to-interp-nattype-func-adapter(|jstring, s))> func*
+    NativeBaseTypeDecl(jstring, s, _, func*) -> <map(ds-to-interp-nattype-func-adapter(|jstring, s))> func*
   
   ds-to-interp-nattype-func-adapter(|jstring, sort_nat):
     NativeFunctionDecl(fun, kid*, sort_res) ->

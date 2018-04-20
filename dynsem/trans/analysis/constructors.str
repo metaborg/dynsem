@@ -75,6 +75,7 @@ signature
     MetaFunction: ArrowKind
     
     JClass: Property
+    Creatable: Property
 
 signature
   sorts

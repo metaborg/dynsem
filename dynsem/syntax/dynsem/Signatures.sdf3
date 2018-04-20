@@ -83,7 +83,10 @@ context-free syntax // native data types
   JSNIPPET = <<STRING>>
   
   NativeTypeDecl.NativeBaseTypeDecl =
-    [[JSNIPPET] as [ID] { [{NativeFunctionDecl "\n"}*] } ]
+    [[JSNIPPET] as [ID][Createable] { [{NativeFunctionDecl "\n"}*] } ]
+  
+  Createable.Yes = [!]
+  Createable.No = []
   
   NativeTypeDecl.NativeSubTypeDecl =
     [[JSNIPPET] as [ID] -> [ID] { [{NativeFunctionDecl "\n"}*] } ]

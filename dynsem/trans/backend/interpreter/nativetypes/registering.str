@@ -13,7 +13,7 @@ rules
     mapconcat(require(ds-to-interp-nattyterms-registry-init, debug-decl-name|"Registry init generation failed for native data type"))
   
   ds-to-interp-nattyterms-registry-init:
-    NativeBaseTypeDecl(jstring, s, func*) -> 
+    NativeBaseTypeDecl(jstring, s, _, func*) -> 
       <mapconcat(require(ds-to-interp-nattyterms-registry-init(|s), debug-decl-name|"Registry init generation failed for native data type function"))> func*
   
   ds-to-interp-nattyterms-registry-init(|s):

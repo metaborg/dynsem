@@ -146,12 +146,16 @@ rules /* store signatures */
   store-native-datatypes = NativeDataTypes(map(store-native-datatype))
 
   store-native-datatype:
-    d@NativeBaseTypeDecl(jstring, name, func*) -> d
+    d@NativeBaseTypeDecl(jstring, name, creatable, func*) -> d
     with
       <store-def(|Types())> name => name-def;
       <store-prop(|SortKind(), name-def)> NativeSort();
       <store-prop(|JClass(), name-def)> jstring;
-      <map(store-native-datatype-op(|name-def))> func*
+      <map(store-native-datatype-op(|name-def))> func*;
+      if <?Yes()> creatable
+      then
+        <store-prop(|Creatable(), name-def)> Creatable()
+      end
 
   store-native-datatype:
     d@NativeSubTypeDecl(javastring, name, sup, func*) -> d
@@ -230,7 +234,7 @@ rules
   check-signature:
     <?SortDecl(s, _)
     + ?AliasDecl(s, _)
-    + ?NativeBaseTypeDecl(_, s, _)
+    + ?NativeBaseTypeDecl(_, s, _, _)
     + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
     where
       <lookup-defs(|Types())> s => [_, _ | _];
@@ -239,7 +243,7 @@ rules
   check-signature:
     <?SortDecl(s, _)
     + ?AliasDecl(s, _)
-    + ?NativeBaseTypeDecl(_, s, _)
+    + ?NativeBaseTypeDecl(_, s, _, _)
     + ?NativeSubTypeDecl(_, s, _, _)> -> <fail>
     where
       ty := <rw-type> SimpleSort(s);

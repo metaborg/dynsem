@@ -13,7 +13,7 @@ strategies // classes for sorts
   jclass-term-api = jclass-nativety
   
   jclass-nativety:
-    NativeBaseTypeDecl(jstring, _, _) -> <unquote(?'"')> jstring
+    NativeBaseTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
   
   jclass-nativety:
     NativeSubTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
