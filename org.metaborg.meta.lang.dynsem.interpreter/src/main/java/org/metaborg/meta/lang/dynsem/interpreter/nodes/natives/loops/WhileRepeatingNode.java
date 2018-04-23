@@ -10,6 +10,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.RepeatingNode;
 import com.oracle.truffle.api.profiles.BranchProfile;
+import com.oracle.truffle.api.profiles.LoopConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 import mb.flowspec.runtime.interpreter.TypesGen;
@@ -38,6 +39,7 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 		adoptChildren();
 	}
 
+	private final LoopConditionProfile conditionProfile = LoopConditionProfile.createCountingProfile();
 	private final BranchProfile continueTaken = BranchProfile.create();
 	private final BranchProfile breakTaken = BranchProfile.create();
 
@@ -51,27 +53,27 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 	 */
 	@Override
 	public boolean executeRepeating(VirtualFrame frame) {
-		if (!evaluateCondition(frame)) {
-			return false;
-		}
-
-		try {
-			final Object bodyTerm = frame.getValue(bodyTSlot);
-			final Object[] bodyArgs = mkArgs(frame);
-			bodyArgs[0] = bodyTerm;
-			final RuleResult bodyResult = bodyEvalNode.execute(bodyTerm.getClass(), bodyArgs);
-			updateRwComponents(frame, bodyResult.components);
-			updateResult(frame, bodyResult.result);
-			return true;
-		} catch (LoopContinueException cex) {
-			continueTaken.enter();
-			updateRwComponents(frame, cex.getComponents());
-			updateResult(frame, cex.getThrown());
-			return true;
-		} catch (LoopBreakException brex) {
-			breakTaken.enter();
-			updateRwComponents(frame, brex.getComponents());
-			updateResult(frame, brex.getThrown());
+		if (conditionProfile.profile(evaluateCondition(frame))) {
+			try {
+				final Object bodyTerm = frame.getValue(bodyTSlot);
+				final Object[] bodyArgs = mkArgs(frame);
+				bodyArgs[0] = bodyTerm;
+				final RuleResult bodyResult = bodyEvalNode.execute(bodyTerm.getClass(), bodyArgs);
+				updateRwComponents(frame, bodyResult.components);
+				updateResult(frame, bodyResult.result);
+				return true;
+			} catch (LoopContinueException cex) {
+				continueTaken.enter();
+				updateRwComponents(frame, cex.getComponents());
+				updateResult(frame, cex.getThrown());
+				return true;
+			} catch (LoopBreakException brex) {
+				breakTaken.enter();
+				updateRwComponents(frame, brex.getComponents());
+				updateResult(frame, brex.getThrown());
+				return false;
+			}
+		} else {
 			return false;
 		}
 

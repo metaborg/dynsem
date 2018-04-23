@@ -11,6 +11,7 @@ import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.Truffle;
@@ -57,6 +58,7 @@ public final class InterpreterUtils {
 	public static void writeSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot, Object val) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Attempted to write null value for slot " + slot.getIdentifier(),
 					createStacktrace());
 		}
@@ -66,6 +68,7 @@ public final class InterpreterUtils {
 	public static <T> T notNull(DynSemContext ctx, T val) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Null value encountered", createStacktrace());
 		}
 		return val;
