@@ -19,6 +19,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 
 import com.github.krukow.clj_lang.IPersistentMap;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -52,33 +53,9 @@ public abstract class CreateScope extends NativeOpBuild {
 		IListTerm<Occurrence> decs = ctx.getTermRegistry().getListClass(Occurrence.class).cast(_decs);
 		IListTerm<Occurrence> refs = ctx.getTermRegistry().getListClass(Occurrence.class).cast(_refs);
 
-		Shape edgesShape = ScopeEdges.SINGLETON.createShape();
-		Allocator edgeAllocator = ScopeEdges.SINGLETON.allocator();
-		ScopeIdentifier[][] edgeScopes = new ScopeIdentifier[edgesMap.count()][];
-		int i = 0;
-		for (Entry<?, ?> edgeEntry : edgesMap) {
-			Label edgeLabel = (Label) edgeEntry.getKey();
-			edgesShape = edgesShape
-					.addProperty(Property.create(edgeLabel, edgeAllocator.locationForType(ScopeIdentifier[].class,
-							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
-			edgeScopes[i] = ((IListTerm<ScopeIdentifier>) edgeEntry.getValue()).toArray();
-			i++;
-		}
-		DynamicObject edges = edgesShape.createFactory().newInstance((Object[]) edgeScopes);
+		DynamicObject edges = createScopeEdges(edgesMap);
 
-		Shape importsShape = ScopeImports.SINGLETON.createShape();
-		Allocator importAllocator = ScopeImports.SINGLETON.allocator();
-		Occurrence[][] importedOccs = new Occurrence[importsMap.count()][];
-		int j = 0;
-		for (Entry<?, ?> importEntry : importsMap) {
-			Label importLabel = (Label) importEntry.getKey();
-			importsShape = importsShape
-					.addProperty(Property.create(importLabel, importAllocator.locationForType(Occurrence[].class,
-							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
-			importedOccs[j] = ((IListTerm<Occurrence>) importEntry.getValue()).toArray();
-			j++;
-		}
-		DynamicObject imports = importsShape.createFactory().newInstance((Object[]) importedOccs);
+		DynamicObject imports = createImports(importsMap);
 
 		DynamicObject scopeEntry = ScopeEntryLayoutImpl.INSTANCE.createScopeEntry(scopeIdent, decs.toArray(),
 				refs.toArray(), edges, imports);
@@ -99,6 +76,42 @@ public abstract class CreateScope extends NativeOpBuild {
 		protoFrameInit.execute(frame, scopeEntry);
 
 		return scopeIdent;
+	}
+
+	@TruffleBoundary
+	private DynamicObject createImports(IPersistentMap<?, ?> importsMap) {
+		Shape importsShape = ScopeImports.SINGLETON.createShape();
+		Allocator importAllocator = ScopeImports.SINGLETON.allocator();
+		Occurrence[][] importedOccs = new Occurrence[importsMap.count()][];
+		int j = 0;
+		for (Entry<?, ?> importEntry : importsMap) {
+			Label importLabel = (Label) importEntry.getKey();
+			importsShape = importsShape
+					.addProperty(Property.create(importLabel, importAllocator.locationForType(Occurrence[].class,
+							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
+			importedOccs[j] = ((IListTerm<Occurrence>) importEntry.getValue()).toArray();
+			j++;
+		}
+		DynamicObject imports = importsShape.createFactory().newInstance((Object[]) importedOccs);
+		return imports;
+	}
+
+	@TruffleBoundary
+	private DynamicObject createScopeEdges(IPersistentMap<?, ?> edgesMap) {
+		Shape edgesShape = ScopeEdges.SINGLETON.createShape();
+		Allocator edgeAllocator = ScopeEdges.SINGLETON.allocator();
+		ScopeIdentifier[][] edgeScopes = new ScopeIdentifier[edgesMap.count()][];
+		int i = 0;
+		for (Entry<?, ?> edgeEntry : edgesMap) {
+			Label edgeLabel = (Label) edgeEntry.getKey();
+			edgesShape = edgesShape
+					.addProperty(Property.create(edgeLabel, edgeAllocator.locationForType(ScopeIdentifier[].class,
+							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
+			edgeScopes[i] = ((IListTerm<ScopeIdentifier>) edgeEntry.getValue()).toArray();
+			i++;
+		}
+		DynamicObject edges = edgesShape.createFactory().newInstance((Object[]) edgeScopes);
+		return edges;
 	}
 
 	public static CreateScope create(SourceSection source, TermBuild scopeIdent, TermBuild decs, TermBuild decTypes,

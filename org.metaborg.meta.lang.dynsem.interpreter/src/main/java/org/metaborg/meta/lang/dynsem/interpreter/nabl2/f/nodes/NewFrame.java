@@ -23,6 +23,7 @@ public abstract class NewFrame extends NativeOpBuild {
 		super(source);
 	}
 
+	// FIXME cache the location of the slots-links being set
 	@Specialization(guards = { "scopeident == scopeident_cached" })
 	public DynamicObject createCached(ScopeIdentifier scopeident, Object links,
 			@Cached("lookupListClass()") Class<? extends IListTerm<FrameLink>> linksListClass,

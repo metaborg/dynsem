@@ -17,7 +17,7 @@ public abstract class GetAtAddr extends NativeOpBuild {
 	}
 
 	@Specialization
-	public Object executeFrameGet(FrameAddr addr) {
+	public Object executeGet(FrameAddr addr) {
 		return addr.location().get(addr.frame());
 	}
 

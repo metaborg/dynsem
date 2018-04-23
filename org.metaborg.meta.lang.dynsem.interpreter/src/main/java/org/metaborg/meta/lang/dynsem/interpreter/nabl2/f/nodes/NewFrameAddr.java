@@ -32,7 +32,7 @@ public abstract class NewFrameAddr extends NativeOpBuild {
 		return new FrameAddr(frm, loc);
 	}
 
-	@Specialization(replaces = "createCached", guards = "frm.getShape().isValid()")
+	@Specialization(replaces = "createCached")
 	public FrameAddr createUncached(DynamicObject frm, Occurrence dec) {
 		return new FrameAddr(frm, frm.getShape().getProperty(dec).getLocation());
 	}
