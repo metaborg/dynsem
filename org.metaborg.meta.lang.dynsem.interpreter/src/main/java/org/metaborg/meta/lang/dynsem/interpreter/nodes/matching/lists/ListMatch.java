@@ -25,11 +25,11 @@ public class ListMatch extends MatchPattern {
 	}
 
 	@Override
-	public void executeMatch(VirtualFrame frame, Object term) {
+	public boolean executeMatch(VirtualFrame frame, Object term) {
 		final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(listClass)
 				.apply(getSourceSection(), cloneNodes(elemPatterns), cloneNode(tailPattern));
 
-		replace(concreteMatch).executeMatch(frame, term);
+		return replace(concreteMatch).executeMatch(frame, term);
 	}
 
 	public static ListMatch create(IStrategoAppl t, FrameDescriptor fd) {

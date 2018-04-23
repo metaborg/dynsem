@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.profiles.ConditionProfile;
+import com.oracle.truffle.api.profiles.PrimitiveValueProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class IntLiteralTermMatchPattern extends LiteralMatchPattern {
@@ -13,13 +14,12 @@ public abstract class IntLiteralTermMatchPattern extends LiteralMatchPattern {
 		this.lit = lit;
 	}
 
-	private final ConditionProfile profile = ConditionProfile.createCountingProfile();
+	private final ConditionProfile condProfile = ConditionProfile.createCountingProfile();
+	private final PrimitiveValueProfile valProfile = PrimitiveValueProfile.createEqualityProfile();
 
 	@Specialization
-	public void doSuccess(int i) {
-		if (profile.profile(i != lit)) {
-			throw PatternMatchFailure.INSTANCE;
-		}
+	public boolean doSuccess(int i) {
+		return condProfile.profile(valProfile.profile(i) == lit);
 	}
 
 }

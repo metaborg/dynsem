@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -10,6 +9,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class GenericListMatch extends MatchPattern {
@@ -23,23 +23,18 @@ public abstract class GenericListMatch extends MatchPattern {
 		this.tailPattern = tailPattern;
 	}
 
+	private final ConditionProfile c1Profile = ConditionProfile.createCountingProfile();
+	private final ConditionProfile c2Profile = ConditionProfile.createCountingProfile();
+
 	@Specialization(guards = "tailPattern == null")
-	public void doNoTail(VirtualFrame frame, IListTerm<?> list) {
-		assert tailPattern == null;
-		if (numHeadElems != list.size()) {
-			throw PatternMatchFailure.INSTANCE;
-		}
+	public boolean doNoTail(VirtualFrame frame, IListTerm<?> list) {
+		return c1Profile.profile(numHeadElems == list.size());
 	}
 
 	@Specialization(guards = "tailPattern != null")
-	public void doWithTail(VirtualFrame frame, IListTerm<?> list) {
-		assert tailPattern != null;
-
-		if (numHeadElems > list.size()) {
-			throw PatternMatchFailure.INSTANCE;
-		}
-
-		tailPattern.executeMatch(frame, list.drop(numHeadElems));
+	public boolean doWithTail(VirtualFrame frame, IListTerm<?> list) {
+		return c1Profile.profile(list.size() >= numHeadElems)
+				&& c2Profile.profile(tailPattern.executeMatch(frame, list.drop(numHeadElems)));
 	}
 
 	public static GenericListMatch create(IStrategoAppl t, FrameDescriptor fd) {

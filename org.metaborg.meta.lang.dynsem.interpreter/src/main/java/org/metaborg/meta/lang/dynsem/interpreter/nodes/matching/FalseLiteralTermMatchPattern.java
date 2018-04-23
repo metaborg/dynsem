@@ -13,10 +13,8 @@ public abstract class FalseLiteralTermMatchPattern extends LiteralMatchPattern {
 	private final ConditionProfile profile = ConditionProfile.createCountingProfile();
 
 	@Specialization
-	public void doSuccess(boolean b) {
-		if (profile.profile(b)) {
-			throw PatternMatchFailure.INSTANCE;
-		}
+	public boolean doSuccess(boolean b) {
+		return !profile.profile(b);
 	}
 
 }

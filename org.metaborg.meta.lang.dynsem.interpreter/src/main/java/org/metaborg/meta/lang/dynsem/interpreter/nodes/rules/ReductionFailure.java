@@ -1,7 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-
 import com.oracle.truffle.api.nodes.ControlFlowException;
 
 /**

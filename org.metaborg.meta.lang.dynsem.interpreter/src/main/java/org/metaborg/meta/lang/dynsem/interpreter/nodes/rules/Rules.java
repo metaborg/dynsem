@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -30,7 +29,7 @@ public abstract class Rules extends Rule {
 	public RuleResult executeFixed(VirtualFrame frame) {
 		try {
 			return (RuleResult) primaryCallNode.call(frame.getArguments());
-		} catch (PatternMatchFailure pmfx) {
+		} catch (PremiseFailureException rafx) {
 			alternativeTaken.enter();
 			return (RuleResult) alternativeCallNode.call(frame.getArguments());
 		}
@@ -50,30 +49,6 @@ public abstract class Rules extends Rule {
 	protected Rule cloneUninitialized() {
 		throw new UnsupportedOperationException();
 	}
-
-	//
-	// public Rule makeUninitializedCloneWithoutFallback() {
-	// CompilerAsserts.neverPartOfCompilation();
-	// if (alternativeRule instanceof FallbackRule) {
-	// return primaryRule.cloneUninitialized();
-	// } else if (alternativeRule instanceof Rules) {
-	// return RulesNodeGen.create(language(), getSourceSection(), primaryRule.cloneUninitialized(),
-	// ((Rules) alternativeRule).makeUninitializedCloneWithoutFallback());
-	// } else {
-	// return cloneUninitialized();
-	// }
-	// }
-
-	// public void replaceFallbackWith(Rule replacement) {
-	// CompilerAsserts.neverPartOfCompilation();
-	// if (alternativeRule instanceof FallbackRule) {
-	// this.alternativeRule = replacement;
-	// } else if (alternativeRule instanceof Rules) {
-	// ((Rules) alternativeRule).replaceFallbackWith(replacement);
-	// } else {
-	// throw new IllegalStateException("Rules do not contain a fallback rule");
-	// }
-	// }
 
 	@Override
 	@TruffleBoundary

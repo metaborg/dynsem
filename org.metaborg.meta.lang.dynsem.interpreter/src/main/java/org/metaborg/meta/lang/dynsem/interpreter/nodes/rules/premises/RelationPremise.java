@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InvokeRelationNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RelationPremiseInputBuilder;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
@@ -12,6 +13,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -47,16 +49,21 @@ public class RelationPremise extends Premise {
 		final RuleResult res = relationLhs.execute(frame);
 
 		// evaluate the RHS pattern match
-		rhsNode.executeMatch(frame, res.result);
-
-		// CompilerAsserts.compilationConstant(res.components.length);
+		if (!rhsNode.executeMatch(frame, res.result)) {
+			CompilerDirectives.transferToInterpreter();
+			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
+		}
 
 		// evaluate the RHS component pattern matches
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i));
+			if (!rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i))) {
+				CompilerDirectives.transferToInterpreter();
+				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
+			}
 		}
+
 	}
 
 	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {

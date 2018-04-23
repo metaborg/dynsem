@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.SortFunCallBuild
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.NoOpPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -17,6 +18,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.nodes.NodeUtil.NodeCountFilter;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class MatchPremise extends Premise {
@@ -71,13 +73,17 @@ public class MatchPremise extends Premise {
 			super(term, pattern, source);
 		}
 
+		private final ConditionProfile profile = ConditionProfile.createCountingProfile();
+
 		@Override
 		public void execute(VirtualFrame frame) {
-			patt.executeMatch(frame, term.executeGeneric(frame));
+			doEvaluated(term.executeGeneric(frame), frame);
 		}
 
 		public void doEvaluated(Object t, VirtualFrame frame) {
-			patt.executeMatch(frame, t);
+			if (!profile.profile(patt.executeMatch(frame, t))) {
+				throw PremiseFailureException.SINGLETON;
+			}
 		}
 
 	}

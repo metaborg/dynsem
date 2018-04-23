@@ -25,7 +25,7 @@ public class ConMatch extends MatchPattern {
 	}
 
 	@Override
-	public void executeMatch(VirtualFrame frame, Object t) {
+	public boolean executeMatch(VirtualFrame frame, Object t) {
 		final DynSemContext ctx = getContext();
 		final ITermRegistry termReg = ctx.getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
@@ -33,7 +33,7 @@ public class ConMatch extends MatchPattern {
 		MatchPattern matcher = InterpreterUtils.notNull(ctx, termReg.lookupMatchFactory(termClass))
 				.apply(getSourceSection(), cloneNodes(children));
 
-		replace(matcher).executeMatch(frame, t);
+		return replace(matcher).executeMatch(frame, t);
 	}
 
 	public static ConMatch create(IStrategoAppl t, FrameDescriptor fd) {

@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -97,7 +97,7 @@ public class HandleNode extends NativeExecutableNode {
 			}
 			try {
 				return (RuleResult) handlerCallTarget.call(args);
-			} catch (PatternMatchFailure pmf) {
+			} catch (PremiseFailureException rafx) {
 				handlerFails.enter();
 				throw abex;
 			}

@@ -23,11 +23,11 @@ public class TupleMatch extends MatchPattern {
 	}
 
 	@Override
-	public void executeMatch(VirtualFrame frame, Object term) {
+	public boolean executeMatch(VirtualFrame frame, Object term) {
 		final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(tupleClass)
 				.apply(getSourceSection(), cloneNodes(elemPatterns));
 
-		replace(concreteMatch).executeMatch(frame, term);
+		return replace(concreteMatch).executeMatch(frame, term);
 	}
 
 	public static TupleMatch create(IStrategoAppl t, FrameDescriptor fd) {

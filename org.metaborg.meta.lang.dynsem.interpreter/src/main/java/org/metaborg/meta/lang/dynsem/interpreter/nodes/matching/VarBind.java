@@ -21,8 +21,9 @@ public class VarBind extends MatchPattern {
 	}
 
 	@Override
-	public void executeMatch(VirtualFrame frame, Object t) {
+	public boolean executeMatch(VirtualFrame frame, Object t) {
 		InterpreterUtils.writeSlot(getContext(), frame, slot, t);
+		return true;
 	}
 
 	public static VarBind create(IStrategoAppl t, FrameDescriptor fd) {

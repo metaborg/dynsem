@@ -6,6 +6,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class AsMatch extends MatchPattern {
@@ -19,10 +20,13 @@ public class AsMatch extends MatchPattern {
 		this.patternNode = patternNode;
 	}
 
+	private final ConditionProfile c1Profile = ConditionProfile.createCountingProfile();
+	private final ConditionProfile c2Profile = ConditionProfile.createCountingProfile();
+
 	@Override
-	public void executeMatch(VirtualFrame frame, Object t) {
-		patternNode.executeMatch(frame, t);
-		varNode.executeMatch(frame, t);
+	public boolean executeMatch(VirtualFrame frame, Object t) {
+		return c1Profile.profile(patternNode.executeMatch(frame, t))
+				&& c2Profile.profile(varNode.executeMatch(frame, t));
 	}
 
 	public static AsMatch create(IStrategoAppl t, FrameDescriptor fd) {

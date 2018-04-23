@@ -29,7 +29,9 @@ public class RuleInputsNode extends DynSemNode {
 		final Object[] args = frame.getArguments();
 
 		// evaluate the source pattern
-		inPattern.executeMatch(frame, args[0]);
+		if (!inPattern.executeMatch(frame, args[0])) {
+			throw PremiseFailureException.SINGLETON;
+		}
 
 		// evaluate the component patterns
 		evaluateComponentPatterns(frame, args);
@@ -39,7 +41,9 @@ public class RuleInputsNode extends DynSemNode {
 	private void evaluateComponentPatterns(VirtualFrame frame, Object[] args) {
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
-			componentPatterns[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), args, i + 1));
+			if (!componentPatterns[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), args, i + 1))) {
+				throw PremiseFailureException.SINGLETON;
+			}
 		}
 	}
 
