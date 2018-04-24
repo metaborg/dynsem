@@ -26,7 +26,7 @@ public abstract class ListLengthFixedMatch extends MatchPattern {
 
 	@Specialization(replaces = "executeCachedList")
 	public boolean executeList(VirtualFrame frame, IListTerm<?> list,
-			@Cached("createCountingProfile()") ConditionProfile profile) {
+			@Cached("createBinaryProfile()") ConditionProfile profile) {
 		return profile.profile(list.size() == expectedLength);
 	}
 

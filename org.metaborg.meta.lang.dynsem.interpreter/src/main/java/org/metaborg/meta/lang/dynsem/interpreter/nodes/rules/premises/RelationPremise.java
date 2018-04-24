@@ -47,12 +47,13 @@ public abstract class RelationPremise extends Premise {
 
 	@Specialization
 	@ExplodeLoop
-	public void executeWithProfile(VirtualFrame frame, @Cached("createCountingProfile()") ConditionProfile profile) {
+	public void executeWithProfile(VirtualFrame frame, @Cached("createBinaryProfile()") ConditionProfile profile1,
+			@Cached("createCountingProfile()") ConditionProfile profile2) {
 		// execute the reduction
 		final RuleResult res = relationLhs.execute(frame);
 
 		// evaluate the RHS pattern match
-		if (!rhsNode.executeMatch(frame, res.result)) {
+		if (!profile1.profile(rhsNode.executeMatch(frame, res.result))) {
 			CompilerDirectives.transferToInterpreter();
 			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
 		}
@@ -61,7 +62,7 @@ public abstract class RelationPremise extends Premise {
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			if (!profile.profile(
+			if (!profile2.profile(
 					rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i)))) {
 				CompilerDirectives.transferToInterpreter();
 				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());

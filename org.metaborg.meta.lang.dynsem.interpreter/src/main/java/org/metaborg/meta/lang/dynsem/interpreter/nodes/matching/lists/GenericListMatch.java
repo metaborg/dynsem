@@ -26,14 +26,14 @@ public abstract class GenericListMatch extends MatchPattern {
 
 	@Specialization(guards = "tailPattern == null")
 	public boolean doNoTail(VirtualFrame frame, IListTerm<?> list,
-			@Cached("createCountingProfile()") ConditionProfile profile) {
+			@Cached("createBinaryProfile()") ConditionProfile profile) {
 		return profile.profile(numHeadElems == list.size());
 	}
 
 	@Specialization(guards = "tailPattern != null")
 	public boolean doWithTail(VirtualFrame frame, IListTerm<?> list,
-			@Cached("createCountingProfile()") ConditionProfile profile1,
-			@Cached("createCountingProfile()") ConditionProfile profile2) {
+			@Cached("createBinaryProfile()") ConditionProfile profile1,
+			@Cached("createBinaryProfile()") ConditionProfile profile2) {
 		return profile1.profile(list.size() >= numHeadElems)
 				&& profile2.profile(tailPattern.executeMatch(frame, list.drop(numHeadElems)));
 	}

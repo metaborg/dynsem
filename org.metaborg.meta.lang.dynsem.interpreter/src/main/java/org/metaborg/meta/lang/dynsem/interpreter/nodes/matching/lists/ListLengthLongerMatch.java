@@ -20,13 +20,13 @@ public abstract class ListLengthLongerMatch extends MatchPattern {
 
 	@Specialization(limit = "1", guards = { "list == cachedL" })
 	public boolean executeCachedList(VirtualFrame frame, IListTerm<?> list, @Cached("list") IListTerm<?> cachedL,
-			@Cached("cachedL.size()") int cachedLength, @Cached("createCountingProfile()") ConditionProfile profile) {
+			@Cached("cachedL.size()") int cachedLength, @Cached("createBinaryProfile()") ConditionProfile profile) {
 		return profile.profile(minimalLength <= cachedLength);
 	}
 
 	@Specialization(replaces = "executeCachedList")
 	public boolean executeList(VirtualFrame frame, IListTerm<?> list,
-			@Cached("createCountingProfile()") ConditionProfile profile) {
+			@Cached("createBinaryProfile()") ConditionProfile profile) {
 		return profile.profile(minimalLength <= list.size());
 	}
 

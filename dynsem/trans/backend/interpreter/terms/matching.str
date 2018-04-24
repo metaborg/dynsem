@@ -29,4 +29,4 @@ strategies
     (i, e_prematch) -> e |[ e_prematch && ~x:$[profile_[i]].profile(~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]())) ]|
   
   ds-to-interp-terms-match-profile:
-    i -> param |[ @Cached("createCountingProfile()") ConditionProfile ~x:$[profile_[i]] ]|
+    i -> param |[ @Cached("createBinaryProfile()") ConditionProfile ~x:$[profile_[i]] ]|

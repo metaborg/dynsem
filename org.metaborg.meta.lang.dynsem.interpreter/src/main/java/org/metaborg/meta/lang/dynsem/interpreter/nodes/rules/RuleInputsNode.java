@@ -32,18 +32,19 @@ public abstract class RuleInputsNode extends DynSemNode {
 
 	@Specialization
 	@ExplodeLoop
-	public void executeWithProfiling(VirtualFrame frame, @Cached("createCountingProfile()") ConditionProfile profile) {
+	public void executeWithProfiling(VirtualFrame frame, @Cached("createBinaryProfile()") ConditionProfile profile1,
+			@Cached("createCountingProfile()") ConditionProfile profile2) {
 		final Object[] args = frame.getArguments();
 
 		// evaluate the source pattern
-		if (!inPattern.executeMatch(frame, args[0])) {
+		if (!profile1.profile(inPattern.executeMatch(frame, args[0]))) {
 			throw PremiseFailureException.SINGLETON;
 		}
 
 		// evaluate the component patterns
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
-			if (!profile.profile(componentPatterns[i].executeMatch(frame,
+			if (!profile2.profile(componentPatterns[i].executeMatch(frame,
 					InterpreterUtils.getComponent(getContext(), args, i + 1)))) {
 				throw PremiseFailureException.SINGLETON;
 			}

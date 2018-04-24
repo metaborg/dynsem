@@ -38,10 +38,11 @@ public abstract class NativeCallPremise extends Premise {
 
 	@Specialization
 	@ExplodeLoop
-	public void execute(VirtualFrame frame, @Cached("createCountingProfile()") ConditionProfile profile) {
+	public void execute(VirtualFrame frame, @Cached("createBinaryProfile()") ConditionProfile profile1,
+			@Cached("createCountingProfile()") ConditionProfile profile2) {
 		final RuleResult res = execNode.execute(frame);
 
-		if (!rhsNode.executeMatch(frame, res.result)) {
+		if (!profile1.profile(rhsNode.executeMatch(frame, res.result))) {
 			CompilerDirectives.transferToInterpreter();
 			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
 		}
@@ -50,7 +51,7 @@ public abstract class NativeCallPremise extends Premise {
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			if (!profile.profile(
+			if (!profile2.profile(
 					rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i)))) {
 				CompilerDirectives.transferToInterpreter();
 				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());

@@ -25,8 +25,8 @@ public abstract class AsMatch extends MatchPattern {
 
 	@Specialization
 	public boolean executeMatch(VirtualFrame frame, Object t,
-			@Cached("createCountingProfile()") ConditionProfile profile1,
-			@Cached("createCountingProfile()") ConditionProfile profile2) {
+			@Cached("createBinaryProfile()") ConditionProfile profile1,
+			@Cached("createBinaryProfile()") ConditionProfile profile2) {
 		return profile1.profile(patternNode.executeMatch(frame, t)) && profile2.profile(varNode.executeMatch(frame, t));
 	}
 

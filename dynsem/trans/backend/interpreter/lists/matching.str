@@ -23,6 +23,7 @@ rules
         import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.*;
         import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.x_listmatchclassnotailuninitng.*;
         import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.x_listmatchclasswithtailuninitng.*;
+        import org.metaborg.lang.tiger.interpreter.generated.terms.match.List_A_Exp_Sort_MFactory.List_A_Exp_Sort_M_WithTail_UninitializedNodeGen.List_A_Exp_Sort_M_DeadHeadNodeGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.NoOpPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthFixedMatch;
@@ -155,14 +156,11 @@ rules
                     if (tailPattern instanceof NoOpPattern) {
                       replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length));
                     } else if (tailPattern instanceof ListLengthFixedMatch) {
-                      replace(ListLengthFixedMatchNodeGen.create(getSourceSection(),
-                          elemPatterns.length + ((ListLengthFixedMatch) tailPattern).getExpectedLength()));
+                      replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length + ((ListLengthFixedMatch) tailPattern).getExpectedLength()));
                     } else if (tailPattern instanceof ListLengthLongerMatch) {
-                      replace(ListLengthLongerMatchNodeGen.create(getSourceSection(),
-                          elemPatterns.length + ((ListLengthLongerMatch) tailPattern).getMinimalLength()));
+                      replace(ListLengthLongerMatchNodeGen.create(getSourceSection(), elemPatterns.length + ((ListLengthLongerMatch) tailPattern).getMinimalLength()));
                     } else {
-                      replace(List_A_Exp_Sort_M_DeadHeadNodeGen.create(getSourceSection(), elemPatterns.length,
-                          tailPattern));
+                      replace(x_listmatchclassdeadheadng.create(getSourceSection(), elemPatterns.length, tailPattern));
                     }
                     return tailMatched;
                 } else {
