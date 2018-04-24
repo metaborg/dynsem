@@ -31,14 +31,12 @@ public abstract class Case2 extends DynSemNode {
 	public abstract boolean execute(VirtualFrame frame, Object t);
 
 	@Specialization(guards = { "guard == null", "next == null" })
-	@ExplodeLoop
 	public boolean executeNoGuardNoNext(VirtualFrame frame, Object t) {
 		evaluatePremises(frame);
 		return true;
 	}
 
 	@Specialization(guards = { "guard != null", "next == null" })
-	@ExplodeLoop
 	public boolean executeGuardNoNext(VirtualFrame frame, Object t) {
 		if (guard.executeMatch(frame, t)) {
 			evaluatePremises(frame);
@@ -51,7 +49,6 @@ public abstract class Case2 extends DynSemNode {
 	private final BranchProfile nextTaken = BranchProfile.create();
 
 	@Specialization(guards = { "guard != null", "next != null" })
-	@ExplodeLoop
 	public boolean executeGuardWithNext(VirtualFrame frame, Object t) {
 		if (guard.executeMatch(frame, t)) {
 			evaluatePremises(frame);
@@ -62,9 +59,10 @@ public abstract class Case2 extends DynSemNode {
 		}
 	}
 
+	@ExplodeLoop
 	protected void evaluatePremises(VirtualFrame frame) {
-		for (Premise p : premises) {
-			p.execute(frame);
+		for (int i = 0; i < premises.length; i++) {
+			premises[i].execute(frame);
 		}
 	}
 
