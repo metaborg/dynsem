@@ -26,13 +26,13 @@
 		<dependency>
 			<groupId>com.oracle.truffle</groupId>
 			<artifactId>truffle-api</artifactId>
-			<version>0.32</version>
+			<version>1.0.0-rc1</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>com.oracle.truffle</groupId>
 			<artifactId>truffle-dsl-processor</artifactId>
-			<version>0.32</version>
+			<version>1.0.0-rc1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.metaborg</groupId>
