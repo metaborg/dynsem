@@ -13,12 +13,14 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.dsl.NodeChild;
+import com.oracle.truffle.api.dsl.NodeChildren;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.nodes.NodeUtil.NodeCountFilter;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class MatchPremise extends Premise {
@@ -48,7 +50,8 @@ public class MatchPremise extends Premise {
 			replace(NoOpPremiseNodeGen.create(getSourceSection()));
 		} else {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
-			replace(new NonElidableMatchPremise(term, patt, getSourceSection())).doEvaluated(t, frame);
+			replace(MatchPremiseFactory.NonElidableMatchPremiseNodeGen.create(getSourceSection(),
+					NodeUtil.cloneNode(term), NodeUtil.cloneNode(patt))).executeEvaluated(frame, t);
 		}
 	}
 
@@ -66,24 +69,28 @@ public class MatchPremise extends Premise {
 		return NodeUtil.printCompactTreeToString(this);
 	}
 
-	public class NonElidableMatchPremise extends MatchPremise {
+	@NodeChildren({ @NodeChild(value = "trm", type = TermBuild.class),
+			@NodeChild(value = "patt", type = MatchPattern.class, executeWith = "trm") })
+	public abstract static class NonElidableMatchPremise extends Premise {
 
-		public NonElidableMatchPremise(TermBuild term, MatchPattern pattern, SourceSection source) {
-			super(term, pattern, source);
+		public NonElidableMatchPremise(SourceSection source) {
+			super(source);
 		}
 
-		private final ConditionProfile profile = ConditionProfile.createCountingProfile();
+		public abstract void executeEvaluated(VirtualFrame f, Object trm);
 
-		@Override
-		public void execute(VirtualFrame frame) {
-			doEvaluated(term.executeGeneric(frame), frame);
-		}
-
-		public void doEvaluated(Object t, VirtualFrame frame) {
-			if (!profile.profile(patt.executeMatch(frame, t))) {
+		@Specialization
+		public void executeWithEvaluatedChildren(Object t, boolean matched) {
+			if (!matched) {
 				throw PremiseFailureException.SINGLETON;
 			}
 		}
 
+		@TruffleBoundary
+		public void dumpTerm(Object t) {
+			System.out.println(t);
+		}
+
 	}
+
 }
