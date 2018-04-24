@@ -89,7 +89,8 @@ rules
                 super(source, patterns);
               }
         
-              private final ConditionProfile eqLen = ConditionProfile.createCountingProfile();
+              private final ConditionProfile eqLen = ConditionProfile.createBinaryProfile();
+              private final ConditionProfile elemProfile = ConditionProfile.createBinaryProfile();
         
               @Specialization
               @ExplodeLoop
@@ -98,7 +99,7 @@ rules
                   return false;
                 } else {
                   for (MatchPattern patt : elemPatterns) {
-                    if(!patt.executeMatch(frame, l.head())){
+                    if(!elemProfile.profile(patt.executeMatch(frame, l.head()))) {
                       return false;
                     }
                     l = l.tail();
@@ -145,13 +146,11 @@ rules
               return elemPattsAreNoOps;
             }
         
-            protected final ConditionProfile gtLen = ConditionProfile.createCountingProfile();
-        
             @Specialization
             public boolean executeSpecific(VirtualFrame frame, x_listclass l) {
               CompilerAsserts.neverPartOfCompilation("Should have already specialized. Untested code!");
               if (elemPattsAreNoOps()) {
-                if (gtLen.profile(l.size() >= elemPatterns.length)) {
+                if (l.size() >= elemPatterns.length) {
                     boolean tailMatched = tailPattern.executeMatch(frame, l.drop(elemPatterns.length));
                     if (tailPattern instanceof NoOpPattern) {
                       replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length));
@@ -179,6 +178,10 @@ rules
                 super(source, patterns, tailPattern);
               }
         
+              private final ConditionProfile gtLen = ConditionProfile.createBinaryProfile();
+              private final ConditionProfile elemProfile = ConditionProfile.createBinaryProfile();
+              private final ConditionProfile tailProfile = ConditionProfile.createBinaryProfile();
+              
               @Specialization
               @ExplodeLoop
               public boolean executeSpecific(VirtualFrame frame, x_listclass l) {
@@ -187,12 +190,12 @@ rules
                 } else {
                   x_listclass tail = l;
                   for (MatchPattern patt : elemPatterns) {
-                    if(!patt.executeMatch(frame, tail.head())){
+                    if(!elemProfile.profile(patt.executeMatch(frame, tail.head()))){
                       return false;
                     }
                     tail = tail.tail();
                   }
-                  return tailPattern.executeMatch(frame, tail);
+                  return tailProfile.profile(tailPattern.executeMatch(frame, tail));
                 }
               }
         
@@ -213,13 +216,14 @@ rules
               }
         
               private final ConditionProfile ltLen = ConditionProfile.createCountingProfile();
-        
+              private final ConditionProfile tailProfile = ConditionProfile.createBinaryProfile();
+              
               @Specialization
               public boolean executeSpecific(VirtualFrame frame, x_listclass l) {
                 if (ltLen.profile(l.size() < deadHeadSize)) {
                   return false;
                 } else {
-                  return tailPattern.executeMatch(frame, l.drop(deadHeadSize));
+                  return tailProfile.profile(tailPattern.executeMatch(frame, l.drop(deadHeadSize)));
                 }
               }
         
