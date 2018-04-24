@@ -25,7 +25,7 @@ public abstract class CaseMatchPremise extends Premise {
 		super(source);
 	}
 
-	private final ConditionProfile profile = ConditionProfile.createCountingProfile();
+	private final ConditionProfile profile = ConditionProfile.createBinaryProfile();
 
 	@Specialization
 	public void executeCases(Object t, boolean success) {
