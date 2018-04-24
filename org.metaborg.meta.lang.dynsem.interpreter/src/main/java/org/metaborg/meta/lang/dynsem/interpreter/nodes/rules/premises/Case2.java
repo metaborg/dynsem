@@ -36,8 +36,6 @@ public abstract class Case2 extends DynSemNode {
 		return true;
 	}
 
-	// private final ConditionProfile profile1 = ConditionProfile.createBinaryProfile();
-
 	@Specialization(guards = { "guard != null", "next == null" })
 	public boolean executeGuardNoNext(VirtualFrame frame, Object t) {
 		if (guard.executeMatch(frame, t)) {
@@ -50,9 +48,6 @@ public abstract class Case2 extends DynSemNode {
 			return false;
 		}
 	}
-
-	// private final ConditionProfile profile2 = ConditionProfile.createBinaryProfile();
-	// private final BranchProfile nextTaken = BranchProfile.create();
 
 	@Specialization(guards = { "guard != null", "next != null" })
 	public boolean executeGuardWithNext(VirtualFrame frame, Object t) {
