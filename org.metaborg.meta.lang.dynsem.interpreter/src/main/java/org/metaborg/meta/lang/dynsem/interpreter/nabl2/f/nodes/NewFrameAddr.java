@@ -54,7 +54,7 @@ public abstract class NewFrameAddr extends NativeOpBuild {
 			throw new ReductionFailure(
 					"Occurrence " + dec + " does not exist in scope "
 							+ FrameLayoutImpl.INSTANCE.getScope(shape.createFactory()),
-					InterpreterUtils.createStacktrace());
+					InterpreterUtils.createStacktrace(), this);
 		}
 		return property.getLocation();
 	}

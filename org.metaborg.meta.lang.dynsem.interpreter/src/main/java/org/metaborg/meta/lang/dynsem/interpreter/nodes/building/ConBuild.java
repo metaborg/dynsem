@@ -44,7 +44,7 @@ public abstract class ConBuild extends TermBuild {
 		final ITermRegistry termReg = getContext().getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
 
-		final TermBuild build = InterpreterUtils.notNull(getContext(), termReg.lookupBuildFactory(termClass))
+		final TermBuild build = InterpreterUtils.notNull(getContext(), termReg.lookupBuildFactory(termClass), this)
 				.apply(getSourceSection(), cloneNodes(children));
 
 		return replace(build).executeIApplTerm(frame);

@@ -36,7 +36,7 @@ public class Rules2 extends Rule {
 			}
 		}
 
-		throw new ReductionFailure("Rules failed", InterpreterUtils.createStacktrace());
+		throw new ReductionFailure("Rules failed", InterpreterUtils.createStacktrace(), this);
 
 	}
 

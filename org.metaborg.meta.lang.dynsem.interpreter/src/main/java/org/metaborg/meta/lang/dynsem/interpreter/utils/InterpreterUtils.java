@@ -21,55 +21,60 @@ import com.oracle.truffle.api.frame.FrameInstance.FrameAccess;
 import com.oracle.truffle.api.frame.FrameInstanceVisitor;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.RootNode;
 
 public final class InterpreterUtils {
 
-	public static void setComponent(DynSemContext ctx, Object[] arguments, int idx, Object val) {
+	public static void setComponent(DynSemContext ctx, Object[] arguments, int idx, Object val, Node location) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
-			throw new ReductionFailure("Attempted to write null component at index " + idx, createStacktrace());
+			throw new ReductionFailure("Attempted to write null component at index " + idx, createStacktrace(),
+					location);
 		}
 		arguments[idx] = val;
 	}
 
-	public static Object getComponent(DynSemContext ctx, Object[] arguments, int idx) {
+	public static Object getComponent(DynSemContext ctx, Object[] arguments, int idx, Node location) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && idx >= arguments.length) {
-			throw new ReductionFailure("Attempted access to unbound component at index " + idx, createStacktrace());
+			throw new ReductionFailure("Attempted access to unbound component at index " + idx, createStacktrace(),
+					location);
 		}
 		final Object val = arguments[idx];
 		if (ctx.isSafeComponentsEnabled() && val == null) {
-			throw new ReductionFailure("Attempted access to null component at index " + idx, createStacktrace());
+			throw new ReductionFailure("Attempted access to null component at index " + idx, createStacktrace(),
+					location);
 		}
 		return val;
 	}
 
-	public static Object readSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot) {
+	public static Object readSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot, Node location) {
 		final Object val = frame.getValue(slot);
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
-			throw new ReductionFailure("Accessed null value for slot " + slot.getIdentifier(), createStacktrace());
+			throw new ReductionFailure("Accessed null value for slot " + slot.getIdentifier(), createStacktrace(),
+					location);
 		}
 
 		return val;
 	}
 
-	public static void writeSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot, Object val) {
+	public static void writeSlot(DynSemContext ctx, VirtualFrame frame, FrameSlot slot, Object val, Node location) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
 			throw new ReductionFailure("Attempted to write null value for slot " + slot.getIdentifier(),
-					createStacktrace());
+					createStacktrace(), location);
 		}
 		frame.setObject(slot, val);
 	}
 
-	public static <T> T notNull(DynSemContext ctx, T val) {
+	public static <T> T notNull(DynSemContext ctx, T val, Node location) {
 		CompilerAsserts.compilationConstant(ctx.isSafeComponentsEnabled());
 		if (ctx.isSafeComponentsEnabled() && val == null) {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
-			throw new ReductionFailure("Null value encountered", createStacktrace());
+			throw new ReductionFailure("Null value encountered", createStacktrace(), location);
 		}
 		return val;
 	}

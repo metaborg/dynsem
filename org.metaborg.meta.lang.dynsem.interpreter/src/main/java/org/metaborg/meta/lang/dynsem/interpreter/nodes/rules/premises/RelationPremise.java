@@ -55,7 +55,7 @@ public abstract class RelationPremise extends Premise {
 		// evaluate the RHS pattern match
 		if (!profile1.profile(rhsNode.executeMatch(frame, res.result))) {
 			CompilerDirectives.transferToInterpreter();
-			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
+			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace(), this);
 		}
 
 		// evaluate the RHS component pattern matches
@@ -63,9 +63,10 @@ public abstract class RelationPremise extends Premise {
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			if (!profile2.profile(
-					rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i)))) {
+					rhsRwNodes[i].executeMatch(frame,
+							InterpreterUtils.getComponent(getContext(), components, i, this)))) {
 				CompilerDirectives.transferToInterpreter();
-				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
+				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace(), this);
 			}
 		}
 

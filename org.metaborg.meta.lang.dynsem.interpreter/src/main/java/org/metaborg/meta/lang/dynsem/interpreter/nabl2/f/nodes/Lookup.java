@@ -47,7 +47,7 @@ public abstract class Lookup extends NativeOpBuild {
 	protected CallTarget lookupPathResolver(Occurrence ref) {
 		Object p = NaBL2LayoutImpl.INSTANCE.getNameResolution(getContext().getNaBL2Solution()).get(ref);
 		if (p == null) {
-			throw new ReductionFailure("Unresolved reference: " + ref, InterpreterUtils.createStacktrace());
+			throw new ReductionFailure("Unresolved reference: " + ref, InterpreterUtils.createStacktrace(), this);
 		}
 		assert p instanceof Path;
 		return ((Path) p).getCallTarget();

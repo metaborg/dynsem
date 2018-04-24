@@ -34,7 +34,7 @@ public class FallbackRule extends Rule {
 			nextDispatchClass = nextDispatchClass(frame);
 			if (nextDispatchClass == null) {
 				throw new ReductionFailure("No rule " + fallbackOfClass.getSimpleName() + " -" + arrowName
-						+ "-> applies to " + frame.getArguments()[0], InterpreterUtils.createStacktrace());
+						+ "-> applies to " + frame.getArguments()[0], InterpreterUtils.createStacktrace(), this);
 			}
 		}
 		RuleResult fallbackResult = dispatchNode.execute(nextDispatchClass, frame.getArguments());

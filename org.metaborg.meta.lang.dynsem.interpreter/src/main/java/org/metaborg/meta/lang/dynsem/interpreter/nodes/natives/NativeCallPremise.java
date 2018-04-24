@@ -12,7 +12,6 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -43,8 +42,7 @@ public abstract class NativeCallPremise extends Premise {
 		final RuleResult res = execNode.execute(frame);
 
 		if (!profile1.profile(rhsNode.executeMatch(frame, res.result))) {
-			CompilerDirectives.transferToInterpreter();
-			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
+			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace(), this);
 		}
 
 		// evaluate the RHS component pattern matches
@@ -52,9 +50,9 @@ public abstract class NativeCallPremise extends Premise {
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			if (!profile2.profile(
-					rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i)))) {
-				CompilerDirectives.transferToInterpreter();
-				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
+					rhsRwNodes[i].executeMatch(frame,
+							InterpreterUtils.getComponent(getContext(), components, i, this)))) {
+				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace(), this);
 			}
 		}
 	}

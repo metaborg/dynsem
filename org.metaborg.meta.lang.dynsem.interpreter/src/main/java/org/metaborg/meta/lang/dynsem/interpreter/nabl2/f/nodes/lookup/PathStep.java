@@ -42,7 +42,7 @@ public abstract class PathStep extends Node {
 			throw new ReductionFailure(
 					"Slot " + key + " does not exist for frame of scope "
 							+ FrameLayoutImpl.INSTANCE.getScope(shape.createFactory()),
-					InterpreterUtils.createStacktrace());
+					InterpreterUtils.createStacktrace(), this);
 		}
 		return property.getLocation();
 	}

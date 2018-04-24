@@ -71,7 +71,7 @@ public abstract class AddFrameLink extends NativeOpBuild {
 			throw new ReductionFailure(
 					"Slot for link " + linkIdent + " does not exist for frame of scope "
 							+ FrameLayoutImpl.INSTANCE.getScope(shape.createFactory()),
-					InterpreterUtils.createStacktrace());
+					InterpreterUtils.createStacktrace(), this);
 		}
 		return property.getLocation();
 	}

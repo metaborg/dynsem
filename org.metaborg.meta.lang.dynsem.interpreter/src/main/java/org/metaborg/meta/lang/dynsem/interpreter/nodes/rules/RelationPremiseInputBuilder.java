@@ -52,7 +52,7 @@ public abstract class RelationPremiseInputBuilder extends TermBuild {
 		CompilerAsserts.compilationConstant(componentNodes.length);
 
 		for (int i = 0; i < componentNodes.length; i++) {
-			InterpreterUtils.setComponent(getContext(), args, i + 1, componentNodes[i].executeGeneric(frame));
+			InterpreterUtils.setComponent(getContext(), args, i + 1, componentNodes[i].executeGeneric(frame), this);
 		}
 
 		return args;

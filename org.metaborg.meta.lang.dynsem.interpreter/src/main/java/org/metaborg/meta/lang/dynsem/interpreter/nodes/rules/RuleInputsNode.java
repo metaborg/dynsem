@@ -45,7 +45,7 @@ public abstract class RuleInputsNode extends DynSemNode {
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
 			if (!profile2.profile(componentPatterns[i].executeMatch(frame,
-					InterpreterUtils.getComponent(getContext(), args, i + 1)))) {
+					InterpreterUtils.getComponent(getContext(), args, i + 1, this)))) {
 				throw PremiseFailureException.SINGLETON;
 			}
 		}

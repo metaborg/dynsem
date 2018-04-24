@@ -25,7 +25,7 @@ public abstract class VarRead extends TermBuild {
 	// FIXME: we should provide type information here for the return type
 	@Specialization
 	public Object executeRead(VirtualFrame frame) {
-		return InterpreterUtils.readSlot(getContext(), frame, slot);
+		return InterpreterUtils.readSlot(getContext(), frame, slot, this);
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
