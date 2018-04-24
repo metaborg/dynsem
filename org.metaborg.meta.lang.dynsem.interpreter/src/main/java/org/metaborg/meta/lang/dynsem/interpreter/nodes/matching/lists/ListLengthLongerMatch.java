@@ -6,7 +6,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class ListLengthLongerMatch extends MatchPattern {
@@ -20,14 +19,13 @@ public abstract class ListLengthLongerMatch extends MatchPattern {
 
 	@Specialization(limit = "1", guards = { "list == cachedL" })
 	public boolean executeCachedList(VirtualFrame frame, IListTerm<?> list, @Cached("list") IListTerm<?> cachedL,
-			@Cached("cachedL.size()") int cachedLength, @Cached("createBinaryProfile()") ConditionProfile profile) {
-		return profile.profile(minimalLength <= cachedLength);
+			@Cached("cachedL.size()") int cachedLength) {
+		return minimalLength <= cachedLength;
 	}
 
 	@Specialization(replaces = "executeCachedList")
-	public boolean executeList(VirtualFrame frame, IListTerm<?> list,
-			@Cached("createBinaryProfile()") ConditionProfile profile) {
-		return profile.profile(minimalLength <= list.size());
+	public boolean executeList(VirtualFrame frame, IListTerm<?> list) {
+		return minimalLength <= list.size();
 	}
 
 	public int getMinimalLength() {

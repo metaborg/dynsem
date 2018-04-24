@@ -26,7 +26,10 @@ strategies
     (i, s) -> bstm |[ this.~x:$[p_[i]] = ~x:$[p_[i]]; ]|
 
   ds-to-interp-terms-matching-matchdescend:
-    (i, e_prematch) -> e |[ e_prematch && ~x:$[profile_[i]].profile(~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]())) ]|
-  
-  ds-to-interp-terms-match-profile:
-    i -> param |[ @Cached("createBinaryProfile()") ConditionProfile ~x:$[profile_[i]] ]|
+    (i, e_prematch) -> e |[ e_prematch && ~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()) ]|
+
+//  ds-to-interp-terms-matching-matchdescend:
+//    (i, e_prematch) -> e |[ e_prematch && ~x:$[profile_[i]].profile(~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]())) ]|
+//  
+//  ds-to-interp-terms-match-profile:
+//    i -> param |[ @Cached("createBinaryProfile()") ConditionProfile ~x:$[profile_[i]] ]|

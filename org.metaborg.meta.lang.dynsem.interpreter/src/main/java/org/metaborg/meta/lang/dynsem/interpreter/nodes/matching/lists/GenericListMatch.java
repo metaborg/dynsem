@@ -6,11 +6,9 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
-import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class GenericListMatch extends MatchPattern {
@@ -25,17 +23,13 @@ public abstract class GenericListMatch extends MatchPattern {
 	}
 
 	@Specialization(guards = "tailPattern == null")
-	public boolean doNoTail(VirtualFrame frame, IListTerm<?> list,
-			@Cached("createBinaryProfile()") ConditionProfile profile) {
-		return profile.profile(numHeadElems == list.size());
+	public boolean doNoTail(VirtualFrame frame, IListTerm<?> list) {
+		return numHeadElems == list.size();
 	}
 
 	@Specialization(guards = "tailPattern != null")
-	public boolean doWithTail(VirtualFrame frame, IListTerm<?> list,
-			@Cached("createBinaryProfile()") ConditionProfile profile1,
-			@Cached("createBinaryProfile()") ConditionProfile profile2) {
-		return profile1.profile(list.size() >= numHeadElems)
-				&& profile2.profile(tailPattern.executeMatch(frame, list.drop(numHeadElems)));
+	public boolean doWithTail(VirtualFrame frame, IListTerm<?> list) {
+		return list.size() >= numHeadElems && tailPattern.executeMatch(frame, list.drop(numHeadElems));
 	}
 
 	public static GenericListMatch create(IStrategoAppl t, FrameDescriptor fd) {

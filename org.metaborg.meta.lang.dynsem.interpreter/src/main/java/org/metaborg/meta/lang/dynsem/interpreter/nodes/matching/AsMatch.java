@@ -4,11 +4,9 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
-import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class AsMatch extends MatchPattern {
@@ -24,10 +22,8 @@ public abstract class AsMatch extends MatchPattern {
 
 
 	@Specialization
-	public boolean executeMatch(VirtualFrame frame, Object t,
-			@Cached("createBinaryProfile()") ConditionProfile profile1,
-			@Cached("createBinaryProfile()") ConditionProfile profile2) {
-		return profile1.profile(patternNode.executeMatch(frame, t)) && profile2.profile(varNode.executeMatch(frame, t));
+	public boolean doMatch(VirtualFrame frame, Object t) {
+		return patternNode.executeMatch(frame, t) && varNode.executeMatch(frame, t);
 	}
 
 	public static AsMatch create(IStrategoAppl t, FrameDescriptor fd) {

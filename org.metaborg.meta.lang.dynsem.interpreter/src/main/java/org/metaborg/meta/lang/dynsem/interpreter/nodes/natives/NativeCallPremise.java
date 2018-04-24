@@ -12,12 +12,10 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class NativeCallPremise extends Premise {
@@ -37,11 +35,10 @@ public abstract class NativeCallPremise extends Premise {
 
 	@Specialization
 	@ExplodeLoop
-	public void execute(VirtualFrame frame, @Cached("createBinaryProfile()") ConditionProfile profile1,
-			@Cached("createCountingProfile()") ConditionProfile profile2) {
+	public void doExecute(VirtualFrame frame) {
 		final RuleResult res = execNode.execute(frame);
 
-		if (!profile1.profile(rhsNode.executeMatch(frame, res.result))) {
+		if (!rhsNode.executeMatch(frame, res.result)) {
 			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace(), this);
 		}
 
@@ -49,9 +46,7 @@ public abstract class NativeCallPremise extends Premise {
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			if (!profile2.profile(
-					rhsRwNodes[i].executeMatch(frame,
-							InterpreterUtils.getComponent(getContext(), components, i, this)))) {
+			if (!rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i, this))) {
 				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace(), this);
 			}
 		}

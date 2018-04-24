@@ -11,6 +11,8 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class Case2 extends DynSemNode {
@@ -29,37 +31,40 @@ public abstract class Case2 extends DynSemNode {
 	public abstract boolean execute(VirtualFrame frame, Object t);
 
 	@Specialization(guards = { "guard == null", "next == null" })
+	@ExplodeLoop
 	public boolean executeNoGuardNoNext(VirtualFrame frame, Object t) {
-		for (Premise p : premises) {
-			p.execute(frame);
-		}
+		evaluatePremises(frame);
 		return true;
 	}
 
 	@Specialization(guards = { "guard != null", "next == null" })
+	@ExplodeLoop
 	public boolean executeGuardNoNext(VirtualFrame frame, Object t) {
 		if (guard.executeMatch(frame, t)) {
-			for (Premise p : premises) {
-				System.out.println(p.getClass());
-				p.execute(frame);
-			}
+			evaluatePremises(frame);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
+	private final BranchProfile nextTaken = BranchProfile.create();
+
 	@Specialization(guards = { "guard != null", "next != null" })
+	@ExplodeLoop
 	public boolean executeGuardWithNext(VirtualFrame frame, Object t) {
 		if (guard.executeMatch(frame, t)) {
-			for (Premise p : premises) {
-				System.out.println(p.getClass());
-				p.execute(frame);
-			}
+			evaluatePremises(frame);
 			return true;
 		} else {
-			// nextTaken.enter();
+			nextTaken.enter();
 			return next.execute(frame, t);
+		}
+	}
+
+	protected void evaluatePremises(VirtualFrame frame) {
+		for (Premise p : premises) {
+			p.execute(frame);
 		}
 	}
 

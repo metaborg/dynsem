@@ -40,7 +40,7 @@ strategies
           }
         
           @Specialization
-          public boolean doTyped(VirtualFrame frame, x_termclass term, param1*) {
+          public boolean doTyped(VirtualFrame frame, x_termclass term) {
             return e_match;
           }
 
@@ -52,5 +52,5 @@ strategies
       fdec* := <ds-to-interp-terms-matching-fdecs> s*; 
       param0* := <ds-to-interp-terms-matching-initparams> s*;
       bstm0* := <ds-to-interp-terms-matching-finits> s*;
-      param1* := <range; map(ds-to-interp-terms-match-profile)> (1, <length; inc> s*);
+//      param1* := <range; map(ds-to-interp-terms-match-profile)> (1, <length; inc> s*);
       e_match := <foldr(!e |[ true ]|, ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> s*)

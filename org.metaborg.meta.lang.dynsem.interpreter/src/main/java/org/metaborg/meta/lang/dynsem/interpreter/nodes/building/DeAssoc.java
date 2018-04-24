@@ -17,7 +17,6 @@ import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "left", type = TermBuild.class),
@@ -37,14 +36,12 @@ public abstract class DeAssoc extends TermBuild {
 		return DeAssocNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), left, right);
 	}
 
-	private final ConditionProfile profile = ConditionProfile.createBinaryProfile();
-
 	@Specialization
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object doMap(PersistentMap map, Object key) {
 		Object res = MapUtils.get(map, key);
-		if (profile.profile(res == null)) {
-			throw new ReductionFailure("No map entry for key: " + key, InterpreterUtils.createStacktrace());
+		if (res == null) {
+			throw new ReductionFailure("No map entry for key: " + key, InterpreterUtils.createStacktrace(), this);
 		}
 		return res;
 	}

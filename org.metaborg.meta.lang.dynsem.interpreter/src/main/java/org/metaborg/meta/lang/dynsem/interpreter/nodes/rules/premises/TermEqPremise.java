@@ -17,7 +17,6 @@ import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.nodes.NodeUtil;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.profiles.ValueProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -38,24 +37,23 @@ public abstract class TermEqPremise extends Premise {
 	}
 
 	@Specialization
-	public void doBoolean(boolean left, boolean right, @Cached("createCountingProfile()") ConditionProfile profile) {
-		if (profile.profile(left != right)) {
+	public void doBoolean(boolean left, boolean right) {
+		if (left != right) {
 			throw PremiseFailureException.SINGLETON;
 		}
 	}
 
 	@Specialization
-	public void doInt(int right, int left, @Cached("createCountingProfile()") ConditionProfile profile) {
-		if (profile.profile(left != right)) {
+	public void doInt(int right, int left) {
+		if (left != right) {
 			throw PremiseFailureException.SINGLETON;
 		}
 	}
 
 	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" }, limit = "1")
 	public void doString(String left, String right, @Cached("left") String cachedLeft,
-			@Cached("right") String cachedRight, @Cached("doStringEq(cachedLeft, cachedRight)") boolean isEqual,
-			@Cached("createBinaryProfile()") ConditionProfile profile) {
-		if (profile.profile(!isEqual)) {
+			@Cached("right") String cachedRight, @Cached("doStringEq(cachedLeft, cachedRight)") boolean isEqual) {
+		if (!isEqual) {
 			throw PremiseFailureException.SINGLETON;
 		}
 	}
@@ -67,9 +65,8 @@ public abstract class TermEqPremise extends Premise {
 
 	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" })
 	public void doITermDirect(IApplTerm left, IApplTerm right, @Cached("left") IApplTerm cachedLeft,
-			@Cached("right") IApplTerm cachedRight, @Cached("cachedLeft.equals(cachedRight)") boolean isEqual,
-			@Cached("createBinaryProfile()") ConditionProfile profile) {
-		if (profile.profile(!isEqual)) {
+			@Cached("right") IApplTerm cachedRight, @Cached("cachedLeft.equals(cachedRight)") boolean isEqual) {
+		if (!isEqual) {
 			throw PremiseFailureException.SINGLETON;
 		}
 	}
@@ -77,9 +74,8 @@ public abstract class TermEqPremise extends Premise {
 	@Specialization(replaces = "doITermDirect")
 	public void doITermIndirect(IApplTerm left, IApplTerm right,
 			@Cached("createClassProfile()") ValueProfile leftTypeProfile,
-			@Cached("createClassProfile()") ValueProfile rightTypeProfile,
-			@Cached("createBinaryProfile()") ConditionProfile profile) {
-		if (profile.profile(!leftTypeProfile.profile(left).equals(rightTypeProfile.profile(right)))) {
+			@Cached("createClassProfile()") ValueProfile rightTypeProfile) {
+		if (!leftTypeProfile.profile(left).equals(rightTypeProfile.profile(right))) {
 			throw PremiseFailureException.SINGLETON;
 		}
 	}
@@ -87,9 +83,8 @@ public abstract class TermEqPremise extends Premise {
 	@SuppressWarnings("rawtypes")
 	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" }, limit = "1")
 	public void doListDirect(PersistentList left, PersistentList right, @Cached("left") PersistentList cachedLeft,
-			@Cached("right") PersistentList cachedRight, @Cached("doListEq(cachedLeft, cachedRight)") boolean isEqual,
-			@Cached("createBinaryProfile()") ConditionProfile profile) {
-		if (profile.profile(!isEqual)) {
+			@Cached("right") PersistentList cachedRight, @Cached("doListEq(cachedLeft, cachedRight)") boolean isEqual) {
+		if (!isEqual) {
 			throw PremiseFailureException.SINGLETON;
 		}
 	}
@@ -100,12 +95,10 @@ public abstract class TermEqPremise extends Premise {
 		return l1.equals(l2);
 	}
 
-	private final ConditionProfile profile = ConditionProfile.createCountingProfile();
-
 	@Fallback
 	@TruffleBoundary
 	public void doObject(Object left, Object right) {
-		if (profile.profile(!left.equals(right))) {
+		if (!left.equals(right)) {
 			throw PremiseFailureException.SINGLETON;
 		}
 	}

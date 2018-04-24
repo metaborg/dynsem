@@ -3,7 +3,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class StringLiteralTermMatchPattern extends LiteralMatchPattern {
@@ -20,11 +19,9 @@ public abstract class StringLiteralTermMatchPattern extends LiteralMatchPattern 
 		return isEq;
 	}
 
-	private final ConditionProfile eqProfile = ConditionProfile.createCountingProfile();
-
 	@Specialization(replaces = "doCachedString")
 	public boolean doUncachedString(String s) {
-		return eqProfile.profile(isStringEq(s));
+		return isStringEq(s);
 	}
 
 	@TruffleBoundary
