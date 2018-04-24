@@ -18,8 +18,6 @@ public abstract class ListLengthFixedMatch extends MatchPattern {
 		this.expectedLength = expectedLength;
 	}
 
-	private final ConditionProfile profile = ConditionProfile.createCountingProfile();
-
 	@Specialization(guards = { "list == cachedL" })
 	public boolean executeCachedList(VirtualFrame frame, IListTerm<?> list, @Cached("list") IListTerm<?> cachedL,
 			@Cached("cachedL.size() == expectedLength") boolean eqLength) {
@@ -27,8 +25,13 @@ public abstract class ListLengthFixedMatch extends MatchPattern {
 	}
 
 	@Specialization(replaces = "executeCachedList")
-	public boolean executeList(VirtualFrame frame, IListTerm<?> list) {
+	public boolean executeList(VirtualFrame frame, IListTerm<?> list,
+			@Cached("createCountingProfile()") ConditionProfile profile) {
 		return profile.profile(list.size() == expectedLength);
+	}
+
+	public int getExpectedLength() {
+		return expectedLength;
 	}
 
 }

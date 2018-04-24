@@ -9,12 +9,15 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.Cached;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class RuleInputsNode extends DynSemNode {
+public abstract class RuleInputsNode extends DynSemNode {
 
 	@Child protected MatchPattern inPattern;
 	@Children protected final MatchPattern[] componentPatterns;
@@ -25,7 +28,11 @@ public class RuleInputsNode extends DynSemNode {
 		this.componentPatterns = componentPatterns;
 	}
 
-	public void execute(VirtualFrame frame) {
+	public abstract void execute(VirtualFrame frame);
+
+	@Specialization
+	@ExplodeLoop
+	public void executeWithProfiling(VirtualFrame frame, @Cached("createCountingProfile()") ConditionProfile profile) {
 		final Object[] args = frame.getArguments();
 
 		// evaluate the source pattern
@@ -34,25 +41,23 @@ public class RuleInputsNode extends DynSemNode {
 		}
 
 		// evaluate the component patterns
-		evaluateComponentPatterns(frame, args);
-	}
-
-	@ExplodeLoop
-	private void evaluateComponentPatterns(VirtualFrame frame, Object[] args) {
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
-			if (!componentPatterns[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), args, i + 1))) {
+			if (!profile.profile(componentPatterns[i].executeMatch(frame,
+					InterpreterUtils.getComponent(getContext(), args, i + 1)))) {
 				throw PremiseFailureException.SINGLETON;
 			}
 		}
 	}
+
 
 	public static RuleInputsNode create(IStrategoAppl lhsT, IStrategoList componentsT, FrameDescriptor fd) {
 		MatchPattern[] lhsSemCompPatterns = new MatchPattern[componentsT.size()];
 		for (int i = 0; i < lhsSemCompPatterns.length; i++) {
 			lhsSemCompPatterns[i] = MatchPattern.create(Tools.applAt(componentsT, i), fd);
 		}
-		return new RuleInputsNode(SourceUtils.dynsemSourceSectionFromATerm(lhsT), MatchPattern.create(lhsT, fd),
+		return RuleInputsNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(lhsT),
+				MatchPattern.create(lhsT, fd),
 				lhsSemCompPatterns);
 	}
 }

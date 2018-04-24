@@ -50,7 +50,6 @@ public class MatchPremise extends Premise {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
 			replace(new NonElidableMatchPremise(term, patt, getSourceSection())).doEvaluated(t, frame);
 		}
-		patt.executeMatch(frame, t);
 	}
 
 	public static MatchPremise create(IStrategoAppl t, FrameDescriptor fd) {

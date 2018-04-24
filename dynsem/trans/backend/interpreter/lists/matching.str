@@ -25,7 +25,6 @@ rules
         import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.x_listmatchclasswithtailuninitng.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.NoOpPattern;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthFixedMatch;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthFixedMatchNodeGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthLongerMatch;
@@ -75,12 +74,11 @@ rules
             }
         
             @Specialization
-            public void executeSpecific(VirtualFrame frame, x_listclass l) {
+            public boolean executeSpecific(VirtualFrame frame, x_listclass l) {
               if (elemPattsAreNoOps(elemPatterns)) {
-                replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length)).executeMatch(frame,
-                    l);
+                return replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length)).executeMatch(frame, l);
               } else {
-                replace(x_listmatchclassnotailng.create(getSourceSection(), elemPatterns));
+                return replace(x_listmatchclassnotailng.create(getSourceSection(), elemPatterns)).executeMatch(frame, l);
               }
             }
         
@@ -94,14 +92,17 @@ rules
         
               @Specialization
               @ExplodeLoop
-              public void executeSpecific(VirtualFrame frame, x_listclass l) {
+              public boolean executeSpecific(VirtualFrame frame, x_listclass l) {
                 if (eqLen.profile(l.size() != elemPatterns.length)) {
-                  throw PatternMatchFailure.INSTANCE;
+                  return false;
                 } else {
                   for (MatchPattern patt : elemPatterns) {
-                    patt.executeMatch(frame, l.head());
+                    if(!patt.executeMatch(frame, l.head())){
+                      return false;
+                    }
                     l = l.tail();
                   }
+                  return true;
                 }
               }
         
@@ -146,15 +147,11 @@ rules
             protected final ConditionProfile gtLen = ConditionProfile.createCountingProfile();
         
             @Specialization
-            public void executeSpecific(VirtualFrame frame, x_listclass l) {
+            public boolean executeSpecific(VirtualFrame frame, x_listclass l) {
               CompilerAsserts.neverPartOfCompilation("Should have already specialized. Untested code!");
               if (elemPattsAreNoOps()) {
                 if (gtLen.profile(l.size() >= elemPatterns.length)) {
-                  try {
-                    tailPattern.executeMatch(frame, l.drop(elemPatterns.length));
-                  } catch (PatternMatchFailure pmfx) {
-                    throw pmfx;
-                  } finally {
+                    boolean tailMatched = tailPattern.executeMatch(frame, l.drop(elemPatterns.length));
                     if (tailPattern instanceof NoOpPattern) {
                       replace(ListLengthFixedMatchNodeGen.create(getSourceSection(), elemPatterns.length));
                     } else if (tailPattern instanceof ListLengthFixedMatch) {
@@ -164,21 +161,15 @@ rules
                       replace(ListLengthLongerMatchNodeGen.create(getSourceSection(),
                           elemPatterns.length + ((ListLengthLongerMatch) tailPattern).getMinimalLength()));
                     } else {
-                      replace(x_listmatchclassdeadheadng.create(getSourceSection(),
-                          elemPatterns.length, tailPattern));
+                      replace(List_A_Exp_Sort_M_DeadHeadNodeGen.create(getSourceSection(), elemPatterns.length,
+                          tailPattern));
                     }
-                  }
-                  /*
-                   * we can optimize if the tail pattern specialized to either one of: - NoOp -
-                   * ListFixedLength - ListLongerThan
-                   */
+                    return tailMatched;
                 } else {
-                  // list ain't big enough
-                  throw PatternMatchFailure.INSTANCE;
+                  return false;
                 }
-        
-              } else {
-                replace(x_listmatchclassfullng.create(getSourceSection(), elemPatterns, tailPattern))
+              }  else {
+                return replace(x_listmatchclassfullng.create(getSourceSection(), elemPatterns, tailPattern))
                     .executeSpecific(frame, l);
               }
             }
@@ -192,16 +183,18 @@ rules
         
               @Specialization
               @ExplodeLoop
-              public void executeSpecific(VirtualFrame frame, x_listclass l) {
+              public boolean executeSpecific(VirtualFrame frame, x_listclass l) {
                 if (gtLen.profile(l.size() < elemPatterns.length)) {
-                  throw PatternMatchFailure.INSTANCE;
+                  return false;
                 } else {
                   x_listclass tail = l;
                   for (MatchPattern patt : elemPatterns) {
-                    patt.executeMatch(frame, tail.head());
+                    if(!patt.executeMatch(frame, tail.head())){
+                      return false;
+                    }
                     tail = tail.tail();
                   }
-                  tailPattern.executeMatch(frame, tail);
+                  return tailPattern.executeMatch(frame, tail);
                 }
               }
         
@@ -224,11 +217,11 @@ rules
               private final ConditionProfile ltLen = ConditionProfile.createCountingProfile();
         
               @Specialization
-              public void executeSpecific(VirtualFrame frame, x_listclass l) {
+              public boolean executeSpecific(VirtualFrame frame, x_listclass l) {
                 if (ltLen.profile(l.size() < deadHeadSize)) {
-                  throw PatternMatchFailure.INSTANCE;
+                  return false;
                 } else {
-                  tailPattern.executeMatch(frame, l.drop(deadHeadSize));
+                  return tailPattern.executeMatch(frame, l.drop(deadHeadSize));
                 }
               }
         

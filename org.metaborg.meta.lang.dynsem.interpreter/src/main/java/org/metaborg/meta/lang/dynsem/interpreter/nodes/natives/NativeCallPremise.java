@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
@@ -11,12 +12,16 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.dsl.Cached;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class NativeCallPremise extends Premise {
+public abstract class NativeCallPremise extends Premise {
 	@Child private NativeExecutableNode execNode;
 
 	@Child private MatchPattern rhsNode;
@@ -31,18 +36,25 @@ public class NativeCallPremise extends Premise {
 		this.rhsRwNodes = rhsComponentNodes;
 	}
 
-	@Override
+	@Specialization
 	@ExplodeLoop
-	public void execute(VirtualFrame frame) {
+	public void execute(VirtualFrame frame, @Cached("createCountingProfile()") ConditionProfile profile) {
 		final RuleResult res = execNode.execute(frame);
 
-		rhsNode.executeMatch(frame, res.result);
+		if (!rhsNode.executeMatch(frame, res.result)) {
+			CompilerDirectives.transferToInterpreter();
+			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
+		}
 
 		// evaluate the RHS component pattern matches
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i));
+			if (!profile.profile(
+					rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i)))) {
+				CompilerDirectives.transferToInterpreter();
+				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
+			}
 		}
 	}
 
@@ -59,7 +71,8 @@ public class NativeCallPremise extends Premise {
 			rhsRwNodes[i] = MatchPattern.create(Tools.applAt(rhsRwsT, i), ruleFD);
 		}
 
-		return new NativeCallPremise(SourceUtils.dynsemSourceSectionFromATerm(t), ruleNode, rhsNode, rhsRwNodes);
+		return NativeCallPremiseNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), ruleNode, rhsNode,
+				rhsRwNodes);
 	}
 
 }

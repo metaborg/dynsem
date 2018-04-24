@@ -14,9 +14,12 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.dsl.Cached;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.profiles.ConditionProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
 /**
@@ -26,7 +29,7 @@ import com.oracle.truffle.api.source.SourceSection;
  * @author vladvergu
  *
  */
-public class RelationPremise extends Premise {
+public abstract class RelationPremise extends Premise {
 
 	@Child protected InvokeRelationNode relationLhs;
 
@@ -42,9 +45,9 @@ public class RelationPremise extends Premise {
 		this.rhsRwNodes = rhsComponentNodes;
 	}
 
-	@Override
+	@Specialization
 	@ExplodeLoop
-	public void execute(VirtualFrame frame) {
+	public void executeWithProfile(VirtualFrame frame, @Cached("createCountingProfile()") ConditionProfile profile) {
 		// execute the reduction
 		final RuleResult res = relationLhs.execute(frame);
 
@@ -58,7 +61,8 @@ public class RelationPremise extends Premise {
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			if (!rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i))) {
+			if (!profile.profile(
+					rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i)))) {
 				CompilerDirectives.transferToInterpreter();
 				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace());
 			}
@@ -79,7 +83,7 @@ public class RelationPremise extends Premise {
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
-		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
+		return RelationPremiseNodeGen.create(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
 				DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
 				SourceUtils.dynsemSourceSectionFromATerm(t));
 	}

@@ -22,8 +22,9 @@ strategies
         import ~x:<get-opt> TermPkg().x_termclass;
         import ~x:<get-opt> NativePkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
+        import com.oracle.truffle.api.profiles.ConditionProfile;
         
+        import com.oracle.truffle.api.dsl.Cached;
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.dsl.Fallback;
         import com.oracle.truffle.api.frame.VirtualFrame;
@@ -39,19 +40,10 @@ strategies
           }
         
           @Specialization
-          public void doTyped(VirtualFrame frame, x_termclass term) {
-            bstm1*
+          public boolean doTyped(VirtualFrame frame, x_termclass term, param1*) {
+            return e_match;
           }
 
-          @Fallback
-          public void doGeneric(VirtualFrame frame, Object term) {
-            if (term instanceof x_termclass) {
-              doTyped(frame, (x_termclass) term);
-            } else {
-              throw PatternMatchFailure.INSTANCE;
-            }
-          }
-          
         }
       ]|
     where
@@ -60,4 +52,5 @@ strategies
       fdec* := <ds-to-interp-terms-matching-fdecs> s*; 
       param0* := <ds-to-interp-terms-matching-initparams> s*;
       bstm0* := <ds-to-interp-terms-matching-finits> s*;
-      bstm1* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> s*)
+      param1* := <range; map(ds-to-interp-terms-match-profile)> (1, <length; inc> s*);
+      e_match := <foldr(!e |[ true ]|, ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> s*)
