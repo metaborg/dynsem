@@ -10,6 +10,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
@@ -38,8 +39,8 @@ public class WhileNode extends NativeExecutableNode {
 	private final FrameSlot conditionTSlot;
 	private final FrameSlot bodyTSlot;
 	private final FrameSlot resultTSlot;
-	private final FrameSlot[] roCompSlots;
-	private final FrameSlot[] rwCompSlots;
+	@CompilationFinal(dimensions = 1) private final FrameSlot[] roCompSlots;
+	@CompilationFinal(dimensions = 1) private final FrameSlot[] rwCompSlots;
 
 	public WhileNode(SourceSection source, TermBuild conditionBuildNode, TermBuild bodyBuildNode,
 			TermBuild defaultValBuildNode, TermBuild[] roCompBuilds, TermBuild[] rwCompBuilds) {
