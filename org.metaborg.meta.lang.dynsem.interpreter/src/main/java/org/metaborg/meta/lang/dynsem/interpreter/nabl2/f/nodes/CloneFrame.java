@@ -25,7 +25,9 @@ public abstract class CloneFrame extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "frm.getShape() == cached_shape" })
+	public abstract DynamicObject executeWithEvaluatedFrame(DynamicObject frm);
+
+	@Specialization(limit = "10", guards = { "frm.getShape() == cached_shape" })
 	@ExplodeLoop
 	public DynamicObject executeCachedShape(DynamicObject frm, @Cached("frm.getShape()") Shape cached_shape,
 			@Cached(value = "getLocations(cached_shape)", dimensions = 1) Location[] locations) {

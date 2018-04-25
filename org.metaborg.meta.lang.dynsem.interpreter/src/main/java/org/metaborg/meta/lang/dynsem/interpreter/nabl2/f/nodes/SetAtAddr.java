@@ -21,7 +21,7 @@ public abstract class SetAtAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "addr.location() == cached_location" })
+	@Specialization(limit = "10", guards = { "addr.location() == cached_location" })
 	public Object executeFrameSetCached(FrameAddr addr, Object val,
 			@Cached("addr.location()") Location cached_location) {
 		try {

@@ -18,7 +18,7 @@ public abstract class GetAtAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "addr.location() == cached_location" })
+	@Specialization(limit = "10", guards = { "addr.location() == cached_location" })
 	public Object executeFrameGetCached(FrameAddr addr, @Cached("addr.location()") Location cached_location) {
 		return cached_location.get(addr.frame());
 	}
