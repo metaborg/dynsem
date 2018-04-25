@@ -29,7 +29,10 @@ strategies // builder for sorts
   
 strategies // checked builders
   
-  jclass-checkedbuilder-api = fail
+  jclass-checkedbuilder-api = fail // jclass-nativety-checkedbuilder
+
+  jclass-nativety-checkedbuilder:
+    dec@NativeBaseTypeDecl(_, _, _, _) -> $[Is_[<jclass-nativety; shorten-uniqueify-string> dec]]
 
 strategies // matcher for sorts
   
