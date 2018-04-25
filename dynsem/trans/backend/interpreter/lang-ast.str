@@ -67,10 +67,11 @@ rules /* Sort & Constructor classes */
       implicit-map-key* := <collect-all(\ MapSort(k, _) -> ListSort(k) \); nub> sig;
       implicit-map-val* := <collect-all(\ MapSort(_, v) -> ListSort(v) \); nub> sig
   
-  get-languagetuple-usage-in-module =
-    ?Module(_, _);
-    collect-all(?TupleSort(_));
-    nub
+  get-languagetuple-usage-in-module:
+    m -> <nub> [tup-decl*, tup-used*]
+    where
+      tup-decl* := <collect-all(?TupleSort(_))> m;
+      tup-used* := <collect-all(\ Tuple(t*) -> TupleSort(<map(type-of; derw-type)> t*) \)> m
   
   ds-to-interp-hashcode-append:
     (idx, e) -> e |[ e.append(~x:$[_[idx]]) ]|
