@@ -5,11 +5,13 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.arrays.ArrayAddr;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.object.FinalLocationException;
 import com.oracle.truffle.api.object.IncompatibleLocationException;
+import com.oracle.truffle.api.object.Location;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "addr", type = TermBuild.class), @NodeChild(value = "val", type = TermBuild.class) })
@@ -19,7 +21,18 @@ public abstract class SetAtAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization // (guards = { "canSetInFrame(addr, val)" })
+	@Specialization(guards = { "addr.location() == cached_location" })
+	public Object executeFrameSetCached(FrameAddr addr, Object val,
+			@Cached("addr.location()") Location cached_location) {
+		try {
+			cached_location.set(addr.frame(), val);
+		} catch (IncompatibleLocationException | FinalLocationException e) {
+			throw new IllegalStateException(e);
+		}
+		return val;
+	}
+
+	@Specialization(replaces = "executeFrameSetCached")
 	public Object executeFrameSet(FrameAddr addr, Object val) {
 		try {
 			addr.location().set(addr.frame(), val);
