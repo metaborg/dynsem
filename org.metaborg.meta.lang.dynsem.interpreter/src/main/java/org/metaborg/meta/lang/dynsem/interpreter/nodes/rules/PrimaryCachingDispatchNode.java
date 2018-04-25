@@ -13,7 +13,7 @@ public abstract class PrimaryCachingDispatchNode extends DispatchNode {
 	@Override
 	public abstract RuleResult execute(Class<?> dispatchClass, Object[] args);
 
-	@Specialization(limit = "1", guards = { "dispatchClass == cachedDispatchClass" })
+	@Specialization(limit = "4", guards = { "dispatchClass == cachedDispatchClass" })
 	public RuleResult doCachedPrimary(Class<?> dispatchClass, Object[] args,
 			@Cached("dispatchClass") Class<?> cachedDispatchClass,
 			@Cached("createDispatchChain(cachedDispatchClass)") DispatchChainRoot dispatchChain) {
