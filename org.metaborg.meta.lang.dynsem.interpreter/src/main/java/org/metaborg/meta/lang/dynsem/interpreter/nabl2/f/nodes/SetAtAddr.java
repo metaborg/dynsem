@@ -34,11 +34,13 @@ public abstract class SetAtAddr extends NativeOpBuild {
 
 	@Specialization(replaces = "executeFrameSetCached")
 	public Object executeFrameSet(FrameAddr addr, Object val) {
-		try {
-			addr.location().set(addr.frame(), val);
-		} catch (IncompatibleLocationException | FinalLocationException e) {
-			throw new IllegalStateException(e);
-		}
+		assert addr.location().canSet(val);
+		// try {
+		addr.frame().set(addr.key(), val);
+		// addr.location().set(addr.frame(), val);
+		// } catch (IncompatibleLocationException | FinalLocationException e) {
+		// throw new IllegalStateException(e);
+		// }
 		return val;
 	}
 

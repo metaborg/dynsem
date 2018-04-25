@@ -36,7 +36,7 @@ public abstract class D extends PathStep {
 	public FrameAddr lookupCached(DynamicObject frm, @Cached("lookupShape(frm)") Shape frm_shape,
 			@Cached("lookupLocation(frm_shape, dec)") Location loc) {
 		assert FrameLayoutImpl.INSTANCE.getScope(frm).equals(scopeIdent);
-		return new FrameAddr(frm, loc);
+		return new FrameAddr(frm, loc, dec);
 	}
 
 	@Specialization(replaces = "lookupCached")

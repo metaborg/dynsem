@@ -25,7 +25,8 @@ public abstract class GetAtAddr extends NativeOpBuild {
 
 	@Specialization(replaces = "executeFrameGetCached")
 	public Object executeFrameGet(FrameAddr addr) {
-		return addr.location().get(addr.frame());
+		return addr.frame().get(addr.key());
+		// return addr.location().get(addr.frame());
 	}
 
 	@Specialization

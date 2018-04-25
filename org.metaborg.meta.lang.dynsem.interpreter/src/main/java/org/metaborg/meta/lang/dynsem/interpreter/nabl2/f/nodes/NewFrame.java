@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameLink;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -23,31 +22,38 @@ public abstract class NewFrame extends NativeOpBuild {
 		super(source);
 	}
 
-	// FIXME cache the location of the slots-links being set
 	@Specialization(guards = { "scopeident == scopeident_cached" })
-	public DynamicObject createCached(ScopeIdentifier scopeident, Object links,
+	public DynamicObject executeCachedProto(ScopeIdentifier scopeident, Object links,
 			@Cached("lookupListClass()") Class<? extends IListTerm<FrameLink>> linksListClass,
 			@Cached("scopeident") ScopeIdentifier scopeident_cached,
-			@Cached("lookupProtoFrame(scopeident)") DynamicObject protoFrame) {
-		return actualCreate(linksListClass.cast(links), protoFrame);
+			@Cached("getContext().getProtoFrame(scopeident_cached)") DynamicObject protoFrame_cached,
+			@Cached("createFrameCloner()") CloneFrame cloner) {
+		DynamicObject clone = cloner.executeWithEvaluatedFrame(protoFrame_cached);
+		setLinks(clone, linksListClass.cast(links).toArray());
+		return clone;
 	}
 
-	@Specialization(replaces = "createCached")
-	public DynamicObject executeCreateFrame(ScopeIdentifier scopeident, Object links,
-			@Cached("lookupListClass()") Class<? extends IListTerm<FrameLink>> linksListClass) {
-		return actualCreate(linksListClass.cast(links), getContext().getProtoFrame(scopeident));
+
+	@Specialization(replaces = "executeCachedProto")
+	public DynamicObject executeUncached(ScopeIdentifier scopeident, Object links,
+			@Cached("lookupListClass()") Class<? extends IListTerm<FrameLink>> linksListClass,
+			@Cached("createFrameCloner()") CloneFrame cloner) {
+		DynamicObject clone = cloner.executeWithEvaluatedFrame(getContext().getProtoFrame(scopeident));
+		setLinks(clone, linksListClass.cast(links).toArray());
+		return clone;
 	}
 
-	private DynamicObject actualCreate(IListTerm<FrameLink> links, DynamicObject protoFrame) {
-		assert FrameLayoutImpl.INSTANCE.isFrame(protoFrame);
-
-		DynamicObject frame = protoFrame.copy(protoFrame.getShape());
-		for (FrameLink link : links) {
+	private void setLinks(DynamicObject frm, FrameLink[] links) {
+		for (int i = 0; i < links.length; i++) {
+			FrameLink link = links[i];
 			// FIXME: investigate optimizing this with location caches
-			frame.set(link.link(), link.frame());
+			frm.set(link.link(), link.frame());
 		}
+	}
 
-		return frame;
+	protected CloneFrame createFrameCloner() {
+		CompilerAsserts.neverPartOfCompilation();
+		return CloneFrameNodeGen.create(getSourceSection(), null);
 	}
 
 	protected Class<? extends IListTerm<FrameLink>> lookupListClass() {
@@ -55,10 +61,10 @@ public abstract class NewFrame extends NativeOpBuild {
 		return getContext().getTermRegistry().getListClass(FrameLink.class);
 	}
 
-	protected DynamicObject lookupProtoFrame(ScopeIdentifier scopeident) {
-		CompilerAsserts.neverPartOfCompilation();
-		return getContext().getProtoFrame(scopeident);
-	}
+	// protected DynamicObject lookupProtoFrame(ScopeIdentifier scopeident) {
+	// CompilerAsserts.neverPartOfCompilation();
+	// return getContext().getProtoFrame(scopeident);
+	// }
 
 	public static NewFrame create(SourceSection source, TermBuild scope, TermBuild links) {
 		return NewFrameNodeGen.create(source, scope, links);

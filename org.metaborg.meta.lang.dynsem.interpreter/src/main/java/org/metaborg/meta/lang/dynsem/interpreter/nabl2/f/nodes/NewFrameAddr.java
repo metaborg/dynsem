@@ -29,12 +29,12 @@ public abstract class NewFrameAddr extends NativeOpBuild {
 	@Specialization(guards = { "dec == dec_cached", "shapeCheck(shape, frm)" })
 	public FrameAddr createCached(DynamicObject frm, Occurrence dec, @Cached("dec") Occurrence dec_cached,
 			@Cached("lookupShape(frm)") Shape shape, @Cached("lookupLocation(shape, dec)") Location loc) {
-		return new FrameAddr(frm, loc);
+		return new FrameAddr(frm, loc, dec_cached);
 	}
 
 	@Specialization(replaces = "createCached")
 	public FrameAddr createUncached(DynamicObject frm, Occurrence dec) {
-		return new FrameAddr(frm, frm.getShape().getProperty(dec).getLocation());
+		return new FrameAddr(frm, frm.getShape().getProperty(dec).getLocation(), dec);
 	}
 
 	protected Shape lookupShape(DynamicObject frm) {
