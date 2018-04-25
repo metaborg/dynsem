@@ -54,9 +54,9 @@ rules
         
           @ExplodeLoop
           private final x_elemclass[] executeElems(VirtualFrame frame) {
-            final x_elemclass[] elems = new x_elemclass[elemNodes.length];
+            final Object[] elems = new x_elemclass[elemNodes.length];
             for (int idx = 0; idx < elems.length; idx++) {
-              elems[idx] =  TypesGen.x_aselemfun(elemNodes[idx].executeGeneric(frame));
+              elems[idx] =  elemNodes[idx].executeGeneric(frame);
             }
             return (x_elemclass[]) elems;
           }
