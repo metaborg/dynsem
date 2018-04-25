@@ -95,8 +95,8 @@ rules
                 if (l.size() != elemPatterns.length) {
                   return false;
                 } else {
-                  for (MatchPattern patt : elemPatterns) {
-                    if(!patt.executeMatch(frame, l.head())) {
+                  for (int idx = 0; idx < elemPatterns.length; idx++) {
+                    if(!elemPatterns[idx].executeMatch(frame, l.head())) {
                       return false;
                     }
                     l = l.tail();
@@ -182,8 +182,8 @@ rules
                   return false;
                 } else {
                   x_listclass tail = l;
-                  for (MatchPattern patt : elemPatterns) {
-                    if(!patt.executeMatch(frame, tail.head())){
+                  for(int idx = 0; idx < elemPatterns.length; idx++){
+                    if(!elemPatterns[idx].executeMatch(frame, tail.head())){
                       return false;
                     }
                     tail = tail.tail();

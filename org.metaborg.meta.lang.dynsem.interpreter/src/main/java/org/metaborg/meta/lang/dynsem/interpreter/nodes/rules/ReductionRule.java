@@ -51,7 +51,6 @@ public class ReductionRule extends Rule {
 
 	@Override
 	public RuleResult execute(VirtualFrame frame) {
-		// printmessage();
 		/* evaluate the inputs node */
 		inputsNode.execute(frame);
 
@@ -61,11 +60,6 @@ public class ReductionRule extends Rule {
 		/* evaluate the rule target */
 		return target.execute(frame);
 	}
-
-	// @TruffleBoundary
-	// private void printmessage() {
-	// System.out.println(this.toString());
-	// }
 
 	@ExplodeLoop
 	private void evaluatePremises(VirtualFrame frame) {

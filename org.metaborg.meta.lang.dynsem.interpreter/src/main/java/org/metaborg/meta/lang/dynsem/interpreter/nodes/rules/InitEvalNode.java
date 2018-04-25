@@ -21,7 +21,7 @@ public class InitEvalNode extends DynSemRootNode {
 		this.program = program;
 		this.initNabl2 = new InitNaBL2Node(source);
 		this.initProtoFrames = new InitProtoFrames(source);
-		this.initDispatch = DispatchNodeGen.create(source, "init");
+		this.initDispatch = DispatchNode.create(source, "init");
 
 		Truffle.getRuntime().createCallTarget(this);
 	}

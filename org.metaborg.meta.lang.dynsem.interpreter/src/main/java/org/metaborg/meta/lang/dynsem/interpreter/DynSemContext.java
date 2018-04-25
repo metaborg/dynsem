@@ -12,6 +12,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FramePrototypesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 
@@ -123,7 +124,7 @@ public final class DynSemContext {
 	 * 
 	 * @return
 	 */
-	public RuleRegistry getRuleRegistry() {
+	public IRuleRegistry getRuleRegistry() {
 		return ruleRegistry;
 	}
 

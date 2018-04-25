@@ -26,7 +26,7 @@ public abstract class DynSemNode extends Node {
 
 	protected final DynSemContext getContext() {
 		if (ctx == null) {
-			CompilerDirectives.transferToInterpreter();
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			ctx = DynSemLanguage.getContext(getRootNode());
 		}
 		return ctx;
@@ -36,7 +36,7 @@ public abstract class DynSemNode extends Node {
 
 	protected final NaBL2Context nabl2Context() {
 		if (context == null) {
-			CompilerDirectives.transferToInterpreter();
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			context = (NaBL2Context) getContext().readProperty(NaBL2Context.class.getName(), null);
 		}
 		return context;

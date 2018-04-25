@@ -2,7 +2,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
 import com.oracle.truffle.api.frame.FrameSlot;
@@ -34,8 +33,8 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 		this.resultTSlot = resultTSlot;
 		this.roCompSlots = roCompSlots;
 		this.rwCompSlots = rwCompSlots;
-		this.conditionEvalNode = DispatchNodeGen.create(getSourceSection(), "");
-		this.bodyEvalNode = DispatchNodeGen.create(getSourceSection(), "");
+		this.conditionEvalNode = DispatchNode.create(getSourceSection(), "");
+		this.bodyEvalNode = DispatchNode.create(getSourceSection(), "");
 		adoptChildren();
 	}
 

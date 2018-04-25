@@ -23,9 +23,9 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
-public class RuleRegistry {
+public class RuleRegistry implements IRuleRegistry {
 
-	private final Map<String, Map<Class<?>, CallTarget>> rules = new HashMap<>();
+	private final Map<String, Map<Class<?>, CallTarget[]>> rules = new HashMap<>();
 
 	@CompilationFinal private boolean isInit;
 
@@ -34,45 +34,62 @@ public class RuleRegistry {
 	protected void init() {
 	}
 
+	@Override
 	public void setLanguage(DynSemLanguage language) {
 		this.language = language;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#getLanguage()
+	 */
+	@Override
 	public DynSemLanguage getLanguage() {
 		return language;
 	}
 
-	public void registerRule(String arrowName, Class<?> dispatchClass, CallTarget jointRuleRoot) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#registerRule(java.lang.String,
+	 * java.lang.Class, com.oracle.truffle.api.CallTarget)
+	 */
+	@Override
+	public void registerRule(String arrowName, Class<?> dispatchClass, CallTarget[] targets) {
 		CompilerAsserts.neverPartOfCompilation();
-		Map<Class<?>, CallTarget> rulesForName = rules.get(arrowName);
+		Map<Class<?>, CallTarget[]> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			rulesForName = new HashMap<>();
 			rules.put(arrowName, rulesForName);
 		}
-		rulesForName.put(dispatchClass, jointRuleRoot);
+		rulesForName.put(dispatchClass, targets);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#lookupRule(java.lang.String,
+	 * java.lang.Class)
+	 */
+	@Override
 	@TruffleBoundary
-	public CallTarget lookupRule(String arrowName, Class<?> dispatchClass) {
+	public CallTarget[] lookupRules(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
-		CallTarget jointRuleForClass = null;
 
-		Map<Class<?>, CallTarget> jointRulesForName = rules.get(arrowName);
+		Map<Class<?>, CallTarget[]> rulesForName = rules.get(arrowName);
 
-		if (jointRulesForName != null) {
-			jointRuleForClass = jointRulesForName.get(dispatchClass);
+		if (rulesForName == null) {
+			return new CallTarget[0];
 		}
 
-		if (jointRuleForClass == null) {
-			jointRuleForClass = new FallbackRule(language, SourceUtils.dynsemSourceSectionUnvailable(), arrowName,
-					dispatchClass).getCallTarget();
-			registerRule(arrowName, dispatchClass, jointRuleForClass);
-		}
-		return jointRuleForClass;
+		CallTarget[] rules = rulesForName.get(dispatchClass);
+
+		return rules != null ? rules : new CallTarget[0];
 	}
 
 	@TruffleBoundary
@@ -113,8 +130,8 @@ public class RuleRegistry {
 				for (Entry<Class<?>, List<ReductionRule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
 					registerRule(arrowName, dispatchClass,
-							RuleFactory.createRule(language, SourceUtils.dynsemSourceSectionUnvailable(),
-									rulesForClass.getValue(), arrowName, dispatchClass).getCallTarget());
+							RuleFactory.createRuleTargets(language, SourceUtils.dynsemSourceSectionUnvailable(),
+									rulesForClass.getValue(), arrowName, dispatchClass));
 				}
 			}
 

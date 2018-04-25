@@ -5,17 +5,16 @@ import java.util.Arrays;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchChainRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
-import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.profiles.BranchProfile;
@@ -33,7 +32,9 @@ public class HandleNode extends NativeExecutableNode {
 
 	@Child private ReflectiveHandlerBuild handlerBuildNode;
 
-	@CompilationFinal private CallTarget handlerCallTarget;
+	@Child private DispatchChainRoot handlerDispatch;
+
+	// @CompilationFinal private CallTarget handlerCallTarget;
 
 	public HandleNode(SourceSection source, TermBuild evalBuildNode, TermBuild catchBuildNode,
 			TermBuild continueBuildNode) {
@@ -42,8 +43,8 @@ public class HandleNode extends NativeExecutableNode {
 		this.catchBuildNode = catchBuildNode;
 		this.continueBuildNode = continueBuildNode;
 		this.handlerBuildNode = ReflectiveHandlerBuildNodeGen.create(source);
-		this.evalDispatchNode = DispatchNodeGen.create(source, "");
-		this.continueDispatchNode = DispatchNodeGen.create(source, "");
+		this.evalDispatchNode = DispatchNode.create(source, "");
+		this.continueDispatchNode = DispatchNode.create(source, "");
 	}
 
 	private final BranchProfile catchTaken = BranchProfile.create();
@@ -84,19 +85,13 @@ public class HandleNode extends NativeExecutableNode {
 				args[i + numRoComps + 1] = rwComps[i];
 			}
 
-			if (handlerCallTarget == null) {
-				// CompilerDirectives.transferToInterpreterAndInvalidate();
-				// FIXME: this is broken because it will throw a ReductionFailure if the handler fails to match, instead
-				handlerCallTarget = getContext().getRuleRegistry().lookupRule("", handlerT.getClass());
-				// of rethrowing
-				// if (handlerRule instanceof Rules) {
-				// handlerCallTarget = ((Rules) handlerRule).makeUninitializedCloneWithoutFallback().getCallTarget();
-				// } else {
-				// handlerCallTarget = handlerRule.makeUninitializedClone().getCallTarget();
-				// }
+			if (handlerDispatch == null) {
+				 CompilerDirectives.transferToInterpreterAndInvalidate();
+				handlerDispatch = insert(
+						DispatchChainRoot.createUninitialized(getSourceSection(), "", handlerT.getClass(), true));
 			}
 			try {
-				return (RuleResult) handlerCallTarget.call(args);
+				return handlerDispatch.execute(args);
 			} catch (PremiseFailureException rafx) {
 				handlerFails.enter();
 				throw abex;

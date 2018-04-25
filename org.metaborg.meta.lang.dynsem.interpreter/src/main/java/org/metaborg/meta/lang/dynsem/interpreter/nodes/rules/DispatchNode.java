@@ -5,17 +5,12 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
-import com.oracle.truffle.api.CallTarget;
-import com.oracle.truffle.api.dsl.Cached;
-import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.nodes.DirectCallNode;
-import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class DispatchNode extends DynSemNode {
 
-	private final String arrowName;
+	protected final String arrowName;
 
 	public DispatchNode(SourceSection source, String arrowName) {
 		super(source);
@@ -24,34 +19,15 @@ public abstract class DispatchNode extends DynSemNode {
 
 	public abstract RuleResult execute(Class<?> dispatchClass, Object[] args);
 
-	@Specialization(limit = "4", guards = "dispatchClass == cachedDispatchClass")
-	public RuleResult doDirect(Class<?> dispatchClass, Object[] args,
-			@Cached("dispatchClass") Class<?> cachedDispatchClass,
-			@Cached("create(getUnifiedCallTarget(cachedDispatchClass))") DirectCallNode callNode) {
-		return (RuleResult) callNode.call(args);
-	}
-
-	@Specialization(replaces = "doDirect")
-	public RuleResult doIndirect(Class<?> dispatchClass, Object[] args, @Cached("create()") IndirectCallNode callNode) {
-		// printmiss(dispatchClass);
-		return (RuleResult) callNode.call(getUnifiedCallTarget(dispatchClass), args);
-	}
-
-	// @TruffleBoundary
-	// private void printmiss(Class<?> dispatchClass) {
-	// System.out.println("Cache miss dispatching on " + dispatchClass.getSimpleName() + " from " + getRootNode());
-	// }
-
-	protected final CallTarget getUnifiedCallTarget(Class<?> dispatchClass) {
-		return getContext().getRuleRegistry().lookupRule(arrowName, dispatchClass);
-	}
-
 	public static DispatchNode create(IStrategoAppl source, IStrategoAppl arrow, FrameDescriptor fd) {
 		assert Tools.hasConstructor(arrow, "NamedDynamicEmitted", 3);
 		String arrowName = Tools.stringAt(arrow, 1).stringValue();
 
 		assert Tools.hasConstructor(source, "Source", 2);
-		return DispatchNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(source), arrowName);
+		return PrimaryCachingDispatchNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(source), arrowName);
 	}
 
+	public static DispatchNode create(SourceSection source, String arrowName) {
+		return PrimaryCachingDispatchNodeGen.create(source, arrowName);
+	}
 }

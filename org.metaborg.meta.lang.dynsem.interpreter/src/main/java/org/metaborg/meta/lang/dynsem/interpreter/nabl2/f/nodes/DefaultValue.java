@@ -4,7 +4,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNodeGen;
 
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -19,7 +18,7 @@ public abstract class DefaultValue extends DynSemNode {
 
 	public DefaultValue(SourceSection source) {
 		super(source);
-		this.defaultValueDispatchNode = DispatchNodeGen.create(source, "");
+		this.defaultValueDispatchNode = DispatchNode.create(source, "");
 	}
 
 	public abstract Object execute(VirtualFrame frame, Object type);
