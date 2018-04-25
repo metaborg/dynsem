@@ -21,7 +21,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class ReductionRule extends Rule {
+public final class ReductionRule extends Rule {
 
 	public final static String DEFAULT_NAME = "";
 
@@ -34,18 +34,14 @@ public class ReductionRule extends Rule {
 
 	@Child protected RuleTarget target;
 
-	private final IStrategoAppl sourceCode;
-
 	public ReductionRule(DynSemLanguage lang, SourceSection source, FrameDescriptor fd, String arrowName,
-			Class<?> dispatchClass, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output,
-			IStrategoAppl sourceCode) {
+			Class<?> dispatchClass, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output) {
 		super(lang, source, fd);
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;
 		this.inputsNode = inputsNode;
 		this.premises = premises;
 		this.target = output;
-		this.sourceCode = sourceCode;
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
@@ -72,16 +68,6 @@ public class ReductionRule extends Rule {
 	@Override
 	public boolean isCloningAllowed() {
 		return true;
-	}
-
-	@Override
-	protected boolean isCloneUninitializedSupported() {
-		return true;
-	}
-
-	@Override
-	protected ReductionRule cloneUninitialized() {
-		return createWithFrameDescriptor(language(), sourceCode, getFrameDescriptor());
 	}
 
 	public String getArrowName() {
@@ -149,7 +135,7 @@ public class ReductionRule extends Rule {
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 
 			return new ReductionRule(lang, SourceUtils.dynsemSourceSectionFromATerm(ruleT), fd, arrowName,
-					dispatchClass, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target, ruleT);
+					dispatchClass, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
 		}
 
 		throw new NotImplementedException("Unsupported rule term: " + ruleT);

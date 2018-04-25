@@ -32,14 +32,14 @@ public abstract class DynSemRootNode extends RootNode {
 	@Override
 	public abstract boolean isCloningAllowed();
 
-	@Override
-	protected abstract boolean isCloneUninitializedSupported();
-
-	@Override
-	protected abstract DynSemRootNode cloneUninitialized();
-
-	public DynSemRootNode makeUninitializedClone() {
-		return cloneUninitialized();
-	}
+	// @Override
+	// protected abstract boolean isCloneUninitializedSupported();
+	//
+	// @Override
+	// protected abstract DynSemRootNode cloneUninitialized();
+	//
+	// public DynSemRootNode makeUninitializedClone() {
+	// return cloneUninitialized();
+	// }
 
 }
