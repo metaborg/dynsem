@@ -63,12 +63,12 @@ context-free syntax // rules
   GuardedValue.UValue = Term
   
   Case.CasePattern = [
-    [Term] =>
+    [Term] ->
       [{Premise ";\n"}*]
   ]
   
   Case.CaseOtherwise = [
-    otherwise =>
+    otherwise ->
       [{Premise ";\n"}*]
   ]
   
