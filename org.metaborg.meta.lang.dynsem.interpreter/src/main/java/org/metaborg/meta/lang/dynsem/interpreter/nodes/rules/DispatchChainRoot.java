@@ -56,7 +56,9 @@ public abstract class DispatchChainRoot extends DynSemNode {
 					if (failSoftly) {
 						throw PremiseFailureException.SINGLETON;
 					} else {
-						throw new ReductionFailure("Rule application failed", InterpreterUtils.createStacktrace(),
+						throw new ReductionFailure(
+								"No rules applicable for " + dispatchClass.getSimpleName() + " on " + args[0],
+								InterpreterUtils.createStacktrace(),
 								this);
 					}
 				}
@@ -163,7 +165,7 @@ public abstract class DispatchChainRoot extends DynSemNode {
 				if (failSoftly) {
 					throw PremiseFailureException.SINGLETON;
 				} else {
-					throw new ReductionFailure("Reduction failure", InterpreterUtils.createStacktrace(), this);
+					throw new ReductionFailure("No more rules to try", InterpreterUtils.createStacktrace(), this);
 				}
 			}
 			return rightChain.execute(args);

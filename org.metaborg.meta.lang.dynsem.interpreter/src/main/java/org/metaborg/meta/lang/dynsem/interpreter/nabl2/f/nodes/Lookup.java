@@ -27,6 +27,8 @@ public abstract class Lookup extends NativeOpBuild {
 		super(source);
 	}
 
+	public abstract FrameAddr executeWithEvaluatedFrame(DynamicObject frm, Occurrence ref);
+
 	// FIXME: this is where we need to be very careful w.r.t. object languages because the Path stored in resolution may
 	// not be correct (method overriding)
 
