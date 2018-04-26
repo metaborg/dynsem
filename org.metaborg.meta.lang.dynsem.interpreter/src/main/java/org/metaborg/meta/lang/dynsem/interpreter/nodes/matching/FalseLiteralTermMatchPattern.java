@@ -11,7 +11,7 @@ public abstract class FalseLiteralTermMatchPattern extends LiteralMatchPattern {
 
 	@Specialization
 	public boolean doSuccess(boolean b) {
-		return b;
+		return !b;
 	}
 
 }
