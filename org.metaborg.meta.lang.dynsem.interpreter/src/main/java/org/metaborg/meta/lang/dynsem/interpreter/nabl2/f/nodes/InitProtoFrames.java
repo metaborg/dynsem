@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2Context;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeGraphLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopesLayoutImpl;
@@ -21,14 +22,16 @@ public class InitProtoFrames extends DynSemNode {
 	}
 
 	public void execute(VirtualFrame frame) {
-		DynSemContext ctx = getContext();
-		DynamicObject scopes = ScopeGraphLayoutImpl.INSTANCE
-				.getScopes(NaBL2LayoutImpl.INSTANCE.getScopeGraph(ctx.getNaBL2Solution()));
-		assert ScopesLayoutImpl.INSTANCE.isScopes(scopes);
-		for (Property scopeIdentProp : scopes.getShape().getProperties()) {
-			initProtoFrame.execute(frame, scopeIdentProp.get(scopes, true));
+		NaBL2Context nabl2ctx = nabl2Context();
+		if (nabl2ctx != null) {
+			DynSemContext ctx = getContext();
+			DynamicObject scopes = ScopeGraphLayoutImpl.INSTANCE
+					.getScopes(NaBL2LayoutImpl.INSTANCE.getScopeGraph(ctx.getNaBL2Solution()));
+			assert ScopesLayoutImpl.INSTANCE.isScopes(scopes);
+			for (Property scopeIdentProp : scopes.getShape().getProperties()) {
+				initProtoFrame.execute(frame, scopeIdentProp.get(scopes, true));
+			}
 		}
-
 	}
 
 }
