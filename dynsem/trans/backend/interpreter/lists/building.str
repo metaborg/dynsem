@@ -5,6 +5,7 @@ imports
   signatures/dynsem/-
   backend/interpreter/-
   backend/interpreter/lists/util
+  backend/interpreter/terms/-
   backend/utils/-
   backend/common/-
   libjava-front
@@ -76,7 +77,7 @@ rules
     where
       x_listclass := <jclass-term> ls;
       x_listbuildclass := <jclass-termbuilder> ls;
-      x_elemclass := <jclass-term> es;
+      x_elemclass := <jclass-term; jclass-box> es;
       x_aslistfun := $[as[x_listclass]];
       x_aselemfun := $[as[<classname-of> x_elemclass]]
 
