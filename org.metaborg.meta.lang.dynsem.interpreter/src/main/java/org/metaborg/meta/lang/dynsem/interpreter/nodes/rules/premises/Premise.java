@@ -40,6 +40,9 @@ public abstract class Premise extends DynSemNode {
 		if (Tools.hasConstructor(premT, "TermEq", 2)) {
 			return TermEqPremise.create(premT, fd);
 		}
+		if (Tools.hasConstructor(premT, "Fails", 1)) {
+			return FailsPremise.create(lang, premT, fd);
+		}
 
 		throw new NotImplementedException("Unsupported premise: " + t);
 	}

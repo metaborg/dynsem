@@ -27,6 +27,8 @@ public abstract class DispatchChainRoot extends DynSemNode {
 
 	public static final class Uninitialized extends DispatchChainRoot {
 
+		@Child private DispatchChainRoot chain;
+
 		private final Class<?> dispatchClass;
 		private final String arrowName;
 
@@ -38,28 +40,28 @@ public abstract class DispatchChainRoot extends DynSemNode {
 
 		@Override
 		public RuleResult execute(Object[] args) {
-			CallTarget[] targets = getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
-			if (targets.length > 0) {
-				CompilerDirectives.transferToInterpreterAndInvalidate();
-				// System.out.println("Uninitialized -> Expanding (" + dispatchClass.getSimpleName() + ")");
-				return replace(
-						Expanding.createFromTargets(getSourceSection(), targets, dispatchClass, arrowName, failSoftly))
-						.execute(args);
-			} else {
-				Class<?> nextDispatchClass = DispatchUtils.nextDispatchClass(args[0], dispatchClass);
-				if (nextDispatchClass != null) {
+			if (chain == null) {
+				CallTarget[] targets = getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
+				if (targets.length > 0) {
 					CompilerDirectives.transferToInterpreterAndInvalidate();
-					// System.out
-					// .println("Uninitialized -> Fallback Uninitialized (" + dispatchClass.getSimpleName() + ")");
-					return replace(DispatchChainRoot.createUninitialized(getSourceSection(), arrowName,
-							nextDispatchClass, failSoftly)).execute(args);
-				}
-				if (failSoftly) {
-					throw PremiseFailureException.SINGLETON;
+					this.chain = insert(Expanding.createFromTargets(getSourceSection(), targets, dispatchClass,
+							arrowName, failSoftly));
 				} else {
-					throw new ReductionFailure("Rule application failed", InterpreterUtils.createStacktrace(), this);
+					Class<?> nextDispatchClass = DispatchUtils.nextDispatchClass(args[0], dispatchClass);
+					if (nextDispatchClass != null) {
+						CompilerDirectives.transferToInterpreterAndInvalidate();
+						this.chain = insert(DispatchChainRoot.createUninitialized(getSourceSection(), arrowName,
+								nextDispatchClass, failSoftly));
+					}
+					if (failSoftly) {
+						throw PremiseFailureException.SINGLETON;
+					} else {
+						throw new ReductionFailure("Rule application failed", InterpreterUtils.createStacktrace(),
+								this);
+					}
 				}
 			}
+			return chain.execute(args);
 		}
 
 	}
@@ -70,18 +72,18 @@ public abstract class DispatchChainRoot extends DynSemNode {
 
 		@CompilationFinal private int currentOffset;
 
-		private final CallTarget[] candidateTargets;
+		@CompilationFinal(dimensions = 1) private final CallTarget[] candidateTargets;
 		private final Class<?> dispatchClass;
 		private final String arrowName;
 
-		public Expanding(SourceSection source, int currentOffset, CallTarget[] candidateTargets, Class<?> dispatchClass,
-				String arrowName, boolean failSoftly) {
+		public Expanding(SourceSection source, CallTarget[] candidateTargets, Class<?> dispatchClass, String arrowName,
+				boolean failSoftly) {
 			super(source, failSoftly);
 			this.dispatchClass = dispatchClass;
 			this.arrowName = arrowName;
 			assert currentOffset < candidateTargets.length;
 			this.candidateTargets = candidateTargets;
-			this.currentOffset = currentOffset;
+			this.currentOffset = 0;
 			this.leftChain = new DispatchChain(source, candidateTargets[currentOffset], null);
 		}
 
@@ -106,8 +108,8 @@ public abstract class DispatchChainRoot extends DynSemNode {
 			if (currentOffset + 1 < candidateTargets.length) {
 				// System.out.println("Expanding -> Expanding (" + dispatchClass.getSimpleName() + ")");
 				// we can still inject another candidate call target
-				currentOffset++;
 				CompilerDirectives.transferToInterpreterAndInvalidate();
+				currentOffset++;
 				leftChain = insert(new DispatchChain(getSourceSection(), candidateTargets[currentOffset], leftChain));
 				return executeFirst(args);
 			} else {
@@ -120,8 +122,7 @@ public abstract class DispatchChainRoot extends DynSemNode {
 				} else {
 					return replace(new Expanded(getSourceSection(), leftChain,
 							new Uninitialized(getSourceSection(), arrowName, nextDispatchClass, failSoftly),
-							failSoftly))
-									.executeRight(args);
+							failSoftly)).executeRight(args);
 				}
 
 			}
@@ -129,7 +130,7 @@ public abstract class DispatchChainRoot extends DynSemNode {
 
 		protected static Expanding createFromTargets(SourceSection source, CallTarget[] targets, Class<?> dispatchClass,
 				String arrowName, boolean failSoftly) {
-			return new Expanding(source, 0, targets, dispatchClass, arrowName, failSoftly);
+			return new Expanding(source, targets, dispatchClass, arrowName, failSoftly);
 		}
 
 	}
