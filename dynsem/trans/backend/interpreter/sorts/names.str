@@ -5,6 +5,7 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/names
+  backend/utils/-
   backend/common/-
   
 strategies // classes for sorts
@@ -92,7 +93,7 @@ strategies // checked builders
     ss@SimpleSort(s) -> ss
     where
       <not(type-is-builtin)> s;
-      <lookup-def(|Type()); lookup-prop(|SortKind())> s => LanguageSort()
+      <lookup-def(|Types()); lookup-prop(|SortKind())> s => LanguageSort()
 
 strategies // matcher for sorts
   
