@@ -10,7 +10,6 @@ import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.ImportStatic;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -40,7 +39,6 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 		}
 
 		@Specialization
-		@ExplodeLoop
 		public RuleResult executeNoFailure(String dispatchKey, Object[] args,
 				@Cached("create()") IndirectCallNode callNode) {
 			CallTarget[] callTargets = getContext().getRuleRegistry().lookupRules(arrowName, dispatchKey);

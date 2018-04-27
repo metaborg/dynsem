@@ -57,7 +57,6 @@ public class RuleRegistry implements IRuleRegistry {
 	 */
 	@Override
 	public void registerRule(String arrowName, String dispatchKey, CallTarget[] targets) {
-		System.out.println("Registering " + targets.length + " rules for " + dispatchKey);
 		CompilerAsserts.neverPartOfCompilation();
 		Map<String, CallTarget[]> rulesForName = rules.get(arrowName);
 

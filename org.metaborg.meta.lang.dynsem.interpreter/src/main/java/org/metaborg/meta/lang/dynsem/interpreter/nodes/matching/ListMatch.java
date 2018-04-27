@@ -9,6 +9,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class ListMatch extends MatchPattern {
@@ -38,6 +39,7 @@ public abstract class ListMatch extends MatchPattern {
 	}
 
 	@Specialization(guards = "tailPattern != null")
+	@ExplodeLoop
 	public boolean doWithTail(VirtualFrame frame, ListTerm term) {
 		if (term.size() < elemPatterns.length) {
 			return false;
