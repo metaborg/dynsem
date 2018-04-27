@@ -19,6 +19,6 @@ public class InvokeRelationNode extends DynSemNode {
 
 	public RuleResult execute(VirtualFrame frame) {
 		Object[] args = inputBuilder.executeObjectArray(frame);
-		return dispatchNode.execute(args[0].getClass(), args);
+		return dispatchNode.execute(DispatchUtils.dispatchKeyOf(args[0]), args);
 	}
 }

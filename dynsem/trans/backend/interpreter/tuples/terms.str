@@ -21,82 +21,17 @@ rules
         import org.spoofax.interpreter.core.Tools;
         import org.spoofax.interpreter.terms.*;
         import ~x:<get-opt> NativePkg().*;
-        import ~x:<get-opt> TopPkg().TypesGen;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import com.oracle.truffle.api.CompilerAsserts;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-        import org.apache.commons.lang3.builder.HashCodeBuilder;
-        import org.metaborg.meta.lang.dynsem.interpreter.terms.ITupleTerm;
-        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.TupleTerm;
         
-        public final class x_classname implements ITupleTerm {
+        public final class x_classname {
 
           public final static int ARITY = ~i:<length; int-to-string> c-ty*;
           
-          ~finit*
-
-          ~fdec0*
-
-          ~fget0*
 
           ~mcreate0*
 
-          private final IStrategoTerm strategoTerm;
-          
-          @Override
-          public int size() {
-            return ARITY;
-          }
-          
-          @Override
-          public boolean equals(Object obj) {
-            if (this == obj)
-              return true;
-            if (obj == null)
-              return false;
-            if (getClass() != obj.getClass())
-              return false;
-            x_classname other = (x_classname) obj;
-            bstm2*
-            return true;
-          }
-          
-          @Override
-          public boolean hasStrategoTerm() {
-              return strategoTerm != null;
-          }
-          
-          @Override
-          public IStrategoTerm getStrategoTerm() {
-              return strategoTerm;
-          }
-          
-          @TruffleBoundary
-          @Override
-          public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("(");
-            bstm3*
-            sb.append(")");
-            return sb.toString();
-          }
-          
-          @Override
-          @TruffleBoundary
-          public int hashCode() {
-            return e_hash.toHashCode();
-          }
-          
-          @Override
-          public ITermInstanceChecker getCheck() {
-            return new ITermInstanceChecker() {
-        
-              @Override
-              public boolean isInstance(Object obj) {
-                return TypesGen.~x:$[is[x_classname]](obj);
-              }
-            };
-          }
         }
       ]|
     where
@@ -114,20 +49,21 @@ rules
       then
         mcreate0* := class-body-dec* |[
             @TruffleBoundary
-            public static x_classname create(IStrategoTerm term) {
+            public static TupleTerm create(IStrategoTerm term) {
               throw new IllegalStateException("Tuples of value terms cannot be created from Stratego terms");
             }
         ]|
       else
         e1* := <map-with-index((\ i -> e |[ term.getSubterm(~i:<dec; int-to-string>) ]| \, id); ds-to-interp-sorts-to-create-arg)> c-ty*;
+        sort-string := <string-type> srt;
         mcreate0* := class-body-dec* |[
             @TruffleBoundary
-            public static x_classname create(IStrategoTerm term) {
+            public static TupleTerm create(IStrategoTerm term) {
               CompilerAsserts.neverPartOfCompilation();
               assert term != null;
               assert Tools.isTermTuple(term);
               assert term.getSubtermCount() == ARITY;
-              return new x_classname(e1*, term);
+              return new TupleTerm(~e:Lit(String([Chars(sort-string)])), new Object[] { e1* }, term);
             }
         ]|
       end

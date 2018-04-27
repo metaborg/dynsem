@@ -22,8 +22,8 @@ rules
       compilation-unit |[
         package ~x:<get-opt> BuildPkg();
       
-        import ~x:<get-opt> TopPkg().TypesGen;
-        import ~x:$[[<get-opt> TermPkg()].*];
+//        import ~x:<get-opt> TopPkg().TypesGen;
+//        import ~x:$[[<get-opt> TermPkg()].*];
         import ~x:<get-opt> NativePkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         import com.oracle.truffle.api.dsl.NodeChild;

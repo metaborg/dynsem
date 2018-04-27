@@ -26,7 +26,7 @@ public final class ReductionRule extends Rule {
 	public final static String DEFAULT_NAME = "";
 
 	private final String arrowName;
-	private final Class<?> dispatchClass;
+	private final String dispatchKey;
 
 	@Child protected RuleInputsNode inputsNode;
 
@@ -35,10 +35,10 @@ public final class ReductionRule extends Rule {
 	@Child protected RuleTarget target;
 
 	public ReductionRule(DynSemLanguage lang, SourceSection source, FrameDescriptor fd, String arrowName,
-			Class<?> dispatchClass, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output) {
+			String dispatchKey, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output) {
 		super(lang, source, fd);
 		this.arrowName = arrowName;
-		this.dispatchClass = dispatchClass;
+		this.dispatchKey = dispatchKey;
 		this.inputsNode = inputsNode;
 		this.premises = premises;
 		this.target = output;
@@ -74,14 +74,14 @@ public final class ReductionRule extends Rule {
 		return arrowName;
 	}
 
-	public Class<?> getDispatchClass() {
-		return dispatchClass;
+	public String getDispatchKey() {
+		return dispatchKey;
 	}
 
 	@Override
 	@TruffleBoundary
 	public String toString() {
-		return dispatchClass.getSimpleName() + " -" + getArrowName() + "->";
+		return dispatchKey + " -" + getArrowName() + "->";
 	}
 
 	@TruffleBoundary
@@ -123,19 +123,12 @@ public final class ReductionRule extends Rule {
 
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
 
-		String dispatchClassName = Tools.javaStringAt(ruleT, 4);
-		Class<?> dispatchClass;
-
-		try {
-			dispatchClass = ReductionRule.class.getClassLoader().loadClass(dispatchClassName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
-		}
+		String dispatchKey = Tools.javaStringAt(ruleT, 4);
 
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 
 			return new ReductionRule(lang, SourceUtils.dynsemSourceSectionFromATerm(ruleT), fd, arrowName,
-					dispatchClass, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
+					dispatchKey, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
 		}
 
 		throw new NotImplementedException("Unsupported rule term: " + ruleT);

@@ -89,11 +89,7 @@ strategies // checked builders
   jclass-srtcheckedbuilder-ng:
     ss@SimpleSort(s) -> $[[<jclass-srtcheckedbuilder> ss]NodeGen]
     
-  jclass-has-checkedbuilder:
-    ss@SimpleSort(s) -> ss
-    where
-      <not(type-is-builtin)> s;
-      <lookup-def(|Types()); lookup-prop(|SortKind())> s => LanguageSort()
+  jclass-has-checkedbuilder = fail
 
 strategies // matcher for sorts
   

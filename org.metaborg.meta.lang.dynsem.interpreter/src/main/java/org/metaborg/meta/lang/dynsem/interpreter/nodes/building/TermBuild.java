@@ -61,7 +61,7 @@ public abstract class TermBuild extends DynSemNode {
 		return BuiltinTypesGen.asObjectArray(executeGeneric(frame));
 	}
 
-	public IListTerm<?> executeIList(VirtualFrame frame) {
+	public IListTerm executeIList(VirtualFrame frame) {
 		return BuiltinTypesGen.asIListTerm(executeGeneric(frame));
 	}
 
@@ -71,7 +71,7 @@ public abstract class TermBuild extends DynSemNode {
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
-		if (Tools.hasConstructor(t, "Con", 2)) {
+		if (Tools.hasConstructor(t, "Con", 3)) {
 			return ConBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "NativeOp", 2)) {

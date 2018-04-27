@@ -25,7 +25,7 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class RuleRegistry implements IRuleRegistry {
 
-	private final Map<String, Map<Class<?>, CallTarget[]>> rules = new HashMap<>();
+	private final Map<String, Map<String, CallTarget[]>> rules = new HashMap<>();
 
 	@CompilationFinal private boolean isInit;
 
@@ -56,15 +56,16 @@ public class RuleRegistry implements IRuleRegistry {
 	 * java.lang.Class, com.oracle.truffle.api.CallTarget)
 	 */
 	@Override
-	public void registerRule(String arrowName, Class<?> dispatchClass, CallTarget[] targets) {
+	public void registerRule(String arrowName, String dispatchKey, CallTarget[] targets) {
+		System.out.println("Registering " + targets.length + " rules for " + dispatchKey);
 		CompilerAsserts.neverPartOfCompilation();
-		Map<Class<?>, CallTarget[]> rulesForName = rules.get(arrowName);
+		Map<String, CallTarget[]> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			rulesForName = new HashMap<>();
 			rules.put(arrowName, rulesForName);
 		}
-		rulesForName.put(dispatchClass, targets);
+		rulesForName.put(dispatchKey, targets);
 	}
 
 	/*
@@ -75,19 +76,19 @@ public class RuleRegistry implements IRuleRegistry {
 	 */
 	@Override
 	@TruffleBoundary
-	public CallTarget[] lookupRules(String arrowName, Class<?> dispatchClass) {
+	public CallTarget[] lookupRules(String arrowName, String dispatchKey) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
 
-		Map<Class<?>, CallTarget[]> rulesForName = rules.get(arrowName);
+		Map<String, CallTarget[]> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			return new CallTarget[0];
 		}
 
-		CallTarget[] rules = rulesForName.get(dispatchClass);
+		CallTarget[] rules = rulesForName.get(dispatchKey);
 
 		return rules != null ? rules : new CallTarget[0];
 	}
@@ -104,34 +105,34 @@ public class RuleRegistry implements IRuleRegistry {
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 
-			Map<String, Map<Class<?>, List<ReductionRule>>> rules = new HashMap<>();
+			Map<String, Map<String, List<ReductionRule>>> rules = new HashMap<>();
 
 			for (IStrategoTerm ruleTerm : rulesTerm) {
 				ReductionRule r = ReductionRule.create(language, (IStrategoAppl) ruleTerm);
 
-				Map<Class<?>, List<ReductionRule>> rulesForName = rules.get(r.getArrowName());
+				Map<String, List<ReductionRule>> rulesForName = rules.get(r.getArrowName());
 				if (rulesForName == null) {
 					rulesForName = new HashMap<>();
 					rules.put(r.getArrowName(), rulesForName);
 				}
 
-				List<ReductionRule> rulesForClass = rulesForName.get(r.getDispatchClass());
+				List<ReductionRule> rulesForClass = rulesForName.get(r.getDispatchKey());
 
 				if (rulesForClass == null) {
 					rulesForClass = new LinkedList<>();
-					rulesForName.put(r.getDispatchClass(), rulesForClass);
+					rulesForName.put(r.getDispatchKey(), rulesForClass);
 				}
 
 				rulesForClass.add(r);
 			}
 
-			for (Entry<String, Map<Class<?>, List<ReductionRule>>> rulesForNameEntry : rules.entrySet()) {
+			for (Entry<String, Map<String, List<ReductionRule>>> rulesForNameEntry : rules.entrySet()) {
 				final String arrowName = rulesForNameEntry.getKey();
-				for (Entry<Class<?>, List<ReductionRule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
-					Class<?> dispatchClass = rulesForClass.getKey();
-					registerRule(arrowName, dispatchClass,
+				for (Entry<String, List<ReductionRule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
+					String dispatchKey = rulesForClass.getKey();
+					registerRule(arrowName, dispatchKey,
 							RuleFactory.createRuleTargets(language, SourceUtils.dynsemSourceSectionUnvailable(),
-									rulesForClass.getValue(), arrowName, dispatchClass));
+									rulesForClass.getValue()));
 				}
 			}
 

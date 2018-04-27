@@ -33,6 +33,7 @@ rules
     ; desugar-concat-all
     ; resugar-and-typecast-lists
     ; jtype-lists
+    ; add-sorts-to-cons
 
 rules
 
@@ -53,10 +54,10 @@ rules
     As(_, t) -> <get-relation-kind-class> t
   
   get-relation-kind-class:
-    con@Con(c, k*) -> (TermKind(), <jclass-term-qual> con)
+    con@Con(c, k*) -> (TermKind(), $[[c]/[<length; int-to-string> k*]])
   
   get-relation-kind-class:
-    Cast(_, srt@SimpleSort(s)) -> (SortKind(), <jclass-term-qual> srt)
+    Cast(_, srt@SimpleSort(s)) -> (SortKind(), $[SimpleSort([s])])
     where <not(type-is-builtin)> s
 
   get-relation-kind-class:
@@ -275,3 +276,12 @@ rules /* resugar list construction */
 //      ListType(ty1) := <type-of> t1;
 //      ListType(ty2) := <type-of> t2;
 //      <eq> (ty1, ty2)
+
+rules
+  
+  add-sorts-to-cons = bottomup(try(add-sort-to-con))
+  
+  add-sort-to-con:
+    Con(name, k*) -> Con(name, k*, SimpleSort(srt-ty))
+    where
+      ConstructorType(_, srt-ty) := <lookup-def(|Constructors()); lookup-prop(|Type())> (name, <length> k*)

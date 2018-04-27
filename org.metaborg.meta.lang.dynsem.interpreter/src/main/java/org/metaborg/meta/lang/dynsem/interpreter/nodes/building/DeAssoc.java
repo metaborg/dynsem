@@ -4,7 +4,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ApplTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.MapUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -47,9 +47,8 @@ public abstract class DeAssoc extends TermBuild {
 	}
 
 	@Specialization
-	@SuppressWarnings("rawtypes")
-	public Object doList(IListTerm list, int idx) {
-		return list.get(idx);
+	public Object doList(ApplTerm list, int idx) {
+		return list.subterm(idx);
 	}
 
 }

@@ -1,8 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.GenericListMatch;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListMatch;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -28,7 +26,7 @@ public abstract class MatchPattern extends DynSemNode {
 		if (Tools.hasConstructor(t, "Wld", 0)) {
 			return NoOpPattern.create(t);
 		}
-		if (Tools.hasConstructor(t, "Con", 2)) {
+		if (Tools.hasConstructor(t, "Con", 3)) {
 			return ConMatch.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "VarRef", 1)) {
@@ -39,7 +37,7 @@ public abstract class MatchPattern extends DynSemNode {
 		}
 
 		if (Tools.hasConstructor(t, "List_", 1) || Tools.hasConstructor(t, "ListTail", 2)) {
-			return GenericListMatch.create(t, fd);
+			return DeadHeadListMatch.create(t, fd);
 		}
 
 		if (Tools.hasConstructor(t, "TypedTuple", 2)) {

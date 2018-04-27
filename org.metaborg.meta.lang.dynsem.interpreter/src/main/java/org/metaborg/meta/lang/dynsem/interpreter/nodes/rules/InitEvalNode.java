@@ -19,8 +19,8 @@ public class InitEvalNode extends DynSemRootNode {
 	public InitEvalNode(DynSemLanguage lang, SourceSection source, ITerm program) {
 		super(lang, source);
 		this.program = program;
-		this.initNabl2 = new InitNaBL2Node(source);
-		this.initProtoFrames = new InitProtoFrames(source);
+		// this.initNabl2 = new InitNaBL2Node(source);
+		// this.initProtoFrames = new InitProtoFrames(source);
 		this.initDispatch = DispatchNode.create(source, "init");
 
 		Truffle.getRuntime().createCallTarget(this);
@@ -28,9 +28,9 @@ public class InitEvalNode extends DynSemRootNode {
 
 	@Override
 	public Object execute(VirtualFrame frame) {
-		initNabl2.execute(frame);
-		initProtoFrames.execute(frame);
-		return initDispatch.execute(program.getClass(), new Object[] { program });
+		// initNabl2.execute(frame);
+		// initProtoFrames.execute(frame);
+		return initDispatch.execute(DispatchUtils.dispatchKeyOf(program), new Object[] { program });
 	}
 
 	@Override

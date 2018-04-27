@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.IWithStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
@@ -113,8 +113,8 @@ public final class InterpreterUtils {
 	}
 
 	private static Object findProgramLocation(Object inputTerm) {
-		if (inputTerm instanceof ITerm) {
-			IStrategoTerm t = ((ITerm) inputTerm).getStrategoTerm();
+		if (inputTerm instanceof IWithStrategoTerm) {
+			IStrategoTerm t = ((IWithStrategoTerm) inputTerm).getStrategoTerm();
 			if (t != null) {
 				ImploderAttachment imploder = ImploderAttachment.get(t);
 				if (imploder != null) {

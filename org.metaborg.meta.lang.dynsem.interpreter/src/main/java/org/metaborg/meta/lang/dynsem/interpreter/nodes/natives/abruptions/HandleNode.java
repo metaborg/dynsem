@@ -7,6 +7,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchChainRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -30,7 +31,7 @@ public class HandleNode extends NativeExecutableNode {
 	@Child private TermBuild continueBuildNode;
 	@Child private DispatchNode continueDispatchNode;
 
-	@Child private ReflectiveHandlerBuild handlerBuildNode;
+	@Child private HandlerBuild handlerBuildNode;
 
 	@Child private DispatchChainRoot handlerDispatch;
 
@@ -42,7 +43,7 @@ public class HandleNode extends NativeExecutableNode {
 		this.evalBuildNode = evalBuildNode;
 		this.catchBuildNode = catchBuildNode;
 		this.continueBuildNode = continueBuildNode;
-		this.handlerBuildNode = ReflectiveHandlerBuildNodeGen.create(source);
+		this.handlerBuildNode = new HandlerBuild(source);
 		this.evalDispatchNode = DispatchNode.create(source, "");
 		this.continueDispatchNode = DispatchNode.create(source, "");
 	}
@@ -61,7 +62,7 @@ public class HandleNode extends NativeExecutableNode {
 			// try to evaluate the wrapped body
 			Object[] args = Arrays.copyOf(handleArgs, handleArgs.length);
 			args[0] = evalT;
-			result = evalDispatchNode.execute(evalT.getClass(), args);
+			result = evalDispatchNode.execute(DispatchUtils.dispatchKeyOf(evalT), args);
 		} catch (AbortedEvaluationException abex) {
 			catchTaken.enter();
 			Object catchingT = catchBuildNode.executeGeneric(frame);
@@ -88,7 +89,8 @@ public class HandleNode extends NativeExecutableNode {
 			if (handlerDispatch == null) {
 				 CompilerDirectives.transferToInterpreterAndInvalidate();
 				handlerDispatch = insert(
-						DispatchChainRoot.createUninitialized(getSourceSection(), "", handlerT.getClass(), true));
+						DispatchChainRoot.createUninitialized(getSourceSection(), "",
+								DispatchUtils.dispatchKeyOf(handlerT), true));
 			}
 			try {
 				return handlerDispatch.execute(args);
@@ -119,7 +121,7 @@ public class HandleNode extends NativeExecutableNode {
 				args[i + numRoComps + 1] = rwComps[i];
 			}
 
-			return continueDispatchNode.execute(continueT.getClass(), args);
+			return continueDispatchNode.execute(DispatchUtils.dispatchKeyOf(continueT), args);
 		}
 	}
 

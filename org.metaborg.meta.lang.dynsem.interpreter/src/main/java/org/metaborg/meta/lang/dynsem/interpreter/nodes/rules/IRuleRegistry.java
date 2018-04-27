@@ -10,9 +10,9 @@ public interface IRuleRegistry {
 
 	public void setLanguage(DynSemLanguage language);
 
-	void registerRule(String arrowName, Class<?> dispatchClass, CallTarget[] rules);
+	void registerRule(String arrowName, String dispatchKey, CallTarget[] rules);
 
-	CallTarget[] lookupRules(String arrowName, Class<?> dispatchClass);
+	CallTarget[] lookupRules(String arrowName, String dispatchKey);
 
 
 }

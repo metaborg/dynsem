@@ -1,33 +1,41 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.TupleTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class TupleMatch extends MatchPattern {
+public abstract class TupleMatch extends MatchPattern {
 
 	@Children private final MatchPattern[] elemPatterns;
-	private final Class<?> tupleClass;
 
-	public TupleMatch(SourceSection source, MatchPattern[] elemPatterns, Class<?> tupleClass) {
+	public TupleMatch(SourceSection source, MatchPattern[] elemPatterns) {
 		super(source);
 		this.elemPatterns = elemPatterns;
-		this.tupleClass = tupleClass;
 	}
 
-	@Override
-	public boolean executeMatch(VirtualFrame frame, Object term) {
-		final MatchPattern concreteMatch = getContext().getTermRegistry().lookupMatchFactory(tupleClass)
-				.apply(getSourceSection(), cloneNodes(elemPatterns));
+	@Specialization
+	@ExplodeLoop
+	public boolean doTuple(VirtualFrame frame, TupleTerm tupl) {
+		if (elemPatterns.length != tupl.size()) {
+			return false;
+		}
 
-		return replace(concreteMatch).executeMatch(frame, term);
+		Object[] subterms = tupl.subterms();
+		for (int i = 0; i < elemPatterns.length; i++) {
+			if (!elemPatterns[i].executeMatch(frame, subterms[i])) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static TupleMatch create(IStrategoAppl t, FrameDescriptor fd) {
@@ -40,16 +48,7 @@ public class TupleMatch extends MatchPattern {
 			children[i] = MatchPattern.create(Tools.applAt(childrenT, i), fd);
 		}
 
-		final String dispatchClassName = Tools.stringAt(t, 1).stringValue();
-		Class<?> dispatchClass;
-
-		try {
-			dispatchClass = ReductionRule.class.getClassLoader().loadClass(dispatchClassName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
-		}
-
-		return new TupleMatch(SourceUtils.dynsemSourceSectionFromATerm(t), children, dispatchClass);
+		return TupleMatchNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), children);
 	}
 
 }

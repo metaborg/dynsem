@@ -10,53 +10,27 @@ public abstract class PrimaryCachingDispatchNode extends DispatchNode {
 		super(source, arrowName);
 	}
 
-	@Override
-	public abstract RuleResult execute(Class<?> dispatchClass, Object[] args);
-
-	@Specialization(limit = "4", guards = { "dispatchClass == cachedDispatchClass" })
-	public RuleResult doCachedPrimary(Class<?> dispatchClass, Object[] args,
-			@Cached("dispatchClass") Class<?> cachedDispatchClass,
-			@Cached("createDispatchChain(cachedDispatchClass)") DispatchChainRoot dispatchChain) {
+	@Specialization(limit = "4", guards = { "dispatchKey == cachedDispatchKey" })
+	public RuleResult doCachedPrimary(String dispatchKey, Object[] args,
+			@Cached("dispatchKey") String cachedDispatchKey,
+			@Cached("createDispatchChain(cachedDispatchKey)") DispatchChainRoot dispatchChain) {
 		return dispatchChain.execute(args);
 	}
 
 	@Specialization(replaces = "doCachedPrimary")
-	public RuleResult doSecondary(Class<?> dispatchClass, Object[] args,
+	public RuleResult doSecondary(String dispatchKey, Object[] args,
 			@Cached("createSecondaryDispatch()") SecondaryCachingDispatchNode secondaryDispatch) {
-		return secondaryDispatch.execute(dispatchClass, args);
+		return secondaryDispatch.execute(dispatchKey, args);
 	}
 
-	protected DispatchChainRoot createDispatchChain(Class<?> dispatchClass) {
-		return DispatchChainRoot.createUninitialized(getSourceSection(), arrowName, dispatchClass, false);
+	protected DispatchChainRoot createDispatchChain(String dispatchKey) {
+		return DispatchChainRoot.createUninitialized(getSourceSection(), arrowName, dispatchKey, false);
 	}
 
 	protected SecondaryCachingDispatchNode createSecondaryDispatch() {
 		return SecondaryCachingDispatchNode.createUninitialized(getSourceSection(), arrowName);
 	}
 
-	// @Specialization(limit = "4", guards = "dispatchClass == cachedDispatchClass")
-	// public RuleResult doDirect(Class<?> dispatchClass, Object[] args,
-	// @Cached("dispatchClass") Class<?> cachedDispatchClass,
-	// @Cached("create(getUnifiedCallTarget(cachedDispatchClass))") DirectCallNode callNode) {
-	// return (RuleResult) callNode.call(args);
-	// }
-	//
-	// @Specialization(replaces = "doDirect")
-	// public RuleResult doIndirect(Class<?> dispatchClass, Object[] args, @Cached("create()") IndirectCallNode
-	// callNode) {
-	// // printmiss(dispatchClass);
-	// return (RuleResult) callNode.call(getUnifiedCallTarget(dispatchClass), args);
-	// }
-	//
-	// // @TruffleBoundary
-	// // private void printmiss(Class<?> dispatchClass) {
-	// // System.out.println("Cache miss dispatching on " + dispatchClass.getSimpleName() + " from " + getRootNode());
-	// // }
-	//
-	// protected final CallTarget getUnifiedCallTarget(Class<?> dispatchClass) {
-	// return getContext().getRuleRegistry().lookupRule(arrowName, dispatchClass);
-	// }
-	//
 
 
 }

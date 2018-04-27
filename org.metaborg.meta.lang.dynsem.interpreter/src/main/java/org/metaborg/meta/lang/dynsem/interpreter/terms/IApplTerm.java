@@ -8,8 +8,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.terms;
  */
 public interface IApplTerm extends ITerm {
 
-	/**
-	 * @return the {@link Class} representing the sort of this application term.
-	 */
-	public Class<?> getSortClass();
+	public String name();
+
 }

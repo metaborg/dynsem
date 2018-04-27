@@ -29,8 +29,8 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 		return GenericDispatchNodeGen.create(getSourceSection(), arrowName);
 	}
 
-	protected DispatchChainRoot createRootDispatch(Class<?> dispatchClass) {
-		return DispatchChainRoot.createUninitialized(getSourceSection(), arrowName, dispatchClass, false);
+	protected DispatchChainRoot createRootDispatch(String dispatchKey) {
+		return DispatchChainRoot.createUninitialized(getSourceSection(), arrowName, dispatchKey, false);
 	}
 
 	public static abstract class GenericDispatch extends DispatchNode {
@@ -41,9 +41,9 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 
 		@Specialization
 		@ExplodeLoop
-		public RuleResult executeNoFailure(Class<?> dispatchClass, Object[] args,
+		public RuleResult executeNoFailure(String dispatchKey, Object[] args,
 				@Cached("create()") IndirectCallNode callNode) {
-			CallTarget[] callTargets = getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
+			CallTarget[] callTargets = getContext().getRuleRegistry().lookupRules(arrowName, dispatchKey);
 			for (int i = 0; i < callTargets.length; i++) {
 				try {
 					return (RuleResult) callNode.call(callTargets[i], args);
@@ -63,15 +63,15 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 		}
 
 		@Specialization
-		public RuleResult executeNoFailure(Class<?> dispatchClass, Object[] args,
+		public RuleResult executeNoFailure(String dispatchKey, Object[] args,
 				@Cached("createGenericDispatch()") GenericDispatch left) {
 			try {
-				return left.execute(dispatchClass, args);
+				return left.execute(dispatchKey, args);
 			} catch (PremiseFailureException pmfx) {
 				// System.out.println("WithoutFailure -> WithFailure (" + dispatchClass.getName() + ")");
 				CompilerDirectives.transferToInterpreterAndInvalidate();
 				return replace(WithFailureNodeGen.create(getSourceSection(), arrowName, left))
-						.executeSkippingLeft(dispatchClass, args, true);
+						.executeSkippingLeft(dispatchKey, args, true);
 			}
 		}
 
@@ -87,20 +87,20 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 		}
 
 		@Override
-		public final RuleResult execute(Class<?> dispatchClass, Object[] args) {
-			return executeSkippingLeft(dispatchClass, args, false);
+		public final RuleResult execute(String dispatchKey, Object[] args) {
+			return executeSkippingLeft(dispatchKey, args, false);
 		}
 
-		public abstract RuleResult executeSkippingLeft(Class<?> dispatchClass, Object[] args, boolean skipLeft);
+		public abstract RuleResult executeSkippingLeft(String nextDispatchKey, Object[] args, boolean skipLeft);
 
-		@Specialization(guards = { "nextDispatchClass(args, dispatchClass) == cachedNextDispatchClass",
-				"cachedNextDispatchClass != null" })
-		public RuleResult executeCachedNotNullRight(Class<?> dispatchClass, Object[] args, boolean skipLeft,
-				@Cached("nextDispatchClass(args, dispatchClass)") Class<?> cachedNextDispatchClass,
-				@Cached("createRootDispatch(cachedNextDispatchClass)") DispatchChainRoot right) {
+		@Specialization(guards = { "nextDispatchKey(args, dispatchKey) == cachedNextDispatchKey",
+				"cachedNextDispatchKey != null" })
+		public RuleResult executeCachedNotNullRight(String dispatchKey, Object[] args, boolean skipLeft,
+				@Cached("nextDispatchKey(args, dispatchKey)") String cachedNextDispatchKey,
+				@Cached("createRootDispatch(cachedNextDispatchKey)") DispatchChainRoot right) {
 			if (!skipLeft) {
 				try {
-					return left.execute(dispatchClass, args);
+					return left.execute(dispatchKey, args);
 				} catch (PremiseFailureException pmfx) {
 					;
 				}
@@ -109,13 +109,13 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 			return right.execute(args);
 		}
 
-		@Specialization(guards = { "nextDispatchClass(args, dispatchClass) == cachedNextDispatchClass",
-				"cachedNextDispatchClass == null" })
-		public RuleResult executeCachedNullRight(Class<?> dispatchClass, Object[] args, boolean skipLeft,
-				@Cached("nextDispatchClass(args, dispatchClass)") Class<?> cachedNextDispatchClass) {
+		@Specialization(guards = { "nextDispatchKey(args, dispatchKey) == cachedNextDispatchKey",
+				"cachedNextDispatchKey == null" })
+		public RuleResult executeCachedNullRight(String dispatchKey, Object[] args, boolean skipLeft,
+				@Cached("nextDispatchKey(args, dispatchKey)") String cachedNextDispatchKey) {
 			if (!skipLeft) {
 				try {
-					return left.execute(dispatchClass, args);
+					return left.execute(dispatchKey, args);
 				} catch (PremiseFailureException pmfx) {
 					;
 				}
@@ -125,19 +125,19 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 		}
 
 		@Specialization(replaces = { "executeCachedNotNullRight", "executeCachedNullRight" })
-		public RuleResult executeGeneric(Class<?> dispatchClass, Object[] args, boolean skipLeft,
+		public RuleResult executeGeneric(String dispatchKey, Object[] args, boolean skipLeft,
 				@Cached("createGenericDispatch()") GenericDispatch right) {
 			if (!skipLeft) {
 				try {
-					return left.execute(dispatchClass, args);
+					return left.execute(dispatchKey, args);
 				} catch (PremiseFailureException pmfx) {
 					;
 				}
 			}
-			Class<?> nextDispatchClass = DispatchUtils.nextDispatchClass(args, dispatchClass);
-			if (nextDispatchClass != null) {
+			String nextDispatchKey = DispatchUtils.nextDispatchKey(args, dispatchKey);
+			if (nextDispatchKey != null) {
 				try {
-					return right.execute(dispatchClass, args);
+					return right.execute(nextDispatchKey, args);
 				} catch (PremiseFailureException pmfx) {
 					;
 				}

@@ -50,5 +50,21 @@ rules
   
   external classname-of(|)
   
+  external term-to-string(|)
 
+//  string-type = term-to-string
+
+  string-type:
+    SimpleSort(s) -> $[SimpleSort([s])]
+  
+  string-type:
+    ListSort(s) -> $[ListSort([<string-type> s])]
+  
+  string-type:
+    MapSort(key-sort, val-sort) -> $[MapSort([<string-type> key-sort],[<string-type> val-sort])]
+  
+  string-type:
+    TupleSort(s*) -> $[TupleSort([<map(string-type); separate-by(|","); concat-strings> s*])]
+  
+  
 

@@ -9,8 +9,8 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class RuleFactory {
 
-	public static CallTarget[] createRuleTargets(DynSemLanguage lang, SourceSection source, List<? extends Rule> rules,
-			String arrowName, Class<?> dispatchClass) {
+	public static CallTarget[] createRuleTargets(DynSemLanguage lang, SourceSection source,
+			List<? extends Rule> rules) {
 		CallTarget[] targets = new CallTarget[rules.size()];
 		for (int i = 0; i < targets.length; i++) {
 			targets[i] = rules.get(i).getCallTarget();

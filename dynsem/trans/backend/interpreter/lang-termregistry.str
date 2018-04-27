@@ -25,9 +25,9 @@ rules /* term registry */
         import java.util.Map;
         
         import ~x:<get-opt> TermPkg().*;
-        import ~x:<get-opt> BuildPkg().*;
-        import ~x:<get-opt> MatchPkg().*;
-        import ~x:<get-opt> ChecksPkg().*;
+//        import ~x:<get-opt> BuildPkg().*;
+//        import ~x:<get-opt> MatchPkg().*;
+//        import ~x:<get-opt> ChecksPkg().*;
         import ~x:<get-opt> NativePkg().*;
         
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
@@ -41,11 +41,11 @@ rules /* term registry */
         import com.oracle.truffle.api.source.SourceSection;
         
         public class x_classname implements ITermRegistry {
-          private final Map<String, Class<?>> constructorClasses = new HashMap<String, Class<?>>();
+//          private final Map<String, Class<?>> constructorClasses = new HashMap<String, Class<?>>();
           private final Map<String, Class<?>> nativeOpClasses = new HashMap<String, Class<?>>();
-          private final Map<Class<?>, Class<? extends IListTerm<?>>> listClasses = new HashMap<Class<?>, Class<? extends IListTerm<?>>>();
-          private final Map<Class<?>, ITermBuildFactory> builderFactories = new HashMap<Class<?>, ITermBuildFactory>();
-          private final Map<Class<?>, ITermMatchPatternFactory> matcherFactories = new HashMap<Class<?>, ITermMatchPatternFactory>();
+//          private final Map<Class<?>, Class<? extends IListTerm<?>>> listClasses = new HashMap<Class<?>, Class<? extends IListTerm<?>>>();
+//          private final Map<Class<?>, ITermBuildFactory> builderFactories = new HashMap<Class<?>, ITermBuildFactory>();
+//          private final Map<Class<?>, ITermMatchPatternFactory> matcherFactories = new HashMap<Class<?>, ITermMatchPatternFactory>();
           private final Map<Class<?>, ITermBuildFactory> nativeOpFactories = new HashMap<Class<?>, ITermBuildFactory>();
           private final Map<String, ITermBuildFactory> nativeAdapterFactories = new HashMap<String, ITermBuildFactory>();
           
@@ -54,29 +54,29 @@ rules /* term registry */
           }
         
           private void init() {
-            bstm0*
+//            bstm0*
             bstm1*
             bstm2*
-            bstm3*
-            bstm4*
+//            bstm3*
+//            bstm4*
           }
           
           @Override
           public ITerm parseProgramTerm(IStrategoTerm p) {
             return ~x:<jclass-term> SimpleSort(<get-opt> StartSymbol()).create(p);
           }
-          
-          @Override
-          public ITermBuildFactory lookupBuildFactory(Class<?> termClass) {
-            CompilerAsserts.neverPartOfCompilation();
-            return builderFactories.get(termClass);
-          }
-        
-          @Override
-          public ITermMatchPatternFactory lookupMatchFactory(Class<?> termClass) {
-            CompilerAsserts.neverPartOfCompilation();
-            return matcherFactories.get(termClass);
-          }
+//          
+//          @Override
+//          public ITermBuildFactory lookupBuildFactory(Class<?> termClass) {
+//            CompilerAsserts.neverPartOfCompilation();
+//            return builderFactories.get(termClass);
+//          }
+//        
+//          @Override
+//          public ITermMatchPatternFactory lookupMatchFactory(Class<?> termClass) {
+//            CompilerAsserts.neverPartOfCompilation();
+//            return matcherFactories.get(termClass);
+//          }
           
           @Override
           public ITermBuildFactory lookupNativeOpBuildFactory(Class<?> termClass) {
@@ -91,15 +91,15 @@ rules /* term registry */
             return nativeAdapterFactories.get(sort + "/" + function + "/" + arity);
           }
           
-          @Override
-          public Class<?> getConstructorClass(String constr, int arity) {
-            CompilerAsserts.neverPartOfCompilation();
-            Class<?> clazz = constructorClasses.get(constr + "/" + arity);
-            if (clazz == null) {
-              throw new RuntimeException("Failed to load class for constructor " + constr + "/" + arity);
-            }
-            return clazz;
-          }
+//          @Override
+//          public Class<?> getConstructorClass(String constr, int arity) {
+//            CompilerAsserts.neverPartOfCompilation();
+//            Class<?> clazz = constructorClasses.get(constr + "/" + arity);
+//            if (clazz == null) {
+//              throw new RuntimeException("Failed to load class for constructor " + constr + "/" + arity);
+//            }
+//            return clazz;
+//          }
 
           @Override
           public Class<?> getNativeOperatorClass(String constr, int arity) {
@@ -111,21 +111,21 @@ rules /* term registry */
             return clazz;
           }
   
-          @Override
-          public <T> Class<? extends IListTerm<T>> getListClass(Class<T> elemClass) {
-            CompilerAsserts.neverPartOfCompilation();
-            @SuppressWarnings("unchecked")
-            Class<? extends IListTerm<T>> clazz = (Class<? extends IListTerm<T>>) listClasses.get(elemClass);
-            if (clazz == null) {
-              throw new RuntimeException("Failed to load list class for element class " + elemClass.getName());
-            }
-            return clazz;
-          }
+//          @Override
+//          public <T> Class<? extends IListTerm<T>> getListClass(Class<T> elemClass) {
+//            CompilerAsserts.neverPartOfCompilation();
+//            @SuppressWarnings("unchecked")
+//            Class<? extends IListTerm<T>> clazz = (Class<? extends IListTerm<T>>) listClasses.get(elemClass);
+//            if (clazz == null) {
+//              throw new RuntimeException("Failed to load list class for element class " + elemClass.getName());
+//            }
+//            return clazz;
+//          }
 
-          @Override  
-          public Class<?> getMapClass(String keySortName, String mapSortName) {
-            throw new RuntimeException("Not implemented");
-          }
+//          @Override  
+//          public Class<?> getMapClass(String keySortName, String mapSortName) {
+//            throw new RuntimeException("Not implemented");
+//          }
           
       }
       ]|
@@ -136,11 +136,12 @@ rules /* term registry */
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
       x_classname := $[[<get-opt> LangName()]TermRegistry]; 
-      bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
+//      bstm0* := <ds-to-interp-terms-registry-inits> consdecl*;
       bstm1* := <ds-to-interp-natopterms-registry-inits> natopdecl*;
       bstm2* := <ds-to-interp-nattyterms-registry-inits> nattydecl*;
-      bstm3* := <ds-to-interp-lists-registry-inits> list-dec*;
-      bstm4* := <ds-to-interp-tuples-registry-inits> tuple-dec*
+//      bstm3* := <ds-to-interp-lists-registry-inits> list-dec*;
+//      bstm4* := <ds-to-interp-tuples-registry-inits> tuple-dec*
+      id
 
   
 

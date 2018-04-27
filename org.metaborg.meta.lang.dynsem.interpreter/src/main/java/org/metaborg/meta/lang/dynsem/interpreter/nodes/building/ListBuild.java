@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionRule;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -10,28 +9,41 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class ListBuild extends TermBuild {
 
-	@Children private final TermBuild[] elemNodes;
-	@Child private TermBuild tailNode;
-	private final Class<?> listClass;
+	@Children protected final TermBuild[] elemNodes;
+	@Child protected TermBuild tailNode;
+	private final String listSort;
 
-	public ListBuild(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode, Class<?> listClass) {
+	public ListBuild(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode, String listSort) {
 		super(source);
 		this.elemNodes = elemNodes;
 		this.tailNode = tailNode;
-		this.listClass = listClass;
+		this.listSort = listSort;
 	}
 
-	@Specialization
-	public IListTerm<?> executeSpecialize(VirtualFrame frame) {
-		final ITermBuildFactory tbFactory = getContext().getTermRegistry().lookupBuildFactory(listClass);
-		final TermBuild concreteListBuild = tbFactory.apply(getSourceSection(), cloneNodes(elemNodes),
-				cloneNode(tailNode));
+	@Specialization(guards = "tailNode == null")
+	@ExplodeLoop
+	public ListTerm doNoTail(VirtualFrame frame) {
+		Object[] elems = new Object[elemNodes.length];
+		for (int i = 0; i < elemNodes.length; i++) {
+			elems[i] = elemNodes[i].executeGeneric(frame);
+		}
+		return new ListTerm(listSort, elems, null);
+	}
 
-		return replace(concreteListBuild).executeIList(frame);
+	@Specialization(guards = "tailNode != null")
+	@ExplodeLoop
+	public ListTerm doWithTail(VirtualFrame frame) {
+		Object[] elems = new Object[elemNodes.length];
+		for (int i = 0; i < elemNodes.length; i++) {
+			elems[i] = elemNodes[i].executeGeneric(frame);
+		}
+
+		return tailNode.executeIList(frame).prefix(elems);
 	}
 
 	public static ListBuild create(IStrategoAppl t, FrameDescriptor fd) {
@@ -48,17 +60,10 @@ public abstract class ListBuild extends TermBuild {
 			tailNodes = TermBuild.create(Tools.applAt(t, 1), fd);
 		}
 
-		final String dispatchClassName = Tools.javaStringAt(t, Tools.hasConstructor(t, "TypedList", 2) ? 1 : 2);
-		Class<?> dispatchClass;
-
-		try {
-			dispatchClass = ReductionRule.class.getClassLoader().loadClass(dispatchClassName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
-		}
+		final String sort = Tools.javaStringAt(t, Tools.hasConstructor(t, "TypedList", 2) ? 1 : 2);
 
 		return ListBuildNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), elemNodes, tailNodes,
-				dispatchClass);
+				sort);
 	}
 
 }

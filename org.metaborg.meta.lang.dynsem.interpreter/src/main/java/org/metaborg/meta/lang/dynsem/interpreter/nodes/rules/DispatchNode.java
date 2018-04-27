@@ -17,7 +17,7 @@ public abstract class DispatchNode extends DynSemNode {
 		this.arrowName = arrowName;
 	}
 
-	public abstract RuleResult execute(Class<?> dispatchClass, Object[] args);
+	public abstract RuleResult execute(String dispatchKey, Object[] args);
 
 	public static DispatchNode create(IStrategoAppl source, IStrategoAppl arrow, FrameDescriptor fd) {
 		assert Tools.hasConstructor(arrow, "NamedDynamicEmitted", 3);

@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.TermPlaceholder;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.TermPlaceholder;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 

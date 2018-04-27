@@ -2,6 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -58,7 +59,7 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 				final Object bodyTerm = frame.getValue(bodyTSlot);
 				final Object[] bodyArgs = mkArgs(frame);
 				bodyArgs[0] = bodyTerm;
-				final RuleResult bodyResult = bodyEvalNode.execute(bodyTerm.getClass(), bodyArgs);
+				final RuleResult bodyResult = bodyEvalNode.execute(DispatchUtils.dispatchKeyOf(bodyTerm), bodyArgs);
 				updateRwComponents(frame, bodyResult.components);
 				updateResult(frame, bodyResult.result);
 				return true;
@@ -83,7 +84,7 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 		final Object conditionTerm = frame.getValue(conditionTSlot);
 		final Object[] conditionArgs = mkArgs(frame);
 		conditionArgs[0] = conditionTerm;
-		final RuleResult result = conditionEvalNode.execute(conditionTerm.getClass(), conditionArgs);
+		final RuleResult result = conditionEvalNode.execute(DispatchUtils.dispatchKeyOf(conditionTerm), conditionArgs);
 		updateRwComponents(frame, result.components);
 		return TypesGen.asBoolean(result.result);
 	}
