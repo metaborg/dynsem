@@ -19,13 +19,10 @@ public class RuleTarget extends Node {
 	@Children protected final TermBuild[] componentNodes;
 	private final SourceSection sourceSection;
 
-	private final RuleResult pooledResult;
-
 	public RuleTarget(TermBuild rhsNode, TermBuild[] componentNodes, SourceSection source) {
 		this.sourceSection = source;
 		this.rhsNode = rhsNode;
 		this.componentNodes = componentNodes;
-		this.pooledResult = new RuleResult(new Object[componentNodes.length]);
 	}
 
 	@Override
@@ -35,16 +32,15 @@ public class RuleTarget extends Node {
 
 	@ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
-		pooledResult.result = rhsNode.executeGeneric(frame);
+		Object result = rhsNode.executeGeneric(frame);
 
-		Object[] resultComps = pooledResult.components;
-		CompilerAsserts.compilationConstant(resultComps);
+		Object[] resultComps = new Object[componentNodes.length];
 
 		for (int i = 0; i < componentNodes.length; i++) {
 			resultComps[i] = componentNodes[i].executeGeneric(frame);
 		}
 
-		return pooledResult;
+		return new RuleResult(result, resultComps);
 	}
 
 	public static RuleTarget create(IStrategoAppl targetT, FrameDescriptor fd) {

@@ -43,8 +43,6 @@ public class WhileNode extends NativeExecutableNode {
 	private final FrameSlot bodyClassSlot;
 	private final FrameSlot resultTSlot;
 
-	private final RuleResult pooledResult;
-
 	public WhileNode(SourceSection source, TermBuild conditionBuildNode, TermBuild bodyBuildNode,
 			TermBuild defaultValBuildNode, TermBuild[] roCompBuilds, TermBuild[] rwCompBuilds) {
 		super(source);
@@ -53,7 +51,6 @@ public class WhileNode extends NativeExecutableNode {
 		this.defaultValBuildNode = defaultValBuildNode;
 		this.roCompBuilds = roCompBuilds;
 		this.rwCompBuilds = rwCompBuilds;
-		this.pooledResult = new RuleResult(new Object[rwCompBuilds.length]);
 		loopFrameDescriptor = new FrameDescriptor();
 
 		this.conditionTSlot = loopFrameDescriptor.addFrameSlot(ID_CONDITION);
@@ -93,15 +90,14 @@ public class WhileNode extends NativeExecutableNode {
 
 		loopNode.executeLoop(loopFrame);
 
-		pooledResult.result = loopFrame.getValue(resultTSlot);
-		final Object[] outRwComps = pooledResult.components;
-		CompilerAsserts.compilationConstant(outRwComps);
+		Object result = loopFrame.getValue(resultTSlot);
+		final Object[] outRwComps = new Object[rwCompBuilds.length];
 
 		for (int i = 0; i < outRwComps.length; i++) {
 			outRwComps[i] = args[i + 1 + roCompBuilds.length];
 		}
 
-		return pooledResult;
+		return new RuleResult(result, outRwComps);
 
 	}
 
