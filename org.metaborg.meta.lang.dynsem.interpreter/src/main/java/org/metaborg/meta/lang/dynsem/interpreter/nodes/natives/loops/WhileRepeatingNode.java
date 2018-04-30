@@ -1,10 +1,11 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.StatefulControlFlowException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -17,23 +18,27 @@ import mb.flowspec.runtime.interpreter.TypesGen;
 
 public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 
+	private final int numRwComponents;
+
 	private final FrameSlot conditionTSlot;
+	private final FrameSlot conditionClassSlot;
 	private final FrameSlot bodyTSlot;
+	private final FrameSlot bodyClassSlot;
+
 	private final FrameSlot resultTSlot;
-	@CompilationFinal(dimensions = 1) private final FrameSlot[] roCompSlots;
-	@CompilationFinal(dimensions = 1) private final FrameSlot[] rwCompSlots;
 
 	@Child private DispatchNode conditionEvalNode;
 	@Child private DispatchNode bodyEvalNode;
 
-	public WhileRepeatingNode(SourceSection source, FrameSlot conditionTSlot, FrameSlot bodyTSlot,
-			FrameSlot resultTSlot, FrameSlot[] roCompSlots, FrameSlot[] rwCompSlots) {
+	public WhileRepeatingNode(SourceSection source, FrameSlot conditionTSlot, FrameSlot conditionClassSlot,
+			FrameSlot bodyTSlot, FrameSlot bodyClassSlot, FrameSlot resultTSlot, int numRwComponents) {
 		super(source);
 		this.conditionTSlot = conditionTSlot;
+		this.conditionClassSlot = conditionClassSlot;
 		this.bodyTSlot = bodyTSlot;
+		this.bodyClassSlot = bodyClassSlot;
 		this.resultTSlot = resultTSlot;
-		this.roCompSlots = roCompSlots;
-		this.rwCompSlots = rwCompSlots;
+		this.numRwComponents = numRwComponents;
 		this.conditionEvalNode = DispatchNode.create(getSourceSection(), "");
 		this.bodyEvalNode = DispatchNode.create(getSourceSection(), "");
 		adoptChildren();
@@ -53,24 +58,21 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 	 */
 	@Override
 	public boolean executeRepeating(VirtualFrame frame) {
-		if (conditionProfile.profile(evaluateCondition(frame))) {
+		Object[] args = frame.getArguments();
+		CompilerAsserts.compilationConstant(args.length);
+		args[0] = frame.getValue(conditionTSlot);
+		if (conditionProfile.profile(evaluateCondition(frame, args))) {
 			try {
-				final Object bodyTerm = frame.getValue(bodyTSlot);
-				final Object[] bodyArgs = mkArgs(frame);
-				bodyArgs[0] = bodyTerm;
-				final RuleResult bodyResult = bodyEvalNode.execute(bodyTerm.getClass(), bodyArgs);
-				updateRwComponents(frame, bodyResult.components);
-				updateResult(frame, bodyResult.result);
+				args[0] = frame.getValue(bodyTSlot);
+				evaluateBody(frame, args);
 				return true;
 			} catch (LoopContinueException cex) {
 				continueTaken.enter();
-				updateRwComponents(frame, cex.getComponents());
-				updateResult(frame, cex.getThrown());
+				handleInterrupted(frame, args, cex);
 				return true;
 			} catch (LoopBreakException brex) {
 				breakTaken.enter();
-				updateRwComponents(frame, brex.getComponents());
-				updateResult(frame, brex.getThrown());
+				handleInterrupted(frame, args, brex);
 				return false;
 			}
 		} else {
@@ -79,38 +81,46 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 
 	}
 
-	private boolean evaluateCondition(VirtualFrame frame) {
-		final Object conditionTerm = frame.getValue(conditionTSlot);
-		final Object[] conditionArgs = mkArgs(frame);
-		conditionArgs[0] = conditionTerm;
-		final RuleResult result = conditionEvalNode.execute(conditionTerm.getClass(), conditionArgs);
-		updateRwComponents(frame, result.components);
-		return TypesGen.asBoolean(result.result);
-	}
+	@ExplodeLoop
+	private boolean evaluateCondition(VirtualFrame frame, Object[] args) {
+		CompilerAsserts.compilationConstant(args.length);
+		final RuleResult conditionResult = conditionEvalNode.execute((Class<?>) frame.getValue(conditionClassSlot),
+				args);
+		final Object[] resultRwComponents = conditionResult.components;
+		assert resultRwComponents.length == numRwComponents;
 
-	private void updateResult(VirtualFrame frame, Object result) {
-		frame.setObject(resultTSlot, result);
+		for (int i = args.length - 1; i >= args.length - numRwComponents; i--) {
+			args[i] = resultRwComponents[i - numRwComponents - 1];
+		}
+
+		return TypesGen.asBoolean(conditionResult.result);
 	}
 
 	@ExplodeLoop
-	private void updateRwComponents(VirtualFrame frame, Object[] components) {
-		for (int i = 0; i < rwCompSlots.length; i++) {
-			frame.setObject(rwCompSlots[i], components[i]);
+	private void evaluateBody(VirtualFrame frame, Object[] args) {
+		CompilerAsserts.compilationConstant(args.length);
+		final RuleResult bodyResult = bodyEvalNode.execute((Class<?>) frame.getValue(bodyClassSlot), args);
+
+		final Object[] resultRwComponents = bodyResult.components;
+		assert resultRwComponents.length == numRwComponents;
+
+		for (int i = args.length - 1; i >= args.length - numRwComponents; i--) {
+			args[i] = resultRwComponents[i - numRwComponents - 1];
 		}
+
+		frame.setObject(resultTSlot, bodyResult.result);
 	}
 
 	@ExplodeLoop
-	private Object[] mkArgs(VirtualFrame frame) {
-		final int numRoComps = roCompSlots.length;
-		final int numRwComps = rwCompSlots.length;
-		final Object[] args = new Object[numRoComps + numRwComps + 1];
-		for (int i = 0; i < numRoComps; i++) {
-			args[i + 1] = frame.getValue(roCompSlots[i]);
-		}
-		for (int i = 0; i < numRwComps; i++) {
-			args[i + numRoComps + 1] = frame.getValue(rwCompSlots[i]);
-		}
-		return args;
-	}
+	private void handleInterrupted(VirtualFrame frame, Object[] args, StatefulControlFlowException ex) {
+		CompilerAsserts.compilationConstant(args.length);
+		frame.setObject(resultTSlot, ex.getThrown());
 
+		final Object[] thrownRwComponents = ex.getComponents();
+		assert thrownRwComponents.length == numRwComponents;
+
+		for (int i = args.length - 1; i >= args.length - numRwComponents; i--) {
+			args[i] = thrownRwComponents[i - numRwComponents - 1];
+		}
+	}
 }
