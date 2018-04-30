@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Cons;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Nil;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -19,8 +20,13 @@ public abstract class ListLengthTermBuild extends TermBuild {
 	}
 
 	@Specialization
-	public int doEvaluated(ListTerm l) {
-		return l.size();
+	public int doNil(Nil l) {
+		return 0;
+	}
+
+	@Specialization
+	public int doCons(Cons cons) {
+		return cons.size();
 	}
 
 	public static ListLengthTermBuild create(IStrategoAppl t, FrameDescriptor fd) {

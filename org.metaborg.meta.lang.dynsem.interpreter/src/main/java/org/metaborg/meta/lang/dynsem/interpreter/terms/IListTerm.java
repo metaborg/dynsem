@@ -1,7 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.terms;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ListTerm;
-
 /**
  * Interface for all list terms.
  * 
@@ -20,8 +18,8 @@ public interface IListTerm extends ITerm {
 
 	public IListTerm drop(int n);
 
-	public IListTerm reverse();
+	public IListTerm prefix(Object[] elems);
 
-	public ListTerm prefix(Object[] elems);
 
+	// public Assumption getFixedLengthAssumption();
 }

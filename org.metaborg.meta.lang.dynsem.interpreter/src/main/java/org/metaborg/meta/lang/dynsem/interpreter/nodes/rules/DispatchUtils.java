@@ -1,8 +1,12 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ApplTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Cons;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ConsNilList;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Nil;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.TupleTerm;
+
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public final class DispatchUtils {
 
@@ -32,13 +36,19 @@ public final class DispatchUtils {
 			return dispatchKeyOf((TupleTerm) t);
 		}
 
-		if (t instanceof ListTerm) {
-			return dispatchKeyOf((ListTerm) t);
+		if (t instanceof Nil) {
+			return dispatchKeyOf((Nil) t);
 		}
+
+		if (t instanceof Cons) {
+			return dispatchKeyOf((Cons) t);
+		}
+
 
 		throw new IllegalStateException("Cannot determine dispatch key for term: " + t);
 	}
 
+	@TruffleBoundary
 	public static String dispatchKeyOf(ApplTerm appl) {
 		return appl.name() + "/" + appl.size();
 	}
@@ -47,7 +57,7 @@ public final class DispatchUtils {
 		return tupl.sort();
 	}
 
-	public static String dispatchKeyOf(ListTerm list) {
+	public static String dispatchKeyOf(ConsNilList list) {
 		return list.sort();
 	}
 }

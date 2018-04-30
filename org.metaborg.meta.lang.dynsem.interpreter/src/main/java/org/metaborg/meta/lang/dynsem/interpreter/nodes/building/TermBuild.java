@@ -1,14 +1,18 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.con.CachingConBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypes;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.BuiltinTypesGen;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.ITupleTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ApplTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Cons;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ConsNilList;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Nil;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.TupleTerm;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.terms.util.NotImplementedException;
 
 import com.github.krukow.clj_ds.PersistentMap;
@@ -45,8 +49,8 @@ public abstract class TermBuild extends DynSemNode {
 		return BuiltinTypesGen.asITerm(executeGeneric(frame));
 	}
 
-	public IApplTerm executeIApplTerm(VirtualFrame frame) {
-		return BuiltinTypesGen.asIApplTerm(executeGeneric(frame));
+	public ApplTerm executeApplTerm(VirtualFrame frame) {
+		return BuiltinTypesGen.asApplTerm(executeGeneric(frame));
 	}
 
 	public PersistentMap<?, ?> executeMap(VirtualFrame frame) {
@@ -61,18 +65,26 @@ public abstract class TermBuild extends DynSemNode {
 		return BuiltinTypesGen.asObjectArray(executeGeneric(frame));
 	}
 
-	public IListTerm executeIList(VirtualFrame frame) {
-		return BuiltinTypesGen.asIListTerm(executeGeneric(frame));
+	public ConsNilList executeList(VirtualFrame frame) {
+		return BuiltinTypesGen.asConsNilList(executeGeneric(frame));
 	}
 
-	public ITupleTerm executeITuple(VirtualFrame frame) {
-		return BuiltinTypesGen.asITupleTerm(executeGeneric(frame));
+	public Cons executeCons(VirtualFrame frame) {
+		return BuiltinTypesGen.asCons(executeGeneric(frame));
+	}
+
+	public Nil executeNil(VirtualFrame frame) {
+		return BuiltinTypesGen.asNil(executeGeneric(frame));
+	}
+
+	public TupleTerm executeTuple(VirtualFrame frame) {
+		return BuiltinTypesGen.asTupleTerm(executeGeneric(frame));
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		if (Tools.hasConstructor(t, "Con", 3)) {
-			return ConBuild.create(t, fd);
+			return CachingConBuild.create(t, fd);
 		}
 		if (Tools.hasConstructor(t, "NativeOp", 2)) {
 			return NativeOpTermBuild.create(t, fd);
@@ -156,6 +168,15 @@ public abstract class TermBuild extends DynSemNode {
 		}
 
 		throw new NotImplementedException("Unsupported term build: " + t);
+	}
+
+	public static TermBuild[] createArray(IStrategoList ts, FrameDescriptor fd) {
+		CompilerAsserts.neverPartOfCompilation();
+		TermBuild[] builds = new TermBuild[ts.size()];
+		for (int i = 0; i < builds.length; i++) {
+			builds[i] = TermBuild.create(Tools.applAt(ts, i), fd);
+		}
+		return builds;
 	}
 
 	public static TermBuild[] cloneNodes(TermBuild[] nodes) {

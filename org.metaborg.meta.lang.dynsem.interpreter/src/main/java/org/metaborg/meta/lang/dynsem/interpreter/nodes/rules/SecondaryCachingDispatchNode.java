@@ -7,6 +7,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.ImportStatic;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -91,7 +92,7 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 
 		public abstract RuleResult executeSkippingLeft(String nextDispatchKey, Object[] args, boolean skipLeft);
 
-		@Specialization(guards = { "nextDispatchKey(args, dispatchKey) == cachedNextDispatchKey",
+		@Specialization(guards = { "stringEq(nextDispatchKey(args, dispatchKey), cachedNextDispatchKey)",
 				"cachedNextDispatchKey != null" })
 		public RuleResult executeCachedNotNullRight(String dispatchKey, Object[] args, boolean skipLeft,
 				@Cached("nextDispatchKey(args, dispatchKey)") String cachedNextDispatchKey,
@@ -107,7 +108,7 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 			return right.execute(args);
 		}
 
-		@Specialization(guards = { "nextDispatchKey(args, dispatchKey) == cachedNextDispatchKey",
+		@Specialization(guards = { "nextDispatchKey(args, dispatchKey) == null",
 				"cachedNextDispatchKey == null" })
 		public RuleResult executeCachedNullRight(String dispatchKey, Object[] args, boolean skipLeft,
 				@Cached("nextDispatchKey(args, dispatchKey)") String cachedNextDispatchKey) {
@@ -120,6 +121,11 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 			}
 
 			throw new ReductionFailure("Reduction failed", InterpreterUtils.createStacktrace(), this);
+		}
+
+		@TruffleBoundary
+		protected static boolean stringEq(String a, String b) {
+			return a.equals(b);
 		}
 
 		@Specialization(replaces = { "executeCachedNotNullRight", "executeCachedNullRight" })

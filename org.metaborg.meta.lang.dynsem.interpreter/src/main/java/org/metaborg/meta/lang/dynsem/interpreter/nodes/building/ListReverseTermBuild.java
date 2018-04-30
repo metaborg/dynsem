@@ -1,9 +1,12 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Cons;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ConsNilList;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Nil;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
@@ -18,10 +21,20 @@ public abstract class ListReverseTermBuild extends TermBuild {
 		super(source);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Specialization
-	public ListTerm doEvaluated(ListTerm l) {
-		return l.reverse();
+	public Nil doNil(Nil nil) {
+		return nil;
+	}
+
+	public ConsNilList doCons(Cons cons) {
+		final String sort = cons.sort();
+		final IStrategoTerm aterm = cons.getStrategoTerm();
+		Object[] elems = cons.subterms();
+		ConsNilList reversed = new Nil(sort, aterm);
+		for (int i = 0; i < elems.length; i++) {
+			reversed = new Cons(sort, elems[i], reversed, aterm);
+		}
+		return reversed;
 	}
 
 	public static ListReverseTermBuild create(IStrategoAppl t, FrameDescriptor fd) {

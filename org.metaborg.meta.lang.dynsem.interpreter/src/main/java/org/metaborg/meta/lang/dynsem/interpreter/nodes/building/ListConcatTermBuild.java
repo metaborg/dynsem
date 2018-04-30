@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Cons;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.Nil;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -21,8 +21,23 @@ public abstract class ListConcatTermBuild extends TermBuild {
 	}
 
 	@Specialization
-	public IListTerm doLists(ListTerm l, ListTerm r) {
-		return r.prefix(l.subterms());
+	public Nil doNilNil(Nil nil1, Nil nil2) {
+		return nil1;
+	}
+
+	@Specialization
+	public Cons doConsNil(Cons cons, Nil nil) {
+		return cons;
+	}
+
+	@Specialization
+	public Cons doNilCons(Nil nil, Cons cons) {
+		return cons;
+	}
+
+	@Specialization
+	public Cons doConsCons(Cons cons1, Cons cons2) {
+		return (Cons) cons2.prefix(cons1.subterms());
 	}
 
 	public static ListConcatTermBuild create(IStrategoAppl t, FrameDescriptor fd) {

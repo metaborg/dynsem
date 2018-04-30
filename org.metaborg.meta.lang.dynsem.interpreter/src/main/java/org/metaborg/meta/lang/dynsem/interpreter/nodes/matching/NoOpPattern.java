@@ -14,7 +14,7 @@ public abstract class NoOpPattern extends MatchPattern {
 	}
 
 	@Specialization
-	public boolean executeMatch() {
+	public boolean doSuccess() {
 		return true;
 	}
 

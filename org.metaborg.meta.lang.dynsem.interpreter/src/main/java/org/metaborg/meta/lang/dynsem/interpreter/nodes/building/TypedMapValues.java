@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
-import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.concrete.ConsNilList;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -31,8 +31,12 @@ public abstract class TypedMapValues extends TermBuild {
 	}
 
 	@Specialization
-	public ListTerm doList(@SuppressWarnings("rawtypes") PersistentMap map) {
-		return new ListTerm(valueListSort, map.values().toArray(), null);
+	public ConsNilList doList(@SuppressWarnings("rawtypes") PersistentMap map) {
+		return ConsNilList.fromArray(valueListSort, valuesOf(map), null);
+	}
+
+	private Object[] valuesOf(@SuppressWarnings("rawtypes") PersistentMap map) {
+		return map.values().toArray();
 	}
 
 }

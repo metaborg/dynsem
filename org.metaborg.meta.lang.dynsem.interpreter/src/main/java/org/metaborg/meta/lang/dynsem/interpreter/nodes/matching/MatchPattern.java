@@ -32,12 +32,9 @@ public abstract class MatchPattern extends DynSemNode {
 		if (Tools.hasConstructor(t, "VarRef", 1)) {
 			return VarBind.create(t, fd);
 		}
-		if (Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3)) {
-			return ListMatch.create(t, fd);
-		}
-
-		if (Tools.hasConstructor(t, "List_", 1) || Tools.hasConstructor(t, "ListTail", 2)) {
-			return DeadHeadListMatch.create(t, fd);
+		if (Tools.hasConstructor(t, "TypedList", 2) || Tools.hasConstructor(t, "TypedListTail", 3)
+				|| Tools.hasConstructor(t, "List_", 1) || Tools.hasConstructor(t, "ListTail", 2)) {
+			return ListMatchPattern.create(t, fd);
 		}
 
 		if (Tools.hasConstructor(t, "TypedTuple", 2)) {
