@@ -1,7 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
-import java.util.Arrays;
-
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
@@ -44,8 +42,8 @@ public class WhileNode extends NativeExecutableNode {
 	private final FrameSlot bodyTSlot;
 	private final FrameSlot bodyClassSlot;
 	private final FrameSlot resultTSlot;
-	// @CompilationFinal(dimensions = 1) private final FrameSlot[] roCompSlots;
-	// @CompilationFinal(dimensions = 1) private final FrameSlot[] rwCompSlots;
+
+	private final RuleResult pooledResult;
 
 	public WhileNode(SourceSection source, TermBuild conditionBuildNode, TermBuild bodyBuildNode,
 			TermBuild defaultValBuildNode, TermBuild[] roCompBuilds, TermBuild[] rwCompBuilds) {
@@ -55,7 +53,7 @@ public class WhileNode extends NativeExecutableNode {
 		this.defaultValBuildNode = defaultValBuildNode;
 		this.roCompBuilds = roCompBuilds;
 		this.rwCompBuilds = rwCompBuilds;
-
+		this.pooledResult = new RuleResult(new Object[rwCompBuilds.length]);
 		loopFrameDescriptor = new FrameDescriptor();
 
 		this.conditionTSlot = loopFrameDescriptor.addFrameSlot(ID_CONDITION);
@@ -63,15 +61,6 @@ public class WhileNode extends NativeExecutableNode {
 		this.bodyTSlot = loopFrameDescriptor.addFrameSlot(ID_BODY);
 		this.bodyClassSlot = loopFrameDescriptor.addFrameSlot(ID_BODY_CLASS);
 		this.resultTSlot = loopFrameDescriptor.addFrameSlot(ID_RESULT);
-		//
-		// this.roCompSlots = new FrameSlot[roCompBuilds.length];
-		// for (int i = 0; i < roCompBuilds.length; i++) {
-		// this.roCompSlots[i] = loopFrameDescriptor.addFrameSlot("RO_" + i);
-		// }
-		// this.rwCompSlots = new FrameSlot[rwCompBuilds.length];
-		// for (int i = 0; i < rwCompBuilds.length; i++) {
-		// this.rwCompSlots[i] = loopFrameDescriptor.addFrameSlot("RW_" + i);
-		// }
 		this.loopNode = Truffle.getRuntime().createLoopNode(
 				new WhileRepeatingNode(source, conditionTSlot, conditionClassSlot, bodyTSlot, bodyClassSlot,
 						resultTSlot, rwCompBuilds.length));
@@ -101,26 +90,18 @@ public class WhileNode extends NativeExecutableNode {
 
 		Object defaultValT = defaultValBuildNode.executeGeneric(frame);
 		loopFrame.setObject(resultTSlot, defaultValT);
-		//
-		// for (int i = 0; i < roCompBuilds.length; i++) {
-		// loopFrame.setObject(roCompSlots[i], roCompBuilds[i].executeGeneric(frame));
-		// }
-		//
-		// for (int i = 0; i < rwCompBuilds.length; i++) {
-		// loopFrame.setObject(rwCompSlots[i], rwCompBuilds[i].executeGeneric(frame));
-		// }
 
 		loopNode.executeLoop(loopFrame);
 
-		// Object[] outRwComps = new Object[rwCompBuilds.length];
+		pooledResult.result = loopFrame.getValue(resultTSlot);
+		final Object[] outRwComps = pooledResult.components;
+		CompilerAsserts.compilationConstant(outRwComps);
 
-		//
-		// for (int i = 0; i < .length; i++) {
-		// outRwComps[i] = loopFrame.getValue(rwCompSlots[i]);
-		// }
+		for (int i = 0; i < outRwComps.length; i++) {
+			outRwComps[i] = args[i + 1 + roCompBuilds.length];
+		}
 
-		return new RuleResult(loopFrame.getValue(resultTSlot),
-				Arrays.copyOfRange(args, 1 + roCompBuilds.length, args.length));
+		return pooledResult;
 
 	}
 
