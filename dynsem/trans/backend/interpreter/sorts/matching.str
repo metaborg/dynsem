@@ -35,9 +35,9 @@ strategies
 //        import com.oracle.truffle.api.dsl.Specialization;
 //        import com.oracle.truffle.api.frame.VirtualFrame;
 //        import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-//        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCheckedBuild;
+//        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCastNode;
 //        
-//        public abstract class x_issortclass extends TypeCheckedBuild {
+//        public abstract class x_issortclass extends TypeCastNode {
 //          
 //          public x_issortclass() {
 //            super(SourceUtils.dynsemSourceSectionUnvailable());
@@ -68,9 +68,9 @@ strategies
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.frame.VirtualFrame;
         import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCheckedBuild;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCastNode;
         
-        public abstract class x_issortclass extends TypeCheckedBuild {
+        public abstract class x_issortclass extends TypeCastNode {
           
           public x_issortclass() {
             super(SourceUtils.dynsemSourceSectionUnvailable());
@@ -102,9 +102,9 @@ strategies
         import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.frame.VirtualFrame;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCheckedBuild;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCastNode;
         
-        public abstract class x_issortclass extends TypeCheckedBuild {
+        public abstract class x_issortclass extends TypeCastNode {
           
           public x_issortclass() {
             super(SourceUtils.dynsemSourceSectionUnvailable());

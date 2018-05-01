@@ -5,9 +5,9 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChild(value = "tb", type = TermBuild.class)
-public abstract class TypeCheckedBuild extends TermBuild {
+public abstract class TypeCastNode extends TermBuild {
 
-	public TypeCheckedBuild(SourceSection source) {
+	public TypeCastNode(SourceSection source) {
 		super(source);
 	}
 
