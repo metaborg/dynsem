@@ -54,4 +54,10 @@ public final class TermPlaceholder implements ITerm, IWithStrategoTerm {
 				"May not query properties of the ??? (placeholder) term" + InterpreterUtils.createStacktrace());
 	}
 
+	@Override
+	public String dispatchkey() {
+		throw new RuntimeException(
+				"May not query properties of the ??? (placeholder) term" + InterpreterUtils.createStacktrace());
+	}
+
 }

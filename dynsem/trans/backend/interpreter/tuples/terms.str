@@ -63,7 +63,7 @@ rules
               assert term != null;
               assert Tools.isTermTuple(term);
               assert term.getSubtermCount() == ARITY;
-              return new TupleTerm(~e:Lit(String([Chars(sort-string)])), new Object[] { e1* }, term);
+              return new TupleTerm(~e:Lit(String([Chars(sort-string)])).intern(), new Object[] { e1* }, term);
             }
         ]|
       end

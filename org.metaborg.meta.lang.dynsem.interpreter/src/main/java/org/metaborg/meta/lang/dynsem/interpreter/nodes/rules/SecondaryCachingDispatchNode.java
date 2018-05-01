@@ -92,7 +92,7 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 
 		public abstract RuleResult executeSkippingLeft(String nextDispatchKey, Object[] args, boolean skipLeft);
 
-		@Specialization(guards = { "stringEq(nextDispatchKey(args, dispatchKey), cachedNextDispatchKey)",
+		@Specialization(guards = { "nextDispatchKey(args, dispatchKey) == cachedNextDispatchKey",
 				"cachedNextDispatchKey != null" })
 		public RuleResult executeCachedNotNullRight(String dispatchKey, Object[] args, boolean skipLeft,
 				@Cached("nextDispatchKey(args, dispatchKey)") String cachedNextDispatchKey,

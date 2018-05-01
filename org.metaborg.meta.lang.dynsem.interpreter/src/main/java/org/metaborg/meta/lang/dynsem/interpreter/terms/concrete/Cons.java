@@ -36,4 +36,9 @@ public final class Cons extends ConsNilList {
 	public String toString() {
 		return "C(" + head + tail.toString() + ")";
 	}
+
+	@Override
+	public String dispatchkey() {
+		return sort();
+	}
 }

@@ -25,12 +25,13 @@ public abstract class ListBuild extends TermBuild {
 		if (Tools.hasConstructor(t, "TypedListTail", 3)) {
 			tailNode = TermBuild.create(Tools.applAt(t, 1), fd);
 		} else {
-			tailNode = NilBuildNodeGen.create(source, sort);
+			tailNode = NilBuildNodeGen.create(source, sort.intern());
 		}
 
 		IStrategoList elemTs = Tools.listAt(t, 0);
 		for (int i = 0; i < elemTs.size(); i++) {
-			tailNode = ConsBuildNodeGen.create(source, sort, TermBuild.create(Tools.applAt(elemTs, i), fd), tailNode);
+			tailNode = ConsBuildNodeGen.create(source, sort.intern(), TermBuild.create(Tools.applAt(elemTs, i), fd),
+					tailNode);
 		}
 
 		return tailNode;

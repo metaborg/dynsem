@@ -12,20 +12,24 @@ public final class ApplTerm implements IApplTerm, IWithStrategoTerm {
 	private final String sort;
 	private final String name;
 	private final int arity;
+	private final String dispatchKey;
+
 	@CompilationFinal(dimensions = 1) private final Object[] subterms;
 
 	private final IStrategoTerm strategoTerm;
 
-	public ApplTerm(String sort, String name, Object[] subterms, IStrategoTerm strTerm) {
+	public ApplTerm(String sort, String name, Object[] subterms, String dispatchKey,
+			IStrategoTerm strTerm) {
 		this.sort = sort;
 		this.name = name;
 		this.arity = subterms.length;
 		this.subterms = subterms;
 		this.strategoTerm = strTerm;
+		this.dispatchKey = dispatchKey;
 	}
 
-	public ApplTerm(String sort, String name, Object[] subterms) {
-		this(sort, name, subterms, null);
+	public ApplTerm(String sort, String name, Object[] subterms, String dispatchKey) {
+		this(sort, name, subterms, dispatchKey, null);
 	}
 
 	@Override
@@ -81,6 +85,11 @@ public final class ApplTerm implements IApplTerm, IWithStrategoTerm {
 		}
 		sb.append(")");
 		return sb.toString();
+	}
+
+	@Override
+	public String dispatchkey() {
+		return dispatchKey;
 	}
 
 }

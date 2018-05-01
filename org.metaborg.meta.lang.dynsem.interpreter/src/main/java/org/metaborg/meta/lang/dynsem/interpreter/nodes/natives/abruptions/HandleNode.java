@@ -7,9 +7,9 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchChainRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -56,18 +56,18 @@ public class HandleNode extends NativeExecutableNode {
 	@Override
 	public RuleResult execute(VirtualFrame frame) {
 		final Object[] handleArgs = frame.getArguments();
-		Object evalT = evalBuildNode.executeGeneric(frame);
+		ITerm evalT = (ITerm) evalBuildNode.executeGeneric(frame);
 		RuleResult result = null;
 		try {
 			// try to evaluate the wrapped body
 			Object[] args = Arrays.copyOf(handleArgs, handleArgs.length);
 			args[0] = evalT;
-			result = evalDispatchNode.execute(DispatchUtils.dispatchKeyOf(evalT), args);
+			result = evalDispatchNode.execute(evalT.dispatchkey(), args);
 		} catch (AbortedEvaluationException abex) {
 			catchTaken.enter();
 			Object catchingT = catchBuildNode.executeGeneric(frame);
 
-			Object handlerT = handlerBuildNode.execute(frame, abex.getThrown(), catchingT);
+			ITerm handlerT = (ITerm) handlerBuildNode.execute(frame, abex.getThrown(), catchingT);
 			// handler gets the ROs from the handle
 			// and the RW from the exception
 			Object[] rwComps = abex.getComponents();
@@ -90,7 +90,7 @@ public class HandleNode extends NativeExecutableNode {
 				 CompilerDirectives.transferToInterpreterAndInvalidate();
 				handlerDispatch = insert(
 						DispatchChainRoot.createUninitialized(getSourceSection(), "",
-								DispatchUtils.dispatchKeyOf(handlerT), true));
+								handlerT.dispatchkey(), true));
 			}
 			try {
 				return handlerDispatch.execute(args);
@@ -103,7 +103,7 @@ public class HandleNode extends NativeExecutableNode {
 		if (continueExistsCondition.profile(continueBuildNode == null)) {
 			return result;
 		} else {
-			Object continueT = continueBuildNode.executeGeneric(frame);
+			ITerm continueT = (ITerm) continueBuildNode.executeGeneric(frame);
 			// continue gets the ROs from the handle
 			// and the RW from the eval result
 			Object[] rwComps = result.components;
@@ -121,7 +121,7 @@ public class HandleNode extends NativeExecutableNode {
 				args[i + numRoComps + 1] = rwComps[i];
 			}
 
-			return continueDispatchNode.execute(DispatchUtils.dispatchKeyOf(continueT), args);
+			return continueDispatchNode.execute(continueT.dispatchkey(), args);
 		}
 	}
 

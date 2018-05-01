@@ -60,7 +60,7 @@ rules
                 final int final_idx = idx; // this is needed because e_elemcreate might be an anonymous object reading the idx
                 elems[idx] = e_elemcreate;
               }
-              return ConsNilList.fromArray(~e:Lit(String([Chars(sort-string)])), elems, term);
+              return ConsNilList.fromArray(~e:Lit(String([Chars(sort-string)])).intern(), elems, term);
             }
         ]|
       end

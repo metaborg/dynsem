@@ -24,14 +24,17 @@ public abstract class CachingConBuild extends TermBuild {
 	private final String sort;
 	private final IStrategoList childrenAterm;
 	private final FrameDescriptor fd;
+	private final String dispatchKey;
 
-	public CachingConBuild(SourceSection source, String name, String sort, IStrategoList childrenAterm,
+	public CachingConBuild(SourceSection source, String name, String sort,
+			IStrategoList childrenAterm,
 			FrameDescriptor fd) {
 		super(source);
 		this.sort = sort;
 		this.name = name;
 		this.childrenAterm = childrenAterm;
 		this.fd = fd;
+		this.dispatchKey = (name + "/" + childrenAterm.size()).intern();
 	}
 
 	@Specialization(limit = "1", guards = { "args == args_cached" })
@@ -43,12 +46,13 @@ public abstract class CachingConBuild extends TermBuild {
 	@Specialization
 	public ApplTerm doUncached(VirtualFrame frame, Cons args) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
-		return replace(new ConBuild(getSourceSection(), name, sort, TermBuild.createArray(childrenAterm, fd)))
+		return replace(
+				new ConBuild(getSourceSection(), name, sort, TermBuild.createArray(childrenAterm, fd)))
 				.executeEvaluated(frame, args.subterms());
 	}
 
 	protected ApplTerm createAppl(Cons args) {
-		return new ApplTerm(sort, name, args.subterms());
+		return new ApplTerm(sort, name, args.subterms(), dispatchKey);
 	}
 
 	public static TermBuild create(IStrategoAppl t, FrameDescriptor fd) {
@@ -65,9 +69,9 @@ public abstract class CachingConBuild extends TermBuild {
 		SourceSection source = SourceUtils.dynsemSourceSectionFromATerm(t);
 
 		if (children.length == 0) {
-			return NullaryConBuildNodeGen.create(source, constr, sort);
+			return NullaryConBuildNodeGen.create(source, constr.intern(), sort);
 		} else {
-			return CachingConBuildNodeGen.create(source, constr, sort, childrenT, fd,
+			return CachingConBuildNodeGen.create(source, constr.intern(), sort.intern(), childrenT, fd,
 					ConArgBuild.fromTermBuilds(source, children));
 		}
 	}

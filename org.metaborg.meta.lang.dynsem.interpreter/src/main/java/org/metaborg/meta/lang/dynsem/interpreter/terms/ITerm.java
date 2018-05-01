@@ -22,5 +22,6 @@ public interface ITerm {
 
 	public String sort();
 	
+	public String dispatchkey();
 
 }

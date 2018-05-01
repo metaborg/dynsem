@@ -68,7 +68,7 @@ rules
             assert term != null;
             assert Tools.isTermAppl(term);
             assert Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
-            return new ApplTerm(~e:Lit(String([Chars(sort-string)])), CONSTRUCTOR, new Object[] { e1* }, term);
+            return new ApplTerm(~e:Lit(String([Chars(sort-string)])).intern(), CONSTRUCTOR.intern(), new Object[] { e1* }, (CONSTRUCTOR + "/" + ARITY).intern(), term);
           } ]| ]
       end;
       e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds-to-interp-hashcode-append)> <range> (1, <length; inc> kid*);

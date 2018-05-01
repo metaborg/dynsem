@@ -29,4 +29,8 @@ public final class Nil extends ConsNilList {
 		return "N()";
 	}
 
+	@Override
+	public String dispatchkey() {
+		return sort();
+	}
 }

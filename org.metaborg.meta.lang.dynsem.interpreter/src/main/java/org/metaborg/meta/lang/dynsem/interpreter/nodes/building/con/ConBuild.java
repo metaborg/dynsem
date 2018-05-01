@@ -12,6 +12,7 @@ public final class ConBuild extends TermBuild {
 
 	private final String name;
 	private final String sort;
+	private final String dispatchKey;
 
 	@Children private TermBuild[] children;
 
@@ -20,6 +21,7 @@ public final class ConBuild extends TermBuild {
 		this.sort = sort;
 		this.name = name;
 		this.children = children;
+		this.dispatchKey = (name + "/" + children.length).intern();
 	}
 
 	@Override
@@ -38,7 +40,7 @@ public final class ConBuild extends TermBuild {
 	}
 
 	public ApplTerm doCreate(Object[] args) {
-		return new ApplTerm(sort, name, args, null);
+		return new ApplTerm(sort, name, args, dispatchKey, null);
 	}
 
 	@ExplodeLoop

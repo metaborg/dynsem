@@ -30,7 +30,7 @@ public class InitEvalNode extends DynSemRootNode {
 	public Object execute(VirtualFrame frame) {
 		// initNabl2.execute(frame);
 		// initProtoFrames.execute(frame);
-		return initDispatch.execute(DispatchUtils.dispatchKeyOf(program), new Object[] { program });
+		return initDispatch.execute(program.dispatchkey(), new Object[] { program });
 	}
 
 	@Override

@@ -55,4 +55,9 @@ public final class TupleTerm implements ITupleTerm, IWithStrategoTerm {
 		return strategoTerm;
 	}
 
+	@Override
+	public String dispatchkey() {
+		return sort();
+	}
+
 }

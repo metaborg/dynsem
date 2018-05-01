@@ -123,7 +123,7 @@ public final class ReductionRule extends Rule {
 
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
 
-		String dispatchKey = Tools.javaStringAt(ruleT, 4);
+		String dispatchKey = Tools.javaStringAt(ruleT, 4).intern();
 
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 

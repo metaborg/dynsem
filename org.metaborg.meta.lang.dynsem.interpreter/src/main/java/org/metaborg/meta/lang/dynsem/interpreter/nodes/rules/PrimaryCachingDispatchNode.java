@@ -11,7 +11,7 @@ public abstract class PrimaryCachingDispatchNode extends DispatchNode {
 		super(source, arrowName);
 	}
 
-	@Specialization(limit = "4", guards = { "stringEq(dispatchKey, cachedDispatchKey)" })
+	@Specialization(limit = "4", guards = { "dispatchKey == cachedDispatchKey" })
 	public RuleResult doCachedPrimary(String dispatchKey, Object[] args,
 			@Cached("dispatchKey") String cachedDispatchKey,
 			@Cached("createDispatchChain(cachedDispatchKey)") DispatchChainRoot dispatchChain) {

@@ -73,7 +73,7 @@ rules
     (dec@ConsDecl(name, [sref@SimpleSort(_)], _, _), bstm0) ->
       bstm |[
         try {
-          return new ApplTerm(~e:Lit(String([Chars(sort-string)])), ~e:Lit(String([Chars(name)])), new Object[] { e_create });
+          return new ApplTerm(~e:Lit(String([Chars(sort-string)])), ~e:Lit(String([Chars(name)])), new Object[] { e_create }, (~e:Lit(String([Chars(name)])) + "/1").intern());
         } catch (IllegalStateException ~x:<newname>) {
           bstm0
         }

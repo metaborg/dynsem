@@ -28,7 +28,7 @@ public abstract class ConMatch extends MatchPattern {
 	@Specialization
 	@ExplodeLoop
 	public boolean doApplTerm(VirtualFrame frame, ApplTerm appl) {
-		if (!stringEq(name, appl.name()) || children.length != appl.size()) {
+		if (name != appl.name() || children.length != appl.size()) {
 			return false;
 		}
 		Object[] subterms = appl.subterms();
@@ -55,6 +55,6 @@ public abstract class ConMatch extends MatchPattern {
 			children[i] = MatchPattern.create(Tools.applAt(childrenT, i), fd);
 		}
 
-		return ConMatchNodeGen.create(constr, children, SourceUtils.dynsemSourceSectionFromATerm(t));
+		return ConMatchNodeGen.create(constr.intern(), children, SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 }

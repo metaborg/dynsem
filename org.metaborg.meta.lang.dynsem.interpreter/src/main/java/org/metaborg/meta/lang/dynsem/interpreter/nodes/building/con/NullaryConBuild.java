@@ -12,11 +12,13 @@ public abstract class NullaryConBuild extends TermBuild {
 
 	private final String name;
 	private final String sort;
+	private final String dispatchKey;
 
 	public NullaryConBuild(SourceSection source, String name, String sort) {
 		super(source);
 		this.sort = sort;
 		this.name = name;
+		this.dispatchKey = (name + "/0").intern();
 	}
 
 	@Specialization
@@ -25,7 +27,7 @@ public abstract class NullaryConBuild extends TermBuild {
 	}
 
 	protected ApplTerm createAppl() {
-		return new ApplTerm(sort, name, new Object[0], null);
+		return new ApplTerm(sort, name, new Object[0], dispatchKey, null);
 	}
 
 }
