@@ -23,7 +23,7 @@ strategies // classes for sorts
       then
         classname := jclass
       else
-        classname := $[A_[<ds-utils-java-escape-id> s]_Sort]
+        classname := <ds-utils-java-escape-id> s
       end
   
   jclass-term-qual-api = jclass-srt-qual

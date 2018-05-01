@@ -23,7 +23,6 @@ rules
         import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.*;
         import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.x_listmatchclassnotailuninitng.*;
         import ~x:$[[<get-opt> MatchPkg()]].x_listmatchclassfactory.x_listmatchclasswithtailuninitng.*;
-        import org.metaborg.lang.tiger.interpreter.generated.terms.match.List_A_Exp_Sort_MFactory.List_A_Exp_Sort_M_WithTail_UninitializedNodeGen.List_A_Exp_Sort_M_DeadHeadNodeGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.NoOpPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListLengthFixedMatch;
@@ -36,7 +35,6 @@ rules
         import com.oracle.truffle.api.dsl.Specialization;
         import com.oracle.truffle.api.frame.VirtualFrame;
         import com.oracle.truffle.api.nodes.ExplodeLoop;
-        import com.oracle.truffle.api.profiles.ConditionProfile;
         import com.oracle.truffle.api.source.SourceSection;
         
         public abstract class x_listmatchclass extends MatchPattern {
