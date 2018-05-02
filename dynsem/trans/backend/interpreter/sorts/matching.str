@@ -112,12 +112,12 @@ strategies
 
           ~meth0*
           
-          public abstract x_sortclass executeCast(VirtualFrame frame);
+          public abstract x_sortclass executeLeafCast(VirtualFrame frame);
 
-          public abstract x_sortclass executeCastEvaluated(Object term);
+          public abstract x_sortclass executeEvaluated(Object term);
           
           @Specialization
-          public x_sortclass doFallback(x_sortclass term) {
+          public x_sortclass executeFallback(x_sortclass term) {
             return term;
           }
         
@@ -138,5 +138,5 @@ strategies
         ]|
       where
         x_termclass := <jclass-term> dec;
-        x_method := $[do[<shorten-uniqueify-string> x_termclass]]
+        x_method := $[execute[<shorten-uniqueify-string> x_termclass]]
 

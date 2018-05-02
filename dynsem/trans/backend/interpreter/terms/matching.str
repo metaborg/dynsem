@@ -18,7 +18,7 @@ strategies
   ds-to-interp-terms-matching-fdecs = map-with-index(ds-to-interp-terms-matching-fdec)
   
   ds-to-interp-terms-matching-fdec:
-    (i, _) -> class-body-dec |[ @Child private MatchPattern ~x:$[p_[i]]; ]|
+    (i, _) -> class-body-dec |[ @Child protected MatchPattern ~x:$[p_[i]]; ]|
 
   ds-to-interp-terms-matching-finits = map-with-index(ds-to-interp-terms-matching-finit)
   
