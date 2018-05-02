@@ -11,10 +11,15 @@ public abstract class StringLiteralTermMatchPattern extends LiteralMatchPattern 
 
 	public StringLiteralTermMatchPattern(String lit, SourceSection source) {
 		super(source);
-		this.lit = lit;
+		this.lit = lit.intern();
 	}
 
-	@Specialization(guards = "s == cachedS")
+	@Specialization(guards = "lit == s")
+	public boolean doRefEq(String s) {
+		return true;
+	}
+
+	@Specialization(replaces = "doRefEq", guards = "s == cachedS")
 	public boolean doCachedString(String s, @Cached("s") String cachedS, @Cached("isStringEq(cachedS)") boolean isEq) {
 		return isEq;
 	}
