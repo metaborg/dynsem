@@ -22,7 +22,7 @@ strategies
         import ~x:<get-opt> TermPkg().x_termclass;
         import ~x:<get-opt> NativePkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-        import com.oracle.truffle.api.profiles.ValueProfile;
+        import com.oracle.truffle.api.profiles.ConditionProfile;
         
         import com.oracle.truffle.api.dsl.Cached;
         import com.oracle.truffle.api.dsl.Specialization;
@@ -41,7 +41,7 @@ strategies
           }
         
           @Specialization
-          public void doTyped(VirtualFrame frame, x_termclass term, param1*) {
+          public void doTyped(VirtualFrame frame, x_termclass term) {
             bstm_match*
           }
 
@@ -53,5 +53,5 @@ strategies
       fdec* := <ds-to-interp-terms-matching-fdecs> s*; 
       param0* := <ds-to-interp-terms-matching-initparams> s*;
       bstm0* := <ds-to-interp-terms-matching-finits> s*;
-      param1* := <range; map(ds-to-interp-terms-match-profile)> (1, <length; inc> s*);
+//      param1* := <range; map(ds-to-interp-terms-match-profile)> (1, <length; inc> s*);
       bstm_match* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> s*)
