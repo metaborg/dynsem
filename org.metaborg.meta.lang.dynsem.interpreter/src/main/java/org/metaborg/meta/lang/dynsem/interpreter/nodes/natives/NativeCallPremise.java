@@ -2,7 +2,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
@@ -38,17 +37,13 @@ public abstract class NativeCallPremise extends Premise {
 	public void doExecute(VirtualFrame frame) {
 		final RuleResult res = execNode.execute(frame);
 
-		if (!rhsNode.executeMatch(frame, res.result)) {
-			throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace(), this);
-		}
+		rhsNode.executeMatch(frame, res.result);
 
 		// evaluate the RHS component pattern matches
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			if (!rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i, this))) {
-				throw new ReductionFailure("Relation premise failure", InterpreterUtils.createStacktrace(), this);
-			}
+			rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i, this));
 		}
 	}
 

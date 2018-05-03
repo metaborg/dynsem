@@ -30,6 +30,7 @@ strategies
         import com.oracle.truffle.api.dsl.Fallback;
         import com.oracle.truffle.api.frame.VirtualFrame;
         import com.oracle.truffle.api.source.SourceSection;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
         
         public abstract class x_matcherclass extends MatchPattern {
         
@@ -41,13 +42,13 @@ strategies
           }
         
           @Specialization
-          public boolean doDeepMatch(VirtualFrame frame, x_termclass term) {
-            return e_match;
+          public void doDeepMatch(VirtualFrame frame, x_termclass term) {
+            bstm_match*
           }
 
           @Fallback
-          public boolean doShallowFail(VirtualFrame frame, Object term) {
-              return false;
+          public void doShallowFail(VirtualFrame frame, Object term) {
+            throw PremiseFailureException.SINGLETON;
           }
           
         }
@@ -59,5 +60,5 @@ strategies
       param0* := <ds-to-interp-terms-matching-initparams> kid*;
       bstm0* := <ds-to-interp-terms-matching-finits> kid*;
 //      param1* := <range; map(ds-to-interp-terms-match-profile)> (1, <length; inc> kid*);
-      e_match := <foldr(!e |[ true ]|, ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> kid*)
+      bstm_match* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> kid*)
 

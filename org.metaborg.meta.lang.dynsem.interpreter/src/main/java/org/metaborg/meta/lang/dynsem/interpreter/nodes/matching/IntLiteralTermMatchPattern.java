@@ -1,5 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
+
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -13,8 +15,10 @@ public abstract class IntLiteralTermMatchPattern extends LiteralMatchPattern {
 	}
 
 	@Specialization
-	public boolean doSuccess(int i) {
-		return i == lit;
+	public void doSuccess(int i) {
+		if (i != lit) {
+			throw PremiseFailureException.SINGLETON;
+		}
 	}
 
 }

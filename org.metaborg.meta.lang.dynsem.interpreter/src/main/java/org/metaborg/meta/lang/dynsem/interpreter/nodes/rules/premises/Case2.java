@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -28,35 +29,32 @@ public abstract class Case2 extends DynSemNode {
 		this.next = next;
 	}
 
-	public abstract boolean execute(VirtualFrame frame, Object t);
+	public abstract void execute(VirtualFrame frame, Object t);
 
 	@Specialization(guards = { "guard == null", "next == null" })
-	public boolean executeNoGuardNoNext(VirtualFrame frame, Object t) {
+	public void executeNoGuardNoNext(VirtualFrame frame, Object t) {
 		evaluatePremises(frame);
-		return true;
 	}
 
 	@Specialization(guards = { "guard != null", "next == null" })
-	public boolean executeGuardNoNext(VirtualFrame frame, Object t) {
-		if (guard.executeMatch(frame, t)) {
-			evaluatePremises(frame);
-			return true;
-		} else {
-			return false;
-		}
+	public void executeGuardNoNext(VirtualFrame frame, Object t) {
+		guard.executeMatch(frame, t);
+		evaluatePremises(frame);
 	}
 
 	private final BranchProfile nextTaken = BranchProfile.create();
 
 	@Specialization(guards = { "guard != null", "next != null" })
-	public boolean executeGuardWithNext(VirtualFrame frame, Object t) {
-		if (guard.executeMatch(frame, t)) {
-			evaluatePremises(frame);
-			return true;
-		} else {
+	public void executeGuardWithNext(VirtualFrame frame, Object t) {
+		try {
+			guard.executeMatch(frame, t);
+		} catch (PremiseFailureException pmfx) {
 			nextTaken.enter();
-			return next.execute(frame, t);
+			next.execute(frame, t);
+			return;
 		}
+		evaluatePremises(frame);
+
 	}
 
 	@ExplodeLoop

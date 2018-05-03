@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.terms.shared;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.dsl.Fallback;
@@ -67,13 +68,13 @@ public class U0 extends USort {
 		}
 
 		@Specialization
-		public boolean doDeepMatch(VirtualFrame frame, U0 term) {
-			return true;
+		public void doDeepMatch(VirtualFrame frame, U0 term) {
+
 		}
 
 		@Fallback
-		public boolean doShallowFail(VirtualFrame frame, Object term) {
-			return false;
+		public void doShallowFail(VirtualFrame frame, Object term) {
+			throw PremiseFailureException.SINGLETON;
 		}
 
 		public static Match create(SourceSection source) {

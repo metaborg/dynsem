@@ -14,8 +14,8 @@ public abstract class NoOpPattern extends MatchPattern {
 	}
 
 	@Specialization
-	public boolean executeMatch() {
-		return true;
+	public void executeMatch() {
+		;
 	}
 
 	public static NoOpPattern create(IStrategoAppl t) {

@@ -5,7 +5,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.SortFunCallBuild
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.NoOpPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -50,8 +49,8 @@ public class MatchPremise extends Premise {
 			replace(NoOpPremiseNodeGen.create(getSourceSection()));
 		} else {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
-			replace(MatchPremiseFactory.NonElidableMatchPremiseNodeGen.create(getSourceSection(),
-					NodeUtil.cloneNode(term), NodeUtil.cloneNode(patt))).executeEvaluated(frame, t);
+			replace(MatchPremiseFactory.NonElidableMatchPremiseNodeGen.create(getSourceSection(), patt, term))
+					.executeEvaluated(frame, t);
 		}
 	}
 
@@ -69,26 +68,21 @@ public class MatchPremise extends Premise {
 		return NodeUtil.printCompactTreeToString(this);
 	}
 
-	@NodeChildren({ @NodeChild(value = "trm", type = TermBuild.class),
-			@NodeChild(value = "patt", type = MatchPattern.class, executeWith = "trm") })
+	@NodeChildren({ @NodeChild(value = "trm", type = TermBuild.class) })
 	public abstract static class NonElidableMatchPremise extends Premise {
 
-		public NonElidableMatchPremise(SourceSection source) {
+		@Child private MatchPattern patt;
+
+		public NonElidableMatchPremise(SourceSection source, MatchPattern patt) {
 			super(source);
+			this.patt = patt;
 		}
 
 		public abstract void executeEvaluated(VirtualFrame f, Object trm);
 
 		@Specialization
-		public void executeWithEvaluatedChildren(Object t, boolean matched) {
-			if (!matched) {
-				throw PremiseFailureException.SINGLETON;
-			}
-		}
-
-		@TruffleBoundary
-		public void dumpTerm(Object t) {
-			System.out.println(t);
+		public void executeWithEvaluatedChildren(VirtualFrame f, Object t) {
+			patt.executeMatch(f, t);
 		}
 
 	}

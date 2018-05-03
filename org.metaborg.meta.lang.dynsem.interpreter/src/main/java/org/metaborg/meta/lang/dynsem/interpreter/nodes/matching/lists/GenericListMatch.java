@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -23,13 +24,18 @@ public abstract class GenericListMatch extends MatchPattern {
 	}
 
 	@Specialization(guards = "tailPattern == null")
-	public boolean doNoTail(VirtualFrame frame, IListTerm<?> list) {
-		return numHeadElems == list.size();
+	public void doNoTail(VirtualFrame frame, IListTerm<?> list) {
+		if (numHeadElems != list.size()) {
+			throw PremiseFailureException.SINGLETON;
+		}
 	}
 
 	@Specialization(guards = "tailPattern != null")
-	public boolean doWithTail(VirtualFrame frame, IListTerm<?> list) {
-		return list.size() >= numHeadElems && tailPattern.executeMatch(frame, list.drop(numHeadElems));
+	public void doWithTail(VirtualFrame frame, IListTerm<?> list) {
+		if (list.size() < numHeadElems) {
+			throw PremiseFailureException.SINGLETON;
+		}
+		tailPattern.executeMatch(frame, list.drop(numHeadElems));
 	}
 
 	public static GenericListMatch create(IStrategoAppl t, FrameDescriptor fd) {

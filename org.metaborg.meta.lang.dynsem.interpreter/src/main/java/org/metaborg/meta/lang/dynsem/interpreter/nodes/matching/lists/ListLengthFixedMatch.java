@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 
 import com.oracle.truffle.api.dsl.Cached;
@@ -17,14 +18,18 @@ public abstract class ListLengthFixedMatch extends MatchPattern {
 	}
 
 	@Specialization(guards = { "list == cachedL" })
-	public boolean executeCachedList(IListTerm<?> list, @Cached("list") IListTerm<?> cachedL,
+	public void executeCachedList(IListTerm<?> list, @Cached("list") IListTerm<?> cachedL,
 			@Cached("cachedL.size() == expectedLength") boolean eqLength) {
-		return eqLength;
+		if (!eqLength) {
+			throw PremiseFailureException.SINGLETON;
+		}
 	}
 
 	@Specialization(replaces = "executeCachedList")
-	public boolean executeList(IListTerm<?> list) {
-		return list.size() == expectedLength;
+	public void executeList(IListTerm<?> list) {
+		if (list.size() != expectedLength) {
+			throw PremiseFailureException.SINGLETON;
+		}
 	}
 
 	public final int getExpectedLength() {
