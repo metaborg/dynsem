@@ -25,10 +25,16 @@ strategies
   ds-to-interp-terms-matching-finit:
     (i, s) -> bstm |[ this.~x:$[p_[i]] = ~x:$[p_[i]]; ]|
 
+//  ds-to-interp-terms-matching-matchdescend:
+//    (i, bstm0*) -> bstm* |[
+//      bstm0*
+//      (~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()));
+//    ]|
+
   ds-to-interp-terms-matching-matchdescend:
     (i, bstm0*) -> bstm* |[
       bstm0*
-      (~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()));
+      (~x:$[p_[i]].executeMatch(frame, ~x:$[profile_[i]].profile(term.~x:$[get_[i]]())));
     ]|
 
 
@@ -38,5 +44,5 @@ strategies
 //  ds-to-interp-terms-matching-matchdescend:
 //    (i, e_prematch) -> e |[ e_prematch && ~x:$[profile_[i]].profile(~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]())) ]|
 //  
-//  ds-to-interp-terms-match-profile:
-//    i -> param |[ @Cached("createBinaryProfile()") ConditionProfile ~x:$[profile_[i]] ]|
+  ds-to-interp-terms-match-profile:
+    i -> param |[ @Cached("createClassProfile()") ValueProfile ~x:$[profile_[i]] ]|
