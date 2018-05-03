@@ -50,12 +50,7 @@ public abstract class TermEqPremise extends Premise {
 		}
 	}
 
-	@Specialization(guards = { "left == right" })
-	public void doStringRefEq(String left, String right) {
-		;
-	}
-
-	@Specialization(limit = "1", replaces = "doStringRefEq", guards = { "left == cachedLeft", "right == cachedRight" })
+	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" }, limit = "1")
 	public void doString(String left, String right, @Cached("left") String cachedLeft,
 			@Cached("right") String cachedRight, @Cached("doStringEq(cachedLeft, cachedRight)") boolean isEqual) {
 		if (!isEqual) {
@@ -68,19 +63,13 @@ public abstract class TermEqPremise extends Premise {
 		return s1.equals(s2);
 	}
 
-	@Specialization(guards = { "left == right" })
-	public void doITermRefEq(IApplTerm left, IApplTerm right) {
-
-	}
-
-	@Specialization(replaces = "doITermRefEq", guards = { "left == cachedLeft", "right == cachedRight" })
+	@Specialization(guards = { "left == cachedLeft", "right == cachedRight" })
 	public void doITermDirect(IApplTerm left, IApplTerm right, @Cached("left") IApplTerm cachedLeft,
 			@Cached("right") IApplTerm cachedRight, @Cached("cachedLeft.equals(cachedRight)") boolean isEqual) {
 		if (!isEqual) {
 			throw PremiseFailureException.SINGLETON;
 		}
 	}
-
 
 	@Specialization(replaces = "doITermDirect")
 	public void doITermIndirect(IApplTerm left, IApplTerm right,

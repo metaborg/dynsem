@@ -15,7 +15,7 @@ public abstract class StringLiteralTermBuild extends TermBuild {
 
 	public StringLiteralTermBuild(String val, SourceSection source) {
 		super(source);
-		this.val = val.intern();
+		this.val = val;
 	}
 
 	public static StringLiteralTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
