@@ -40,6 +40,6 @@ rules
       x_termbuildclass := <jclass-termbuilder> dec;
       x_termbuildNG := <jclass-termbuilder-ng> dec;
       x_matchNG := <jclass-matcher-ng> dec;
-      e1* := <map-with-index(ds-to-interp-termbuild-access(|"children"))> kid*;
+      e1* := <map-with-index((dec; int-to-string, id); ds-to-interp-termbuild-access(|"children"))> kid*;
       e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
   

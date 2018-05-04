@@ -4,7 +4,7 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/-
-  backend/interpreter/lists/util
+  backend/interpreter/lists/-
   backend/interpreter/terms/-
   backend/utils/-
   backend/common/-
@@ -21,64 +21,140 @@ rules
       compilation-unit |[
         package ~x:<get-opt> BuildPkg();
   
-        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> TermPkg().x_listclass.*;
+        import ~x:<get-opt> BuildPkg().x_listbuildfactory.*;
         import ~x:<get-opt> ChecksPkg().*;
-        import ~x:$[[<get-opt> TopPkg()].TypesGen];
+        import ~x:<get-opt> TopPkg().TypesGen;
         
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
         
+        import com.oracle.truffle.api.dsl.Cached;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
         import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.nodes.ExplodeLoop;
         import com.oracle.truffle.api.source.SourceSection;
         
         public abstract class x_listbuildclass extends TermBuild {
         
-          @Children protected final TermBuild[] elemNodes;
-        
-          @Child protected TermBuild tailNode;
-        
-          public x_listbuildclass(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode) {
+          public x_listbuildclass(SourceSection source) {
             super(source);
-            this.elemNodes = elemNodes;
-            this.tailNode = tailNode;
           }
           
-          @Override
-          // NB: this method is final so that the Truffle DSL cannot generate an overriding method (which would be incorrect)
-          public final x_listclass executeEvaluated(VirtualFrame frame, Object... terms) {
-            x_elemclass[] elems = (x_elemclass[]) terms[0];
-            x_listclass tail = terms[1] != null ? TypesGen.x_aslistfun(terms[1]) : null;
-        
-            return tail != null ? tail.addAll(elems) : new x_listclass(elems);
-          }
-        
-          @ExplodeLoop
-          private final x_elemclass[] executeElems(VirtualFrame frame) {
-            final Object[] elems = new x_elemclass[elemNodes.length];
-            for (int idx = 0; idx < elems.length; idx++) {
-              elems[idx] =  elemNodes[idx].executeGeneric(frame);
+          public static TermBuild create(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode) {
+            
+            assert elemNodes != null && elemNodes.length > 0;
+            TermBuild tail = tailNode != null ? tailNode : x_nilbuilderng.create(source);
+            for(int idx = elemNodes.length -1; idx >= 0; idx--) {
+              tail = x_consbuilderng.create(source, ~e:<ds-to-interp-termbuild-access(|"elemNodes")> ("idx", es), tail);
             }
-            return (x_elemclass[]) elems;
+            return tail;
           }
         
-          @Specialization(guards = "tailNode == null")
-          public x_listclass doNoTail(VirtualFrame frame) {
-            return new x_listclass(executeElems(frame));
+          public static abstract class x_nilbuilder extends TermBuild {
+        
+            public x_nilbuilder(SourceSection source) {
+              super(source);
+            }
+        
+            @Specialization
+            public x_nilclass doNil() {
+              return x_listclass.EMPTY;
+            }
+        
           }
         
-          @Specialization
-          public x_listclass doTail(VirtualFrame frame) {
-            return TypesGen.x_aslistfun(tailNode.executeGeneric(frame)).addAll(executeElems(frame));
+          @NodeChildren({ @NodeChild(value = "elem", type = x_checkedelembuilder.class),
+              @NodeChild(value = "tail", type = TermBuild.class) })
+          public static abstract class x_consbuilder extends TermBuild {
+        
+            public x_consbuilder(SourceSection source) {
+              super(source);
+            }
+        
+            @Specialization(limit = "1", guards = "elem == elem_cached")
+            public x_consclass doCachedNoTail(x_elemclass elem, x_nilclass tail, @Cached("elem") x_elemclass elem_cached,
+                @Cached("doUncached(elem_cached, tail)") x_consclass l_cached) {
+              return l_cached;
+            }
+        
+            @Specialization(limit = "1", guards = {"elem == elem_cached", "tail == tail_cached" })
+            public x_consclass doCachedTail(x_elemclass elem, x_consclass tail, @Cached("elem") x_elemclass elem_cached,
+                @Cached("tail") x_consclass tail_cached, @Cached("doUncached(elem, tail)") x_consclass l_cached) {
+              return l_cached;
+            }
+        
+            @Specialization(replaces = { "doCachedNoTail", "doCachedTail" })
+            public x_consclass doUncached(x_elemclass elem, x_listclass tail) {
+              return new x_consclass(elem, tail, null);
+            }
           }
         
         }
+//        import com.oracle.truffle.api.dsl.Specialization;
+//        import com.oracle.truffle.api.frame.VirtualFrame;
+//        import com.oracle.truffle.api.nodes.ExplodeLoop;
+//        import com.oracle.truffle.api.source.SourceSection;
+//        
+//        public abstract class x_listbuildclass extends TermBuild {
+//        
+//          @Children protected final TermBuild[] elemNodes;
+//        
+//          @Child protected TermBuild tailNode;
+//        
+//          public x_listbuildclass(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode) {
+//            super(source);
+//            this.elemNodes = elemNodes;
+//            this.tailNode = tailNode;
+//          }
+//          
+//          @Override
+//          // NB: this method is final so that the Truffle DSL cannot generate an overriding method (which would be incorrect)
+//          public final x_listclass executeEvaluated(VirtualFrame frame, Object... terms) {
+//            x_elemclass[] elems = (x_elemclass[]) terms[0];
+//            x_listclass tail = terms[1] != null ? TypesGen.x_aslistfun(terms[1]) : null;
+//        
+//            return tail != null ? tail.addAll(elems) : new x_listclass(elems);
+//          }
+//        
+//          @ExplodeLoop
+//          private final x_elemclass[] executeElems(VirtualFrame frame) {
+//            final Object[] elems = new x_elemclass[elemNodes.length];
+//            for (int idx = 0; idx < elems.length; idx++) {
+//              elems[idx] =  elemNodes[idx].executeGeneric(frame);
+//            }
+//            return (x_elemclass[]) elems;
+//          }
+//        
+//          @Specialization(guards = "tailNode == null")
+//          public x_listclass doNoTail(VirtualFrame frame) {
+//            return new x_listclass(executeElems(frame));
+//          }
+//        
+//          @Specialization
+//          public x_listclass doTail(VirtualFrame frame) {
+//            return TypesGen.x_aslistfun(tailNode.executeGeneric(frame)).addAll(executeElems(frame));
+//          }
+//        
+//        }
       ]|
     where
       x_listclass := <jclass-term> ls;
-      x_listbuildclass := <jclass-termbuilder> ls;
+      x_consclass := <jclass-term-list-cons> ls;
+      x_nilclass  := <jclass-term-list-nil> ls;
       x_elemclass := <jclass-term; jclass-box> es;
-      x_aslistfun := $[as[x_listclass]];
-      x_aselemfun := $[as[<classname-of> x_elemclass]]
+      x_listbuildclass := <jclass-termbuilder> ls;
+      x_listbuildfactory := $[[x_listbuildclass]Factory];
+      x_nilbuilder  := <jclass-listbuilder-nil> ls;
+      x_consbuilder := <jclass-listbuilder-cons> ls;
+      x_nilbuilderng := <jclass-listbuilder-nil-ng> ls;
+      x_consbuilderng := <jclass-listbuilder-cons-ng> ls; 
+      if <jclass-has-checkedbuilder> es
+      then
+        x_checkedelembuilder := <jclass-checkedbuilder> es
+      else
+        x_checkedelembuilder := <jclass-termbuilder-generic> es
+      end
+
 
     

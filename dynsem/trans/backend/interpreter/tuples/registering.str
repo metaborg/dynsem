@@ -40,8 +40,8 @@ rules
       x_termbuild := <jclass-termbuilder> dec;
       x_termbuildNG := <jclass-termbuilder-ng> dec;
       x_termmatchNG := <jclass-matcher-ng> dec;
-      e1* := <map-with-index(ds-to-interp-termbuild-access(|"children"))> s*;
+      e1* := <map-with-index((dec; int-to-string, id); ds-to-interp-termbuild-access(|"children"))> s*;
       e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> s*
 
   ds-to-interp-termbuild-access(|x_children):
-    (i, TupleSort(_)) -> e |[ x_children[~i:<dec; int-to-string> i] ]|
+    (x_idx, TupleSort(_)) -> e |[ x_children[x_idx] ]|

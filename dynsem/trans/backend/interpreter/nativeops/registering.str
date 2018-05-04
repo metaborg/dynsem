@@ -27,6 +27,6 @@ rules
       ]|
     where
       con-name := <concat-strings> [name, "/", <length; int-to-string> kid*];
-      e1* := <map-with-index(ds-to-interp-termbuild-access(|"children"))> kid*;
+      e1* := <map-with-index((dec; int-to-string, id); ds-to-interp-termbuild-access(|"children"))> kid*;
       x_natop := <jclass-termbuilder> d
       

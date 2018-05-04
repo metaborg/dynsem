@@ -5,7 +5,7 @@ imports
   signatures/dynsem/-
   backend/common/-
   backend/interpreter/-
-  backend/interpreter/lists/util
+  backend/interpreter/lists/-
   backend/interpreter/terms/-
 
 strategies
@@ -19,198 +19,381 @@ rules
     s@ListSort(es) ->
       compilation-unit |[
         package ~x:<get-opt> TermPkg();
-
-        import java.util.Collection;
-        import java.util.Iterator;
-        import org.apache.commons.lang3.builder.HashCodeBuilder;
+        
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-        import org.metaborg.meta.lang.dynsem.interpreter.utils.ListUtils;
-        import com.github.krukow.clj_lang.IPersistentStack;
-        import com.github.krukow.clj_lang.PersistentList;
-        import com.github.krukow.clj_lang.ISeq;
+        import org.spoofax.interpreter.terms.IStrategoTerm;
+        import org.spoofax.interpreter.core.Tools;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         import com.oracle.truffle.api.CompilerAsserts;
         import org.spoofax.interpreter.core.Tools;
         import org.spoofax.interpreter.terms.*;
-        import ~x:<get-opt> NativePkg().*;
         
-        public final class x_listclass implements IListTerm<x_elemclass> {
-
-          private final IPersistentStack<x_elemclass> backend;
+        public abstract class x_listclass implements IListTerm<x_elemclass> {
+        
           private final IStrategoTerm strategoTerm;
         
-          public x_listclass(x_elemclass[] elems) {
-            this(elems, null);
-          }
- 
-          @TruffleBoundary
-          public x_listclass(Collection<x_elemclass> elemSet) {
-            this(elemSet.toArray(new x_elemclass[0]));
-          }
+          public final static x_nilclass EMPTY = new x_nilclass();
         
-          @SuppressWarnings("unchecked")
-          @TruffleBoundary
-          private x_listclass(x_elemclass[] elems, IStrategoTerm strategoTerm) {
-            this((IPersistentStack<x_elemclass>) PersistentList.create(elems), strategoTerm);
-          }
-        
-          private x_listclass(IPersistentStack<x_elemclass> backend, IStrategoTerm strategoTerm) {
-            this.backend = backend;
+          public x_listclass(IStrategoTerm strategoTerm) {
             this.strategoTerm = strategoTerm;
           }
-
+        
           @Override
-          public IStrategoTerm getStrategoTerm() {
-            return strategoTerm;
-          }
-          
-          @Override
-          public boolean hasStrategoTerm() {
+          public final boolean hasStrategoTerm() {
             return strategoTerm != null;
           }
-          
+        
           @Override
-          @TruffleBoundary
-          public int size() {
-            return backend.count();
+          public final IStrategoTerm getStrategoTerm() {
+            return strategoTerm;
           }
         
           @Override
-          public ITermInstanceChecker getCheck() {
-            return new ITermInstanceChecker() {
-        
-              @Override
-              public boolean isInstance(Object obj) {
-                return obj instanceof x_listclass;
-              }
-            };
-          }
-          
-          @Override
-          public x_elemclass get(int n) {
-            ISeq<x_elemclass> seq = backend.seq();
-            for (int k = 0; k < n; k++) {
-              seq = seq.next();
-            }
-            return seq != null ? seq.first() : null;
-          }
-        
-          @Override
-          @TruffleBoundary
-          public x_elemclass head() {
-            return backend.peek();
-          }
-          
-          @Override
-          public x_elemclass[] take(int numElems) {
-            final x_elemclass[] store = new x_elemclass[numElems];
-            final Iterator<x_elemclass> iter = iterator();
-            for (int idx = 0; idx < numElems; idx++) {
-              store[idx] = _next(iter);
-            }
-            return store;
+          public final ITermInstanceChecker getCheck() {
+            return null;
           }
 
           @Override
-          public x_listclass tail() {
-            return new x_listclass(_pop(backend), getStrategoTerm());
-          }
+          public abstract x_elemclass elem();
         
           @Override
-          @TruffleBoundary
-          public x_listclass drop(int numElems) {
-            IPersistentStack<x_elemclass> tail = backend;
-            for (int idx = 0; idx < numElems; idx++) {
-              tail = _pop(tail);
+          public abstract x_listclass tail();
+          
+          @Override
+          public abstract x_listclass drop(int numElems);
+        
+        
+          @Override
+          public x_consclass prefix(x_elemclass prefix) {
+            return new x_consclass(prefix, this, this.getStrategoTerm());
+          }
+          
+          @Override
+          public IListTerm<x_elemclass> prefixAll(IListTerm<x_elemclass> prefix) {
+            x_listclass head = this;
+            x_elemclass[] prefixElems = prefix.toArray();
+            for(int idx = prefixElems.length - 1; idx >= 0; idx--) {
+              head = new x_consclass(prefixElems[idx], head, head.getStrategoTerm());
             }
-            return new x_listclass(tail, getStrategoTerm());
+            return head;
           }
-        
+
           @Override
-          public x_listclass add(x_elemclass elem) {
-            return new x_listclass(_cons(backend, elem), getStrategoTerm());
-          }
-        
-          @Override
-          public x_listclass addAll(x_elemclass[] elems) {
-            IPersistentStack<x_elemclass> backend = this.backend;
-        
-            for (int idx = elems.length - 1; idx >= 0; idx--) {
-              backend = _cons(backend, elems[idx]);
+          public x_elemclass[] toArray() {
+            x_elemclass[] arr = new x_elemclass[size()];
+            x_listclass head = this;
+            for(int idx = 0; idx < arr.length; idx++) {
+              arr[idx] = head.elem();
+              head = head.tail();
             }
-            return new x_listclass(backend, getStrategoTerm());
+            return arr;
           }
           
           @Override
           public x_listclass reverse() {
-            return new x_listclass(ListUtils.reverse(backend), null);
-          }
-          
-          @Override
-          @TruffleBoundary
-          public int hashCode() {
-            return new HashCodeBuilder().append(backend).toHashCode();
-          }
-          
-          @Override
-          @SuppressWarnings("unchecked")
-          @TruffleBoundary
-          public Iterator<x_elemclass> iterator() {
-            return ((com.github.krukow.clj_ds.PersistentList<x_elemclass>) backend).iterator();
+            IStrategoTerm sterm = getStrategoTerm();
+            x_listclass result = new x_nilclass();
+            x_elemclass[] elems = toArray();
+            for(int idx = 0; idx < elems.length; idx++) {
+              result = new x_consclass(elems[idx], result, sterm);
+            }
+            return result;
           }
           
           @Override
           @TruffleBoundary
           public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            IPersistentStack<x_elemclass> tail = backend;
-            while (tail.peek() != null) {
-              sb.append(tail.peek());
-              tail = tail.pop();
-              if (tail.peek() != null) {
-                sb.append(", ");
+            StringBuilder str = new StringBuilder("[");
+            x_listclass head = this;
+            while(head instanceof x_consclass) {
+              str.append(head.elem());
+              head = head.tail();
+              if(head instanceof x_consclass) {
+                str.append(", ");
               }
             }
-            sb.append("]");
-            return sb.toString();
+            return str.append("]").toString();
           }
+          public static final class x_consclass extends x_listclass {
           
-          @SuppressWarnings("rawtypes")
-          @Override
-          @TruffleBoundary
-          public x_elemclass[] toArray() {
-            if (size() > 0) {
-              return (x_elemclass[]) ((PersistentList) this.backend).toArray(new x_elemclass[size()]);  
-            } else {
-              return new x_elemclass[0];
+            private final x_elemclass elem;
+            private final x_listclass tail;
+            private final int size;
+        
+            public x_consclass(x_elemclass elem, x_listclass tail, IStrategoTerm strategoTerm) {
+              super(strategoTerm);
+              this.elem = elem;
+              this.tail = tail;
+              this.size = 1 + tail.size();
+            }
+        
+            @Override
+            public int size() {
+              return size;
+            }
+        
+            @Override
+            public x_elemclass elem() {
+              return elem;
+            }
+        
+            @Override
+            public x_listclass tail() {
+              return tail;
+            }
+            
+            @Override
+            public x_elemclass get(int idx) {
+              if (idx == 0) {
+                return elem;
+              } else {
+                return tail.get(idx - 1);
+              }
+            }
+            
+            @Override
+            public x_listclass drop(int numElems) {
+              if(numElems == 0) {
+                return this;
+              }else {
+                return tail.drop(numElems - 1);
+              }
             }
           }
-          
-          @TruffleBoundary
-          private static IPersistentStack<x_elemclass> _pop(
-              IPersistentStack<x_elemclass> backend) {
-            return backend.pop();
-          }
-          
-          @TruffleBoundary
-          private static IPersistentStack<x_elemclass> _cons(
-              IPersistentStack<x_elemclass> backend, x_elemclass elem) {
-            return (IPersistentStack<x_elemclass>) backend.cons(elem);
-          }
-          
-          @TruffleBoundary
-          private static x_elemclass _next(Iterator<x_elemclass> iter){
-            return iter.next();
+        
+          public static final class x_nilclass extends x_listclass {
+        
+            private x_nilclass() {
+              super(null);
+            }
+        
+            @Override
+            public x_elemclass elem() {
+              throw new IllegalStateException("No elem in a Nil"); // TODO: maybe throw PremiseFailure
+            }
+        
+            public x_nilclass tail() {
+              throw new IllegalStateException("No tail of a Nil"); // TODO: maybe throw PremiseFailure
+            }
+        
+            @Override
+            public int size() {
+              return 0;
+            }
+        
+            @Override
+            public x_listclass reverse() {
+              return this;
+            }
+            
+            public x_listclass drop(int idx) {
+              if(idx == 0) return this;
+              throw new IllegalStateException("Nothing to drop from a Nil");
+            }
+            
+            @Override
+            public x_elemclass get(int idx) {
+              throw new IllegalStateException("No elems in a Nil");
+            }
           }
           
           ~mcreate0*
-          
+        
         }
+//        import java.util.Collection;
+//        import java.util.Iterator;
+//        import org.apache.commons.lang3.builder.HashCodeBuilder;
+//        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
+//        import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+//        import org.metaborg.meta.lang.dynsem.interpreter.utils.ListUtils;
+//        import com.github.krukow.clj_lang.IPersistentStack;
+//        import com.github.krukow.clj_lang.PersistentList;
+//        import com.github.krukow.clj_lang.ISeq;
+//        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+//        import com.oracle.truffle.api.CompilerAsserts;
+//        import org.spoofax.interpreter.core.Tools;
+//        import org.spoofax.interpreter.terms.*;
+//        import ~x:<get-opt> NativePkg().*;
+//        
+//        public final class x_listclass implements IListTerm<x_elemclass> {
+//
+//          private final IPersistentStack<x_elemclass> backend;
+//          private final IStrategoTerm strategoTerm;
+//        
+//          public x_listclass(x_elemclass[] elems) {
+//            this(elems, null);
+//          }
+// 
+//          @TruffleBoundary
+//          public x_listclass(Collection<x_elemclass> elemSet) {
+//            this(elemSet.toArray(new x_elemclass[0]));
+//          }
+//        
+//          @SuppressWarnings("unchecked")
+//          @TruffleBoundary
+//          private x_listclass(x_elemclass[] elems, IStrategoTerm strategoTerm) {
+//            this((IPersistentStack<x_elemclass>) PersistentList.create(elems), strategoTerm);
+//          }
+//        
+//          private x_listclass(IPersistentStack<x_elemclass> backend, IStrategoTerm strategoTerm) {
+//            this.backend = backend;
+//            this.strategoTerm = strategoTerm;
+//          }
+//
+//          @Override
+//          public IStrategoTerm getStrategoTerm() {
+//            return strategoTerm;
+//          }
+//          
+//          @Override
+//          public boolean hasStrategoTerm() {
+//            return strategoTerm != null;
+//          }
+//          
+//          @Override
+//          @TruffleBoundary
+//          public int size() {
+//            return backend.count();
+//          }
+//        
+//          @Override
+//          public ITermInstanceChecker getCheck() {
+//            return new ITermInstanceChecker() {
+//        
+//              @Override
+//              public boolean isInstance(Object obj) {
+//                return obj instanceof x_listclass;
+//              }
+//            };
+//          }
+//          
+//          @Override
+//          public x_elemclass get(int n) {
+//            ISeq<x_elemclass> seq = backend.seq();
+//            for (int k = 0; k < n; k++) {
+//              seq = seq.next();
+//            }
+//            return seq != null ? seq.first() : null;
+//          }
+//        
+//          @Override
+//          @TruffleBoundary
+//          public x_elemclass head() {
+//            return backend.peek();
+//          }
+//          
+//          @Override
+//          public x_elemclass[] take(int numElems) {
+//            final x_elemclass[] store = new x_elemclass[numElems];
+//            final Iterator<x_elemclass> iter = iterator();
+//            for (int idx = 0; idx < numElems; idx++) {
+//              store[idx] = _next(iter);
+//            }
+//            return store;
+//          }
+//
+//          @Override
+//          public x_listclass tail() {
+//            return new x_listclass(_pop(backend), getStrategoTerm());
+//          }
+//        
+//          @Override
+//          @TruffleBoundary
+//          public x_listclass drop(int numElems) {
+//            IPersistentStack<x_elemclass> tail = backend;
+//            for (int idx = 0; idx < numElems; idx++) {
+//              tail = _pop(tail);
+//            }
+//            return new x_listclass(tail, getStrategoTerm());
+//          }
+//        
+//          @Override
+//          public x_listclass add(x_elemclass elem) {
+//            return new x_listclass(_cons(backend, elem), getStrategoTerm());
+//          }
+//        
+//          @Override
+//          public x_listclass addAll(x_elemclass[] elems) {
+//            IPersistentStack<x_elemclass> backend = this.backend;
+//        
+//            for (int idx = elems.length - 1; idx >= 0; idx--) {
+//              backend = _cons(backend, elems[idx]);
+//            }
+//            return new x_listclass(backend, getStrategoTerm());
+//          }
+//          
+//          @Override
+//          public x_listclass reverse() {
+//            return new x_listclass(ListUtils.reverse(backend), null);
+//          }
+//          
+//          @Override
+//          @TruffleBoundary
+//          public int hashCode() {
+//            return new HashCodeBuilder().append(backend).toHashCode();
+//          }
+//          
+//          @Override
+//          @SuppressWarnings("unchecked")
+//          @TruffleBoundary
+//          public Iterator<x_elemclass> iterator() {
+//            return ((com.github.krukow.clj_ds.PersistentList<x_elemclass>) backend).iterator();
+//          }
+//          
+//          @Override
+//          @TruffleBoundary
+//          public String toString() {
+//            final StringBuilder sb = new StringBuilder();
+//            sb.append("[");
+//            IPersistentStack<x_elemclass> tail = backend;
+//            while (tail.peek() != null) {
+//              sb.append(tail.peek());
+//              tail = tail.pop();
+//              if (tail.peek() != null) {
+//                sb.append(", ");
+//              }
+//            }
+//            sb.append("]");
+//            return sb.toString();
+//          }
+//          
+//          @SuppressWarnings("rawtypes")
+//          @Override
+//          @TruffleBoundary
+//          public x_elemclass[] toArray() {
+//            if (size() > 0) {
+//              return (x_elemclass[]) ((PersistentList) this.backend).toArray(new x_elemclass[size()]);  
+//            } else {
+//              return new x_elemclass[0];
+//            }
+//          }
+//          
+//          @TruffleBoundary
+//          private static IPersistentStack<x_elemclass> _pop(
+//              IPersistentStack<x_elemclass> backend) {
+//            return backend.pop();
+//          }
+//          
+//          @TruffleBoundary
+//          private static IPersistentStack<x_elemclass> _cons(
+//              IPersistentStack<x_elemclass> backend, x_elemclass elem) {
+//            return (IPersistentStack<x_elemclass>) backend.cons(elem);
+//          }
+//          
+//          @TruffleBoundary
+//          private static x_elemclass _next(Iterator<x_elemclass> iter){
+//            return iter.next();
+//          }
+//          
+//          ~mcreate0*
+//          
+//        }
       ]|
     where
       x_listclass := <jclass-term> s;
+      x_consclass := <jclass-term-list-cons> s;
+      x_nilclass := <jclass-term-list-nil> s;
       x_elemclass := <jclass-term; jclass-box> es;
       if <is-value-sort> es
       then
@@ -230,12 +413,12 @@ rules
               assert Tools.isTermList(term);
               
               IStrategoList l = (IStrategoList) term;
-              x_elemclass[] elems = new x_elemclass[l.size()];
-              for(int idx = 0; idx < elems.length; idx++){
-                final int final_idx = idx; // this is needed because e_elemcreate might be an anonymous object reading the idx
-                elems[idx] = e_elemcreate;
+              x_listclass res = EMPTY;
+              for(int idx = l.size() - 1; idx >= 0; idx--) {
+                final int final_idx = idx;
+                res = new x_consclass(e_elemcreate, res, l);
               }
-              return new x_listclass(elems, term);
+              return res;
             }
         ]|
       end

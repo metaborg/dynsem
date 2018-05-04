@@ -7,6 +7,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -30,7 +31,14 @@ public abstract class GenericListMatch extends MatchPattern {
 		}
 	}
 
-	@Specialization(guards = "tailPattern != null")
+	@SuppressWarnings("rawtypes")
+	@Specialization(guards = { "tailPattern != null", "list == list_cached", "list.size() >= numHeadElems" })
+	public void doWithTailCached(VirtualFrame frame, IListTerm list, @Cached("list") IListTerm list_cached,
+			@Cached("list.drop(numHeadElems)") IListTerm tail) {
+		tailPattern.executeMatch(frame, tail);
+	}
+
+	@Specialization(replaces = "doWithTailCached", guards = "tailPattern != null")
 	public void doWithTail(VirtualFrame frame, IListTerm<?> list) {
 		if (list.size() < numHeadElems) {
 			throw PremiseFailureException.SINGLETON;

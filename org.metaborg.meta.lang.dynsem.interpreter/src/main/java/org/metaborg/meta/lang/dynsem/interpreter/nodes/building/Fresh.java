@@ -7,7 +7,7 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class Fresh extends TermBuild {
+public abstract class Fresh extends NativeOpBuild {
 
 	private static int next = 0;
 

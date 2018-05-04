@@ -24,15 +24,15 @@ rules
         matcherFactories.put(x_listclass.class, new ITermMatchPatternFactory() {
           @Override
           public MatchPattern apply(SourceSection source, Object... objects) {
-            return x_listmatchclass.createUninitialized(source, (MatchPattern[]) objects[0],(MatchPattern) objects[1]);
+            return x_listmatchclass.create(source, (MatchPattern[]) objects[0],(MatchPattern) objects[1]);
           }
         });
       ]|
     where
       x_elemclass := <jclass-term> es;
       x_listclass := <jclass-term> ls;
-      x_listbuildgenclass := <jclass-termbuilder-ng> ls;
+      x_listbuildgenclass := <jclass-termbuilder> ls;
       x_listmatchclass := <jclass-matcher> ls
   
   ds-to-interp-termbuild-access(|x_children):
-    (i, ListSort(s)) -> e |[ children[~i:<dec; int-to-string> i] ]|
+    (x_idx, ListSort(s)) -> e |[ children[x_idx] ]|
