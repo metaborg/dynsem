@@ -48,7 +48,7 @@ strategies
           }
           
           @Specialization(replaces = "doCached")
-          public x_termclass doTyped(param0*) {
+          public x_termclass doUncached(param0*) {
             return buildTerm(e0*);
           }
           
