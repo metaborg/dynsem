@@ -3,6 +3,9 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SecondaryCachingDispatchNodeFactory.GenericDispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SecondaryCachingDispatchNodeFactory.WithFailureNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SecondaryCachingDispatchNodeFactory.WithoutFailureNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchChainRoot;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.CallTarget;
