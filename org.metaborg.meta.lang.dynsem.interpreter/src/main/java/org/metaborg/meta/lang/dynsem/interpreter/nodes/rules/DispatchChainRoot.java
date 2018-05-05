@@ -52,14 +52,14 @@ public abstract class DispatchChainRoot extends DynSemNode {
 						CompilerDirectives.transferToInterpreterAndInvalidate();
 						this.chain = insert(DispatchChainRoot.createUninitialized(getSourceSection(), arrowName,
 								nextDispatchClass, failSoftly));
-					}
-					if (failSoftly) {
-						throw PremiseFailureException.SINGLETON;
 					} else {
-						throw new ReductionFailure(
-								"No rules applicable for " + dispatchClass.getSimpleName() + " on " + args[0],
-								InterpreterUtils.createStacktrace(),
-								this);
+						if (failSoftly) {
+							throw PremiseFailureException.SINGLETON;
+						} else {
+							throw new ReductionFailure(
+									"No rules applicable for " + dispatchClass.getSimpleName() + " on " + args[0],
+									InterpreterUtils.createStacktrace(), this);
+						}
 					}
 				}
 			}
