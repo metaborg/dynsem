@@ -153,4 +153,9 @@ public final class InterpreterUtils {
 		});
 		return str.length();
 	}
+
+	@TruffleBoundary
+	public static void printlnStdOut(String s) {
+		System.out.println(s);
+	}
 }
