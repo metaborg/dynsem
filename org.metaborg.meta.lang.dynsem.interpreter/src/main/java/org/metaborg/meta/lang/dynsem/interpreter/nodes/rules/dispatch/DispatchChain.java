@@ -39,4 +39,8 @@ public final class DispatchChain extends DynSemNode {
 		return (RuleResult) leftCall.call(args);
 	}
 
+	public int size() {
+		return right == null ? 1 : 1 + right.size();
+	}
+
 }
