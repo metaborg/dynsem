@@ -7,7 +7,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
-import com.oracle.truffle.api.nodes.Node.Child;
 import com.oracle.truffle.api.source.SourceSection;
 
 public final class Uninitialized extends DispatchChainRoot {
