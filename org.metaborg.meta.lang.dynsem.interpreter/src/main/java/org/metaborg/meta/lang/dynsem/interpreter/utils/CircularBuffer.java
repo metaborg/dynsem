@@ -84,6 +84,9 @@ public class CircularBuffer<T> implements Iterable<T> {
 			right.prev = left;
 			numElems--;
 			numVisited--;
+			if (current == lastAccessed) {
+				current = right;
+			}
 			lastAccessed = null;
 		}
 

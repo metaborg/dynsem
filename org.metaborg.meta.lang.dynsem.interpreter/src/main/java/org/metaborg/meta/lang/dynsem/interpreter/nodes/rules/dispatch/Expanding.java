@@ -63,7 +63,7 @@ public final class Expanding extends DispatchChainRoot {
 			CallTarget candidate = candidateIter.next();
 			try {
 				RuleResult result = (RuleResult) indirectCallNode.call(candidate, args);
-				// call succeeded, insert it
+				// call succeeded, move from buffer to chain
 				candidateIter.remove();
 				CompilerDirectives.transferToInterpreterAndInvalidate();
 				leftChain = insert(new DispatchChain(getSourceSection(), candidate, leftChain));
