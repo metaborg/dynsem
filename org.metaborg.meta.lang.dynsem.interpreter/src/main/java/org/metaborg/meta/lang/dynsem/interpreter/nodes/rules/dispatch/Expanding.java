@@ -1,73 +1,96 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
 
+import java.util.Iterator;
+
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.CircularBuffer;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
-import com.oracle.truffle.api.nodes.Node.Child;
+import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.source.SourceSection;
 
 public final class Expanding extends DispatchChainRoot {
-
-	@Child private DispatchChain leftChain;
-
-	@CompilationFinal private int currentOffset;
-
-	@CompilationFinal(dimensions = 1) private final CallTarget[] candidateTargets;
 	private final Class<?> dispatchClass;
 	private final String arrowName;
+	private final CircularBuffer<CallTarget> targetBuffer;
+
+	@Child private DispatchChain leftChain;
+	@Child private IndirectCallNode indirectCallNode;
+
+	@Child private DispatchChainRoot rightChain;
+	@CompilationFinal private Class<?> nextDispatchClass;
+	@CompilationFinal private boolean hasExecutedRight;
 
 	public Expanding(SourceSection source, CallTarget[] candidateTargets, Class<?> dispatchClass, String arrowName,
 			boolean failSoftly) {
 		super(source, failSoftly);
 		this.dispatchClass = dispatchClass;
 		this.arrowName = arrowName;
-		assert currentOffset < candidateTargets.length;
-		this.candidateTargets = candidateTargets;
-		this.currentOffset = 0;
-		this.leftChain = new DispatchChain(source, candidateTargets[currentOffset], null);
+		assert candidateTargets.length > 0;
+		this.indirectCallNode = IndirectCallNode.create();
+		this.targetBuffer = new CircularBuffer<>(candidateTargets);
 	}
 
 	@Override
 	public RuleResult execute(Object[] args) {
+		if (leftChain == null) {
+			return expand(args);
+		}
+
 		try {
 			return leftChain.execute(args);
 		} catch (PremiseFailureException pmfx) {
-			return expandAndTryAgain(args);
+			return expand(args);
 		}
 	}
 
-	public RuleResult executeFirst(Object[] args) {
-		try {
-			return leftChain.executeLeft(args);
-		} catch (PremiseFailureException pmfx) {
-			return expandAndTryAgain(args);
+	private RuleResult expand(Object[] args) {
+		// if no more candidates, replace with fully expanded
+		if (targetBuffer.size() == 0) {
+			// no more candidates in buffer
+			assert leftChain != null;
+			return replace(new Expanded(getSourceSection(), leftChain, null, failSoftly)).executeRight(args);
 		}
-	}
 
-	private RuleResult expandAndTryAgain(Object[] args) {
-		if (currentOffset + 1 < candidateTargets.length) {
-			// System.out.println("Expanding -> Expanding (" + dispatchClass.getSimpleName() + ")");
-			// we can still inject another candidate call target
+		// there are more candidates, try them
+		Iterator<CallTarget> candidateIter = targetBuffer.iterator();
+		while (candidateIter.hasNext()) {
+			CallTarget candidate = candidateIter.next();
+			try {
+				RuleResult result = (RuleResult) indirectCallNode.call(candidate, args);
+				// call succeeded, insert it
+				candidateIter.remove();
+				CompilerDirectives.transferToInterpreterAndInvalidate();
+				leftChain = insert(new DispatchChain(getSourceSection(), candidate, leftChain));
+				return result;
+			} catch (PremiseFailureException pmfx) {
+				;
+			}
+		}
+
+		// everything has failed, we need to try fallback
+		if (!hasExecutedRight) {
 			CompilerDirectives.transferToInterpreterAndInvalidate();
-			currentOffset++;
-			leftChain = insert(new DispatchChain(getSourceSection(), candidateTargets[currentOffset], leftChain));
-			return executeFirst(args);
-		} else {
-			// chain is fully expanded, we have to fall back
-			CompilerDirectives.transferToInterpreterAndInvalidate();
-			// System.out.println("Expanding -> Expanded (" + dispatchClass.getSimpleName() + ")");
-			Class<?> nextDispatchClass = DispatchUtils.nextDispatchClass(args[0], dispatchClass);
-			if (nextDispatchClass == null) {
-				return replace(new Expanded(getSourceSection(), leftChain, null, failSoftly)).executeRight(args);
-			} else {
-				return replace(new Expanded(getSourceSection(), leftChain,
-						new Uninitialized(getSourceSection(), arrowName, nextDispatchClass, failSoftly),
-						failSoftly)).executeRight(args);
+			nextDispatchClass = DispatchUtils.nextDispatchClass(args[0], dispatchClass);
+			if (nextDispatchClass != null) {
+				rightChain = insert(new Uninitialized(getSourceSection(), arrowName, nextDispatchClass, failSoftly));
 			}
 
+		}
+
+		if (nextDispatchClass == null) {
+			if (failSoftly) {
+				throw PremiseFailureException.SINGLETON;
+			} else {
+				throw new ReductionFailure("No more rules to try", InterpreterUtils.createStacktrace(), this);
+			}
+		} else {
+			return rightChain.execute(args);
 		}
 	}
 
