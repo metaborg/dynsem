@@ -35,4 +35,4 @@ rules
       x_listmatchclass := <jclass-matcher> ls
   
   ds-to-interp-termbuild-access(|x_children):
-    (x_idx, ListSort(s)) -> e |[ children[x_idx] ]|
+    (x_idx, ListSort(s)) -> e |[ x_children[x_idx] ]|

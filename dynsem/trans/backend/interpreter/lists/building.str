@@ -91,52 +91,6 @@ rules
           }
         
         }
-//        import com.oracle.truffle.api.dsl.Specialization;
-//        import com.oracle.truffle.api.frame.VirtualFrame;
-//        import com.oracle.truffle.api.nodes.ExplodeLoop;
-//        import com.oracle.truffle.api.source.SourceSection;
-//        
-//        public abstract class x_listbuildclass extends TermBuild {
-//        
-//          @Children protected final TermBuild[] elemNodes;
-//        
-//          @Child protected TermBuild tailNode;
-//        
-//          public x_listbuildclass(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode) {
-//            super(source);
-//            this.elemNodes = elemNodes;
-//            this.tailNode = tailNode;
-//          }
-//          
-//          @Override
-//          // NB: this method is final so that the Truffle DSL cannot generate an overriding method (which would be incorrect)
-//          public final x_listclass executeEvaluated(VirtualFrame frame, Object... terms) {
-//            x_elemclass[] elems = (x_elemclass[]) terms[0];
-//            x_listclass tail = terms[1] != null ? TypesGen.x_aslistfun(terms[1]) : null;
-//        
-//            return tail != null ? tail.addAll(elems) : new x_listclass(elems);
-//          }
-//        
-//          @ExplodeLoop
-//          private final x_elemclass[] executeElems(VirtualFrame frame) {
-//            final Object[] elems = new x_elemclass[elemNodes.length];
-//            for (int idx = 0; idx < elems.length; idx++) {
-//              elems[idx] =  elemNodes[idx].executeGeneric(frame);
-//            }
-//            return (x_elemclass[]) elems;
-//          }
-//        
-//          @Specialization(guards = "tailNode == null")
-//          public x_listclass doNoTail(VirtualFrame frame) {
-//            return new x_listclass(executeElems(frame));
-//          }
-//        
-//          @Specialization
-//          public x_listclass doTail(VirtualFrame frame) {
-//            return TypesGen.x_aslistfun(tailNode.executeGeneric(frame)).addAll(executeElems(frame));
-//          }
-//        
-//        }
       ]|
     where
       x_listclass := <jclass-term> ls;

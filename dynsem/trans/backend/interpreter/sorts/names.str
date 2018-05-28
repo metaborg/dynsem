@@ -37,7 +37,7 @@ strategies // classes for sorts
         classname := <jclass-srt> ss
       else
         classname := $[[<get-opt> TermPkg()].[<jclass-srt> ss]]
-      end 
+      end
   
 strategies // builder for sorts
 

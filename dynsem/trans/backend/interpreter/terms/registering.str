@@ -11,6 +11,6 @@ imports
 rules
 
   ds-to-interp-termbuild-access(|x_children):
-    (x_idx, s) -> e |[ children[x_idx] ]|
+    (x_idx, s) -> e |[ x_children[x_idx] ]|
     where
       <type-is-builtin> s
