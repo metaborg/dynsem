@@ -139,7 +139,13 @@ rules
         mequals0* := class-body-dec* |[
           @Override
           public boolean equals(Object obj) {
-            return (this == obj);
+            if (this == obj)
+              return true;
+            if (obj == null)
+              return false;
+            if (getClass() != obj.getClass())
+              return false;
+            return true;
           }
         ]|
       else
