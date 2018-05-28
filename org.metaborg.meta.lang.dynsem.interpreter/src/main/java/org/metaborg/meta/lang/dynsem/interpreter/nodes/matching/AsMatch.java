@@ -4,11 +4,12 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class AsMatch extends MatchPattern {
+public abstract class AsMatch extends MatchPattern {
 
 	@Child private VarBind varNode;
 	@Child private MatchPattern patternNode;
@@ -19,15 +20,17 @@ public class AsMatch extends MatchPattern {
 		this.patternNode = patternNode;
 	}
 
-	@Override
-	public void executeMatch(VirtualFrame frame, Object t) {
+
+	@Specialization
+	public void doMatch(VirtualFrame frame, Object t) {
 		patternNode.executeMatch(frame, t);
 		varNode.executeMatch(frame, t);
 	}
 
 	public static AsMatch create(IStrategoAppl t, FrameDescriptor fd) {
 		assert Tools.hasConstructor(t, "As", 2);
-		return new AsMatch(SourceUtils.dynsemSourceSectionFromATerm(t), VarBind.create(Tools.applAt(t, 0), fd),
+		return AsMatchNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t),
+				VarBind.create(Tools.applAt(t, 0), fd),
 				MatchPattern.create(Tools.applAt(t, 1), fd));
 
 	}

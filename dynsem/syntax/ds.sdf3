@@ -63,20 +63,31 @@ context-free syntax // rules
   GuardedValue.UValue = Term
   
   Case.CasePattern = [
-    [Term] =>
+    [Term] ->
       [{Premise ";\n"}*]
   ]
   
+  Case.CasePattern = [
+    [Term] =>
+      [{Premise ";\n"}*]
+  ] {deprecated("Use PAT -> PREM instead")}
+  
+  Case.CaseOtherwise = [
+    otherwise ->
+      [{Premise ";\n"}*]
+  ]
+
   Case.CaseOtherwise = [
     otherwise =>
       [{Premise ";\n"}*]
-  ]
+  ] {deprecated("Use PAT -> PREM instead")}
   
   ID = <_> {reject}
   ID = <imports> {reject}
   ID = <signature> {reject}
   ID = <constructors> {reject}
   ID = <sorts> {reject}
+  ID = <abruptions> {reject}
   ID = <native> {reject}
   ID = <operators> {reject}
   ID = <datatypes> {reject}
@@ -96,8 +107,6 @@ context-free syntax // rules
   ID = <allkeys> {reject}
   ID = <allvalues> {reject}
   ID = <otherwise> {reject}
-  ID = <semantic> {reject}
-  ID = <components> {reject}
   ID = <case> {reject}
   ID = <as> {reject}
   ID = <or> {reject}

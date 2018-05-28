@@ -1,6 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.GenericListMatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.ListMatch;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -21,10 +23,10 @@ public abstract class MatchPattern extends DynSemNode {
 	public static MatchPattern create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		if (Tools.hasConstructor(t, "ArgBind", 1)) {
-			return WldMatchPattern.create(t);
+			return NoOpPattern.create(t);
 		}
 		if (Tools.hasConstructor(t, "Wld", 0)) {
-			return WldMatchPattern.create(t);
+			return NoOpPattern.create(t);
 		}
 		if (Tools.hasConstructor(t, "Con", 2)) {
 			return ConMatch.create(t, fd);

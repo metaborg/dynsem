@@ -27,6 +27,7 @@ signature
     EnableSafeComponents : DSOpt
     EnableTermCaching : DSOpt
     EnableDebug : DSOpt
+    EnableNativeFrames: DSOpt
     MavenGroupId : DSOpt
     MavenArtifactId : DSOpt
     JavaGenDirRel : DSOpt
@@ -34,6 +35,7 @@ signature
     TopPkg : DSOpt
     TermPkg : DSOpt
     MatchPkg : DSOpt
+    ChecksPkg: DSOpt
     BuildPkg : DSOpt
     NativePkg : DSOpt
     RuleRegistry : DSOpt
@@ -96,6 +98,7 @@ rules
       (EnableSafeComponents(), do-safe-components),
       (EnableTermCaching(), do-term-caching),
       (EnableDebug(), do-debug),
+      (EnableNativeFrames(), do-native-frames),
       (MavenGroupId(), genproject-groupid),
       (MavenArtifactId(), genproject-artifactid),
       (JavaGenDirRel(), java-gendir-rel),
@@ -104,6 +107,7 @@ rules
       (TermPkg(), terms-pkg),
       (BuildPkg(), tbuild-pkg),
       (MatchPkg(), tmatch-pkg),
+      (ChecksPkg(), tchecks-pkg),
       (NativePkg(), native-pkg),
       (RuleRegistry(), rulereg-class),
       (PreProcessor(), preprocess-class),
@@ -143,6 +147,7 @@ rules
       do-enable-backtracking := <read-property(|"interpreter.fullbacktracking", "false")> prop-file;
       do-safe-components := <read-property(|"interpreter.safecomponents", "false")> prop-file;
       do-term-caching := <read-property(|"interpreter.termcaching", "false")> prop-file;
+      do-native-frames := <read-property(|"interpreter.nativeframes", "false")> prop-file;
       do-debug := <read-property(|"interpreter.debug", "false")> prop-file;
       genproject-groupid := <ds-to-interp-read-prop-required(|"project.groupid")> prop-file;
       genproject-artifactid := <ds-to-interp-read-prop-required(|"project.artifactid")> prop-file;
@@ -152,6 +157,7 @@ rules
       terms-pkg := $[[gen-pkg].terms];
       tbuild-pkg := $[[terms-pkg].build];
       tmatch-pkg := $[[terms-pkg].match];
+      tchecks-pkg := $[[terms-pkg].checks];
       native-pkg := <read-property(|"project.nativepackage", $[[langname].interpreter.natives])> prop-file;
       tests-pkg := $[[gen-pkg].test];
       rulereg-class := <read-property(|"project.ruleregistry", "org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry")> prop-file;

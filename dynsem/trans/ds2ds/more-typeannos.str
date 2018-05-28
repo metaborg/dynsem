@@ -43,6 +43,16 @@ rules
     Formula(Match(lhs, tup@Tuple(_))) -> Formula(Match(lhs, Cast(tup, tuple-sort)))
     where
       tuple-sort := <type-of; derw-type> lhs
+
+  add-typeanno-to-list-tuples:
+    Formula(Match(lhs, l@ListTail(_, _))) -> Formula(Match(lhs, Cast(l, l-sort)))
+    where
+      l-sort := <type-of; derw-type> lhs
+
+  add-typeanno-to-list-tuples:
+    Formula(Match(lhs, l@List_(_))) -> Formula(Match(lhs, Cast(l, l-sort)))
+    where
+      l-sort := <type-of; derw-type> lhs
   
   add-typeanno-to-list-tuples:
     LabelComp(Label(l), List_([])) -> LabelComp(Label(l), Cast(List_([]), list-sort))

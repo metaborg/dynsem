@@ -1,0 +1,49 @@
+module backend/interpreter/tuples/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/common/-
+  
+strategies
+  
+  jclass-term-api = jclass-tuple
+  
+  jclass-tuple:
+    TupleSort(s*) -> $[Tuple_[<map(jclass-term; shorten-uniqueify-string); separate-by(|"_"); concat-strings> s*]]
+
+  jclass-term-qual-api = jclass-tuple-qual
+
+  jclass-tuple-qual:
+    ss@TupleSort(s*) -> $[[<get-opt> TermPkg()].[<jclass-tuple> ss]]
+
+strategies // builder for sorts
+
+  jclass-termbuilder-api = jclass-tuplebuilder
+
+  jclass-tuplebuilder:
+    dec@TupleSort(s*) -> $[[<jclass-tuple> dec]_B]
+  
+  jclass-termbuilder-ng-api = jclass-tuplebuilder-ng
+  
+  jclass-tuplebuilder-ng:
+    dec@TupleSort(s*) -> $[[<jclass-tuplebuilder> dec]NodeGen]
+
+strategies // checked builders
+  
+  jclass-checkedbuilder = fail
+
+strategies // matcher for sorts
+  
+  jclass-matcher-api = jclass-tuplematcher
+  
+  jclass-tuplematcher:
+    dec@TupleSort(s*) -> $[[<jclass-tuple> dec]_M] 
+
+  jclass-matcher-ng-api = jclass-tuplematcher-ng
+
+  jclass-tuplematcher-ng:
+    dec@TupleSort(s*) -> $[[<jclass-tuplematcher> dec]NodeGen]
+  

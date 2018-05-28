@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -18,9 +19,16 @@ public abstract class ListReverseTermBuild extends TermBuild {
 		super(source);
 	}
 
+	@Specialization(guards = "l == l_cached")
 	@SuppressWarnings("rawtypes")
-	@Specialization
-	public IListTerm doEvaluated(IListTerm l) {
+	public IListTerm doCached(IListTerm l, @Cached("l") IListTerm l_cached,
+			@Cached("doUncached(l_cached)") IListTerm l_reversed_cached) {
+		return l_reversed_cached;
+	}
+
+	@Specialization(replaces = "doCached")
+	@SuppressWarnings("rawtypes")
+	public IListTerm doUncached(IListTerm l) {
 		return l.reverse();
 	}
 

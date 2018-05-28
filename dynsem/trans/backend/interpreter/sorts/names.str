@@ -1,0 +1,102 @@
+module backend/interpreter/sorts/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/utils/-
+  backend/common/-
+  
+strategies // classes for sorts
+  
+  jclass-term-api = jclass-srt
+  
+  jclass-srt:
+    SortDecl(s, _) -> <jclass-srt> SimpleSort(s)
+  
+  jclass-srt:
+    SimpleSort(s) -> classname
+    where
+      <not(type-is-builtin)> s;
+      if jclass := <lookup-def(|Types()); lookup-prop(|JClass()); unquote(?'"')> s
+      then
+        classname := jclass
+      else
+        classname := <ds-utils-java-escape-id> s
+      end
+  
+  jclass-term-qual-api = jclass-srt-qual
+  
+  jclass-srt-qual:
+    ss@SimpleSort(s) -> classname
+    where
+      <not(type-is-builtin)> s;
+      if <lookup-def(|Types()); has-prop(|JClass())> s
+      then
+        classname := <jclass-srt> ss
+      else
+        classname := $[[<get-opt> TermPkg()].[<jclass-srt> ss]]
+      end
+  
+strategies // builder for sorts
+
+  jclass-termbuilder-api = jclass-srtbuilder
+
+  jclass-srtbuilder:
+    SortDecl(s, _) -> <jclass-srtbuilder> SimpleSort(s)
+  
+  jclass-srtbuilder:
+    ss@SimpleSort(s) -> <with(fail|$[No builder can exist for builtin type [s]])>
+    where <type-is-builtin> s
+  
+  jclass-srtbuilder:
+    ss@SimpleSort(s) -> classname
+    where
+      <not(type-is-builtin)> s;
+      if jclass := <lookup-def(|Types()); lookup-prop(|JClass()); unquote(?'"')> s
+      then
+        classname := $[[jclass].Build]
+      else
+        classname := $[[<jclass-srt> ss]_B]
+      end
+
+strategies // checked builders
+  
+  jclass-checkedbuilder-api = jclass-srtcheckedbuilder
+  
+  jclass-srtcheckedbuilder:
+    SortDecl(s, _) -> <jclass-srtcheckedbuilder> SimpleSort(s)
+  
+  jclass-srtcheckedbuilder:
+    SimpleSort(s) -> <with(fail|$[No checked builder can exist for builtin type [s]])>
+    where <type-is-builtin> s
+  
+  jclass-srtcheckedbuilder:
+    ss@SimpleSort(s) -> $[Is_[<jclass-srt> ss]]
+    where
+      <not(type-is-builtin)> s;
+      <lookup-def(|Types()); not(lookup-prop(|JClass()))> s
+
+  jclass-srtcheckedbuilder:
+    ss@SimpleSort(s) -> $[Is_[<jclass-srt; shorten-uniqueify-string> ss]]
+    where
+      <not(type-is-builtin)> s;
+      <lookup-def(|Types()); lookup-prop(|JClass())> s
+
+  jclass-checkedbuilder-ng-api = jclass-srtcheckedbuilder-ng
+
+  jclass-srtcheckedbuilder-ng:
+    ss@SimpleSort(s) -> $[[<jclass-srtcheckedbuilder> ss]NodeGen]
+    
+  jclass-has-checkedbuilder:
+    ss@SimpleSort(s) -> ss
+    where
+      <not(type-is-builtin)> s;
+      <lookup-def(|Types()); lookup-prop(|SortKind())> s => LanguageSort()
+
+strategies // matcher for sorts
+  
+  jclass-matcher-api = fail
+  
+  jclass-matcher-ng-api = fail

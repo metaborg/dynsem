@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
@@ -19,6 +20,6 @@ public class InvokeRelationNode extends DynSemNode {
 
 	public RuleResult execute(VirtualFrame frame) {
 		Object[] args = inputBuilder.executeObjectArray(frame);
-		return dispatchNode.execute(frame, args[0].getClass(), args);
+		return dispatchNode.execute(args[0].getClass(), args);
 	}
 }

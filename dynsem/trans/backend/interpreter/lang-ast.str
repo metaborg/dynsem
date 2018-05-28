@@ -2,7 +2,16 @@ module backend/interpreter/lang-ast
 
 imports
   signatures/-
+  analysis/-
   backend/interpreter/-
+  backend/interpreter/terms/-
+  backend/interpreter/sorts/-
+  backend/interpreter/constructors/-
+  backend/interpreter/lists/-
+  backend/interpreter/tuples/-
+  backend/interpreter/maps/-
+  backend/interpreter/nativeops/-
+  backend/interpreter/nativetypes/-
   backend/utils/-
   backend/common/-
   libjava-front
@@ -10,23 +19,24 @@ imports
 rules
   
   ds-to-interp-terms-module =
-    ?mod@Module(_, <fetch-elem(?Signatures(sig*))>);
-    ds-backend-on-changed-signatures(
+    m-in-analysis(
+      ?mod@Module(_, <fetch-elem(?Signatures(sig*))>);
       where(ds-to-interp-clean-target; ds-to-interp-gen-project);
       <ds-to-interp-terms-signatures-top; ds-to-interp-write-classes(|<get-opt> TermPkg())> mod;
       <ds-to-interp-terms-types-signatures; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
       <ds-to-inter-terms-sortbuilding; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
+      <ds-to-interp-terms-sortmatching; ds-to-interp-write-classes(|<get-opt> ChecksPkg())> sig*;
       <ds-to-interp-terms-building; ds-to-interp-write-classes(|<get-opt> BuildPkg())> mod;
       <ds-to-interp-terms-matching; ds-to-interp-write-classes(|<get-opt> MatchPkg())> mod;
       <ds-to-interp-nattypes-adapters-top; ds-to-interp-write-classes(|<get-opt> BuildPkg())> sig*;
-      <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod
-    |sig*);
-    ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-    ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-    ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-    ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-    ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-    ds-to-interp-gen-test-harness
+      <ds-to-interp-terms-registry-top; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg())> mod;
+      ds-to-interp-language; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+//      ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+      ds-to-interp-gen-test-harness
+    )
 
   ds-to-interp-clean-target =
     get-opt(|CleanProject()) <
@@ -45,10 +55,10 @@ rules /* Sort & Constructor classes */
       cons-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      sort-class* := <map(ds-to-interp-terms-sortdecl(|cons-dec*))> sort-dec*;
-      cons-class* := <map(ds-to-interp-terms-consdecl)> cons-dec*;
-      tuple-class* := <map(ds-to-interp-terms-tupledecl)> tuple-dec*;
-      list-class* := <map(ds-to-interp-terms-listdecl)> list-dec*
+      sort-class* := <ds-to-interp-terms-sortdecls(|cons-dec*)> sort-dec*;
+      cons-class* := <ds-to-interp-terms-consdecls> cons-dec*;
+      tuple-class* := <ds-to-interp-terms-tupledecls> tuple-dec*;
+      list-class* := <ds-to-interp-terms-listdecls> list-dec*
   
   get-languagelist-usage-in-signatures:
     sig -> [explicit-list*, implicit-map-key*, implicit-map-val*]
@@ -57,626 +67,15 @@ rules /* Sort & Constructor classes */
       implicit-map-key* := <collect-all(\ MapSort(k, _) -> ListSort(k) \); nub> sig;
       implicit-map-val* := <collect-all(\ MapSort(_, v) -> ListSort(v) \); nub> sig
   
-  get-languagetuple-usage-in-module =
-    ?Module(_, _);
-    collect-all(?TupleSort(_));
-    nub
+  get-languagetuple-usage-in-module:
+    m -> <nub> [tup-decl*, tup-used*]
+    where
+      tup-decl* := <collect-all(?TupleSort(_))> m;
+      tup-used* := <collect-all(\ Tuple(t*) -> TupleSort(<map(type-of; derw-type)> t*) \)> m
   
-  ds-to-interp-terms-sortdecl(|cons-dec*):
-    dec@SortDecl(s) ->
-      compilation-unit |[
-        package ~x:<get-opt> TermPkg();
-        
-        import org.spoofax.interpreter.core.Tools;
-        import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
-        import org.spoofax.interpreter.terms.*;
-        import com.oracle.truffle.api.CompilerAsserts;
-        
-        public abstract class x_class implements IApplTerm {
-        
-          @Override
-          public Class<? extends IApplTerm> getSortClass() {
-            return x_class.class;
-          }
-        
-          public static x_class create(IStrategoTerm term) {
-            CompilerAsserts.neverPartOfCompilation();
-            assert term != null;
-            bstm0*
-            bstm1
-          }
-          
-        }
-      ]|
-    where
-      x_class := <ds-to-interp-terms-types-name> dec;
-      appl-cons-dec* := <filter(?ConsDecl(_, _, SimpleSort(s),_))> cons-dec*; 
-      bstm0* := <map(ds-to-interp-terms-sortdec-createdisp)> appl-cons-dec*;
-      impl-consdec* := <filter(?ConsDecl(_, [_], SimpleSort(s), Annos([ImplicitAnno()])))> cons-dec*;
-      bstm1 := <foldr(! bstm |[ throw new IllegalStateException("Unsupported term: " + term); ]|, ds-to-interp-terms-sortdec-impldisp)> impl-consdec*
-
-  ds-to-interp-terms-sortdec-createdisp:
-    dec@ConsDecl(name, kid*, _, _) ->
-      bstm |[
-        if (Tools.isTermAppl(term) && Tools.hasConstructor((IStrategoAppl) term, ~e:Lit(String([Chars(name)])), ~i:<length; int-to-string> kid*)) {
-          return ~x:<ds-to-interp-terms-types-name> dec.create(term);
-        }
-      ]| 
-
-  ds-to-interp-terms-sortdec-impldisp:
-    (dec@ConsDecl(name, [sref@SimpleSort(_)], _, _), bstm0) ->
-      bstm |[
-        try {
-          return new x_class(e_create);
-        } catch (IllegalStateException ~x:<newname>) {
-          bstm0
-        }
-      ]|
-    where
-      x_class := <ds-to-interp-terms-types-name> dec;
-      e_create := <ds-to-interp-terms-sortdec-impldisp-constr> sref 
-  
-  ds-to-interp-terms-sortdec-impldisp-constr:
-    sref@SimpleSort(s) -> e |[ ~x:<ds-to-interp-terms-types-name> sref.create(term) ]|
-    where
-      <not(is-builtin-type)> s
-
-  ds-to-interp-terms-sortdec-impldisp-constr:
-    sref@SimpleSort("String") -> e |[ ((IStrategoString) term).stringValue() ]|
-
-  ds-to-interp-terms-sortdec-impldisp-constr:
-    sref@SimpleSort("Int") -> e |[ ((IStrategoInt) term).intValue() ]|
-
-  ds-to-interp-terms-consdecl:
-    dec@ConsDecl(name, kid*, s, _) ->
-      compilation-unit |[
-        package ~x:<get-opt> TermPkg();
-        
-        import org.spoofax.interpreter.core.Tools;
-        import org.spoofax.interpreter.terms.*;
-        import ~x:<get-opt> NativePkg().*;
-        import ~x:<get-opt> TopPkg().TypesGen;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
-        import com.oracle.truffle.api.CompilerAsserts;
-        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-        import org.apache.commons.lang3.builder.HashCodeBuilder;
-        
-        public final class x_classname extends ~x:<ds-to-interp-terms-types-name> s {
-
-          public final static String CONSTRUCTOR = ~e:Lit(String([Chars(name)]));
-          public final static int ARITY = ~i:<length; int-to-string> kid*;
-          private final IStrategoTerm strategoTerm;
-          
-          ~finit*
-
-          ~fdec0*
-
-          ~fget0*
-
-          public static x_classname create(IStrategoTerm term) {
-            CompilerAsserts.neverPartOfCompilation();
-            assert term != null;
-            assert Tools.isTermAppl(term);
-            assert Tools.hasConstructor((IStrategoAppl) term, CONSTRUCTOR, ARITY);
-            return new x_classname(e1*, term);
-          }
-          
-          @Override
-          public int size() {
-            return ARITY;
-          }
-          
-          @Override
-          public boolean equals(Object obj) {
-            if (this == obj)
-              return true;
-            if (obj == null)
-              return false;
-            if (getClass() != obj.getClass())
-              return false;
-            x_classname other = (x_classname) obj;
-            bstm2*
-            return true;
-          }
-          
-          @Override
-          public boolean hasStrategoTerm() {
-              return strategoTerm != null;
-          }
-          
-          @Override
-          public IStrategoTerm getStrategoTerm() {
-              return strategoTerm;
-          }
-          
-          @TruffleBoundary
-          @Override
-          public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append(CONSTRUCTOR);
-            sb.append("(");
-            bstm3*
-            sb.append(")");   
-            return sb.toString();
-          }
-          
-          @Override
-          @TruffleBoundary
-          public int hashCode() {
-            return e_hash.toHashCode();
-          }
-          
-          @Override
-          public ITermInstanceChecker getCheck() {
-            return new ITermInstanceChecker() {
-        
-              @Override
-              public boolean isInstance(Object obj) {
-                return TypesGen.~x:$[is[x_classname]](obj);
-              }
-            };
-          }
-        }
-      ]|
-    where
-      x_classname := <ds-to-interp-terms-types-name> dec;
-      param0* := <ds-to-interp-sorts-to-params> kid*;
-      bstm0* := <ds-to-interp-sorts-to-finits> kid*;
-      fdec0* := <ds-to-interp-sorts-to-fdecs> kid*;
-      fget0* := <ds-to-interp-sorts-to-fgets> kid*;
-      e0* := <range; map(\ i -> e |[ ~x:<int-to-string; mkidx> ]| \)> (1, <length; inc> kid*);
-      e1* := <map-with-index((\ i -> e |[ term.getSubterm(~i:<dec; int-to-string>) ]| \, id); ds-to-interp-sorts-to-create-arg)> kid*;
-      bstm2* := <map-with-index(ds2java-field-eq-check)> kid*;
-      e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds-to-interp-hashcode-append)> <range> (1, <length; inc> kid*);
-      bstm3* := <map-with-index(Fst; !bstm |[ sb.append(~x:<int-to-string; mkidx>); ]|); separate-by(|bstm |[ sb.append(", "); ]|)> kid*
-    where
-      if [] := kid*
-      then
-        finit* := class-body-dec* |[
-          public final static x_classname SINGLETON = new x_classname();
-          private x_classname() {
-            this(null);
-          }
-          
-          private x_classname(IStrategoTerm strategoTerm){
-            this.strategoTerm = strategoTerm;
-          }
-        ]|
-      else
-        finit* := class-body-dec* |[
-          public x_classname(param0*) {
-            this(e0*, null);
-          }
-          
-          private x_classname(param0*, IStrategoTerm strategoTerm) {
-            bstm0*
-            this.strategoTerm = strategoTerm;
-          }
-        ]|
-      end
-
-  ds-to-interp-terms-tupledecl:
-    srt@TupleSort(c-ty*) ->
-      compilation-unit |[
-        package ~x:<get-opt> TermPkg();
-        
-        import org.spoofax.interpreter.core.Tools;
-        import org.spoofax.interpreter.terms.*;
-        import ~x:<get-opt> NativePkg().*;
-        import ~x:<get-opt> TopPkg().TypesGen;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
-        import com.oracle.truffle.api.CompilerAsserts;
-        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-        import org.apache.commons.lang3.builder.HashCodeBuilder;
-        import org.metaborg.meta.lang.dynsem.interpreter.terms.ITupleTerm;
-        
-        public final class x_classname implements ITupleTerm {
-
-          public final static int ARITY = ~i:<length; int-to-string> c-ty*;
-          private final IStrategoTerm strategoTerm;
-          
-          ~finit*
-
-          ~fdec0*
-
-          ~fget0*
-
-          public static x_classname create(IStrategoTerm term) {
-            CompilerAsserts.neverPartOfCompilation();
-            assert term != null;
-            assert Tools.isTermTuple(term);
-            assert term.getSubtermCount() == ARITY;
-            return new x_classname(e1*, term);
-          }
-          
-          @Override
-          public int size() {
-            return ARITY;
-          }
-          
-          @Override
-          public boolean equals(Object obj) {
-            if (this == obj)
-              return true;
-            if (obj == null)
-              return false;
-            if (getClass() != obj.getClass())
-              return false;
-            x_classname other = (x_classname) obj;
-            bstm2*
-            return true;
-          }
-          
-          @Override
-          public boolean hasStrategoTerm() {
-              return strategoTerm != null;
-          }
-          
-          @Override
-          public IStrategoTerm getStrategoTerm() {
-              return strategoTerm;
-          }
-          
-          @TruffleBoundary
-          @Override
-          public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("(");
-            bstm3*
-            sb.append(")");
-            return sb.toString();
-          }
-          
-          @Override
-          @TruffleBoundary
-          public int hashCode() {
-            return e_hash.toHashCode();
-          }
-          
-          @Override
-          public ITermInstanceChecker getCheck() {
-            return new ITermInstanceChecker() {
-        
-              @Override
-              public boolean isInstance(Object obj) {
-                return TypesGen.~x:$[is[x_classname]](obj);
-              }
-            };
-          }
-        }
-      ]|
-    where
-      x_classname := <ds-to-interp-terms-types-name> srt;
-      param0* := <ds-to-interp-sorts-to-params> c-ty*;
-      bstm0* := <ds-to-interp-sorts-to-finits> c-ty*;
-      fdec0* := <ds-to-interp-sorts-to-fdecs> c-ty*;
-      fget0* := <ds-to-interp-sorts-to-fgets> c-ty*;
-      e0* := <range; map(\ i -> e |[ ~x:<int-to-string; mkidx> ]| \)> (1, <length; inc> c-ty*);
-      e1* := <map-with-index((\ i -> e |[ term.getSubterm(~i:<dec; int-to-string>) ]| \, id); ds-to-interp-sorts-to-create-arg)> c-ty*;
-      bstm2* := <map-with-index(ds2java-field-eq-check)> c-ty*;
-      e_hash := <foldr(!e |[ new HashCodeBuilder() ]|, ds-to-interp-hashcode-append)> <range> (1, <length; inc> c-ty*);
-      bstm3* := <map-with-index(Fst; !bstm |[ sb.append(~x:<int-to-string; mkidx>); ]|); separate-by(|bstm |[ sb.append(", "); ]|)> c-ty*
-    where
-      finit* := class-body-dec* |[
-        public x_classname(param0*) {
-          this(e0*, null);
-        }
-        
-        private x_classname(param0*, IStrategoTerm strategoTerm) {
-          bstm0*
-          this.strategoTerm = strategoTerm;
-        }
-      ]|
-      
   ds-to-interp-hashcode-append:
     (idx, e) -> e |[ e.append(~x:$[_[idx]]) ]|
   
-  ds-to-interp-terms-listdecl:
-    s@ListSort(es) ->
-      compilation-unit |[
-        package ~x:<get-opt> TermPkg();
-
-        import java.util.Collection;
-        import java.util.Iterator;
-        import org.apache.commons.lang3.builder.HashCodeBuilder;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
-        import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-        import org.metaborg.meta.lang.dynsem.interpreter.utils.ListUtils;
-        import com.github.krukow.clj_lang.IPersistentStack;
-        import com.github.krukow.clj_lang.PersistentList;
-        import com.github.krukow.clj_lang.ISeq;
-        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-        import com.oracle.truffle.api.CompilerAsserts;
-        import org.spoofax.interpreter.core.Tools;
-        import org.spoofax.interpreter.terms.*;
-        import ~x:<get-opt> NativePkg().*;
-        
-        public final class x_listclass implements IListTerm<x_elemclass> {
-
-          private final IPersistentStack<x_elemclass> backend;
-          private final IStrategoTerm strategoTerm;
-        
-          public x_listclass(x_elemclass[] elems) {
-            this(elems, null);
-          }
- 
-          public x_listclass(Collection<x_elemclass> elemSet) {
-            this(elemSet.toArray(new x_elemclass[0]));
-          }
-        
-          @SuppressWarnings("unchecked")
-          private x_listclass(x_elemclass[] elems, IStrategoTerm strategoTerm) {
-            this((IPersistentStack<x_elemclass>) PersistentList.create(elems), strategoTerm);
-          }
-        
-          private x_listclass(IPersistentStack<x_elemclass> backend, IStrategoTerm strategoTerm) {
-            this.backend = backend;
-            this.strategoTerm = strategoTerm;
-          }
-
-          @Override
-          public IStrategoTerm getStrategoTerm() {
-            return strategoTerm;
-          }
-          
-          @Override
-          public boolean hasStrategoTerm() {
-            return strategoTerm != null;
-          }
-          
-          @Override
-          public int size() {
-            return backend.count();
-          }
-        
-          @Override
-          public ITermInstanceChecker getCheck() {
-            return new ITermInstanceChecker() {
-        
-              @Override
-              public boolean isInstance(Object obj) {
-                return obj instanceof x_listclass;
-              }
-            };
-          }
-          
-          @Override
-          public x_elemclass get(int n) {
-            ISeq<x_elemclass> seq = backend.seq();
-            for (int k = 0; k < n; k++) {
-              seq = seq.next();
-            }
-            return seq != null ? seq.first() : null;
-          }
-        
-          @Override
-          @TruffleBoundary
-          public x_elemclass head() {
-            return backend.peek();
-          }
-          
-          @Override
-          public x_elemclass[] take(int numElems) {
-            final x_elemclass[] store = new x_elemclass[numElems];
-            final Iterator<x_elemclass> iter = iterator();
-            for (int idx = 0; idx < numElems; idx++) {
-              store[idx] = _next(iter);
-            }
-            return store;
-          }
-
-          @Override
-          public x_listclass tail() {
-            return new x_listclass(_pop(backend), getStrategoTerm());
-          }
-        
-          @Override
-          public x_listclass drop(int numElems) {
-            IPersistentStack<x_elemclass> tail = backend;
-            for (int idx = 0; idx < numElems; idx++) {
-              tail = _pop(tail);
-            }
-            return new x_listclass(tail, getStrategoTerm());
-          }
-        
-          @Override
-          public x_listclass add(x_elemclass elem) {
-            return new x_listclass(_cons(backend, elem), getStrategoTerm());
-          }
-        
-          @Override
-          public x_listclass addAll(x_elemclass[] elems) {
-            IPersistentStack<x_elemclass> backend = this.backend;
-        
-            for (int idx = elems.length - 1; idx >= 0; idx--) {
-              backend = _cons(backend, elems[idx]);
-            }
-            return new x_listclass(backend, getStrategoTerm());
-          }
-          
-          @Override
-          public x_listclass reverse() {
-            return new x_listclass(ListUtils.reverse(backend), null);
-          }
-          
-          @Override
-          @TruffleBoundary
-          public int hashCode() {
-            return new HashCodeBuilder().append(backend).toHashCode();
-          }
-          
-          @Override
-          @SuppressWarnings("unchecked")
-          @TruffleBoundary
-          public Iterator<x_elemclass> iterator() {
-            return ((com.github.krukow.clj_ds.PersistentList<x_elemclass>) backend).iterator();
-          }
-          
-          @Override
-          @TruffleBoundary
-          public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            IPersistentStack<x_elemclass> tail = backend;
-            while (tail.peek() != null) {
-              sb.append(tail.peek());
-              tail = tail.pop();
-              if (tail.peek() != null) {
-                sb.append(", ");
-              }
-            }
-            sb.append("]");
-            return sb.toString();
-          }
-          
-          @SuppressWarnings("rawtypes")
-          @Override
-          @TruffleBoundary
-          public x_elemclass[] toArray() {
-            if (size() > 0) {
-              return (x_elemclass[]) ((PersistentList) this.backend).toArray(new x_elemclass[size()]);  
-            } else {
-              return new x_elemclass[0];
-            }
-          }
-          
-          @TruffleBoundary
-          private static IPersistentStack<x_elemclass> _pop(
-              IPersistentStack<x_elemclass> backend) {
-            return backend.pop();
-          }
-          
-          @TruffleBoundary
-          private static IPersistentStack<x_elemclass> _cons(
-              IPersistentStack<x_elemclass> backend, x_elemclass elem) {
-            return (IPersistentStack<x_elemclass>) backend.cons(elem);
-          }
-          
-          @TruffleBoundary
-          private static x_elemclass _next(Iterator<x_elemclass> iter){
-            return iter.next();
-          }
-          
-          public static x_listclass create(IStrategoTerm term) {
-            CompilerAsserts.neverPartOfCompilation();
-            assert term != null;
-            assert Tools.isTermList(term);
-            
-            IStrategoList l = (IStrategoList) term;
-            x_elemclass[] elems = new x_elemclass[l.size()];
-            for(int idx = 0; idx < elems.length; idx++){
-              final int final_idx = idx; // FIXME this is only needed because e_elemcreate might be an anonymous object reading the idx
-              elems[idx] = e_elemcreate;
-            }
-            return new x_listclass(elems, term);
-          }
-        
-        }
-      ]|
-    where
-      x_listclass := <ds-to-interp-terms-types-name> s;
-      x_elemclassunboxed := <ds-to-interp-terms-types-name> es;
-      x_elemclass := <ds-box-java-type> x_elemclassunboxed;
-      e_elemcreate := <ds-to-interp-sortelem-to-create-arg(|e |[ l.getSubterm(final_idx) ]|)> es
-  
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@SimpleSort(s)) ->
-      e |[ x_ttype.create(e_term) ]|
-    where
-      <not(is-builtin-type)> s;
-      x_ttype := <ds-to-interp-terms-types-name> sref
-
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, ls@ListSort(_)) -> e |[ x_listclass.create(e_term) ]|
-    where
-      x_listclass := <ds-to-interp-terms-types-name> ls
-  
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, ts@TupleSort(_)) -> e |[ x_tupleclass.create(e_term) ]|
-    where
-      x_tupleclass := <ds-to-interp-terms-types-name> ts
-
-  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
-    s@SimpleSort(_) -> e |[ x_elemclass.create(e_tmpelem) ]|
-    where
-      <not(is-builtin-type)> s;
-      x_elemclass := <ds-to-interp-terms-types-name> s
-
-  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
-    l@ListSort(_) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, l)
-  
-  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
-    t@TupleSort(_) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, t)
-
-  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
-    m@MapSort(_, _) -> <ds-to-interp-sorts-to-create-arg> (e_tmpelem, m)
-      
-  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
-    SimpleSort("String") -> e |[ Tools.asJavaString(e_tmpelem) ]|
-
-  ds-to-interp-sortelem-to-create-arg(|e_tmpelem):
-    SimpleSort("Int") -> e |[ Tools.asJavaInt(e_tmpelem) ]|
-
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, MapSort(skey, sval)) ->
-      e |[
-        new Object() {
-          public com.github.krukow.clj_lang.PersistentHashMap apply() {
-            IStrategoTerm x_mapT = e_term;
-            assert Tools.isTermList(x_mapT);
-          
-            IStrategoList x_bindsT = (IStrategoList)x_mapT;
-          
-            java.util.Map<x_keyclass, x_valclass> x_map = new java.util.HashMap<x_keyclass, x_valclass>(
-                Math.round(x_bindsT.size() / 0.75f), 0.75f);
-            for (IStrategoTerm x_bindT : x_bindsT) {
-              assert Tools.isTermTuple(x_bindT) && x_bindT.getSubtermCount() == 2;
-              x_map.put(e_keycreate, e_valcreate);
-            }
-            return com.github.krukow.clj_lang.PersistentHashMap.create(x_map);
-          }
-        }.apply()
-      ]|
-    where
-      x_mapT := $[_[<newname>]];
-      x_bindsT := $[_[<newname>]];
-      x_map := $[_[<newname>]];
-      x_bindT := $[_[<newname>]];
-      x_keyclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> skey;
-      x_valclass := <ds-to-interp-terms-types-name; try(ds-box-java-type)> sval;
-      e_keycreate := <ds-to-interp-sorts-to-create-arg> (e |[ x_bindT.getSubterm(0) ]|, skey);
-      e_valcreate := <ds-to-interp-sorts-to-create-arg> (e |[ x_bindT.getSubterm(1) ]|, sval)
-
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@NativeType(_, "org.spoofax.interpreter.terms.IStrategoTerm")) -> e |[ e_term ]|
-
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@NativeType(_, qpath)) -> e |[ null ]|
-    where
-      <not(eq)> (qpath, "org.spoofax.interpreter.terms.IStrategoTerm") 
-
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@SimpleSort("String")) -> e |[ ((IStrategoString) e_term).stringValue() ]|
-
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@SimpleSort("Int")) -> e |[ ((IStrategoInt) e_term).intValue() ]|
-
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, sref@SimpleSort("Bool")) ->
-      e |[
-        new Object() {
-          public boolean apply() {
-            IStrategoAppl x_tmp1 = (IStrategoAppl) e_term;
-            assert Tools.hasConstructor(x_tmp1, "True", 0) || Tools.hasConstructor(x_tmp1, "False", 0);
-            return Tools.hasConstructor(x_tmp1, "True", 0) ? true : false;
-          }
-        }.apply()
-      ]|
-    where
-      x_tmp1 := $[_[<newname>]]
-  
-  ds-to-interp-sorts-to-create-arg:
-    (e_term, SimpleSort("AST")) -> e |[ null ]|
   
   // generate equality check for a field that is of native type
   ds2java-field-eq-check:
@@ -687,7 +86,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      <is-primitive-type> ty;
+      <type-is-primitive> ty;
       x_idx := $[_[idx]]
   
   // generate equality check for a field that is of user type
@@ -703,7 +102,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      <not(is-primitive-type)> ty;
+      <not(type-is-primitive)> ty;
       x_idx := $[_[idx]]
   
   ds-to-interp-sorts-to-params = is-list; map-with-index(ds-to-interp-sort-to-param)
@@ -711,7 +110,7 @@ rules /* Sort & Constructor classes */
   ds-to-interp-sort-to-param:
     (i, s) -> param |[ x_sortclass x_name ]|
     where
-      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_sortclass := <jclass-term> s;
       x_name := $[_[i]]
   
   ds-to-interp-sorts-to-finits = is-list; map-with-index(ds-to-interp-sort-to-finit)
@@ -726,7 +125,7 @@ rules /* Sort & Constructor classes */
   ds-to-interp-sort-to-fdec:
     (i, s) -> class-body-dec |[ private final x_sortclass x_name; ]|
     where
-      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_sortclass := <jclass-term> s;
       x_name := $[_[i]]
 
   ds-to-interp-sorts-to-fgets = is-list; map-with-index(ds-to-interp-sort-to-fget)
@@ -739,7 +138,7 @@ rules /* Sort & Constructor classes */
         }
       ]|
     where
-      x_sortclass := <ds-to-interp-terms-types-name> s;
+      x_sortclass := <jclass-term> s;
       x_getname := $[get_[i]];
       x_name := $[_[i]]
 
@@ -764,48 +163,14 @@ rules /* type system class */
     where
       <fetch-elem(?Signatures(sig-sec*))> section*;
       decl* := <filter(?Sorts(<id>) + ?Constructors(<id>) + ?NativeDataTypes(<id>)); concat;
-        qsort(?(ConsDecl(_, _, _, _), SortDecl(_)) + ?(SortDecl(_), NativeBaseTypeDecl(_, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _)))> sig-sec*;
+        qsort(?(ConsDecl(_, _, _, _), SortDecl(_, _)) + ?(SortDecl(_, _), NativeBaseTypeDecl(_, _, _, _)) + ?(ConsDecl(_, _, _, _), NativeBaseTypeDecl(_, _, _, _)))> sig-sec*;
       list* := <get-languagelist-usage-in-signatures> sig-sec*;
       tuple* := <get-languagetuple-usage-in-module> mod;
       ![decl*, tuple*, list*];
-      map(ds-to-interp-terms-types-name);
+      map(jclass-term);
       map(!Lit(Class(ClassOrInterfaceType(TypeName(Id(<id>)), None())))); nub => type*
 
 rules /* term building */
-
-  ds-to-inter-terms-sortbuilding = is-list; fetch-elem(?Sorts(<id>)); map(ds-to-interp-terms-sortbuilding)
-  
-  ds-to-interp-terms-sortbuilding:
-    dec@SortDecl(s) -> 
-      compilation-unit |[
-        package ~x:<get-opt> BuildPkg();
-  
-        import ~x:$[[<get-opt> TermPkg()].[<ds-to-interp-terms-types-name> dec]];
-        import ~x:$[[<get-opt> TopPkg()].TypesGen];
-        
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.nodes.UnexpectedResultException;
-        import com.oracle.truffle.api.source.SourceSection;
-        
-        public abstract class x_class extends TermBuild {
-        
-          public x_class(SourceSection source) {
-            super(source);
-          }
-        
-          public x_sortclass x_execmethod(VirtualFrame frame)
-              throws UnexpectedResultException {
-            return TypesGen.x_expectmethod(executeGeneric(frame));
-          }
-        
-        }
-      ]|
-    where
-      x_class := $[A[<ds-to-interp-terms-types-name> dec]Build];
-      x_sortclass := <ds-to-interp-terms-types-name> dec;
-      x_execmethod := $[execute[x_sortclass]];
-      x_expectmethod := $[expect[x_sortclass]]
 
   ds-to-interp-terms-building:
     mod@Module(_, section*) -> [con-build*, list-build*, tuple-build*]
@@ -814,155 +179,11 @@ rules /* term building */
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      con-build* := <map(ds-to-interp-terms-building-con)> con-dec*;
-      list-build* := <map(ds-to-interp-terms-building-list)> list-dec*;
+      con-build* := <ds-to-interp-terms-building-cons> con-dec*;
+      list-build* := <ds-to-interp-terms-building-lists> list-dec*;
       tuple-build* := <map(ds-to-interp-terms-building-tuple)> tuple-dec*
 
-  ds-to-interp-terms-building-con:
-    dec@ConsDecl(_, kid*, s, _) ->
-      compilation-unit |[
-        package ~x:<get-opt> BuildPkg();
-      
-        import ~x:$[[<get-opt> TermPkg()].*];
-        import ~x:<get-opt> NativePkg().*;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
-        import com.oracle.truffle.api.dsl.NodeChild;
-        import com.oracle.truffle.api.dsl.NodeChildren;
-        import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.source.SourceSection;
 
-        @NodeChildren({ ~child* })
-        public abstract class x_class extends ~x:$[A[<ds-to-interp-terms-types-name> s]Build] {
-
-          public x_class(SourceSection source) {
-            super(source);
-          }
-          
-          @Specialization
-          public x_termclass doTyped(param0*) {
-            return e_term;
-          }
-          
-        }
-      ]|
-    where
-      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
-      child* := <ds-to-interp-terms-building-childannos> kid*;
-      x_termclass := <ds-to-interp-terms-types-name> dec;
-      param0* := <ds-to-interp-terms-building-params> kid*;
-      e0* := <ds-to-interp-terms-building-exprs> kid*
-    where
-      if [] := kid*
-      then
-        e_term := e |[ x_termclass.SINGLETON ]|
-      else
-        e_term := e |[ new x_termclass(e0*) ]|
-      end
-
-  ds-to-interp-terms-building-tuple:
-    dec@TupleSort(s*) ->
-      compilation-unit |[
-        package ~x:<get-opt> BuildPkg();
-      
-        import ~x:$[[<get-opt> TermPkg()].*];
-        import ~x:<get-opt> NativePkg().*;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
-        import com.oracle.truffle.api.dsl.NodeChild;
-        import com.oracle.truffle.api.dsl.NodeChildren;
-        import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.source.SourceSection;
-
-        @NodeChildren({ ~child* })
-        public abstract class x_class extends TermBuild {
-
-          public x_class(SourceSection source) {
-            super(source);
-          }
-          
-          @Specialization
-          public x_termclass doTyped(param0*) {
-            return e_term;
-          }
-          
-        }
-      ]|
-    where
-      x_class := $[[<ds-to-interp-terms-types-name> dec]Build];
-      child* := <ds-to-interp-terms-building-childannos> s*;
-      x_termclass := <ds-to-interp-terms-types-name> dec;
-      param0* := <ds-to-interp-terms-building-params> s*;
-      e0* := <ds-to-interp-terms-building-exprs> s*;
-      e_term := e |[ new x_termclass(e0*) ]|
-
-  ds-to-interp-terms-building-childannos = map-with-index(ds-to-interp-terms-building-childanno)
-  
-  ds-to-interp-terms-building-childanno:
-    (i, s) -> anno |[ @NodeChild(value = ~e:Lit(String([Chars($[tb_[i]])])), type = TermBuild.class) ]|
-  
-  ds-to-interp-terms-building-params = map-with-index(ds-to-interp-terms-building-param)
-  
-  ds-to-interp-terms-building-param:
-    (i, s) -> param |[ final ~x:<ds-to-interp-terms-types-name> s ~x:$[tb_[i]] ]|
-
-  ds-to-interp-terms-building-exprs = map-with-index(ds-to-interp-terms-building-expr)
-  
-  ds-to-interp-terms-building-expr:
-    (i, _) -> e |[ ~x:$[tb_[i]] ]|
-
-  ds-to-interp-terms-building-list:
-    ls@ListSort(es) ->
-      compilation-unit |[
-        package ~x:<get-opt> BuildPkg();
-  
-        import ~x:$[[<get-opt> TermPkg()].*];
-        import ~x:$[[<get-opt> TopPkg()].TypesGen];
-        
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-        
-        import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.nodes.ExplodeLoop;
-        import com.oracle.truffle.api.source.SourceSection;
-        
-        public abstract class x_listbuildclass extends TermBuild {
-        
-          @Children protected final TermBuild[] elemNodes;
-        
-          @Child protected TermBuild tailNode;
-        
-          public x_listbuildclass(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode) {
-            super(source);
-            this.elemNodes = elemNodes;
-            this.tailNode = tailNode;
-          }
-        
-          @ExplodeLoop
-          private final x_elemclass[] executeElems(VirtualFrame frame) {
-            final x_elemclass[] elems = new x_elemclass[elemNodes.length];
-            for (int idx = 0; idx < elems.length; idx++) {
-              elems[idx] = (x_elemclass) elemNodes[idx].executeGeneric(frame);
-            }
-            return elems;
-          }
-        
-          @Specialization(guards = "tailNode == null")
-          public x_listclass doNoTail(VirtualFrame frame) {
-            return new x_listclass(executeElems(frame));
-          }
-        
-          @Specialization
-          public x_listclass doTail(VirtualFrame frame) {
-            final x_listclass tailList = TypesGen.x_aslistfun(tailNode.executeGeneric(frame));
-            return tailList.addAll(executeElems(frame));
-          }
-        
-        }
-      ]|
-    where
-      x_listclass := <ds-to-interp-terms-types-name> ls;
-      x_listbuildclass := $[[x_listclass]Build];
-      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es;
-      x_aslistfun := $[as[x_listclass]]
       
 
 rules /* term matching */
@@ -974,203 +195,13 @@ rules /* term matching */
       con-dec* := <fetch-elem(?Constructors(<id>))> sig*;
       list-dec* := <get-languagelist-usage-in-signatures> sig*;
       tuple-dec* := <get-languagetuple-usage-in-module> mod;
-      con-match* := <map(ds-to-interp-terms-matching-con)> con-dec*;
-      list-match* := <map(ds-to-interp-terms-matching-list)> list-dec*;
-      tuple-match* := <map(ds-to-interp-terms-matching-tuple)> tuple-dec*
+      con-match* := <ds-to-interp-terms-matching-cons> con-dec*;
+      list-match* := <ds-to-interp-terms-matching-lists> list-dec*;
+      tuple-match* := <ds-to-interp-terms-matching-tuples> tuple-dec*
 
-  ds-to-interp-terms-matching-con:
-    dec@ConsDecl(_, kid*, _, _) -> 
-      compilation-unit |[
-        package ~x:<get-opt> MatchPkg();
-        
-        import ~x:<get-opt> TermPkg().x_termclass;
-        import ~x:<get-opt> NativePkg().*;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-        
-        import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.dsl.Fallback;
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.source.SourceSection;
-        
-        public abstract class x_matcherclass extends MatchPattern {
-        
-          ~fdec*
-        
-          public x_matcherclass(SourceSection source, param0*) {
-            super(source);
-            bstm0*
-          }
-        
-          @Specialization
-          public void doTyped(VirtualFrame frame, x_termclass term) {
-            bstm1*
-          }
 
-          @Fallback
-          public void doGeneric(VirtualFrame frame, Object term) {
-            if (term instanceof x_termclass) {
-              doTyped(frame, (x_termclass) term);
-            } else {
-              throw PatternMatchFailure.INSTANCE;
-            }
-          }
-          
-        }
-      ]|
-    where
-      x_termclass := <ds-to-interp-terms-types-name> dec;
-      x_matcherclass := $[[x_termclass]MatchPattern];
-      fdec* := <ds-to-interp-terms-matching-fdecs> kid*; 
-      param0* := <ds-to-interp-terms-matching-initparams> kid*;
-      bstm0* := <ds-to-interp-terms-matching-finits> kid*;
-      bstm1* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> kid*)
       
-  ds-to-interp-terms-matching-tuple:
-    dec@TupleSort(s*) -> 
-      compilation-unit |[
-        package ~x:<get-opt> MatchPkg();
-        
-        import ~x:<get-opt> TermPkg().x_termclass;
-        import ~x:<get-opt> NativePkg().*;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-        
-        import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.dsl.Fallback;
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.source.SourceSection;
-        
-        public abstract class x_matcherclass extends MatchPattern {
-        
-          ~fdec*
-        
-          public x_matcherclass(SourceSection source, param0*) {
-            super(source);
-            bstm0*
-          }
-        
-          @Specialization
-          public void doTyped(VirtualFrame frame, x_termclass term) {
-            bstm1*
-          }
 
-          @Fallback
-          public void doGeneric(VirtualFrame frame, Object term) {
-            if (term instanceof x_termclass) {
-              doTyped(frame, (x_termclass) term);
-            } else {
-              throw PatternMatchFailure.INSTANCE;
-            }
-          }
-          
-        }
-      ]|
-    where
-      x_termclass := <ds-to-interp-terms-types-name> dec;
-      x_matcherclass := $[[x_termclass]MatchPattern];
-      fdec* := <ds-to-interp-terms-matching-fdecs> s*; 
-      param0* := <ds-to-interp-terms-matching-initparams> s*;
-      bstm0* := <ds-to-interp-terms-matching-finits> s*;
-      bstm1* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> s*)
-      
-  ds-to-interp-terms-matching-initparams = map-with-index(ds-to-interp-terms-matching-initparam)
-  
-  ds-to-interp-terms-matching-initparam:
-    (i, s) -> param |[ MatchPattern ~x:$[p_[i]] ]|
 
-  ds-to-interp-terms-matching-fdecs = map-with-index(ds-to-interp-terms-matching-fdec)
-  
-  ds-to-interp-terms-matching-fdec:
-    (i, _) -> class-body-dec |[ @Child protected MatchPattern ~x:$[p_[i]]; ]|
 
-  ds-to-interp-terms-matching-finits = map-with-index(ds-to-interp-terms-matching-finit)
-  
-  ds-to-interp-terms-matching-finit:
-    (i, s) -> bstm |[ this.~x:$[p_[i]] = ~x:$[p_[i]]; ]|
-
-  ds-to-interp-terms-matching-matchdescend:
-    (i, bstm0*) -> bstm* |[
-      bstm0*
-      (~x:$[p_[i]].executeMatch(frame, term.~x:$[get_[i]]()));
-    ]|
-
-  ds-to-interp-terms-matching-list:
-    ls@ListSort(es) -> 
-      compilation-unit |[
-        package ~x:<get-opt> MatchPkg();
-  
-        import ~x:$[[<get-opt> TermPkg()].*];
-        
-        import java.util.Iterator;
-        
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-        
-        import com.oracle.truffle.api.dsl.Specialization;
-        import com.oracle.truffle.api.nodes.ExplodeLoop;
-        import com.oracle.truffle.api.frame.VirtualFrame;
-        import com.oracle.truffle.api.source.SourceSection;
-        
-        public abstract class x_listmatchclass extends MatchPattern {
-        
-          @Children
-          protected final MatchPattern[] elemPatterns;
-        
-          @Child
-          protected MatchPattern tailPattern;
-        
-          public x_listmatchclass(SourceSection source, MatchPattern[] patterns, MatchPattern tailPattern) {
-            super(source);
-            this.elemPatterns = patterns;
-            this.tailPattern = tailPattern;
-          }
-          
-          @Specialization(guards = "tailPattern == null")
-          public void doGenericNoTail(VirtualFrame frame, x_listclass list) {
-            assert tailPattern == null;
-            if (elemPatterns.length != list.size()) {
-              throw PatternMatchFailure.INSTANCE;
-            }
-        
-            matchElemPatterns(frame, list);
-          }
-        
-          @Specialization(guards = "tailPattern != null")
-          public void doGenericWithTail(VirtualFrame frame, x_listclass list) {
-            assert tailPattern != null;
-        
-            if (elemPatterns.length > list.size()) {
-              throw PatternMatchFailure.INSTANCE;
-            }
-        
-            matchElemPatterns(frame, list);
-        
-            tailPattern.executeMatch(frame, list.drop(elemPatterns.length));
-          }
-          
-          @Specialization(guards = "notAList(o)")
-          public void doFail(VirtualFrame frame, Object o) {
-            throw PatternMatchFailure.INSTANCE;
-          }
-          
-          protected static boolean notAList(Object o){
-            return !(o instanceof x_listclass);
-          }
-        
-          @ExplodeLoop
-          private final void matchElemPatterns(VirtualFrame frame,
-              x_listclass list) {
-            final x_elemclass[] elems = list.take(elemPatterns.length);
-            for (int idx = 0; idx < elemPatterns.length; idx++) {
-              elemPatterns[idx].executeMatch(frame, elems[idx]);
-            }
-          }
-        
-        }
-      ]|
-    where
-      x_listclass := <ds-to-interp-terms-types-name> ls;
-      x_listmatchclass := $[[x_listclass]MatchPattern];
-      x_elemclass := <ds-to-interp-terms-types-name; ds-box-java-type> es
 

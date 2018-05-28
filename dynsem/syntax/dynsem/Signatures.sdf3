@@ -16,7 +16,11 @@ context-free syntax // sort declarations
     sorts
       <{SortDecl "\n"}*>>
   
-  SortDecl.SortDecl = <<ID>>
+  SortDecl.SortDeclNoAnnos = [[ID]]
+  SortDecl.SortDecl = [[ID] {[{SortAnno ", "}*]}]
+  
+  SortAnno.ValueSort = "value"
+  SortAnno.ClassSource = [class([JSNIPPET])]
   
 context-free syntax // variable schemes
   
@@ -57,6 +61,7 @@ context-free syntax // constructor declarations
   ConsAnnos.Annos = [{[ { ConsAnno "," }* ]}]
   ConsAnno.ImplicitAnno = [implicit]
   ConsAnno.MetafunAnno = [meta-function]
+  ConsAnno.ClassSource = [class([JSNIPPET])]
 
   Type.SimpleSort = <<ID>>
   Type.ListSort = <List(<Type>)> 
@@ -78,7 +83,10 @@ context-free syntax // native data types
   JSNIPPET = <<STRING>>
   
   NativeTypeDecl.NativeBaseTypeDecl =
-    [[JSNIPPET] as [ID] { [{NativeFunctionDecl "\n"}*] } ]
+    [[JSNIPPET] as [ID][Createable] { [{NativeFunctionDecl "\n"}*] } ]
+  
+  Createable.Yes = [!]
+  Createable.No = []
   
   NativeTypeDecl.NativeSubTypeDecl =
     [[JSNIPPET] as [ID] -> [ID] { [{NativeFunctionDecl "\n"}*] } ]
@@ -95,8 +103,13 @@ context-free syntax // native operator declarations
     native operators
       <{NativeOpDecl "\n"}*>>
   
-  NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}+] -> [Type]]
-  NativeOpDecl.NullaryNativeOpDecl = [[ID] : [Type]]
+  NativeOpDecl.NativeOpDeclNoAnnos = [[ID] : [{Type " * "}+] -> [Type]]
+  
+  NativeOpDecl.NativeOpDecl = [[ID] : [{Type " * "}+] -> [Type] {[{NativeOpAnno ", "}*]}]
+  NativeOpAnno.ClassSource = [class([JSNIPPET])]
+  
+  NativeOpDecl.NullaryNativeOpDeclNoAnnos = [[ID] : [Type]]
+  NativeOpDecl.NullaryNativeOpDecl = [[ID] : [Type] {[{NativeOpAnno ", "}*]}]
 
 context-free syntax // internal constructor declarations
 
@@ -119,6 +132,8 @@ context-free syntax
   ArrowDecl.ArrowDecl = [[ArrowROs] [Type] [ArrowRWs] -[IDNOHYPH]-> [Type] [ArrowRWs]]
   
   ArrowDecl.MetaFunDecl = [[ArrowROs] [ID]([{Type ", "}*]) [ArrowRWs] --> [Type] [ArrowRWs]]
+  
+  ArrowDecl.NativeFunDecl = [[ArrowROs] [ID]([{Type ", "}*]) [ArrowRWs] --> [Type] [ArrowRWs] {native}]
   
   ArrowROs.NoArrowROs = []
   ArrowROs.ArrowROs = [[{Label ", "}+] |-]

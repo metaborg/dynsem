@@ -1,10 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InvokeRelationNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RelationPremiseInputBuilder;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -12,6 +12,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -24,7 +25,7 @@ import com.oracle.truffle.api.source.SourceSection;
  * @author vladvergu
  *
  */
-public class RelationPremise extends Premise {
+public abstract class RelationPremise extends Premise {
 
 	@Child protected InvokeRelationNode relationLhs;
 
@@ -40,9 +41,9 @@ public class RelationPremise extends Premise {
 		this.rhsRwNodes = rhsComponentNodes;
 	}
 
-	@Override
+	@Specialization
 	@ExplodeLoop
-	public void execute(VirtualFrame frame) {
+	public void executeWithProfile(VirtualFrame frame) {
 		// execute the reduction
 		final RuleResult res = relationLhs.execute(frame);
 
@@ -53,8 +54,9 @@ public class RelationPremise extends Premise {
 		final Object[] components = res.components;
 		CompilerAsserts.compilationConstant(rhsRwNodes.length);
 		for (int i = 0; i < rhsRwNodes.length; i++) {
-			rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i));
+			rhsRwNodes[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), components, i, this));
 		}
+
 	}
 
 	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
@@ -70,7 +72,7 @@ public class RelationPremise extends Premise {
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
-		return new RelationPremise(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
+		return RelationPremiseNodeGen.create(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
 				DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
 				SourceUtils.dynsemSourceSectionFromATerm(t));
 	}

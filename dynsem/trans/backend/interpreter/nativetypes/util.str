@@ -1,0 +1,15 @@
+module backend/interpreter/nativetypes/util
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  backend/interpreter/sorts/util
+  
+strategies
+  
+  debug-decl-name:
+    NativeBaseTypeDecl(jstring, s, _, _) -> $[[s] aka [jstring]]
+  
+  debug-decl-name:
+    NativeFunctionDecl(fun, kid*, _) -> $[[fun]/[<length> kid*]]

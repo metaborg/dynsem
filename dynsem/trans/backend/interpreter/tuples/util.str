@@ -1,0 +1,16 @@
+module backend/interpreter/constructors/util
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  
+strategies
+  
+  debug-decl-name:
+    TupleSort(ss) -> $[([<map(debug-decl-name); separate-by(|", "); concat-strings> ss])]
+  
+  is-value-sort:
+    ts@TupleSort(ss) -> ts
+    where
+      <fetch-elem(is-value-sort)> ss 

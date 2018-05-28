@@ -1,0 +1,113 @@
+module backend/interpreter/lists/matching
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/interpreter/lists/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+  
+  ds-to-interp-terms-matching-lists =
+    map(require(ds-to-interp-terms-matching-list, debug-decl-name|"List match generation failed for"))
+
+rules
+  ds-to-interp-terms-matching-list:
+    ls@ListSort(es) -> compilation-unit |[
+        package ~x:<get-opt> MatchPkg();
+       
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> TermPkg().x_listclass.*;
+        import org.metaborg.lang.tiger.interpreter.generated.terms.match.x_listmatchclassfactory.*;
+        import org.metaborg.lang.tiger.interpreter.generated.terms.match.List_Dec_MFactory.Nil_Dec_MNodeGen;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
+        
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_listmatchclass extends MatchPattern {
+        
+          public x_listmatchclass(SourceSection source) {
+            super(source);
+          }
+          
+          public static MatchPattern create(SourceSection source, MatchPattern[] elemPatts, MatchPattern tailPatt) {
+            assert elemPatts != null;
+            MatchPattern tail = tailPatt != null ? tailPatt : x_nilmatchng.create(source);
+            for(int idx = elemPatts.length - 1; idx >= 0; idx--) {
+              tail = x_consmatchng.create(source, elemPatts[idx], tail);
+            }
+            return tail;
+          }
+          
+          public static abstract class x_nilmatchclass extends x_listmatchclass {
+        
+            public x_nilmatchclass(SourceSection source) {
+              super(source);
+            }
+            
+            @Specialization
+            public void doNil(x_nilclass nil) {
+              ;
+            }
+            
+            @Specialization
+            public void doCons(x_consclass l) {
+              throw PremiseFailureException.SINGLETON;
+            }
+            
+          }
+          
+          public static abstract class x_consmatchclass extends x_listmatchclass {
+          
+            @Child private MatchPattern elemPattern;
+            @Child private MatchPattern tailPattern;
+        
+            public x_consmatchclass(SourceSection source, MatchPattern elemPattern, MatchPattern tailPattern) {
+              super(source);
+              this.elemPattern = elemPattern;
+              this.tailPattern = tailPattern;
+            }
+            
+            @Specialization
+            public void doTail(VirtualFrame frame, x_consclass cons) {
+              elemPattern.executeMatch(frame, cons.elem());
+              tailPattern.executeMatch(frame, cons.tail());
+            }
+            
+            @Specialization
+            public void doMismatch(x_nilclass nil) {
+              throw PremiseFailureException.SINGLETON;
+            }
+            
+          }
+          
+        }
+    ]|
+  where
+    x_listclass := <jclass-term> ls;
+    x_consclass := <jclass-term-list-cons> ls;
+    x_nilclass := <jclass-term-list-nil> ls; 
+    x_listmatchclass := <jclass-matcher> ls;
+    x_listmatchclassfactory := $[[x_listmatchclass]Factory];
+    x_consmatchclass := <jclass-listmatcher-cons> ls;
+    x_nilmatchclass := <jclass-listmatcher-nil> ls;
+    x_consmatchng := <jclass-listmatcher-cons-ng> ls;
+    x_nilmatchng := <jclass-listmatcher-nil-ng> ls
+//    x_elemclass := <jclass-term> es;
+//    x_listmatchclassnotailuninit := $[[x_listmatchclass]_NoTail_Uninitialized];
+//    x_listmatchclassnotailuninitng := $[[x_listmatchclassnotailuninit]NodeGen];
+//    x_listmatchclassnotail := $[[x_listmatchclass]_NoTail];
+//    x_listmatchclassnotailng := $[[x_listmatchclassnotail]NodeGen];
+//    x_listmatchclasswithtailuninit := $[[x_listmatchclass]_WithTail_Uninitialized];
+//    x_listmatchclasswithtailuninitng := $[[x_listmatchclasswithtailuninit]NodeGen];
+//    x_listmatchclassdeadhead := $[[x_listmatchclass]_DeadHead];
+//    x_listmatchclassdeadheadng := $[[x_listmatchclassdeadhead]NodeGen];
+//    x_listmatchclassfull := $[[x_listmatchclass]_Full];
+//    x_listmatchclassfullng := $[[x_listmatchclassfull]NodeGen];
+//    x_listmatchclassfactory := $[[x_listmatchclass]Factory]

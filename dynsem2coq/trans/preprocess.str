@@ -51,7 +51,7 @@ rules // Accumulate information about declared arrows, rules, and AST constructo
       				 map(\ rule -> <unfold-rule-cases> ([], rule) \); // Unfolds case constructions into multiple rules
       				 concat> contents;
       // Sort declarations
-      sort_decls := <filter(?Sorts(<id>)); concat; filter(?SortDecl(<id>))> sigs*;
+      sort_decls := <filter(?Sorts(<id>)); concat; filter(?SortDecl(<id>, _))> sigs*;
       // Sort constructors
       sort_constrs := <filter(?Constructors(<id>)); concat> sigs*;
       // Arrow declarations

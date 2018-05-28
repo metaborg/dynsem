@@ -1,0 +1,142 @@
+module backend/interpreter/sorts/matching
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/interpreter/sorts/util
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-interp-terms-sortmatching =
+    is-list;
+    constr-by-sorts;
+    map(require(ds-to-interp-terms-sortmatching, Fst; debug-decl-name|"Match generation failed for sort"))
+  
+  constr-by-sorts:
+    sig* -> sort-cons*
+    where
+      sort-decl*  := <fetch-elem(?Sorts(<id>))> sig*;
+      cons-decl*  := <fetch-elem(?Constructors(<id>))> sig*;
+      sort-cons*  := <map(\ SortDecl(s, a) -> (SortDecl(s, a), <filter(?ConsDecl(_, _, SimpleSort(s), _))> cons-decl*) \)> sort-decl*
+//      ;
+//      natty-cons* := <fetch-elem(?NativeDataTypes(<id>)); map(\ d -> (d, []) \)> sig*
+  
+//  ds-to-interp-terms-sortmatching:
+//    (dec@NativeBaseTypeDecl(_, _, _, _), []) ->
+//      compilation-unit |[
+//        package ~x:<get-opt> ChecksPkg();
+//        
+//        import ~x:<get-opt> TermPkg().*;
+//        import ~x:<get-opt> NativePkg().*;
+//        import com.oracle.truffle.api.dsl.Specialization;
+//        import com.oracle.truffle.api.frame.VirtualFrame;
+//        import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
+//        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCastNode;
+//        
+//        public abstract class x_issortclass extends TypeCastNode {
+//          
+//          public x_issortclass() {
+//            super(SourceUtils.dynsemSourceSectionUnvailable());
+//          }
+//          
+//          public abstract Object executeGeneric(VirtualFrame frame);
+//        
+//          public abstract x_sortclass executeEvaluated(Object term);
+//          
+//          @Specialization
+//          public final x_sortclass executeLeafCast(x_sortclass term) {
+//            return term;
+//          }
+//        
+//        }
+//      ]|
+//    where
+//      x_sortclass := <jclass-term> dec;
+//      x_issortclass := <jclass-checkedbuilder> dec
+  
+  ds-to-interp-terms-sortmatching:
+    (dec@SortDecl(_, _), []) -> 
+      compilation-unit |[
+        package ~x:<get-opt> ChecksPkg();
+        
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> NativePkg().*;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCastNode;
+        
+        public abstract class x_issortclass extends TypeCastNode {
+          
+          public x_issortclass() {
+            super(SourceUtils.dynsemSourceSectionUnvailable());
+          }
+          
+          public abstract Object executeGeneric(VirtualFrame frame);
+        
+          public abstract x_sortclass executeEvaluated(Object term);
+          
+          @Specialization
+          public final x_sortclass executeLeafCast(x_sortclass term) {
+            return term;
+          }
+        
+        }
+      ]|
+    where
+      x_sortclass := <jclass-term> dec;
+      x_issortclass := <jclass-checkedbuilder> dec
+  
+
+  ds-to-interp-terms-sortmatching:
+    (dec@SortDecl(_, _), con-decl*@[_|_]) -> 
+      compilation-unit |[
+        package ~x:<get-opt> ChecksPkg();
+        
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TypeCastNode;
+        
+        public abstract class x_issortclass extends TypeCastNode {
+          
+          public x_issortclass() {
+            super(SourceUtils.dynsemSourceSectionUnvailable());
+          }
+
+          ~meth0*
+          
+          public abstract x_sortclass executeLeafCast(VirtualFrame frame);
+
+          public abstract x_sortclass executeEvaluated(Object term);
+          
+          @Specialization
+          public x_sortclass executeFallback(x_sortclass term) {
+            return term;
+          }
+        
+        }
+      ]|
+    where
+      x_sortclass := <jclass-term> dec;
+      x_issortclass := <jclass-checkedbuilder> dec;
+      meth0* := <map(ds-to-interp-terms-sortmatching-con-check)> con-decl*
+   
+    ds-to-interp-terms-sortmatching-con-check:
+      dec@ConsDecl(_, _, _, _) ->
+        class-body-dec |[
+          @Specialization
+          public final x_termclass x_method(x_termclass term) {
+            return term;
+          }
+        ]|
+      where
+        x_termclass := <jclass-term> dec;
+        x_method := $[execute[<shorten-uniqueify-string> x_termclass]]
+

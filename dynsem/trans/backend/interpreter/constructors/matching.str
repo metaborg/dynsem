@@ -1,0 +1,72 @@
+module backend/interpreter/constructors/matching
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/terms/-
+  backend/interpreter/-
+  backend/utils/-
+  backend/interpreter/constructors/util
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-interp-terms-matching-cons =
+    is-list;
+    filter(is-generatable-consdecl; require(ds-to-interp-terms-matching-con, debug-decl-name|"Match generation failed for constructor"))
+
+  ds-to-interp-terms-matching-con:
+    dec@ConsDecl(_, kid*, _, _) -> 
+      compilation-unit |[
+        package ~x:<get-opt> MatchPkg();
+        
+        import ~x:<get-opt> TermPkg().x_termclass;
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
+        import com.oracle.truffle.api.profiles.ConditionProfile;
+        import com.oracle.truffle.api.profiles.ValueProfile;
+        import com.oracle.truffle.api.dsl.Cached;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.dsl.Fallback;
+        import com.oracle.truffle.api.frame.VirtualFrame;
+        import com.oracle.truffle.api.source.SourceSection;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
+        
+        public abstract class x_matcherclass extends MatchPattern {
+        
+          ~fdec*
+        
+          public x_matcherclass(SourceSection source, param0*) {
+            super(source);
+            bstm0*
+          }
+          
+          @Specialization
+          public void doDeepMatch(VirtualFrame frame, x_termclass term) {
+            bstm_match*
+          }
+          
+          private final ConditionProfile profile = ConditionProfile.createCountingProfile();
+
+          @Fallback
+          public void doGeneric(VirtualFrame frame, Object term) {
+            if(profile.profile(term instanceof x_termclass)) {
+              doDeepMatch(frame, (x_termclass) term);
+            } else {
+              throw PremiseFailureException.SINGLETON;
+            }
+          }
+          
+        }
+      ]|
+    where
+      x_termclass := <jclass-term> dec;
+      x_matcherclass := <jclass-matcher> dec;
+      fdec* := <ds-to-interp-terms-matching-fdecs> kid*; 
+      param0* := <ds-to-interp-terms-matching-initparams> kid*;
+      bstm0* := <ds-to-interp-terms-matching-finits> kid*;
+//      param1* := <range; map(ds-to-interp-terms-match-profile)> (1, <length; inc> kid*);
+      bstm_match* := <foldr(![], ds-to-interp-terms-matching-matchdescend)> <range; reverse> (1, <length; inc> kid*)
+

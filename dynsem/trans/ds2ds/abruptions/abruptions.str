@@ -1,0 +1,157 @@
+module ds2ds/abruptions/abruptions
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  ds2ds/explication
+  ds2ds/explicate-arrow-types
+  backend/interpreter/signature
+  
+strategies // name definitions
+  
+  abr-name-sort-thrown   = !"Thrown"
+  abr-name-sort-throwing = !"Evaluatable"
+  abr-name-sort-catching = !"Catching"
+  abr-name-sort-val      = !"Val"
+  abr-name-sort-unit     = !"U"
+  
+  abr-name-handler = !"handler"
+  abr-name-handle  = !"_native_handle"
+  abr-name-raise   = !"_native_raise"
+  
+  abr-name-mk-sort = !SimpleSort(<id>)
+
+strategies // selective enabling
+
+  abr-are-enabled = where(UsesAbruptions)
+
+  abr-enable-module =
+    try(
+      UsesAbruptions; debug(!"Abruptions already enabled ") <+
+      where(
+        ?Module(_, <id>);
+        fetch-elem(?Signatures(<id>));
+        fetch-elem(?Arrows(<id>));
+        fetch-elem(abr-is-handle-decl + abr-is-raise-decl);
+        rules(UsesAbruptions: t -> t)
+      )
+    )
+    
+  abr-new-scope(s) = {| UsesAbruptions:
+    s
+  |}
+  
+strategies // signature generation
+
+  abr-is-handle-decl =
+    where(
+     ?NativeFunDecl(_, <abr-name-handle>, [SimpleSort(<abr-name-sort-throwing>), SimpleSort(<abr-name-sort-catching>)], _, SimpleSort(<abr-name-sort-val>), _)
+    )
+
+
+  abr-is-handle-decl =
+    where(
+      ?NativeFunDecl(_, <abr-name-handle>, [SimpleSort(<abr-name-sort-throwing>), SimpleSort(<abr-name-sort-catching>), SimpleSort(<abr-name-sort-throwing>)], _, SimpleSort(<abr-name-sort-val>), _)
+    )
+  
+  abr-is-raise-decl =
+    where(
+      ?NativeFunDecl(_, <abr-name-raise >, [SimpleSort(<abr-name-sort-thrown>)], _, SimpleSort(<abr-name-sort-unit>), _)
+    )
+  
+strategies // explication
+
+  explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) =
+    abr-are-enabled < abr-explicate-arrow-imports(|comps-table, imps-table) + fail
+  /*
+  The handler invokation should receive all of the RO components
+  from where the handle was invoked
+  It should also receive the RW components from where the exception was thrown
+  
+  */
+  
+  abr-explicate-arrow-imports(|comps-table, imps-table) =
+    // explication for handle/2 and handle/3
+    // it receives all of the RO and RW components required by the 
+    // Evaluatable and Catching reductions
+    throwing-arr := <resolve-applicable-arrow-defsite> ("", <abr-name-sort-throwing>);
+    handler-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handler>]_2_Meta]);
+    imp* := [Impo(throwing-arr, []), Impo(handler-arr, [])];
+    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handle>]_2_Native]);
+    <explication-api-add-imports(|comps-table, imps-table)> (handle-2-native-arr, imp*);
+    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handle>]_3_Native]);
+    <explication-api-add-imports(|comps-table, imps-table)> (handle-3-native-arr, imp*);
+    fail
+  
+  abr-explicate-arrow-imports(|comps-table, imps-table) =
+    // explication for handler/2
+    // it should receive the RO components from the handle
+    // it should receive the RW components from the raise
+    // but we cannot do this fine-grained explication
+    // so we'll just make the handler/2 depend on the handle/2 and handle/3 components
+    handler-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-handler>]_2_Meta]));
+    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handle>]_2_Native]);
+    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", $[[<abr-name-handle>]_3_Native]);
+    <explication-api-add-imports(|comps-table, imps-table)> (handler-arr, [Impo(handle-2-native-arr, []), Impo(handle-3-native-arr, [])]);
+    fail
+  
+  abr-explicate-arrow-imports(|comps-table, imps-table) =
+    // explication for raise/1
+    // it receives the RW components from handle/2 and handle/3
+    // it should not receive RO components, but we have no way of filtering them
+    // at this point because explication has not been performed so we don't
+    // actually know what the components are
+    raise-native-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<abr-name-raise>]_1_Native]));
+    handle-2-native-ty := $[[<abr-name-handle>]_2_Native];
+    handle-2-native-arr := <resolve-applicable-arrow-defsite> ("", handle-2-native-ty);
+    handle-3-native-ty := $[[<abr-name-handle>]_3_Native];
+    handle-3-native-arr := <resolve-applicable-arrow-defsite> ("", handle-3-native-ty);
+    <explication-api-add-imports(|comps-table, imps-table)> (raise-native-arr, [Impo(handle-2-native-arr, []), Impo(handle-3-native-arr, [])]);
+    fail
+  
+strategies // backend
+
+signature
+  constructors
+    Raise: List(Term) * Term -> NativeRule
+    Handle: Term * Term -> NativeRule
+    Handle: Term * Term * Term -> NativeRule
+  
+strategies
+  abr-rewrite-natives-module = 
+    abr-new-scope(
+      abr-enable-module;
+      abr-are-enabled <
+      alltd(abr-rewrite-native-relation)
+      + id
+    )
+  
+  abr-rewrite-native-relation: // handle/3
+    Formula(Relation(Reads(ro*), Source(Con(cname, [throwing, catching, continuing]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(Handle(throwing, catching, continuing), rhs, rw-out-var*))
+    where
+      abr-name-handle => cname
+    with
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
+  
+  abr-rewrite-native-relation: // handle/2
+    Formula(Relation(Reads(ro*), Source(Con(cname, [throwing, catching]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(Handle(throwing, catching), rhs, rw-out-var*))
+    where
+      abr-name-handle => cname
+    with
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
+ 
+  abr-rewrite-native-relation: // raise/1
+    Formula(Relation(Reads(ro*), Source(Con(cname, [thrown]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(Raise(rw-in-var*, thrown), rhs, rw-out-var*))
+    where
+      abr-name-raise => cname
+    with
+      rw-in-var* := <map(\ LabelComp(_, t) -> t\)> rw-in*;
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
+      
+
+
+

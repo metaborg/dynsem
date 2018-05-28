@@ -1,0 +1,12 @@
+module backend/interpreter/constructors/util
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  backend/interpreter/sorts/util
+  
+strategies
+  
+  debug-decl-name:
+    NativeOpDecl(name, kid*, _, _)-> $[[name]/[<length> kid*]]

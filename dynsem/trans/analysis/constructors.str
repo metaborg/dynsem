@@ -19,7 +19,6 @@ signature
 
   constructors
     Type: Property
-    NativeTypeJString: Property
     NativeTypeSuperType : Property
     Use: Property
     ROs: Property
@@ -52,20 +51,31 @@ signature
   sorts
     SortKind
     ConsKind
+    ArrowKind
+    JClass
   
   constructors
     SortKind: Property
     LanguageSort: SortKind
-  	NativeSort: SortKind
-  	SystemSort: SortKind
-  	AliasSort: SortKind
-  	
-  	ConsKind: Property
-  	LanguageCons: ConsKind
-  	ImplicitCons: ConsKind
-  	Metafunc: ConsKind
-  	NativeCons: ConsKind
-  	NativeOpCons: ConsKind
+  	  NativeSort: SortKind
+  	  SystemSort: SortKind
+  	  AliasSort: SortKind
+
+    ConsKind: Property
+    LanguageCons: ConsKind
+    NativeCons: ConsKind
+    NativeOpCons: ConsKind
+    
+    ImplicitCons: ConsKind
+    Metafunc: ConsKind
+    
+    ArrowKind: Property
+    LanguageArrow: ArrowKind
+    NativeArrow: ArrowKind
+    MetaFunction: ArrowKind
+    
+    JClass: Property
+    Creatable: Property
 
 signature
   sorts

@@ -76,7 +76,7 @@ rules // Augmenting module with sort declarations and constructors for explicate
 				cons_decl :=
 					ConsDecl(<postify-constructor> sort', <concat> [scope_kind_list, type_kind_list, [sort']], SimpleSort(<postify> sort'), Annos([]));
 				mod' :=
-					<alltd(\ Sorts(ss) -> Sorts(<add-after(|<store-sort> SortDecl(<get-sort-name> sort'))> (SortDecl(<postify> sort'), ss)) \);
+					<alltd(\ Sorts(ss) -> Sorts(<add-after(|<store-sort> SortDecl(<get-sort-name> sort', []))> (SortDecl(<postify> sort', []), ss)) \);
 					 alltd(\ Constructors(cs) -> Constructors([<store-constructor> cons_decl|cs]) \)> mod
 			) <+
 			(
@@ -87,7 +87,7 @@ rules // Augmenting module with sort declarations and constructors for explicate
 	check-sort-defined:
 		(mod, SimpleSort(x)) -> 1
 		where
-			<oncetd(?SortDecl(x))> mod
+			<oncetd(?SortDecl(x, _))> mod
 
 	check-sort-defined:
 		(mod, ListSort(x)) -> 1

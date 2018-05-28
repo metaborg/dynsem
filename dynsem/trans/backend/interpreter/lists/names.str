@@ -1,0 +1,81 @@
+module backend/interpreter/lists/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/common/-
+  
+strategies // classes for sorts
+  
+  jclass-term-api = jclass-list
+  
+  jclass-list:
+    ListSort(s) -> $[List_[<jclass-term; shorten-uniqueify-string> s]]
+
+  jclass-term-list-nil:
+    ListSort(s) -> $[Nil_[<jclass-term; shorten-uniqueify-string> s]]
+  
+  jclass-term-list-cons:
+    ListSort(s) -> $[Cons_[<jclass-term; shorten-uniqueify-string> s]]
+  
+  jclass-term-qual-api = jclass-list-qual 
+   
+  jclass-list-qual:
+    ss@ListSort(s) -> $[[<get-opt> TermPkg()].[<jclass-list> ss]]
+    
+
+strategies // builder for sorts
+
+  jclass-termbuilder-api = jclass-listbuilder
+
+  jclass-listbuilder:
+    dec@ListSort(s) -> $[[<jclass-list> dec]_B]
+  
+  jclass-listbuilder-nil:
+    dec@ListSort(_) -> $[[<jclass-term-list-nil> dec]_B]
+  
+  jclass-listbuilder-cons:
+    dec@ListSort(_) -> $[[<jclass-term-list-cons> dec]_B]
+  
+  jclass-termbuilder-ng-api = jclass-listbuilder-ng
+  
+  jclass-listbuilder-ng:
+    dec@ListSort(_) -> $[[<jclass-listbuilder> dec]NodeGen]
+
+  jclass-listbuilder-nil-ng:
+    dec@ListSort(_) -> $[[<jclass-listbuilder-nil> dec]NodeGen]
+
+  jclass-listbuilder-cons-ng:
+    dec@ListSort(_) -> $[[<jclass-listbuilder-cons> dec]NodeGen]
+
+strategies // checked builders
+  
+  jclass-checkedbuilder-api = fail
+
+strategies // matcher for sorts
+  
+  jclass-matcher-api = jclass-listmatcher
+  
+  jclass-listmatcher:
+    dec@ListSort(s) -> $[[<jclass-list> dec]_M]
+
+  jclass-listmatcher-nil:
+    dec@ListSort(s) -> $[[<jclass-term-list-nil> dec]_M]
+
+  jclass-listmatcher-cons:
+    dec@ListSort(s) -> $[[<jclass-term-list-cons> dec]_M]
+  
+  jclass-matcher-ng-api = jclass-listmatcher-ng
+  
+  jclass-listmatcher-ng:
+    dec@ListSort(_) -> $[[<jclass-listmatcher> dec]NodeGen]
+  
+  jclass-listmatcher-nil-ng:
+    dec@ListSort(s) -> $[[<jclass-listmatcher-nil> dec]NodeGen]
+
+  jclass-listmatcher-cons-ng:
+    dec@ListSort(s) -> $[[<jclass-listmatcher-cons> dec]NodeGen]
+
+  

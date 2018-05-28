@@ -30,7 +30,7 @@ public class ConMatch extends MatchPattern {
 		final ITermRegistry termReg = ctx.getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
 
-		MatchPattern matcher = InterpreterUtils.notNull(ctx, termReg.lookupMatchFactory(termClass))
+		MatchPattern matcher = InterpreterUtils.notNull(ctx, termReg.lookupMatchFactory(termClass), this)
 				.apply(getSourceSection(), cloneNodes(children));
 
 		replace(matcher).executeMatch(frame, t);

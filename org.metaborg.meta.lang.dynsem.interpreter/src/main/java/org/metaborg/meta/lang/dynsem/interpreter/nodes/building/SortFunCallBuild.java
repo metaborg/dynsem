@@ -5,12 +5,12 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
-import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class SortFunCallBuild extends TermBuild {
+public abstract class SortFunCallBuild extends TermBuild {
 
 	private final String function;
 	private final String sort;
@@ -37,15 +37,16 @@ public class SortFunCallBuild extends TermBuild {
 			children[i + 1] = TermBuild.create(Tools.applAt(argsT, i), fd);
 		}
 
-		return new SortFunCallBuild(sort, function, children, SourceUtils.dynsemSourceSectionFromATerm(t));
+		return SortFunCallBuildNodeGen.create(sort, function, children, SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
 	@Override
+	@Specialization
 	public Object executeGeneric(VirtualFrame frame) {
-		CompilerDirectives.transferToInterpreterAndInvalidate();
 		TermBuild build = getContext().getTermRegistry()
 				.lookupNativeTypeAdapterBuildFactory(sort, function, children.length - 1)
 				.apply(getSourceSection(), children);
 		return replace(build).executeGeneric(frame);
 	}
+
 }

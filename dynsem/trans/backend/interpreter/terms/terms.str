@@ -1,0 +1,32 @@
+module backend/interpreter/terms/terms
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+
+rules // creation from aterms
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@SimpleSort("String")) -> e |[ Tools.asJavaString(e_term) ]|
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@SimpleSort("Int")) -> e |[ Tools.asJavaInt(e_term) ]|
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, sref@SimpleSort("Bool")) ->
+      e |[
+        new Object() {
+          public boolean apply() {
+            IStrategoAppl x_tmp1 = (IStrategoAppl) e_term;
+            assert Tools.hasConstructor(x_tmp1, "True", 0) || Tools.hasConstructor(x_tmp1, "False", 0);
+            return Tools.hasConstructor(x_tmp1, "True", 0) ? true : false;
+          }
+        }.apply()
+      ]|
+    where
+      x_tmp1 := $[_[<newname>]]
+  
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, SimpleSort("AST")) -> e |[ null ]|
+    

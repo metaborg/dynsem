@@ -1,0 +1,16 @@
+module backend/interpreter/maps/util
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  backend/interpreter/sorts/util
+  
+strategies
+  
+  is-value-sort:
+    ms@MapSort(ks, vs) -> ms
+    where
+      <is-value-sort> ks
+      <+
+      <is-value-sort> vs

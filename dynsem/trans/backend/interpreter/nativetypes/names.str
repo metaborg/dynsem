@@ -1,0 +1,40 @@
+module backend/interpreter/nativetypes/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/interpreter/signature
+  backend/common/-
+  
+strategies // classes for sorts
+  
+  jclass-term-api = jclass-nativety
+  
+  jclass-nativety:
+    NativeBaseTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
+  
+  jclass-nativety:
+    NativeSubTypeDecl(jstring, _, _, _) -> <unquote(?'"')> jstring
+
+  jclass-nativety:
+    NativeType(_, jstring) -> jstring
+
+strategies // builder for sorts
+
+  jclass-termbuilder-api = fail
+      
+  jclass-termbuilder-ng-api = fail
+  
+strategies // checked builders
+  
+  jclass-checkedbuilder-api = fail // jclass-nativety-checkedbuilder
+
+  jclass-nativety-checkedbuilder:
+    dec@NativeBaseTypeDecl(_, _, _, _) -> $[Is_[<jclass-nativety; shorten-uniqueify-string> dec]]
+
+strategies // matcher for sorts
+  
+  jclass-matcher-api = fail
+  

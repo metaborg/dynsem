@@ -1,0 +1,249 @@
+module backend/interpreter/lists/terms
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/common/-
+  backend/interpreter/-
+  backend/interpreter/lists/-
+  backend/interpreter/terms/-
+
+strategies
+
+  ds-to-interp-terms-listdecls = 
+    map(require(ds-to-interp-terms-listdecl, debug-decl-name|"List term generation failed for"))
+  
+rules
+
+  ds-to-interp-terms-listdecl:
+    s@ListSort(es) ->
+      compilation-unit |[
+        package ~x:<get-opt> TermPkg();
+        
+        import java.util.Iterator;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.ConsNilIterator;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+        import org.spoofax.interpreter.terms.IStrategoTerm;
+        import org.spoofax.interpreter.core.Tools;
+        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        import com.oracle.truffle.api.CompilerAsserts;
+        import org.spoofax.interpreter.core.Tools;
+        import org.spoofax.interpreter.terms.*;
+        
+        public abstract class x_listclass implements IListTerm<x_elemclass> {
+        
+          private final IStrategoTerm strategoTerm;
+        
+          public final static x_nilclass EMPTY = new x_nilclass();
+        
+          public x_listclass(IStrategoTerm strategoTerm) {
+            this.strategoTerm = strategoTerm;
+          }
+        
+          @Override
+          public final boolean hasStrategoTerm() {
+            return strategoTerm != null;
+          }
+        
+          @Override
+          public final IStrategoTerm getStrategoTerm() {
+            return strategoTerm;
+          }
+        
+          @Override
+          public final ITermInstanceChecker getCheck() {
+            return null;
+          }
+
+          @Override
+          public abstract x_elemclass elem();
+        
+          @Override
+          public abstract x_listclass tail();
+          
+          @Override
+          public abstract x_listclass drop(int numElems);
+        
+        
+          @Override
+          public x_consclass prefix(x_elemclass prefix) {
+            return new x_consclass(prefix, this, this.getStrategoTerm());
+          }
+          
+          @Override
+          public IListTerm<x_elemclass> prefixAll(IListTerm<x_elemclass> prefix) {
+            x_listclass head = this;
+            x_elemclass[] prefixElems = prefix.toArray();
+            for(int idx = prefixElems.length - 1; idx >= 0; idx--) {
+              head = new x_consclass(prefixElems[idx], head, head.getStrategoTerm());
+            }
+            return head;
+          }
+
+          @Override
+          public x_elemclass[] toArray() {
+            x_elemclass[] arr = new x_elemclass[size()];
+            x_listclass head = this;
+            for(int idx = 0; idx < arr.length; idx++) {
+              arr[idx] = head.elem();
+              head = head.tail();
+            }
+            return arr;
+          }
+          
+          @Override
+          public x_listclass reverse() {
+            IStrategoTerm sterm = getStrategoTerm();
+            x_listclass result = new x_nilclass();
+            x_elemclass[] elems = toArray();
+            for(int idx = 0; idx < elems.length; idx++) {
+              result = new x_consclass(elems[idx], result, sterm);
+            }
+            return result;
+          }
+          
+          @Override
+          public Iterator<x_elemclass> iterator() {
+            return new ConsNilIterator<x_elemclass>(this);
+          }
+          
+          @Override
+          @TruffleBoundary
+          public String toString() {
+            StringBuilder str = new StringBuilder("[");
+            x_listclass head = this;
+            while(head instanceof x_consclass) {
+              str.append(head.elem());
+              head = head.tail();
+              if(head instanceof x_consclass) {
+                str.append(", ");
+              }
+            }
+            return str.append("]").toString();
+          }
+          public static final class x_consclass extends x_listclass {
+          
+            private final x_elemclass elem;
+            private final x_listclass tail;
+            private final int size;
+        
+            public x_consclass(x_elemclass elem, x_listclass tail, IStrategoTerm strategoTerm) {
+              super(strategoTerm);
+              this.elem = elem;
+              this.tail = tail;
+              this.size = 1 + tail.size();
+            }
+        
+            @Override
+            public int size() {
+              return size;
+            }
+        
+            @Override
+            public x_elemclass elem() {
+              return elem;
+            }
+        
+            @Override
+            public x_listclass tail() {
+              return tail;
+            }
+            
+            @Override
+            public x_elemclass get(int idx) {
+              if (idx == 0) {
+                return elem;
+              } else {
+                return tail.get(idx - 1);
+              }
+            }
+            
+            @Override
+            public x_listclass drop(int numElems) {
+              if(numElems == 0) {
+                return this;
+              }else {
+                return tail.drop(numElems - 1);
+              }
+            }
+          }
+        
+          public static final class x_nilclass extends x_listclass {
+        
+            private x_nilclass() {
+              super(null);
+            }
+        
+            @Override
+            public x_elemclass elem() {
+              throw new IllegalStateException("No elem in a Nil"); // TODO: maybe throw PremiseFailure
+            }
+        
+            public x_nilclass tail() {
+              throw new IllegalStateException("No tail of a Nil"); // TODO: maybe throw PremiseFailure
+            }
+        
+            @Override
+            public int size() {
+              return 0;
+            }
+        
+            @Override
+            public x_listclass reverse() {
+              return this;
+            }
+            
+            public x_listclass drop(int idx) {
+              if(idx == 0) return this;
+              throw new IllegalStateException("Nothing to drop from a Nil");
+            }
+            
+            @Override
+            public x_elemclass get(int idx) {
+              throw new IllegalStateException("No elems in a Nil");
+            }
+          }
+          
+          ~mcreate0*
+        
+        }
+      ]|
+    where
+      x_listclass := <jclass-term> s;
+      x_consclass := <jclass-term-list-cons> s;
+      x_nilclass := <jclass-term-list-nil> s;
+      x_elemclass := <jclass-term; jclass-box> es;
+      if <is-value-sort> es
+      then
+        mcreate0* := class-body-dec* |[
+            @TruffleBoundary
+            public static x_listclass create(IStrategoTerm term) {
+              throw new IllegalStateException("Lists of value terms cannot be created from Stratego terms");
+            }
+        ]|
+      else
+        e_elemcreate := <ds-to-interp-sorts-to-create-arg> (e |[ l.getSubterm(final_idx) ]|, es);
+        mcreate0* := class-body-dec* |[
+            @TruffleBoundary
+            public static x_listclass create(IStrategoTerm term) {
+              CompilerAsserts.neverPartOfCompilation();
+              assert term != null;
+              assert Tools.isTermList(term);
+              
+              IStrategoList l = (IStrategoList) term;
+              x_listclass res = EMPTY;
+              for(int idx = l.size() - 1; idx >= 0; idx--) {
+                final int final_idx = idx;
+                res = new x_consclass(e_elemcreate, res, l);
+              }
+              return res;
+            }
+        ]|
+      end
+
+rules // creation from aterms
+
+  ds-to-interp-sorts-to-create-arg:
+    (e_term, ls@ListSort(_)) -> e |[ ~x:<jclass-term> ls.create(e_term) ]|
+

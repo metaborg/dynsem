@@ -7,7 +7,6 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_ds.PersistentMap;
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -32,7 +31,6 @@ public abstract class MapUnbindBuild extends TermBuild {
 
 	@Specialization
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@TruffleBoundary
 	public PersistentMap<?, ?> doEvaluated(PersistentMap map, Object key) {
 		return MapUtils.remove(map, key);
 	}

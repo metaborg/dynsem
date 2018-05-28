@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuildCacheOptionNode;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -9,24 +8,20 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-// TODO experiment with dissolving this node into its parent
-public class RelationPremiseInputBuilder extends TermBuild {
+public abstract class RelationPremiseInputBuilder extends TermBuild {
 
 	@Child protected TermBuild termNode;
 	@Children protected final TermBuild[] componentNodes;
 
 	public RelationPremiseInputBuilder(TermBuild termNode, TermBuild[] componentNodes, SourceSection source) {
 		super(source);
-		this.termNode = new TermBuildCacheOptionNode(termNode);
-		TermBuild[] actualSubTermNodes = new TermBuild[componentNodes.length];
-		for (int i = 0; i < actualSubTermNodes.length; i++) {
-			actualSubTermNodes[i] = new TermBuildCacheOptionNode(componentNodes[i]);
-		}
+		this.termNode = termNode;
 		this.componentNodes = componentNodes;
 	}
 
@@ -41,10 +36,13 @@ public class RelationPremiseInputBuilder extends TermBuild {
 			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
 		}
 
-		return new RelationPremiseInputBuilder(lhsNode, rwNodes, SourceUtils.dynsemSourceSectionFromATerm(source));
+		return RelationPremiseInputBuilderNodeGen.create(lhsNode, rwNodes,
+				SourceUtils.dynsemSourceSectionFromATerm(source));
 	}
 
+	@Override
 	@ExplodeLoop
+	@Specialization
 	public Object[] executeObjectArray(VirtualFrame frame) {
 		Object term = termNode.executeGeneric(frame);
 
@@ -54,15 +52,10 @@ public class RelationPremiseInputBuilder extends TermBuild {
 		CompilerAsserts.compilationConstant(componentNodes.length);
 
 		for (int i = 0; i < componentNodes.length; i++) {
-			InterpreterUtils.setComponent(getContext(), args, i + 1, componentNodes[i].executeGeneric(frame));
+			InterpreterUtils.setComponent(getContext(), args, i + 1, componentNodes[i].executeGeneric(frame), this);
 		}
 
 		return args;
-	}
-
-	@Override
-	public Object[] executeGeneric(VirtualFrame frame) {
-		return executeObjectArray(frame);
 	}
 
 }
