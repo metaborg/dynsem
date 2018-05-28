@@ -27,6 +27,7 @@ signature
     EnableSafeComponents : DSOpt
     EnableTermCaching : DSOpt
     EnableDebug : DSOpt
+    EnableNativeFrames: DSOpt
     MavenGroupId : DSOpt
     MavenArtifactId : DSOpt
     JavaGenDirRel : DSOpt
@@ -97,6 +98,7 @@ rules
       (EnableSafeComponents(), do-safe-components),
       (EnableTermCaching(), do-term-caching),
       (EnableDebug(), do-debug),
+      (EnableNativeFrames(), do-native-frames),
       (MavenGroupId(), genproject-groupid),
       (MavenArtifactId(), genproject-artifactid),
       (JavaGenDirRel(), java-gendir-rel),
@@ -145,6 +147,7 @@ rules
       do-enable-backtracking := <read-property(|"interpreter.fullbacktracking", "false")> prop-file;
       do-safe-components := <read-property(|"interpreter.safecomponents", "false")> prop-file;
       do-term-caching := <read-property(|"interpreter.termcaching", "false")> prop-file;
+      do-native-frames := <read-property(|"interpreter.nativeframes", "false")> prop-file;
       do-debug := <read-property(|"interpreter.debug", "false")> prop-file;
       genproject-groupid := <ds-to-interp-read-prop-required(|"project.groupid")> prop-file;
       genproject-artifactid := <ds-to-interp-read-prop-required(|"project.artifactid")> prop-file;

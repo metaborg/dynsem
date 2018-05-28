@@ -47,6 +47,7 @@ public final class DynSemContext {
 	public static final String CONFIG_TERMTRANSFORMER = "TERMTRANSFORM";
 	public static final String CONFIG_RULEREG = "RULEREG";
 	public static final String CONFIG_MIMETYPE = "MIMETYPEOBJLANG";
+	public static final String CONFIG_NATIVEFRAMES = "NATIVEFRAMES";
 
 	private final InputStream specification;
 
@@ -67,22 +68,22 @@ public final class DynSemContext {
 	private final boolean safecomponents;
 	private final boolean caching;
 	private final boolean debug;
+	private final boolean nativeframes;
 
 	public DynSemContext(Map<String, Object> config) {
-		// TODO: there must be a smell here...
 		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermTransformer) config.get(CONFIG_TERMTRANSFORMER),
 				(ITermRegistry) config.get(CONFIG_TERMREGISTRY), (RuleRegistry) config.get(CONFIG_RULEREG),
 				(InputStream) config.get(CONFIG_STDIN), (PrintStream) config.get(CONFIG_STDOUT),
 				(PrintStream) config.get(CONFIG_STDERR), (InputStream) config.get(CONFIG_DSSPEC),
 				(String) config.get(CONFIG_MIMETYPE), (boolean) config.get(CONFIG_BACKTRACK),
 				(boolean) config.get(CONFIG_SAFECOMPS), (boolean) config.get(CONFIG_TERMCACHE),
-				(boolean) config.get(CONFIG_DEBUG), config);
+				(boolean) config.get(CONFIG_DEBUG), (boolean) config.get(CONFIG_NATIVEFRAMES), config);
 	}
 
 	private DynSemContext(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry,
 			RuleRegistry ruleRegistry, InputStream input, PrintStream output, PrintStream err,
 			InputStream specification, String mimetype_lang, boolean backtracking, boolean safecomponents,
-			boolean caching, boolean debug, Map<String, Object> config) {
+			boolean caching, boolean debug, boolean nativeframes, Map<String, Object> config) {
 		this.parser = parser;
 		this.termTransformer = transformer;
 		this.termRegistry = termRegistry;
@@ -95,6 +96,7 @@ public final class DynSemContext {
 		this.safecomponents = safecomponents;
 		this.caching = caching;
 		this.debug = debug;
+		this.nativeframes = nativeframes;
 		this.properties = new HashMap<>();
 	}
 
@@ -248,13 +250,16 @@ public final class DynSemContext {
 		return (DynamicObject) protoFrames.get(ident);
 	}
 
-
 	public boolean isSafeComponentsEnabled() {
 		return safecomponents;
 	}
 
 	public boolean isTermCachingEnabled() {
 		return caching;
+	}
+
+	public boolean isNativeFramesEnabled() {
+		return nativeframes;
 	}
 
 	public boolean isDEBUG() {

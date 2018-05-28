@@ -29,8 +29,10 @@ public class InitEvalNode extends DynSemRootNode {
 
 	@Override
 	public Object execute(VirtualFrame frame) {
-		initNabl2.execute(frame);
-		initProtoFrames.execute(frame);
+		if (getContext().isNativeFramesEnabled()) {
+			initNabl2.execute(frame);
+			initProtoFrames.execute(frame);
+		}
 		return initDispatch.execute(program.getClass(), new Object[] { program });
 	}
 

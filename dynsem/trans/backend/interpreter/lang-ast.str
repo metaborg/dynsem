@@ -34,7 +34,7 @@ rules
       ds-to-interp-language-entrypoint; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
       ds-to-interp-language-coreentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
       ds-to-interp-language-daemonentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
-      ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
+//      ds-to-interp-language-benchmarkentry; MkSingleton; ds-to-interp-write-classes(|<get-opt> TopPkg());
       ds-to-interp-gen-test-harness
     )
 
