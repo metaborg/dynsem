@@ -27,9 +27,10 @@ rules
         import ~x:<get-opt> TopPkg().TypesGen;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import com.oracle.truffle.api.CompilerAsserts;
-        import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         import org.apache.commons.lang3.builder.HashCodeBuilder;
+        import com.oracle.truffle.api.CompilerDirectives;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+        import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
         
         public final class x_classname extends ~x:<jclass-term> s {
 
@@ -75,9 +76,21 @@ rules
             return sb.toString();
           }
           
+          @CompilationFinal private boolean hashCodeComputed;
+          @CompilationFinal private int hashcode;
+          
           @Override
-          @TruffleBoundary
           public int hashCode() {
+            if(!hashCodeComputed) {
+              CompilerDirectives.transferToInterpreterAndInvalidate();
+              hashcode = makeHashCode();
+              hashCodeComputed = true;
+            }
+            return hashcode;
+          }
+
+          @TruffleBoundary
+          private int makeHashCode() {
             return e_hash.toHashCode();
           }
           
