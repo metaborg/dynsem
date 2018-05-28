@@ -67,10 +67,20 @@ context-free syntax // rules
       [{Premise ";\n"}*]
   ]
   
+  Case.CasePattern = [
+    [Term] =>
+      [{Premise ";\n"}*]
+  ] {deprecated("Use PAT -> PREM instead")}
+  
   Case.CaseOtherwise = [
     otherwise ->
       [{Premise ";\n"}*]
   ]
+
+  Case.CaseOtherwise = [
+    otherwise =>
+      [{Premise ";\n"}*]
+  ] {deprecated("Use PAT -> PREM instead")}
   
   ID = <_> {reject}
   ID = <imports> {reject}
