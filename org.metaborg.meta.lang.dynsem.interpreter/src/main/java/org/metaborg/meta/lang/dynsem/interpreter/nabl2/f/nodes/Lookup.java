@@ -55,8 +55,4 @@ public abstract class Lookup extends NativeOpBuild {
 		return ((Path) p).getCallTarget();
 	}
 
-	public static Lookup create(SourceSection source, TermBuild frm, TermBuild occurrence) {
-		return LookupNodeGen.create(source, frm, occurrence);
-	}
-
 }

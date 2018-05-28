@@ -59,9 +59,4 @@ public abstract class CloneFrame extends NativeOpBuild {
 		return locations;
 	}
 
-
-	public static CloneFrame create(SourceSection source, TermBuild frm) {
-		return CloneFrameNodeGen.create(source, frm);
-	}
-
 }

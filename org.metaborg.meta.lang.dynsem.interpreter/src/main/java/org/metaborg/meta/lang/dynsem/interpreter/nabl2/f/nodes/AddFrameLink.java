@@ -76,8 +76,4 @@ public abstract class AddFrameLink extends NativeOpBuild {
 		return property.getLocation();
 	}
 
-	public static AddFrameLink create(SourceSection source, TermBuild frm, TermBuild link) {
-		return AddFrameLinkNodeGen.create(source, frm, link);
-	}
-
 }

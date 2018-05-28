@@ -54,7 +54,4 @@ public abstract class SetAtAddr extends NativeOpBuild {
 	// return addr.location().canSet(val);
 	// }
 
-	public static SetAtAddr create(SourceSection source, TermBuild addr, TermBuild val) {
-		return SetAtAddrNodeGen.create(source, addr, val);
-	}
 }

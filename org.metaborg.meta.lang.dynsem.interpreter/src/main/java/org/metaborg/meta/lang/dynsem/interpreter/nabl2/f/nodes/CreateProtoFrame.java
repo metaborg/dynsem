@@ -30,7 +30,7 @@ public class CreateProtoFrame extends DynSemNode {
 
 	public CreateProtoFrame(SourceSection source) {
 		super(source);
-		this.defaultValueNode = DefaultValueNodeGen.create(source);
+		this.defaultValueNode = FrameNodeFactories.createDefaultValue(source);
 	}
 
 	public DynamicObject execute(VirtualFrame frame, DynamicObject scopeEntry) {

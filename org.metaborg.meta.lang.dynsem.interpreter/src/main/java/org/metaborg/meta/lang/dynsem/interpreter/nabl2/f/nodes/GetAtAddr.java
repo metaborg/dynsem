@@ -33,8 +33,4 @@ public abstract class GetAtAddr extends NativeOpBuild {
 	public Object executeArrayGet(ArrayAddr addr) {
 		return addr.arr().get(addr.idx());
 	}
-
-	public static GetAtAddr create(SourceSection source, TermBuild addr) {
-		return GetAtAddrNodeGen.create(source, addr);
-	}
 }

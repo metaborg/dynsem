@@ -18,7 +18,7 @@ public class InitProtoFrames extends DynSemNode {
 
 	public InitProtoFrames(SourceSection source) {
 		super(source);
-		this.initProtoFrame = InitProtoFrameNodeGen.create(source);
+		this.initProtoFrame = FrameNodeFactories.createInitProtoFrame(source);
 	}
 
 	public void execute(VirtualFrame frame) {

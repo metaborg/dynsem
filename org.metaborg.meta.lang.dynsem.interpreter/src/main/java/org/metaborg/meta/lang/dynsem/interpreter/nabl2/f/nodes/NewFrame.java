@@ -66,8 +66,4 @@ public abstract class NewFrame extends NativeOpBuild {
 	// return getContext().getProtoFrame(scopeident);
 	// }
 
-	public static NewFrame create(SourceSection source, TermBuild scope, TermBuild links) {
-		return NewFrameNodeGen.create(source, scope, links);
-	}
-
 }
