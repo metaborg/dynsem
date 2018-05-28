@@ -69,7 +69,7 @@ public abstract class CreateScope extends NativeOpBuild {
 
 		IListTerm<?> decTypesHead = decTypes;
 		for (Occurrence dec : decs) {
-			types.define(dec, decTypesHead.head());
+			types.define(dec, decTypesHead.elem());
 			decTypesHead = decTypesHead.tail();
 		}
 

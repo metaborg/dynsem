@@ -20,6 +20,8 @@ rules
       compilation-unit |[
         package ~x:<get-opt> TermPkg();
         
+        import java.util.Iterator;
+        import org.metaborg.meta.lang.dynsem.interpreter.terms.ConsNilIterator;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
         import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -99,6 +101,11 @@ rules
               result = new x_consclass(elems[idx], result, sterm);
             }
             return result;
+          }
+          
+          @Override
+          public Iterator<x_elemclass> iterator() {
+            return new ConsNilIterator<x_elemclass>(this);
           }
           
           @Override

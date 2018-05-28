@@ -8,7 +8,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.terms;
  * @param <T>
  *            type of the elements in this list
  */
-public interface IListTerm<T> extends ITerm {
+public interface IListTerm<T> extends ITerm, Iterable<T> {
 
 	public T elem();
 
