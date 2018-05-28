@@ -13,18 +13,16 @@ public class ConsNilIterator<T> implements Iterator<T> {
 
 	@Override
 	public boolean hasNext() {
-		return current.elem() != null;
+		return current.size() > 0;
 	}
 
 	@Override
 	public T next() {
-		if (current.elem() == null) {
+		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
-
-		current = current.tail();
-
 		T elem = current.elem();
+		current = current.tail();
 		return elem;
 	}
 

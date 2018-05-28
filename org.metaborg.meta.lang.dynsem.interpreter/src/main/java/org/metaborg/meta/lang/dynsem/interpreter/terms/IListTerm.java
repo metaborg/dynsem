@@ -26,6 +26,9 @@ public interface IListTerm<T> extends ITerm, Iterable<T> {
 
 	public IListTerm<T> drop(int numElems);
 
+	@Override
+	public int size();
+
 	// /**
 	// * @return the n-th element of this list, or <code>null</code> if the list is too short.
 	// */
