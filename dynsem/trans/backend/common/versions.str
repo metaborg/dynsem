@@ -3,7 +3,11 @@ module backend/common/versions
 
 strategies
 
-  ver-maven-compiler-plugin = !"1.8"
+  ver-source-java-version = !"1.8"
+
+  ver-target-java-version = !"1.8"
+
+  ver-maven-compiler-plugin = !"3.7.0"
   
   ver-maven-clean-plugin = !"3.0.0"
   
