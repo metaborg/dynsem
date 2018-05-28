@@ -43,7 +43,7 @@ rules
           
           public static TermBuild create(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode) {
             
-            assert elemNodes != null && elemNodes.length > 0;
+            assert elemNodes != null;
             TermBuild tail = tailNode != null ? tailNode : x_nilbuilderng.create(source);
             for(int idx = elemNodes.length -1; idx >= 0; idx--) {
               tail = x_consbuilderng.create(source, ~e:<ds-to-interp-termbuild-access(|"elemNodes")> ("idx", es), tail);
