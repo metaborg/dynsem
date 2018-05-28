@@ -12,19 +12,14 @@ import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "namespace", type = TermBuild.class),
 		@NodeChild(value = "name", type = TermBuild.class), @NodeChild(value = "termindex", type = TermBuild.class) })
-public abstract class MakeOccurrence_3 extends NativeOpBuild {
+public abstract class MakeOccurrence extends NativeOpBuild {
 
-	public MakeOccurrence_3(SourceSection source) {
+	public MakeOccurrence(SourceSection source) {
 		super(source);
 	}
 
 	@Specialization
 	public Occurrence execBuild(String namespace, String name, TermIndex index) {
 		return new Occurrence(namespace, name, index);
-	}
-
-	public static MakeOccurrence_3 create(SourceSection source, TermBuild namespace, TermBuild name,
-			TermBuild termindex) {
-		return MakeOccurrence_3NodeGen.create(source, namespace, name, termindex);
 	}
 }

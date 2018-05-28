@@ -22,8 +22,4 @@ public abstract class mkScopeIdentifier extends NativeOpBuild {
 		return new ScopeIdentifier(resource, name);
 	}
 
-	public static NativeOpBuild create(SourceSection source, TermBuild resource, TermBuild name) {
-		return mkScopeIdentifierNodeGen.create(source, resource, name);
-	}
-
 }

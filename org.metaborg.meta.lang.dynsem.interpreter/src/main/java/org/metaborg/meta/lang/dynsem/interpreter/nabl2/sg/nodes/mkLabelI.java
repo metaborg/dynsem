@@ -17,8 +17,4 @@ public abstract class mkLabelI extends NativeOpBuild {
 		return Label.I;
 	}
 
-	public static NativeOpBuild create(SourceSection source) {
-		return mkLabelINodeGen.create(source);
-	}
-
 }

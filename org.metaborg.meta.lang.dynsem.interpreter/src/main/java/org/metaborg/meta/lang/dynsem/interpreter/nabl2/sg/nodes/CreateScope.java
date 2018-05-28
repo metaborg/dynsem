@@ -113,10 +113,4 @@ public abstract class CreateScope extends NativeOpBuild {
 		DynamicObject edges = edgesShape.createFactory().newInstance((Object[]) edgeScopes);
 		return edges;
 	}
-
-	public static CreateScope create(SourceSection source, TermBuild scopeIdent, TermBuild decs, TermBuild decTypes,
-			TermBuild refs,
-			TermBuild edges, TermBuild imports) {
-		return CreateScopeNodeGen.create(source, scopeIdent, decs, decTypes, refs, edges, imports);
-	}
 }

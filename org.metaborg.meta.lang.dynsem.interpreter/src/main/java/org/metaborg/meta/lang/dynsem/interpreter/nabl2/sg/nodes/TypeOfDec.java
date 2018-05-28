@@ -27,9 +27,4 @@ public abstract class TypeOfDec extends NativeOpBuild {
 	public Object getTypeUncached(Occurrence dec) {
 		return NaBL2LayoutImpl.INSTANCE.getTypes(getContext().getNaBL2Solution()).get(dec);
 	}
-
-
-	public static TypeOfDec create(SourceSection source, TermBuild dec) {
-		return TypeOfDecNodeGen.create(source, dec);
-	}
 }

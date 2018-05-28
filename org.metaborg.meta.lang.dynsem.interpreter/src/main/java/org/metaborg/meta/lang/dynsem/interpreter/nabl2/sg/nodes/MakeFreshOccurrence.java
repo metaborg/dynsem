@@ -15,11 +15,11 @@ import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "namespace", type = TermBuild.class),
 		@NodeChild(value = "name", type = TermBuild.class) })
-public abstract class MakeOccurrence_2 extends NativeOpBuild {
+public abstract class MakeFreshOccurrence extends NativeOpBuild {
 
 	@Child private Fresh freshGen;
 
-	public MakeOccurrence_2(SourceSection source) {
+	public MakeFreshOccurrence(SourceSection source) {
 		super(source);
 		this.freshGen = FreshNodeGen.create(source);
 	}
@@ -27,10 +27,6 @@ public abstract class MakeOccurrence_2 extends NativeOpBuild {
 	@Specialization
 	public Occurrence execBuild(VirtualFrame frame, String namespace, String name) {
 		return new Occurrence(namespace, name, new TermIndex("<phantom>", freshGen.executeInteger(frame)));
-	}
-
-	public static NativeOpBuild create(SourceSection source, TermBuild namespace, TermBuild name) {
-		return MakeOccurrence_2NodeGen.create(source, namespace, name);
 	}
 
 }

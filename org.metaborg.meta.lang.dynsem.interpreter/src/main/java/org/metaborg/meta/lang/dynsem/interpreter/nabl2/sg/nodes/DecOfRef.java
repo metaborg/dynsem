@@ -30,8 +30,4 @@ public abstract class DecOfRef extends NativeOpBuild {
 				.getTargetDec();
 	}
 
-	public static DecOfRef create(SourceSection source, TermBuild ref) {
-		return DecOfRefNodeGen.create(source, ref);
-	}
-
 }
