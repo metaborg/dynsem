@@ -21,8 +21,7 @@ rules
        
         import ~x:<get-opt> TermPkg().*;
         import ~x:<get-opt> TermPkg().x_listclass.*;
-        import org.metaborg.lang.tiger.interpreter.generated.terms.match.x_listmatchclassfactory.*;
-        import org.metaborg.lang.tiger.interpreter.generated.terms.match.List_Dec_MFactory.Nil_Dec_MNodeGen;
+        import ~x:<get-opt> MatchPkg().x_listmatchclassfactory.*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
         
