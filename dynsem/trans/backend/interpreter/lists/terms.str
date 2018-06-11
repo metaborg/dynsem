@@ -80,6 +80,15 @@ rules
             }
             return head;
           }
+  
+          public static final x_listclass fromArray(x_elemclass[] elems) {
+            x_listclass tail = new x_nilclass();
+            for(int idx = elems.length - 1; idx >= 0; idx++) {
+              tail = new x_consclass(elems[idx], tail, null);
+            }
+            
+            return tail;
+          }
 
           @Override
           public x_elemclass[] toArray() {
