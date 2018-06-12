@@ -21,6 +21,7 @@ rules
   desugar-for-interpreter =
     explicate-arrow-types-noanalysis
     ; add-rulekind-flags-module
+    ; clone-list-rules-module
     ; loops-rewrite-natives-module
     ; abr-rewrite-natives-module
     ; desugar-semantic-components
@@ -75,13 +76,24 @@ rules
     Cast(_, MapSort(_, _)) -> (MapKind(), "MAP REDUCTION NOT SUPPORTED")
   
   get-relation-kind-class:
-    Cast(_, srt@ListSort(_)) -> (ListKind(), <jclass-term-qual> srt)
+    Cast(_, srt@ListSort(_)) -> (ListKind(), [<jclass-term-list-nil-qual> srt, <jclass-term-list-cons-qual> srt])
   
   get-relation-kind-class:
     Cast(_, srt@TupleSort(_)) -> (TupleKind(), <jclass-term-qual> srt)
 
-//  qualify-term-class:
-//    class -> $[[<get-opt> TermPkg()].[class]]
+rules /* clone list rules */
+
+  clone-list-rules-module = oncetd(Rules(map(clone-list-rule); concat))
+  
+  clone-list-rule:
+    Rule(p*, infer, relation, ListKind(), [nil-dispatch, cons-dispatch]) -> [
+      Rule(p*, infer, relation, ListKind(), nil-dispatch),
+      Rule(p*, infer, relation, ListKind(), cons-dispatch)
+    ]
+  
+  clone-list-rule:
+    r@Rule(_, _, _, kind, _) -> [r]
+    where <not(?ListKind())> kind
 
 rules /* rename arguments */
 
