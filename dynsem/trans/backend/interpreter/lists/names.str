@@ -19,6 +19,12 @@ strategies // classes for sorts
   
   jclass-term-list-cons:
     ListSort(s) -> $[Cons_[<jclass-term; shorten-uniqueify-string> s]]
+
+  jclass-term-list-nil-qual:
+    ss@ListSort(_) -> $[[<get-opt> TermPkg()].[<jclass-list> ss]$[<jclass-term-list-nil> ss]]
+  
+  jclass-term-list-cons-qual:
+    ss@ListSort(_) -> $[[<get-opt> TermPkg()].[<jclass-list> ss]$[<jclass-term-list-cons> ss]]
   
   jclass-term-qual-api = jclass-list-qual 
    
