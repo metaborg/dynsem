@@ -92,7 +92,7 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 		final int args_skip = args.length - numRwComponents;
 
 		for (int i = numRwComponents - 1; i >= 0; i--) {
-			args[args_skip + numRwComponents - 1] = resultRwComponents[i];
+			args[args_skip + numRwComponents + i - 2] = resultRwComponents[i];
 		}
 
 		return TypesGen.asBoolean(conditionResult.result);
@@ -109,7 +109,7 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 		final int args_skip = args.length - numRwComponents;
 
 		for (int i = numRwComponents - 1; i >= 0; i--) {
-			args[args_skip + numRwComponents - 1] = resultRwComponents[i];
+			args[args_skip + numRwComponents + i - 2] = resultRwComponents[i];
 		}
 
 		frame.setObject(resultTSlot, bodyResult.result);
