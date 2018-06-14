@@ -35,7 +35,7 @@ public final class NaBL2SolutionUtils {
 	@TruffleBoundary
 	public static IStrategoTerm getAstProperty(NaBL2Context nabl2Context, IStrategoTerm sterm, ITerm key) {
 		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
-		TermIndex index = getTermIndex(nabl2Context, sterm);
+		TermIndex index = getTermIndex(sterm);
 		Optional<ITerm> val = nabl2Context.getSolution().astProperties().getValue(index, key);
 		if (!val.isPresent()) {
 			throw new IllegalArgumentException("Node has no " + key + " parameter");
@@ -44,7 +44,7 @@ public final class NaBL2SolutionUtils {
 	}
 
 	@TruffleBoundary
-	public static TermIndex getTermIndex(NaBL2Context nabl2Context, IStrategoTerm sterm) {
+	public static TermIndex getTermIndex(IStrategoTerm sterm) {
 		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		if (sterm == null) {
 			throw new IllegalArgumentException("Primitive must be called on an AST node.");
