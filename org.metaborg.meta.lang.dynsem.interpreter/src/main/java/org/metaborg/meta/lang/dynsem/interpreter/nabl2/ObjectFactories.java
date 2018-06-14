@@ -195,7 +195,7 @@ public class ObjectFactories {
 			importsShape = importsShape.addProperty(
 					Property.create(importLabel, importAllocator.locationForType(Occurrence[].class,
 							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
-			IStrategoList occListT = Tools.listAt(importsTerm, 1);
+			IStrategoList occListT = Tools.listAt(importTerm, 1);
 			Occurrence[] occs = new Occurrence[occListT.size()];
 			for (int j = 0; j < occs.length; j++) {
 				occs[j] = Occurrence.create(Tools.applAt(occListT, j));
