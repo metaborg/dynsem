@@ -58,4 +58,9 @@ public final class FrameNodeFactories {
 		return AddFrameLinkNodeGen.create(source, frm, link);
 	}
 
+	public static NewFrameFromTermScope createNewFrameFromTermScope(SourceSection source, TermBuild ast,
+			TermBuild links) {
+		return NewFrameFromTermScopeNodeGen.create(source, ast, links);
+	}
+
 }
