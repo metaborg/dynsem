@@ -13,7 +13,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImp
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayout;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.terms.shared.ValSort;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.object.DynamicObject;
@@ -50,7 +49,7 @@ public class CreateProtoFrame extends DynSemNode {
 		for (int i = 0; i < decs.length; i++) {
 			Occurrence dec = decs[i];
 			decPropVals[i] = defaultValueNode.execute(frame, types.get(dec));
-			Property prop = Property.create(dec, allocator.locationForType(ValSort.class), 0);
+			Property prop = Property.create(dec, allocator.locationForType(Object.class), 0);
 			protoShape = protoShape.addProperty(prop);
 			decProps[i] = prop;
 		}
