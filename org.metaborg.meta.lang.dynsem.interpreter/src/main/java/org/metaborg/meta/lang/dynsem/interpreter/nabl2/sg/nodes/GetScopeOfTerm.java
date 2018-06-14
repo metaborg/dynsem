@@ -47,4 +47,8 @@ public abstract class GetScopeOfTerm extends NativeOpBuild {
 				t.getStrategoTerm(), AstProperties.key("bodyScope"));
 		return ScopeIdentifier.create(scopeIdentT);
 	}
+
+	public static GetScopeOfTerm create(SourceSection source, TermBuild t) {
+		return ScopeNodeFactories.createScopeOfTerm(source, t);
+	}
 }

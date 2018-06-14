@@ -23,4 +23,8 @@ public abstract class ScopeOfFrame extends NativeOpBuild {
 		return FrameLayoutImpl.INSTANCE.getScope(frm);
 	}
 
+	public static ScopeOfFrame create(SourceSection source, TermBuild frm) {
+		return FrameNodeFactories.createScopeOfFrame(source, frm);
+	}
+
 }

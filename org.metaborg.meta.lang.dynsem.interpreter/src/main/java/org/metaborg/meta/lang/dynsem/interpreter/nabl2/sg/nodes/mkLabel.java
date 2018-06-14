@@ -21,4 +21,8 @@ public abstract class mkLabel extends NativeOpBuild {
 		throw new IllegalStateException("Custom label is not supported: " + l);
 	}
 
+	public static mkLabel create(SourceSection source, TermBuild labelstring) {
+		return ScopeNodeFactories.createMkLabel(source, labelstring);
+	}
+
 }

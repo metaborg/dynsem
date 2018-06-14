@@ -20,4 +20,8 @@ public abstract class NewArray extends NativeOpBuild {
 	public Array executeNewArray(int len, Object val) {
 		return new Array(len, val);
 	}
+
+	public static NewArray create(SourceSection source, TermBuild len, TermBuild val) {
+		return ArrayNodeFactories.createNewArray(source, len, val);
+	}
 }

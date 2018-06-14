@@ -41,4 +41,7 @@ public abstract class DefaultValue extends DynSemNode {
 				.apply(getSourceSection(), new TermBuild[] { null });
 	}
 
+	public static DefaultValue create(SourceSection source) {
+		return FrameNodeFactories.createDefaultValue(source);
+	}
 }

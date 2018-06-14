@@ -59,4 +59,8 @@ public abstract class NewFrameAddr extends NativeOpBuild {
 		return property.getLocation();
 	}
 
+	public static NewFrameAddr create(SourceSection source, TermBuild frm, TermBuild dec) {
+		return FrameNodeFactories.createNewFrameAddr(source, frm, dec);
+	}
+
 }

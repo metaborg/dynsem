@@ -34,4 +34,8 @@ public abstract class InitProtoFrame extends DynSemNode {
 		return ScopeEntryLayoutImpl.INSTANCE.isScopeEntry(scopeEntry);
 	}
 
+	public static InitProtoFrame create(SourceSection source) {
+		return FrameNodeFactories.createInitProtoFrame(source);
+	}
+
 }

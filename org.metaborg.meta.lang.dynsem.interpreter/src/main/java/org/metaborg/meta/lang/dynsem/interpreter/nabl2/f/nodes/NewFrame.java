@@ -11,6 +11,7 @@ import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.object.DynamicObject;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -68,5 +69,9 @@ public abstract class NewFrame extends NativeOpBuild {
 	// CompilerAsserts.neverPartOfCompilation();
 	// return getContext().getProtoFrame(scopeident);
 	// }
+
+	public static NewFrame create(SourceSection source, TermBuild t, TermBuild links) {
+		return FrameNodeFactories.createNewFrame(source, t, links);
+	}
 
 }

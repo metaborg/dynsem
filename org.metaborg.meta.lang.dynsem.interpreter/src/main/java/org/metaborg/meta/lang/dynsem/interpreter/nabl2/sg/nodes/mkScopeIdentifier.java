@@ -22,4 +22,8 @@ public abstract class mkScopeIdentifier extends NativeOpBuild {
 		return new ScopeIdentifier(resource, name);
 	}
 
+	public static mkScopeIdentifier create(SourceSection source, TermBuild resource, TermBuild name) {
+		return ScopeNodeFactories.createMkScopeIdentifier(source, resource, name);
+	}
+
 }

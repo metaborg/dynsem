@@ -29,4 +29,8 @@ public abstract class MakeFreshOccurrence extends NativeOpBuild {
 		return new Occurrence(namespace, name, new TermIndex("<phantom>", freshGen.executeInteger(frame)));
 	}
 
+	public static MakeFreshOccurrence create(SourceSection source, TermBuild namespace, TermBuild name) {
+		return ScopeNodeFactories.createMakeFreshOccurrence(source, namespace, name);
+	}
+
 }

@@ -23,4 +23,8 @@ public abstract class GetTopLevelTermIndex extends NativeOpBuild {
 
 		return new TermIndex(termIndex.getResource(), 0);
 	}
+
+	public static GetTopLevelTermIndex create(SourceSection source, TermBuild term) {
+		return ScopeNodeFactories.createGetTopLevelTermIndex(source, term);
+	}
 }

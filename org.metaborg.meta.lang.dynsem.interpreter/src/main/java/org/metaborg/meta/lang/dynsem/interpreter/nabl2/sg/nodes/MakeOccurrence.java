@@ -22,4 +22,9 @@ public abstract class MakeOccurrence extends NativeOpBuild {
 	public Occurrence execBuild(String namespace, String name, TermIndex index) {
 		return new Occurrence(namespace, name, index);
 	}
+
+	public static MakeOccurrence create(SourceSection source, TermBuild namespace, TermBuild name,
+			TermBuild termindex) {
+		return ScopeNodeFactories.createMakeOccurrence(source, namespace, name, termindex);
+	}
 }

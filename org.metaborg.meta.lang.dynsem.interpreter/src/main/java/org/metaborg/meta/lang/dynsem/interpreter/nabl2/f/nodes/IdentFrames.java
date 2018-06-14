@@ -23,4 +23,8 @@ public abstract class IdentFrames extends NativeOpBuild {
 		return (frm1 == frm2);
 	}
 
+	public static IdentFrames create(SourceSection source, TermBuild frm1, TermBuild frm2) {
+		return FrameNodeFactories.createIdentFrames(source, frm1, frm2);
+	}
+
 }

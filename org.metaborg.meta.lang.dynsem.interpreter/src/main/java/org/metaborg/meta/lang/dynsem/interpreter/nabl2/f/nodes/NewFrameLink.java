@@ -57,4 +57,8 @@ public abstract class NewFrameLink extends NativeOpBuild {
 		return frm.getShape();
 	}
 
+	public static NewFrameLink create(SourceSection source, TermBuild label, TermBuild frm) {
+		return FrameNodeFactories.createNewFrameLink(source, label, frm);
+	}
+
 }

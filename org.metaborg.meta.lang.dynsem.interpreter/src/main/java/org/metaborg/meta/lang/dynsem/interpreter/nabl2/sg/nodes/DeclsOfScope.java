@@ -56,4 +56,8 @@ public abstract class DeclsOfScope extends NativeOpBuild {
 		return listBuild.executeEvaluated(null, new Object[] { decs, null });
 	}
 
+	public static DeclsOfScope create(SourceSection source, TermBuild scope) {
+		return ScopeNodeFactories.createDeclsOfScope(source, scope);
+	}
+
 }
