@@ -22,6 +22,9 @@ public abstract class NewFrame extends NativeOpBuild {
 		super(source);
 	}
 
+	@Override
+	public abstract DynamicObject executeGeneric(VirtualFrame frame);
+
 	@Specialization(guards = { "scopeident == scopeident_cached" })
 	public DynamicObject executeCachedProto(ScopeIdentifier scopeident, Object links,
 			@Cached("lookupListClass()") Class<? extends IListTerm<FrameLink>> linksListClass,
