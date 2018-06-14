@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
 import com.oracle.truffle.api.source.SourceSection;
@@ -14,19 +13,19 @@ public final class ScopeNodeFactories {
 		return TypeOfDecNodeGen.create(source, dec);
 	}
 
-	public static NativeOpBuild createMkScopeIdentifier(SourceSection source, TermBuild resource, TermBuild name) {
+	public static mkScopeIdentifier createMkScopeIdentifier(SourceSection source, TermBuild resource, TermBuild name) {
 		return mkScopeIdentifierNodeGen.create(source, resource, name);
 	}
 
-	public static NativeOpBuild createMkLabelP(SourceSection source) {
+	public static mkLabelP createMkLabelP(SourceSection source) {
 		return mkLabelPNodeGen.create(source);
 	}
 
-	public static NativeOpBuild createMkLabelI(SourceSection source) {
+	public static mkLabelI createMkLabelI(SourceSection source) {
 		return mkLabelINodeGen.create(source);
 	}
 
-	public static NativeOpBuild createMkLabel(SourceSection source, TermBuild labelstring) {
+	public static mkLabel createMkLabel(SourceSection source, TermBuild labelstring) {
 		return mkLabelNodeGen.create(source, labelstring);
 	}
 
@@ -35,7 +34,8 @@ public final class ScopeNodeFactories {
 		return MakeOccurrenceNodeGen.create(source, namespace, name, termindex);
 	}
 
-	public static NativeOpBuild createMakeFreshOccurrence(SourceSection source, TermBuild namespace, TermBuild name) {
+	public static MakeFreshOccurrence createMakeFreshOccurrence(SourceSection source, TermBuild namespace,
+			TermBuild name) {
 		return MakeFreshOccurrenceNodeGen.create(source, namespace, name);
 	}
 
