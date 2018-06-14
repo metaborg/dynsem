@@ -22,6 +22,9 @@ public final class Occurrence {
 	}
 
 	public static Occurrence create(IStrategoTerm t) {
+		if (!Tools.isTermAppl(t)) {
+			throw new IllegalStateException();
+		}
 		assert Tools.isTermAppl(t);
 		IStrategoAppl occT = (IStrategoAppl) t;
 		assert Tools.hasConstructor(occT, "Occurrence", 3);
