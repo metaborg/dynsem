@@ -61,4 +61,8 @@ public final class ScopeNodeFactories {
 		return ScopeNodeFactories.createCreateScope(source, scopeIdent, decs, decTypes, refs, edges, imports);
 	}
 
+	public static AssocScopeOf createAssocScopeOf(SourceSection source, TermBuild occurrence, TermBuild label) {
+		return AssocScopeOfNodeGen.create(source, occurrence, label);
+	}
+
 }
