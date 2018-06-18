@@ -29,6 +29,19 @@ public final class Label {
 		}
 		throw new IllegalStateException("Unsupported label term: " + term);
 	}
+
+	@Override
+	public String toString() {
+		return l;
+	}
+
+	@Override
+	public int hashCode() {
+		return 37 * l.hashCode() + 9534;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return this == obj || (obj instanceof Label && ((Label) obj).l.equals(this.l));
+	}
 }
-
-
