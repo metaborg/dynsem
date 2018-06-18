@@ -3,7 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.lookup;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameAddr;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutUtil;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLinkIdentifier;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameEdgeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
@@ -20,7 +20,7 @@ import com.oracle.truffle.api.object.Shape;
 public abstract class E extends PathStep {
 
 	private final Label edgeLabel;
-	protected final FrameLinkIdentifier linkIdent;
+	protected final FrameEdgeIdentifier linkIdent;
 
 	@Child private PathStep next;
 
@@ -29,7 +29,7 @@ public abstract class E extends PathStep {
 		super(scopeIdent);
 		this.edgeLabel = edgeLabel;
 		this.next = next;
-		this.linkIdent = new FrameLinkIdentifier(edgeLabel, next.scopeIdent);
+		this.linkIdent = new FrameEdgeIdentifier(edgeLabel, next.scopeIdent);
 	}
 
 	@Override

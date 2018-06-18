@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes.GetScopeOfTermNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
 import com.oracle.truffle.api.source.SourceSection;
@@ -18,12 +17,22 @@ public final class FrameNodeFactories {
 		return ScopeOfFrameNodeGen.create(source, frm);
 	}
 
-	public static NewFrameLink createNewFrameLink(SourceSection source, TermBuild label, TermBuild frm) {
-		return NewFrameLinkNodeGen.create(source, label, frm);
+	public static NewFrameEdgeLink createNewFrameEdgeLink(SourceSection source, TermBuild label, TermBuild frm) {
+		return NewFrameEdgeLinkNodeGen.create(source, label, frm);
 	}
 
-	public static NewFrame createNewFrame(SourceSection source, TermBuild t, TermBuild links) {
-		return NewFrameNodeGen.create(source, GetScopeOfTermNodeGen.create(source, t), links);
+	public static NewFrameImportLink createNewFrameImportLink(SourceSection source, TermBuild label, TermBuild occ,
+			TermBuild frm) {
+		return NewFrameImportLinkNodeGen.create(source, label, occ, frm);
+	}
+
+	public static NewFrame createNewFrame(SourceSection source, TermBuild scope, TermBuild links) {
+		return NewFrameNodeGen.create(source, scope, links);
+	}
+
+	public static NewFrameFromTermScope createNewFrameFromTermScope(SourceSection source, TermBuild ast,
+			TermBuild links) {
+		return NewFrameFromTermScopeNodeGen.create(source, ast, links);
 	}
 
 	public static NewFrameAddr createNewFrameAddr(SourceSection source, TermBuild frm, TermBuild dec) {
@@ -58,9 +67,6 @@ public final class FrameNodeFactories {
 		return AddFrameLinkNodeGen.create(source, frm, link);
 	}
 
-	public static NewFrameFromTermScope createNewFrameFromTermScope(SourceSection source, TermBuild ast,
-			TermBuild links) {
-		return NewFrameFromTermScopeNodeGen.create(source, ast, links);
-	}
+
 
 }

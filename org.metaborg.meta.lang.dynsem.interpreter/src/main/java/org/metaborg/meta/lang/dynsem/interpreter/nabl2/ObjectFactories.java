@@ -124,7 +124,7 @@ public class ObjectFactories {
 
 	private static DynamicObject createDeclarationEntry(IStrategoAppl deTerm) {
 		assert Tools.hasConstructor(deTerm, "DE", 2);
-		ScopeIdentifier[] decs = createScopeIdentifiers(Tools.listAt(deTerm, 0));
+		ScopeIdentifier[] decScopes = createScopeIdentifiers(Tools.listAt(deTerm, 0));
 
 		IStrategoList edgesTerm = Tools.listAt(deTerm, 1);
 		Allocator edgeAllocator = ScopeEdges.SINGLETON.allocator();
@@ -144,8 +144,8 @@ public class ObjectFactories {
 			}
 			edgeScopes[i] = scopes;
 		}
-		DynamicObject edges = edgesShape.createFactory().newInstance((Object[]) edgeScopes);
-		return DeclEntryLayoutImpl.INSTANCE.createDeclEntry(decs, edges);
+		DynamicObject assocs = edgesShape.createFactory().newInstance((Object[]) edgeScopes);
+		return DeclEntryLayoutImpl.INSTANCE.createDeclEntry(decScopes, assocs);
 	}
 
 	private static DynamicObject createScopes(IStrategoList scopesTerm) {

@@ -1,8 +1,8 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameLink;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameEdgeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLinkIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -19,9 +19,9 @@ import com.oracle.truffle.api.source.SourceSection;
 @NodeChildren({ @NodeChild(value = "label", type = TermBuild.class),
 		@NodeChild(value = "frm", type = TermBuild.class) })
 // @ImportStatic(FrameLayoutImpl.class)
-public abstract class NewFrameLink extends NativeOpBuild {
+public abstract class NewFrameEdgeLink extends NativeOpBuild {
 
-	public NewFrameLink(SourceSection source) {
+	public NewFrameEdgeLink(SourceSection source) {
 		super(source);
 	}
 
@@ -33,22 +33,22 @@ public abstract class NewFrameLink extends NativeOpBuild {
 	@Specialization(guards = { "label == label_cached", "shapeCheck(frm_shape, frm)" })
 	public FrameLink createCached(Label label, DynamicObject frm, @Cached("label") Label label_cached,
 			@Cached("lookupShape(frm)") Shape frm_shape,
-			@Cached("createLinkIdentifier(label, frm)") FrameLinkIdentifier linkIdent) {
+			@Cached("createLinkIdentifier(label, frm)") FrameEdgeIdentifier linkIdent) {
 		return new FrameLink(label, frm, linkIdent);
 	}
 
 	@Specialization(replaces = "createCached")
 	public FrameLink createUncached(Label label, DynamicObject frm) {
-		return new FrameLink(label, frm);
+		return new FrameLink(label, frm, createLinkIdentifier(label, frm));
 	}
 
 	protected boolean shapeCheck(Shape shape, DynamicObject frm) {
 		return shape != null && shape.check(frm);
 	}
 
-	protected FrameLinkIdentifier createLinkIdentifier(Label label, DynamicObject frm) {
+	protected FrameEdgeIdentifier createLinkIdentifier(Label label, DynamicObject frm) {
 		CompilerAsserts.neverPartOfCompilation();
-		return new FrameLinkIdentifier(label, FrameLayoutImpl.INSTANCE.getScope(frm));
+		return new FrameEdgeIdentifier(label, FrameLayoutImpl.INSTANCE.getScope(frm));
 	}
 
 	protected Shape lookupShape(DynamicObject frm) {
@@ -57,8 +57,8 @@ public abstract class NewFrameLink extends NativeOpBuild {
 		return frm.getShape();
 	}
 
-	public static NewFrameLink create(SourceSection source, TermBuild label, TermBuild frm) {
-		return FrameNodeFactories.createNewFrameLink(source, label, frm);
+	public static NewFrameEdgeLink create(SourceSection source, TermBuild label, TermBuild frm) {
+		return FrameNodeFactories.createNewFrameEdgeLink(source, label, frm);
 	}
 
 }

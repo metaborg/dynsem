@@ -1,9 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.lookup;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameAddr;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameImportIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutUtil;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLinkIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
@@ -21,7 +21,7 @@ public abstract class N extends PathStep {
 
 	private final Label importLabel;
 	private final Occurrence importRef;
-	protected final FrameLinkIdentifier linkIdent;
+	protected final FrameImportIdentifier linkIdent;
 
 	@Child private PathStep next;
 
@@ -30,7 +30,7 @@ public abstract class N extends PathStep {
 		this.importLabel = importLabel;
 		this.importRef = importRef;
 		this.next = next;
-		this.linkIdent = new FrameLinkIdentifier(importLabel, next.scopeIdent);
+		this.linkIdent = new FrameImportIdentifier(importLabel, importRef);
 	}
 
 	@Override
