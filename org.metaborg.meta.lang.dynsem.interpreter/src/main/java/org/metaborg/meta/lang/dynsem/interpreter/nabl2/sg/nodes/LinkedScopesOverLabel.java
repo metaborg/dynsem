@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl;
@@ -18,45 +18,47 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.object.DynamicObject;
 import com.oracle.truffle.api.source.SourceSection;
 
-@NodeChildren({ @NodeChild(value = "scope", type = TermBuild.class) })
-public abstract class DeclsOfScope extends NativeOpBuild {
+@NodeChildren({ @NodeChild(value = "scope", type = TermBuild.class),
+		@NodeChild(value = "label", type = TermBuild.class) })
+public abstract class LinkedScopesOverLabel extends NativeOpBuild {
 
-	public DeclsOfScope(SourceSection source) {
+	public LinkedScopesOverLabel(SourceSection source) {
 		super(source);
 	}
 
 	// TODO
 	// @Specialization(guards = { "scope == scope_cached" })
-	// public Object executeCachedFull(ScopeIdentifier scope, @Cached("scope") ScopeIdentifier scope_cached,
-	// @Cached(value = "lookupScopeDecls(scope)", dimensions = 1) Occurrence[] decs_cached,
+	// public Object doCached(ScopeIdentifier scope, ALabel label, @Cached("scope") ScopeIdentifier scope_cached,
+	// @Cached("label") ALabel label_cached,
+	// @Cached(value = "lookupScopes(scope_cached, label_cached)", dimensions = 1) ScopeIdentifier[] scopes_cached,
 	// @Cached("createListBuild()") TermBuild listBuild,
-	// @Cached("createList(listBuild, decs_cached)") Object list_cached) {
+	// @Cached("createList(listBuild, scopes_cached)") Object list_cached) {
 	// return list_cached;
 	// }
 
-	@Specialization // (replaces = "executeCachedFull")
-	public Object executeCachedFull(ScopeIdentifier scope,
+	@Specialization // (replaces = "doCached")
+	public Object doUncached(ScopeIdentifier scope, ALabel label,
 			@Cached("createListConstructor()") ITermInit listConstructor) {
-		return listConstructor.apply((Object[]) lookupScopeDecls(scope));
+		return listConstructor.apply((Object[]) lookupScopes(scope, label));
 	}
 
-	protected Occurrence[] lookupScopeDecls(ScopeIdentifier scope) {
+	protected ScopeIdentifier[] lookupScopes(ScopeIdentifier scope, ALabel label) {
 		DynamicObject sg = NaBL2LayoutImpl.INSTANCE.getScopeGraph(getContext().getNaBL2Solution());
 
 		DynamicObject scopes = ScopeGraphLayoutImpl.INSTANCE.getScopes(sg);
-		// FIXME eliminate this cast
-		return ScopeEntryLayoutImpl.INSTANCE.getDeclarations((DynamicObject) scopes.get(scope));
+		DynamicObject scopeEntry = (DynamicObject) scopes.get(scope);
+		DynamicObject scopeEdges = ScopeEntryLayoutImpl.INSTANCE.getEdges(scopeEntry);
+		return (ScopeIdentifier[]) scopeEdges.get(label);
 	}
 
 	protected ITermInit createListConstructor() {
 		CompilerAsserts.neverPartOfCompilation();
 		ITermRegistry registry = getContext().getTermRegistry();
-		Class<?> listClass = registry.getListClass(Occurrence.class);
+		Class<?> listClass = registry.getListClass(ScopeIdentifier.class);
 		return registry.lookupClassConstructorWrapper(listClass);
 	}
 
-	public static DeclsOfScope create(SourceSection source, TermBuild scope) {
-		return ScopeNodeFactories.createDeclsOfScope(source, scope);
+	public static LinkedScopesOverLabel create(SourceSection source, TermBuild scope, TermBuild label) {
+		return ScopeNodeFactories.createLinkedScopesOverLabel(source, scope, label);
 	}
-
 }

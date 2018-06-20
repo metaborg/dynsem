@@ -17,18 +17,6 @@ public final class ScopeNodeFactories {
 		return mkScopeIdentifierNodeGen.create(source, resource, name);
 	}
 
-	public static mkLabelP createMkLabelP(SourceSection source) {
-		return mkLabelPNodeGen.create(source);
-	}
-
-	public static mkLabelI createMkLabelI(SourceSection source) {
-		return mkLabelINodeGen.create(source);
-	}
-
-	public static mkLabel createMkLabel(SourceSection source, TermBuild labelstring) {
-		return mkLabelNodeGen.create(source, labelstring);
-	}
-
 	public static MakeOccurrence createMakeOccurrence(SourceSection source, TermBuild namespace, TermBuild name,
 			TermBuild termindex) {
 		return MakeOccurrenceNodeGen.create(source, namespace, name, termindex);
@@ -55,14 +43,21 @@ public final class ScopeNodeFactories {
 		return DeclsOfScopeNodeGen.create(source, scope);
 	}
 
-	public static CreateScope createCreateScope(SourceSection source, TermBuild scopeIdent, TermBuild decs, TermBuild decTypes,
-			TermBuild refs,
-			TermBuild edges, TermBuild imports) {
+	public static CreateScope createCreateScope(SourceSection source, TermBuild scopeIdent, TermBuild decs,
+			TermBuild decTypes, TermBuild refs, TermBuild edges, TermBuild imports) {
 		return ScopeNodeFactories.createCreateScope(source, scopeIdent, decs, decTypes, refs, edges, imports);
 	}
 
 	public static AssocScopeOf createAssocScopeOf(SourceSection source, TermBuild occurrence, TermBuild label) {
 		return AssocScopeOfNodeGen.create(source, occurrence, label);
+	}
+
+	public static ScopesEqual createScopesEquals(SourceSection source, TermBuild s1, TermBuild s2) {
+		return ScopesEqualNodeGen.create(source, s1, s2);
+	}
+
+	public static LinkedScopesOverLabel createLinkedScopesOverLabel(SourceSection source, TermBuild scope, TermBuild label) {
+		return LinkedScopesOverLabelNodeGen.create(source, scope, label);
 	}
 
 }

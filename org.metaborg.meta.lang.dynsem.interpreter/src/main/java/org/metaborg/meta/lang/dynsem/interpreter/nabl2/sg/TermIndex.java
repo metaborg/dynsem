@@ -16,7 +16,7 @@ public final class TermIndex {
 	private final int offset;
 
 	public TermIndex(String resource, int offset) {
-		this.resource = resource;
+		this.resource = resource.intern();
 		this.offset = offset;
 	}
 

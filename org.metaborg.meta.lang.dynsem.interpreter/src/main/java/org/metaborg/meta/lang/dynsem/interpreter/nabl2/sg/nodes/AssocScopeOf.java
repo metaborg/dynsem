@@ -1,7 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.DeclEntryLayoutImpl;
@@ -26,7 +26,7 @@ public abstract class AssocScopeOf extends NativeOpBuild {
 	}
 
 	@Specialization
-	public ScopeIdentifier executeGet(Occurrence occurrence, Label label) {
+	public ScopeIdentifier executeGet(Occurrence occurrence, ALabel label) {
 		DynSemContext ctx = getContext();
 		DynamicObject nabl2 = ctx.getNaBL2Solution();
 		// DynamicObject types = NaBL2LayoutImpl.INSTANCE.getTypes(nabl2);

@@ -3,7 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameLink;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameImportIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -32,14 +32,14 @@ public abstract class NewFrameImportLink extends NativeOpBuild {
 	 * scope)
 	 */
 	@Specialization(guards = { "label == label_cached", "occ == occ_cached", "shapeCheck(frm_shape, frm)" })
-	public FrameLink createCached(Label label, Occurrence occ, DynamicObject frm, @Cached("label") Label label_cached,
+	public FrameLink createCached(ALabel label, Occurrence occ, DynamicObject frm, @Cached("label") ALabel label_cached,
 			@Cached("occ") Occurrence occ_cached, @Cached("lookupShape(frm)") Shape frm_shape,
 			@Cached("createLinkIdentifier(label, occ)") FrameImportIdentifier linkIdent) {
 		return new FrameLink(label, frm, linkIdent);
 	}
 
 	@Specialization(replaces = "createCached")
-	public FrameLink createUncached(Label label, Occurrence occ, DynamicObject frm) {
+	public FrameLink createUncached(ALabel label, Occurrence occ, DynamicObject frm) {
 		return new FrameLink(label, frm, createLinkIdentifier(label, occ));
 	}
 
@@ -47,7 +47,7 @@ public abstract class NewFrameImportLink extends NativeOpBuild {
 		return shape != null && shape.check(frm);
 	}
 
-	protected FrameImportIdentifier createLinkIdentifier(Label label, Occurrence occ) {
+	protected FrameImportIdentifier createLinkIdentifier(ALabel label, Occurrence occ) {
 		CompilerAsserts.neverPartOfCompilation();
 		return new FrameImportIdentifier(label, occ);
 	}

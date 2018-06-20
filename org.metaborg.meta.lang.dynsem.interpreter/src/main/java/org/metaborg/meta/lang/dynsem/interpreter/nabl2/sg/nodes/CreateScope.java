@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.InitProtoFrame;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.InitProtoFrameNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
@@ -85,7 +85,7 @@ public abstract class CreateScope extends NativeOpBuild {
 		Occurrence[][] importedOccs = new Occurrence[importsMap.count()][];
 		int j = 0;
 		for (Entry<?, ?> importEntry : importsMap) {
-			Label importLabel = (Label) importEntry.getKey();
+			ALabel importLabel = (ALabel) importEntry.getKey();
 			importsShape = importsShape
 					.addProperty(Property.create(importLabel, importAllocator.locationForType(Occurrence[].class,
 							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
@@ -103,7 +103,7 @@ public abstract class CreateScope extends NativeOpBuild {
 		ScopeIdentifier[][] edgeScopes = new ScopeIdentifier[edgesMap.count()][];
 		int i = 0;
 		for (Entry<?, ?> edgeEntry : edgesMap) {
-			Label edgeLabel = (Label) edgeEntry.getKey();
+			ALabel edgeLabel = (ALabel) edgeEntry.getKey();
 			edgesShape = edgesShape
 					.addProperty(Property.create(edgeLabel, edgeAllocator.locationForType(ScopeIdentifier[].class,
 							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));

@@ -2,7 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.lookup;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameAddr;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -28,7 +28,7 @@ public final class Path extends RootNode {
 
 	@Override
 	public FrameAddr execute(VirtualFrame frame) {
-		return p.executeLookup(FrameLayoutUtil.layout().getType().cast(frame.getArguments()[0]));
+		return p.executeLookup(FrameUtils.layout().getType().cast(frame.getArguments()[0]));
 	}
 
 	public static Path create(IStrategoList steps, DynSemLanguage lang) {
@@ -43,21 +43,24 @@ public final class Path extends RootNode {
 				assert tailStep == null;
 				tailStep = D.create(stepTerm);
 				continue;
-			}
-			if (Tools.hasConstructor(stepTerm, "E")) {
+			} else if (Tools.hasConstructor(stepTerm, "E")) {
 				assert tailStep != null;
 				tailStep = E.create(stepTerm, tailStep);
 				continue;
-			}
-			if (Tools.hasConstructor(stepTerm, "N")) {
-				assert tailStep == null;
-				tailStep = N.create(stepTerm);
+			} else if (Tools.hasConstructor(stepTerm, "N")) {
+				assert tailStep != null;
+				tailStep = N.create(stepTerm, tailStep);
 				continue;
+			} else {
+				throw new IllegalStateException("Unsupported path step: " + stepTerm);
 			}
-			throw new IllegalStateException("Unsupported path step: " + stepTerm);
 		}
 		assert tailStep != null;
 		return tailStep;
 	}
 
+	@Override
+	public String toString() {
+		return "Path: " + p.toString();
+	}
 }

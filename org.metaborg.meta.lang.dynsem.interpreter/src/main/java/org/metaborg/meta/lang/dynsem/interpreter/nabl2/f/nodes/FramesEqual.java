@@ -11,20 +11,20 @@ import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "frm1", type = TermBuild.class),
 		@NodeChild(value = "frm2", type = TermBuild.class) })
-public abstract class IdentFrames extends NativeOpBuild {
+public abstract class FramesEqual extends NativeOpBuild {
 
-	public IdentFrames(SourceSection source) {
+	public FramesEqual(SourceSection source) {
 		super(source);
 	}
 
 	@Specialization
-	public boolean executeClone(DynamicObject frm1, DynamicObject frm2) {
+	public boolean eqCheck(DynamicObject frm1, DynamicObject frm2) {
 		// TODO proper cast-check for frames
 		return (frm1 == frm2);
 	}
 
-	public static IdentFrames create(SourceSection source, TermBuild frm1, TermBuild frm2) {
-		return FrameNodeFactories.createIdentFrames(source, frm1, frm2);
+	public static FramesEqual create(SourceSection source, TermBuild frm1, TermBuild frm2) {
+		return FrameNodeFactories.createFramesEqual(source, frm1, frm2);
 	}
 
 }

@@ -4,6 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.ITermBuildFactor
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermMatchPatternFactory;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermInit;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public interface ITermRegistry {
@@ -16,6 +17,8 @@ public interface ITermRegistry {
 
 	public ITermBuildFactory lookupNativeTypeAdapterBuildFactory(String sort, String function, int arity);
 
+	public ITermInit lookupClassConstructorWrapper(Class<?> termClass);
+
 	public Class<?> getConstructorClass(String constr, int arity);
 
 	public Class<?> getNativeOperatorClass(String constr, int arity);
@@ -23,6 +26,7 @@ public interface ITermRegistry {
 	public <T> Class<? extends IListTerm<T>> getListClass(Class<T> elemClass);
 
 	public Class<?> getMapClass(String keySortName, String mapSortName);
+
 
 	public ITerm parseProgramTerm(IStrategoTerm t);
 }

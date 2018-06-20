@@ -8,7 +8,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.lookup.Path;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.DeclEntryLayoutImpl;
@@ -133,7 +133,7 @@ public class ObjectFactories {
 		for (int i = 0; i < edgeScopes.length; i++) {
 			IStrategoTerm edgeTerm = edgesTerm.getSubterm(i);
 			assert Tools.isTermTuple(edgeTerm);
-			Label edgeLabel = Label.create(Tools.applAt(edgeTerm, 0));
+			ALabel edgeLabel = ALabel.create(Tools.applAt(edgeTerm, 0));
 			edgesShape = edgesShape
 					.addProperty(Property.create(edgeLabel, edgeAllocator.locationForType(
 					ScopeIdentifier[].class, EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
@@ -171,7 +171,7 @@ public class ObjectFactories {
 		for (int i = 0; i < edgeScopes.length; i++) {
 			IStrategoTerm edgeTerm = edgesTerm.getSubterm(i);
 			assert Tools.isTermTuple(edgeTerm);
-			Label edgeLabel = Label.create(Tools.applAt(edgeTerm, 0));
+			ALabel edgeLabel = ALabel.create(Tools.applAt(edgeTerm, 0));
 			edgesShape = edgesShape
 					.addProperty(Property.create(edgeLabel, edgeAllocator.locationForType(
 					ScopeIdentifier[].class, EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));
@@ -191,7 +191,7 @@ public class ObjectFactories {
 		for (int i = 0; i < importedOccs.length; i++) {
 			IStrategoTerm importTerm = importsTerm.getSubterm(i);
 			assert Tools.isTermTuple(importTerm);
-			Label importLabel = Label.create(Tools.applAt(importTerm, 0));
+			ALabel importLabel = ALabel.create(Tools.applAt(importTerm, 0));
 			importsShape = importsShape.addProperty(
 					Property.create(importLabel, importAllocator.locationForType(Occurrence[].class,
 							EnumSet.of(LocationModifier.NonNull, LocationModifier.Final)), 0));

@@ -16,8 +16,8 @@ public final class Occurrence {
 	private final TermIndex index;
 
 	public Occurrence(String namespace, String name, TermIndex index) {
-		this.namespace = namespace;
-		this.name = name;
+		this.namespace = namespace.intern();
+		this.name = name.intern();
 		this.index = index;
 	}
 
@@ -59,7 +59,7 @@ public final class Occurrence {
 	@TruffleBoundary
 	public String toString() {
 		return new StringBuilder().append("Occurrence(Namespace(").append(namespace).append("), ").append(name)
-				.append(", ").append(index).append(")").toString();
+				.append(", ").append(index).append(")").append("@").append(hashCode()).toString();
 	}
 
 }

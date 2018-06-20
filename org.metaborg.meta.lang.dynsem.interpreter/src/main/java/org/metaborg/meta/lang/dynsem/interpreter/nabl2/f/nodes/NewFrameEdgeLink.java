@@ -3,7 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameLink;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameEdgeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
@@ -31,14 +31,14 @@ public abstract class NewFrameEdgeLink extends NativeOpBuild {
 	 * scope)
 	 */
 	@Specialization(guards = { "label == label_cached", "shapeCheck(frm_shape, frm)" })
-	public FrameLink createCached(Label label, DynamicObject frm, @Cached("label") Label label_cached,
+	public FrameLink createCached(ALabel label, DynamicObject frm, @Cached("label") ALabel label_cached,
 			@Cached("lookupShape(frm)") Shape frm_shape,
 			@Cached("createLinkIdentifier(label, frm)") FrameEdgeIdentifier linkIdent) {
 		return new FrameLink(label, frm, linkIdent);
 	}
 
 	@Specialization(replaces = "createCached")
-	public FrameLink createUncached(Label label, DynamicObject frm) {
+	public FrameLink createUncached(ALabel label, DynamicObject frm) {
 		return new FrameLink(label, frm, createLinkIdentifier(label, frm));
 	}
 
@@ -46,7 +46,7 @@ public abstract class NewFrameEdgeLink extends NativeOpBuild {
 		return shape != null && shape.check(frm);
 	}
 
-	protected FrameEdgeIdentifier createLinkIdentifier(Label label, DynamicObject frm) {
+	protected FrameEdgeIdentifier createLinkIdentifier(ALabel label, DynamicObject frm) {
 		CompilerAsserts.neverPartOfCompilation();
 		return new FrameEdgeIdentifier(label, FrameLayoutImpl.INSTANCE.getScope(frm));
 	}

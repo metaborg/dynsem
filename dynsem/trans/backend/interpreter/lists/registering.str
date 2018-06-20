@@ -15,6 +15,12 @@ rules
     ls@ListSort(es) ->
       bstm* |[
         listClasses.put(x_elemclass.class, x_listclass.class);
+        initWrappers.put(x_listclass.class, new ITermInit() {
+          @Override
+          public x_listclass apply(Object... objects) {
+            return x_listclass.fromArray((x_elemclass[]) objects);
+          }
+        });
         builderFactories.put(x_listclass.class, new ITermBuildFactory() {
           @Override
           public TermBuild apply(SourceSection source, Object... objects) {

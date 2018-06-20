@@ -20,6 +20,13 @@ rules
     dec@ConsDecl(name, kid*, _, _) ->
       bstm* |[
         constructorClasses.put(~e:Lit(String([Chars(con-name)])), x_conclass.class);
+        initWrappers.put(x_conclass.class, new ITermInit() {
+          @Override
+          public x_conclass apply(Object... children) {
+            return e_init;
+          }
+        });
+
         builderFactories.put(x_conclass.class, new ITermBuildFactory() {
           @Override
           public x_termbuildclass apply(SourceSection source, TermBuild... children) {
@@ -41,5 +48,11 @@ rules
       x_termbuildNG := <jclass-termbuilder-ng> dec;
       x_matchNG := <jclass-matcher-ng> dec;
       e1* := <map-with-index((dec; int-to-string, id); ds-to-interp-termbuild-access(|"children"))> kid*;
-      e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*
+      e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> kid*;
+      if [] := kid* then
+        e_init := e |[ x_conclass.SINGLETON ]|
+      else
+        e_children* := <map-with-index((dec; int-to-string, jclass-term); \ (idx, x_ty) -> e |[ (x_ty) children[~i:idx] ]| \)> kid*;
+        e_init := e |[ new x_conclass(e_children*) ]|
+      end
   

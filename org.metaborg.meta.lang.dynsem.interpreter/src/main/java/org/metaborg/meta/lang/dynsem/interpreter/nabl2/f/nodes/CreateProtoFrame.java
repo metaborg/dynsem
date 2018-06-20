@@ -9,8 +9,8 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameEdgeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameImportIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutUtil;
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Label;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
@@ -55,8 +55,6 @@ public class CreateProtoFrame extends DynSemNode {
 
 		/* Create and populate slots (for declarations) */
 
-		// temporary mapping from occurrence to in-frame property
-		// Map<Occurrence, Property> occ2prop = new HashMap<>();
 		// temporary mapping from in-frame property to (default) value
 		Map<Property, Object> prop2val = new HashMap<>();
 
@@ -70,29 +68,18 @@ public class CreateProtoFrame extends DynSemNode {
 			prop2val.put(prop, defaultValueNode.execute(frame, types.get(dec)));
 		}
 
-		// Occurrence[] decs = scopeLayout.getDeclarations(scopeEntry);
-		// Property[] decProps = new Property[decs.length];
-		// Object[] decPropVals = new Object[decs.length];
-		// for (int i = 0; i < decs.length; i++) {
-		// Occurrence dec = decs[i];
-		// decPropVals[i] = defaultValueNode.execute(frame, types.get(dec));
-		// Property prop = Property.create(dec, allocator.locationForType(Object.class), 0);
-		// protoShape = protoShape.addProperty(prop);
-		// decProps[i] = prop;
-		// }
-
 
 		// create props for every edge. NB: we're flattening the structure by encoding
 		// multiplicity in the property name (edgeIdentifier)
 		DynamicObject scopeEdges = scopeLayout.getEdges(scopeEntry);
 		List<Object> edgeLinkLabels = scopeEdges.getShape().getKeyList();
 		for (Object edgeLinkLabelObj : edgeLinkLabels) {
-			Label linkLabel = (Label) edgeLinkLabelObj;
+			ALabel linkLabel = (ALabel) edgeLinkLabelObj;
 			ScopeIdentifier[] linkedScopes = (ScopeIdentifier[]) scopeEdges.get(linkLabel);
 			for (ScopeIdentifier linkedScope : linkedScopes) {
 				FrameEdgeIdentifier edgeIdentifier = new FrameEdgeIdentifier(linkLabel, linkedScope);
 				Property edgeProp = Property.create(edgeIdentifier,
-						allocator.locationForType(FrameLayoutUtil.layout().getType()), 0);
+						allocator.locationForType(FrameUtils.layout().getType()), 0);
 				protoShape = protoShape.addProperty(edgeProp);
 			}
 		}
@@ -103,12 +90,12 @@ public class CreateProtoFrame extends DynSemNode {
 		DynamicObject scopeImports = scopeLayout.getImports(scopeEntry);
 		List<Object> importLinkLabels = scopeImports.getShape().getKeyList();
 		for (Object importLinkLabelObj : importLinkLabels) {
-			Label linkLabel = (Label) importLinkLabelObj;
+			ALabel linkLabel = (ALabel) importLinkLabelObj;
 			Occurrence[] viaOccurrences = (Occurrence[]) scopeImports.get(linkLabel);
 			for (Occurrence viaOccurrence : viaOccurrences) {
 				FrameImportIdentifier importIdentifier = new FrameImportIdentifier(linkLabel, viaOccurrence);
 				Property importProp = Property.create(importIdentifier,
-						allocator.locationForType(FrameLayoutUtil.layout().getType()), 0);
+						allocator.locationForType(FrameUtils.layout().getType()), 0);
 				protoShape = protoShape.addProperty(importProp);
 			}
 		}

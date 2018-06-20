@@ -52,6 +52,7 @@ public abstract class Lookup extends NativeOpBuild {
 			throw new ReductionFailure("Unresolved reference: " + ref, InterpreterUtils.createStacktrace(), this);
 		}
 		assert p instanceof Path;
+		System.out.println(p);
 		return ((Path) p).getCallTarget();
 	}
 

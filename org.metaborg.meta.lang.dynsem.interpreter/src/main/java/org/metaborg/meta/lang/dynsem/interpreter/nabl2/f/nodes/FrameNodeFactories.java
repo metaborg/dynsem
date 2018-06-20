@@ -35,10 +35,6 @@ public final class FrameNodeFactories {
 		return NewFrameFromTermScopeNodeGen.create(source, ast, links);
 	}
 
-	public static NewFrameAddr createNewFrameAddr(SourceSection source, TermBuild frm, TermBuild dec) {
-		return NewFrameAddrNodeGen.create(source, frm, dec);
-	}
-
 	public static Lookup createLookup(SourceSection source, TermBuild frm, TermBuild occurrence) {
 		return LookupNodeGen.create(source, frm, occurrence);
 	}
@@ -47,8 +43,8 @@ public final class FrameNodeFactories {
 		return InitProtoFrameNodeGen.create(source);
 	}
 
-	public static IdentFrames createIdentFrames(SourceSection source, TermBuild frm1, TermBuild frm2) {
-		return IdentFramesNodeGen.create(source, frm1, frm2);
+	public static FramesEqual createFramesEqual(SourceSection source, TermBuild frm1, TermBuild frm2) {
+		return FramesEqualNodeGen.create(source, frm1, frm2);
 	}
 
 	public static GetAtAddr createGetAtAddr(SourceSection source, TermBuild addr) {
