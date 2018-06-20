@@ -45,6 +45,11 @@ public abstract class D extends PathStep {
 	// }
 
 	@Override
+	public void setNext(PathStep next) {
+		throw new IllegalStateException("Cannot add next path step after D step");
+	}
+
+	@Override
 	@TruffleBoundary
 	public String toString() {
 		return "D(" + scopeIdent + ", " + dec + ")";

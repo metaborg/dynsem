@@ -10,6 +10,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.object.DynamicObject;
@@ -54,6 +55,13 @@ public abstract class N extends PathStep {
 		DynamicObject nextFrame = FrameUtils.layout().getType().cast(frm.get(linkIdent));
 		assert FrameLayoutImpl.INSTANCE.getScope(nextFrame).equals(next.scopeIdent);
 		return next.executeLookup(nextFrame);
+	}
+
+	@Override
+	public void setNext(PathStep next) {
+		assert next != null;
+		CompilerDirectives.transferToInterpreterAndInvalidate();
+		this.next = insert(next);
 	}
 
 	@TruffleBoundary

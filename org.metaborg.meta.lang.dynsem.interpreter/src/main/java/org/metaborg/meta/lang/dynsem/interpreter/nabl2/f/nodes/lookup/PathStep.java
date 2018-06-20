@@ -18,6 +18,7 @@ public abstract class PathStep extends Node {
 
 	public abstract FrameAddr executeLookup(DynamicObject frm);
 
+	public abstract void setNext(PathStep next);
 
 
 }

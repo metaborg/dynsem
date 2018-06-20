@@ -21,6 +21,14 @@ public final class Occurrence {
 		this.index = index;
 	}
 
+	public String namespace() {
+		return namespace;
+	}
+
+	public String name() {
+		return name;
+	}
+
 	public static Occurrence create(IStrategoTerm t) {
 		if (!Tools.isTermAppl(t)) {
 			throw new IllegalStateException();
