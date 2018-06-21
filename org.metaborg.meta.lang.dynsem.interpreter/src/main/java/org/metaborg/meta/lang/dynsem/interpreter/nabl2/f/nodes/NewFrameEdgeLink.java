@@ -34,12 +34,12 @@ public abstract class NewFrameEdgeLink extends NativeOpBuild {
 	public FrameLink createCached(ALabel label, DynamicObject frm, @Cached("label") ALabel label_cached,
 			@Cached("lookupShape(frm)") Shape frm_shape,
 			@Cached("createLinkIdentifier(label, frm)") FrameEdgeIdentifier linkIdent) {
-		return new FrameLink(label, frm, linkIdent);
+		return new FrameLink(frm, linkIdent);
 	}
 
 	@Specialization(replaces = "createCached")
 	public FrameLink createUncached(ALabel label, DynamicObject frm) {
-		return new FrameLink(label, frm, createLinkIdentifier(label, frm));
+		return new FrameLink(frm, createLinkIdentifier(label, frm));
 	}
 
 	protected boolean shapeCheck(Shape shape, DynamicObject frm) {

@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
@@ -8,29 +7,24 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.CompilerDirectives.ValueType;
 import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.object.DynamicObject;
-import com.oracle.truffle.api.object.Location;
 import com.oracle.truffle.api.source.SourceSection;
 
+@ValueType
 public final class FrameAddr extends Addr {
 
 	private final DynamicObject frame;
 	private final Occurrence key;
-	private final Location location;
 
 	public FrameAddr(DynamicObject frame, Occurrence key) {
-		this(frame, key, FrameUtils.lookupLocation(frame, key));
-	}
-
-	public FrameAddr(DynamicObject frame, Occurrence key, Location loc) {
 		this.frame = frame;
 		this.key = key;
-		this.location = loc;
 	}
 
 	@Override
@@ -48,10 +42,6 @@ public final class FrameAddr extends Addr {
 
 	public DynamicObject frame() {
 		return frame;
-	}
-
-	public Location location() {
-		return location;
 	}
 
 	public Occurrence key() {
@@ -75,7 +65,7 @@ public final class FrameAddr extends Addr {
 
 	@Override
 	public String toString() {
-		return "FrameAddr(" + frame + ", " + key + ", [" + location + "])";
+		return "FrameAddr(" + frame + ", " + key + ")";
 	}
 
 	@NodeChildren({ @NodeChild(value = "frm", type = TermBuild.class),
@@ -85,13 +75,6 @@ public final class FrameAddr extends Addr {
 		public Build(SourceSection source) {
 			super(source);
 		}
-
-		// @Specialization(guards = { "shapeCheck(frm_shape, frm)" })
-		// public FrameAddr buildCached(DynamicObject frm, Occurrence key,
-		// @Cached("lookupShape(frm)") Shape frm_shape,
-		// @Cached("lookupLocation(frm_shape, key)") Location loc) {
-		// return new FrameAddr(frm, key, loc);
-		// }
 
 		@Specialization // (replaces = "buildCached")
 		public FrameAddr buildUncached(DynamicObject frm, Occurrence key) {

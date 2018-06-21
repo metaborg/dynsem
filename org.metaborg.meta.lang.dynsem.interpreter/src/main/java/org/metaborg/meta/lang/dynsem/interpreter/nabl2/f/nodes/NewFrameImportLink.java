@@ -35,12 +35,12 @@ public abstract class NewFrameImportLink extends NativeOpBuild {
 	public FrameLink createCached(ALabel label, Occurrence occ, DynamicObject frm, @Cached("label") ALabel label_cached,
 			@Cached("occ") Occurrence occ_cached, @Cached("lookupShape(frm)") Shape frm_shape,
 			@Cached("createLinkIdentifier(label, occ)") FrameImportIdentifier linkIdent) {
-		return new FrameLink(label, frm, linkIdent);
+		return new FrameLink(frm, linkIdent);
 	}
 
 	@Specialization(replaces = "createCached")
 	public FrameLink createUncached(ALabel label, Occurrence occ, DynamicObject frm) {
-		return new FrameLink(label, frm, createLinkIdentifier(label, occ));
+		return new FrameLink(frm, createLinkIdentifier(label, occ));
 	}
 
 	protected boolean shapeCheck(Shape shape, DynamicObject frm) {

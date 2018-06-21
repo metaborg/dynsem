@@ -12,8 +12,11 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.object.DynamicObject;
+import com.oracle.truffle.api.object.Property;
+import com.oracle.truffle.api.object.Shape;
 
 public abstract class E extends PathStep {
 
@@ -35,20 +38,15 @@ public abstract class E extends PathStep {
 		return next.getTargetDec();
 	}
 
-	// @Specialization(guards = { "shapeCheck(frm_shape, frm)" })
-	// public FrameAddr lookupCached(DynamicObject frm, @Cached("lookupShape(frm)") Shape frm_shape,
-	// @Cached("lookupLocation(frm_shape, linkIdent)") Location loc) {
-	// DynamicObject nextFrame = FrameUtils.layout().getType().cast(loc.get(frm, frm_shape));
-	// assert FrameLayoutImpl.INSTANCE.getScope(nextFrame).equals(next.scopeIdent);
-	// return next.executeLookup(nextFrame);
-	// }
-	//
-	// @Specialization(replaces = "lookupCached")
-	// public FrameAddr fallback(DynamicObject frm) {
-	// throw new IllegalStateException("Path<->scope instability");
-	// }
+	@Specialization(guards = { "shape_cached.check(frm)" })
+	public FrameAddr lookupCached(DynamicObject frm,
+			@Cached("frm.getShape()") Shape shape_cached,
+			@Cached("frm.getShape().getProperty(linkIdent)") Property linkProp) {
+		DynamicObject nextFrame = FrameUtils.layout().getType().cast(linkProp.get(frm, shape_cached));
+		return next.executeLookup(nextFrame);
+	}
 
-	@Specialization
+	@Specialization(replaces = "lookupCached")
 	public FrameAddr lookup(DynamicObject frm) {
 		DynamicObject nextFrame = FrameUtils.layout().getType().cast(frm.get(linkIdent));
 		assert FrameLayoutImpl.INSTANCE.getScope(nextFrame).equals(next.scopeIdent);

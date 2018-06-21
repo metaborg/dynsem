@@ -2,12 +2,18 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameAddr;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.arrays.ArrayAddr;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.object.FinalLocationException;
+import com.oracle.truffle.api.object.IncompatibleLocationException;
+import com.oracle.truffle.api.object.Property;
+import com.oracle.truffle.api.object.Shape;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "addr", type = TermBuild.class), @NodeChild(value = "val", type = TermBuild.class) })
@@ -17,28 +23,21 @@ public abstract class SetAtAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	// TODO
-	// @Specialization(limit = "10", guards = { "addr.location() == cached_location" })
-	// public Object executeFrameSetCached(FrameAddr addr, Object val,
-	// @Cached("addr.location()") Location cached_location) {
-	// try {
-	// cached_location.set(addr.frame(), val);
-	// } catch (IncompatibleLocationException | FinalLocationException e) {
-	// throw new IllegalStateException(e);
-	// }
-	// return val;
-	// }
+	@Specialization(guards = { "addr.key() == key_cached", "shape_cached.check(addr.frame())" })
+	public Object doSetCached(FrameAddr addr, Object val, @Cached("addr.key()") Occurrence key_cached,
+			@Cached("addr.frame().getShape()") Shape shape_cached,
+			@Cached("shape_cached.getProperty(key_cached)") Property slot_property) {
+		try {
+			slot_property.set(addr.frame(), val, shape_cached);
+		} catch (IncompatibleLocationException | FinalLocationException e) {
+			throw new IllegalStateException(e);
+		}
+		return null;
+	}
 
-	@Specialization // (replaces = "executeFrameSetCached")
-	public Object executeFrameSet(FrameAddr addr, Object val) {
-		assert addr.location().canSet(val);
-
-		// try {
+	@Specialization(replaces = "doSetCached")
+	public Object doSet(FrameAddr addr, Object val) {
 		addr.frame().set(addr.key(), val);
-		// addr.location().set(addr.frame(), val);
-		// } catch (IncompatibleLocationException | FinalLocationException e) {
-		// throw new IllegalStateException(e);
-		// }
 		return val;
 	}
 
@@ -47,10 +46,6 @@ public abstract class SetAtAddr extends NativeOpBuild {
 		addr.arr().set(addr.idx(), val);
 		return val;
 	}
-
-	// protected static boolean canSetInFrame(FrameAddr addr, Object val) {
-	// return addr.location().canSet(val);
-	// }
 
 	public static SetAtAddr create(SourceSection source, TermBuild addr, TermBuild val) {
 		return FrameNodeFactories.createSetAddr(source, addr, val);

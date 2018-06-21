@@ -20,7 +20,6 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
 
-// FIXME: add functions for SG-FRAMES-ARRAY related classes
 @TypeSystemReference(BuiltinTypes.class)
 @NodeInfo(description = "The abstract base node for all term construction")
 public abstract class TermBuild extends DynSemNode {

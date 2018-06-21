@@ -2,11 +2,15 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameAddr;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.arrays.ArrayAddr;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.Occurrence;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.object.Property;
+import com.oracle.truffle.api.object.Shape;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChild(value = "addr", type = TermBuild.class)
@@ -16,17 +20,16 @@ public abstract class GetAtAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	// TODO
-	// @Specialization(limit = "10", guards = { "addr.location() == cached_location" })
-	// public Object executeFrameGetCached(FrameAddr addr, @Cached("addr.location()") Location cached_location) {
-	// return cached_location.get(addr.frame());
-	// }
+	@Specialization(guards = { "addr.key() == key_cached", "shape_cached.check(addr.frame())" })
+	public Object doGetCached(FrameAddr addr, @Cached("addr.key()") Occurrence key_cached,
+			@Cached("addr.frame().getShape()") Shape shape_cached,
+			@Cached("shape_cached.getProperty(key_cached)") Property slot_property) {
+		return slot_property.get(addr.frame(), shape_cached);
+	}
 
-	@Specialization // (replaces = "executeFrameGetCached")
-	public Object executeFrameGet(FrameAddr addr) {
-		// return addr.location().get(addr.frame());
+	@Specialization(replaces = "doGetCached")
+	public Object doGet(FrameAddr addr) {
 		return addr.frame().get(addr.key());
-		// return addr.location().get(addr.frame());
 	}
 
 	@Specialization

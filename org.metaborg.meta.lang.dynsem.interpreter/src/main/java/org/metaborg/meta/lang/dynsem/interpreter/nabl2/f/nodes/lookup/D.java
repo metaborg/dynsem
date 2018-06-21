@@ -24,25 +24,10 @@ public abstract class D extends PathStep {
 		return dec;
 	}
 
-	/*
-	 * we cache the location. our BIG TIME assumption is that this instance of the node will only ever be called on
-	 * frames of the same scopes!!!
-	 */
-	// @Specialization(guards = { "shapeCheck(frm_shape, frm)" })
-	// public FrameAddr lookupCached(DynamicObject frm, @Cached("lookupShape(frm)") Shape frm_shape,
-	// @Cached("lookupLocation(frm_shape, dec)") Location loc) {
-	// assert FrameLayoutImpl.INSTANCE.getScope(frm).equals(scopeIdent);
-	// return new FrameAddr(frm, dec, loc);
-	// }
 	@Specialization
 	public FrameAddr lookup(DynamicObject frm) {
 		return new FrameAddr(frm, dec);
 	}
-
-	// @Specialization(replaces = "lookupCached")
-	// public FrameAddr fallback(DynamicObject frm) {
-	// throw new IllegalStateException("Path<->scope instability");
-	// }
 
 	@Override
 	public void setNext(PathStep next) {
