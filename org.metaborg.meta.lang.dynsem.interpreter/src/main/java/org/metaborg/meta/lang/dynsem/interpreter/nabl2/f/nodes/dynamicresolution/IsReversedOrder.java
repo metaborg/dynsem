@@ -22,7 +22,15 @@ abstract class IsReversedOrder extends DynSemNode {
 
 	public abstract boolean execute(ALabel l1, ALabel l2);
 
-	@Specialization
+	@Specialization(guards = { "l1.equals(l1_cached)", "l2.equals(l2_cached)" }, limit = "16")
+	public boolean areLabelsSwappedCached(ALabel l1, ALabel l2, @Cached("l1") ALabel l1_cached,
+			@Cached("l2") ALabel l2_cached, @Cached("getOrderSwapTermClass()") Class<?> orderSwapTermClass,
+			@Cached("getTermInit(orderSwapTermClass)") ITermInit orderSwapTermInit,
+			@Cached("areLabelsSwapped(l1_cached, l2_cached, orderSwapTermClass, orderSwapTermInit)") boolean swapped) {
+		return swapped;
+	}
+
+	@Specialization(replaces = "areLabelsSwappedCached")
 	public boolean areLabelsSwapped(ALabel l1, ALabel l2,
 			@Cached("getOrderSwapTermClass()") Class<?> orderSwapTermClass,
 			@Cached("getTermInit(orderSwapTermClass)") ITermInit orderSwapTermInit) {
