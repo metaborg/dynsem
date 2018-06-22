@@ -34,13 +34,20 @@ rules
         public abstract class x_listclass implements IListTerm<x_elemclass> {
         
           private final IStrategoTerm strategoTerm;
+          protected final int size;
         
           public final static x_nilclass EMPTY = new x_nilclass();
         
-          public x_listclass(IStrategoTerm strategoTerm) {
+          public x_listclass(IStrategoTerm strategoTerm, int size) {
             this.strategoTerm = strategoTerm;
+            this.size = size;
           }
-        
+
+          @Override
+          public final int size() {
+            return this.size;
+          }
+          
           @Override
           public final boolean hasStrategoTerm() {
             return strategoTerm != null;
@@ -135,18 +142,11 @@ rules
           
             private final x_elemclass elem;
             private final x_listclass tail;
-            private final int size;
         
             public x_consclass(x_elemclass elem, x_listclass tail, IStrategoTerm strategoTerm) {
-              super(strategoTerm);
+              super(strategoTerm, 1 + tail.size());
               this.elem = elem;
               this.tail = tail;
-              this.size = 1 + tail.size();
-            }
-        
-            @Override
-            public int size() {
-              return size;
             }
         
             @Override
@@ -181,7 +181,7 @@ rules
           public static final class x_nilclass extends x_listclass {
         
             private x_nilclass() {
-              super(null);
+              super(null, 0);
             }
         
             @Override
@@ -191,11 +191,6 @@ rules
         
             public x_nilclass tail() {
               throw new IllegalStateException("No tail of a Nil"); // TODO: maybe throw PremiseFailure
-            }
-        
-            @Override
-            public int size() {
-              return 0;
             }
         
             @Override
