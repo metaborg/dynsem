@@ -99,15 +99,21 @@ rules
 
           @Override
           public x_elemclass[] toArray() {
+            if(size == 0) {
+              return new x_elemclass[0]; 
+            }
             x_elemclass[] arr = new x_elemclass[size()];
-            x_listclass head = this;
+            x_consclass head = (x_consclass) this;
             for(int idx = 0; idx < arr.length; idx++) {
-              arr[idx] = head.elem();
-              head = head.tail();
+              arr[idx] = head.elem;
+              x_listclass tail = head.tail;
+              if(tail instanceof x_consclass){
+                head = (x_consclass) tail;
+              }
             }
             return arr;
           }
-          
+
           @Override
           public x_listclass reverse() {
             IStrategoTerm sterm = getStrategoTerm();
