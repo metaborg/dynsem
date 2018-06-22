@@ -26,7 +26,7 @@ public abstract class NewFrame extends NativeOpBuild {
 	@Override
 	public abstract DynamicObject executeGeneric(VirtualFrame frame);
 
-	@Specialization(guards = { "scopeident == scopeident_cached" })
+	@Specialization(guards = { "scopeident.equals(scopeident_cached)" }, limit = "10")
 	public DynamicObject executeCachedProto(ScopeIdentifier scopeident, Object links,
 			@Cached("lookupListClass()") Class<? extends IListTerm<FrameLink>> linksListClass,
 			@Cached("scopeident") ScopeIdentifier scopeident_cached,
@@ -38,7 +38,7 @@ public abstract class NewFrame extends NativeOpBuild {
 	}
 
 
-	@Specialization(replaces = "executeCachedProto")
+	@Specialization // (replaces = "executeCachedProto")
 	public DynamicObject executeUncached(ScopeIdentifier scopeident, Object links,
 			@Cached("lookupListClass()") Class<? extends IListTerm<FrameLink>> linksListClass,
 			@Cached("createFrameCloner()") CloneFrame cloner) {
@@ -64,11 +64,6 @@ public abstract class NewFrame extends NativeOpBuild {
 		CompilerAsserts.neverPartOfCompilation();
 		return getContext().getTermRegistry().getListClass(FrameLink.class);
 	}
-
-	// protected DynamicObject lookupProtoFrame(ScopeIdentifier scopeident) {
-	// CompilerAsserts.neverPartOfCompilation();
-	// return getContext().getProtoFrame(scopeident);
-	// }
 
 	public static NewFrame create(SourceSection source, TermBuild t, TermBuild links) {
 		return FrameNodeFactories.createNewFrame(source, t, links);
