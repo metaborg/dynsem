@@ -5,6 +5,7 @@ import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -21,7 +22,9 @@ public final class ScopeIdentifier {
 		this.resource = resource;
 	}
 
+	@TruffleBoundary
 	public static final ScopeIdentifier create(IStrategoTerm t) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.isTermAppl(t);
 		IStrategoAppl identTerm = (IStrategoAppl) t;
 		assert Tools.hasConstructor(identTerm, "Scope", 2);

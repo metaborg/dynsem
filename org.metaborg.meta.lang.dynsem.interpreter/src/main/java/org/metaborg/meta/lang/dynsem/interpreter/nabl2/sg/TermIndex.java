@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -20,7 +21,9 @@ public final class TermIndex {
 		this.offset = offset;
 	}
 
+	@TruffleBoundary
 	public static TermIndex create(IStrategoAppl termIndexT) {
+		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(termIndexT, "TermIndex", 2);
 		return new TermIndex(Tools.javaStringAt(termIndexT, 0), Tools.javaIntAt(termIndexT, 1));
 	}
