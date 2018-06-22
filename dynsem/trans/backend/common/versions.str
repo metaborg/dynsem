@@ -19,6 +19,6 @@ strategies
 
   ver-nailgun = !"0.9.1"
   
-  ver-truffle = !"1.0.0-rc1"
+  ver-truffle = !"1.0.0-rc2"
   
   ver-logback = !"1.1.2"
