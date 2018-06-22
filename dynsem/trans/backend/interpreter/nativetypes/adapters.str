@@ -24,6 +24,7 @@ rules
       
         import ~x:<get-opt> TopPkg().TypesGen;
         import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:$[[<get-opt> TermPkg()].checks.*];
         import ~x:<get-opt> NativePkg().*;
         import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
         import com.oracle.truffle.api.dsl.NodeChild;
@@ -33,10 +34,13 @@ rules
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
         @NodeChildren({ @NodeChild(value="receiver", type=TermBuild.class), ~child* })
-        public abstract class x_adapter extends TermBuild {
-
+        public abstract class x_adapter extends NativeOpBuild {
+          
+          ~finit*
+          
           public x_adapter(SourceSection source) {
             super(source);
+            bstm1*
           }
           
           public static x_adapter create(param2*) {
@@ -64,10 +68,23 @@ rules
       e_logic := e |[ receiver.~x:fun(e1*) ]|;
       if <?SimpleSort(<id>); lookup-def(|Types()); has-prop(|JClass())> sort_res
       then
-        x_resclassname := <classname-of> x_res;
-        e_checkedlogic := e |[ TypesGen.~x:$[as[x_resclassname]](e_logic) ]|
+        if <jclass-has-checkedbuilder> sort_res
+        then
+          x_checkedbuilder := <jclass-checkedbuilder> sort_res;
+          x_checkedbuilderng := <jclass-checkedbuilder-ng> sort_res;
+          finit* := [class-body-dec |[ @Child private x_checkedbuilder typecast; ]|];
+          bstm1* := [bstm* |[ this.typecast = x_checkedbuilderng.create(null); ]|];
+          e_checkedlogic := e |[ this.typecast.executeEvaluated(e_logic) ]|
+        else
+          finit* := [];
+          bstm1* := [];
+          x_resclassname := <classname-of> x_res;
+          e_checkedlogic := e |[ TypesGen.~x:$[as[x_resclassname]](e_logic) ]|
+        end
       else
-        e_checkedlogic := e_logic
+        e_checkedlogic := e_logic;
+        finit* := [];
+        bstm1* := []
       end;
       e2* := [ e |[ receiver ]|, e1* ];
       param2* := <concat> [ [ param |[ SourceSection source ]|, param |[ TermBuild receiver ]| ], <ds-to-interp-nattype-func-adapter-create-params> kid* ];
