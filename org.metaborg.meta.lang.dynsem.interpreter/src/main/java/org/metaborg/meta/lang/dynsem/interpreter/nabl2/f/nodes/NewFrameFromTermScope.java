@@ -11,12 +11,11 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class NewFrameFromTermScope extends NativeOpBuild {
 
-	@Child private NewFrame newframe;
+	@Child private NewFrame2 newframe;
 
 	public NewFrameFromTermScope(SourceSection source, TermBuild ast, TermBuild links) {
 		super(source);
-		this.newframe = FrameNodeFactories.createNewFrame(source, ScopeNodeFactories.createScopeOfTerm(source, ast),
-				links);
+		this.newframe = FrameNodeFactories.createNewFrame2(source, ScopeNodeFactories.createScopeOfTerm(source, ast));
 	}
 
 	@Specialization

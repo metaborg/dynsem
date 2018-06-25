@@ -5,7 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
 public abstract class Addr implements IApplTerm {
 
 	@Override
-	public Class<?> getSortClass() {
+	public final Class<?> getSortClass() {
 		return Addr.class;
 	}
 

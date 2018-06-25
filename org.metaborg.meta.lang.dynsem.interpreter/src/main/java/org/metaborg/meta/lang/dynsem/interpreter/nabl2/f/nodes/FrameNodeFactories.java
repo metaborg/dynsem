@@ -17,17 +17,8 @@ public final class FrameNodeFactories {
 		return ScopeOfFrameNodeGen.create(source, frm);
 	}
 
-	public static NewFrameEdgeLink createNewFrameEdgeLink(SourceSection source, TermBuild label, TermBuild frm) {
-		return NewFrameEdgeLinkNodeGen.create(source, label, frm);
-	}
-
-	public static NewFrameImportLink createNewFrameImportLink(SourceSection source, TermBuild label, TermBuild occ,
-			TermBuild frm) {
-		return NewFrameImportLinkNodeGen.create(source, label, occ, frm);
-	}
-
-	public static NewFrame createNewFrame(SourceSection source, TermBuild scope, TermBuild links) {
-		return NewFrameNodeGen.create(source, scope, links);
+	public static NewFrame2 createNewFrame2(SourceSection source, TermBuild scope) {
+		return NewFrame2NodeGen.create(source, scope);
 	}
 
 	public static NewFrameFromTermScope createNewFrameFromTermScope(SourceSection source, TermBuild ast,

@@ -8,12 +8,12 @@ import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
-public final class FrameEdgeIdentifier implements FrameLinkIdentifier {
-	private final ALabel linkLabel;
+public final class FrameEdgeIdentifier extends FrameLinkIdentifier {
+
 	private final ScopeIdentifier toScope;
 
 	public FrameEdgeIdentifier(ALabel linkLabel, ScopeIdentifier toScope) {
-		this.linkLabel = linkLabel;
+		super(linkLabel);
 		this.toScope = toScope;
 	}
 

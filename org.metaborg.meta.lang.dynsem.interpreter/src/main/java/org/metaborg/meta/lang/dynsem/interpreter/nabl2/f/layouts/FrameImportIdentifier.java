@@ -8,12 +8,11 @@ import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
-public final class FrameImportIdentifier implements FrameLinkIdentifier {
-	private final ALabel linkLabel;
+public final class FrameImportIdentifier extends FrameLinkIdentifier {
 	private final Occurrence viaOccurrence;
 
 	public FrameImportIdentifier(ALabel linkLabel, Occurrence viaOccurrence) {
-		this.linkLabel = linkLabel;
+		super(linkLabel);
 		this.viaOccurrence = viaOccurrence;
 	}
 

@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FrameLink;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.FLink;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLinkIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
@@ -23,20 +23,22 @@ public abstract class AddFrameLink extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "shape_cached.check(frm)", "link.link().equals(linkIdentifier_cached)" })
-	public DynamicObject doLinkCached(DynamicObject frm, FrameLink link, @Cached("frm.getShape()") Shape shape_cached,
-			@Cached("link.link()") FrameLinkIdentifier linkIdentifier_cached,
-			@Cached("shape_cached.getProperty(linkIdentifier_cached)") Property property_cached) {
+	@Specialization(guards = { "shape_cached.check(frm)", "linkId_cached.equals(link.link())" })
+	public DynamicObject doLinkCached(DynamicObject frm, FLink link, @Cached("frm.getShape()") Shape shape_cached,
+			@Cached("link.link()") FrameLinkIdentifier linkId_cached,
+			@Cached("shape_cached.getProperty(linkId_cached)") Property property_cached) {
+
 		try {
 			property_cached.set(frm, link.frame(), shape_cached);
 		} catch (IncompatibleLocationException | FinalLocationException e) {
 			throw new IllegalStateException(e);
 		}
+
 		return frm;
 	}
 
 	@Specialization
-	public DynamicObject doLink(DynamicObject frm, FrameLink link) {
+	public DynamicObject doLink(DynamicObject frm, FLink link) {
 		frm.set(link.link(), link.frame());
 		return frm;
 	}
