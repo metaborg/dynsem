@@ -45,7 +45,7 @@ public final class ScopeNodeFactories {
 
 	public static CreateScope createCreateScope(SourceSection source, TermBuild scopeIdent, TermBuild decs,
 			TermBuild decTypes, TermBuild refs, TermBuild edges, TermBuild imports) {
-		return ScopeNodeFactories.createCreateScope(source, scopeIdent, decs, decTypes, refs, edges, imports);
+		return CreateScopeNodeGen.create(source, scopeIdent, decs, decTypes, refs, edges, imports);
 	}
 
 	public static AssocScopeOf createAssocScopeOf(SourceSection source, TermBuild occurrence, TermBuild label) {
@@ -56,7 +56,8 @@ public final class ScopeNodeFactories {
 		return ScopesEqualNodeGen.create(source, s1, s2);
 	}
 
-	public static LinkedScopesOverLabel createLinkedScopesOverLabel(SourceSection source, TermBuild scope, TermBuild label) {
+	public static LinkedScopesOverLabel createLinkedScopesOverLabel(SourceSection source, TermBuild scope,
+			TermBuild label) {
 		return LinkedScopesOverLabelNodeGen.create(source, scope, label);
 	}
 
