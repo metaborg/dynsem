@@ -4,6 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureExcep
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
 import com.oracle.truffle.api.CallTarget;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.source.SourceSection;
@@ -45,6 +46,7 @@ public final class Expanding extends DispatchChainRoot {
 	}
 
 	private RuleResult expand(Object[] args) {
+		CompilerDirectives.transferToInterpreterAndInvalidate();
 		while (nextCandidateIndex < candidates.length) {
 			CallTarget candidate = candidates[nextCandidateIndex];
 			nextCandidateIndex++;
