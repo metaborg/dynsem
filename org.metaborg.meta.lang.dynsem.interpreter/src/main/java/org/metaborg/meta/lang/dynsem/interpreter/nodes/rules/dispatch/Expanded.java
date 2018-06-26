@@ -5,6 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -40,6 +41,12 @@ public class Expanded extends DispatchChainRoot {
 			}
 		}
 		return rightChain.execute(args);
+	}
+	
+	@TruffleBoundary
+	@Override
+	public String toString() {
+		return "Expanded(left: " + leftChain + ", right: " + rightChain + ")";
 	}
 
 }
