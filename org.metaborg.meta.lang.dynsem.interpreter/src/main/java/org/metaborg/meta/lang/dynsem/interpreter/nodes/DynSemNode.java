@@ -75,14 +75,11 @@ public abstract class DynSemNode extends Node {
 	@TruffleBoundary
 	private static Optional<ITerm> internal_getPropertyValue(NaBL2Context nabl2ctx, TermIndex index, ITerm key) {
 		Optional<ITerm> prop = nabl2ctx.getSolution().astProperties().getValue(index, key);
-		if (!prop.isPresent()) {
-			System.out.println("oops");
-		}
 		return prop;
 	}
 
 	@TruffleBoundary
-	private static TermIndex getTermIndex(IStrategoTerm sterm) {
+	protected static TermIndex getTermIndex(IStrategoTerm sterm) {
 		if (sterm == null) {
 			throw new IllegalArgumentException("Primitive must be called on an AST node.");
 		}
