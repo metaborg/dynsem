@@ -262,9 +262,9 @@ rules /* resugar list construction */
        tuple-class := <jclass-term-qual> tuple-sort
   
   list-to-jtypedlist:
-    Cast(MapKeys(t), list-sort) -> TypedMapKeys(t, keylist-class)
+    Cast(MapKeys(t), ListSort(ety)) -> TypedMapKeys(t, key-class)
     where
-      keylist-class := <jclass-term-qual> list-sort
+      key-class := <jclass-term-qual> ety
   
   list-to-jtypedlist:
     Cast(MapValues(t), list-sort) -> TypedMapValues(t, vallist-class)
