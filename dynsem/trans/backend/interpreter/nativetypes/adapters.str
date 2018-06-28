@@ -5,6 +5,7 @@ imports
   signatures/dynsem/Signatures-sig
   backend/common/opts
   backend/interpreter/names
+  backend/interpreter/terms/-
   analysis/-
   libjava-front
 
@@ -66,8 +67,8 @@ rules
       param1* := [ param |[ x_recvtype receiver ]|, param0*];
       e1* := <ds-to-interp-nattype-func-adapter-eval-exprs> kid*;
       e_logic := e |[ receiver.~x:fun(e1*) ]|;
-      if <?SimpleSort(<id>); lookup-def(|Types()); has-prop(|JClass())> sort_res
-      then
+//      if <?SimpleSort(<id>); lookup-def(|Types()); has-prop(|JClass())> sort_res
+//      then
         if <jclass-has-checkedbuilder> sort_res
         then
           x_checkedbuilder := <jclass-checkedbuilder> sort_res;
@@ -79,13 +80,13 @@ rules
           finit* := [];
           bstm1* := [];
           x_resclassname := <classname-of> x_res;
-          e_checkedlogic := e |[ TypesGen.~x:$[as[x_resclassname]](e_logic) ]|
-        end
-      else
-        e_checkedlogic := e_logic;
-        finit* := [];
-        bstm1* := []
-      end;
+          e_checkedlogic := e |[ TypesGen.~x:$[as[<jclass-box> x_resclassname]](e_logic) ]|
+        end;
+//      else
+//        e_checkedlogic := e_logic;
+//        finit* := [];
+//        bstm1* := []
+//      end;
       e2* := [ e |[ receiver ]|, e1* ];
       param2* := <concat> [ [ param |[ SourceSection source ]|, param |[ TermBuild receiver ]| ], <ds-to-interp-nattype-func-adapter-create-params> kid* ];
       e3* := <concat> [ [e |[ source ]|, e |[ receiver ]| ], <ds-to-interp-nattype-func-adapter-create-exprs> kid* ]
