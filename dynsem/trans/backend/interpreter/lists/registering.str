@@ -4,6 +4,7 @@ imports
   signatures/-
   signatures/dynsem/-
   backend/interpreter/-
+  backend/interpreter/terms/-
   backend/interpreter/lists/util
 
 rules
@@ -18,7 +19,7 @@ rules
         initWrappers.put(x_listclass.class, new ITermInit() {
           @Override
           public x_listclass apply(Object... objects) {
-            return x_listclass.fromArray((x_elemclass[]) objects);
+            return x_listclass.fromArray((x_elemclassboxed[]) objects);
           }
         });
         builderFactories.put(x_listclass.class, new ITermBuildFactory() {
@@ -36,6 +37,7 @@ rules
       ]|
     where
       x_elemclass := <jclass-term> es;
+      x_elemclassboxed := <jclass-box> x_elemclass;
       x_listclass := <jclass-term> ls;
       x_listbuildgenclass := <jclass-termbuilder> ls;
       x_listmatchclass := <jclass-matcher> ls
