@@ -120,13 +120,16 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 	@ExplodeLoop
 	private void handleInterrupted(VirtualFrame frame, Object[] args, StatefulControlFlowException ex) {
 		CompilerAsserts.compilationConstant(args.length);
-		frame.setObject(resultTSlot, ex.getThrown());
 
-		final Object[] thrownRwComponents = ex.getComponents();
-		assert thrownRwComponents.length == numRwComponents;
+		final Object[] resultRwComponents = ex.getComponents();
+		assert resultRwComponents.length == numRwComponents;
 
-		for (int i = args.length - 1; i >= args.length - numRwComponents; i--) {
-			args[i] = thrownRwComponents[i - numRwComponents - 1];
+		final int numRoComponents = args.length - numRwComponents - 1;
+		final int args_base_index = numRoComponents + 1;
+
+		for (int i = 0; i < numRwComponents; i++) {
+			args[args_base_index + i] = resultRwComponents[i];
 		}
+		frame.setObject(resultTSlot, ex.getThrown());
 	}
 }
