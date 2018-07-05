@@ -32,7 +32,7 @@ public abstract class SetAtAddr extends NativeOpBuild {
 		} catch (IncompatibleLocationException | FinalLocationException e) {
 			throw new IllegalStateException(e);
 		}
-		return null;
+		return val;
 	}
 
 	@Specialization(replaces = "doSetCached")
