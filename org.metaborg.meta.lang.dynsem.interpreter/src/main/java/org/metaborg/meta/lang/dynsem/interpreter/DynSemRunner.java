@@ -13,7 +13,7 @@ import org.metaborg.core.project.IProject;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2Context;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.spoofax.core.Spoofax;
-import org.metaborg.spoofax.core.context.scopegraph.ISpoofaxScopeGraphContext;
+import org.metaborg.spoofax.core.context.constraint.IConstraintContext;
 import org.metaborg.spoofax.core.shell.CLIUtils;
 import org.metaborg.spoofax.core.unit.ISpoofaxAnalyzeUnit;
 import org.metaborg.spoofax.core.unit.ISpoofaxInputUnit;
@@ -24,6 +24,9 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import com.google.common.collect.ImmutableMap;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+
+import mb.nabl2.spoofax.analysis.IResult;
+import mb.nabl2.stratego.StrategoBlob;
 
 public class DynSemRunner {
 	private final Spoofax S;
@@ -84,12 +87,15 @@ public class DynSemRunner {
 					throw new MetaborgException("Analysis returned errors.");
 				}
 				ImmutableMap.Builder<String, Object> propBuilder = ImmutableMap.builder();
-				if (context instanceof ISpoofaxScopeGraphContext) {
-					ISpoofaxScopeGraphContext<?> scopeGraphContext = (ISpoofaxScopeGraphContext<?>) context;
-					scopeGraphContext.unit(file.getName().getURI()).solution().ifPresent(solution -> {
-						propBuilder.put(NaBL2Context.class.getName(),
-								new NaBL2Context(solution.findAndLock(), S.termFactoryService.getGeneric()));
-					});
+				if (context instanceof IConstraintContext) {
+					IConstraintContext constraintContext = (IConstraintContext) context;
+					if (constraintContext.hasAnalysis(file)) {
+						IStrategoTerm analysisTerm = constraintContext.getAnalysis(file);
+						StrategoBlob.match(analysisTerm, IResult.class).ifPresent(r -> {
+							propBuilder.put(NaBL2Context.class.getName(),
+									new NaBL2Context(r.solution(), S.termFactoryService.getGeneric()));
+						});
+					}
 				}
 				props = propBuilder.build();
 				if (analyzed.hasAst()) {
