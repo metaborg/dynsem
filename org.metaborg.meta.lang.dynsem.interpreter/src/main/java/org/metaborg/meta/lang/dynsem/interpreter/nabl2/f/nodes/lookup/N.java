@@ -46,7 +46,7 @@ public abstract class N extends PathStep {
 		return next.executeLookup(nextFrame);
 	}
 
-	@Specialization(replaces = "lookupCached")
+	@Specialization // (replaces = "lookupCached")
 	public FrameAddr lookup(DynamicObject frm) {
 		DynamicObject nextFrame = FrameUtils.layout().getType().cast(frm.get(linkIdent));
 		assert FrameLayoutImpl.INSTANCE.getScope(nextFrame).equals(next.scopeIdent);

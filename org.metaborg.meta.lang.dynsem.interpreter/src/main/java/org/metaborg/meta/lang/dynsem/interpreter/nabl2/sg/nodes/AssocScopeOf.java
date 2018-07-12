@@ -11,6 +11,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeGraphLayo
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 
+import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -25,8 +26,15 @@ public abstract class AssocScopeOf extends NativeOpBuild {
 		super(source);
 	}
 
+	@Specialization(guards = { "occurrence == occurrence_cached", "label_cached.equals(label)" }, limit = "20")
+	public ScopeIdentifier doGetCached(Occurrence occurrence, ALabel label,
+			@Cached("occurrence") Occurrence occurrence_cached, @Cached("label") ALabel label_cached,
+			@Cached("doGet(occurrence_cached, label_cached)") ScopeIdentifier scope) {
+		return scope;
+	}
+
 	@Specialization
-	public ScopeIdentifier executeGet(Occurrence occurrence, ALabel label) {
+	public ScopeIdentifier doGet(Occurrence occurrence, ALabel label) {
 		DynSemContext ctx = getContext();
 		DynamicObject nabl2 = ctx.getNaBL2Solution();
 		// DynamicObject types = NaBL2LayoutImpl.INSTANCE.getTypes(nabl2);

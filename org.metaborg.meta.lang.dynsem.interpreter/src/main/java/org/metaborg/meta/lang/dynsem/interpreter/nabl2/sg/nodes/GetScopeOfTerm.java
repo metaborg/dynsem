@@ -29,7 +29,7 @@ public abstract class GetScopeOfTerm extends NativeOpBuild {
 		return sid_cached;
 	}
 
-	@Specialization(replaces = "executeCached")
+	@Specialization // (replaces = "executeCached")
 	public ScopeIdentifier executeUncached(ITerm t) {
 		return getScopeIdentifier(t);
 	}

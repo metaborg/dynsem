@@ -23,7 +23,7 @@ public abstract class NewFrame2 extends NativeOpBuild {
 	@Override
 	public abstract DynamicObject executeGeneric(VirtualFrame frame);
 
-	@Specialization(guards = { "scopeId_cached.equals(scopeId)" })
+	@Specialization(guards = { "scopeId_cached.equals(scopeId)" }, limit = "20")
 	public DynamicObject doNewFrameCached(ScopeIdentifier scopeId, @Cached("scopeId") ScopeIdentifier scopeId_cached,
 			@Cached("createFrameCloner()") CloneFrame cloner,
 			@Cached("getContext().getProtoFrame(scopeId_cached)") DynamicObject protoFrame_cached) {

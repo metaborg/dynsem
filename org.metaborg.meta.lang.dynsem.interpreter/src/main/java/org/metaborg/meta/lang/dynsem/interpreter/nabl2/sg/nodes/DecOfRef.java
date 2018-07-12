@@ -24,7 +24,7 @@ public abstract class DecOfRef extends NativeOpBuild {
 		return dec;
 	}
 
-	@Specialization(replaces = "getCached")
+	@Specialization // (replaces = "getCached")
 	public Occurrence getUncached(Occurrence ref) {
 		return ((Path) NaBL2LayoutImpl.INSTANCE.getNameResolution(getContext().getNaBL2Solution()).get(ref))
 				.getTargetDec();
