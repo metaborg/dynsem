@@ -20,14 +20,14 @@ public abstract class GetAtAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "addr.key() == key_cached", "shape_cached.check(addr.frame())" })
+	@Specialization(guards = { "addr.key() == key_cached", "shape_cached.check(addr.frame())" }, limit = "20")
 	public Object doGetCached(FrameAddr addr, @Cached("addr.key()") Occurrence key_cached,
 			@Cached("addr.frame().getShape()") Shape shape_cached,
 			@Cached("shape_cached.getProperty(key_cached)") Property slot_property) {
 		return slot_property.get(addr.frame(), shape_cached);
 	}
 
-	@Specialization(replaces = "doGetCached")
+	@Specialization // (replaces = "doGetCached")
 	public Object doGet(FrameAddr addr) {
 		return addr.frame().get(addr.key());
 	}

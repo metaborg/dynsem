@@ -26,7 +26,7 @@ public abstract class LinkedScopesOverLabel extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "scope.equals(scope_cached)", "label.equals(label_cached)" })
+	@Specialization(guards = { "scope.equals(scope_cached)", "label.equals(label_cached)" }, limit = "1000")
 	public Object doGetScopesCached(ScopeIdentifier scope, ALabel label, @Cached("scope") ScopeIdentifier scope_cached,
 			@Cached("label") ALabel label_cached,
 			@Cached("createListConstructor()") ITermInit listConstructor,
@@ -34,7 +34,7 @@ public abstract class LinkedScopesOverLabel extends NativeOpBuild {
 		return scopesList;
 	}
 
-	@Specialization // (replaces = "doCached")
+	@Specialization // (replaces = "doGetScopesCached")
 	public Object doGetScopes(ScopeIdentifier scope, ALabel label,
 			@Cached("createListConstructor()") ITermInit listConstructor) {
 		return listConstructor.apply((Object[]) lookupScopes(scope, label));

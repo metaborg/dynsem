@@ -25,7 +25,7 @@ public abstract class DeclsOfScope extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "scope == scope_cached" })
+	@Specialization(guards = { "scope == scope_cached" }, limit = "20")
 	public Object executeCached(ScopeIdentifier scope, @Cached("scope") ScopeIdentifier scope_cached,
 			@Cached(value = "lookupScopeDecls(scope)", dimensions = 1) Occurrence[] decs_cached,
 			@Cached("createListConstructor()") ITermInit listConstructor,
@@ -33,7 +33,7 @@ public abstract class DeclsOfScope extends NativeOpBuild {
 		return list_cached;
 	}
 
-	@Specialization(replaces = "executeCached")
+	@Specialization // (replaces = "executeCached")
 	public Object executeUncached(ScopeIdentifier scope,
 			@Cached("createListConstructor()") ITermInit listConstructor) {
 		return listConstructor.apply((Object[]) lookupScopeDecls(scope));

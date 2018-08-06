@@ -23,7 +23,7 @@ public abstract class SetAtAddr extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "addr.key() == key_cached", "shape_cached.check(addr.frame())" })
+	@Specialization(guards = { "addr.key() == key_cached", "shape_cached.check(addr.frame())" }, limit = "20")
 	public Object doSetCached(FrameAddr addr, Object val, @Cached("addr.key()") Occurrence key_cached,
 			@Cached("addr.frame().getShape()") Shape shape_cached,
 			@Cached("shape_cached.getProperty(key_cached)") Property slot_property) {
@@ -35,7 +35,7 @@ public abstract class SetAtAddr extends NativeOpBuild {
 		return val;
 	}
 
-	@Specialization(replaces = "doSetCached")
+	@Specialization // (replaces = "doSetCached")
 	public Object doSet(FrameAddr addr, Object val) {
 		addr.frame().set(addr.key(), val);
 		return val;

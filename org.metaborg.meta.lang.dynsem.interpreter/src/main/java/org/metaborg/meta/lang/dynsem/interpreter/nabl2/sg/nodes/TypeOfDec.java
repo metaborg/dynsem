@@ -17,13 +17,13 @@ public abstract class TypeOfDec extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "dec == dec_cached" })
+	@Specialization(guards = { "dec == dec_cached" }, limit = "20")
 	public Object getTypeCached(Occurrence dec, @Cached("dec") Occurrence dec_cached,
 			@Cached("getTypeUncached(dec)") Object type) {
 		return type;
 	}
 
-	@Specialization(replaces = "getTypeCached")
+	@Specialization // (replaces = "getTypeCached")
 	public Object getTypeUncached(Occurrence dec) {
 		return NaBL2LayoutImpl.INSTANCE.getTypes(getContext().getNaBL2Solution()).get(dec);
 	}

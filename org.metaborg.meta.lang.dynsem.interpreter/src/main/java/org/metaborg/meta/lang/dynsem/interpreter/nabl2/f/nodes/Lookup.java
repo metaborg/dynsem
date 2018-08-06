@@ -34,13 +34,13 @@ public abstract class Lookup extends NativeOpBuild {
 
 	// FIXME: this is the place to cache the lookup. if the ref is constant and the frame shape is constant then teh
 	// Location part of teh frameaddr will also be constant and then we don't need to reevaluate the entire chain
-	@Specialization(guards = { "ref.equals(ref_cached)" })
+	@Specialization(guards = { "ref.equals(ref_cached)" }, limit = "20")
 	public FrameAddr executeCachedDirect(DynamicObject frm, Occurrence ref, @Cached("ref") Occurrence ref_cached,
 			@Cached("create(lookupPathResolver(ref_cached))") DirectCallNode resolverNode) {
 		return (FrameAddr) resolverNode.call(new Object[] { frm });
 	}
 
-	@Specialization(replaces = "executeCachedDirect")
+	@Specialization // (replaces = "executeCachedDirect")
 	public FrameAddr executeIndirect(DynamicObject frm, Occurrence ref,
 			@Cached("create()") IndirectCallNode resolverNode) {
 		return (FrameAddr) resolverNode.call(lookupPathResolver(ref), new Object[] { frm });

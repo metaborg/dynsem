@@ -30,7 +30,7 @@ abstract class IsReversedOrder extends DynSemNode {
 		return swapped;
 	}
 
-	@Specialization(replaces = "areLabelsSwappedCached")
+	@Specialization // (replaces = "areLabelsSwappedCached")
 	public boolean areLabelsSwapped(ALabel l1, ALabel l2,
 			@Cached("getOrderSwapTermClass()") Class<?> orderSwapTermClass,
 			@Cached("getTermInit(orderSwapTermClass)") ITermInit orderSwapTermInit) {
