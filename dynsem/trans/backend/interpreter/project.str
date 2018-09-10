@@ -37,10 +37,10 @@ rules
             <plugins>
               <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>[<ver-maven-compiler-plugin>]</version>
                 <configuration>
-                  <source>[<ver-maven-compiler-plugin>]</source>
-                  <target>[<ver-maven-compiler-plugin>]</target>
+                  <source>[<ver-source-java-version>]</source>
+                  <target>[<ver-target-java-version>]</target>
                 </configuration>
               </plugin>
               <plugin>
@@ -281,7 +281,7 @@ rules
       /.classpath
       /.settings
       /.factorypath
-      [<get-opt> ResourceDirAbs()]/signatures-digest.cache
+      [<get-opt> ResourceDirRel()]/signatures-digest.cache
       [<get-opt> TargetSpecRel()]
       [<get-opt> TargetTableRel()]
       [<get-opt> TargetLogbackRel()]

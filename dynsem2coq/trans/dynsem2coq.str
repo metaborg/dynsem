@@ -11,3 +11,6 @@ rules // HACKS
     file -> str
     where
       str := <prim("STRSGLR_parse_string", id|file, (), (), file)>
+
+  pp-dynsem-Premise-string = fail
+  

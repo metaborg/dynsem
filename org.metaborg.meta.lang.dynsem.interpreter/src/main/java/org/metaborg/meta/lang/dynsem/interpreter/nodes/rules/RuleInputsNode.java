@@ -25,6 +25,7 @@ public class RuleInputsNode extends DynSemNode {
 		this.componentPatterns = componentPatterns;
 	}
 
+	@ExplodeLoop
 	public void execute(VirtualFrame frame) {
 		final Object[] args = frame.getArguments();
 
@@ -32,14 +33,9 @@ public class RuleInputsNode extends DynSemNode {
 		inPattern.executeMatch(frame, args[0]);
 
 		// evaluate the component patterns
-		evaluateComponentPatterns(frame, args);
-	}
-
-	@ExplodeLoop
-	private void evaluateComponentPatterns(VirtualFrame frame, Object[] args) {
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
-			componentPatterns[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), args, i + 1));
+			componentPatterns[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), args, i + 1, this));
 		}
 	}
 

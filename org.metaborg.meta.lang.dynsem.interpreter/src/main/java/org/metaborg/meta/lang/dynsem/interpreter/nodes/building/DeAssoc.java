@@ -3,7 +3,10 @@
  */
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.MapUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -34,13 +37,13 @@ public abstract class DeAssoc extends TermBuild {
 	}
 
 	@Specialization
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object doMap(PersistentMap map, Object key) {
-		Object res = map.get(key);
-		if (res != null) {
-			return res;
+		Object res = MapUtils.get(map, key);
+		if (res == null) {
+			throw new ReductionFailure("No map entry for key: " + key, InterpreterUtils.createStacktrace(), this);
 		}
-		throw new IllegalStateException("No map entry for key: " + key);
+		return res;
 	}
 
 	@Specialization

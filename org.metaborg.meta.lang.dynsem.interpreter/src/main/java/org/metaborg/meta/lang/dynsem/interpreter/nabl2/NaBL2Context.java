@@ -1,8 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 
-import org.metaborg.meta.nabl2.solver.ISolution;
-import org.metaborg.meta.nabl2.stratego.StrategoTerms;
 import org.spoofax.interpreter.terms.ITermFactory;
+
+import mb.nabl2.solver.ISolution;
+import mb.nabl2.stratego.StrategoTerms;
 
 public class NaBL2Context {
 

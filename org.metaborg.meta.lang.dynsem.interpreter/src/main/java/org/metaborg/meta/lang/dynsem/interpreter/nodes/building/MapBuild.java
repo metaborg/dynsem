@@ -6,11 +6,14 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.github.krukow.clj_ds.PersistentMap;
+import com.github.krukow.clj_ds.TransientMap;
 import com.github.krukow.clj_lang.PersistentHashMap;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.dsl.NodeChild;
+import com.oracle.truffle.api.dsl.NodeChildren;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class MapBuild extends TermBuild {
@@ -33,7 +36,7 @@ public abstract class MapBuild extends TermBuild {
 		throw new RuntimeException("Unsupported map build term: " + t);
 	}
 
-	public static final class EmptyMapBuild extends MapBuild {
+	public abstract static class EmptyMapBuild extends MapBuild {
 
 		public EmptyMapBuild(SourceSection source) {
 			super(source);
@@ -42,16 +45,11 @@ public abstract class MapBuild extends TermBuild {
 		public static EmptyMapBuild create(IStrategoAppl t) {
 			assert Tools.hasConstructor(t, "Map_", 1);
 			assert Tools.isTermList(t.getSubterm(0)) && Tools.listAt(t, 0).size() == 0;
-			return new EmptyMapBuild(SourceUtils.dynsemSourceSectionFromATerm(t));
+			return MapBuildFactory.EmptyMapBuildNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 
-		@Override
-		public Object executeGeneric(VirtualFrame frame) {
-			return executeMap(frame);
-		}
-
-		@Override
-		public PersistentMap<?, ?> executeMap(VirtualFrame frame) {
+		@Specialization
+		public PersistentMap<?, ?> executeEmpty() {
 			return create();
 		}
 
@@ -61,15 +59,12 @@ public abstract class MapBuild extends TermBuild {
 		}
 	}
 
-	public static final class BindMapBuild extends MapBuild {
+	@NodeChildren({ @NodeChild(value = "key", type = TermBuild.class),
+			@NodeChild(value = "val", type = TermBuild.class) })
+	public static abstract class BindMapBuild extends MapBuild {
 
-		@Child private TermBuild keyNode;
-		@Child private TermBuild valNode;
-
-		public BindMapBuild(TermBuild keyNode, TermBuild valNode, SourceSection source) {
+		public BindMapBuild(SourceSection source) {
 			super(source);
-			this.keyNode = keyNode;
-			this.valNode = valNode;
 		}
 
 		public static BindMapBuild create(IStrategoAppl t, FrameDescriptor fd) {
@@ -81,25 +76,21 @@ public abstract class MapBuild extends TermBuild {
 			TermBuild keyNode = TermBuild.create(Tools.applAt(bind, 0), fd);
 			TermBuild valNode = TermBuild.create(Tools.applAt(bind, 1), fd);
 
-			return new BindMapBuild(keyNode, valNode, SourceUtils.dynsemSourceSectionFromATerm(t));
+			return MapBuildFactory.BindMapBuildNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), keyNode,
+					valNode);
 		}
 
-		@Override
-		public Object executeGeneric(VirtualFrame frame) {
-			return executeMap(frame);
+		@Specialization
+		public PersistentMap<?, ?> executeBind(Object key, Object val) {
+			return doCreateAndBind(key, val);
 		}
 
-		@Override
-		public PersistentMap<?, ?> executeMap(VirtualFrame frame) {
-			Object key = keyNode.executeGeneric(frame);
-			Object val = valNode.executeGeneric(frame);
-			return create(key, val);
-		}
-
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@TruffleBoundary
-		private PersistentMap<?, ?> create(Object key, Object val) {
-			return PersistentHashMap.emptyMap().plus(key, val);
+		private PersistentMap<?, ?> doCreateAndBind(Object key, Object val) {
+			return ((TransientMap) PersistentHashMap.EMPTY.asTransient()).plus(key, val).persist();
 		}
+
 	}
 
 }

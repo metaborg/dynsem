@@ -12,6 +12,7 @@ imports
   analysis/-
   
 rules
+
 //  ds-to-interp-specification-editor:
 //    (_, _, ast, path, project-path) -> None()
 //    where
@@ -24,14 +25,16 @@ rules
   
   ds-to-interp(|path, project-path, local-project-path) =
     log-timed(
-      ds-backend-copy-table;
-      ds-to-interp-specification(|path, project-path); ds-backend-write-spec;
-      ds-to-interp-terms(|path, local-project-path)
+      where(ds-backend-copy-table);
+      module-to-core(|path, project-path);
+      where(in-project-path(desugar-for-interpreter-module|project-path); ds-backend-write-spec);
+      where(ds-to-interp-terms(|path, local-project-path))
     |$[Generating interpreter at: [<get-opt> GenProject()]])
   
-  ds-to-interp-specification(|path, project-path) =
-    module-to-core(|path, project-path);
-    in-project-path(desugar-for-interpreter-module|project-path)
+ 
+//  ds-to-interp-specification(|path, project-path) =
+//    module-to-core(|path, project-path);
+//    in-project-path(desugar-for-interpreter-module|project-path)
   
   ds-to-interp-terms(|path, local-project-path) = 
     in-project-path(ds-to-interp-terms-module|local-project-path)

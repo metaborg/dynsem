@@ -34,15 +34,13 @@ public class RuleTarget extends Node {
 	public RuleResult execute(VirtualFrame frame) {
 		Object result = rhsNode.executeGeneric(frame);
 
-		CompilerAsserts.compilationConstant(componentNodes.length);
-
-		Object[] componentValues = new Object[componentNodes.length];
+		Object[] resultComps = new Object[componentNodes.length];
 
 		for (int i = 0; i < componentNodes.length; i++) {
-			componentValues[i] = componentNodes[i].executeGeneric(frame);
+			resultComps[i] = componentNodes[i].executeGeneric(frame);
 		}
 
-		return new RuleResult(result, componentValues);
+		return new RuleResult(result, resultComps);
 	}
 
 	public static RuleTarget create(IStrategoAppl targetT, FrameDescriptor fd) {

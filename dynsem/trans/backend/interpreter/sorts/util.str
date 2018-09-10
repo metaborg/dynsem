@@ -1,0 +1,22 @@
+module backend/interpreter/constructors/util
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  
+strategies
+  
+  is-generatable-sortdecl:
+    dec@SortDecl(s, _) -> dec
+    where
+      sdef := <lookup-def(|Types())> s;
+      <not(has-prop(|JClass()))> sdef
+  
+  is-value-sort: 
+    ss@SimpleSort(s) -> ss
+    where
+      <lookup-def(|Types()); has-prop(|ValueSort())> s  
+  
+  debug-decl-name:
+    SortDecl(s, _) -> s

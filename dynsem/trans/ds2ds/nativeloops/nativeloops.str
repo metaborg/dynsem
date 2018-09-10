@@ -1,0 +1,136 @@
+module ds2ds/nativeloops/nativeloops
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  ds2ds/explication
+  ds2ds/explicate-arrow-types
+  backend/interpreter/signature
+  
+strategies // name definitions
+
+  loops-name-sort-val       = !"Val"
+  loops-name-sort-unit      = !"U"
+  loops-name-sort-condition = !"Condition"
+  loops-name-sort-eval      = !"Evaluatable"
+  loops-name-while          = !"_native_while"
+  loops-name-break          = !"_native_loop_break"
+  loops-name-continue       = !"_native_loop_continue"
+
+  loops-name-mk-sort = !SimpleSort(<id>)
+  
+strategies // selective enabling
+
+  loops-are-enabled = where(UsesLoops)
+
+  loops-enable-module =
+    try(
+      UsesLoops <+
+      where(
+        ?Module(_, <id>);
+        fetch-elem(?Signatures(<id>));
+        fetch-elem(?Arrows(<id>));
+        fetch-elem(loops-is-while-decl + loops-is-break-decl + loops-is-continue-decl);
+        rules(UsesLoops: t -> t)
+      )
+    )
+    
+  loops-new-scope(s) = {| UsesLoops:
+    s
+  |}
+  
+strategies // signature detection
+
+  loops-is-while-decl =
+    where(
+     ?NativeFunDecl(_, <loops-name-while>, [SimpleSort(<loops-name-sort-condition>), SimpleSort(<loops-name-sort-eval>), SimpleSort(<loops-name-sort-val>)], _, SimpleSort(<loops-name-sort-val>), _)
+    )
+  
+  loops-is-break-decl =
+    where(
+     ?NativeFunDecl(_, <loops-name-break>, [SimpleSort(<loops-name-sort-val>)], _, SimpleSort(<loops-name-sort-unit>), _)
+    )
+  
+  loops-is-continue-decl =
+    where(
+     ?NativeFunDecl(_, <loops-name-continue>, [SimpleSort(<loops-name-sort-val>)], _, SimpleSort(<loops-name-sort-unit>), _)
+    )
+  
+strategies // explication
+
+  explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) =
+    loops-are-enabled < loops-explicate-arrow-imports(|comps-table, imps-table) + fail
+  
+  loops-explicate-arrow-imports(|comps-table, imps-table) =
+    // native while loop imports all components from Condition and Evaluatable
+    condition-arr := <resolve-applicable-arrow-defsite> ("", <loops-name-sort-condition>);
+    eval-arr := <resolve-applicable-arrow-defsite> ("", <loops-name-sort-eval>);
+    imp* := [Impo(condition-arr, []), Impo(eval-arr, [])];
+    while-native-ty := $[[<loops-name-while>]_3_Native];
+    while-arr := <resolve-applicable-arrow-defsite> ("", while-native-ty);
+    <explication-api-add-imports(|comps-table, imps-table)> (while-arr, imp*);
+    fail
+  
+  loops-explicate-arrow-imports(|comps-table, imps-table) =
+    // break and continue consume all components that the while does (so that they can snapshot the RW*)
+    break-native-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<loops-name-break>]_1_Native]));
+    continue-native-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<loops-name-continue>]_1_Native]));
+    while-native-arr := <resolve-applicable-arrow-defsite> ("", <rw-type> SimpleSort($[[<loops-name-while>]_3_Native]));
+    <explication-api-add-imports(|comps-table, imps-table)> (break-native-arr, [Impo(while-native-arr, [])]);
+    <explication-api-add-imports(|comps-table, imps-table)> (continue-native-arr, [Impo(while-native-arr, [])]);
+    fail
+
+strategies // backend
+
+signature
+  constructors
+//    NativeRelationPremise: NativeRule * Term * List(Term) -> Relation
+//  WhileNode: condition * body * defaultvalue * List(RO) * List(RW) -> NativeRule
+    WhileNode: Term * Term * Term * List(Term) * List(Term) -> NativeRule
+    BreakNode: Term * List(Term) -> NativeRule
+    ContinueNode: Term * List(Term) -> NativeRule
+
+  
+strategies
+
+  loops-rewrite-natives-module = 
+    loops-new-scope(
+      loops-enable-module;
+      loops-are-enabled
+      < alltd(loops-rewrite-native-relation)
+      + id
+    )
+  
+  loops-rewrite-native-relation: // break
+    Formula(Relation(Reads(ro*), Source(Con(cname, [val]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(BreakNode(val, rw-in-var*), rhs, rw-out-var*))
+    where
+      loops-name-break => cname
+    with
+      rw-in-var* := <map(\ LabelComp(_, t) -> t\)> rw-in*;
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
+  
+  loops-rewrite-native-relation: // continue
+    Formula(Relation(Reads(ro*), Source(Con(cname, [val]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(ContinueNode(val, rw-in-var*), rhs, rw-out-var*))
+    where
+      loops-name-continue => cname
+    with
+      rw-in-var* := <map(\ LabelComp(_, t) -> t\)> rw-in*;
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
+   
+   loops-rewrite-native-relation: // while
+    Formula(Relation(Reads(ro*), Source(Con(cname, [cond, body, val]), rw-in*), NamedDynamicEmitted([], "", _), Target(rhs, rw-out*))) ->
+      Formula(NativeRelationPremise(WhileNode(cond, body, val, ro-var*, rw-in-var*), rhs, rw-out-var*))
+    where
+      loops-name-while => cname
+    with
+      ro-var* := <map(\ LabelComp(_, t) -> t\)> ro*;
+      rw-in-var* := <map(\ LabelComp(_, t) -> t\)> rw-in*;
+      rw-out-var* := <map(\ LabelComp(_, t) -> t\)> rw-out*
+ 
+      
+
+
+

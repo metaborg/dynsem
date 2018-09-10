@@ -1,0 +1,26 @@
+module backend/interpreter/sorts/registering
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/utils/utils
+  backend/common/-
+
+rules
+
+  ds-to-interp-termbuild-access(|x_children):
+    (x_idx, ss@SimpleSort(s)) -> e |[ x_checkedbuilderng.create(x_children[x_idx]) ]|
+    where
+      <jclass-has-checkedbuilder> ss;
+      x_checkedbuilderng := <jclass-checkedbuilder-ng> ss
+  
+  ds-to-interp-termbuild-access(|x_children):
+    (x_idx, ss@SimpleSort(s)) -> e |[ x_children[x_idx] ]|
+    where
+      <not(jclass-has-checkedbuilder)> ss
+
+
+  
+  

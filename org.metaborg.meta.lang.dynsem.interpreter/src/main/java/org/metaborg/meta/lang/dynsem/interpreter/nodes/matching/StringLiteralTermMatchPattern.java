@@ -1,5 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.matching;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
+
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -17,14 +19,14 @@ public abstract class StringLiteralTermMatchPattern extends LiteralMatchPattern 
 	@Specialization(guards = "s == cachedS")
 	public void doCachedString(String s, @Cached("s") String cachedS, @Cached("isStringEq(cachedS)") boolean isEq) {
 		if (!isEq) {
-			throw PatternMatchFailure.INSTANCE;
+			throw PremiseFailureException.SINGLETON;
 		}
 	}
 
-	@Specialization(contains = "doCachedString")
+	@Specialization(replaces = "doCachedString")
 	public void doUncachedString(String s) {
 		if (!isStringEq(s)) {
-			throw PatternMatchFailure.INSTANCE;
+			throw PremiseFailureException.SINGLETON;
 		}
 	}
 

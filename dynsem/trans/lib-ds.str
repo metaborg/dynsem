@@ -3,6 +3,7 @@ module lib-ds
 imports
   signatures/-
   signatures/dynsem/-
+  libstratego-aterm
   
 // utilities for DynSem analysis
 
@@ -21,7 +22,7 @@ rules // utils for deterministic variable name generation
 rules // projections for sorts
   
   get-sort-name =
-    ?SortDecl(<id>)
+    ?SortDecl(<id>, _)
     + ?SimpleSort(<id>)
     + ?ListSort(s); !$[L_[<get-sort-name> s]]
     + ?MapSort(k-s, v-s); !$[M_[<get-sort-name> k-s]_[<get-sort-name> v-s]]
@@ -100,4 +101,11 @@ rules // utils
         end
     )
   
-  opt-with(s) = with(s)
+  opt-with(s) = with(s; ?t); !t
+  
+  require(s, s-extract|msg) =
+    s <+ s-extract; ?str; with(fail|$[[msg]: [str]])
+  
+  require(s|msg) = require(s, pp-aterm|msg)
+  
+  

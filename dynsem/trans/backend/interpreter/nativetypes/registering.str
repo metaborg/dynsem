@@ -1,0 +1,34 @@
+module backend/interpreter/nativetypes/registering
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/interpreter/nativetypes/util
+  backend/interpreter/terms/registering
+
+rules
+  
+  ds-to-interp-nattyterms-registry-inits =
+    mapconcat(require(ds-to-interp-nattyterms-registry-init, debug-decl-name|"Registry init generation failed for native data type"))
+  
+  ds-to-interp-nattyterms-registry-init:
+    NativeBaseTypeDecl(jstring, s, _, func*) -> 
+      <mapconcat(require(ds-to-interp-nattyterms-registry-init(|s), debug-decl-name|"Registry init generation failed for native data type function"))> func*
+  
+  ds-to-interp-nattyterms-registry-init(|s):
+    NativeFunctionDecl(fun, kid*, _) ->
+      bstm* |[
+        nativeAdapterFactories.put(e_adaptkey, new ITermBuildFactory() {
+    
+          @Override
+          public TermBuild apply(SourceSection source, TermBuild... children) {
+            return x_adapter.create(source, children[0], e1*);
+          }
+        });
+      ]|
+    where
+      e_adaptkey := Lit(String([Chars(<concat-strings> [s, "/", fun, "/", <length; int-to-string> kid*])]));
+      x_adapter := <concat-strings> ["_adapt_", s, "_", fun, "_", <length; int-to-string> kid*];
+      e1* := <map-with-index(\ (i, s) -> e |[ children[~i:<int-to-string> i] ]| \)> kid*
+  

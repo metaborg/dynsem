@@ -1,0 +1,18 @@
+module backend/interpreter/constructors/util
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  analysis/-
+  
+strategies
+  
+  is-generatable-consdecl:
+    dec@ConsDecl(name, kid*, _, _) -> dec
+    where
+      cdef := <lookup-def(|Constructors())> (name, <length> kid*);
+      <not(has-prop(|JClass()))> cdef
+  
+  debug-decl-name:
+    ConsDecl(name, kid*, _, _) -> $[[name]/[<length> kid*]]
+  

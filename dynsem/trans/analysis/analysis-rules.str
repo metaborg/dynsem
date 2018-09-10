@@ -444,12 +444,21 @@ rules // type rules for match-sides
     t@Con(c, aparam*) -> <type-coerce-full(id)> (ty, in-ty)
     where
       c-def := <lookup-def(|Constructors())> (c, <length> aparam*);
+      LanguageCons() := <lookup-prop(|ConsKind())>;
       ConstructorType(fparam-ty*, ty) := <lookup-prop(|Type())> c-def;
       <zip(type-check-match-wrap)> (fparam-ty*, aparam*);
       if <not(InSource); lookup-prop(|ConsKind())> c-def => Metafunc()
       then
         add-msg(|Error(), t, $[Cannot match against meta-function [c]])
       end
+  
+  type-check-match-con(|in-ty):
+    t@Con(c, aparam*) -> <type-coerce-full(id)> (ty, in-ty)
+    where
+      c-def := <lookup-def(|Constructors())> (c, <length> aparam*);
+      ConstructorType(fparam-ty*, ty) := <lookup-prop(|Type())> c-def;
+      NativeOpCons() := <lookup-prop(|ConsKind())> c-def;
+      add-msg(|Error(), t, $[Native operator may not be used in a match position])
   
   type-check-match-list(|in-ty):
   	List_([]) -> <type-coerce-full(id)> (ListType(ALPHATYPE()), in-ty)
@@ -699,7 +708,7 @@ rules /* support for implicit conversions */
   // initialize the memo table with the implicit constructors and arrows as paths
   prime-typaths =
     lookup-def-all(|Constructors());
-    filter(where(lookup-prop(|ConsKind()) => ImplicitCons()));
+    filter(where(lookup-prop(|ImplicitCons()) => ImplicitCons()));
     map(store-prime-conspath);
     lookup-def-all(|Arrows());
     map(store-prime-arrowpath)

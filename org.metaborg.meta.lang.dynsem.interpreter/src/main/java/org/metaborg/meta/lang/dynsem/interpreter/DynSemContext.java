@@ -6,11 +6,19 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FramePrototypesLayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImpl;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.object.DynamicObject;
 
 /**
  * Interpreter context which maintains runtime-specific entities. Instances of {@link DynSemContext} are primarily
@@ -24,7 +32,7 @@ import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
  */
 // FIXME: the DynSemContext should be split in (1) static context --- reusable across multiple programs and (2) a
 // dynamic (per-program run) context
-public class DynSemContext {
+public final class DynSemContext {
 
 	public static final String CONFIG_DSSPEC = "DYNSEMSPEC";
 	public static final String CONFIG_STDIN = "STDIN";
@@ -39,6 +47,7 @@ public class DynSemContext {
 	public static final String CONFIG_TERMTRANSFORMER = "TERMTRANSFORM";
 	public static final String CONFIG_RULEREG = "RULEREG";
 	public static final String CONFIG_MIMETYPE = "MIMETYPEOBJLANG";
+	public static final String CONFIG_NATIVEFRAMES = "NATIVEFRAMES";
 
 	private final InputStream specification;
 
@@ -56,24 +65,25 @@ public class DynSemContext {
 	private Map<String, Object> properties;
 
 	@CompilationFinal private boolean initialized;
-	private final boolean backtracking;
 	private final boolean safecomponents;
 	private final boolean caching;
 	private final boolean debug;
+	private final boolean nativeframes;
 
 	public DynSemContext(Map<String, Object> config) {
-		// TODO: there must be a smell here...
-		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermTransformer) config.get(CONFIG_TERMTRANSFORMER), (ITermRegistry) config.get(CONFIG_TERMREGISTRY),
-				(RuleRegistry) config.get(CONFIG_RULEREG), (InputStream) config.get(CONFIG_STDIN),
-				(PrintStream) config.get(CONFIG_STDOUT), (PrintStream) config.get(CONFIG_STDERR),
-				(InputStream) config.get(CONFIG_DSSPEC), (String) config.get(CONFIG_MIMETYPE),
-				(boolean) config.get(CONFIG_BACKTRACK), (boolean) config.get(CONFIG_SAFECOMPS),
-				(boolean) config.get(CONFIG_TERMCACHE), (boolean) config.get(CONFIG_DEBUG), config);
+		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermTransformer) config.get(CONFIG_TERMTRANSFORMER),
+				(ITermRegistry) config.get(CONFIG_TERMREGISTRY), (RuleRegistry) config.get(CONFIG_RULEREG),
+				(InputStream) config.get(CONFIG_STDIN), (PrintStream) config.get(CONFIG_STDOUT),
+				(PrintStream) config.get(CONFIG_STDERR), (InputStream) config.get(CONFIG_DSSPEC),
+				(String) config.get(CONFIG_MIMETYPE), (boolean) config.get(CONFIG_BACKTRACK),
+				(boolean) config.get(CONFIG_SAFECOMPS), (boolean) config.get(CONFIG_TERMCACHE),
+				(boolean) config.get(CONFIG_DEBUG), (boolean) config.get(CONFIG_NATIVEFRAMES), config);
 	}
 
-	private DynSemContext(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry, RuleRegistry ruleRegistry,
-			InputStream input, PrintStream output, PrintStream err, InputStream specification, String mimetype_lang,
-			boolean backtracking, boolean safecomponents, boolean caching, boolean debug, Map<String, Object> config) {
+	private DynSemContext(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry,
+			RuleRegistry ruleRegistry, InputStream input, PrintStream output, PrintStream err,
+			InputStream specification, String mimetype_lang, boolean backtracking, boolean safecomponents,
+			boolean caching, boolean debug, boolean nativeframes, Map<String, Object> config) {
 		this.parser = parser;
 		this.termTransformer = transformer;
 		this.termRegistry = termRegistry;
@@ -83,10 +93,10 @@ public class DynSemContext {
 		this.err = err;
 		this.specification = specification;
 		this.mimetype_lang = mimetype_lang;
-		this.backtracking = backtracking;
 		this.safecomponents = safecomponents;
 		this.caching = caching;
 		this.debug = debug;
+		this.nativeframes = nativeframes;
 		this.properties = new HashMap<>();
 	}
 
@@ -116,7 +126,7 @@ public class DynSemContext {
 	 * 
 	 * @return
 	 */
-	public RuleRegistry getRuleRegistry() {
+	public IRuleRegistry getRuleRegistry() {
 		return ruleRegistry;
 	}
 
@@ -132,7 +142,7 @@ public class DynSemContext {
 	public ITermTransformer getTermTransformer() {
 		return termTransformer;
 	}
-	
+
 	/**
 	 * Read property from the custom property store maintained by this {@link DynSemContext}.
 	 * 
@@ -212,8 +222,32 @@ public class DynSemContext {
 		return mimetype_lang;
 	}
 
-	public boolean isFullBacktrackingEnabled() {
-		return backtracking;
+	@CompilationFinal private DynamicObject nabl2solution;
+
+	public boolean hasNaBL2Solution() {
+		return nabl2solution != null;
+	}
+
+	public void setNabl2Solution(DynamicObject nabl2) {
+		CompilerDirectives.transferToInterpreterAndInvalidate();
+		assert NaBL2LayoutImpl.INSTANCE.isNaBL2(nabl2);
+		this.nabl2solution = nabl2;
+	}
+
+	public DynamicObject getNaBL2Solution() {
+		return Objects.requireNonNull(nabl2solution,
+				"No NaBL2 context available. Does the language use NaBL2, and was the interpreter invoked using the correct runner?");
+	}
+
+	private final DynamicObject protoFrames = FramePrototypesLayoutImpl.INSTANCE.createFramePrototypes();
+
+	public void addProtoFrame(ScopeIdentifier ident, DynamicObject frameProto) {
+		assert FrameLayoutImpl.INSTANCE.isFrame(frameProto);
+		protoFrames.define(ident, frameProto);
+	}
+
+	public DynamicObject getProtoFrame(ScopeIdentifier ident) {
+		return (DynamicObject) protoFrames.get(ident);
 	}
 
 	public boolean isSafeComponentsEnabled() {
@@ -222,6 +256,10 @@ public class DynSemContext {
 
 	public boolean isTermCachingEnabled() {
 		return caching;
+	}
+
+	public boolean isNativeFramesEnabled() {
+		return nativeframes;
 	}
 
 	public boolean isDEBUG() {

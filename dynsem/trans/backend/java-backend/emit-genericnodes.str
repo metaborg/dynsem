@@ -79,7 +79,7 @@ rules
       sortname := <ds2java-type-to-identifier> ty;
       gennodename := $[Generic_[sortname]];
       c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => LanguageCons()))>;
-      impl-c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ConsKind()) => ImplicitCons()))>;
+      impl-c-def* := <lookup-def-all(|Constructors()); filter(where(lookup-prop(|Type()) => ConstructorType(_, ty)); where(lookup-prop(|ImplicitCons()) => ImplicitCons()))>;
       exec* := <lookup-applicable-arrow-def; map(ds2java-arrow-specializedispatch)> ty
 
   ds2java-consdecl-specializer:

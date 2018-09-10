@@ -1,0 +1,114 @@
+module backend/interpreter/lists/building
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/interpreter/lists/-
+  backend/interpreter/terms/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+  ds-to-interp-terms-building-lists = 
+    map(require(ds-to-interp-terms-building-list, debug-decl-name|"List build generation failed for"))
+  
+rules
+
+  ds-to-interp-terms-building-list:
+    ls@ListSort(es) ->
+      compilation-unit |[
+        package ~x:<get-opt> BuildPkg();
+  
+        import ~x:<get-opt> TermPkg().*;
+        import ~x:<get-opt> TermPkg().x_listclass.*;
+        import ~x:<get-opt> BuildPkg().x_listbuildfactory.*;
+        import ~x:<get-opt> ChecksPkg().*;
+        import ~x:<get-opt> TopPkg().TypesGen;
+        
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+        
+        import com.oracle.truffle.api.dsl.Cached;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.source.SourceSection;
+        
+        public abstract class x_listbuildclass extends TermBuild {
+        
+          public x_listbuildclass(SourceSection source) {
+            super(source);
+          }
+          
+          public static TermBuild create(SourceSection source, TermBuild[] elemNodes, TermBuild tailNode) {
+            
+            assert elemNodes != null;
+            TermBuild tail = tailNode != null ? tailNode : x_nilbuilderng.create(source);
+            for(int idx = elemNodes.length -1; idx >= 0; idx--) {
+              tail = x_consbuilderng.create(source, ~e:<ds-to-interp-termbuild-access(|"elemNodes")> ("idx", es), tail);
+            }
+            return tail;
+          }
+        
+          public static abstract class x_nilbuilder extends TermBuild {
+        
+            public x_nilbuilder(SourceSection source) {
+              super(source);
+            }
+        
+            @Specialization
+            public x_nilclass doNil() {
+              return x_listclass.EMPTY;
+            }
+        
+          }
+        
+          @NodeChildren({ @NodeChild(value = "elem", type = x_checkedelembuilder.class),
+              @NodeChild(value = "tail", type = TermBuild.class) })
+          public static abstract class x_consbuilder extends TermBuild {
+        
+            public x_consbuilder(SourceSection source) {
+              super(source);
+            }
+        
+            @Specialization(limit = "1", guards = "elem == elem_cached")
+            public x_consclass doCachedNoTail(x_elemclass elem, x_nilclass tail, @Cached("elem") x_elemclass elem_cached,
+                @Cached("doUncached(elem_cached, tail)") x_consclass l_cached) {
+              return l_cached;
+            }
+        
+            @Specialization(limit = "1", guards = {"elem == elem_cached", "tail == tail_cached" })
+            public x_consclass doCachedTail(x_elemclass elem, x_consclass tail, @Cached("elem") x_elemclass elem_cached,
+                @Cached("tail") x_consclass tail_cached, @Cached("doUncached(elem, tail)") x_consclass l_cached) {
+              return l_cached;
+            }
+        
+            @Specialization(replaces = { "doCachedNoTail", "doCachedTail" })
+            public x_consclass doUncached(x_elemclass elem, x_listclass tail) {
+              return new x_consclass(elem, tail, null);
+            }
+          }
+        
+        }
+      ]|
+    where
+      x_listclass := <jclass-term> ls;
+      x_consclass := <jclass-term-list-cons> ls;
+      x_nilclass  := <jclass-term-list-nil> ls;
+      x_elemclass := <jclass-term; jclass-box> es;
+      x_listbuildclass := <jclass-termbuilder> ls;
+      x_listbuildfactory := $[[x_listbuildclass]Factory];
+      x_nilbuilder  := <jclass-listbuilder-nil> ls;
+      x_consbuilder := <jclass-listbuilder-cons> ls;
+      x_nilbuilderng := <jclass-listbuilder-nil-ng> ls;
+      x_consbuilderng := <jclass-listbuilder-cons-ng> ls; 
+      if <jclass-has-checkedbuilder> es
+      then
+        x_checkedelembuilder := <jclass-checkedbuilder> es
+      else
+        x_checkedelembuilder := <jclass-termbuilder-generic> es
+      end
+
+
+    

@@ -5,6 +5,7 @@ imports
   ds
 
 signature
+  sorts NativeRule
   constructors
     ArgBind : Int -> Var
     ArgRead : Int -> Var
@@ -14,6 +15,7 @@ signature
     ListSource: Term * Type -> Term
     Relation : Source * Rel * Target -> Relation
     RecRelation: Source * Rel * Target -> Relation
+    NativeRelationPremise: NativeRule * Term * List(Term) -> Relation
     Fails : Premise -> Premise
     
     TypedList : List(Term) * String -> List

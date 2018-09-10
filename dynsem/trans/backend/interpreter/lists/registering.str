@@ -1,0 +1,46 @@
+module backend/interpreter/lists/registering
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/-
+  backend/interpreter/terms/-
+  backend/interpreter/lists/util
+
+rules
+
+  ds-to-interp-lists-registry-inits =
+    mapconcat(require(ds-to-interp-lists-registry-init, debug-decl-name|"List registry init generation failed for"))
+  
+  ds-to-interp-lists-registry-init:
+    ls@ListSort(es) ->
+      bstm* |[
+        listClasses.put(x_elemclass.class, x_listclass.class);
+        initWrappers.put(x_listclass.class, new ITermInit() {
+          @Override
+          public x_listclass apply(Object... objects) {
+            return x_listclass.fromArray((x_elemclassboxed[]) objects);
+          }
+        });
+        builderFactories.put(x_listclass.class, new ITermBuildFactory() {
+          @Override
+          public TermBuild apply(SourceSection source, Object... objects) {
+            return x_listbuildgenclass.create(source, (TermBuild[]) objects[0], (TermBuild) objects[1]);
+          }
+        });
+        matcherFactories.put(x_listclass.class, new ITermMatchPatternFactory() {
+          @Override
+          public MatchPattern apply(SourceSection source, Object... objects) {
+            return x_listmatchclass.create(source, (MatchPattern[]) objects[0],(MatchPattern) objects[1]);
+          }
+        });
+      ]|
+    where
+      x_elemclass := <jclass-term> es;
+      x_elemclassboxed := <jclass-box> x_elemclass;
+      x_listclass := <jclass-term> ls;
+      x_listbuildgenclass := <jclass-termbuilder> ls;
+      x_listmatchclass := <jclass-matcher> ls
+  
+  ds-to-interp-termbuild-access(|x_children):
+    (x_idx, ListSort(s)) -> e |[ x_children[x_idx] ]|

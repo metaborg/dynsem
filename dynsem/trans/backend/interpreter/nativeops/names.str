@@ -1,0 +1,37 @@
+module backend/interpreter/nativeops/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/common/-
+  
+strategies
+  
+  jclass-term-api = fail
+
+strategies
+
+  jclass-termbuilder-api = jclass-nativeopbuilder
+
+  jclass-nativeopbuilder:
+    NativeOpDecl(name, kid*, _, _) -> classname
+    where
+      if jclass := <lookup-def(|Constructors()); lookup-prop(|JClass()); unquote(?'"')> (name, <length> kid*)
+      then
+        classname := jclass
+      else
+        classname := <concat-strings> [<ds-utils-java-escape-id> name, "_", <length; int-to-string> kid*]
+      end
+  
+  jclass-termbuilder-ng-api = fail
+  
+strategies // checked builders
+  
+  jclass-checkedbuilder-api = fail
+
+strategies // matcher for sorts
+  
+  jclass-matcher-api = fail
+  

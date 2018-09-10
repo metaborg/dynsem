@@ -1,0 +1,51 @@
+module backend/interpreter/tuples/registering
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/names
+  backend/utils/utils
+  backend/common/-
+  lib-ds
+
+rules
+
+  ds-to-interp-tuples-registry-inits =
+    mapconcat(require(ds-to-interp-tuples-registry-init, debug-decl-name|"Tuple registry init generation failed for"))
+
+  ds-to-interp-tuples-registry-init:
+    dec@TupleSort(s*) ->
+      bstm* |[
+       builderFactories.put(x_termclass.class, new ITermBuildFactory() {
+          @Override
+          public x_termbuild apply(SourceSection source,
+              TermBuild... children) {
+            return x_termbuildNG.create(source, e1*);
+          }
+        });
+        initWrappers.put(x_termclass.class, new ITermInit() {
+          @Override
+          public x_termclass apply(Object... children) {
+            return new x_termclass(e_children*);
+          }
+        });
+        matcherFactories.put(x_termclass.class, new ITermMatchPatternFactory() {
+          @Override
+          public MatchPattern apply(SourceSection source,
+              MatchPattern... children) {
+            return x_termmatchNG.create(source, e2*);
+          }
+        });
+      ]|
+    with
+      x_termclass := <jclass-term> dec;
+      x_termbuild := <jclass-termbuilder> dec;
+      x_termbuildNG := <jclass-termbuilder-ng> dec;
+      x_termmatchNG := <jclass-matcher-ng> dec;
+      e1* := <map-with-index((dec; int-to-string, id); ds-to-interp-termbuild-access(|"children"))> s*;
+      e2* := <map-with-index(\ (i, _) -> e |[ children[~i:<dec; int-to-string> i] ]| \)> s*;
+      e_children* := <map-with-index((dec; int-to-string, jclass-term); \ (idx, x_ty) -> e |[ (x_ty) children[~i:idx] ]| \)> s*
+
+  ds-to-interp-termbuild-access(|x_children):
+    (x_idx, TupleSort(_)) -> e |[ x_children[x_idx] ]|

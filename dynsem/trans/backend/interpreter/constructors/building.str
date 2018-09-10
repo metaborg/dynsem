@@ -1,0 +1,117 @@
+module backend/interpreter/constructors/building
+
+imports
+  signatures/-
+  signatures/dynsem/-
+  backend/interpreter/terms/-
+  backend/interpreter/constructors/util
+  backend/interpreter/-
+  backend/utils/-
+  backend/common/-
+  libjava-front
+
+strategies
+
+  ds-to-interp-terms-building-cons = 
+    is-list;
+    filter(is-generatable-consdecl; require(ds-to-interp-terms-building-con, debug-decl-name|"Build generation failed for constructor"))
+
+  ds-to-interp-terms-building-con:
+    dec@ConsDecl(name, kid*@[_|_], s, _) ->
+      compilation-unit |[
+        package ~x:<get-opt> BuildPkg();
+      
+        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:<get-opt> NativePkg().*;
+        import ~x:<get-opt> ChecksPkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import com.oracle.truffle.api.dsl.Cached;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.source.SourceSection;
+
+        @NodeChildren({ ~child* })
+        public abstract class x_class extends x_sortbuilder {
+
+          public x_class(SourceSection source) {
+            super(source);
+          }
+         
+          
+          @Specialization(limit = "1", guards = e_cacheguard)
+          public x_termclass doCached(
+              param0*,
+              param1*,
+              @Cached(~e:Lit(String([Chars(str_cachegen)]))) x_termclass cachedTerm) {
+            return cachedTerm;
+          }
+          
+          @Specialization(replaces = "doCached")
+          public x_termclass doUncached(param0*) {
+            return buildTerm(e0*);
+          }
+          
+          protected final x_termclass buildTerm(param0*) {
+            return e_term;
+          }
+          
+        }
+      ]|
+    where
+      x_sortbuilder := <jclass-termbuilder> s;
+      x_class := <jclass-termbuilder> dec;
+      child* := <ds-to-interp-terms-building-childannos> kid*;
+      x_termclass := <jclass-term> dec;
+      param0* := <ds-to-interp-terms-building-params> kid*;
+      param1* := <ds-to-interp-terms-building-cachedparams> kid*;
+      e_cacheguard := <ds-to-interp-terms-cachedparam-cacheguards> kid*;
+      e0* := <ds-to-interp-terms-building-exprs> kid*;
+      str_cachegen := <ds-utils-debugged-java-pp> e |[ buildTerm(e0*) ]|
+    where
+      if [] := kid*
+      then
+        e_term := e |[ x_termclass.SINGLETON ]|
+      else
+        e_term := e |[ new x_termclass(e0*) ]|
+      end
+  
+  ds-to-interp-terms-building-con:
+    dec@ConsDecl(name, [], s, _) ->
+      compilation-unit |[
+        package ~x:<get-opt> BuildPkg();
+      
+        import ~x:$[[<get-opt> TermPkg()].*];
+        import ~x:<get-opt> NativePkg().*;
+        import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.*;
+        import com.oracle.truffle.api.dsl.Cached;
+        import com.oracle.truffle.api.dsl.NodeChild;
+        import com.oracle.truffle.api.dsl.NodeChildren;
+        import com.oracle.truffle.api.dsl.Specialization;
+        import com.oracle.truffle.api.source.SourceSection;
+
+        @NodeChildren({ })
+        public abstract class x_class extends x_sortbuilder {
+
+          public x_class(SourceSection source) {
+            super(source);
+          }
+          
+          @Specialization(limit = "1")
+          public x_termclass doCached(
+              @Cached("buildTerm()") x_termclass cachedTerm) {
+            return cachedTerm;
+          }
+          
+          protected final x_termclass buildTerm() {
+            return x_termclass.SINGLETON;
+          }
+          
+        }
+      ]|
+    where
+      x_sortbuilder := <jclass-termbuilder> s;
+      x_class := <jclass-termbuilder> dec;
+      x_termclass := <jclass-term> dec
+
+

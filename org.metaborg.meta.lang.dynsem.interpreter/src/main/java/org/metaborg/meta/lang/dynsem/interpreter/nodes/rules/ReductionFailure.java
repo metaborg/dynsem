@@ -1,8 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.PatternMatchFailure;
-
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.TruffleException;
 import com.oracle.truffle.api.nodes.ControlFlowException;
+import com.oracle.truffle.api.nodes.Node;
 
 /**
  * {@link ControlFlowException} to signal that a reduction has failed. In contrast to {@link PatternMatchFailure} this
@@ -11,19 +12,30 @@ import com.oracle.truffle.api.nodes.ControlFlowException;
  * @author vladvergu
  *
  */
-public class ReductionFailure extends RuntimeException {
-
-	public ReductionFailure(String trace, Throwable t) {
-		super(trace, t);
-	}
-
-	public ReductionFailure(String message, String trace) {
-		super(message + "\n" + trace);
-	}
+public class ReductionFailure extends RuntimeException implements TruffleException {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3427027667192711474L;
+
+	private final Node location;
+
+	@TruffleBoundary
+	public ReductionFailure(String message, String trace, Node location) {
+		super(message + "\n" + trace);
+		this.location = location;
+	}
+
+
+	@Override
+	public synchronized Throwable fillInStackTrace() {
+		return null;
+	}
+
+	@Override
+	public Node getLocation() {
+		return location;
+	}
 
 }

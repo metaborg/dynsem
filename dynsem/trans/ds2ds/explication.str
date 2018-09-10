@@ -78,7 +78,7 @@ strategies
     (arrow-def, new-compo*) -> compo*
     where
       old-compo* := <hashtable-get(|arrow-def)> comps;
-      compo* := <nub; explication-util-qsort-comps> [new-compo*, old-compo*];
+      compo* := <explication-components-nub; explication-util-qsort-comps> [new-compo*, old-compo*];
       <hashtable-put(|arrow-def, compo*)> comps
   
   explication-api-get-imports(|comps, imps):
@@ -91,9 +91,42 @@ strategies
       imp* := <nub> [new-imp*, old-imp*];
       <hashtable-put(|arrow-def, imp*)> imps
   
+  
+  explication-components-nub:
+    comps -> comps'
+    with
+      tbl := <new-hashtable>;
+      comps' := <explication-components-nub(|tbl)> comps;
+      <hashtable-destroy> tbl
+  
+  explication-components-nub(|buff):
+    [] -> <map(\ compdef -> Comp(compdef, <hashtable-get(|compdef)> buff) \)> compdefs
+    with
+      compdefs := <hashtable-keys> buff
+      
+  
+  explication-components-nub(|buff):
+    [Comp(compdef, kind') | comps] -> <explication-components-nub(|buff)> comps
+    where
+      if kind := <hashtable-get(|compdef)> buff
+      then
+        <hashtable-put(|compdef, <explication-compkind-union> (kind, kind'))> buff
+      else
+        <hashtable-put(|compdef, kind')> buff
+      end
+  
+  explication-compkind-union =
+    if ?(RW(), _) <+ ?(_, RW())
+    then
+      !RW()
+    else
+      !RO()
+    end
+ 
+  
 rules
 
-  explication-api-explicate(s) = 
+  explication-api-explicate(s) =
     where(explication-api-init-storage(?comps-table, ?imps-table));
     where(explication-gather-data-arrowdecl(|comps-table, imps-table));
     where(alltd(explication-gather-data-rule(|comps-table, imps-table)));
@@ -121,7 +154,10 @@ rules
   
   explication-gather-data-arrowdecl(|comps-table, imps-table) =
       lookup-def-all(|Arrows());
-      map(explication-associate-decl-components(|comps-table, imps-table))
+      map(explication-associate-decl-components(|comps-table, imps-table));
+      try(explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table))
+
+  explication-gather-data-arrowdecl-extend-api(|comps-table, imps-table) = fail
 
   explication-associate-decl-components(|comps-table, imps-table) =
     ?arrow-def;
@@ -218,6 +254,14 @@ rules
       (ro-comp*, rw-comp*) := <explication-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
       (ro*, rw*) := <(map(explication-util-comp-to-label), map(explication-util-comp-to-label))> (ro-comp*, rw-comp*)
 
+  explication-explicate-arrow-decl(|comps-table, imps-table):
+    NativeFunDecl(_, cname, kid-srt*, _, out-srt, _) -> NativeFunDecl(ArrowROs(ro*), cname, kid-srt*, ArrowRWs(rw*), out-srt, ArrowRWs(rw*))
+    where
+      t_sort := SimpleSort($[[cname]_[<length; int-to-string> kid-srt*]_Native]);
+      arrow-def := <resolve-applicable-arrow-defsite> ("", <rw-type> t_sort);
+      (ro-comp*, rw-comp*) := <explication-api-get-components(|comps-table, imps-table); partition(?Comp(_, RO()))> arrow-def;
+      (ro*, rw*) := <(map(explication-util-comp-to-label), map(explication-util-comp-to-label))> (ro-comp*, rw-comp*)
+
   explication-explicate-rules-module(|comps-table, imps-table):
     Module(name, section*) -> Module(name, section'*)
     where
@@ -225,21 +269,27 @@ rules
 
   explication-explicate-rule(|comps-table, imps-table):
     Rule(prem*, infer, Relation(Reads(ro*), Source(lhs, sc*), arr, Target(rhs, tc*))) ->
-      Rule(prem'*, infer, Relation(Reads(ro'*), Source(lhs, sc'*), arr, Target(rhs, tc'*)))
+      Rule(prem'*, infer, Relation(Reads(ro''*), Source(lhs, sc''*), arr, Target(rhs, tc''*)))
     where opt-with(
       arrow-def := <resolve-applicable-arrow-defsite> (<get-arrow-name> arr, <rulelhs-get-type> lhs)
     )
     where opt-with(
       // init storage
       compgen-table := <new-hashtable>;
+      // RW components that are used in RO position in the conclusion should be preserved
+      // we do this by moving them from the RO position to the RW positions by ensuring the same value is returned 
+      rw-label* := <explication-api-get-components(|comps-table, imps-table); filter(?Comp(_, RW()); explication-util-comp-to-label)> arrow-def;
+      (ro'*, rw-new*) := <partition(where(not(\ LabelComp(label, _) -> <fetch-elem(?label)> rw-label* \)))> ro*;
+      sc'* := [sc*, rw-new*];
+      tc'* := [tc*, rw-new*];
       // introduce ROs adding missing ones
-      ro'* := <explication-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RO())> ro*;
+      ro''* := <explication-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RO())> ro'*;
       // introduce RWs adding missing ones
-      sc'* := <explication-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> sc*;
+      sc''* := <explication-intro-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> sc'*;
       // explicate premises
       prem'* := <alltd(explication-explicate-premise(|comps-table, imps-table, arrow-def, compgen-table))> prem*;
       // read missing RWs
-      tc'* := <explication-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> tc*;
+      tc''* := <explication-use-comps(|comps-table, imps-table, compgen-table, arrow-def, RW())> tc'*;
       // destroy storage
       <hashtable-destroy> compgen-table
     )
@@ -331,7 +381,11 @@ rules
   
   explication-util-comp-to-compdef = ?Comp(<id>, _)
   
-  explication-util-compo-eq = ?(Comp(x, _), Comp(x, _))
+//  explication-util-compo-eq = ?(Comp(x, _), Comp(x, _))
+  explication-util-compo-eq =
+    // imported        existing
+    ?(Comp(x, kind1), Comp(x, kind2));
+    (<eq> (kind1, kind2) <+ RO() := kind1; RW() := kind2)
   
   explication-util-compo-gt = ?(Comp((_, x, _), _), Comp((_, y, _), _)); !(x, y); string-gt
   
@@ -341,6 +395,9 @@ rules
   
   explication-util-comp-to-label:
     Comp(compdef, _) -> Label(<def-get-name> compdef)
+  
+  explication-util-labelcomp-to-compdef:
+    LabelComp(Label(name), _) -> <lookup-def(|Components())> name
   
   explication-util-filter-transform-compdefs(s|kind) =
     filter(?Comp(_, kind); s)

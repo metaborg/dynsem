@@ -18,72 +18,81 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.TAFTermReader;
 
+import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
-public class RuleRegistry {
+public class RuleRegistry implements IRuleRegistry {
 
-	private final Map<String, Map<Class<?>, JointRuleRoot>> rules = new HashMap<>();
+	private final Map<String, Map<Class<?>, CallTarget[]>> rules = new HashMap<>();
 
-	private boolean isInit;
+	@CompilationFinal private boolean isInit;
 
 	@CompilationFinal private DynSemLanguage language;
 
 	protected void init() {
 	}
 
+	@Override
 	public void setLanguage(DynSemLanguage language) {
 		this.language = language;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#getLanguage()
+	 */
+	@Override
 	public DynSemLanguage getLanguage() {
 		return language;
 	}
 
-	@TruffleBoundary
-	public int ruleCount() {
-		int i = 0;
-		for (Map<?, JointRuleRoot> val : rules.values()) {
-			for (JointRuleRoot root : val.values()) {
-				i += root.getJointNode().getUnionNode().getRules().size();
-			}
-		}
-		return i;
-	}
-
-	@TruffleBoundary
-	public void registerJointRule(String arrowName, Class<?> dispatchClass, JointRuleRoot jointRuleRoot) {
-		Map<Class<?>, JointRuleRoot> rulesForName = rules.get(arrowName);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#registerRule(java.lang.String,
+	 * java.lang.Class, com.oracle.truffle.api.CallTarget)
+	 */
+	@Override
+	public void registerRule(String arrowName, Class<?> dispatchClass, CallTarget[] targets) {
+		CompilerAsserts.neverPartOfCompilation();
+		Map<Class<?>, CallTarget[]> rulesForName = rules.get(arrowName);
 
 		if (rulesForName == null) {
 			rulesForName = new HashMap<>();
 			rules.put(arrowName, rulesForName);
 		}
-		rulesForName.put(dispatchClass, jointRuleRoot);
+		rulesForName.put(dispatchClass, targets);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#lookupRule(java.lang.String,
+	 * java.lang.Class)
+	 */
+	@Override
 	@TruffleBoundary
-	public JointRuleRoot lookupRules(String arrowName, Class<?> dispatchClass) {
+	public CallTarget[] lookupRules(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
-		JointRuleRoot jointRuleForClass = null;
 
-		Map<Class<?>, JointRuleRoot> jointRulesForName = rules.get(arrowName);
+		Map<Class<?>, CallTarget[]> rulesForName = rules.get(arrowName);
 
-		if (jointRulesForName != null) {
-			jointRuleForClass = jointRulesForName.get(dispatchClass);
+		if (rulesForName == null) {
+			return new CallTarget[0];
 		}
 
-		if (jointRuleForClass == null) {
-			jointRuleForClass = createJointRoot(RuleKind.PLACEHOLDER, arrowName, dispatchClass, new Rule[0]);
-			registerJointRule(arrowName, dispatchClass, jointRuleForClass);
-		}
-		return jointRuleForClass;
+		CallTarget[] rules = rulesForName.get(dispatchClass);
+
+		return rules != null ? rules : new CallTarget[0];
 	}
 
+	@TruffleBoundary
 	public void populate(InputStream specStream) {
 		CompilerAsserts.neverPartOfCompilation();
 		try {
@@ -95,18 +104,18 @@ public class RuleRegistry {
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 
-			Map<String, Map<Class<?>, List<Rule>>> rules = new HashMap<>();
+			Map<String, Map<Class<?>, List<ReductionRule>>> rules = new HashMap<>();
 
 			for (IStrategoTerm ruleTerm : rulesTerm) {
-				Rule r = Rule.create(ruleTerm);
+				ReductionRule r = ReductionRule.create(language, (IStrategoAppl) ruleTerm);
 
-				Map<Class<?>, List<Rule>> rulesForName = rules.get(r.getArrowName());
+				Map<Class<?>, List<ReductionRule>> rulesForName = rules.get(r.getArrowName());
 				if (rulesForName == null) {
 					rulesForName = new HashMap<>();
 					rules.put(r.getArrowName(), rulesForName);
 				}
 
-				List<Rule> rulesForClass = rulesForName.get(r.getDispatchClass());
+				List<ReductionRule> rulesForClass = rulesForName.get(r.getDispatchClass());
 
 				if (rulesForClass == null) {
 					rulesForClass = new LinkedList<>();
@@ -116,25 +125,19 @@ public class RuleRegistry {
 				rulesForClass.add(r);
 			}
 
-			for (Entry<String, Map<Class<?>, List<Rule>>> rulesForNameEntry : rules.entrySet()) {
+			for (Entry<String, Map<Class<?>, List<ReductionRule>>> rulesForNameEntry : rules.entrySet()) {
 				final String arrowName = rulesForNameEntry.getKey();
-				for (Entry<Class<?>, List<Rule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
+				for (Entry<Class<?>, List<ReductionRule>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
-					RuleKind kind = rulesForClass.getValue().get(0).getKind();
-					registerJointRule(arrowName, dispatchClass, createJointRoot(kind, arrowName, dispatchClass,
-							rulesForClass.getValue().toArray(new Rule[] {})));
+					registerRule(arrowName, dispatchClass,
+							RuleFactory.createRuleTargets(language, SourceUtils.dynsemSourceSectionUnvailable(),
+									rulesForClass.getValue(), arrowName, dispatchClass));
 				}
 			}
 
 		} catch (IOException ioex) {
 			throw new RuntimeException("Could not load specification ATerm", ioex);
 		}
-	}
-
-	protected final JointRuleRoot createJointRoot(RuleKind kind, String arrowName, Class<?> dispatchClass,
-			Rule[] rules) {
-		return new JointRuleRoot(language, SourceUtils.dynsemSourceSectionUnvailable(), kind, arrowName, dispatchClass,
-				rules);
 	}
 
 	private static IStrategoList ruleListTerm(IStrategoTerm topSpecTerm) {

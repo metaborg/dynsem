@@ -1,0 +1,71 @@
+module backend/interpreter/terms/names
+
+imports
+  analysis/-
+  signatures/-
+  signatures/dynsem/-
+
+strategies
+
+  jclass-term-api = jclass-base
+
+  jclass-base:
+    SimpleSort("AST") -> $[org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm]
+  
+  jclass-base:
+    SimpleSort("String") -> $[String]
+
+  jclass-base:
+    SimpleSort("Int") -> $[int]
+
+  jclass-base:
+    SimpleSort("Bool") -> $[boolean]
+
+  jclass-term-qual-api = jclass-base-qual
+
+  jclass-base-qual:
+    ss@SimpleSort("AST") -> <jclass-base> ss
+  
+  jclass-base-qual:
+    SimpleSort("String") -> $[java.lang.String]
+
+  jclass-base-qual:
+    SimpleSort("Int") -> $[java.lang.Integer]
+
+  jclass-base-qual:
+    SimpleSort("Bool") -> $[java.lang.Boolean]
+
+strategies
+  
+  type-is-builtin:
+    ss@SimpleSort(s) -> ss
+    where <type-is-builtin> s
+  
+  type-is-builtin:
+    ss@ListSort(s) -> ss
+    where <type-is-builtin> s
+  
+  type-is-builtin =
+    ?"String"
+    + ?"Int"
+    + ?"Bool"
+    + ?"AST"
+
+  type-is-primitive:
+    ss@SimpleSort(s) -> ss
+    where <type-is-primitive> s 
+
+  type-is-primitive =
+    ?"Int"
+    + ?"Bool"
+
+strategies
+
+  jclass-box = try(_jclass-box)
+  
+  _jclass-box:
+    "int" -> $[Integer]
+  
+  _jclass-box:
+    "boolean" -> $[Boolean]
+
