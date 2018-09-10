@@ -15,7 +15,7 @@ strategies
   
   ver-slf4j = !"1.7.10"
   
-  ver-spoofax = !"2.5.0-SNAPSHOT"
+  ver-spoofax = !"2.5.0"
 
   ver-nailgun = !"0.9.1"
   
