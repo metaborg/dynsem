@@ -25,7 +25,7 @@ rules
     ; loops-rewrite-natives-module
     ; abr-rewrite-natives-module
     ; desugar-semantic-components
-    ; mark-rule-arguments
+//    ; mark-rule-arguments
     ; desugar-natives
     ; desugar-list-reductions
 //    ; desugar-rec-tco
@@ -97,32 +97,32 @@ rules /* clone list rules */
 
 rules /* rename arguments */
 
-  mark-rule-arguments = alltd(?Rule(_, _, _, _, _); mark-rule-arguments-rule)
-  
-  mark-rule-arguments-rule:
-    Rule(prem*, infer, Relation(Source(lhs, rw*), arrow, target), kind, class)
-      -> Rule(prem'*, infer, Relation(Source(lhs', rw*), arrow, target'), kind, class)
-    with {| RenameArgument, NextArgument:
-      rules(NextArgument: _ -> 1);
-      lhs' := <try(mark-rule-arguments-bind-source)> lhs;
-      prem'* := <alltd(mark-rule-arguments-read)> prem*;
-      target' := <alltd(mark-rule-arguments-read)> target
-    |}
-
-  mark-rule-arguments-bind-source:
-    Cast(var@Var(v), l@ListSort(_)) -> Cast(ArgBind(0), l)
-    where
-      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
-
-  mark-rule-arguments-bind-source:
-    As(var@Var(v), source) -> source
-    where
-      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
-
-  mark-rule-arguments-read = RenameArgument
-
-  type-of:
-    ArgRead(i){v} -> <type-of> v
+//  mark-rule-arguments = alltd(?Rule(_, _, _, _, _); mark-rule-arguments-rule)
+//  
+//  mark-rule-arguments-rule:
+//    Rule(prem*, infer, Relation(Source(lhs, rw*), arrow, target), kind, class)
+//      -> Rule(prem'*, infer, Relation(Source(lhs', rw*), arrow, target'), kind, class)
+//    with {| RenameArgument, NextArgument:
+//      rules(NextArgument: _ -> 1);
+//      lhs' := <try(mark-rule-arguments-bind-source)> lhs;
+//      prem'* := <alltd(mark-rule-arguments-read)> prem*;
+//      target' := <alltd(mark-rule-arguments-read)> target
+//    |}
+//
+//  mark-rule-arguments-bind-source:
+//    Cast(var@Var(v), l@ListSort(_)) -> Cast(ArgBind(0), l)
+//    where
+//      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
+//
+//  mark-rule-arguments-bind-source:
+//    As(var@Var(v), source) -> source
+//    where
+//      rules(RenameArgument: VarRef(v) -> ArgRead(0){var})
+//
+//  mark-rule-arguments-read = RenameArgument
+//
+//  type-of:
+//    ArgRead(i){v} -> <type-of> v
 
 rules /* native operators */
 
