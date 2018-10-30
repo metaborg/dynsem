@@ -22,7 +22,6 @@ rules
         
         import java.util.Iterator;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.ConsNilIterator;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
         import org.spoofax.interpreter.terms.IStrategoTerm;
         import org.spoofax.interpreter.core.Tools;
@@ -58,11 +57,6 @@ rules
             return strategoTerm;
           }
         
-          @Override
-          public final ITermInstanceChecker getCheck() {
-            return null;
-          }
-
           @Override
           public abstract x_elemclass elem();
         

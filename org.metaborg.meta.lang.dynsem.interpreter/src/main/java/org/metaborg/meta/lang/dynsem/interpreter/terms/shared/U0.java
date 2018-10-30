@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.terms.shared;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -21,16 +20,6 @@ public class U0 extends USort {
 	@Override
 	public int size() {
 		return 0;
-	}
-
-	@Override
-	public ITermInstanceChecker getCheck() {
-		return new ITermInstanceChecker() {
-			@Override
-			public boolean isInstance(Object obj) {
-				return obj instanceof U0;
-			}
-		};
 	}
 
 	@Override

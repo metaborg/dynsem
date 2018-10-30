@@ -25,7 +25,6 @@ rules
         import org.spoofax.interpreter.terms.*;
         import ~x:<get-opt> NativePkg().*;
         import ~x:<get-opt> TopPkg().TypesGen;
-        import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
         import com.oracle.truffle.api.CompilerAsserts;
         import org.apache.commons.lang3.builder.HashCodeBuilder;
         import com.oracle.truffle.api.CompilerDirectives;
@@ -92,17 +91,6 @@ rules
           @TruffleBoundary
           private int makeHashCode() {
             return e_hash.toHashCode();
-          }
-          
-          @Override
-          public ITermInstanceChecker getCheck() {
-            return new ITermInstanceChecker() {
-        
-              @Override
-              public boolean isInstance(Object obj) {
-                return TypesGen.~x:$[is[x_classname]](obj);
-              }
-            };
           }
         }
       ]|

@@ -1,7 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -29,11 +28,6 @@ public final class Label extends ALabel {
 
 	public String get_1() {
 		return label;
-	}
-
-	@Override
-	public ITermInstanceChecker getCheck() {
-		return null;
 	}
 
 	@Override

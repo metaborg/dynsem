@@ -13,7 +13,7 @@ import com.oracle.truffle.api.object.Property;
 import com.oracle.truffle.api.object.Shape;
 import com.oracle.truffle.api.source.SourceSection;
 
-@NodeChildren({ @NodeChild(value = "frame", type = TermBuild.class),
+@NodeChildren({ @NodeChild(value = "frm", type = TermBuild.class),
 		@NodeChild(value = "dec", type = TermBuild.class) })
 public abstract class GetFrameSlot extends NativeOpBuild {
 
@@ -21,19 +21,19 @@ public abstract class GetFrameSlot extends NativeOpBuild {
 		super(source);
 	}
 
-	@Specialization(guards = { "dec == dec_cached", "shape_cached.check(frame)" }, limit = "20")
-	public Object doGetCached(DynamicObject frame, Occurrence dec, @Cached("dec") Occurrence dec_cached,
-			@Cached("frame.getShape()") Shape shape_cached,
+	@Specialization(guards = { "dec == dec_cached", "shape_cached.check(frm)" }, limit = "20")
+	public Object doGetCached(DynamicObject frm, Occurrence dec, @Cached("dec") Occurrence dec_cached,
+			@Cached("frm.getShape()") Shape shape_cached,
 			@Cached("shape_cached.getProperty(dec_cached)") Property slot_property) {
-		return slot_property.get(frame, shape_cached);
+		return slot_property.get(frm, shape_cached);
 	}
 
 	@Specialization(replaces = "doGetCached")
-	public Object doGet(DynamicObject frame, Occurrence dec) {
-		return frame.get(dec);
+	public Object doGet(DynamicObject frm, Occurrence dec) {
+		return frm.get(dec);
 	}
 
-	public static GetFrameSlot create(SourceSection source, TermBuild frame, TermBuild dec) {
-		return GetFrameSlotNodeGen.create(source, frame, dec);
+	public static GetFrameSlot create(SourceSection source, TermBuild frm, TermBuild dec) {
+		return GetFrameSlotNodeGen.create(source, frm, dec);
 	}
 }

@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.terms;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.ITermInstanceChecker;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 /**
@@ -18,14 +17,6 @@ public interface ITerm {
 	 * @return the size of this {@link ITerm}
 	 */
 	public int size();
-
-	/**
-	 * Create and return an instance of {@link ITermInstanceChecker} which can check whether an arbitrary {@link Object}
-	 * is an instance of this {@link ITerm}.
-	 * 
-	 * @return a fresh {@link ITermInstanceChecker} for the kind of {@link ITerm} this {@link ITerm} represents.
-	 */
-	public ITermInstanceChecker getCheck();
 
 	/**
 	 * Check whether this {@link ITerm} has an associated {@link IStrategoTerm}.
