@@ -144,7 +144,12 @@ rules // lift constructor sub-terms in match
       [p1*, p2*, p3*, Formula(Relation(Reads(read'*), Source(lhs',sc'*), NamedDynamicEmitted(em1*, arrow), Target(rhs',tc'*))), p4*, p5*]
       where
         (p1*, read'*) := <try-factor(factorize-target-components, ?succ)> read*;
-        (p2*, lhs') := <lift-build-on-cond(not(is-prime-factor), ?succ)> lhs;
+        if <is-native-rule-call> lhs
+        then
+          (p2*, lhs') := <try-factor(factorize-build, ?succ)> lhs
+        else
+          (p2*, lhs') := <lift-build-on-cond(not(is-prime-factor), ?succ)> lhs
+        end;
         (p3*, sc'*) := <try-factor(factorize-target-components, ?succ)> sc*;
         (p4*, rhs') := <lift-match-on-cond(not(is-prime-factor), ?succ)> rhs;
         (p5*, tc'*) := <try-factor(factorize-source-components, ?succ)> tc*;
