@@ -76,12 +76,12 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "NativeOp", 2)) {
 			return NativeOpTermBuild.create(t, fd);
 		}
-		if (Tools.hasConstructor(t, "VarRef", 1)) {
-			return VarRead.create(t, fd);
+		if (Tools.hasConstructor(t, "VarRef", 1) || Tools.hasConstructor(t, "ConstRef", 1)) {
+			return SlotRead.create(t, fd);
 		}
-		if (Tools.hasConstructor(t, "ArgRead", 1)) {
-			return ArgRead.create(t);
-		}
+		// if (Tools.hasConstructor(t, "ArgRead", 1)) {
+		// return ArgRead.create(t);
+		// }
 		if (Tools.hasConstructor(t, "Map_", 1)) {
 			return MapBuild.create(t, fd);
 		}
@@ -153,6 +153,7 @@ public abstract class TermBuild extends DynSemNode {
 		if (Tools.hasConstructor(t, "TermPlaceholder", 0)) {
 			return TermPlaceholderBuild.create(t, fd);
 		}
+
 
 		throw new NotImplementedException("Unsupported term build: " + t);
 	}

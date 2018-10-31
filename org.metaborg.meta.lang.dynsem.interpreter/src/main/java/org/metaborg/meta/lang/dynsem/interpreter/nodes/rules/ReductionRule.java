@@ -17,6 +17,7 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
@@ -113,13 +114,13 @@ public final class ReductionRule extends Rule {
 
 		String arrowName = Tools.javaStringAt(arrowTerm, 1);
 
-		IStrategoAppl lhsConTerm = null;
-
-		if (Tools.hasConstructor(lhsLeftTerm, "As", 2)) {
-			lhsConTerm = Tools.applAt(lhsLeftTerm, 1);
-		} else {
-			lhsConTerm = lhsLeftTerm;
-		}
+		// IStrategoAppl lhsConTerm = null;
+		//
+		// if (Tools.hasConstructor(lhsLeftTerm, "As", 2)) {
+		// lhsConTerm = Tools.applAt(lhsLeftTerm, 1);
+		// } else {
+		// lhsConTerm = lhsLeftTerm;
+		// }
 
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
 
@@ -135,7 +136,7 @@ public final class ReductionRule extends Rule {
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 
 			return new ReductionRule(lang, SourceUtils.dynsemSourceSectionFromATerm(ruleT), fd, arrowName,
-					dispatchClass, RuleInputsNode.create(lhsConTerm, lhsCompsTerm, fd), premises, target);
+					dispatchClass, RuleInputsNode.create(lhsLeftTerm, lhsCompsTerm, fd), premises, target);
 		}
 
 		throw new NotImplementedException("Unsupported rule term: " + ruleT);
@@ -143,22 +144,24 @@ public final class ReductionRule extends Rule {
 
 	@TruffleBoundary
 	protected static FrameDescriptor createFrameDescriptor(IStrategoTerm t) {
-		Set<String> vars = new HashSet<>();
+		final FrameDescriptor fd = new FrameDescriptor();
+		final Set<String> vars = new HashSet<>();
 		TermVisitor visitor = new TermVisitor() {
 
 			@Override
 			public void preVisit(IStrategoTerm t) {
-				if (Tools.isTermAppl(t) && Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)) {
-					vars.add(Tools.stringAt(t, 0).stringValue());
+				if (Tools.isTermAppl(t) && (Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)
+						|| Tools.hasConstructor((IStrategoAppl) t, "ConstRef", 1))) {
+					String v = Tools.stringAt(t, 0).stringValue();
+					if (!vars.contains(v)) {
+						fd.addFrameSlot(v, false, FrameSlotKind.Object);
+						vars.add(v);
+					}
 				}
 			}
 		};
 
 		visitor.visit(t);
-		FrameDescriptor fd = new FrameDescriptor();
-		for (String v : vars) {
-			fd.addFrameSlot(v);
-		}
 		return fd;
 	}
 
