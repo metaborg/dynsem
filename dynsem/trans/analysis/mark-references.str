@@ -8,7 +8,7 @@ rules
   
   mark-vars = mark-var-defs-in-rules
   
-  unmark-vars = alltd(\ Var(x) -> VarRef(x) \)
+  unmark-vars = alltd(\ Var(x) -> VarRef(x) \ + \ Const(x) -> ConstRef(x) \)
 
 rules
 	
@@ -46,6 +46,5 @@ rules
   	<+ CaseOtherwise(mark-vardefs-in-premise)
   	<+ GuardedBind(make-vars, id)
 
-  make-vars =
-  	alltd(origin-track-forced(\ VarRef(x) -> Var(x) \))
+  make-vars = alltd(origin-track-forced(\ VarRef(x) -> Var(x) \ + \ ConstRef(x) -> Const(x) \))
 

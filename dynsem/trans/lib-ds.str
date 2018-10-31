@@ -11,6 +11,7 @@ signature
   constructors
     Var : LID -> Term
     Var : ID -> Term
+    Const: ID -> Term
 
 
 rules // utils for deterministic variable name generation

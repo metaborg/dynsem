@@ -71,12 +71,12 @@ strategies // analysis workhorse
   store-all:
     m@Module(n, section*) -> m
     with
-      store-built-ins;
-      <map(try(store-signatures))> section*;
-      <check-signatures> m;
-      <store-rules-all> section*;
-      <post-analysis-checks> m;
-      <gen-implicit-info-top> m
+      store-built-ins
+      ; <map(try(store-signatures))> section*
+      ; <check-signatures> m
+      ; <store-rules-all> section*
+      ; <post-analysis-checks> m
+      ; <gen-implicit-info-top> m
 
 strategies // import resolution
 

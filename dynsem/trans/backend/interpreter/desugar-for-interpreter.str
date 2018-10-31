@@ -176,57 +176,57 @@ rules /* list reductions */
 
 rules /* TCO */
 
-  desugar-rec-tco = alltd(try(desugar-rule-pushdown-target); desugar-rule-rec-tco)
-
-  desugar-rule-pushdown-target:
-    Rule(p*, infer, Relation(src, arrow, Target(tt, rws)), kind, class) ->
-      Rule([p*, Formula(Match(tt, Var(v)))], infer, Relation(src, arrow, Target(VarRef(v), rws)), kind, class)
-    where
-      <not(?VarRef(_))> tt;
-      v := <newname>
-
-  desugar-rule-rec-tco:
-    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
-    where {| CurrentRelation:
-      rules(CurrentRelation: _ -> (c, <length> k*, arrow-name));
-      p'* := <desugar-prems-rec-tco(try(?succ))> p*;
-      !succ // ensure we have rewritten at least one call
-    |}
-  
-  desugar-rule-rec-tco:
-    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
-    where {| CurrentRelation:
-      rules(CurrentRelation: _ -> (<rw-type> ty, -1, arrow-name));
-      p'* := <desugar-prems-rec-tco(try(?succ))> p*;
-      !succ // ensure we have rewritten at least one call
-    |}
-  
-  desugar-prems-rec-tco(s) = is-list; try(at-last([desugar-prem-rec-tco(s)]))
-  
-  desugar-prem-rec-tco(s) =
-    CaseMatch(id, map(try(CaseOtherwise(desugar-prems-rec-tco(s)) + CasePattern(id, desugar-prems-rec-tco(s)))))
-  
-  desugar-prem-rec-tco(s):
-    Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
-      Formula(RecRelation(src, rel, tgt))
-    where
-      (c, k-length, arrow-name) := <CurrentRelation>;
-      <eq> (k-length, <length> k*);
-      s
-
-  desugar-prem-rec-tco(s):
-    Formula(Relation(src@Source(ArgRead(0), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
-      Formula(RecRelation(src, rel, tgt))
-    where
-      (_, _, arrow-name) := <CurrentRelation>;
-      s
-  
-  desugar-prem-rec-tco(s):
-    Formula(Relation(src@Source(ListSource(_, lty), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
-      Formula(RecRelation(src, rel, tgt))
-    where
-      (lty, -1, arrow-name) := <CurrentRelation>; 
-      s
+//  desugar-rec-tco = alltd(try(desugar-rule-pushdown-target); desugar-rule-rec-tco)
+//
+//  desugar-rule-pushdown-target:
+//    Rule(p*, infer, Relation(src, arrow, Target(tt, rws)), kind, class) ->
+//      Rule([p*, Formula(Match(tt, Var(v)))], infer, Relation(src, arrow, Target(VarRef(v), rws)), kind, class)
+//    where
+//      <not(?VarRef(_))> tt;
+//      v := <newname>
+//
+//  desugar-rule-rec-tco:
+//    Rule(p*, infer, rel@Relation(Source(Con(c, k*), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
+//    where {| CurrentRelation:
+//      rules(CurrentRelation: _ -> (c, <length> k*, arrow-name));
+//      p'* := <desugar-prems-rec-tco(try(?succ))> p*;
+//      !succ // ensure we have rewritten at least one call
+//    |}
+//  
+//  desugar-rule-rec-tco:
+//    Rule(p*, infer, rel@Relation(Source(Cast(_, ty@ListSort(_)), _), NamedDynamicEmitted(_, arrow-name, _), _), kind, class) -> Rule(p'*, infer, rel, kind, class)
+//    where {| CurrentRelation:
+//      rules(CurrentRelation: _ -> (<rw-type> ty, -1, arrow-name));
+//      p'* := <desugar-prems-rec-tco(try(?succ))> p*;
+//      !succ // ensure we have rewritten at least one call
+//    |}
+//  
+//  desugar-prems-rec-tco(s) = is-list; try(at-last([desugar-prem-rec-tco(s)]))
+//  
+//  desugar-prem-rec-tco(s) =
+//    CaseMatch(id, map(try(CaseOtherwise(desugar-prems-rec-tco(s)) + CasePattern(id, desugar-prems-rec-tco(s)))))
+//  
+//  desugar-prem-rec-tco(s):
+//    Formula(Relation(src@Source(Con(c, k*), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
+//      Formula(RecRelation(src, rel, tgt))
+//    where
+//      (c, k-length, arrow-name) := <CurrentRelation>;
+//      <eq> (k-length, <length> k*);
+//      s
+//
+//  desugar-prem-rec-tco(s):
+//    Formula(Relation(src@Source(ArgRead(0), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
+//      Formula(RecRelation(src, rel, tgt))
+//    where
+//      (_, _, arrow-name) := <CurrentRelation>;
+//      s
+//  
+//  desugar-prem-rec-tco(s):
+//    Formula(Relation(src@Source(ListSource(_, lty), _), rel@NamedDynamicEmitted(_, arrow-name, _), tgt)) ->
+//      Formula(RecRelation(src, rel, tgt))
+//    where
+//      (lty, -1, arrow-name) := <CurrentRelation>; 
+//      s
 
 rules /* desugar not-match and not equal premises */
 

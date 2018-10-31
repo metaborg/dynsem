@@ -31,7 +31,9 @@ rules /* syntactic checks */
     + ?Int(_) + ?Real(_) + ?String(_) + ?True() + ?False()
   
   post-analysis-check:
-    dec@Var(v) -> <fail>
+    dec -> <fail>
+    where
+      ?Var(v) + ?Const(v)
     where
       <lookup-def(|Vars()); not(lookup-prop(|Use()))> v;
       add-msg(|Warning(), dec, $[Variable [<unrename-var> v] is never read])
@@ -170,8 +172,8 @@ rules
     (expected-ty, actual-ty) -> <type-check-expectation(coerce|t, expected-ty)> actual-ty
 
   type-check-build =
-  	type-check-build-helper; get-alias-base
-  	<+ type-err-build-match-symbols
+    	type-check-build-helper; get-alias-base
+    	<+ type-err-build-match-symbols
     <+ type-err-build
   
   type-check-build-helper =
@@ -192,7 +194,7 @@ rules
   type-err-build-match-symbols:
     t -> NONETYPE()
     where 
-      ?Wld() + ?Var(_)
+      ?Wld() + ?Var(_) + ?Const(_)
     where 
       add-msg(|Error(), t, $[Match symbol in build pattern])
   
@@ -229,14 +231,18 @@ rules
     Fresh() -> IntType()
   
   type-check-build-var:
-    r@VarRef(v) -> v-ty
+    r -> v-ty
+    where
+      ?VarRef(v) + ?ConstRef(v)
     where
       v-def := <lookup-def(|Vars())> v;
       v-ty := <lookup-prop(|Type())> v-def;
       <store-prop(|Use(), v-def)> r
   
   type-check-build-var:
-    r@VarRef(v) -> <fail>
+    r -> <fail>
+    where
+      ?VarRef(v) + ?ConstRef(v)
     where
       <not(lookup-def(|Vars()))> v;
       add-msg(|Error(), r, $[Variable [<unrename-var> v] cannot be resolved])
@@ -406,7 +412,9 @@ rules // type rules for match-sides
     Wld() -> in-ty
   
   type-check-match-var(|in-ty):
-    Var(v) -> ty
+    dec -> ty
+    where
+      ?Var(v) + ?Const(v)
     where
       <not(lookup-def(|Vars()))> v;
       if scheme-def := <get-unique-matching-varscheme(get-all-varschemes)> v
@@ -420,7 +428,9 @@ rules // type rules for match-sides
       <store-prop(|Type(), v-def)> ty
   
   type-check-match-var(|in-ty):
-    dec@Var(v) -> in-ty
+    dec -> in-ty
+    where
+      ?Var(v) + ?Const(v)
     where
       v-ty := <lookup-def(|Vars()); lookup-prop(|Type())> v;
       if <not(type-coerce-full(fail))> (in-ty, v-ty)
@@ -461,7 +471,7 @@ rules // type rules for match-sides
       add-msg(|Error(), t, $[Native operator may not be used in a match position])
   
   type-check-match-list(|in-ty):
-  	List_([]) -> <type-coerce-full(id)> (ListType(ALPHATYPE()), in-ty)
+    	List_([]) -> <type-coerce-full(id)> (ListType(ALPHATYPE()), in-ty)
   
   type-check-match-list(|in-ty):
     ListTail([h], t) -> <type-coerce-full(id)> (l-ty, in-ty')
@@ -472,9 +482,9 @@ rules // type rules for match-sides
     where
       ListType(in-el-ty) := in-ty'
     where
-    	t-ty@ListType(t-el-ty) := <type-check-match(|in-ty')> t;
-    	h-ty := <type-check-match(|in-el-ty)> h;
-    	l-ty := <type-coerce-full(id)> (ListType(h-ty), t-ty)
+      	t-ty@ListType(t-el-ty) := <type-check-match(|in-ty')> t;
+      	h-ty := <type-check-match(|in-el-ty)> h;
+      	l-ty := <type-coerce-full(id)> (ListType(h-ty), t-ty)
 
   type-check-match-tuple(|in-ty):
     ty@Tuple(t*) -> TupleType(<zip(type-check-match-wrap)> (f-ty*, t*))
@@ -516,10 +526,10 @@ rules
       rhs-ty := <type-check-match(|lhs-ty)> rhs
   
   type-check-premise:
-  	f@Formula(NMatch(lhs, rhs)) -> f
-  	where
-  	  lhs-ty := <type-check-build> lhs;
-  	  <type-check-match(|lhs-ty)> rhs
+    	f@Formula(NMatch(lhs, rhs)) -> f
+    	where
+    	  lhs-ty := <type-check-build> lhs;
+    	  <type-check-match(|lhs-ty)> rhs
 
   type-check-premise:
   	f@Formula(Relation(Reads(r*), Source(lhs, sc*), arr, Target(rhs, tc*))) -> f
@@ -544,7 +554,9 @@ rules
       end
       
   type-check-premise:
-    f@Formula(TypeCast(r@VarRef(v-name), ty-term)) -> f
+    f@Formula(TypeCast(r, ty-term)) -> f
+    where
+      <?VarRef(v-name) + ?ConstRef(v-name)> r
     where
       <rw-type> ty-term => ty;
       <lookup-def(|Vars())> v-name => v-def;
@@ -557,7 +569,9 @@ rules
       end
 
   type-check-premise:
-    f@Formula(TypeCheck(r@VarRef(v-name), ty-term)) -> f
+    f@Formula(TypeCheck(r, ty-term)) -> f
+    where
+      <?VarRef(v-name) + ?ConstRef(v-name)> r
     where
       <rw-type> ty-term => ty;
       <lookup-def(|Vars())> v-name => v-def;

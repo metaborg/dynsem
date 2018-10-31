@@ -22,6 +22,9 @@ rules
   
   type-of:
     Var(v) -> <type-of> VarRef(v)
+  
+  type-of:
+    Const(v) -> <type-of> ConstRef(v)
 
   type-of:
     ListTail(elems, tl) -> l-ty
@@ -88,9 +91,15 @@ rules /* variable scheme queries */
 
   get-var-name:
     Var(x) -> x
+
+  get-var-name:
+    Const(x) -> x
   
   get-var-name:
     VarRef(x) -> x
+  
+  get-var-name:
+    ConstRef(x) -> x
 
   get-label-name:
     Label(x) -> x

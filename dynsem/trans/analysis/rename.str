@@ -43,6 +43,9 @@ rules
     Var(x) -> x
   
   rename-collect-vardefs:
+    Const(x) -> x
+  
+  rename-collect-vardefs:
     CaseMatch(t, case*) -> <map(rename-collect-vardefs-top); rename-api-isect-lists> case*
   
   rename-premises(|env) =
@@ -83,9 +86,15 @@ rules
   
   rename-var(|env):
     VarRef(v) -> VarRef(<rename-api-rename(|env)> v)
+
+  rename-var(|env):
+    ConstRef(v) -> ConstRef(<rename-api-rename(|env)> v)
   
   rename-var(|env):
     Var(v) -> Var(<rename-api-rename(|env)> v)
+  
+  rename-var(|env):
+    Const(v) -> Const(<rename-api-rename(|env)> v)
   
 rules
 
@@ -97,7 +106,7 @@ rules
       env := <RenameEnvs>
   
   unrename-var:
-    VarRef(x) -> VarRef(<rename-api-invrename(|env)> x)
+    ConstRef(x) -> ConstRef(<rename-api-invrename(|env)> x)
     where
       env := <RenameEnvs>
   

@@ -54,6 +54,7 @@ strategies
               ; copy-propagation-module
               ; eliminate-dead-premises-module
               ; insert-wildcards-module
+              ; mark-const-vars-module
               ; defactorize-module
               ; prettify-vars-module
             )

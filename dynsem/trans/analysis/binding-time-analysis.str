@@ -1,0 +1,157 @@
+module analysis/binding-time-analysis
+
+imports
+  signatures/-
+  backend/interpreter/-
+  analysis/-
+  ds2ds/explicate-arrow-types
+  ds2ds/more-typeannos
+  ds2ds/desugar-concat
+  ds2ds/abruptions/abruptions
+  ds2ds/nativeloops/nativeloops
+  ds
+
+/*
+Implements a static analysis at rule-level to mark variables that are strictly dependent on the input term
+*/
+rules
+
+  mark-const-vars-module =
+    m-in-analysis(
+      Module(id, alltd(mark-const-vars-make-dynamic; mark-const-vars));
+      unrename-all
+    ); unmark-vars
+  
+  mark-const-vars-make-dynamic =
+    ?Rule(_, _, _);
+    alltd(\ ConstRef(x) -> VarRef(x) \ + \ Const(x) -> Var(x) \) 
+  
+  mark-const-vars:
+    r@Rule(prem*, infer, Relation(reads, Source(lhs, sc*), arr, Target(rhs, tc*))) -> r'
+    where {| ConstVar: // contains rules that mirrors variables which are constant
+      // record pattern-bound variables
+      <mark-const-vars-get-bound-vars; map(mark-const-vars-record-const-var)> lhs
+      // analyze premises
+      ; <map(try(mark-const-vars-prem))> prem*
+      // finally mark all constants
+      ; r' := <alltd(mark-const-vars-replace)> r
+    |}
+    
+  mark-const-vars-get-bound-vars = collect-all(?Var(_) + ?Const(_))
+  mark-const-vars-get-read-vars = collect-all(?VarRef(_) + ?ConstRef(_))
+  
+  mark-const-vars-is-const:
+    var -> var
+    where
+      (?VarRef(x) + ?Var(x));
+      <ConstVar> x
+  
+  mark-const-vars-is-const =
+    ?Con(c, aparam*)
+    // if we have a native operator or native constructor we cannot control it, so it's not constant
+    ; cons-kind := <lookup-def(|Constructors()); lookup-prop(|ConsKind())> (c, <length> aparam*)
+    ; <not(?NativeCons() + ?NativeOpCons())> cons-kind
+    // if all of the parameters are constant then we are constant
+    ; <map(mark-const-vars-is-const)> aparam*
+  
+  mark-const-vars-is-const =
+    ?Concat(t1, t2);
+    <mark-const-vars-is-const> t1;
+    <mark-const-vars-is-const> t2
+
+  mark-const-vars-is-const = ?List_([])
+
+  mark-const-vars-is-const =
+    ?ListTail([h], t);
+    <mark-const-vars-is-const> h;
+    <mark-const-vars-is-const> t
+
+  mark-const-vars-is-const =
+    ?DeAssoc(l, idx);
+    <mark-const-vars-is-const> l;
+    <mark-const-vars-is-const> idx
+
+  mark-const-vars-is-const =
+    ?Reverse(t);
+    <mark-const-vars-is-const> t
+
+  mark-const-vars-is-const =
+    ?ListLength(t);
+    <mark-const-vars-is-const> t
+  
+  mark-const-vars-is-const = 
+    ?Tuple(t*)
+    ; <map(mark-const-vars-is-const)> t*
+
+  mark-const-vars-is-const =
+    ?Map_([])
+  
+  mark-const-vars-is-const =
+    ?Map_([Bind(k, v)]);
+    <mark-const-vars-is-const> k;
+    <mark-const-vars-is-const> v
+  
+  mark-const-vars-is-const =
+    ?MapExtend(map1, map2);
+    <mark-const-vars-is-const> map1;
+    <mark-const-vars-is-const> map2
+
+  mark-const-vars-is-const =
+    ?MapUnbind(map, key);
+    <mark-const-vars-is-const> map;
+    <mark-const-vars-is-const> key
+
+  mark-const-vars-is-const =
+    ?DeAssoc(map, key);
+    <mark-const-vars-is-const> map;
+    <mark-const-vars-is-const> key
+
+  mark-const-vars-is-const =
+    ?MapKeys(map);
+    <mark-const-vars-is-const> map
+
+  mark-const-vars-is-const =
+    ?MapValues(map);
+    <mark-const-vars-is-const> map
+
+  mark-const-vars-is-const =
+    ?MapHas(map, key);
+    <mark-const-vars-is-const> map;  
+    <mark-const-vars-is-const> key 
+
+  mark-const-vars-is-const =
+    ?Cast(t, _);
+    <mark-const-vars-is-const> t
+
+  mark-const-vars-is-const = 
+    ?Int(_)
+    + ?Real(_)
+    + ?True()
+    + ?False()
+    + ?String(_)
+  
+  mark-const-vars-prem =
+    ?Formula(Match(lhs, rhs));
+    <mark-const-vars-is-const> lhs;
+    <mark-const-vars-get-bound-vars; map(mark-const-vars-record-const-var)> rhs
+  
+  mark-const-vars-replace:
+    var@Var(x) -> Const(x)
+    where
+      <mark-const-vars-is-const> var
+
+  mark-const-vars-replace:
+    var@VarRef(x) -> ConstRef(x)
+    where
+      <mark-const-vars-is-const> var
+  
+  mark-const-vars-record-const-var:
+    var -> var
+    where
+      (?Var(x) + ?VarRef(x) + ?Const(x) + ?ConstRef(x))
+    with
+      rules(ConstVar:+ x -> x) 
+  
+  
+  
+

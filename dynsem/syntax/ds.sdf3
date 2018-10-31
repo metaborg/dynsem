@@ -83,6 +83,7 @@ context-free syntax // rules
   ] {deprecated("Use PAT -> PREM instead")}
   
   ID = <_> {reject}
+  ID = <const> {reject}
   ID = <imports> {reject}
   ID = <signature> {reject}
   ID = <constructors> {reject}
@@ -148,6 +149,7 @@ context-free syntax // formulas
 
 context-free syntax // terms
 
+  Var.ConstRef  = [const [ID]]
   Var.VarRef    = [[ID]]
   Term = Var
   
