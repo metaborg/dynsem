@@ -22,6 +22,21 @@ strategies // name definitions
   
   abr-name-mk-sort = !SimpleSort(<id>)
 
+  is-native-rule-call:
+    t@Con(cname, [_, _, _]) -> t
+    where
+      <abr-name-handler> cname
+  
+  is-native-rule-call:
+    t@Con(cname, [_, _, _]) -> t
+    where
+      <abr-name-handle> cname
+
+  is-native-rule-call:
+    t@Con(cname, [_]) -> t
+    where
+      <abr-name-raise> cname
+
 strategies // selective enabling
 
   abr-are-enabled = where(UsesAbruptions)

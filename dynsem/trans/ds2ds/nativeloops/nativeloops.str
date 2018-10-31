@@ -20,6 +20,21 @@ strategies // name definitions
 
   loops-name-mk-sort = !SimpleSort(<id>)
   
+  is-native-rule-call:
+    t@Con(cname, [_]) -> t
+    where
+      <loops-name-break> cname
+  
+  is-native-rule-call:
+    t@Con(cname, [_]) -> t
+    where
+      <loops-name-continue> cname
+
+  is-native-rule-call:
+    t@Con(cname, [_, _, _]) -> t
+    where
+      <loops-name-while> cname
+  
 strategies // selective enabling
 
   loops-are-enabled = where(UsesLoops)
