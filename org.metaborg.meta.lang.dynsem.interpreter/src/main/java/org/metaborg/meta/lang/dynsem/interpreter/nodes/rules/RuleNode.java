@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -13,6 +14,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermVisitor;
 import org.spoofax.terms.util.NotImplementedException;
 
+import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
@@ -22,7 +24,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class ReductionRule extends Rule {
+public final class RuleNode extends DynSemRootNode {
 
 	public final static String DEFAULT_NAME = "";
 
@@ -35,9 +37,10 @@ public final class ReductionRule extends Rule {
 
 	@Child protected RuleTarget target;
 
-	public ReductionRule(DynSemLanguage lang, SourceSection source, FrameDescriptor fd, String arrowName,
-			Class<?> dispatchClass, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output) {
-		super(lang, source, fd);
+	public RuleNode(DynSemLanguage lang, SourceSection source, FrameDescriptor fd, String arrowName,
+			Class<?> dispatchClass, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output,
+			Assumption constantTermAssumption) {
+		super(lang, source, fd, constantTermAssumption);
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;
 		this.inputsNode = inputsNode;
@@ -86,13 +89,13 @@ public final class ReductionRule extends Rule {
 	}
 
 	@TruffleBoundary
-	public static ReductionRule create(DynSemLanguage lang, IStrategoAppl ruleT) {
+	public static RuleNode create(DynSemLanguage lang, IStrategoAppl ruleT) {
 		CompilerAsserts.neverPartOfCompilation();
 		return createWithFrameDescriptor(lang, ruleT, createFrameDescriptor(ruleT));
 	}
 
 	@TruffleBoundary
-	public static ReductionRule createWithFrameDescriptor(DynSemLanguage lang, IStrategoAppl ruleT,
+	public static RuleNode createWithFrameDescriptor(DynSemLanguage lang, IStrategoAppl ruleT,
 			FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 
@@ -114,29 +117,22 @@ public final class ReductionRule extends Rule {
 
 		String arrowName = Tools.javaStringAt(arrowTerm, 1);
 
-		// IStrategoAppl lhsConTerm = null;
-		//
-		// if (Tools.hasConstructor(lhsLeftTerm, "As", 2)) {
-		// lhsConTerm = Tools.applAt(lhsLeftTerm, 1);
-		// } else {
-		// lhsConTerm = lhsLeftTerm;
-		// }
-
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
 
 		String dispatchClassName = Tools.javaStringAt(ruleT, 4);
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = ReductionRule.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = RuleNode.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
 
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 
-			return new ReductionRule(lang, SourceUtils.dynsemSourceSectionFromATerm(ruleT), fd, arrowName,
-					dispatchClass, RuleInputsNode.create(lhsLeftTerm, lhsCompsTerm, fd), premises, target);
+			return new RuleNode(lang, SourceUtils.dynsemSourceSectionFromATerm(ruleT), fd, arrowName,
+					dispatchClass, RuleInputsNode.create(lhsLeftTerm, lhsCompsTerm, fd), premises, target,
+					Truffle.getRuntime().createAssumption());
 		}
 
 		throw new NotImplementedException("Unsupported rule term: " + ruleT);

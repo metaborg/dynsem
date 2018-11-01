@@ -8,8 +8,10 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNo
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
+import com.oracle.truffle.api.utilities.AlwaysValidAssumption;
 
 public class InitEvalNode extends DynSemRootNode {
 	private final ITerm program;
@@ -18,7 +20,7 @@ public class InitEvalNode extends DynSemRootNode {
 	@Child private DispatchNode initDispatch;
 
 	public InitEvalNode(DynSemLanguage lang, SourceSection source, ITerm program) {
-		super(lang, source);
+		super(lang, source, new FrameDescriptor(), AlwaysValidAssumption.INSTANCE);
 		this.program = program;
 		this.initNabl2 = new InitNaBL2Node(source);
 		this.initProtoFrames = new InitProtoFrames(source);
@@ -28,7 +30,7 @@ public class InitEvalNode extends DynSemRootNode {
 	}
 
 	@Override
-	public Object execute(VirtualFrame frame) {
+	public RuleResult execute(VirtualFrame frame) {
 		if (getContext().isNativeFramesEnabled()) {
 			initNabl2.execute(frame);
 			initProtoFrames.execute(frame);
@@ -44,11 +46,6 @@ public class InitEvalNode extends DynSemRootNode {
 	@Override
 	protected boolean isCloneUninitializedSupported() {
 		return false;
-	}
-
-	@Override
-	protected Rule cloneUninitialized() {
-		throw new UnsupportedOperationException();
 	}
 
 }
