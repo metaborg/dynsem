@@ -23,17 +23,17 @@ strategies // name definitions
   is-native-rule-call:
     t@Con(cname, [_]) -> t
     where
-      <loops-name-break> cname
+      loops-name-break => cname
   
   is-native-rule-call:
     t@Con(cname, [_]) -> t
     where
-      <loops-name-continue> cname
+      loops-name-continue => cname
 
   is-native-rule-call:
     t@Con(cname, [_, _, _]) -> t
     where
-      <loops-name-while> cname
+      loops-name-while => cname
   
 strategies // selective enabling
 
