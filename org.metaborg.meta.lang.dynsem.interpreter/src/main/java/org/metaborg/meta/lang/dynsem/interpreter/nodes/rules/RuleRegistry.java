@@ -39,22 +39,11 @@ public class RuleRegistry implements IRuleRegistry {
 		this.language = language;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#getLanguage()
-	 */
 	@Override
 	public DynSemLanguage getLanguage() {
 		return language;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#registerRule(java.lang.String,
-	 * java.lang.Class, com.oracle.truffle.api.CallTarget)
-	 */
 	@Override
 	public void registerRule(String arrowName, Class<?> dispatchClass, CallTarget[] targets) {
 		CompilerAsserts.neverPartOfCompilation();
@@ -67,12 +56,6 @@ public class RuleRegistry implements IRuleRegistry {
 		rulesForName.put(dispatchClass, targets);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry#lookupRule(java.lang.String,
-	 * java.lang.Class)
-	 */
 	@Override
 	@TruffleBoundary
 	public CallTarget[] lookupRules(String arrowName, Class<?> dispatchClass) {
@@ -104,18 +87,18 @@ public class RuleRegistry implements IRuleRegistry {
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 
-			Map<String, Map<Class<?>, List<RuleNode>>> rules = new HashMap<>();
+			Map<String, Map<Class<?>, List<RuleRootNode>>> rules = new HashMap<>();
 
 			for (IStrategoTerm ruleTerm : rulesTerm) {
-				RuleNode r = RuleNode.create(language, (IStrategoAppl) ruleTerm);
+				RuleRootNode r = RuleRootNode.create(language, (IStrategoAppl) ruleTerm);
 
-				Map<Class<?>, List<RuleNode>> rulesForName = rules.get(r.getArrowName());
+				Map<Class<?>, List<RuleRootNode>> rulesForName = rules.get(r.getArrowName());
 				if (rulesForName == null) {
 					rulesForName = new HashMap<>();
 					rules.put(r.getArrowName(), rulesForName);
 				}
 
-				List<RuleNode> rulesForClass = rulesForName.get(r.getDispatchClass());
+				List<RuleRootNode> rulesForClass = rulesForName.get(r.getDispatchClass());
 
 				if (rulesForClass == null) {
 					rulesForClass = new LinkedList<>();
@@ -125,9 +108,9 @@ public class RuleRegistry implements IRuleRegistry {
 				rulesForClass.add(r);
 			}
 
-			for (Entry<String, Map<Class<?>, List<RuleNode>>> rulesForNameEntry : rules.entrySet()) {
+			for (Entry<String, Map<Class<?>, List<RuleRootNode>>> rulesForNameEntry : rules.entrySet()) {
 				final String arrowName = rulesForNameEntry.getKey();
-				for (Entry<Class<?>, List<RuleNode>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
+				for (Entry<Class<?>, List<RuleRootNode>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
 					registerRule(arrowName, dispatchClass,
 							RuleFactory.createRuleTargets(language, SourceUtils.dynsemSourceSectionUnvailable(),
