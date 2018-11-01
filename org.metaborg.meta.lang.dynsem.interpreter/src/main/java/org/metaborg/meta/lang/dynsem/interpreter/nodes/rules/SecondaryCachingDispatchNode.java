@@ -45,7 +45,7 @@ public abstract class SecondaryCachingDispatchNode extends DispatchNode {
 		// @ExplodeLoop
 		public RuleResult executeNoFailure(Class<?> dispatchClass, Object[] args,
 				@Cached("create()") IndirectCallNode callNode) {
-			CallTarget[] callTargets = getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
+			CallTarget[] callTargets = getContext().getRuleRegistry().lookupCallTargets(arrowName, dispatchClass);
 			for (int i = 0; i < callTargets.length; i++) {
 				try {
 					return (RuleResult) callNode.call(callTargets[i], args);

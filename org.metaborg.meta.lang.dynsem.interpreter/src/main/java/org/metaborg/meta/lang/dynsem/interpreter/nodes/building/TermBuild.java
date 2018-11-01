@@ -28,7 +28,7 @@ public abstract class TermBuild extends DynSemNode {
 		super(source);
 	}
 
-	protected boolean isConstantNode() {
+	public boolean isConstantNode() {
 		return false;
 	}
 

@@ -9,12 +9,11 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class ConBuild extends TermBuild {
+public final class ConBuild extends TermBuild {
 
 	private final String name;
 
@@ -36,11 +35,11 @@ public abstract class ConBuild extends TermBuild {
 		for (int i = 0; i < children.length; i++) {
 			children[i] = TermBuild.create(Tools.applAt(childrenT, i), fd);
 		}
-		return ConBuildNodeGen.create(constr, children, SourceUtils.dynsemSourceSectionFromATerm(t));
+		return new ConBuild(constr, children, SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 
-	@Specialization
-	public IApplTerm executeSpecialize(VirtualFrame frame) {
+	@Override
+	public IApplTerm executeGeneric(VirtualFrame frame) {
 		final ITermRegistry termReg = getContext().getTermRegistry();
 		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
 
@@ -48,6 +47,17 @@ public abstract class ConBuild extends TermBuild {
 				.apply(getSourceSection(), cloneNodes(children));
 
 		return replace(build).executeIApplTerm(frame);
+	}
+
+	@Override
+	public Object executeEvaluated(VirtualFrame frame, Object... terms) {
+		final ITermRegistry termReg = getContext().getTermRegistry();
+		final Class<?> termClass = termReg.getConstructorClass(name, children.length);
+
+		final TermBuild build = InterpreterUtils.notNull(getContext(), termReg.lookupBuildFactory(termClass), this)
+				.apply(getSourceSection(), cloneNodes(children));
+
+		return replace(build).executeEvaluated(frame, terms);
 	}
 
 }

@@ -2,8 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynamicRuleInvokeNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynamicRuleInvokeNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleInvokeNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleInvokeNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -27,7 +27,7 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public abstract class RelationPremise extends Premise {
 
-	@Child protected DynamicRuleInvokeNode relationLhs;
+	@Child protected RuleInvokeNode relationLhs;
 
 	@Child protected MatchPattern rhsNode;
 
@@ -37,7 +37,7 @@ public abstract class RelationPremise extends Premise {
 			MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
 		// this.relationLhs = new DynamicRuleInvokeNode(source, inputBuilderNode, dispatchNode);
-		this.relationLhs = DynamicRuleInvokeNodeGen.create(source, arrowName, termNode, componentNodes);
+		this.relationLhs = RuleInvokeNodeGen.create(source, arrowName, termNode, componentNodes);
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}

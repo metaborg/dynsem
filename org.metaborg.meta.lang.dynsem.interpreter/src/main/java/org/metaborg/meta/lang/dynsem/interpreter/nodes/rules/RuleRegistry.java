@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
@@ -22,10 +21,12 @@ import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.Truffle;
 
 public class RuleRegistry implements IRuleRegistry {
 
-	private final Map<String, Map<Class<?>, CallTarget[]>> rules = new HashMap<>();
+	private final Map<String, Map<Class<?>, CallTarget[]>> targets = new HashMap<>();
+	private final Map<String, Map<Class<?>, RuleRootNode[]>> roots = new HashMap<>();
 
 	@CompilationFinal private boolean isInit;
 
@@ -45,26 +46,35 @@ public class RuleRegistry implements IRuleRegistry {
 	}
 
 	@Override
-	public void registerRule(String arrowName, Class<?> dispatchClass, CallTarget[] targets) {
+	@TruffleBoundary
+	public void registerRule(String arrowName, Class<?> dispatchClass, RuleRootNode[] newRuleRoots) {
 		CompilerAsserts.neverPartOfCompilation();
-		Map<Class<?>, CallTarget[]> rulesForName = rules.get(arrowName);
+		Map<Class<?>, RuleRootNode[]> rootsForName = roots.get(arrowName);
+		Map<Class<?>, CallTarget[]> targetsForName = targets.get(arrowName);
 
-		if (rulesForName == null) {
-			rulesForName = new HashMap<>();
-			rules.put(arrowName, rulesForName);
+		if (rootsForName == null) {
+			rootsForName = new HashMap<>();
+			targetsForName = new HashMap<>();
+			roots.put(arrowName, rootsForName);
+			targets.put(arrowName, targetsForName);
 		}
-		rulesForName.put(dispatchClass, targets);
+		rootsForName.put(dispatchClass, newRuleRoots);
+		CallTarget[] newTargets = new CallTarget[newRuleRoots.length];
+		for (int i = 0; i < newTargets.length; i++) {
+			newTargets[i] = Truffle.getRuntime().createCallTarget(newRuleRoots[i]);
+		}
+		targetsForName.put(dispatchClass, newTargets);
 	}
 
 	@Override
 	@TruffleBoundary
-	public CallTarget[] lookupRules(String arrowName, Class<?> dispatchClass) {
+	public CallTarget[] lookupCallTargets(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
 
-		Map<Class<?>, CallTarget[]> rulesForName = rules.get(arrowName);
+		Map<Class<?>, CallTarget[]> rulesForName = targets.get(arrowName);
 
 		if (rulesForName == null) {
 			return new CallTarget[0];
@@ -73,6 +83,25 @@ public class RuleRegistry implements IRuleRegistry {
 		CallTarget[] rules = rulesForName.get(dispatchClass);
 
 		return rules != null ? rules : new CallTarget[0];
+	}
+
+	@Override
+	@TruffleBoundary
+	public RuleRootNode[] lookupRuleRoots(String arrowName, Class<?> dispatchClass) {
+		if (!isInit) {
+			init();
+			isInit = true;
+		}
+
+		Map<Class<?>, RuleRootNode[]> rootsForName = roots.get(arrowName);
+
+		if (rootsForName == null) {
+			return new RuleRootNode[0];
+		}
+
+		RuleRootNode[] rules = rootsForName.get(dispatchClass);
+
+		return rules != null ? rules : new RuleRootNode[0];
 	}
 
 	@TruffleBoundary
@@ -112,9 +141,10 @@ public class RuleRegistry implements IRuleRegistry {
 				final String arrowName = rulesForNameEntry.getKey();
 				for (Entry<Class<?>, List<RuleRootNode>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
-					registerRule(arrowName, dispatchClass,
-							RuleFactory.createRuleTargets(language, SourceUtils.dynsemSourceSectionUnvailable(),
-									rulesForClass.getValue(), arrowName, dispatchClass));
+					registerRule(arrowName, dispatchClass, rulesForClass.getValue().toArray(new RuleRootNode[0]));
+					// registerRule(arrowName, dispatchClass,
+					// RuleFactory.createRuleTargets(language, SourceUtils.dynsemSourceSectionUnvailable(),
+					// rulesForClass.getValue(), arrowName, dispatchClass));
 				}
 			}
 

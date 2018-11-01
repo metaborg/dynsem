@@ -66,7 +66,7 @@ public abstract class SlotRead extends TermBuild {
 		}
 
 		@Override
-		protected final boolean isConstantNode() {
+		public final boolean isConstantNode() {
 			return true;
 		}
 

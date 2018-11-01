@@ -26,7 +26,7 @@ public final class Uninitialized extends DispatchChainRoot {
 	@Override
 	public RuleResult execute(Object[] args) {
 		if (chain == null) {
-			CallTarget[] targets = getContext().getRuleRegistry().lookupRules(arrowName, dispatchClass);
+			CallTarget[] targets = getContext().getRuleRegistry().lookupCallTargets(arrowName, dispatchClass);
 			if (targets.length > 0) {
 				CompilerDirectives.transferToInterpreterAndInvalidate();
 				this.chain = insert(Expanding.createFromTargets(getSourceSection(), targets, dispatchClass,

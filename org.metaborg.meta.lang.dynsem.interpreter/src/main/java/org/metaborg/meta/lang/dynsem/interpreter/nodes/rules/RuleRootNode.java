@@ -56,6 +56,10 @@ public final class RuleRootNode extends DynSemRootNode {
 		return rule;
 	}
 
+	public IStrategoAppl getRuleSourceTerm() {
+		return sourceTerm;
+	}
+
 	@Override
 	public boolean isCloningAllowed() {
 		return true;
