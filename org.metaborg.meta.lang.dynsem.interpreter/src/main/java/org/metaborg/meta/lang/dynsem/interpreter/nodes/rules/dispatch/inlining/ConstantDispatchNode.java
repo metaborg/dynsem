@@ -1,30 +1,29 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRootNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class ConstantDispatchNode extends DynSemNode {
+public final class ConstantDispatchNode extends AbstractDispatch {
 
 	private final Object inputTerm;
-	private final String arrowName;
 
 	@Child protected InlinedDispatchChainedNode dispatchChain;
 
 	public ConstantDispatchNode(SourceSection source, Object inputTerm, String arrowName) {
-		super(source);
+		super(source, arrowName);
 		this.inputTerm = inputTerm;
-		this.arrowName = arrowName;
 	}
 
+	@Override
 	public RuleResult execute(Object[] args) {
 		return executeHelper(args, true);
 	}

@@ -51,8 +51,9 @@ public abstract class RuleInvokeNode extends DynSemNode {
 	public RuleResult doInlinedDispatch(VirtualFrame frame, @Cached("termNode.isConstantNode()") boolean lhsIsConst,
 			@Cached("evalLhsTermNode(frame)") Object inputTerm,
 			@Cached("getConstantInputAssumption()") Assumption constantTermAssumption,
-			@Cached("create(inputTerm, arrowName)") ConstantDispatchNode dispatchNode,
-			@Cached("_logInlining(inputTerm)") Object __dc) {
+			@Cached("create(inputTerm, arrowName)") ConstantDispatchNode dispatchNode
+	// , @Cached("_logInlining(inputTerm)") Object __dc
+	) {
 
 		Object[] args = new Object[componentNodes.length + 1];
 		args[0] = inputTerm;
@@ -72,11 +73,11 @@ public abstract class RuleInvokeNode extends DynSemNode {
 			@Cached("create(getSourceSection(), arrowName)") DispatchNode dispatchNode) {
 		Object[] args = new Object[componentNodes.length + 1];
 		Object term = evalLhsTermNode(frame);
-		if (!loggedNotInlined) {
-			CompilerAsserts.neverPartOfCompilation();
-			loggedNotInlined = true;
-			_logNotInlining(term);
-		}
+		// if (!loggedNotInlined) {
+		// CompilerAsserts.neverPartOfCompilation();
+		// loggedNotInlined = true;
+		// _logNotInlining(term);
+		// }
 
 		args[0] = term;
 
