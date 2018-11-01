@@ -1,10 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InvokeRelationNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RelationPremiseInputBuilder;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynamicRuleInvokeNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.DynamicRuleInvokeNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -27,16 +27,17 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public abstract class RelationPremise extends Premise {
 
-	@Child protected InvokeRelationNode relationLhs;
+	@Child protected DynamicRuleInvokeNode relationLhs;
 
 	@Child protected MatchPattern rhsNode;
 
 	@Children protected final MatchPattern[] rhsRwNodes;
 
-	public RelationPremise(RelationPremiseInputBuilder inputBuilderNode, DispatchNode dispatchNode,
-			MatchPattern rhsNode, MatchPattern[] rhsComponentNodes, SourceSection source) {
+	public RelationPremise(String arrowName, TermBuild termNode, TermBuild[] componentNodes, MatchPattern rhsNode,
+			MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
-		this.relationLhs = new InvokeRelationNode(source, inputBuilderNode, dispatchNode);
+		// this.relationLhs = new DynamicRuleInvokeNode(source, inputBuilderNode, dispatchNode);
+		this.relationLhs = DynamicRuleInvokeNodeGen.create(source, arrowName, termNode, componentNodes);
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}
@@ -59,6 +60,21 @@ public abstract class RelationPremise extends Premise {
 
 	}
 
+	// public static RelationPremiseInputBuilder __create__(IStrategoAppl source, FrameDescriptor fd) {
+	// CompilerAsserts.neverPartOfCompilation();
+	// assert Tools.hasConstructor(source, "Source", 2);
+	// TermBuild lhsNode = TermBuild.create(Tools.applAt(source, 0), fd);
+	//
+	// IStrategoList rws = Tools.listAt(source, 1);
+	// TermBuild[] rwNodes = new TermBuild[rws.getSubtermCount()];
+	// for (int i = 0; i < rwNodes.length; i++) {
+	// rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
+	// }
+	//
+	// return RelationPremiseInputBuilderNodeGen.create(lhsNode, rwNodes,
+	// SourceUtils.dynsemSourceSectionFromATerm(source));
+	// }
+
 	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(t, "Relation", 3);
@@ -72,8 +88,25 @@ public abstract class RelationPremise extends Premise {
 		for (int i = 0; i < rhsRwNodes.length; i++) {
 			rhsRwNodes[i] = MatchPattern.createFromLabelComp(Tools.applAt(rhsRwsT, i), fd);
 		}
-		return RelationPremiseNodeGen.create(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
-				DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
+		IStrategoAppl arrow = Tools.applAt(t, 1);
+		assert Tools.hasConstructor(arrow, "NamedDynamicEmitted", 3);
+		String arrowName = Tools.stringAt(arrow, 1).stringValue();
+		IStrategoAppl source = Tools.applAt(t, 0);
+		assert Tools.hasConstructor(source, "Source", 2);
+
+		TermBuild lhsNode = TermBuild.create(Tools.applAt(source, 0), fd);
+
+		IStrategoList rws = Tools.listAt(source, 1);
+		TermBuild[] rwNodes = new TermBuild[rws.getSubtermCount()];
+		for (int i = 0; i < rwNodes.length; i++) {
+			rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
+		}
+
+		return RelationPremiseNodeGen.create(arrowName, lhsNode, rwNodes, rhsNode, rhsRwNodes,
 				SourceUtils.dynsemSourceSectionFromATerm(t));
+
+		// return RelationPremiseNodeGen.create(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
+		// DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
+		// SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 }

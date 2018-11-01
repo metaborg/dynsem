@@ -65,6 +65,11 @@ public abstract class SlotRead extends TermBuild {
 			super(slot, source);
 		}
 
+		@Override
+		protected final boolean isConstantNode() {
+			return true;
+		}
+
 		@Specialization(assumptions = "constantTermAssumption")
 		public Object doConstantTerm(VirtualFrame frame, @Cached("doDynamic(frame)") Object cached_term,
 				@Cached("getConstantInputAssumption()") Assumption constantTermAssumption) {

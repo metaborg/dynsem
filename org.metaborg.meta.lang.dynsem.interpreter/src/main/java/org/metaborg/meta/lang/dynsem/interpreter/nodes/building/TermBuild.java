@@ -28,6 +28,10 @@ public abstract class TermBuild extends DynSemNode {
 		super(source);
 	}
 
+	protected boolean isConstantNode() {
+		return false;
+	}
+
 	public abstract Object executeGeneric(VirtualFrame frame);
 
 	public abstract Object executeEvaluated(VirtualFrame frame, Object... terms);
