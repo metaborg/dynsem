@@ -56,7 +56,7 @@ strategies
               ; insert-wildcards-module
               ; mark-const-vars-module
               ; defactorize-module
-              ; prettify-vars-module
+//              ; prettify-vars-module
             )
         )
     |project-path)
