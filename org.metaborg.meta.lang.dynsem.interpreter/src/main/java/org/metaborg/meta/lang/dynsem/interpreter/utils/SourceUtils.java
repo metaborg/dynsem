@@ -8,14 +8,15 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class SourceUtils {
 
+	private final static SourceSection UNAVAILABLE = Source.newBuilder("notext").name("noname").internal()
+			.mimeType(DynSemLanguage.DYNSEM_MIME).build().createUnavailableSection();
+
 	public static SourceSection dynsemSourceSectionFromATerm(IStrategoTerm t) {
-		return Source.newBuilder("notext").name("noname").internal().mimeType(DynSemLanguage.DYNSEM_MIME).build()
-				.createUnavailableSection();
+		return UNAVAILABLE;
 	}
 
 	public static SourceSection dynsemSourceSectionUnvailable() {
-		return Source.newBuilder("notext").name("noname").internal().mimeType(DynSemLanguage.DYNSEM_MIME).build()
-				.createUnavailableSection();
+		return UNAVAILABLE;
 	}
 
 	public static Source getSyntheticSource(final String text, final String name, final String mimetype) {

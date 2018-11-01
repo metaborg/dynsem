@@ -5,14 +5,11 @@ import java.util.Set;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermVisitor;
-import org.spoofax.terms.util.NotImplementedException;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -23,19 +20,23 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 public final class RuleRootNode extends DynSemRootNode {
-
+	private final IStrategoAppl sourceTerm;
 	private final String arrowName;
 	private final Class<?> dispatchClass;
 
 	@Child private RuleNode rule;
 
+	private DynSemLanguage lang;
+
 	protected RuleRootNode(DynSemLanguage lang, SourceSection sourceSection, FrameDescriptor frameDescriptor,
-			String arrowName, Class<?> dispatchClass, RuleNode rule) {
-		super(lang, sourceSection, frameDescriptor, Truffle.getRuntime().createAssumption());
+			String arrowName, Class<?> dispatchClass, RuleNode rule, IStrategoAppl ruleT) {
+		super(lang, sourceSection, frameDescriptor, Truffle.getRuntime()
+				.createAssumption("constant input for " + dispatchClass.getSimpleName() + " -" + arrowName + "->"));
+		this.lang = lang;
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;
 		this.rule = rule;
-		Truffle.getRuntime().createCallTarget(this);
+		this.sourceTerm = ruleT;
 	}
 
 	@Override
@@ -61,6 +62,19 @@ public final class RuleRootNode extends DynSemRootNode {
 	}
 
 	@Override
+	protected boolean isCloneUninitializedSupported() {
+		return true;
+	}
+
+	@Override
+	protected RuleRootNode cloneUninitialized() {
+		// return createWithFrameDescriptor(lang, sourceTerm, getFrameDescriptor());
+		FrameDescriptor fd = getFrameDescriptor();
+		return new RuleRootNode(lang, getSourceSection(), fd, arrowName, dispatchClass,
+				RuleNode.create(lang, sourceTerm, fd), sourceTerm);
+	}
+
+	@Override
 	@TruffleBoundary
 	public String toString() {
 		return dispatchClass.getSimpleName() + " -" + getArrowName() + "->";
@@ -76,42 +90,28 @@ public final class RuleRootNode extends DynSemRootNode {
 	public static RuleRootNode createWithFrameDescriptor(DynSemLanguage lang, IStrategoAppl ruleT, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
 
-		assert Tools.hasConstructor(ruleT, "Rule", 5) : "Unexpected constructor " + ruleT.getConstructor();
-
-		IStrategoList premisesTerm = Tools.listAt(ruleT, 0);
-		Premise[] premises = new Premise[premisesTerm.size()];
-		for (int i = 0; i < premises.length; i++) {
-			premises[i] = Premise.create(lang, Tools.applAt(premisesTerm, i), fd);
-		}
-
 		IStrategoAppl relationT = Tools.applAt(ruleT, 2);
 		assert Tools.hasConstructor(relationT, "Relation", 3);
-		IStrategoAppl lhsSourceTerm = Tools.applAt(relationT, 0);
-		IStrategoAppl lhsLeftTerm = Tools.applAt(lhsSourceTerm, 0);
-		IStrategoList lhsCompsTerm = Tools.listAt(lhsSourceTerm, 1);
 
 		IStrategoAppl arrowTerm = Tools.applAt(relationT, 1);
-
 		String arrowName = Tools.javaStringAt(arrowTerm, 1);
-
-		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
 
 		String dispatchClassName = Tools.javaStringAt(ruleT, 4);
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = RuleNode.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = RuleRootNode.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
 
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 			SourceSection source = SourceUtils.dynsemSourceSectionFromATerm(ruleT);
-			return new RuleRootNode(lang, source, fd, arrowName, dispatchClass,
-					new RuleNode(source, RuleInputsNode.create(lhsLeftTerm, lhsCompsTerm, fd), premises, target));
+			return new RuleRootNode(lang, source, fd, arrowName, dispatchClass, RuleNode.create(lang, ruleT, fd),
+					ruleT);
 		}
 
-		throw new NotImplementedException("Unsupported rule term: " + ruleT);
+		throw new IllegalArgumentException("Unsupported rule term: " + ruleT);
 	}
 
 	@TruffleBoundary
