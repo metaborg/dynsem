@@ -60,7 +60,7 @@ public abstract class RuleInputsNode extends DynSemNode {
 	protected final boolean guardConstantTerm(VirtualFrame frame, Object term_cached,
 			Assumption constantTermAssumption) {
 		if (getInputTerm(frame) != term_cached) {
-			// System.out.println("Invalidated:: " + constantTermAssumption.getName());
+			System.out.println("Invalidated:: " + constantTermAssumption.getName());
 			constantTermAssumption.invalidate();
 			return false;
 		}

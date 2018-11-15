@@ -5,10 +5,10 @@ import java.util.Optional;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2Context;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.RuleUtil;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.Assumption;
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -35,9 +35,8 @@ public abstract class DynSemNode extends Node {
 		return sourceSection;
 	}
 
-	protected final Assumption getConstantInputAssumption() {
-		CompilerAsserts.neverPartOfCompilation();
-		return ((DynSemRootNode) getRootNode()).getConstantTermAssumption();
+	protected Assumption getConstantInputAssumption() {
+		return RuleUtil.getNearestConstantTermAssumption(this);
 	}
 
 	@CompilationFinal DynSemContext ctx;

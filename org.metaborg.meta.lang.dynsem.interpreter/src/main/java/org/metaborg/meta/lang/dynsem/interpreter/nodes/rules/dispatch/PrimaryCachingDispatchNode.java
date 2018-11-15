@@ -1,7 +1,6 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchChainRoot;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;

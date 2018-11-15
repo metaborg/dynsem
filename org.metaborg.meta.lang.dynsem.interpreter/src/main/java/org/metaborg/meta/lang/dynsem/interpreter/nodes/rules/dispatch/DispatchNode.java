@@ -1,6 +1,5 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PrimaryCachingDispatchNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 
 import com.oracle.truffle.api.source.SourceSection;

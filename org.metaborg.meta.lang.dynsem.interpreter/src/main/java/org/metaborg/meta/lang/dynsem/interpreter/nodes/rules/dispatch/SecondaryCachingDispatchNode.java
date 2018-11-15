@@ -1,11 +1,11 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SecondaryCachingDispatchNodeFactory.GenericDispatchNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SecondaryCachingDispatchNodeFactory.WithFailureNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SecondaryCachingDispatchNodeFactory.WithoutFailureNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchChainRoot;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.SecondaryCachingDispatchNodeFactory.GenericDispatchNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.SecondaryCachingDispatchNodeFactory.WithFailureNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.SecondaryCachingDispatchNodeFactory.WithoutFailureNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.CallTarget;

@@ -1,26 +1,23 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining;
 
+import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRootNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
+import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class ConstantDispatchNode extends AbstractDispatch {
+public abstract class InliningDispatchNode extends AbstractDispatch {
 
-	private final Object inputTerm;
+	@Child protected InlinedRuleChainedNode dispatchChain;
 
-	@Child protected InlinedDispatchChainedNode dispatchChain;
-
-	public ConstantDispatchNode(SourceSection source, Object inputTerm, String arrowName) {
+	public InliningDispatchNode(SourceSection source, String arrowName) {
 		super(source, arrowName);
-		this.inputTerm = inputTerm;
 	}
 
 	@Override
@@ -43,27 +40,29 @@ public final class ConstantDispatchNode extends AbstractDispatch {
 		}
 	}
 
+	protected abstract Class<?> dispatchClass();
+
+	protected abstract WrappedRuleNode createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
+			FrameDescriptor frameDescriptor);
+
 	private RuleResult growAndExecute(Object[] args) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
 		IRuleRegistry ruleReg = getContext().getRuleRegistry();
-		RuleRootNode[] roots = ruleReg.lookupRuleRoots(arrowName, inputTerm.getClass());
+		RuleRootNode[] roots = ruleReg.lookupRuleRoots(arrowName, dispatchClass());
 		int currentChainLength = dispatchChain != null ? dispatchChain.length() : 0;
 
 		if (currentChainLength >= roots.length) {
 			// FIXME: of course, we should attempt a sort-wide rule
-			throw new RuntimeException("No more rules to try");
+			throw new RuntimeException("No more rules to try. And sort-dispatch is NOT IMPLEMENTED");
 		}
 
 		RuleRootNode nextRoot = roots[currentChainLength];
 		FrameDescriptor frameDescriptor = nextRoot.getFrameDescriptor();
-		RuleNode clonedRule = RuleNode.create(ruleReg.getLanguage(), nextRoot.getRuleSourceTerm(), frameDescriptor);
+		WrappedRuleNode inlineableRule = createRuleForInlining(ruleReg.getLanguage(), nextRoot.getRuleSourceTerm(),
+				frameDescriptor);
 		dispatchChain = insert(
-				InlinedDispatchChainedNodeGen.create(getSourceSection(), frameDescriptor, clonedRule, dispatchChain));
+				InlinedRuleChainedNodeGen.create(getSourceSection(), frameDescriptor, inlineableRule, dispatchChain));
 		return executeHelper(args, false);
-	}
-
-	public static ConstantDispatchNode create(Object inputTerm, String arrowName) {
-		return new ConstantDispatchNode(SourceUtils.dynsemSourceSectionUnvailable(), inputTerm, arrowName);
 	}
 
 }
