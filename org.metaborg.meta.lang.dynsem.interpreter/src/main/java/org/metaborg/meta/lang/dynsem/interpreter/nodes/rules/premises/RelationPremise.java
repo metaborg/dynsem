@@ -27,6 +27,7 @@ import com.oracle.truffle.api.source.SourceSection;
  */
 public abstract class RelationPremise extends Premise {
 
+	@Children protected final TermBuild[] lhsCompNodes;
 	@Child protected RuleInvokeNode relationLhs;
 
 	@Child protected MatchPattern rhsNode;
@@ -36,8 +37,8 @@ public abstract class RelationPremise extends Premise {
 	public RelationPremise(String arrowName, TermBuild termNode, TermBuild[] componentNodes, MatchPattern rhsNode,
 			MatchPattern[] rhsComponentNodes, SourceSection source) {
 		super(source);
-		// this.relationLhs = new DynamicRuleInvokeNode(source, inputBuilderNode, dispatchNode);
-		this.relationLhs = RuleInvokeNodeGen.create(source, arrowName, termNode, componentNodes);
+		this.lhsCompNodes = componentNodes;
+		this.relationLhs = RuleInvokeNodeGen.create(source, arrowName, termNode);
 		this.rhsNode = rhsNode;
 		this.rhsRwNodes = rhsComponentNodes;
 	}
@@ -45,8 +46,15 @@ public abstract class RelationPremise extends Premise {
 	@Specialization
 	@ExplodeLoop
 	public void executeWithProfile(VirtualFrame frame) {
+		CompilerAsserts.compilationConstant(lhsCompNodes.length);
+		Object[] args = new Object[lhsCompNodes.length + 1];
+
+		for (int i = 0; i < lhsCompNodes.length; i++) {
+			args[i + 1] = lhsCompNodes[i].executeGeneric(frame);
+		}
+
 		// execute the reduction
-		final RuleResult res = relationLhs.execute(frame);
+		final RuleResult res = relationLhs.execute(frame, args);
 
 		// evaluate the RHS pattern match
 		rhsNode.executeMatch(frame, res.result);
@@ -59,21 +67,6 @@ public abstract class RelationPremise extends Premise {
 		}
 
 	}
-
-	// public static RelationPremiseInputBuilder __create__(IStrategoAppl source, FrameDescriptor fd) {
-	// CompilerAsserts.neverPartOfCompilation();
-	// assert Tools.hasConstructor(source, "Source", 2);
-	// TermBuild lhsNode = TermBuild.create(Tools.applAt(source, 0), fd);
-	//
-	// IStrategoList rws = Tools.listAt(source, 1);
-	// TermBuild[] rwNodes = new TermBuild[rws.getSubtermCount()];
-	// for (int i = 0; i < rwNodes.length; i++) {
-	// rwNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(rws, i), fd);
-	// }
-	//
-	// return RelationPremiseInputBuilderNodeGen.create(lhsNode, rwNodes,
-	// SourceUtils.dynsemSourceSectionFromATerm(source));
-	// }
 
 	public static RelationPremise create(IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
@@ -105,8 +98,5 @@ public abstract class RelationPremise extends Premise {
 		return RelationPremiseNodeGen.create(arrowName, lhsNode, rwNodes, rhsNode, rhsRwNodes,
 				SourceUtils.dynsemSourceSectionFromATerm(t));
 
-		// return RelationPremiseNodeGen.create(RelationPremiseInputBuilder.create(Tools.applAt(t, 0), fd),
-		// DispatchNode.create(Tools.applAt(t, 0), Tools.applAt(t, 1), fd), rhsNode, rhsRwNodes,
-		// SourceUtils.dynsemSourceSectionFromATerm(t));
 	}
 }

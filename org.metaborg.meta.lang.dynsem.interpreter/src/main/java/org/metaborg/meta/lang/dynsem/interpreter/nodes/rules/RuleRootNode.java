@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops.WhileNode;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -133,6 +134,10 @@ public final class RuleRootNode extends DynSemRootNode {
 						fd.addFrameSlot(v, false, FrameSlotKind.Object);
 						vars.add(v);
 					}
+				} else if (Tools.isTermAppl(t) && Tools.hasConstructor((IStrategoAppl) t, "CountedWhileNode", 5)) {
+					System.out.println(">>>> " + Tools.javaIntAt(t, 0));
+					fd.addFrameSlot(WhileNode.genComponentsFrameSlotName(Tools.javaIntAt(t, 0)), FrameSlotKind.Object);
+					fd.addFrameSlot(WhileNode.genResultFrameSlotName(Tools.javaIntAt(t, 0)), FrameSlotKind.Object);
 				}
 			}
 		};

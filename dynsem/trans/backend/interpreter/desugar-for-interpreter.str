@@ -3,6 +3,7 @@ module backend/interpreter/desugar-for-interpreter
 imports
   signatures/-
   backend/interpreter/-
+  backend/interpreter/lists/names
   analysis/-
   ds2ds/explicate-arrow-types
   ds2ds/more-typeannos
@@ -34,6 +35,7 @@ rules
     ; desugar-concat-all
     ; resugar-and-typecast-lists
     ; jtype-lists
+    ; counted-while-loops
 
 rules
 
@@ -287,3 +289,19 @@ rules /* resugar list construction */
 //      ListType(ty1) := <type-of> t1;
 //      ListType(ty2) := <type-of> t2;
 //      <eq> (ty1, ty2)
+
+rules /* counted while loops */
+  
+  counted-while-loops =
+    {| WhileCallIdx:
+      rules(WhileCallIdx: _ -> 0);
+      alltd(counted-while-loops-calls)
+    |}
+  
+  counted-while-loops-calls:
+    WhileNode(t1, t2, t3, ts1*, ts2*) -> CountedWhileNode(idx, t1, t2, t3, [ts1*, ts2*])
+    where
+      idx := <WhileCallIdx>;
+      nidx := <inc> idx;
+      rules(WhileCallIdx: _ -> nidx)
+    

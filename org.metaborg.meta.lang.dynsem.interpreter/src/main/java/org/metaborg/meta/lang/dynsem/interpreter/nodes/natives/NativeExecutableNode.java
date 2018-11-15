@@ -28,7 +28,7 @@ public abstract class NativeExecutableNode extends DynSemNode {
 	public static NativeExecutableNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor ruleFD) {
 		CompilerAsserts.neverPartOfCompilation();
 		// WhileNode: Term * Term * Term * List(Term) * List(Term) -> NativeRule
-		if (Tools.hasConstructor(t, "WhileNode", 5)) {
+		if (Tools.hasConstructor(t, "CountedWhileNode", 5)) {
 			return WhileNode.create(lang, t, ruleFD);
 		}
 		// BreakNode: Term * List(Term) -> NativeRule

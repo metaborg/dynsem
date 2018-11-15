@@ -6,10 +6,8 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleInvokeNodeGen.I
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantClassDispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantTermDispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.Assumption;
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
@@ -24,54 +22,42 @@ public abstract class RuleInvokeNode extends DynSemNode {
 	protected final String arrowName;
 
 	@Child protected TermBuild termNode;
-	@Children protected final TermBuild[] componentNodes;
 
-	public RuleInvokeNode(SourceSection source, String arrowName, TermBuild termNode, TermBuild[] componentNodes) {
+	public RuleInvokeNode(SourceSection source, String arrowName, TermBuild termNode) {
 		super(source);
 		this.arrowName = arrowName;
 		this.termNode = termNode;
-		this.componentNodes = componentNodes;
 	}
 
 	protected final Object evalLhsTermNode(VirtualFrame frame) {
 		return termNode.executeGeneric(frame);
 	}
 
-	public abstract RuleResult execute(VirtualFrame frame);
+	public abstract RuleResult execute(VirtualFrame frame, Object[] callArgs);
 
 	private final boolean logInlining = true;
 
 	@Specialization(guards = "lhsIsConst", assumptions = "constantTermAssumption")
 	@ExplodeLoop
-	public RuleResult doConstantTermDispatch(VirtualFrame frame,
+	public RuleResult doConstantTermDispatch(VirtualFrame frame, Object[] callArgs,
 			@Cached("termNode.isConstantNode()") boolean lhsIsConst, @Cached("evalLhsTermNode(frame)") Object inputTerm,
 			@Cached("getConstantInputAssumption()") Assumption constantTermAssumption,
 			@Cached("create(inputTerm.getClass(), arrowName)") ConstantTermDispatchNode dispatchNode) {
 		_logInlining(inputTerm);
-		Object[] args = new Object[componentNodes.length + 1];
-		args[0] = inputTerm;
+		callArgs[0] = inputTerm;
 
-		CompilerAsserts.compilationConstant(componentNodes.length);
-		for (int i = 0; i < componentNodes.length; i++) {
-			InterpreterUtils.setComponent(getContext(), args, i + 1, componentNodes[i].executeGeneric(frame), this);
-		}
-		return dispatchNode.execute(args);
+		return dispatchNode.execute(callArgs);
 	}
 
 	@Specialization(replaces = "doConstantTermDispatch")
 	@ExplodeLoop
-	public RuleResult doOpportunisticDispatch(VirtualFrame frame,
+	public RuleResult doOpportunisticDispatch(VirtualFrame frame, Object[] callArgs,
 			@Cached("create(arrowName)") InvokeHelper dispatchHelperNode) {
-		Object[] args = new Object[componentNodes.length + 1];
 		Object term = evalLhsTermNode(frame);
 		_logNotInlining(term);
+		callArgs[0] = term;
 
-		args[0] = term;
-		CompilerAsserts.compilationConstant(componentNodes.length);
-		for (int i = 0; i < componentNodes.length; i++) {
-			InterpreterUtils.setComponent(getContext(), args, i + 1, componentNodes[i].executeGeneric(frame), this);
-		}
-		return dispatchHelperNode.execute(args, term);
+		return dispatchHelperNode.execute(callArgs, term);
 	}
 
 	public static abstract class InvokeHelper extends Node {

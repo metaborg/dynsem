@@ -38,3 +38,4 @@ signature
     TupleKind : RuleKind
     MapKind : RuleKind
     
+    CountedWhileNode: Int * Term * Term * Term * List(Term) -> NativeRule

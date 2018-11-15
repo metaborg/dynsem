@@ -10,6 +10,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
@@ -20,110 +21,83 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public class WhileNode extends NativeExecutableNode {
 
-	private static final byte ID_CONDITION = 1;
-	private static final byte ID_CONDITION_CLASS = 2;
-	private static final byte ID_BODY = 3;
-	private static final byte ID_BODY_CLASS = 4;
-	private static final byte ID_RESULT = 5;
+	private final FrameSlot componentsFrameSlot;
+	private final FrameSlot loopResultFrameSlot;
 
-	@Child private TermBuild conditionBuildNode;
-	@Child private TermBuild bodyBuildNode;
-	@Child private TermBuild defaultValBuildNode;
-
-	@Children private final TermBuild[] roCompBuilds;
-	@Children private final TermBuild[] rwCompBuilds;
+	@Children private final TermBuild[] componentBuildNodes;
+	@Child private TermBuild defaultResultNode;
+	// @Children private final TermBuild[] roCompBuilds;
+	// @Children private final TermBuild[] rwCompBuilds;
 
 	@Child private LoopNode loopNode;
 
-	private final FrameDescriptor loopFrameDescriptor;
-
-	private final FrameSlot conditionTSlot;
-	private final FrameSlot conditionClassSlot;
-	private final FrameSlot bodyTSlot;
-	private final FrameSlot bodyClassSlot;
-	private final FrameSlot resultTSlot;
-
 	public WhileNode(SourceSection source, TermBuild conditionBuildNode, TermBuild bodyBuildNode,
-			TermBuild defaultValBuildNode, TermBuild[] roCompBuilds, TermBuild[] rwCompBuilds) {
+			TermBuild defaultValBuildNode, TermBuild[] componentBuildNodes, FrameSlot componentsFrameSlot,
+			FrameSlot loopResultFrameSlot) {
 		super(source);
-		this.conditionBuildNode = conditionBuildNode;
-		this.bodyBuildNode = bodyBuildNode;
-		this.defaultValBuildNode = defaultValBuildNode;
-		this.roCompBuilds = roCompBuilds;
-		this.rwCompBuilds = rwCompBuilds;
-		loopFrameDescriptor = new FrameDescriptor();
-
-		this.conditionTSlot = loopFrameDescriptor.addFrameSlot(ID_CONDITION);
-		this.conditionClassSlot = loopFrameDescriptor.addFrameSlot(ID_CONDITION_CLASS);
-		this.bodyTSlot = loopFrameDescriptor.addFrameSlot(ID_BODY);
-		this.bodyClassSlot = loopFrameDescriptor.addFrameSlot(ID_BODY_CLASS);
-		this.resultTSlot = loopFrameDescriptor.addFrameSlot(ID_RESULT);
-		this.loopNode = Truffle.getRuntime().createLoopNode(
-				new WhileRepeatingNode(source, conditionTSlot, conditionClassSlot, bodyTSlot, bodyClassSlot,
-						resultTSlot, rwCompBuilds.length));
+		this.componentBuildNodes = componentBuildNodes;
+		this.componentsFrameSlot = componentsFrameSlot;
+		this.loopResultFrameSlot = loopResultFrameSlot;
+		this.defaultResultNode = defaultValBuildNode;
+		this.loopNode = Truffle.getRuntime().createLoopNode(new WhileRepeatingNode(source, conditionBuildNode,
+				bodyBuildNode, componentsFrameSlot, loopResultFrameSlot));
 	}
 
 	@Override
 	@ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
-		Object[] args = new Object[1 + roCompBuilds.length + rwCompBuilds.length];
-		for (int i = 0; i < roCompBuilds.length; i++) {
-			args[i + 1] = roCompBuilds[i].executeGeneric(frame);
+		// evaluate the input components. we'll make this array with space for the input term
+		Object[] args = new Object[1 + componentBuildNodes.length];
+		for (int i = 0; i < componentBuildNodes.length; i++) {
+			args[i + 1] = componentBuildNodes[i].executeGeneric(frame);
 		}
+		// set the component in the frame
+		frame.setObject(componentsFrameSlot, args);
 
-		for (int i = 0; i < rwCompBuilds.length; i++) {
-			args[i + 1 + roCompBuilds.length] = rwCompBuilds[i].executeGeneric(frame);
+		loopNode.executeLoop(frame);
+		Object resultTerm = frame.getValue(loopResultFrameSlot);
+		// TODO: propagate the semantic components ...
+		if (resultTerm == null) {
+			resultTerm = this.defaultResultNode.executeGeneric(frame);
 		}
-
-		VirtualFrame loopFrame = Truffle.getRuntime().createVirtualFrame(args, loopFrameDescriptor);
-
-		Object conditionT = conditionBuildNode.executeGeneric(frame);
-		loopFrame.setObject(conditionTSlot, conditionT);
-		loopFrame.setObject(conditionClassSlot, conditionT.getClass());
-
-		Object bodyT = bodyBuildNode.executeGeneric(frame);
-		loopFrame.setObject(bodyTSlot, bodyT);
-		loopFrame.setObject(bodyClassSlot, bodyT.getClass());
-
-		Object defaultValT = defaultValBuildNode.executeGeneric(frame);
-		loopFrame.setObject(resultTSlot, defaultValT);
-
-		loopNode.executeLoop(loopFrame);
-
-		Object result = loopFrame.getValue(resultTSlot);
-		final Object[] outRwComps = new Object[rwCompBuilds.length];
-
-		for (int i = 0; i < outRwComps.length; i++) {
-			outRwComps[i] = args[i + 1 + roCompBuilds.length];
-		}
-
-		return new RuleResult(result, outRwComps);
-
+		// TODO: propagate semantic components
+		return new RuleResult(resultTerm, new Object[0]);
 	}
 
 	public static WhileNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
 		CompilerAsserts.neverPartOfCompilation();
-		// WhileNode: Term * Term * Term * List(Term) * List(Term) -> NativeRule
-		assert Tools.hasConstructor(t, "WhileNode", 5);
+		// WhileNode: Int * Term * Term * Term * List(Term) -> NativeRule
+		assert Tools.hasConstructor(t, "CountedWhileNode", 5);
+		FrameSlot componentsFrameSlot = fd.findFrameSlot(genComponentsFrameSlotName(Tools.javaIntAt(t, 0)));
+		FrameSlot resultFrameSlot = fd.findFrameSlot(genResultFrameSlotName(Tools.javaIntAt(t, 0)));
+		TermBuild conditionBuildNode = TermBuild.create(Tools.applAt(t, 1), fd);
+		TermBuild bodyBuildNode = TermBuild.create(Tools.applAt(t, 2), fd);
+		TermBuild defaultValBuildNode = TermBuild.create(Tools.applAt(t, 3), fd);
 
-		TermBuild conditionBuildNode = TermBuild.create(Tools.applAt(t, 0), fd);
-		TermBuild bodyBuildNode = TermBuild.create(Tools.applAt(t, 1), fd);
-		TermBuild defaultValBuildNode = TermBuild.create(Tools.applAt(t, 2), fd);
-
-		IStrategoList roCompsT = Tools.listAt(t, 3);
-		TermBuild[] roCompBuilds = new TermBuild[roCompsT.size()];
-		for (int i = 0; i < roCompBuilds.length; i++) {
-			roCompBuilds[i] = TermBuild.create(Tools.applAt(roCompsT, i), fd);
+		IStrategoList compsT = Tools.listAt(t, 4);
+		TermBuild[] compBuilds = new TermBuild[compsT.size()];
+		for (int i = 0; i < compBuilds.length; i++) {
+			compBuilds[i] = TermBuild.create(Tools.applAt(compsT, i), fd);
 		}
 
-		IStrategoList rwCompsT = Tools.listAt(t, 4);
-		TermBuild[] rwCompBuilds = new TermBuild[rwCompsT.size()];
-		for (int i = 0; i < rwCompBuilds.length; i++) {
-			rwCompBuilds[i] = TermBuild.create(Tools.applAt(rwCompsT, i), fd);
-		}
+		// IStrategoList rwCompsT = Tools.listAt(t, 5);
+		// TermBuild[] rwCompBuilds = new TermBuild[rwCompsT.size()];
+		// for (int i = 0; i < rwCompBuilds.length; i++) {
+		// rwCompBuilds[i] = TermBuild.create(Tools.applAt(rwCompsT, i), fd);
+		// }
 
 		return new WhileNode(SourceUtils.dynsemSourceSectionFromATerm(t), conditionBuildNode, bodyBuildNode,
-				defaultValBuildNode, roCompBuilds, rwCompBuilds);
+				defaultValBuildNode, compBuilds, componentsFrameSlot, resultFrameSlot);
+	}
+
+	@TruffleBoundary
+	public static final String genComponentsFrameSlotName(int idx) {
+		return "__WhileNodeComponentsSlot__" + idx;
+	}
+
+	@TruffleBoundary
+	public static final String genResultFrameSlotName(int idx) {
+		return "__WhileNodeResultSlot__" + idx;
 	}
 
 }
