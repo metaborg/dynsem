@@ -3,7 +3,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.WrappedRuleNode.PassthroughWrappedRule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -25,10 +24,11 @@ public final class ConstantTermDispatchNode extends InliningDispatchNode {
 	}
 
 	@Override
-	protected PassthroughWrappedRule createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
+	protected RuleNode createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
 			FrameDescriptor frameDescriptor, ITermRegistry termReg) {
 		RuleNode wrappableRule = RuleNode.create(language, ruleSourceTerm, frameDescriptor, termReg);
-		return new PassthroughWrappedRule(wrappableRule.getSourceSection(), wrappableRule);
+		// return new PassthroughWrappedRule(wrappableRule.getSourceSection(), wrappableRule);
+		return wrappableRule;
 	}
 
 	public static ConstantTermDispatchNode create(Class<?> dispatchClass, String arrowName) {

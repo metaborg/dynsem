@@ -36,6 +36,7 @@ public abstract class WrappedRuleNode extends DynSemNode {
 		public BoundaryRuleWrap(SourceSection source, RuleNode wrappedRule) {
 			super(source, wrappedRule);
 			this.constantTermAssumption = Truffle.getRuntime().createAssumption("constant input boundary assumption");
+			throw new RuntimeException("Should be building this node");
 		}
 
 		@Override
