@@ -1,18 +1,11 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoList;
 
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -62,32 +55,6 @@ public class WhileNode extends NativeExecutableNode {
 		}
 		// TODO: propagate semantic components
 		return new RuleResult(resultTerm, new Object[0]);
-	}
-
-	public static WhileNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
-		CompilerAsserts.neverPartOfCompilation();
-		// WhileNode: Int * Term * Term * Term * List(Term) -> NativeRule
-		assert Tools.hasConstructor(t, "CountedWhileNode", 5);
-		FrameSlot componentsFrameSlot = fd.findFrameSlot(genComponentsFrameSlotName(Tools.javaIntAt(t, 0)));
-		FrameSlot resultFrameSlot = fd.findFrameSlot(genResultFrameSlotName(Tools.javaIntAt(t, 0)));
-		TermBuild conditionBuildNode = TermBuild.create(Tools.applAt(t, 1), fd);
-		TermBuild bodyBuildNode = TermBuild.create(Tools.applAt(t, 2), fd);
-		TermBuild defaultValBuildNode = TermBuild.create(Tools.applAt(t, 3), fd);
-
-		IStrategoList compsT = Tools.listAt(t, 4);
-		TermBuild[] compBuilds = new TermBuild[compsT.size()];
-		for (int i = 0; i < compBuilds.length; i++) {
-			compBuilds[i] = TermBuild.create(Tools.applAt(compsT, i), fd);
-		}
-
-		// IStrategoList rwCompsT = Tools.listAt(t, 5);
-		// TermBuild[] rwCompBuilds = new TermBuild[rwCompsT.size()];
-		// for (int i = 0; i < rwCompBuilds.length; i++) {
-		// rwCompBuilds[i] = TermBuild.create(Tools.applAt(rwCompsT, i), fd);
-		// }
-
-		return new WhileNode(SourceUtils.dynsemSourceSectionFromATerm(t), conditionBuildNode, bodyBuildNode,
-				defaultValBuildNode, compBuilds, componentsFrameSlot, resultFrameSlot);
 	}
 
 	@TruffleBoundary

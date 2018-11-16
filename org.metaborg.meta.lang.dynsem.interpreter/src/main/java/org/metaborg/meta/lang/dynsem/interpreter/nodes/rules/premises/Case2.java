@@ -1,7 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchNodeFactories;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -64,7 +66,7 @@ public abstract class Case2 extends DynSemNode {
 		}
 	}
 
-	public static Case2 create(DynSemLanguage lang, IStrategoList ts, FrameDescriptor fd) {
+	public static Case2 create(DynSemLanguage lang, IStrategoList ts, FrameDescriptor fd, ITermRegistry termReg) {
 		if (ts.size() == 0) {
 			return null;
 		}
@@ -74,21 +76,21 @@ public abstract class Case2 extends DynSemNode {
 			IStrategoList premTs = Tools.listAt(t, 0);
 			Premise[] premises = new Premise[premTs.size()];
 			for (int i = 0; i < premises.length; i++) {
-				premises[i] = Premise.create(lang, Tools.applAt(premTs, i), fd);
+				premises[i] = PremiseFactories.create(lang, Tools.applAt(premTs, i), fd, termReg);
 			}
 			return Case2NodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), null, premises, null);
 		} else {
 			assert Tools.hasConstructor(t, "CasePattern", 2);
 
-			MatchPattern pattern = MatchPattern.create(Tools.applAt(t, 0), fd);
+			MatchPattern pattern = MatchNodeFactories.create(Tools.applAt(t, 0), fd, termReg);
 
 			IStrategoList premTs = Tools.listAt(t, 1);
 			Premise[] premises = new Premise[premTs.size()];
 			for (int i = 0; i < premises.length; i++) {
-				premises[i] = Premise.create(lang, Tools.applAt(premTs, i), fd);
+				premises[i] = PremiseFactories.create(lang, Tools.applAt(premTs, i), fd, termReg);
 			}
 			return Case2NodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), pattern, premises,
-					create(lang, ts.tail(), fd));
+					create(lang, ts.tail(), fd, termReg));
 		}
 	}
 

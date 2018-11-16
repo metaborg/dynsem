@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -105,7 +106,7 @@ public class RuleRegistry implements IRuleRegistry {
 	}
 
 	@TruffleBoundary
-	public void populate(InputStream specStream) {
+	public void populate(InputStream specStream, ITermRegistry termReg) {
 		CompilerAsserts.neverPartOfCompilation();
 		try {
 			TAFTermReader reader = new TAFTermReader(new TermFactory());
@@ -119,7 +120,7 @@ public class RuleRegistry implements IRuleRegistry {
 			Map<String, Map<Class<?>, List<RuleRootNode>>> rules = new HashMap<>();
 
 			for (IStrategoTerm ruleTerm : rulesTerm) {
-				RuleRootNode r = RuleRootNode.create(language, (IStrategoAppl) ruleTerm);
+				RuleRootNode r = RuleRootNode.create(language, (IStrategoAppl) ruleTerm, termReg);
 
 				Map<Class<?>, List<RuleRootNode>> rulesForName = rules.get(r.getArrowName());
 				if (rulesForName == null) {

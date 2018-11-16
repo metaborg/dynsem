@@ -4,18 +4,11 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.SortFunCallBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.NoOpPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
 
-import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.NodeUtil;
@@ -43,23 +36,17 @@ public class MatchPremise extends Premise {
 
 	@Override
 	public void execute(VirtualFrame frame) {
-		final Object t = term.executeGeneric(frame);
-		if (patt instanceof NoOpPattern && NodeUtil.countNodes(term, is_non_elidable_termbuild) == 0) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
-			replace(NoOpPremiseNodeGen.create(getSourceSection()));
-		} else {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
-			replace(MatchPremiseFactory.NonElidableMatchPremiseNodeGen.create(getSourceSection(), patt, term))
-					.executeEvaluated(frame, t);
-		}
-	}
 
-	public static MatchPremise create(IStrategoAppl t, FrameDescriptor fd) {
-		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "Match", 2);
-		TermBuild lhs = TermBuild.create(Tools.applAt(t, 0), fd);
-		MatchPattern rhs = MatchPattern.create(Tools.applAt(t, 1), fd);
-		return new MatchPremise(lhs, rhs, SourceUtils.dynsemSourceSectionFromATerm(t));
+		final Object t = term.executeGeneric(frame);
+		patt.executeMatch(frame, t);
+		// if (patt instanceof NoOpPattern && NodeUtil.countNodes(term, is_non_elidable_termbuild) == 0) {
+		// // CompilerDirectives.transferToInterpreterAndInvalidate();
+		// replace(NoOpPremiseNodeGen.create(getSourceSection()));
+		// } else {
+		// // CompilerDirectives.transferToInterpreterAndInvalidate();
+		// replace(MatchPremiseFactory.NonElidableMatchPremiseNodeGen.create(getSourceSection(), patt, term))
+		// .executeEvaluated(frame, t);
+		// }
 	}
 
 	@Override

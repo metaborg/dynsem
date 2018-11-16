@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops.WhileNode;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -76,7 +77,7 @@ public final class RuleRootNode extends DynSemRootNode {
 		// return createWithFrameDescriptor(lang, sourceTerm, getFrameDescriptor());
 		FrameDescriptor fd = getFrameDescriptor();
 		return new RuleRootNode(lang, getSourceSection(), fd, arrowName, dispatchClass,
-				RuleNode.create(lang, sourceTerm, fd), sourceTerm);
+				RuleNode.create(lang, sourceTerm, fd, getContext().getTermRegistry()), sourceTerm);
 	}
 
 	@Override
@@ -86,13 +87,14 @@ public final class RuleRootNode extends DynSemRootNode {
 	}
 
 	@TruffleBoundary
-	public static RuleRootNode create(DynSemLanguage lang, IStrategoAppl ruleT) {
+	public static RuleRootNode create(DynSemLanguage lang, IStrategoAppl ruleT, ITermRegistry termReg) {
 		CompilerAsserts.neverPartOfCompilation();
-		return createWithFrameDescriptor(lang, ruleT, createFrameDescriptor(ruleT));
+		return createWithFrameDescriptor(lang, ruleT, createFrameDescriptor(ruleT), termReg);
 	}
 
 	@TruffleBoundary
-	public static RuleRootNode createWithFrameDescriptor(DynSemLanguage lang, IStrategoAppl ruleT, FrameDescriptor fd) {
+	public static RuleRootNode createWithFrameDescriptor(DynSemLanguage lang, IStrategoAppl ruleT, FrameDescriptor fd,
+			ITermRegistry termReg) {
 		CompilerAsserts.neverPartOfCompilation();
 
 		IStrategoAppl relationT = Tools.applAt(ruleT, 2);
@@ -112,7 +114,8 @@ public final class RuleRootNode extends DynSemRootNode {
 
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 			SourceSection source = SourceUtils.dynsemSourceSectionFromATerm(ruleT);
-			return new RuleRootNode(lang, source, fd, arrowName, dispatchClass, RuleNode.create(lang, ruleT, fd),
+			return new RuleRootNode(lang, source, fd, arrowName, dispatchClass,
+					RuleNode.create(lang, ruleT, fd, termReg),
 					ruleT);
 		}
 
@@ -135,7 +138,6 @@ public final class RuleRootNode extends DynSemRootNode {
 						vars.add(v);
 					}
 				} else if (Tools.isTermAppl(t) && Tools.hasConstructor((IStrategoAppl) t, "CountedWhileNode", 5)) {
-					System.out.println(">>>> " + Tools.javaIntAt(t, 0));
 					fd.addFrameSlot(WhileNode.genComponentsFrameSlotName(Tools.javaIntAt(t, 0)), FrameSlotKind.Object);
 					fd.addFrameSlot(WhileNode.genResultFrameSlotName(Tools.javaIntAt(t, 0)), FrameSlotKind.Object);
 				}

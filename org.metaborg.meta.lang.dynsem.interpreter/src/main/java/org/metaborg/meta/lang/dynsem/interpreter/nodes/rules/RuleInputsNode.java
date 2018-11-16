@@ -1,8 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchNodeFactories;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.MatchPattern;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -10,6 +11,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -49,7 +51,7 @@ public abstract class RuleInputsNode extends DynSemNode {
 		// evaluate the component patterns
 		CompilerAsserts.compilationConstant(componentPatterns.length);
 		for (int i = 0; i < componentPatterns.length; i++) {
-			componentPatterns[i].executeMatch(frame, InterpreterUtils.getComponent(getContext(), args, i + 1, this));
+			componentPatterns[i].executeMatch(frame, args[i + 1]);
 		}
 	}
 
@@ -60,19 +62,26 @@ public abstract class RuleInputsNode extends DynSemNode {
 	protected final boolean guardConstantTerm(VirtualFrame frame, Object term_cached,
 			Assumption constantTermAssumption) {
 		if (getInputTerm(frame) != term_cached) {
-			System.out.println("Invalidated:: " + constantTermAssumption.getName());
 			constantTermAssumption.invalidate();
+			_logInvalidation(constantTermAssumption.getName());
 			return false;
 		}
 		return true;
 	}
 
-	public static RuleInputsNode create(IStrategoAppl lhsT, IStrategoList componentsT, FrameDescriptor fd) {
+	@TruffleBoundary
+	private final static void _logInvalidation(String name) {
+		System.out.println("Invalidated:: " + name);
+	}
+
+	public static RuleInputsNode create(IStrategoAppl lhsT, IStrategoList componentsT, FrameDescriptor fd,
+			ITermRegistry termReg) {
 		MatchPattern[] lhsSemCompPatterns = new MatchPattern[componentsT.size()];
 		for (int i = 0; i < lhsSemCompPatterns.length; i++) {
-			lhsSemCompPatterns[i] = MatchPattern.create(Tools.applAt(componentsT, i), fd);
+			lhsSemCompPatterns[i] = MatchNodeFactories.create(Tools.applAt(componentsT, i), fd, termReg);
 		}
-		return RuleInputsNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(lhsT), MatchPattern.create(lhsT, fd),
+		return RuleInputsNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(lhsT),
+				MatchNodeFactories.create(lhsT, fd, termReg),
 				lhsSemCompPatterns);
 	}
 }

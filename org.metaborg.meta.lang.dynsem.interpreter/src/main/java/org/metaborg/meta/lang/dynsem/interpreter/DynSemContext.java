@@ -104,7 +104,7 @@ public final class DynSemContext {
 		if (initialized)
 			return;
 		ruleRegistry.setLanguage(lang);
-		ruleRegistry.populate(specification);
+		ruleRegistry.populate(specification, getTermRegistry());
 		initialized = true;
 	}
 

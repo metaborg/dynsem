@@ -7,16 +7,11 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.MapUtils;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_ds.PersistentMap;
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeChildren({ @NodeChild(value = "left", type = TermBuild.class),
@@ -25,15 +20,6 @@ public abstract class DeAssoc extends TermBuild {
 
 	public DeAssoc(SourceSection source) {
 		super(source);
-	}
-
-	public static DeAssoc create(IStrategoAppl t, FrameDescriptor fd) {
-		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "DeAssoc", 2);
-		TermBuild left = TermBuild.create(Tools.applAt(t, 0), fd);
-		TermBuild right = TermBuild.create(Tools.applAt(t, 1), fd);
-
-		return DeAssocNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), left, right);
 	}
 
 	@Specialization

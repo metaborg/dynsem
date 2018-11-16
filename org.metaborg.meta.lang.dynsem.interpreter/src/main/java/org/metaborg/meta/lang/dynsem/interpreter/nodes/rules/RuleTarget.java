@@ -1,5 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.BuildNodeFactories;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
@@ -43,15 +45,15 @@ public class RuleTarget extends Node {
 		return new RuleResult(result, resultComps);
 	}
 
-	public static RuleTarget create(IStrategoAppl targetT, FrameDescriptor fd) {
+	public static RuleTarget create(IStrategoAppl targetT, FrameDescriptor fd, ITermRegistry termReg) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(targetT, "Target", 2);
-		TermBuild rhsNode = TermBuild.create(Tools.termAt(targetT, 0), fd);
+		TermBuild rhsNode = BuildNodeFactories.create(Tools.termAt(targetT, 0), fd, termReg);
 
 		IStrategoList componentsT = Tools.listAt(targetT, 1);
 		TermBuild[] componentNodes = new TermBuild[componentsT.size()];
 		for (int i = 0; i < componentNodes.length; i++) {
-			componentNodes[i] = TermBuild.createFromLabelComp(Tools.applAt(componentsT, i), fd);
+			componentNodes[i] = BuildNodeFactories.createFromLabelComp(Tools.applAt(componentsT, i), fd, termReg);
 		}
 
 		return new RuleTarget(rhsNode, componentNodes, SourceUtils.dynsemSourceSectionFromATerm(targetT));

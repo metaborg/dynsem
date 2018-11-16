@@ -1,15 +1,11 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.building;
 
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -49,15 +45,6 @@ public abstract class ListConcatTermBuild extends TermBuild {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public IListTerm doUncached(IListTerm l, IListTerm r) {
 		return r.prefixAll(l);
-	}
-
-	public static ListConcatTermBuild create(IStrategoAppl t, FrameDescriptor fd) {
-		assert Tools.hasConstructor(t, "ListConcat", 2);
-
-		TermBuild left = TermBuild.create(Tools.applAt(t, 0), fd);
-		TermBuild right = TermBuild.create(Tools.applAt(t, 1), fd);
-
-		return ListConcatTermBuildNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), left, right);
 	}
 
 }

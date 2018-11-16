@@ -1,6 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
@@ -30,11 +31,7 @@ public abstract class InliningDispatchNode extends AbstractDispatch {
 			if (dispatchChain == null) {
 				return growAndExecute(args);
 			}
-			if (deepAllowed) {
-				return dispatchChain.execute(args);
-			} else {
-				return dispatchChain.doShallow(args);
-			}
+			return dispatchChain.execute(args, deepAllowed);
 		} catch (PremiseFailureException pmfex) {
 			return growAndExecute(args);
 		}
@@ -43,7 +40,7 @@ public abstract class InliningDispatchNode extends AbstractDispatch {
 	protected abstract Class<?> dispatchClass();
 
 	protected abstract WrappedRuleNode createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
-			FrameDescriptor frameDescriptor);
+			FrameDescriptor frameDescriptor, ITermRegistry termReg);
 
 	private RuleResult growAndExecute(Object[] args) {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
@@ -59,9 +56,9 @@ public abstract class InliningDispatchNode extends AbstractDispatch {
 		RuleRootNode nextRoot = roots[currentChainLength];
 		FrameDescriptor frameDescriptor = nextRoot.getFrameDescriptor();
 		WrappedRuleNode inlineableRule = createRuleForInlining(ruleReg.getLanguage(), nextRoot.getRuleSourceTerm(),
-				frameDescriptor);
+				frameDescriptor, getContext().getTermRegistry());
 		dispatchChain = insert(
-				InlinedRuleChainedNodeGen.create(getSourceSection(), frameDescriptor, inlineableRule, dispatchChain));
+				new InlinedRuleChainedNode(getSourceSection(), frameDescriptor, inlineableRule, dispatchChain));
 		return executeHelper(args, false);
 	}
 

@@ -5,16 +5,11 @@ import java.util.Collection;
 
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IListTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_ds.PersistentMap;
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -22,14 +17,6 @@ import com.oracle.truffle.api.source.SourceSection;
 public abstract class TypedMapValues extends TermBuild {
 
 	private final String valueListClass;
-
-	public static TypedMapValues create(IStrategoAppl t, FrameDescriptor fd) {
-		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "TypedMapValues", 2);
-		TermBuild mapNode = TermBuild.create(Tools.applAt(t, 0), fd);
-		String valueListClass = Tools.javaStringAt(t, 1);
-		return TypedMapValuesNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), valueListClass, mapNode);
-	}
 
 	public TypedMapValues(SourceSection source, String keylistClass) {
 		super(source);

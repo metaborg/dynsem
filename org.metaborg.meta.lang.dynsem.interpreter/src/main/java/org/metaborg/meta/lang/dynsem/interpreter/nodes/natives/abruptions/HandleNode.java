@@ -2,20 +2,14 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.abruptions;
 
 import java.util.Arrays;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchChainRoot;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
 
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.profiles.ConditionProfile;
@@ -123,17 +117,6 @@ public class HandleNode extends NativeExecutableNode {
 		}
 	}
 
-	public static HandleNode create(DynSemLanguage lang, IStrategoAppl t, FrameDescriptor fd) {
-		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "Handle", 2) || Tools.hasConstructor(t, "Handle", 3);
-		// Handle: Term * Term * Term -> NativeRule
-		TermBuild evalBuildNode = TermBuild.create(Tools.applAt(t, 0), fd);
-		TermBuild catchBuildNode = TermBuild.create(Tools.applAt(t, 1), fd);
-		TermBuild continueBuildNode = t.getConstructor().getArity() == 3 ? TermBuild.create(Tools.applAt(t, 2), fd)
-				: null;
 
-		return new HandleNode(SourceUtils.dynsemSourceSectionFromATerm(t), evalBuildNode, catchBuildNode,
-				continueBuildNode);
-	}
 
 }

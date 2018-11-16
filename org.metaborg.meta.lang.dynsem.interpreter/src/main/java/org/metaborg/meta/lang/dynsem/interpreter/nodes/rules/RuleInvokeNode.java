@@ -2,9 +2,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleInvokeNodeGen.InvokeHelperNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantClassDispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantTermDispatchNode;
 
 import com.oracle.truffle.api.Assumption;
@@ -14,7 +12,6 @@ import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class RuleInvokeNode extends DynSemNode {
@@ -35,7 +32,7 @@ public abstract class RuleInvokeNode extends DynSemNode {
 
 	public abstract RuleResult execute(VirtualFrame frame, Object[] callArgs);
 
-	private final boolean logInlining = true;
+	private final boolean logInlining = false;
 
 	@Specialization(guards = "lhsIsConst", assumptions = "constantTermAssumption")
 	@ExplodeLoop
@@ -52,75 +49,75 @@ public abstract class RuleInvokeNode extends DynSemNode {
 	@Specialization(replaces = "doConstantTermDispatch")
 	@ExplodeLoop
 	public RuleResult doOpportunisticDispatch(VirtualFrame frame, Object[] callArgs,
-			@Cached("create(arrowName)") InvokeHelper dispatchHelperNode) {
+			@Cached("create(getSourceSection(), arrowName)") DispatchNode dispatchHelperNode) {
 		Object term = evalLhsTermNode(frame);
 		_logNotInlining(term);
 		callArgs[0] = term;
 
-		return dispatchHelperNode.execute(callArgs, term);
+		return dispatchHelperNode.execute(callArgs);
 	}
 
-	public static abstract class InvokeHelper extends Node {
-
-		protected final String arrowName;
-
-		public InvokeHelper(String arrowName) {
-			this.arrowName = arrowName;
-		}
-
-		public abstract RuleResult execute(Object[] args, Object inputTerm);
-
-		@Specialization(guards = "inputTerm.getClass() == cachedClass", limit = "1")
-		public RuleResult doConstantClassDispatch(Object[] args, Object inputTerm,
-				@Cached("inputTerm.getClass()") Class<?> cachedClass,
-				@Cached("create(inputTerm.getClass(), arrowName)") ConstantClassDispatchNode dispatchNode) {
-			_logInlining(inputTerm);
-			return dispatchNode.execute(args);
-		}
-
-		@Specialization(replaces = "doConstantClassDispatch")
-		public RuleResult doDynamicDispatch(Object[] args, Object inputTerm,
-				@Cached("create(getSourceSection(), arrowName)") DispatchNode dispatchNode) {
-			_logNotInlining(inputTerm);
-			return dispatchNode.execute(args);
-		}
-
-		private final boolean logInlining = true;
-		@CompilationFinal private boolean loggedNotInlined;
-
-		private final void _logNotInlining(Object inputTerm) {
-			if (logInlining && !loggedNotInlined) {
-				loggedNotInlined = true;
-				__logNotInlining(inputTerm);
-			}
-		}
-
-		@TruffleBoundary
-		private final void __logNotInlining(Object inputTerm) {
-			System.out.println("Not class-inlining rules for: " + inputTerm.getClass().getSimpleName() + "-" + arrowName
-					+ "-> (under root " + getRootNode() + ")");
-		}
-
-		@CompilationFinal private boolean loggedInlined;
-
-		private final void _logInlining(Object inputTerm) {
-			if (logInlining && !loggedInlined) {
-				loggedInlined = true;
-				__logInlining(inputTerm);
-			}
-		}
-
-		@TruffleBoundary
-		private final void __logInlining(Object inputTerm) {
-			System.out.println("Class-Inlining rules for: " + inputTerm.getClass().getSimpleName() + "-" + arrowName
-					+ "-> (under root " + getRootNode() + ")");
-		}
-
-		public static InvokeHelper create(String arrowName) {
-			return InvokeHelperNodeGen.create(arrowName);
-		}
-
-	}
+	// public static abstract class InvokeHelper extends Node {
+	//
+	// protected final String arrowName;
+	//
+	// public InvokeHelper(String arrowName) {
+	// this.arrowName = arrowName;
+	// }
+	//
+	// public abstract RuleResult execute(Object[] args, Object inputTerm);
+	//
+	// @Specialization(guards = "inputTerm.getClass() == cachedClass", limit = "1")
+	// public RuleResult doConstantClassDispatch(Object[] args, Object inputTerm,
+	// @Cached("inputTerm.getClass()") Class<?> cachedClass,
+	// @Cached("create(inputTerm.getClass(), arrowName)") ConstantClassDispatchNode dispatchNode) {
+	// _logInlining(inputTerm);
+	// return dispatchNode.execute(args);
+	// }
+	//
+	// @Specialization(replaces = "doConstantClassDispatch")
+	// public RuleResult doDynamicDispatch(Object[] args, Object inputTerm,
+	// @Cached("create(getSourceSection(), arrowName)") DispatchNode dispatchNode) {
+	// _logNotInlining(inputTerm);
+	// return dispatchNode.execute(args);
+	// }
+	//
+	// private final boolean logInlining = true;
+	// @CompilationFinal private boolean loggedNotInlined;
+	//
+	// private final void _logNotInlining(Object inputTerm) {
+	// if (logInlining && !loggedNotInlined) {
+	// loggedNotInlined = true;
+	// __logNotInlining(inputTerm);
+	// }
+	// }
+	//
+	// @TruffleBoundary
+	// private final void __logNotInlining(Object inputTerm) {
+	// System.out.println("Not class-inlining rules for: " + inputTerm.getClass().getSimpleName() + "-" + arrowName
+	// + "-> (under root " + getRootNode() + ")");
+	// }
+	//
+	// @CompilationFinal private boolean loggedInlined;
+	//
+	// private final void _logInlining(Object inputTerm) {
+	// if (logInlining && !loggedInlined) {
+	// loggedInlined = true;
+	// __logInlining(inputTerm);
+	// }
+	// }
+	//
+	// @TruffleBoundary
+	// private final void __logInlining(Object inputTerm) {
+	// System.out.println("Class-Inlining rules for: " + inputTerm.getClass().getSimpleName() + "-" + arrowName
+	// + "-> (under root " + getRootNode() + ")");
+	// }
+	//
+	// public static InvokeHelper create(String arrowName) {
+	// return InvokeHelperNodeGen.create(arrowName);
+	// }
+	//
+	// }
 
 	@CompilationFinal private boolean loggedNotInlined;
 

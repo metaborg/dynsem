@@ -3,19 +3,14 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.IApplTerm;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
-import org.spoofax.interpreter.core.Tools;
-import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.github.krukow.clj_lang.PersistentList;
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.profiles.ValueProfile;
 import com.oracle.truffle.api.source.SourceSection;
@@ -28,13 +23,7 @@ public abstract class TermEqPremise extends Premise {
 		super(source);
 	}
 
-	public static TermEqPremise create(IStrategoAppl t, FrameDescriptor fd) {
-		CompilerAsserts.neverPartOfCompilation();
-		assert Tools.hasConstructor(t, "TermEq", 2);
-		TermBuild lhs = TermBuild.create(Tools.applAt(t, 0), fd);
-		TermBuild rhs = TermBuild.create(Tools.applAt(t, 1), fd);
-		return TermEqPremiseNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(t), lhs, rhs);
-	}
+
 
 	@Specialization
 	public void doBoolean(boolean left, boolean right) {

@@ -1,8 +1,10 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.PremiseFactories;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -53,14 +55,14 @@ public final class RuleNode extends DynSemNode {
 	}
 
 	@TruffleBoundary
-	public static RuleNode create(DynSemLanguage lang, IStrategoAppl ruleT, FrameDescriptor fd) {
+	public static RuleNode create(DynSemLanguage lang, IStrategoAppl ruleT, FrameDescriptor fd, ITermRegistry termReg) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(ruleT, "Rule", 5) : "Unexpected constructor " + ruleT.getConstructor();
 
 		IStrategoList premisesTerm = Tools.listAt(ruleT, 0);
 		Premise[] premises = new Premise[premisesTerm.size()];
 		for (int i = 0; i < premises.length; i++) {
-			premises[i] = Premise.create(lang, Tools.applAt(premisesTerm, i), fd);
+			premises[i] = PremiseFactories.create(lang, Tools.applAt(premisesTerm, i), fd, termReg);
 		}
 
 		IStrategoAppl relationT = Tools.applAt(ruleT, 2);
@@ -69,10 +71,10 @@ public final class RuleNode extends DynSemNode {
 		IStrategoAppl lhsLeftTerm = Tools.applAt(lhsSourceTerm, 0);
 		IStrategoList lhsCompsTerm = Tools.listAt(lhsSourceTerm, 1);
 
-		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd);
+		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd, termReg);
 
 		return new RuleNode(SourceUtils.dynsemSourceSectionFromATerm(ruleT),
-				RuleInputsNode.create(lhsLeftTerm, lhsCompsTerm, fd), premises, target);
+				RuleInputsNode.create(lhsLeftTerm, lhsCompsTerm, fd, termReg), premises, target);
 	}
 
 }
