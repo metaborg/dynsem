@@ -131,6 +131,20 @@ rules
     + ?String(_)
   
   mark-const-vars-prem =
+    ?CaseMatch(tb, case*);
+    <mark-const-vars-is-const> tb;
+    <map(try(mark-const-vars-case))> case*
+  
+  mark-const-vars-case = 
+    ?CaseOtherwise(prem*);
+    <map(try(mark-const-vars-prem))> prem*
+  
+  mark-const-vars-case = 
+    ?CasePattern(pat, prem*);
+    <mark-const-vars-get-bound-vars; map(mark-const-vars-record-const-var)> pat;
+    <map(try(mark-const-vars-prem))> prem*
+  
+  mark-const-vars-prem =
     ?Formula(Match(lhs, rhs));
     <mark-const-vars-is-const> lhs;
     <mark-const-vars-get-bound-vars; map(mark-const-vars-record-const-var)> rhs
