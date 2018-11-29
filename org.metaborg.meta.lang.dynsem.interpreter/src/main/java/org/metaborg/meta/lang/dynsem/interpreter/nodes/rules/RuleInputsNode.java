@@ -63,7 +63,7 @@ public abstract class RuleInputsNode extends DynSemNode {
 			Assumption constantTermAssumption) {
 		if (getInputTerm(frame) != term_cached) {
 			constantTermAssumption.invalidate();
-			_logInvalidation(constantTermAssumption.getName());
+			// _logInvalidation(constantTermAssumption.getName());
 			return false;
 		}
 		return true;

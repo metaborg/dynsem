@@ -8,6 +8,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.C
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.InliningDispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -37,10 +38,21 @@ public class InitEvalNode extends DynSemRootNode {
 			initNabl2.execute(frame);
 			initProtoFrames.execute(frame);
 		}
-		// RuleResult res = initDispatch.execute(program.getClass(), new Object[] { program });
-		// return res;
-		return initDispatch.execute(new Object[] { program });
+		RuleResult res = null;
+		for (int i = 0; i < 30; i++) {
+			long st = System.nanoTime();
+			res = initDispatch.execute(new Object[] { program });
+			long et = System.nanoTime();
+			logtime(et - st);
+		}
+		return res;
 	}
+
+	@TruffleBoundary
+	private static final void logtime(long t) {
+		System.out.println(t);
+	}
+
 
 	@Override
 	public boolean isCloningAllowed() {
