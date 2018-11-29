@@ -7,9 +7,11 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 import com.oracle.truffle.api.utilities.AlwaysValidAssumption;
 
@@ -30,12 +32,25 @@ public class InitEvalNode extends DynSemRootNode {
 	}
 
 	@Override
+	@ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
 		if (getContext().isNativeFramesEnabled()) {
 			initNabl2.execute(frame);
 			initProtoFrames.execute(frame);
 		}
-		return initDispatch.execute(program.getClass(), new Object[] { program });
+		RuleResult res = null;
+		for (int i = 0; i < 30; i++) {
+			long st = System.nanoTime();
+			res = initDispatch.execute(program.getClass(), new Object[] { program });
+			long et = System.nanoTime();
+			logtime(et - st);
+		}
+		return res;
+	}
+
+	@TruffleBoundary
+	private static final void logtime(long t) {
+		System.out.println(t);
 	}
 
 	@Override
