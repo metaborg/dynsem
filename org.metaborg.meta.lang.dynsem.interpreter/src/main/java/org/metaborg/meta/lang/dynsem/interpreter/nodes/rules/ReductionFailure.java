@@ -28,10 +28,10 @@ public class ReductionFailure extends RuntimeException implements TruffleExcepti
 	}
 
 
-	@Override
-	public synchronized Throwable fillInStackTrace() {
-		return null;
-	}
+	// @Override
+	// public synchronized Throwable fillInStackTrace() {
+	// return null;
+	// }
 
 	@Override
 	public Node getLocation() {

@@ -48,7 +48,7 @@ public abstract class RelationPremise extends Premise {
 		}
 
 		// execute the reduction
-		final RuleResult res = relationLhs.execute(frame, args);
+		final RuleResult res = relationLhs.executeGeneric(frame, args);
 
 		// evaluate the RHS pattern match
 		rhsNode.executeMatch(frame, res.result);

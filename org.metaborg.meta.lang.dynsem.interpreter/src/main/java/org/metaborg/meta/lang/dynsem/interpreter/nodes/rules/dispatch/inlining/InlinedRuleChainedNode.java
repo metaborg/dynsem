@@ -34,20 +34,6 @@ public final class InlinedRuleChainedNode extends DynSemNode {
 		}
 	}
 
-	// @Specialization(guards = "next == null")
-	// protected RuleResult doShallow(Object[] args) {
-	// return inlinedRule.execute(Truffle.getRuntime().createVirtualFrame(args, inlinedRuleFrameDescriptor));
-	// }
-	//
-	// @Specialization(replaces = "doShallow")
-	// protected RuleResult doDeep(Object[] args) {
-	// try {
-	// return inlinedRule.execute(Truffle.getRuntime().createVirtualFrame(args, inlinedRuleFrameDescriptor));
-	// } catch (PremiseFailureException pmfex) {
-	// return next.execute(args);
-	// }
-	// }
-
 	protected final int length() {
 		if (next == null) {
 			return 1;

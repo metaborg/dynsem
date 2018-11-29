@@ -2,8 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.BoundaryRuleNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.WrappedRuleNode.BoundaryRuleWrap;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
@@ -25,10 +25,9 @@ public final class ConstantClassDispatchNode extends InliningDispatchNode {
 	}
 
 	@Override
-	protected BoundaryRuleWrap createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
+	protected RuleNode createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
 			FrameDescriptor frameDescriptor, ITermRegistry termReg) {
-		RuleNode wrappableRule = RuleNode.create(language, ruleSourceTerm, frameDescriptor, termReg);
-		return new BoundaryRuleWrap(wrappableRule.getSourceSection(), wrappableRule);
+		return BoundaryRuleNode.createFromRuleNode(RuleNode.create(language, ruleSourceTerm, frameDescriptor, termReg));
 	}
 
 	public static ConstantClassDispatchNode create(Class<?> dispatchClass, String arrowName) {

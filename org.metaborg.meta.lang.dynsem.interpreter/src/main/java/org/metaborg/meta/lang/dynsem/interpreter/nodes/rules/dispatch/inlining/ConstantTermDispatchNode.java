@@ -26,9 +26,7 @@ public final class ConstantTermDispatchNode extends InliningDispatchNode {
 	@Override
 	protected RuleNode createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
 			FrameDescriptor frameDescriptor, ITermRegistry termReg) {
-		RuleNode wrappableRule = RuleNode.create(language, ruleSourceTerm, frameDescriptor, termReg);
-		// return new PassthroughWrappedRule(wrappableRule.getSourceSection(), wrappableRule);
-		return wrappableRule;
+		return RuleNode.create(language, ruleSourceTerm, frameDescriptor, termReg);
 	}
 
 	public static ConstantTermDispatchNode create(Class<?> dispatchClass, String arrowName) {

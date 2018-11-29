@@ -6,10 +6,8 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchChainRoot;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatchNode;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.profiles.BranchProfile;
 import com.oracle.truffle.api.profiles.ConditionProfile;
@@ -18,15 +16,15 @@ import com.oracle.truffle.api.source.SourceSection;
 public class HandleNode extends NativeExecutableNode {
 
 	@Child private TermBuild evalBuildNode;
-	@Child private DispatchNode evalDispatchNode;
+	@Child private DynamicDispatchNode evalDispatchNode;
 
 	@Child private TermBuild catchBuildNode;
 	@Child private TermBuild continueBuildNode;
-	@Child private DispatchNode continueDispatchNode;
+	@Child private DynamicDispatchNode continueDispatchNode;
 
 	@Child private ReflectiveHandlerBuild handlerBuildNode;
 
-	@Child private DispatchChainRoot handlerDispatch;
+	@Child private DynamicDispatchNode handlerDispatch;
 
 	// @CompilationFinal private CallTarget handlerCallTarget;
 
@@ -37,8 +35,10 @@ public class HandleNode extends NativeExecutableNode {
 		this.catchBuildNode = catchBuildNode;
 		this.continueBuildNode = continueBuildNode;
 		this.handlerBuildNode = ReflectiveHandlerBuildNodeGen.create(source);
-		this.evalDispatchNode = DispatchNode.create(source, "");
-		this.continueDispatchNode = DispatchNode.create(source, "");
+
+		this.evalDispatchNode = new DynamicDispatchNode(source, "");
+		this.continueDispatchNode = new DynamicDispatchNode(source, "");
+		this.handlerDispatch = new DynamicDispatchNode(source, "");
 	}
 
 	private final BranchProfile catchTaken = BranchProfile.create();
@@ -55,7 +55,7 @@ public class HandleNode extends NativeExecutableNode {
 			// try to evaluate the wrapped body
 			Object[] args = Arrays.copyOf(handleArgs, handleArgs.length);
 			args[0] = evalT;
-			result = evalDispatchNode.execute(evalT.getClass(), args);
+			result = evalDispatchNode.execute(args);
 		} catch (AbortedEvaluationException abex) {
 			catchTaken.enter();
 			Object catchingT = catchBuildNode.executeGeneric(frame);
@@ -79,11 +79,6 @@ public class HandleNode extends NativeExecutableNode {
 				args[i + numRoComps + 1] = rwComps[i];
 			}
 
-			if (handlerDispatch == null) {
-				 CompilerDirectives.transferToInterpreterAndInvalidate();
-				handlerDispatch = insert(
-						DispatchChainRoot.createUninitialized(getSourceSection(), "", handlerT.getClass(), true));
-			}
 			try {
 				return handlerDispatch.execute(args);
 			} catch (PremiseFailureException rafx) {
@@ -113,10 +108,8 @@ public class HandleNode extends NativeExecutableNode {
 				args[i + numRoComps + 1] = rwComps[i];
 			}
 
-			return continueDispatchNode.execute(continueT.getClass(), args);
+			return continueDispatchNode.execute(args);
 		}
 	}
-
-
 
 }

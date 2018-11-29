@@ -2,17 +2,17 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleInvokeNodeGen.InvokeHelperNodeGen;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantTermDispatchNode;
 
 import com.oracle.truffle.api.Assumption;
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
+import com.oracle.truffle.api.utilities.NeverValidAssumption;
 
 public abstract class RuleInvokeNode extends DynSemNode {
 
@@ -30,123 +30,68 @@ public abstract class RuleInvokeNode extends DynSemNode {
 		return termNode.executeGeneric(frame);
 	}
 
-	public abstract RuleResult execute(VirtualFrame frame, Object[] callArgs);
+	public abstract RuleResult executeGeneric(VirtualFrame frame, Object[] callArgs);
 
-	private final boolean logInlining = false;
-
-	@Specialization(guards = "lhsIsConst", assumptions = "constantTermAssumption")
-	@ExplodeLoop
-	public RuleResult doConstantTermDispatch(VirtualFrame frame, Object[] callArgs,
-			@Cached("termNode.isConstantNode()") boolean lhsIsConst, @Cached("evalLhsTermNode(frame)") Object inputTerm,
+	@Specialization(guards = "termNode.isConstantNode()", assumptions = "constantTermAssumption")
+	public RuleResult doConstantTerm(VirtualFrame frame, Object[] callArgs,
 			@Cached("getConstantInputAssumption()") Assumption constantTermAssumption,
-			@Cached("create(inputTerm.getClass(), arrowName)") ConstantTermDispatchNode dispatchNode) {
-		_logInlining(inputTerm);
-		callArgs[0] = inputTerm;
-
-		return dispatchNode.execute(callArgs);
+			@Cached("evalLhsTermNode(frame)") Object inputTerm,
+			@Cached("create(arrowName, constantTermAssumption)") InvokeHelper helperNode) {
+		return helperNode.executeGeneric(frame, callArgs, inputTerm);
 	}
 
-	@Specialization(replaces = "doConstantTermDispatch")
-	@ExplodeLoop
-	public RuleResult doOpportunisticDispatch(VirtualFrame frame, Object[] callArgs,
-			@Cached("create(getSourceSection(), arrowName)") DispatchNode dispatchHelperNode) {
-		Object term = evalLhsTermNode(frame);
-		_logNotInlining(term);
-		callArgs[0] = term;
-
-		return dispatchHelperNode.execute(callArgs);
+	@Specialization(replaces = "doConstantTerm")
+	public RuleResult doDynamicTerm(VirtualFrame frame, Object[] callArgs,
+			@Cached("create(arrowName)") InvokeHelper helperNode) {
+		return helperNode.executeGeneric(frame, callArgs, evalLhsTermNode(frame));
 	}
 
-	// public static abstract class InvokeHelper extends Node {
-	//
-	// protected final String arrowName;
-	//
-	// public InvokeHelper(String arrowName) {
-	// this.arrowName = arrowName;
-	// }
-	//
-	// public abstract RuleResult execute(Object[] args, Object inputTerm);
-	//
-	// @Specialization(guards = "inputTerm.getClass() == cachedClass", limit = "1")
-	// public RuleResult doConstantClassDispatch(Object[] args, Object inputTerm,
-	// @Cached("inputTerm.getClass()") Class<?> cachedClass,
-	// @Cached("create(inputTerm.getClass(), arrowName)") ConstantClassDispatchNode dispatchNode) {
-	// _logInlining(inputTerm);
-	// return dispatchNode.execute(args);
-	// }
-	//
-	// @Specialization(replaces = "doConstantClassDispatch")
-	// public RuleResult doDynamicDispatch(Object[] args, Object inputTerm,
-	// @Cached("create(getSourceSection(), arrowName)") DispatchNode dispatchNode) {
-	// _logNotInlining(inputTerm);
-	// return dispatchNode.execute(args);
-	// }
-	//
-	// private final boolean logInlining = true;
-	// @CompilationFinal private boolean loggedNotInlined;
-	//
-	// private final void _logNotInlining(Object inputTerm) {
-	// if (logInlining && !loggedNotInlined) {
-	// loggedNotInlined = true;
-	// __logNotInlining(inputTerm);
-	// }
-	// }
-	//
-	// @TruffleBoundary
-	// private final void __logNotInlining(Object inputTerm) {
-	// System.out.println("Not class-inlining rules for: " + inputTerm.getClass().getSimpleName() + "-" + arrowName
-	// + "-> (under root " + getRootNode() + ")");
-	// }
-	//
-	// @CompilationFinal private boolean loggedInlined;
-	//
-	// private final void _logInlining(Object inputTerm) {
-	// if (logInlining && !loggedInlined) {
-	// loggedInlined = true;
-	// __logInlining(inputTerm);
-	// }
-	// }
-	//
-	// @TruffleBoundary
-	// private final void __logInlining(Object inputTerm) {
-	// System.out.println("Class-Inlining rules for: " + inputTerm.getClass().getSimpleName() + "-" + arrowName
-	// + "-> (under root " + getRootNode() + ")");
-	// }
-	//
-	// public static InvokeHelper create(String arrowName) {
-	// return InvokeHelperNodeGen.create(arrowName);
-	// }
-	//
-	// }
+	public static abstract class InvokeHelper extends Node {
+		protected final String arrowName;
+		protected Assumption constantTermAssumption;
 
-	@CompilationFinal private boolean loggedNotInlined;
-
-	private final void _logNotInlining(Object inputTerm) {
-		if (logInlining && !loggedNotInlined) {
-			loggedNotInlined = true;
-			__logNotInlining(inputTerm);
+		public InvokeHelper(String arrowName, Assumption constantTermAssumption) {
+			this.arrowName = arrowName;
+			this.constantTermAssumption = constantTermAssumption;
 		}
-	}
 
-	@TruffleBoundary
-	private final void __logNotInlining(Object inputTerm) {
-		System.out.println("Not inlining rules for: " + inputTerm.getClass().getSimpleName() + "-" + arrowName
-				+ "-> (under root " + getRootNode() + ")");
-	}
+		public abstract RuleResult executeGeneric(VirtualFrame frame, Object[] callArgs, Object term);
 
-	@CompilationFinal private boolean loggedInlined;
-
-	private final void _logInlining(Object inputTerm) {
-		if (logInlining && !loggedInlined) {
-			loggedInlined = true;
-			__logInlining(inputTerm);
+		@Specialization(assumptions = "constantTermAssumption")
+		public RuleResult doConstant(VirtualFrame frame, Object[] callArgs, Object term,
+				@Cached("create(term.getClass(), arrowName)") ConstantTermDispatchNode dispatchNode) {
+			callArgs[0] = term;
+			return dispatchNode.execute(callArgs);
 		}
-	}
 
-	@TruffleBoundary
-	private final void __logInlining(Object inputTerm) {
-		System.out.println("Inlining rules for: " + inputTerm.getClass().getSimpleName() + "-" + arrowName
-				+ "-> (under root " + getRootNode() + ")");
+		// @Specialization(replaces = "doConstant", guards = "term.getClass() == cachedDispatchClass", limit = "1")
+		// public RuleResult doClass(VirtualFrame frame, Object[] callArgs, Object term,
+		// @Cached("term.getClass()") Class<?> cachedDispatchClass,
+		// @Cached("create(term.getClass(), arrowName)") ConstantClassDispatchNode dispatchNode) {
+		// callArgs[0] = term;
+		// return dispatchNode.execute(callArgs);
+		// }
+
+		@Specialization(replaces = "doConstant")
+		public RuleResult doDynamic(VirtualFrame frame, Object[] callArgs, Object term,
+				@Cached("create(getSourceSection(), arrowName)") DynamicDispatchNode dynamicDispatch) {
+			// InterpreterUtils.printlnErr("Dynamic dispatch in RuleInvokeNode not implemented");
+			// // TODO: this is probably required for function calls...
+			// throw new ReductionFailure(
+			// "Dynamic dispatch encountered, but support is not implemented. Reducing term: " + term,
+			// InterpreterUtils.createStacktrace(), this);
+			// throw new RuntimeException("Dynamic dispatch encountered, but support is not implemented");
+			callArgs[0] = term;
+			return dynamicDispatch.execute(callArgs);
+		}
+
+		public static InvokeHelper create(String arrowName, Assumption constantTermAssumption) {
+			return InvokeHelperNodeGen.create(arrowName, constantTermAssumption);
+		}
+
+		public static InvokeHelper create(String arrowName) {
+			return InvokeHelperNodeGen.create(arrowName, NeverValidAssumption.INSTANCE);
+		}
 	}
 
 }

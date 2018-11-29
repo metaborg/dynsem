@@ -39,20 +39,21 @@ strategies
           }
          
           
-          @Specialization(limit = "1", guards = e_cacheguard)
-          public x_termclass doCached(
-              param0*,
-              param1*,
-              @Cached(~e:Lit(String([Chars(str_cachegen)]))) x_termclass cachedTerm) {
-            return cachedTerm;
-          }
+//          @Specialization(limit = "1", guards = e_cacheguard)
+//          public x_termclass doCached(
+//              param0*,
+//              param1*,
+//              @Cached(~e:Lit(String([Chars(str_cachegen)]))) x_termclass cachedTerm) {
+//            return cachedTerm;
+//          }
+//          
+//          @Specialization(replaces = "doCached")
+//          public x_termclass doUncached(param0*) {
+//            return buildTerm(e0*);
+//          }
           
-          @Specialization(replaces = "doCached")
-          public x_termclass doUncached(param0*) {
-            return buildTerm(e0*);
-          }
-          
-          protected final x_termclass buildTerm(param0*) {
+          @Specialization
+          public x_termclass buildTerm(param0*) {
             return e_term;
           }
           

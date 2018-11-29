@@ -7,11 +7,12 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantTermDispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.InliningDispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 import com.oracle.truffle.api.utilities.AlwaysValidAssumption;
 
@@ -26,13 +27,13 @@ public class InitEvalNode extends DynSemRootNode {
 		this.program = program;
 		this.initNabl2 = new InitNaBL2Node(source);
 		this.initProtoFrames = new InitProtoFrames(source);
-		// this.initDispatch = DispatchNode.create(source, "init");
 		this.initDispatch = ConstantTermDispatchNode.create(program.getClass(), "init");
 
 		Truffle.getRuntime().createCallTarget(this);
 	}
 
 	@Override
+	@ExplodeLoop
 	public RuleResult execute(VirtualFrame frame) {
 		if (getContext().isNativeFramesEnabled()) {
 			initNabl2.execute(frame);
@@ -43,16 +44,10 @@ public class InitEvalNode extends DynSemRootNode {
 			long st = System.nanoTime();
 			res = initDispatch.execute(new Object[] { program });
 			long et = System.nanoTime();
-			logtime(et - st);
+			InterpreterUtils.printlnOut(et - st);
 		}
 		return res;
 	}
-
-	@TruffleBoundary
-	private static final void logtime(long t) {
-		System.out.println(t);
-	}
-
 
 	@Override
 	public boolean isCloningAllowed() {

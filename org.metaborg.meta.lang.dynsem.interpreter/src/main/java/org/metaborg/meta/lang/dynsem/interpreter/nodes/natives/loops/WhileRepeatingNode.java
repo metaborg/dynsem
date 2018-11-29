@@ -45,7 +45,7 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 
 		if (conditionProfile.profile(evaluateCondition(frame, callArgs))) {
 			try {
-				RuleResult bodyResult = this.bodyInvokeNode.execute(frame, callArgs);
+				RuleResult bodyResult = this.bodyInvokeNode.executeGeneric(frame, callArgs);
 				// TODO propagate sem comps
 				frame.setObject(resultFrameSlot, bodyResult.result);
 				return true;
@@ -89,7 +89,7 @@ public class WhileRepeatingNode extends DynSemNode implements RepeatingNode {
 
 	private boolean evaluateCondition(VirtualFrame frame, Object[] callArgs) {
 		// FIXME: for now we're ignoring updates to RW components
-		RuleResult conditionResult = this.conditionInvokeNode.execute(frame, callArgs);
+		RuleResult conditionResult = this.conditionInvokeNode.executeGeneric(frame, callArgs);
 		return TypesGen.asBoolean(conditionResult.result);
 	}
 

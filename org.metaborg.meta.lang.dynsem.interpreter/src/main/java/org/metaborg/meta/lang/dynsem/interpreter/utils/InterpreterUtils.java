@@ -77,6 +77,16 @@ public final class InterpreterUtils {
 	}
 
 	@TruffleBoundary
+	public static void printlnOut(Object o) {
+		System.out.println(o);
+	}
+
+	@TruffleBoundary
+	public static void printlnErr(Object o) {
+		System.err.println(o);
+	}
+
+	@TruffleBoundary
 	public static String createStacktrace() {
 		CompilerAsserts.neverPartOfCompilation();
 		final StringBuilder str = new StringBuilder();
@@ -154,8 +164,4 @@ public final class InterpreterUtils {
 		return str.length();
 	}
 
-	@TruffleBoundary
-	public static void printlnStdOut(String s) {
-		System.out.println(s);
-	}
 }

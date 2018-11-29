@@ -35,7 +35,7 @@ public abstract class DynSemNode extends Node {
 		return sourceSection;
 	}
 
-	protected Assumption getConstantInputAssumption() {
+	public Assumption getConstantInputAssumption() {
 		return RuleUtil.getNearestConstantTermAssumption(this);
 	}
 

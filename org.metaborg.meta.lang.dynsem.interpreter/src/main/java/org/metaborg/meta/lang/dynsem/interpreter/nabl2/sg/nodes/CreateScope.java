@@ -50,15 +50,16 @@ public abstract class CreateScope extends NativeOpBuild {
 			IListTerm<?> decTypes, IListTerm<?> _refs, IPersistentMap<?, ?> edgesMap, IPersistentMap<?, ?> importsMap) {
 		DynSemContext ctx = getContext();
 
-		IListTerm<Occurrence> decs = ctx.getTermRegistry().getListClass(Occurrence.class).cast(_decs);
-		IListTerm<Occurrence> refs = ctx.getTermRegistry().getListClass(Occurrence.class).cast(_refs);
+		Class<? extends IListTerm<Occurrence>> occurrence_list_class = getOccurrenceListClass(ctx);
+		Occurrence[] decs = occurrence_list_class.cast(_decs).toArray();
+		Occurrence[] refs = occurrence_list_class.cast(_refs).toArray();
 
 		DynamicObject edges = createScopeEdges(edgesMap);
 
 		DynamicObject imports = createImports(importsMap);
 
-		DynamicObject scopeEntry = ScopeEntryLayoutImpl.INSTANCE.createScopeEntry(scopeIdent, decs.toArray(),
-				refs.toArray(), edges, imports);
+		DynamicObject scopeEntry = ScopeEntryLayoutImpl.INSTANCE.createScopeEntry(scopeIdent, decs, refs, edges,
+				imports);
 
 		DynamicObject nabl2 = ctx.getNaBL2Solution();
 		DynamicObject types = NaBL2LayoutImpl.INSTANCE.getTypes(nabl2);
@@ -67,15 +68,19 @@ public abstract class CreateScope extends NativeOpBuild {
 
 		scopes.define(scopeIdent, scopeEntry);
 
-		IListTerm<?> decTypesHead = decTypes;
-		for (Occurrence dec : decs) {
-			types.define(dec, decTypesHead.elem());
-			decTypesHead = decTypesHead.tail();
+		Object[] decTys = decTypes.toArray();
+		for (int i = 0; i < decs.length; i++) {
+			types.define(decs[i], decTys[i]);
 		}
 
 		protoFrameInit.execute(frame, scopeEntry);
 
 		return scopeIdent;
+	}
+
+	@TruffleBoundary
+	private final Class<? extends IListTerm<Occurrence>> getOccurrenceListClass(DynSemContext ctx) {
+		return ctx.getTermRegistry().getListClass(Occurrence.class);
 	}
 
 	@TruffleBoundary

@@ -11,7 +11,6 @@ import org.spoofax.interpreter.terms.IStrategoList;
 
 import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -69,10 +68,10 @@ public abstract class RuleInputsNode extends DynSemNode {
 		return true;
 	}
 
-	@TruffleBoundary
-	private final static void _logInvalidation(String name) {
-		System.out.println("Invalidated:: " + name);
-	}
+	// @TruffleBoundary
+	// private final static void _logInvalidation(String name) {
+	// System.out.println("Invalidated:: " + name);
+	// }
 
 	public static RuleInputsNode create(IStrategoAppl lhsT, IStrategoList componentsT, FrameDescriptor fd,
 			ITermRegistry termReg) {

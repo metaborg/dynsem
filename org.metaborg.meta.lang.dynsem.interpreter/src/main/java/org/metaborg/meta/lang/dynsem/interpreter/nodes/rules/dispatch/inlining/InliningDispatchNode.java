@@ -10,6 +10,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRootNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
@@ -29,12 +30,14 @@ public abstract class InliningDispatchNode extends AbstractDispatch {
 
 	private RuleResult executeHelper(Object[] args, boolean deepAllowed) {
 		try {
+			CompilerAsserts.compilationConstant(dispatchChain);
 			if (dispatchChain == null) {
-				return growAndExecute(args);
+				growChain();
 			}
 			return dispatchChain.execute(args, deepAllowed);
 		} catch (PremiseFailureException pmfex) {
-			return growAndExecute(args);
+			growChain();
+			return executeHelper(args, false);
 		}
 	}
 
@@ -43,7 +46,7 @@ public abstract class InliningDispatchNode extends AbstractDispatch {
 	protected abstract RuleNode createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
 			FrameDescriptor frameDescriptor, ITermRegistry termReg);
 
-	private RuleResult growAndExecute(Object[] args) {
+	private void growChain() {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
 		IRuleRegistry ruleReg = getContext().getRuleRegistry();
 		RuleRootNode[] roots = ruleReg.lookupRuleRoots(arrowName, dispatchClass());
@@ -58,9 +61,8 @@ public abstract class InliningDispatchNode extends AbstractDispatch {
 		FrameDescriptor frameDescriptor = nextRoot.getFrameDescriptor();
 		RuleNode inlineableRule = createRuleForInlining(ruleReg.getLanguage(), nextRoot.getRuleSourceTerm(),
 				frameDescriptor, getContext().getTermRegistry());
-		dispatchChain = insert(
+		this.dispatchChain = insert(
 				new InlinedRuleChainedNode(getSourceSection(), frameDescriptor, inlineableRule, dispatchChain));
-		return executeHelper(args, false);
 	}
 
 }

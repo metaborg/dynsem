@@ -3,7 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.dynamicresolutio
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantClassDispatchNode;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermInit;
 
 import com.oracle.truffle.api.CompilerAsserts;
@@ -12,12 +12,10 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
 abstract class IsReversedOrder extends DynSemNode {
-
-	@Child private DispatchNode dispatch;
+	protected final static String EMPTY = "";
 
 	public IsReversedOrder(SourceSection source) {
 		super(source);
-		this.dispatch = DispatchNode.create(source, "");
 	}
 
 	public abstract boolean execute(ALabel l1, ALabel l2);
@@ -26,16 +24,18 @@ abstract class IsReversedOrder extends DynSemNode {
 	public boolean areLabelsSwappedCached(ALabel l1, ALabel l2, @Cached("l1") ALabel l1_cached,
 			@Cached("l2") ALabel l2_cached, @Cached("getOrderSwapTermClass()") Class<?> orderSwapTermClass,
 			@Cached("getTermInit(orderSwapTermClass)") ITermInit orderSwapTermInit,
-			@Cached("areLabelsSwapped(l1_cached, l2_cached, orderSwapTermClass, orderSwapTermInit)") boolean swapped) {
+			@Cached("create(orderSwapTermClass, EMPTY)") ConstantClassDispatchNode dispatch,
+			@Cached("areLabelsSwapped(l1_cached, l2_cached, orderSwapTermClass, orderSwapTermInit, dispatch)") boolean swapped) {
 		return swapped;
 	}
 
 	@Specialization // (replaces = "areLabelsSwappedCached")
 	public boolean areLabelsSwapped(ALabel l1, ALabel l2,
 			@Cached("getOrderSwapTermClass()") Class<?> orderSwapTermClass,
-			@Cached("getTermInit(orderSwapTermClass)") ITermInit orderSwapTermInit) {
+			@Cached("getTermInit(orderSwapTermClass)") ITermInit orderSwapTermInit,
+			@Cached("create(orderSwapTermClass, EMPTY)") ConstantClassDispatchNode dispatch) {
 		Object[] args = new Object[] { orderSwapTermInit.apply(new Object[] { l1, l2 }) };
-		return (boolean) dispatch.execute(orderSwapTermClass, args).result;
+		return (boolean) dispatch.execute(args).result;
 	}
 
 	protected Class<?> getOrderSwapTermClass() {

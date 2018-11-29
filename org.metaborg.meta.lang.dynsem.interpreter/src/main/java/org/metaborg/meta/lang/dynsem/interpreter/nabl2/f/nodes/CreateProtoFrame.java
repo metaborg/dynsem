@@ -1,11 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameEdgeIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameImportIdentifier;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
@@ -18,10 +14,9 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayo
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.ScopeEntryLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.object.DynamicObject;
-import com.oracle.truffle.api.object.FinalLocationException;
-import com.oracle.truffle.api.object.IncompatibleLocationException;
 import com.oracle.truffle.api.object.Property;
 import com.oracle.truffle.api.object.Shape;
 import com.oracle.truffle.api.object.Shape.Allocator;
@@ -37,11 +32,22 @@ public class CreateProtoFrame extends DynSemNode {
 	}
 
 	public DynamicObject execute(VirtualFrame frame, DynamicObject scopeEntry) {
-		/*
-		 * We're going to build shapes for a prototype frame, instantiate it and populate it with default values
-		 */
-		DynSemContext ctx = getContext();
+		DynamicObject protoFrame = createProtoFrame(scopeEntry);
+		// populate it with default values
+		Occurrence[] declarations = ScopeEntryLayoutImpl.INSTANCE.getDeclarations(scopeEntry);
+		DynamicObject types = NaBL2LayoutImpl.INSTANCE.getTypes(getContext().getNaBL2Solution());
+		for (Occurrence dec : declarations) {
+			protoFrame.set(dec, defaultValueNode.execute(frame, types.get(dec)));
+		}
 
+		return protoFrame;
+	}
+
+	@TruffleBoundary
+	private DynamicObject createProtoFrame(DynamicObject scopeEntry) {
+		/*
+		 * We're going to build shapes for a prototype frame, instantiate it
+		 */
 		ScopeEntryLayout scopeLayout = ScopeEntryLayoutImpl.INSTANCE;
 		assert scopeLayout.isScopeEntry(scopeEntry);
 
@@ -50,24 +56,16 @@ public class CreateProtoFrame extends DynSemNode {
 				.createFrameShape(ScopeEntryLayoutImpl.INSTANCE.getIdentifier(scopeEntry)).getShape();
 		Allocator allocator = protoShape.allocator();
 
-		// retrieve the types, required to compute default values
-		DynamicObject types = NaBL2LayoutImpl.INSTANCE.getTypes(ctx.getNaBL2Solution());
-
 		/* Create and populate slots (for declarations) */
 
 		// temporary mapping from in-frame property to (default) value
-		Map<Property, Object> prop2val = new HashMap<>();
-
-		// allocate properties and compute default values
-		for (Occurrence dec : scopeLayout.getDeclarations(scopeEntry)) {
-			// allocate property
-			Property prop = Property.create(dec, allocator.locationForType(Object.class), 0);
-			// add to shape, yielding new shape
+		Occurrence[] declarations = scopeLayout.getDeclarations(scopeEntry);
+		Property[] declarationProps = new Property[declarations.length];
+		for (int i = 0; i < declarations.length; i++) {
+			Property prop = Property.create(declarations[i], allocator.locationForType(Object.class), 0);
 			protoShape = protoShape.addProperty(prop);
-			// compute and memo default value for this property
-			prop2val.put(prop, defaultValueNode.execute(frame, types.get(dec)));
+			declarationProps[i] = prop;
 		}
-
 
 		// create props for every edge. NB: we're flattening the structure by encoding
 		// multiplicity in the property name (edgeIdentifier)
@@ -101,20 +99,7 @@ public class CreateProtoFrame extends DynSemNode {
 		}
 
 		// instantiate a prototype frame from the shape
-		DynamicObject protoFrame = protoShape.newInstance();
-
-		// set declaration to their computed values
-		for (Entry<Property, Object> p2v : prop2val.entrySet()) {
-			try {
-				p2v.getKey().set(protoFrame, p2v.getValue(), null);
-			} catch (IncompatibleLocationException | FinalLocationException e) {
-				throw new IllegalStateException(e);
-			}
-		}
-
-		assert FrameLayoutImpl.INSTANCE.isFrame(protoFrame);
-
-		return protoFrame;
+		return protoShape.newInstance();
 	}
 
 }

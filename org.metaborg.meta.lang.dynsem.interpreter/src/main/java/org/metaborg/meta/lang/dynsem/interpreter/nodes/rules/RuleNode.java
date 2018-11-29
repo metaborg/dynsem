@@ -17,7 +17,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class RuleNode extends DynSemNode {
+public class RuleNode extends DynSemNode {
 
 	public final static String DEFAULT_NAME = "";
 
