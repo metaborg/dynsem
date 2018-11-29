@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
@@ -9,14 +9,14 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class InlinedRuleChainedNode extends DynSemNode {
+public final class InlinedRuleChain extends DynSemNode {
 
 	private final FrameDescriptor inlinedRuleFrameDescriptor;
 	@Child protected RuleNode inlinedRule;
-	@Child protected InlinedRuleChainedNode next;
+	@Child protected InlinedRuleChain next;
 
-	public InlinedRuleChainedNode(SourceSection source, FrameDescriptor inlinedRuleFrameDescriptor,
-			RuleNode inlinedRule, InlinedRuleChainedNode next) {
+	public InlinedRuleChain(SourceSection source, FrameDescriptor inlinedRuleFrameDescriptor,
+			RuleNode inlinedRule, InlinedRuleChain next) {
 		super(source);
 		this.inlinedRuleFrameDescriptor = inlinedRuleFrameDescriptor;
 		this.inlinedRule = inlinedRule;

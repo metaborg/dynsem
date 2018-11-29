@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2Context;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.RuleUtil;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.RuleUtil;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.Assumption;

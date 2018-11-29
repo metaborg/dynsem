@@ -1,13 +1,15 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRootNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
+import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CompilerAsserts;
@@ -15,12 +17,14 @@ import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.source.SourceSection;
 
-public abstract class InliningDispatchNode extends AbstractDispatch {
+public class InlinedDispatch extends AbstractDispatch {
 
-	@Child protected InlinedRuleChainedNode dispatchChain;
+	@Child protected InlinedRuleChain dispatchChain;
+	private final Class<?> dispatchClass;
 
-	public InliningDispatchNode(SourceSection source, String arrowName) {
+	public InlinedDispatch(SourceSection source, Class<?> dispatchClass, String arrowName) {
 		super(source, arrowName);
+		this.dispatchClass = dispatchClass;
 	}
 
 	@Override
@@ -41,20 +45,25 @@ public abstract class InliningDispatchNode extends AbstractDispatch {
 		}
 	}
 
-	protected abstract Class<?> dispatchClass();
+	public static InlinedDispatch create(Class<?> dispatchClass, String arrowName) {
+		return new InlinedDispatch(SourceUtils.dynsemSourceSectionUnvailable(), dispatchClass, arrowName);
+	}
 
-	protected abstract RuleNode createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
-			FrameDescriptor frameDescriptor, ITermRegistry termReg);
+	protected RuleNode createRuleForInlining(DynSemLanguage language, IStrategoAppl ruleSourceTerm,
+			FrameDescriptor frameDescriptor, ITermRegistry termReg) {
+		return RuleNode.create(language, ruleSourceTerm, frameDescriptor, termReg);
+	}
 
 	private void growChain() {
 		CompilerDirectives.transferToInterpreterAndInvalidate();
 		IRuleRegistry ruleReg = getContext().getRuleRegistry();
-		RuleRootNode[] roots = ruleReg.lookupRuleRoots(arrowName, dispatchClass());
+		RuleRootNode[] roots = ruleReg.lookupRuleRoots(arrowName, dispatchClass);
 		int currentChainLength = dispatchChain != null ? dispatchChain.length() : 0;
 
 		if (currentChainLength >= roots.length) {
 			// FIXME: of course, we should attempt a sort-wide rule
-			throw new RuntimeException("No more rules to try. And sort-dispatch is NOT IMPLEMENTED");
+			throw new ReductionFailure("No more rules to try. And sort-dispatch is NOT IMPLEMENTED",
+					InterpreterUtils.createStacktrace(), this);
 		}
 
 		RuleRootNode nextRoot = roots[currentChainLength];
@@ -62,7 +71,7 @@ public abstract class InliningDispatchNode extends AbstractDispatch {
 		RuleNode inlineableRule = createRuleForInlining(ruleReg.getLanguage(), nextRoot.getRuleSourceTerm(),
 				frameDescriptor, getContext().getTermRegistry());
 		this.dispatchChain = insert(
-				new InlinedRuleChainedNode(getSourceSection(), frameDescriptor, inlineableRule, dispatchChain));
+				new InlinedRuleChain(getSourceSection(), frameDescriptor, inlineableRule, dispatchChain));
 	}
 
 }

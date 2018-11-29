@@ -4,8 +4,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.InitProtoFrames;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes.InitNaBL2Node;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantTermDispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.InliningDispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.InlinedDispatch;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
@@ -20,15 +19,14 @@ public class InitEvalNode extends DynSemRootNode {
 	private final ITerm program;
 	@Child private InitNaBL2Node initNabl2;
 	@Child private InitProtoFrames initProtoFrames;
-	@Child private InliningDispatchNode initDispatch;
+	@Child private InlinedDispatch initDispatch;
 
 	public InitEvalNode(DynSemLanguage lang, SourceSection source, ITerm program) {
 		super(lang, source, new FrameDescriptor(), AlwaysValidAssumption.INSTANCE);
 		this.program = program;
 		this.initNabl2 = new InitNaBL2Node(source);
 		this.initProtoFrames = new InitProtoFrames(source);
-		this.initDispatch = ConstantTermDispatchNode.create(program.getClass(), "init");
-
+		this.initDispatch = InlinedDispatch.create(program.getClass(), "init");
 		Truffle.getRuntime().createCallTarget(this);
 	}
 

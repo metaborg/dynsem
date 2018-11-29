@@ -3,8 +3,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleInvokeNodeGen.InvokeHelperNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatchNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantTermDispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.InlinedDispatch;
 
 import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.dsl.Cached;
@@ -59,7 +59,7 @@ public abstract class RuleInvokeNode extends DynSemNode {
 
 		@Specialization(assumptions = "constantTermAssumption")
 		public RuleResult doConstant(VirtualFrame frame, Object[] callArgs, Object term,
-				@Cached("create(term.getClass(), arrowName)") ConstantTermDispatchNode dispatchNode) {
+				@Cached("create(term.getClass(), arrowName)") InlinedDispatch dispatchNode) {
 			callArgs[0] = term;
 			return dispatchNode.execute(callArgs);
 		}
@@ -74,13 +74,7 @@ public abstract class RuleInvokeNode extends DynSemNode {
 
 		@Specialization(replaces = "doConstant")
 		public RuleResult doDynamic(VirtualFrame frame, Object[] callArgs, Object term,
-				@Cached("create(getSourceSection(), arrowName)") DynamicDispatchNode dynamicDispatch) {
-			// InterpreterUtils.printlnErr("Dynamic dispatch in RuleInvokeNode not implemented");
-			// // TODO: this is probably required for function calls...
-			// throw new ReductionFailure(
-			// "Dynamic dispatch encountered, but support is not implemented. Reducing term: " + term,
-			// InterpreterUtils.createStacktrace(), this);
-			// throw new RuntimeException("Dynamic dispatch encountered, but support is not implemented");
+				@Cached("create(getSourceSection(), arrowName)") DynamicDispatch dynamicDispatch) {
 			callArgs[0] = term;
 			return dynamicDispatch.execute(callArgs);
 		}

@@ -3,7 +3,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.dynamicresolutio
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ALabel;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.ConstantClassDispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatch;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermInit;
 
 import com.oracle.truffle.api.CompilerAsserts;
@@ -13,8 +14,12 @@ import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class IsWellFormedPathNode extends DynSemNode {
 	protected final static String EMPTY = "";
+
+	@Child protected AbstractDispatch dispatch;
+
 	public IsWellFormedPathNode(SourceSection source) {
 		super(source);
+		this.dispatch = DynamicDispatch.create(source, EMPTY);
 	}
 
 	public abstract boolean execute(ReversedResolutionPath rrp, ALabel nextLabel);
@@ -23,8 +28,7 @@ public abstract class IsWellFormedPathNode extends DynSemNode {
 	public boolean checkWF(ReversedResolutionPath rrp, ALabel nextLabel,
 			@Cached("getWellFormednessTermClass()") Class<?> wfTermClass,
 			@Cached("createWellFormednessConConstructor(wfTermClass)") ITermInit wfTermInit,
-			@Cached("createLabelListInit()") ITermInit listInit,
-			@Cached("create(wfTermClass, EMPTY)") ConstantClassDispatchNode dispatch) {
+			@Cached("createLabelListInit()") ITermInit listInit) {
 		int pathLength = rrp != null ? rrp.size() + 1 : 1;
 		ALabel[] labels = new ALabel[pathLength];
 		int i = 0;

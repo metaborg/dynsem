@@ -6,7 +6,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.NativeExecutableNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatchNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatch;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.profiles.BranchProfile;
@@ -16,15 +16,15 @@ import com.oracle.truffle.api.source.SourceSection;
 public class HandleNode extends NativeExecutableNode {
 
 	@Child private TermBuild evalBuildNode;
-	@Child private DynamicDispatchNode evalDispatchNode;
+	@Child private DynamicDispatch evalDispatchNode;
 
 	@Child private TermBuild catchBuildNode;
 	@Child private TermBuild continueBuildNode;
-	@Child private DynamicDispatchNode continueDispatchNode;
+	@Child private DynamicDispatch continueDispatchNode;
 
 	@Child private ReflectiveHandlerBuild handlerBuildNode;
 
-	@Child private DynamicDispatchNode handlerDispatch;
+	@Child private DynamicDispatch handlerDispatch;
 
 	// @CompilationFinal private CallTarget handlerCallTarget;
 
@@ -36,9 +36,9 @@ public class HandleNode extends NativeExecutableNode {
 		this.continueBuildNode = continueBuildNode;
 		this.handlerBuildNode = ReflectiveHandlerBuildNodeGen.create(source);
 
-		this.evalDispatchNode = new DynamicDispatchNode(source, "");
-		this.continueDispatchNode = new DynamicDispatchNode(source, "");
-		this.handlerDispatch = new DynamicDispatchNode(source, "");
+		this.evalDispatchNode = DynamicDispatch.create(source, "");
+		this.continueDispatchNode = DynamicDispatch.create(source, "");
+		this.handlerDispatch = DynamicDispatch.create(source, "");
 	}
 
 	private final BranchProfile catchTaken = BranchProfile.create();
