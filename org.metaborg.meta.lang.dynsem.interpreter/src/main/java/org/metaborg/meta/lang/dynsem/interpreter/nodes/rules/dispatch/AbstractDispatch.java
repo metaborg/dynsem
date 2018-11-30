@@ -14,6 +14,6 @@ public abstract class AbstractDispatch extends DynSemNode {
 		this.arrowName = arrowName;
 	}
 
-	public abstract RuleResult execute(Object[] args);
+	public abstract RuleResult execute(Object[] callArgs);
 
 }

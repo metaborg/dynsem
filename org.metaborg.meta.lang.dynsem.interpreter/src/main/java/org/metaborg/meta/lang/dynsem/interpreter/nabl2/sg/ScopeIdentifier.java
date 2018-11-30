@@ -36,7 +36,7 @@ public final class ScopeIdentifier {
 	@Override
 	public int hashCode() {
 		if (hashcode == -1) {
-			CompilerDirectives.transferToInterpreter();
+			CompilerDirectives.transferToInterpreterAndInvalidate();
 			hashcode = computeHashCode(this);
 		}
 		return hashcode;

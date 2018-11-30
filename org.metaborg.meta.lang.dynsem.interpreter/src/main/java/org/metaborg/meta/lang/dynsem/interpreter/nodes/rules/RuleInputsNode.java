@@ -31,7 +31,7 @@ public abstract class RuleInputsNode extends DynSemNode {
 
 	public abstract void execute(VirtualFrame frame);
 
-	@Specialization(guards = "guardConstantTerm(frame, term_cached, constantTermAssumption)", assumptions = "constantTermAssumption", limit = "1")
+	@Specialization(assumptions = "constantTermAssumption")
 	public void doConstantTerm(VirtualFrame frame, @Cached("getInputTerm(frame)") Object term_cached,
 			@Cached("getConstantInputAssumption()") Assumption constantTermAssumption) {
 		doWithArguments(frame, term_cached, frame.getArguments());
@@ -57,16 +57,18 @@ public abstract class RuleInputsNode extends DynSemNode {
 	protected final Object getInputTerm(VirtualFrame frame) {
 		return frame.getArguments()[0];
 	}
-
-	protected final boolean guardConstantTerm(VirtualFrame frame, Object term_cached,
-			Assumption constantTermAssumption) {
-		if (getInputTerm(frame) != term_cached) {
-			constantTermAssumption.invalidate();
-			// _logInvalidation(constantTermAssumption.getName());
-			return false;
-		}
-		return true;
-	}
+	//
+	// protected final boolean guardConstantTerm(VirtualFrame frame, Object term_cached,
+	// Assumption constantTermAssumption) {
+	// // constantTermAssumption.isValid() &&
+	// if (getInputTerm(frame) != term_cached) {
+	// constantTermAssumption.invalidate();
+	// // _logInvalidation(constantTermAssumption.getName());
+	// return false;
+	// } else {
+	// return true;
+	// }
+	// }
 
 	// @TruffleBoundary
 	// private final static void _logInvalidation(String name) {
@@ -80,7 +82,6 @@ public abstract class RuleInputsNode extends DynSemNode {
 			lhsSemCompPatterns[i] = MatchNodeFactories.create(Tools.applAt(componentsT, i), fd, termReg);
 		}
 		return RuleInputsNodeGen.create(SourceUtils.dynsemSourceSectionFromATerm(lhsT),
-				MatchNodeFactories.create(lhsT, fd, termReg),
-				lhsSemCompPatterns);
+				MatchNodeFactories.create(lhsT, fd, termReg), lhsSemCompPatterns);
 	}
 }

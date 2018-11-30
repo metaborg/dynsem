@@ -13,15 +13,18 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermVisitor;
 
+import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.dsl.Cached;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class RuleRootNode extends DynSemRootNode {
+public abstract class RuleRootNode extends DynSemRootNode {
 	private final IStrategoAppl sourceTerm;
 	private final String arrowName;
 	private final Class<?> dispatchClass;
@@ -42,8 +45,32 @@ public final class RuleRootNode extends DynSemRootNode {
 	}
 
 	@Override
-	public RuleResult execute(VirtualFrame frame) {
+	public abstract RuleResult execute(VirtualFrame frame);
+
+	@Specialization(guards = "guardCheck(frame, inputTerm)", assumptions = "getConstantTermAssumption()", limit = "1")
+	public RuleResult doHasSeenStatic(VirtualFrame frame, @Cached("getInputTerm(frame)") Object inputTerm) {
 		return rule.execute(frame);
+	}
+
+	@Specialization(replaces = "doHasSeenStatic")
+	public RuleResult doHasSeenDynamic(VirtualFrame frame) {
+		return rule.execute(frame);
+	}
+
+	protected boolean guardCheck(VirtualFrame frame, Object refTerm) {
+		Assumption assumption = getConstantTermAssumption();
+		if (!assumption.isValid()) {
+			return false;
+		}
+		if (getInputTerm(frame) != refTerm) {
+			assumption.invalidate();
+			return false;
+		}
+		return true;
+	}
+
+	protected static Object getInputTerm(VirtualFrame frame) {
+		return frame.getArguments()[0];
 	}
 
 	public String getArrowName() {
@@ -76,7 +103,7 @@ public final class RuleRootNode extends DynSemRootNode {
 	protected RuleRootNode cloneUninitialized() {
 		// return createWithFrameDescriptor(lang, sourceTerm, getFrameDescriptor());
 		FrameDescriptor fd = getFrameDescriptor();
-		return new RuleRootNode(lang, getSourceSection(), fd, arrowName, dispatchClass,
+		return RuleRootNodeGen.create(lang, getSourceSection(), fd, arrowName, dispatchClass,
 				RuleNode.create(lang, sourceTerm, fd, getContext().getTermRegistry()), sourceTerm);
 	}
 
@@ -114,9 +141,8 @@ public final class RuleRootNode extends DynSemRootNode {
 
 		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
 			SourceSection source = SourceUtils.dynsemSourceSectionFromATerm(ruleT);
-			return new RuleRootNode(lang, source, fd, arrowName, dispatchClass,
-					RuleNode.create(lang, ruleT, fd, termReg),
-					ruleT);
+			return RuleRootNodeGen.create(lang, source, fd, arrowName, dispatchClass,
+					RuleNode.create(lang, ruleT, fd, termReg), ruleT);
 		}
 
 		throw new IllegalArgumentException("Unsupported rule term: " + ruleT);
@@ -125,14 +151,17 @@ public final class RuleRootNode extends DynSemRootNode {
 	@TruffleBoundary
 	protected static FrameDescriptor createFrameDescriptor(IStrategoTerm t) {
 		final FrameDescriptor fd = new FrameDescriptor();
-		final Set<String> vars = new HashSet<>();
+		final Set<Integer> vars = new HashSet<>();
 		TermVisitor visitor = new TermVisitor() {
 
 			@Override
+			@TruffleBoundary
 			public void preVisit(IStrategoTerm t) {
+				CompilerAsserts.neverPartOfCompilation();
 				if (Tools.isTermAppl(t) && (Tools.hasConstructor((IStrategoAppl) t, "VarRef", 1)
 						|| Tools.hasConstructor((IStrategoAppl) t, "ConstRef", 1))) {
-					String v = Tools.stringAt(t, 0).stringValue();
+					String vstr = Tools.stringAt(t, 0).stringValue();
+					int v = vstr.intern().hashCode();
 					if (!vars.contains(v)) {
 						fd.addFrameSlot(v, false, FrameSlotKind.Object);
 						vars.add(v);

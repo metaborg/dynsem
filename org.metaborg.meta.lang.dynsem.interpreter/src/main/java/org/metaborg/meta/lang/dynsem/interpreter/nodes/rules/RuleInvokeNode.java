@@ -3,8 +3,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleInvokeNodeGen.InvokeHelperNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatch;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.InlinedDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.calls.DynamicDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.InlinedDispatch;
 
 import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.dsl.Cached;
@@ -37,13 +37,14 @@ public abstract class RuleInvokeNode extends DynSemNode {
 			@Cached("getConstantInputAssumption()") Assumption constantTermAssumption,
 			@Cached("evalLhsTermNode(frame)") Object inputTerm,
 			@Cached("create(arrowName, constantTermAssumption)") InvokeHelper helperNode) {
-		return helperNode.executeGeneric(frame, callArgs, inputTerm);
+		return helperNode.executeGeneric(callArgs, inputTerm);
 	}
 
 	@Specialization(replaces = "doConstantTerm")
 	public RuleResult doDynamicTerm(VirtualFrame frame, Object[] callArgs,
 			@Cached("create(arrowName)") InvokeHelper helperNode) {
-		return helperNode.executeGeneric(frame, callArgs, evalLhsTermNode(frame));
+		Object inputTerm = evalLhsTermNode(frame);
+		return helperNode.executeGeneric(callArgs, inputTerm);
 	}
 
 	public static abstract class InvokeHelper extends Node {
@@ -55,25 +56,17 @@ public abstract class RuleInvokeNode extends DynSemNode {
 			this.constantTermAssumption = constantTermAssumption;
 		}
 
-		public abstract RuleResult executeGeneric(VirtualFrame frame, Object[] callArgs, Object term);
+		public abstract RuleResult executeGeneric(Object[] callArgs, Object term);
 
 		@Specialization(assumptions = "constantTermAssumption")
-		public RuleResult doConstant(VirtualFrame frame, Object[] callArgs, Object term,
-				@Cached("create(term.getClass(), arrowName)") InlinedDispatch dispatchNode) {
+		public RuleResult doConstant(Object[] callArgs, Object term,
+				@Cached("create(getSourceSection(), arrowName)") InlinedDispatch dispatchNode) {
 			callArgs[0] = term;
 			return dispatchNode.execute(callArgs);
 		}
 
-		// @Specialization(replaces = "doConstant", guards = "term.getClass() == cachedDispatchClass", limit = "1")
-		// public RuleResult doClass(VirtualFrame frame, Object[] callArgs, Object term,
-		// @Cached("term.getClass()") Class<?> cachedDispatchClass,
-		// @Cached("create(term.getClass(), arrowName)") ConstantClassDispatchNode dispatchNode) {
-		// callArgs[0] = term;
-		// return dispatchNode.execute(callArgs);
-		// }
-
 		@Specialization(replaces = "doConstant")
-		public RuleResult doDynamic(VirtualFrame frame, Object[] callArgs, Object term,
+		public RuleResult doDynamic(Object[] callArgs, Object term,
 				@Cached("create(getSourceSection(), arrowName)") DynamicDispatch dynamicDispatch) {
 			callArgs[0] = term;
 			return dynamicDispatch.execute(callArgs);

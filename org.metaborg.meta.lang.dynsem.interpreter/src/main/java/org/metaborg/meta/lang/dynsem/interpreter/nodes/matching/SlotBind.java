@@ -23,7 +23,6 @@ public abstract class SlotBind extends MatchPattern {
 		@Override
 		public void executeMatch(VirtualFrame frame, Object t) {
 			frame.setObject(slot, t);
-			// InterpreterUtils.writeSlot(getContext(), frame, slot, t, this);
 		}
 
 	}
@@ -37,7 +36,6 @@ public abstract class SlotBind extends MatchPattern {
 		@Override
 		public void executeMatch(VirtualFrame frame, Object t) {
 			frame.setObject(slot, t);
-			// InterpreterUtils.writeSlot(getContext(), frame, slot, t, this);
 		}
 
 	}

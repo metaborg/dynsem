@@ -39,14 +39,6 @@ public class MatchPremise extends Premise {
 
 		final Object t = term.executeGeneric(frame);
 		patt.executeMatch(frame, t);
-		// if (patt instanceof NoOpPattern && NodeUtil.countNodes(term, is_non_elidable_termbuild) == 0) {
-		// // CompilerDirectives.transferToInterpreterAndInvalidate();
-		// replace(NoOpPremiseNodeGen.create(getSourceSection()));
-		// } else {
-		// // CompilerDirectives.transferToInterpreterAndInvalidate();
-		// replace(MatchPremiseFactory.NonElidableMatchPremiseNodeGen.create(getSourceSection(), patt, term))
-		// .executeEvaluated(frame, t);
-		// }
 	}
 
 	@Override

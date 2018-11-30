@@ -15,9 +15,10 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.ExplodeLoop.LoopExplosionKind;
 import com.oracle.truffle.api.source.SourceSection;
 
-public final class RuleNode extends DynSemNode {
+public class RuleNode extends DynSemNode {
 
 	public final static String DEFAULT_NAME = "";
 
@@ -46,7 +47,7 @@ public final class RuleNode extends DynSemNode {
 		return target.execute(frame);
 	}
 
-	@ExplodeLoop
+	@ExplodeLoop(kind = LoopExplosionKind.FULL_EXPLODE)
 	private void evaluatePremises(VirtualFrame frame) {
 		CompilerAsserts.compilationConstant(premises.length);
 		for (int i = 0; i < premises.length; i++) {

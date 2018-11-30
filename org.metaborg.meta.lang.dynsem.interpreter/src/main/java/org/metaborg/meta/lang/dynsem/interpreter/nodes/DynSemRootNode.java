@@ -20,7 +20,7 @@ public abstract class DynSemRootNode extends RootNode {
 		this.constantTermAssumption = constantTermAssumption;
 	}
 
-	public Assumption getConstantTermAssumption() {
+	public final Assumption getConstantTermAssumption() {
 		return constantTermAssumption;
 	}
 

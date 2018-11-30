@@ -295,10 +295,10 @@ public final class BuildNodeFactories {
 
 	public static SlotRead createSlotRead(IStrategoAppl t, FrameDescriptor fd, ITermRegistry termReg) {
 		if (Tools.hasConstructor(t, "ConstRef", 1)) {
-			return ConstReadNodeGen.create(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
+			return ConstReadNodeGen.create(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue().intern().hashCode()),
 					SourceUtils.dynsemSourceSectionFromATerm(t));
 		} else if (Tools.hasConstructor(t, "VarRef", 1)) {
-			return new VarRead(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
+			return new VarRead(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue().intern().hashCode()),
 					SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 		throw new IllegalArgumentException("Unsupported slot read term " + t);

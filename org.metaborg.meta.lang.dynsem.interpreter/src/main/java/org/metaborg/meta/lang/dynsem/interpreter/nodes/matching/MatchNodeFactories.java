@@ -119,10 +119,10 @@ public final class MatchNodeFactories {
 
 	public static SlotBind createSlotBind(IStrategoAppl t, FrameDescriptor fd, ITermRegistry termReg) {
 		if (Tools.hasConstructor(t, "VarRef", 1)) {
-			return new VarBind(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
+			return new VarBind(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue().intern().hashCode()),
 					SourceUtils.dynsemSourceSectionFromATerm(t));
 		} else if (Tools.hasConstructor(t, "ConstRef", 1)) {
-			return new ConstBind(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue()),
+			return new ConstBind(fd.findFrameSlot(Tools.stringAt(t, 0).stringValue().intern().hashCode()),
 					SourceUtils.dynsemSourceSectionFromATerm(t));
 		}
 		throw new IllegalArgumentException("Unsupported slot bind term " + t);

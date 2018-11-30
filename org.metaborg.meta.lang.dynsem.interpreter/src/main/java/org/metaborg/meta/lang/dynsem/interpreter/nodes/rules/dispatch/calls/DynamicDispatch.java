@@ -1,16 +1,15 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.calls;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.nodes.DirectCallNode;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.ExplodeLoop.LoopExplosionKind;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -21,22 +20,20 @@ public abstract class DynamicDispatch extends AbstractDispatch {
 	}
 
 	@Specialization(guards = "termClass(args) == termClass", limit = "3")
-	@ExplodeLoop(kind = LoopExplosionKind.FULL_EXPLODE_UNTIL_RETURN)
 	public RuleResult doCaching(Object[] args, @Cached("termClass(args)") Class<?> termClass,
-			@Cached("create(getSourceSection(), lookupTargets(termClass))") DirectCallChain chain) {
+			@Cached("create(getSourceSection(), lookupTargets(termClass))") DirectCall chain) {
 		return chain.execute(args);
 	}
 
 	@Specialization
 	public RuleResult doLookup(Object[] args, @Cached("create()") IndirectCallNode callNode) {
 		Class<?> termClass = termClass(args);
-		InterpreterUtils.printlnOut("Cache miss for " + termClass.getSimpleName());
 		CallTarget[] targets = lookupTargets(termClass);
 		for (CallTarget target : targets) {
 			try {
 				return (RuleResult) callNode.call(target, args);
 			} catch (PremiseFailureException pmfex) {
-				;
+				continue;
 			}
 		}
 		throw new ReductionFailure("Reduction failed on arrow -" + arrowName + "-> for term " + args[0],

@@ -4,11 +4,10 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.nodes.InitProtoFrames;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.nodes.InitNaBL2Node;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.InlinedDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.InlinedDispatch;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
-import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -26,8 +25,7 @@ public class InitEvalNode extends DynSemRootNode {
 		this.program = program;
 		this.initNabl2 = new InitNaBL2Node(source);
 		this.initProtoFrames = new InitProtoFrames(source);
-		this.initDispatch = InlinedDispatch.create(program.getClass(), "init");
-		Truffle.getRuntime().createCallTarget(this);
+		this.initDispatch = InlinedDispatch.create(source, "init");
 	}
 
 	@Override
@@ -39,10 +37,12 @@ public class InitEvalNode extends DynSemRootNode {
 		}
 		RuleResult res = null;
 		for (int i = 0; i < 30; i++) {
+			// InterpreterUtils.printlnOut(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 			long st = System.nanoTime();
 			res = initDispatch.execute(new Object[] { program });
 			long et = System.nanoTime();
 			InterpreterUtils.printlnOut(et - st);
+			// InterpreterUtils.printlnOut("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 		}
 		return res;
 	}
