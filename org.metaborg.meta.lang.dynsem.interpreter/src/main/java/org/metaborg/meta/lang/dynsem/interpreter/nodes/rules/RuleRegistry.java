@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.graalvm.collections.EconomicMap;
+import org.graalvm.collections.Equivalence;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.InterpreterException;
@@ -26,8 +28,9 @@ import com.oracle.truffle.api.Truffle;
 
 public class RuleRegistry implements IRuleRegistry {
 
-	private final Map<String, Map<Class<?>, CallTarget[]>> targets = new HashMap<>();
-	private final Map<String, Map<Class<?>, RuleRootNode[]>> roots = new HashMap<>();
+	private final EconomicMap<String, EconomicMap<Class<?>, CallTarget[]>> targets = EconomicMap.create();
+	private final EconomicMap<String, EconomicMap<Class<?>, RuleRootNode[]>> roots = EconomicMap.create();
+	private final EconomicMap<CallTarget, RuleRootNode> targets2roots = EconomicMap.create(Equivalence.IDENTITY);
 
 	@CompilationFinal private boolean isInit;
 
@@ -43,66 +46,64 @@ public class RuleRegistry implements IRuleRegistry {
 
 	@Override
 	public DynSemLanguage getLanguage() {
+
 		return language;
 	}
 
 	@Override
-	@TruffleBoundary
 	public void registerRule(String arrowName, Class<?> dispatchClass, RuleRootNode[] newRuleRoots) {
-		CompilerAsserts.neverPartOfCompilation();
-		Map<Class<?>, RuleRootNode[]> rootsForName = roots.get(arrowName);
-		Map<Class<?>, CallTarget[]> targetsForName = targets.get(arrowName);
+
+		EconomicMap<Class<?>, RuleRootNode[]> rootsForName = roots.get(arrowName);
+		EconomicMap<Class<?>, CallTarget[]> targetsForName = targets.get(arrowName);
 
 		if (rootsForName == null) {
-			rootsForName = new HashMap<>();
-			targetsForName = new HashMap<>();
+			rootsForName = EconomicMap.create(Equivalence.IDENTITY);
+			targetsForName = EconomicMap.create(Equivalence.IDENTITY);
 			roots.put(arrowName, rootsForName);
 			targets.put(arrowName, targetsForName);
 		}
 		rootsForName.put(dispatchClass, newRuleRoots);
 		CallTarget[] newTargets = new CallTarget[newRuleRoots.length];
 		for (int i = 0; i < newTargets.length; i++) {
-			newTargets[i] = Truffle.getRuntime().createCallTarget(newRuleRoots[i]);
+			RuleRootNode root = newRuleRoots[i];
+			CallTarget target = Truffle.getRuntime().createCallTarget(root);
+			targets2roots.put(target, root);
+			newTargets[i] = target;
 		}
 		targetsForName.put(dispatchClass, newTargets);
 	}
 
 	@Override
-	@TruffleBoundary
 	public CallTarget[] lookupCallTargets(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
 
-		Map<Class<?>, CallTarget[]> rulesForName = targets.get(arrowName);
+		EconomicMap<Class<?>, CallTarget[]> rulesForName = targets.get(arrowName);
 
-		if (rulesForName == null) {
-			return new CallTarget[0];
-		}
-
-		CallTarget[] rules = rulesForName.get(dispatchClass);
-
-		return rules != null ? rules : new CallTarget[0];
+		return rulesForName != null ? rulesForName.get(dispatchClass) : null;
 	}
 
 	@Override
-	@TruffleBoundary
 	public RuleRootNode[] lookupRuleRoots(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
 
-		Map<Class<?>, RuleRootNode[]> rootsForName = roots.get(arrowName);
+		EconomicMap<Class<?>, RuleRootNode[]> rootsForName = roots.get(arrowName);
 
-		if (rootsForName == null) {
-			return new RuleRootNode[0];
+		return rootsForName != null ? rootsForName.get(dispatchClass) : null;
+	}
+
+	@Override
+	public RuleRootNode lookupRuleRoot(CallTarget target) {
+		if (!isInit) {
+			init();
+			isInit = true;
 		}
-
-		RuleRootNode[] rules = rootsForName.get(dispatchClass);
-
-		return rules != null ? rules : new RuleRootNode[0];
+		return targets2roots.get(target);
 	}
 
 	@TruffleBoundary

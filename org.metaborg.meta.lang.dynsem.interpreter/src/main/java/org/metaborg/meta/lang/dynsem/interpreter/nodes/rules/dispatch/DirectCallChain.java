@@ -11,12 +11,14 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.nodes.DirectCallNode;
+import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.source.SourceSection;
 
 public class DirectCallChain extends DynSemNode {
 
 	@CompilationFinal(dimensions = 1) private final CallTarget[] targets;
 	@Child protected DirectCallChainItem chain;
+	@Child protected IndirectCallNode callNode;
 
 	public DirectCallChain(SourceSection source, CallTarget[] targets) {
 		super(source);

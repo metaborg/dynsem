@@ -16,5 +16,7 @@ public interface IRuleRegistry {
 
 	RuleRootNode[] lookupRuleRoots(String arrowName, Class<?> dispatchClass);
 
+	RuleRootNode lookupRuleRoot(CallTarget target);
+
 
 }
