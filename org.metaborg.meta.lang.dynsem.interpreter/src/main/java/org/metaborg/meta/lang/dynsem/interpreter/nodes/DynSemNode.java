@@ -9,6 +9,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.RuleUtil;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.Assumption;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -36,6 +37,7 @@ public abstract class DynSemNode extends Node {
 	}
 
 	public Assumption getConstantInputAssumption() {
+		CompilerAsserts.neverPartOfCompilation();
 		return RuleUtil.getNearestConstantTermAssumption(this);
 	}
 

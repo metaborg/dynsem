@@ -7,7 +7,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemRootNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.natives.loops.WhileNode;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -25,23 +24,23 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.source.SourceSection;
 
 public abstract class RuleRootNode extends DynSemRootNode {
-	private final IStrategoAppl sourceTerm;
+	private final IStrategoAppl[] sourceTerms;
 	private final String arrowName;
 	private final Class<?> dispatchClass;
 
-	@Child private RuleNode rule;
+	@Child private Rule rule;
 
 	private DynSemLanguage lang;
 
-	protected RuleRootNode(DynSemLanguage lang, SourceSection sourceSection, FrameDescriptor frameDescriptor,
-			String arrowName, Class<?> dispatchClass, RuleNode rule, IStrategoAppl ruleT) {
+	public RuleRootNode(DynSemLanguage lang, SourceSection sourceSection, FrameDescriptor frameDescriptor,
+			String arrowName, Class<?> dispatchClass, Rule rule, IStrategoAppl[] ruleTs) {
 		super(lang, sourceSection, frameDescriptor, Truffle.getRuntime()
 				.createAssumption("constant input for " + dispatchClass.getSimpleName() + " -" + arrowName + "->"));
 		this.lang = lang;
 		this.arrowName = arrowName;
 		this.dispatchClass = dispatchClass;
 		this.rule = rule;
-		this.sourceTerm = ruleT;
+		this.sourceTerms = ruleTs;
 	}
 
 	@Override
@@ -49,12 +48,12 @@ public abstract class RuleRootNode extends DynSemRootNode {
 
 	@Specialization(guards = "guardCheck(frame, inputTerm)", assumptions = "getConstantTermAssumption()", limit = "1")
 	public RuleResult doHasSeenStatic(VirtualFrame frame, @Cached("getInputTerm(frame)") Object inputTerm) {
-		return rule.execute(frame);
+		return rule.evaluateRule(frame);
 	}
 
 	@Specialization(replaces = "doHasSeenStatic")
 	public RuleResult doHasSeenDynamic(VirtualFrame frame) {
-		return rule.execute(frame);
+		return rule.evaluateRule(frame);
 	}
 
 	protected boolean guardCheck(VirtualFrame frame, Object refTerm) {
@@ -81,12 +80,12 @@ public abstract class RuleRootNode extends DynSemRootNode {
 		return dispatchClass;
 	}
 
-	public RuleNode getRuleNode() {
+	public Rule getRuleNode() {
 		return rule;
 	}
 
-	public IStrategoAppl getRuleSourceTerm() {
-		return sourceTerm;
+	public IStrategoAppl[] getSourceATerms() {
+		return sourceTerms;
 	}
 
 	@Override
@@ -101,10 +100,8 @@ public abstract class RuleRootNode extends DynSemRootNode {
 
 	@Override
 	protected RuleRootNode cloneUninitialized() {
-		// return createWithFrameDescriptor(lang, sourceTerm, getFrameDescriptor());
 		FrameDescriptor fd = getFrameDescriptor();
-		return RuleRootNodeGen.create(lang, getSourceSection(), fd, arrowName, dispatchClass,
-				RuleNode.create(lang, sourceTerm, fd, getContext().getTermRegistry()), sourceTerm);
+		return createFromATerms(lang, sourceTerms, fd, getContext().getTermRegistry());
 	}
 
 	@Override
@@ -114,42 +111,51 @@ public abstract class RuleRootNode extends DynSemRootNode {
 	}
 
 	@TruffleBoundary
-	public static RuleRootNode create(DynSemLanguage lang, IStrategoAppl ruleT, ITermRegistry termReg) {
+	public static RuleRootNode createFromATerms(DynSemLanguage lang, IStrategoAppl[] ruleTs, ITermRegistry termReg) {
 		CompilerAsserts.neverPartOfCompilation();
-		return createWithFrameDescriptor(lang, ruleT, createFrameDescriptor(ruleT), termReg);
+		return createFromATerms(lang, ruleTs, createFrameDescriptor(ruleTs), termReg);
 	}
 
 	@TruffleBoundary
-	public static RuleRootNode createWithFrameDescriptor(DynSemLanguage lang, IStrategoAppl ruleT, FrameDescriptor fd,
+	public static RuleRootNode createFromATerms(DynSemLanguage lang, IStrategoAppl[] ruleTs, FrameDescriptor fd,
 			ITermRegistry termReg) {
 		CompilerAsserts.neverPartOfCompilation();
+		assert ruleTs.length > 0;
+		IStrategoAppl tmp = ruleTs[0];
+		String arrName = readArrowNameFromATerm(tmp);
+		Class<?> dispatchClass = readDispatchClassFromATerm(tmp);
 
-		IStrategoAppl relationT = Tools.applAt(ruleT, 2);
-		assert Tools.hasConstructor(relationT, "Relation", 3);
+		SingleRule[] rules = new SingleRule[ruleTs.length];
+		for (int i = 0; i < ruleTs.length; i++) {
+			IStrategoAppl ruleT = ruleTs[i];
 
-		IStrategoAppl arrowTerm = Tools.applAt(relationT, 1);
-		String arrowName = Tools.javaStringAt(arrowTerm, 1);
-
-		String dispatchClassName = Tools.javaStringAt(ruleT, 4);
-		Class<?> dispatchClass;
-
-		try {
-			dispatchClass = RuleRootNode.class.getClassLoader().loadClass(dispatchClassName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
+			rules[i] = SingleRule.createFromATerm(lang, ruleT, fd, termReg);
 		}
-
-		if (Tools.hasConstructor(ruleT, "Rule", 5)) {
-			SourceSection source = SourceUtils.dynsemSourceSectionFromATerm(ruleT);
-			return RuleRootNodeGen.create(lang, source, fd, arrowName, dispatchClass,
-					RuleNode.create(lang, ruleT, fd, termReg), ruleT);
+		SourceSection src = rules[0].getSourceSection();
+		if (rules.length == 1) {
+			return RuleRootNodeGen.create(lang, src, fd, arrName, dispatchClass, rules[0],
+					ruleTs);
+		} else {
+			return RuleRootNodeGen.create(lang, src, fd, arrName, dispatchClass, new MultiRule(src, rules), ruleTs);
 		}
-
-		throw new IllegalArgumentException("Unsupported rule term: " + ruleT);
 	}
 
 	@TruffleBoundary
-	protected static FrameDescriptor createFrameDescriptor(IStrategoTerm t) {
+	public static Class<?> readDispatchClassFromATerm(IStrategoAppl ruleTerm) {
+		String dspClass = Tools.javaStringAt(ruleTerm, 4);
+		try {
+			return RuleRootNode.class.getClassLoader().loadClass(dspClass);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Could not load dispatch class " + dspClass);
+		}
+	}
+
+	public static String readArrowNameFromATerm(IStrategoAppl ruleTerm) {
+		return Tools.javaStringAt(Tools.applAt(Tools.applAt(ruleTerm, 2), 1), 1);
+	}
+
+	@TruffleBoundary
+	protected static FrameDescriptor createFrameDescriptor(IStrategoAppl[] ts) {
 		final FrameDescriptor fd = new FrameDescriptor();
 		final Set<Integer> vars = new HashSet<>();
 		TermVisitor visitor = new TermVisitor() {
@@ -172,8 +178,9 @@ public abstract class RuleRootNode extends DynSemRootNode {
 				}
 			}
 		};
-
-		visitor.visit(t);
+		for (IStrategoAppl t : ts) {
+			visitor.visit(t);
+		}
 		return fd;
 	}
 

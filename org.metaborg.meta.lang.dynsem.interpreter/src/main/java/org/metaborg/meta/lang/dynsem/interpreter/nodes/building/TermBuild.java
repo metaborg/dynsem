@@ -9,22 +9,27 @@ import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITupleTerm;
 
 import com.github.krukow.clj_ds.PersistentMap;
+import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.source.SourceSection;
+import com.oracle.truffle.api.utilities.NeverValidAssumption;
 
 @TypeSystemReference(BuiltinTypes.class)
 @NodeInfo(description = "The abstract base node for all term construction")
 public abstract class TermBuild extends DynSemNode {
 
+	private final Assumption constantBuildAssumption;
+
 	public TermBuild(SourceSection source) {
 		super(source);
+		constantBuildAssumption = NeverValidAssumption.INSTANCE;
 	}
 
-	public boolean isConstantNode() {
-		return false;
+	public Assumption getConstantBuildAssumption() {
+		return constantBuildAssumption;
 	}
 
 	public abstract Object executeGeneric(VirtualFrame frame);

@@ -57,6 +57,7 @@ strategies
               ; mark-const-vars-module
               ; defactorize-module
 //              ; prettify-vars-module
+              ; m-in-analysis(id)
             )
         )
     |project-path)

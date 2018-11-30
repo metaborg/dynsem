@@ -10,11 +10,11 @@ public interface IRuleRegistry {
 
 	public void setLanguage(DynSemLanguage language);
 
-	void registerRule(String arrowName, Class<?> dispatchClass, RuleRootNode[] rules);
+	void registerRule(String arrowName, Class<?> dispatchClass, RuleRootNode ruleRoot);
 
-	CallTarget[] lookupCallTargets(String arrowName, Class<?> dispatchClass);
+	CallTarget lookupCallTarget(String arrowName, Class<?> dispatchClass);
 
-	RuleRootNode[] lookupRuleRoots(String arrowName, Class<?> dispatchClass);
+	RuleRootNode lookupRuleRoot(String arrowName, Class<?> dispatchClass);
 
 	RuleRootNode lookupRuleRoot(CallTarget target);
 

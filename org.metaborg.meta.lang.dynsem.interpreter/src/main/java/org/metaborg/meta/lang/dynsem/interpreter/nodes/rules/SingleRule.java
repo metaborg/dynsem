@@ -2,7 +2,6 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.Premise;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.premises.PremiseFactories;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -18,9 +17,7 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.ExplodeLoop.LoopExplosionKind;
 import com.oracle.truffle.api.source.SourceSection;
 
-public class RuleNode extends DynSemNode {
-
-	public final static String DEFAULT_NAME = "";
+public class SingleRule extends Rule {
 
 	@Child protected RuleInputsNode inputsNode;
 
@@ -28,7 +25,7 @@ public class RuleNode extends DynSemNode {
 
 	@Child protected RuleTarget target;
 
-	public RuleNode(SourceSection source, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output) {
+	public SingleRule(SourceSection source, RuleInputsNode inputsNode, Premise[] premises, RuleTarget output) {
 		super(source);
 
 		this.inputsNode = inputsNode;
@@ -36,7 +33,8 @@ public class RuleNode extends DynSemNode {
 		this.target = output;
 	}
 
-	public RuleResult execute(VirtualFrame frame) {
+	@Override
+	public RuleResult evaluateRule(VirtualFrame frame) {
 		/* evaluate the inputs node */
 		inputsNode.execute(frame);
 
@@ -56,7 +54,8 @@ public class RuleNode extends DynSemNode {
 	}
 
 	@TruffleBoundary
-	public static RuleNode create(DynSemLanguage lang, IStrategoAppl ruleT, FrameDescriptor fd, ITermRegistry termReg) {
+	public static SingleRule createFromATerm(DynSemLanguage lang, IStrategoAppl ruleT, FrameDescriptor fd,
+			ITermRegistry termReg) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(ruleT, "Rule", 5) : "Unexpected constructor " + ruleT.getConstructor();
 
@@ -74,7 +73,7 @@ public class RuleNode extends DynSemNode {
 
 		RuleTarget target = RuleTarget.create(Tools.applAt(relationT, 2), fd, termReg);
 
-		return new RuleNode(SourceUtils.dynsemSourceSectionFromATerm(ruleT),
+		return new SingleRule(SourceUtils.dynsemSourceSectionFromATerm(ruleT),
 				RuleInputsNode.create(lhsLeftTerm, lhsCompsTerm, fd, termReg), premises, target);
 	}
 

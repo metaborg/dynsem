@@ -26,13 +26,11 @@ public abstract class SlotRead extends TermBuild {
 		@Override
 		public Object executeGeneric(VirtualFrame frame) {
 			return frame.getValue(slot);
-			// return InterpreterUtils.readSlot(getContext(), frame, slot, this);
 		}
 
 		@Override
 		public Object executeEvaluated(VirtualFrame frame, Object... terms) {
 			return frame.getValue(slot);
-			// return InterpreterUtils.readSlot(getContext(), frame, slot, this);
 		}
 
 		@Override
@@ -50,20 +48,19 @@ public abstract class SlotRead extends TermBuild {
 		}
 
 		@Override
-		public final boolean isConstantNode() {
-			return true;
+		public Assumption getConstantBuildAssumption() {
+			return getConstantInputAssumption();
 		}
 
-		@Specialization(assumptions = "constantTermAssumption")
+		@Specialization(assumptions = "constantInputAssumption")
 		public Object doConstantTerm(VirtualFrame frame, @Cached("doDynamic(frame)") Object cached_term,
-				@Cached("getConstantInputAssumption()") Assumption constantTermAssumption) {
+				@Cached("getConstantBuildAssumption()") Assumption constantInputAssumption) {
 			return cached_term;
 		}
 
 		@Specialization(replaces = "doConstantTerm")
 		public Object doDynamic(VirtualFrame frame) {
 			return frame.getValue(slot);
-			// return InterpreterUtils.readSlot(getContext(), frame, slot, this);
 		}
 
 		@Override

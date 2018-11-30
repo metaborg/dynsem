@@ -28,8 +28,8 @@ import com.oracle.truffle.api.Truffle;
 
 public class RuleRegistry implements IRuleRegistry {
 
-	private final EconomicMap<String, EconomicMap<Class<?>, CallTarget[]>> targets = EconomicMap.create();
-	private final EconomicMap<String, EconomicMap<Class<?>, RuleRootNode[]>> roots = EconomicMap.create();
+	private final EconomicMap<String, EconomicMap<Class<?>, CallTarget>> targets = EconomicMap.create();
+	private final EconomicMap<String, EconomicMap<Class<?>, RuleRootNode>> roots = EconomicMap.create();
 	private final EconomicMap<CallTarget, RuleRootNode> targets2roots = EconomicMap.create(Equivalence.IDENTITY);
 
 	@CompilationFinal private boolean isInit;
@@ -51,48 +51,43 @@ public class RuleRegistry implements IRuleRegistry {
 	}
 
 	@Override
-	public void registerRule(String arrowName, Class<?> dispatchClass, RuleRootNode[] newRuleRoots) {
+	public void registerRule(String arrowName, Class<?> dispatchClass, RuleRootNode rootNode) {
 
-		EconomicMap<Class<?>, RuleRootNode[]> rootsForName = roots.get(arrowName);
-		EconomicMap<Class<?>, CallTarget[]> targetsForName = targets.get(arrowName);
+		EconomicMap<Class<?>, RuleRootNode> rootsForArrow = roots.get(arrowName);
+		EconomicMap<Class<?>, CallTarget> targetsForArrow = targets.get(arrowName);
 
-		if (rootsForName == null) {
-			rootsForName = EconomicMap.create(Equivalence.IDENTITY);
-			targetsForName = EconomicMap.create(Equivalence.IDENTITY);
-			roots.put(arrowName, rootsForName);
-			targets.put(arrowName, targetsForName);
+		if (rootsForArrow == null) {
+			rootsForArrow = EconomicMap.create(Equivalence.IDENTITY);
+			targetsForArrow = EconomicMap.create(Equivalence.IDENTITY);
+			roots.put(arrowName, rootsForArrow);
+			targets.put(arrowName, targetsForArrow);
 		}
-		rootsForName.put(dispatchClass, newRuleRoots);
-		CallTarget[] newTargets = new CallTarget[newRuleRoots.length];
-		for (int i = 0; i < newTargets.length; i++) {
-			RuleRootNode root = newRuleRoots[i];
-			CallTarget target = Truffle.getRuntime().createCallTarget(root);
-			targets2roots.put(target, root);
-			newTargets[i] = target;
-		}
-		targetsForName.put(dispatchClass, newTargets);
+		rootsForArrow.put(dispatchClass, rootNode);
+		CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);
+		targetsForArrow.put(dispatchClass, callTarget);
+		targets2roots.put(callTarget, rootNode);
 	}
 
 	@Override
-	public CallTarget[] lookupCallTargets(String arrowName, Class<?> dispatchClass) {
+	public CallTarget lookupCallTarget(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
 
-		EconomicMap<Class<?>, CallTarget[]> rulesForName = targets.get(arrowName);
+		EconomicMap<Class<?>, CallTarget> rulesForName = targets.get(arrowName);
 
 		return rulesForName != null ? rulesForName.get(dispatchClass) : null;
 	}
 
 	@Override
-	public RuleRootNode[] lookupRuleRoots(String arrowName, Class<?> dispatchClass) {
+	public RuleRootNode lookupRuleRoot(String arrowName, Class<?> dispatchClass) {
 		if (!isInit) {
 			init();
 			isInit = true;
 		}
 
-		EconomicMap<Class<?>, RuleRootNode[]> rootsForName = roots.get(arrowName);
+		EconomicMap<Class<?>, RuleRootNode> rootsForName = roots.get(arrowName);
 
 		return rootsForName != null ? rootsForName.get(dispatchClass) : null;
 	}
@@ -118,35 +113,35 @@ public class RuleRegistry implements IRuleRegistry {
 
 			IStrategoList rulesTerm = ruleListTerm(topSpecTerm);
 
-			Map<String, Map<Class<?>, List<RuleRootNode>>> rules = new HashMap<>();
+			Map<String, Map<Class<?>, List<IStrategoAppl>>> groupedRules = new HashMap<>();
 
-			for (IStrategoTerm ruleTerm : rulesTerm) {
-				RuleRootNode r = RuleRootNode.create(language, (IStrategoAppl) ruleTerm, termReg);
+			for (IStrategoTerm term : rulesTerm) {
+				IStrategoAppl ruleTerm = (IStrategoAppl) term;
+				Class<?> dispatchClass = RuleRootNode.readDispatchClassFromATerm(ruleTerm);
+				String arrowName = RuleRootNode.readArrowNameFromATerm(ruleTerm);
 
-				Map<Class<?>, List<RuleRootNode>> rulesForName = rules.get(r.getArrowName());
-				if (rulesForName == null) {
-					rulesForName = new HashMap<>();
-					rules.put(r.getArrowName(), rulesForName);
+				Map<Class<?>, List<IStrategoAppl>> rulesForArr = groupedRules.get(arrowName);
+				if (rulesForArr == null) {
+					rulesForArr = new HashMap<>();
+					groupedRules.put(arrowName, rulesForArr);
 				}
 
-				List<RuleRootNode> rulesForClass = rulesForName.get(r.getDispatchClass());
-
+				List<IStrategoAppl> rulesForClass = rulesForArr.get(dispatchClass);
 				if (rulesForClass == null) {
 					rulesForClass = new LinkedList<>();
-					rulesForName.put(r.getDispatchClass(), rulesForClass);
+					rulesForArr.put(dispatchClass, rulesForClass);
 				}
 
-				rulesForClass.add(r);
+				rulesForClass.add(ruleTerm);
 			}
 
-			for (Entry<String, Map<Class<?>, List<RuleRootNode>>> rulesForNameEntry : rules.entrySet()) {
+			for (Entry<String, Map<Class<?>, List<IStrategoAppl>>> rulesForNameEntry : groupedRules.entrySet()) {
 				final String arrowName = rulesForNameEntry.getKey();
-				for (Entry<Class<?>, List<RuleRootNode>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
+				for (Entry<Class<?>, List<IStrategoAppl>> rulesForClass : rulesForNameEntry.getValue().entrySet()) {
 					Class<?> dispatchClass = rulesForClass.getKey();
-					registerRule(arrowName, dispatchClass, rulesForClass.getValue().toArray(new RuleRootNode[0]));
-					// registerRule(arrowName, dispatchClass,
-					// RuleFactory.createRuleTargets(language, SourceUtils.dynsemSourceSectionUnvailable(),
-					// rulesForClass.getValue(), arrowName, dispatchClass));
+					RuleRootNode root = RuleRootNode.createFromATerms(language,
+							rulesForClass.getValue().toArray(new IStrategoAppl[0]), termReg);
+					registerRule(arrowName, dispatchClass, root);
 				}
 			}
 

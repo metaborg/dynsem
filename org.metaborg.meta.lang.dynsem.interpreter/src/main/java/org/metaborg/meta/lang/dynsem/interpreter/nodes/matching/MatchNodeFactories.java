@@ -5,7 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.SlotBind.ConstBi
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.SlotBind.VarBind;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.GenericListMatch;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.matching.lists.GenericListMatchNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SingleRule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -142,7 +142,7 @@ public final class MatchNodeFactories {
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = RuleNode.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = SingleRule.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
@@ -182,7 +182,7 @@ public final class MatchNodeFactories {
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = RuleNode.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = SingleRule.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}

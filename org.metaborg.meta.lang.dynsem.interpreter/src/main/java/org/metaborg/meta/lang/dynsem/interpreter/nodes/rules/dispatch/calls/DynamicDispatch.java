@@ -1,10 +1,7 @@
 package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.calls;
 
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.PremiseFailureException;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.ReductionFailure;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
-import org.metaborg.meta.lang.dynsem.interpreter.utils.InterpreterUtils;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.dsl.Cached;
@@ -21,40 +18,21 @@ public abstract class DynamicDispatch extends AbstractDispatch {
 
 	@Specialization(guards = "termClass(args) == termClass", limit = "3")
 	public RuleResult doCaching(Object[] args, @Cached("termClass(args)") Class<?> termClass,
-			@Cached("create(getSourceSection(), lookupTargets(termClass))") DirectCall chain) {
-		return chain.execute(args);
+			@Cached("create(lookup(termClass))") DirectCallNode callNode) {
+		return (RuleResult) callNode.call(args);
 	}
 
 	@Specialization
 	public RuleResult doLookup(Object[] args, @Cached("create()") IndirectCallNode callNode) {
-		Class<?> termClass = termClass(args);
-		CallTarget[] targets = lookupTargets(termClass);
-		for (CallTarget target : targets) {
-			try {
-				return (RuleResult) callNode.call(target, args);
-			} catch (PremiseFailureException pmfex) {
-				continue;
-			}
-		}
-		throw new ReductionFailure("Reduction failed on arrow -" + arrowName + "-> for term " + args[0],
-				InterpreterUtils.createStacktrace(), this);
+		return (RuleResult) callNode.call(lookup(termClass(args)), args);
 	}
 
 	protected static Class<?> termClass(Object[] args) {
 		return args[0].getClass();
 	}
 
-	protected CallTarget[] lookupTargets(Class<?> termClass) {
-		return getContext().getRuleRegistry().lookupCallTargets(arrowName, termClass);
-	}
-
-	protected DirectCallNode[] createCallNodes(Class<?> termClass) {
-		CallTarget[] targets = lookupTargets(termClass);
-		DirectCallNode[] callNodes = new DirectCallNode[targets.length];
-		for (int i = 0; i < targets.length; i++) {
-			callNodes[i] = DirectCallNode.create(targets[i]);
-		}
-		return callNodes;
+	protected CallTarget lookup(Class<?> termClass) {
+		return getContext().getRuleRegistry().lookupCallTarget(arrowName, termClass);
 	}
 
 	public static DynamicDispatch create(SourceSection source, String arrowName) {

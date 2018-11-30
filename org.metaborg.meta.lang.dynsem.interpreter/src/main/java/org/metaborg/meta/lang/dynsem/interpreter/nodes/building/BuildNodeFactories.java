@@ -5,7 +5,7 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.MapBuild.BindMap
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.MapBuild.EmptyMapBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.SlotRead.VarRead;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.SlotReadFactory.ConstReadNodeGen;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleNode;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SingleRule;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -182,7 +182,7 @@ public final class BuildNodeFactories {
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = RuleNode.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = SingleRule.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
@@ -343,7 +343,7 @@ public final class BuildNodeFactories {
 		Class<?> dispatchClass;
 
 		try {
-			dispatchClass = RuleNode.class.getClassLoader().loadClass(dispatchClassName);
+			dispatchClass = SingleRule.class.getClassLoader().loadClass(dispatchClassName);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Could not load dispatch class " + dispatchClassName);
 		}
