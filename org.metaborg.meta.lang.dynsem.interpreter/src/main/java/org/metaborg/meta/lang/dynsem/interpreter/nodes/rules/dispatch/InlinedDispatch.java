@@ -1,4 +1,4 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
 
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry;
@@ -7,7 +7,6 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.Rule;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRootNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.SingleRule;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 
 import com.oracle.truffle.api.CallTarget;

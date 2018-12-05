@@ -1,7 +1,6 @@
-package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.calls;
+package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.AbstractDispatch;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.dsl.Cached;

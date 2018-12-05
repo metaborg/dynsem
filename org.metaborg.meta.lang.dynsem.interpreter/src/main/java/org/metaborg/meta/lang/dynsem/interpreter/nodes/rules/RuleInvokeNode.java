@@ -2,8 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter.nodes.rules;
 
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.DynSemNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.calls.DynamicDispatch;
-import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.inlining.InlinedDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.DynamicDispatch;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.dispatch.InlinedDispatch;
 
 import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.dsl.Cached;
