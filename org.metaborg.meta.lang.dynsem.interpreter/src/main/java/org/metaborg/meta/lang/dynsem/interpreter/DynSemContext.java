@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import org.metaborg.core.MetaborgException;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FrameLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.f.layouts.FramePrototypesLayoutImpl;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.ScopeIdentifier;
@@ -15,9 +16,13 @@ import org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg.layouts.NaBL2LayoutImp
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.IRuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
+import org.metaborg.spoofax.core.Spoofax;
+import org.metaborg.spoofax.core.shell.CLIUtils;
 
+import com.google.inject.Module;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.object.DynamicObject;
 
 /**
@@ -30,24 +35,8 @@ import com.oracle.truffle.api.object.DynamicObject;
  * @author vladvergu
  *
  */
-// FIXME: the DynSemContext should be split in (1) static context --- reusable across multiple programs and (2) a
-// dynamic (per-program run) context
 public final class DynSemContext {
 
-	public static final String CONFIG_DSSPEC = "DYNSEMSPEC";
-	public static final String CONFIG_STDIN = "STDIN";
-	public static final String CONFIG_STDOUT = "STDOUT";
-	public static final String CONFIG_STDERR = "STDERR";
-	public static final String CONFIG_DEBUG = "DEBUG";
-	public static final String CONFIG_BACKTRACK = "BACKTRACK";
-	public static final String CONFIG_SAFECOMPS = "SAFECOMPS";
-	public static final String CONFIG_TERMCACHE = "TERMCACHE";
-	public static final String CONFIG_PARSER = "PARSER";
-	public static final String CONFIG_TERMREGISTRY = "TERMREG";
-	public static final String CONFIG_TERMTRANSFORMER = "TERMTRANSFORM";
-	public static final String CONFIG_RULEREG = "RULEREG";
-	public static final String CONFIG_MIMETYPE = "MIMETYPEOBJLANG";
-	public static final String CONFIG_NATIVEFRAMES = "NATIVEFRAMES";
 
 	private final InputStream specification;
 
@@ -60,56 +49,62 @@ public final class DynSemContext {
 	private final ITermRegistry termRegistry;
 	private final RuleRegistry ruleRegistry;
 
-	private final String mimetype_lang;
-
 	private Map<String, Object> properties;
 
 	@CompilationFinal private boolean initialized;
-	private final boolean safecomponents;
-	private final boolean caching;
-	private final boolean debug;
 	private final boolean nativeframes;
 
-	public DynSemContext(Map<String, Object> config) {
-		this((IDynSemLanguageParser) config.get(CONFIG_PARSER), (ITermTransformer) config.get(CONFIG_TERMTRANSFORMER),
-				(ITermRegistry) config.get(CONFIG_TERMREGISTRY), (RuleRegistry) config.get(CONFIG_RULEREG),
-				(InputStream) config.get(CONFIG_STDIN), (PrintStream) config.get(CONFIG_STDOUT),
-				(PrintStream) config.get(CONFIG_STDERR), (InputStream) config.get(CONFIG_DSSPEC),
-				(String) config.get(CONFIG_MIMETYPE), (boolean) config.get(CONFIG_BACKTRACK),
-				(boolean) config.get(CONFIG_SAFECOMPS), (boolean) config.get(CONFIG_TERMCACHE),
-				(boolean) config.get(CONFIG_DEBUG), (boolean) config.get(CONFIG_NATIVEFRAMES), config);
-	}
+	private Spoofax S;
+	private CLIUtils cli;
 
-	private DynSemContext(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry,
-			RuleRegistry ruleRegistry, InputStream input, PrintStream output, PrintStream err,
-			InputStream specification, String mimetype_lang, boolean backtracking, boolean safecomponents,
-			boolean caching, boolean debug, boolean nativeframes, Map<String, Object> config) {
+	public DynSemContext(IDynSemLanguageParser parser, ITermTransformer transformer, ITermRegistry termRegistry,
+			RuleRegistry ruleRegistry, InputStream input, OutputStream output, OutputStream err,
+			InputStream specification, boolean nativeframes) {
 		this.parser = parser;
 		this.termTransformer = transformer;
 		this.termRegistry = termRegistry;
 		this.ruleRegistry = ruleRegistry;
 		this.input = input;
-		this.output = output;
-		this.err = err;
+		this.output = new PrintStream(output);
+		this.err = new PrintStream(err);
 		this.specification = specification;
-		this.mimetype_lang = mimetype_lang;
-		this.safecomponents = safecomponents;
-		this.caching = caching;
-		this.debug = debug;
 		this.nativeframes = nativeframes;
 		this.properties = new HashMap<>();
 	}
 
-	public void initialize(DynSemLanguage lang) {
+	public synchronized void initialize(DynSemLanguage lang) throws MetaborgException {
 		if (initialized)
 			return;
 		ruleRegistry.setLanguage(lang);
 		ruleRegistry.populate(specification, getTermRegistry());
+		initializeSpoofax();
 		initialized = true;
 	}
 
 	public boolean isInitialized() {
 		return initialized;
+	}
+
+	@TruffleBoundary
+	private void initializeSpoofax() throws MetaborgException {
+		S = new Spoofax(new DynSemRunnerModule(), new Module[0]);
+		cli = new CLIUtils(S);
+		cli.loadLanguagesFromPath();
+	}
+
+	@TruffleBoundary
+	private void closeSpoofax() {
+		if (S != null) {
+			S.close();
+		}
+	}
+
+	public Spoofax getSpoofax() {
+		return S;
+	}
+
+	public CLIUtils getSpoofaxCLIUtils() {
+		return cli;
 	}
 
 	/**
@@ -217,11 +212,6 @@ public final class DynSemContext {
 	public PrintStream getErr() {
 		return err;
 	}
-
-	public String getMimeTypeObjLanguage() {
-		return mimetype_lang;
-	}
-
 	@CompilationFinal private DynamicObject nabl2solution;
 
 	public boolean hasNaBL2Solution() {
@@ -250,20 +240,8 @@ public final class DynSemContext {
 		return (DynamicObject) protoFrames.get(ident);
 	}
 
-	public boolean isSafeComponentsEnabled() {
-		return safecomponents;
-	}
-
-	public boolean isTermCachingEnabled() {
-		return caching;
-	}
-
 	public boolean isNativeFramesEnabled() {
 		return nativeframes;
-	}
-
-	public boolean isDEBUG() {
-		return debug;
 	}
 
 }

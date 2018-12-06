@@ -24,15 +24,15 @@
 			<version>0.0.4</version>
 		</dependency>
 		<dependency>
-			<groupId>com.oracle.truffle</groupId>
+			<groupId>org.graalvm.truffle</groupId>
 			<artifactId>truffle-api</artifactId>
-			<version>1.0.0-rc2</version>
+			<version>1.0.0-rc9</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
-			<groupId>com.oracle.truffle</groupId>
+			<groupId>org.graalvm.truffle</groupId>
 			<artifactId>truffle-dsl-processor</artifactId>
-			<version>1.0.0-rc2</version>
+			<version>1.0.0-rc9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.metaborg</groupId>

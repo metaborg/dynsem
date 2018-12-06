@@ -13,6 +13,7 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.TruffleLanguage.ContextReference;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
 
@@ -41,14 +42,13 @@ public abstract class DynSemNode extends Node {
 		return RuleUtil.getNearestConstantTermAssumption(this);
 	}
 
-	@CompilationFinal DynSemContext ctx;
+	@CompilationFinal private ContextReference<DynSemContext> ctxRef;
 
-	protected final DynSemContext getContext() {
-		if (ctx == null) {
-			CompilerDirectives.transferToInterpreterAndInvalidate();
-			ctx = DynSemLanguage.getContext(getRootNode());
+	public final DynSemContext getContext() {
+		if (ctxRef == null) {
+			ctxRef = this.getRootNode().getLanguage(DynSemLanguage.class).getContextReference();
 		}
-		return ctx;
+		return ctxRef.get();
 	}
 
 	@CompilationFinal private NaBL2Context context;

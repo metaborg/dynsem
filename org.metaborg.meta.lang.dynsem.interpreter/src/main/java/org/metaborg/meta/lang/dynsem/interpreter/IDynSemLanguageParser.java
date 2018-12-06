@@ -2,9 +2,8 @@ package org.metaborg.meta.lang.dynsem.interpreter;
 
 import javax.annotation.Nullable;
 
+import org.graalvm.polyglot.Source;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-
-import com.oracle.truffle.api.source.Source;
 
 /**
  * Parser which provides an {@link IStrategoTerm} for a given source.

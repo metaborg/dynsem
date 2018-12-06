@@ -9,15 +9,68 @@ rules /* language file. interpreter entry point */
 
   ds-to-interp-language =
     x_language := $[[<get-opt> LangName()]Language];
+    e_langname := Lit(String([Chars(<get-opt> LangName())]));
+    x_transformer := <get-opt> PreProcessor();
+    x_ruleregistry := <get-opt> RuleRegistry();
+    e_nativeframes := <if get-opt(|EnableNativeFrames()) then !e |[ true ]| else !e |[ false ]| end>;
     !compilation-unit |[
       package ~x:<get-opt> TopPkg();
       
+      import java.io.InputStream;
+      import org.apache.commons.io.FilenameUtils;
       import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
+      import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
+      import org.metaborg.meta.lang.dynsem.interpreter.IDynSemLanguageParser;
+      import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
+      import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
+      
+      import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
       import com.oracle.truffle.api.TruffleLanguage;
 
-      @TruffleLanguage.Registration(name = ~e:Lit(String([Chars(<get-opt> LangName())])), version = ~e:Lit(String([Chars(<get-opt> LangVersion())])), mimeType = ~e:Lit(String([Chars(<get-opt> MimeType())])))
+      @TruffleLanguage.Registration(name = e_langname, version = ~e:Lit(String([Chars(<get-opt> LangVersion())])), id = e_langname)
       public class x_language extends DynSemLanguage {
+      
+        public final static String PARSE_TABLE = ~e:Lit(String([Chars(<get-opt> TargetTableRel())]));
+        public final static String START_SYMBOL = ~e:Lit(String([Chars(<get-opt> StartSymbol())]));
+        public final static String SPEC_FILE = ~e:Lit(String([Chars(<get-opt> TargetSpecRel())]));
+      
+        @Override
+        @TruffleBoundary
+        protected IDynSemLanguageParser createParser(Env env) {
+          return new DynSemLanguageParser(
+              x_language.class.getClassLoader().getResourceAsStream(FilenameUtils.getName(PARSE_TABLE)), START_SYMBOL);
+        }
+        
+        @TruffleBoundary
+        private static ITermTransformer createTransformer(Env env) {
+          return new x_transformer();
+        }
 
+        @TruffleBoundary
+        private static ITermRegistry createTermRegistry(Env env) {
+          return new ~x:$[[<get-opt> LangName()]TermRegistry]();
+        }
+
+        @TruffleBoundary
+        private static RuleRegistry createRuleRegistry(Env env) {
+          return new x_ruleregistry();
+        }
+
+        @TruffleBoundary
+        private static InputStream getSpecificationTerm(Env env) {
+          return x_language.class.getClassLoader().getResourceAsStream(FilenameUtils.getName(SPEC_FILE));
+        }
+        
+        @Override
+        protected boolean isWithNativeFrames(Env env) {
+          return e_nativeframes;
+        }
+      
+        @Override
+        protected String getSpoofaxLanguageName() {
+          return e_langname;
+        }
         
       }
     ]|
@@ -27,168 +80,128 @@ rules /* language file. interpreter entry point */
     x_transformer := <get-opt> PreProcessor();
     x_ruleregistry := <get-opt> RuleRegistry();
     x_entryPoint := $[[<get-opt> LangName()]Main];
-    e_backtrack := <if <get-opt> EnableBacktracking() then !e |[ true ]| else !e |[ false ]| end>;
-    e_safecomps := <if get-opt(|EnableSafeComponents()) then !e |[ true ]| else !e |[ false ]| end>;
-    e_termcache := <if get-opt(|EnableTermCaching()) then !e |[ true ]| else !e |[ false ]| end>;
-    e_debug := <if get-opt(|EnableDebug()) then !e |[ true ]| else !e |[ false ]| end>;
     e_nativeframes := <if get-opt(|EnableNativeFrames()) then !e |[ true ]| else !e |[ false ]| end>;
     !compilation-unit |[
       package ~x:<get-opt> TopPkg();
+//
+//      import java.io.InputStream;
+//      import java.io.OutputStream;
+//      import java.util.HashMap;
+//      import java.util.Map;
+//      
+//      import org.apache.commons.io.FilenameUtils;
+//      import com.martiansoftware.nailgun.NGContext;
+//      
+//      import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
+//      import org.metaborg.meta.lang.dynsem.interpreter.DynSemVM;
+//      import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
+//      import org.metaborg.meta.lang.dynsem.interpreter.IDynSemLanguageParser;
+//      import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
+//      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
+//      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
+//      import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
+//      import org.spoofax.interpreter.terms.IStrategoTerm;
+//      import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
-      import java.io.InputStream;
-      import java.io.OutputStream;
-      import java.util.HashMap;
-      import java.util.Map;
-      
-      import org.apache.commons.io.FilenameUtils;
-      import com.martiansoftware.nailgun.NGContext;
-      
-      import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
-      import org.metaborg.meta.lang.dynsem.interpreter.DynSemVM;
-      import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguageParser;
-      import org.metaborg.meta.lang.dynsem.interpreter.IDynSemLanguageParser;
-      import org.metaborg.meta.lang.dynsem.interpreter.ITermRegistry;
-      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
-      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-      import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
-      import org.spoofax.interpreter.terms.IStrategoTerm;
-      import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-
-      import ~x:<get-opt> TopPkg().~x:$[[<get-opt> LangName()]TermRegistry];
+//      import ~x:<get-opt> TopPkg().~x:$[[<get-opt> LangName()]TermRegistry];
 
       public class x_entryPoint {
-        public final static String PARSE_TABLE = ~e:Lit(String([Chars(<get-opt> TargetTableRel())]));
-        public final static String START_SYMBOL = ~e:Lit(String([Chars(<get-opt> StartSymbol())]));
-        public final static String SPEC_FILE = ~e:Lit(String([Chars(<get-opt> TargetSpecRel())]));
-        public final static String MIME_TYPE = ~e:Lit(String([Chars(<get-opt> MimeType())]));
-        
-        public final static boolean BACKTRACK = e_backtrack;
-        public final static boolean SAFECOMPONENTS = e_safecomps;
-        public final static boolean TERMCACHING = e_termcache;
-        public final static boolean DEBUG = e_debug;
-        public final static boolean NATIVEFRAMES = e_nativeframes;
-
-        @TruffleBoundary
-        public static DynSemVM createVM() {
-          return createVM(System.in, System.out, System.err, new HashMap<String, Object>());
-        }
-
-        @TruffleBoundary
-        public static DynSemVM createVM(InputStream stdIn, OutputStream stdOut, OutputStream stdErr,
-              Map<String, Object> config) {
-          config.put(DynSemContext.CONFIG_STDIN, stdIn);
-          config.put(DynSemContext.CONFIG_STDOUT, stdOut);
-          config.put(DynSemContext.CONFIG_STDERR, stdErr);
-      
-          config.put(DynSemContext.CONFIG_BACKTRACK, BACKTRACK);
-          config.put(DynSemContext.CONFIG_SAFECOMPS, SAFECOMPONENTS);
-          config.put(DynSemContext.CONFIG_TERMCACHE, TERMCACHING);
-          config.put(DynSemContext.CONFIG_DEBUG, DEBUG);
-          config.put(DynSemContext.CONFIG_NATIVEFRAMES, NATIVEFRAMES);
-          config.put(DynSemContext.CONFIG_PARSER, createParser());
-          config.put(DynSemContext.CONFIG_TERMTRANSFORMER, createTransformer());
-          config.put(DynSemContext.CONFIG_TERMREGISTRY, createTermRegistry());
-          config.put(DynSemContext.CONFIG_RULEREG, createRuleRegistry());
-          config.put(DynSemContext.CONFIG_MIMETYPE, MIME_TYPE);
-          config.put(DynSemContext.CONFIG_DSSPEC, getSpecificationTerm());
-      
-          DynSemVM vm = new DynSemVM(config);
-      
-          return vm;
-        }
-
-        public static RuleResult evaluate(String programFile, String workingDirectory) throws Exception {
-          return evaluate(createVM(), programFile, workingDirectory);
-        }
-      
-        public static RuleResult evaluate(IStrategoTerm programTerm) throws Exception {
-          return evaluate(createVM(), programTerm);
-        }
-      
-        public static RuleResult evaluate(DynSemVM vm, String programFile, String workingDirectory) throws Exception {
-          return vm.getCallable(programFile, workingDirectory, new HashMap<String, Object>()).call();
-        }
-      
-        public static RuleResult evaluate(DynSemVM vm, IStrategoTerm programTerm) throws Exception {
-          return vm.getCallable(programTerm, new HashMap<String, Object>()).call();
-        }
-      
-        public static void main(String[] args) throws Exception {
-          RuleResult result = evaluate(String.join(" ", args), System.getProperty("user.dir"));
-          System.out.println(result.result);
-        }
-      
-        public static void nailMain(NGContext c) throws Exception {
-          DynSemVM vm = createVM(c.in, c.out, c.err, new HashMap<String, Object>());
-          RuleResult result = evaluate(vm, c.getArgs()[0], c.getWorkingDirectory());
-          c.out.println(result.result);
-        }
-
-        @TruffleBoundary
-        private static IDynSemLanguageParser createParser() {
-          return new DynSemLanguageParser(x_entryPoint.class.getClassLoader()
-            .getResourceAsStream(FilenameUtils.getName(PARSE_TABLE)), START_SYMBOL);
-        }
-
-        @TruffleBoundary
-        private static ITermTransformer createTransformer() {
-          return new x_transformer();
-        }
-
-        @TruffleBoundary
-        private static ITermRegistry createTermRegistry() {
-          return new ~x:$[[<get-opt> LangName()]TermRegistry]();
-        }
-
-        @TruffleBoundary
-        private static RuleRegistry createRuleRegistry() {
-          return new x_ruleregistry();
-        }
-
-        @TruffleBoundary
-        private static InputStream getSpecificationTerm() {
-          return x_entryPoint.class.getClassLoader().getResourceAsStream(FilenameUtils.getName(SPEC_FILE));
-        }
+//        public final static String PARSE_TABLE = ~e:Lit(String([Chars(<get-opt> TargetTableRel())]));
+//        public final static String START_SYMBOL = ~e:Lit(String([Chars(<get-opt> StartSymbol())]));
+//        public final static String SPEC_FILE = ~e:Lit(String([Chars(<get-opt> TargetSpecRel())]));
+//        public final static String MIME_TYPE = ~e:Lit(String([Chars(<get-opt> MimeType())]));
+//        
+//        public final static boolean BACKTRACK = e_backtrack;
+//        public final static boolean SAFECOMPONENTS = e_safecomps;
+//        public final static boolean TERMCACHING = e_termcache;
+//        public final static boolean DEBUG = e_debug;
+//        public final static boolean NATIVEFRAMES = e_nativeframes;
+//
+//        @TruffleBoundary
+//        public static DynSemVM createVM() {
+//          return createVM(System.in, System.out, System.err, new HashMap<String, Object>());
+//        }
+//
+//        @TruffleBoundary
+//        public static DynSemVM createVM(InputStream stdIn, OutputStream stdOut, OutputStream stdErr,
+//              Map<String, Object> config) {
+//          config.put(DynSemContext.CONFIG_STDIN, stdIn);
+//          config.put(DynSemContext.CONFIG_STDOUT, stdOut);
+//          config.put(DynSemContext.CONFIG_STDERR, stdErr);
+//      
+//          config.put(DynSemContext.CONFIG_BACKTRACK, BACKTRACK);
+//          config.put(DynSemContext.CONFIG_SAFECOMPS, SAFECOMPONENTS);
+//          config.put(DynSemContext.CONFIG_TERMCACHE, TERMCACHING);
+//          config.put(DynSemContext.CONFIG_DEBUG, DEBUG);
+//          config.put(DynSemContext.CONFIG_NATIVEFRAMES, NATIVEFRAMES);
+//          config.put(DynSemContext.CONFIG_PARSER, createParser());
+//          config.put(DynSemContext.CONFIG_TERMTRANSFORMER, createTransformer());
+//          config.put(DynSemContext.CONFIG_TERMREGISTRY, createTermRegistry());
+//          config.put(DynSemContext.CONFIG_RULEREG, createRuleRegistry());
+//          config.put(DynSemContext.CONFIG_MIMETYPE, MIME_TYPE);
+//          config.put(DynSemContext.CONFIG_DSSPEC, getSpecificationTerm());
+//      
+//          DynSemVM vm = new DynSemVM(config);
+//      
+//          return vm;
+//        }
+//
+//        public static RuleResult evaluate(String programFile, String workingDirectory) throws Exception {
+//          return evaluate(createVM(), programFile, workingDirectory);
+//        }
+//      
+//        public static RuleResult evaluate(IStrategoTerm programTerm) throws Exception {
+//          return evaluate(createVM(), programTerm);
+//        }
+//      
+//        public static RuleResult evaluate(DynSemVM vm, String programFile, String workingDirectory) throws Exception {
+//          return vm.getCallable(programFile, workingDirectory, new HashMap<String, Object>()).call();
+//        }
+//      
+//        public static RuleResult evaluate(DynSemVM vm, IStrategoTerm programTerm) throws Exception {
+//          return vm.getCallable(programTerm, new HashMap<String, Object>()).call();
+//        }
+//      
+//        public static void main(String[] args) throws Exception {
+//          RuleResult result = evaluate(String.join(" ", args), System.getProperty("user.dir"));
+//          System.out.println(result.result);
+//        }
+//      
+//        public static void nailMain(NGContext c) throws Exception {
+//          DynSemVM vm = createVM(c.in, c.out, c.err, new HashMap<String, Object>());
+//          RuleResult result = evaluate(vm, c.getArgs()[0], c.getWorkingDirectory());
+//          c.out.println(result.result);
+//        }
+//
+//        @TruffleBoundary
+//        private static IDynSemLanguageParser createParser() {
+//          return new DynSemLanguageParser(x_entryPoint.class.getClassLoader()
+//            .getResourceAsStream(FilenameUtils.getName(PARSE_TABLE)), START_SYMBOL);
+//        }
+//
+//        @TruffleBoundary
+//        private static ITermTransformer createTransformer() {
+//          return new x_transformer();
+//        }
+//
+//        @TruffleBoundary
+//        private static ITermRegistry createTermRegistry() {
+//          return new ~x:$[[<get-opt> LangName()]TermRegistry]();
+//        }
+//
+//        @TruffleBoundary
+//        private static RuleRegistry createRuleRegistry() {
+//          return new x_ruleregistry();
+//        }
+//
+//        @TruffleBoundary
+//        private static InputStream getSpecificationTerm() {
+//          return x_entryPoint.class.getClassLoader().getResourceAsStream(FilenameUtils.getName(SPEC_FILE));
+//        }
  
       }
     ]|
 
-//  ds-to-interp-language-benchmarkentry =
-//    x_entryPoint := $[[<get-opt> LangName()]Main];
-//    x_benchrunner := $[[<get-opt> LangName()]BenchmarkRunner];
-//    !compilation-unit |[
-//      package ~x:<get-opt> TopPkg();
-//            
-//      import java.io.File;
-//      import java.io.IOException;
-//      import java.util.HashMap;
-//      import java.util.concurrent.Callable;
-//      import org.metaborg.meta.lang.dynsem.interpreter.DynSemVM;
-//      import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
-//      import org.metaborg.tools.serfer.Benchmark;
-//      import org.metaborg.tools.serfer.BenchmarkConfiguration;
-//      
-//      public class x_benchrunner {
-//      
-//        public static void main(String[] args) throws IOException {
-//          String file = args[0];
-//          DynSemVM vm = x_entryPoint.createVM();
-//          Callable<RuleResult> callee = vm.getCallable(file, System.getProperty("user.dir"), new HashMap<String, Object>());
-//
-//          BenchmarkConfiguration benchconfig = new BenchmarkConfiguration();
-//          benchconfig.warmuprounds = Integer.parseInt(args[2]);
-//          benchconfig.repetitions = Integer.parseInt(args[3]);
-//          benchconfig.dataFile = new File(args[1]);
-//      
-//          Benchmark benchmark = new Benchmark(callee, benchconfig);
-//          benchmark.execute();
-//      
-//          benchmark.writeToFile();
-//        }
-//      
-//      }
-//    ]|
-  
   ds-to-interp-language-coreentry =
     langname := <get-opt> LangName();
     e_langname := Lit(String([Chars(langname)]));
@@ -197,75 +210,92 @@ rules /* language file. interpreter entry point */
     !compilation-unit |[
       package ~x:<get-opt> TopPkg();
 
-      import org.apache.commons.vfs2.FileObject;
-
-      import org.metaborg.core.MetaborgException;
-      import org.metaborg.meta.lang.dynsem.interpreter.DynSemRunner;
-      import org.metaborg.meta.lang.dynsem.interpreter.DynSemRunnerModule;
-      import org.metaborg.spoofax.core.Spoofax;
+      import java.io.File;
+      import java.io.IOException;
+      import org.graalvm.polyglot.Context;
+      import org.graalvm.polyglot.Source;
       import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-      
-      import com.google.inject.Module;
 
       public class x_classname {
-
-        public static void main(String[] args) {
-          if(args.length < 1) {
-              printUsage();
-              return;
+        public static void main(String[] args) throws IOException {
+          if(args.length != 1) {
+            printUsage();
+            System.exit(1);
           }
-          Spoofax S = null;
-          try {
-            S = createSpoofax();
-            DynSemRunner runner = createRunner(S);
-            for(String fileName : args) {
-              FileObject file = resolve(S, fileName);
-              Object result = runner.run(file);
-              printHelper(result);
-            }
-          } catch (MetaborgException mbe) {
-            printStackTrace(mbe);
-          } finally {
-            closeSpoofax(S);
-          }
-        }
-        
-        @TruffleBoundary
-        private static DynSemRunner createRunner(Spoofax S) throws MetaborgException {
-          return new DynSemRunner(S, e_langname, x_entryPoint.createVM());
-        }
-      
-        @TruffleBoundary
-        private static void printStackTrace(MetaborgException mbe) {
-          mbe.printStackTrace(System.err);
+          String fileName = args[0];
+          Context graalvmctx = Context.newBuilder().in(System.in).out(System.out).err(System.err).build();
+          Object result = graalvmctx.eval(Source.newBuilder(e_langname, new File(fileName)).name(fileName).build());
+          printHelper(result);
         }
       
         @TruffleBoundary
         private static void printUsage() {
-          System.err.println("Usage: " + x_classname.class.getName() + " FILES");
-        }
-      
-        @TruffleBoundary
-        private static void closeSpoofax(Spoofax S) {
-          if (S != null) {
-            S.close();
-          }
+          System.err.println("Usage: " + x_classname.class.getName() + " <FILE>");
         }
       
         @TruffleBoundary
         private static void printHelper(Object result) {
           System.out.println(result);
         }
-      
-        @TruffleBoundary
-        private static FileObject resolve(Spoofax S, String fileName) {
-          return S.resourceService.resolve(fileName);
-        }
-      
-        @TruffleBoundary
-        private static Spoofax createSpoofax() throws MetaborgException {
-          return new Spoofax(new DynSemRunnerModule(), new Module[0]);
-        }
+
+
+//        public static void main(String[] args) {
+//          if(args.length < 1) {
+//              printUsage();
+//              return;
+//          }
+//          Spoofax S = null;
+//          try {
+//            S = createSpoofax();
+//            DynSemRunner runner = createRunner(S);
+//            for(String fileName : args) {
+//              FileObject file = resolve(S, fileName);
+//              Object result = runner.run(file);
+//              printHelper(result);
+//            }
+//          } catch (MetaborgException mbe) {
+//            printStackTrace(mbe);
+//          } finally {
+//            closeSpoofax(S);
+//          }
+//        }
+//        
+//        @TruffleBoundary
+//        private static DynSemRunner createRunner(Spoofax S) throws MetaborgException {
+//          return new DynSemRunner(S, e_langname, x_entryPoint.createVM());
+//        }
+//      
+//        @TruffleBoundary
+//        private static void printStackTrace(MetaborgException mbe) {
+//          mbe.printStackTrace(System.err);
+//        }
+//      
+//        @TruffleBoundary
+//        private static void printUsage() {
+//          System.err.println("Usage: " + x_classname.class.getName() + " FILES");
+//        }
+//      
+//        @TruffleBoundary
+//        private static void closeSpoofax(Spoofax S) {
+//          if (S != null) {
+//            S.close();
+//          }
+//        }
+//      
+//        @TruffleBoundary
+//        private static void printHelper(Object result) {
+//          System.out.println(result);
+//        }
+//      
+//        @TruffleBoundary
+//        private static FileObject resolve(Spoofax S, String fileName) {
+//          return S.resourceService.resolve(fileName);
+//        }
+//      
+//        @TruffleBoundary
+//        private static Spoofax createSpoofax() throws MetaborgException {
+//          return new Spoofax(new DynSemRunnerModule(), new Module[0]);
+//        }
 
       }
     ]|
@@ -285,12 +315,12 @@ rules /* language file. interpreter entry point */
       
       public class x_classname {
       
-        public static void main(String[] args) {
-          final NGServer server = new NGServer();
-          final AliasManager aliasManager = server.getAliasManager();
-          aliasManager.addAlias(new Alias(e_aliasname, e_aliasdescr, x_entryPoint.class));
-          server.run();
-        }
+//        public static void main(String[] args) {
+//          final NGServer server = new NGServer();
+//          final AliasManager aliasManager = server.getAliasManager();
+//          aliasManager.addAlias(new Alias(e_aliasname, e_aliasdescr, x_entryPoint.class));
+//          server.run();
+//        }
       
       }
     ]|

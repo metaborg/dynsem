@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
+import org.graalvm.polyglot.Source;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.Disambiguator;
 import org.spoofax.jsglr.client.ParseTable;
@@ -19,7 +20,6 @@ import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.binary.TermReader;
 
-import com.oracle.truffle.api.source.Source;
 
 /**
  * Default {@link IDynSemLanguageParser} implementation which parses a program in its textual representation to an
