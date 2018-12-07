@@ -43,22 +43,22 @@ rules /* language file. interpreter entry point */
         }
         
         @TruffleBoundary
-        private static ITermTransformer createTransformer(Env env) {
+        protected ITermTransformer createTransformer(Env env) {
           return new x_transformer();
         }
 
         @TruffleBoundary
-        private static ITermRegistry createTermRegistry(Env env) {
+        protected ITermRegistry createTermRegistry(Env env) {
           return new ~x:$[[<get-opt> LangName()]TermRegistry]();
         }
 
         @TruffleBoundary
-        private static RuleRegistry createRuleRegistry(Env env) {
+        protected RuleRegistry createRuleRegistry(Env env) {
           return new x_ruleregistry();
         }
 
         @TruffleBoundary
-        private static InputStream getSpecificationTerm(Env env) {
+        protected InputStream getSpecificationTerm(Env env) {
           return x_language.class.getClassLoader().getResourceAsStream(FilenameUtils.getName(SPEC_FILE));
         }
         
