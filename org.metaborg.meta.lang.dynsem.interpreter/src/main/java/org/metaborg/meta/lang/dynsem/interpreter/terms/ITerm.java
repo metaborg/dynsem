@@ -33,4 +33,5 @@ public interface ITerm {
 	 *         {@link ITerm} was not created from a {@link IStrategoTerm} term (i.e. it was created directly).
 	 */
 	public IStrategoTerm getStrategoTerm();
+
 }

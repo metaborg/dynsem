@@ -43,11 +43,31 @@
 			<groupId>org.metaborg</groupId>
 			<artifactId>org.metaborg.core</artifactId>
 			<version>${metaborg-version}</version>
+			<exclusions>
+        <exclusion>
+          <groupId>com.oracle.truffle</groupId>
+          <artifactId>truffle-api</artifactId>
+        </exclusion>
+          <exclusion>
+          <groupId>com.oracle.truffle</groupId>
+          <artifactId>truffle-dsl-processor</artifactId>
+        </exclusion>
+      </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.metaborg</groupId>
 			<artifactId>org.metaborg.spoofax.core</artifactId>
 			<version>${metaborg-version}</version>
+			<exclusions>
+        <exclusion>
+          <groupId>com.oracle.truffle</groupId>
+          <artifactId>truffle-api</artifactId>
+        </exclusion>
+          <exclusion>
+          <groupId>com.oracle.truffle</groupId>
+          <artifactId>truffle-dsl-processor</artifactId>
+        </exclusion>
+      </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.metaborg</groupId>

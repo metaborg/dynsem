@@ -13,6 +13,7 @@ import org.metaborg.core.project.IProject;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2Context;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.InitEvalNode;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleRegistry;
+import org.metaborg.meta.lang.dynsem.interpreter.nodes.rules.RuleResult;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITerm;
 import org.metaborg.meta.lang.dynsem.interpreter.terms.ITermTransformer;
 import org.metaborg.meta.lang.dynsem.interpreter.utils.SourceUtils;
@@ -139,8 +140,8 @@ public abstract class DynSemLanguage extends TruffleLanguage<DynSemContext> {
 	}
 
 	@Override
-	protected boolean isObjectOfLanguage(Object obj) {
-		throw new UnsupportedOperationException();
+	protected boolean isObjectOfLanguage(Object object) {
+		return object instanceof RuleResult;
 	}
 
 	@Override

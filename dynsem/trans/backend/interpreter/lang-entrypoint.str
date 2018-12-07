@@ -10,6 +10,7 @@ rules /* language file. interpreter entry point */
   ds-to-interp-language =
     x_language := $[[<get-opt> LangName()]Language];
     e_langname := Lit(String([Chars(<get-opt> LangName())]));
+    e_mimetype := Lit(String([Chars(<get-opt> MimeType())]));
     x_transformer := <get-opt> PreProcessor();
     x_ruleregistry := <get-opt> RuleRegistry();
     e_nativeframes := <if get-opt(|EnableNativeFrames()) then !e |[ true ]| else !e |[ false ]| end>;
@@ -27,10 +28,10 @@ rules /* language file. interpreter entry point */
       
       import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
       import com.oracle.truffle.api.TruffleLanguage;
-
-      @TruffleLanguage.Registration(name = e_langname, version = ~e:Lit(String([Chars(<get-opt> LangVersion())])), id = e_langname)
-      public class x_language extends DynSemLanguage {
       
+      @TruffleLanguage.Registration(name = x_language.NAME, version = ~e:Lit(String([Chars(<get-opt> LangVersion())])), id = x_language.NAME)
+      public class x_language extends DynSemLanguage {
+        public final static String NAME = e_langname;
         public final static String PARSE_TABLE = ~e:Lit(String([Chars(<get-opt> TargetTableRel())]));
         public final static String START_SYMBOL = ~e:Lit(String([Chars(<get-opt> StartSymbol())]));
         public final static String SPEC_FILE = ~e:Lit(String([Chars(<get-opt> TargetSpecRel())]));
@@ -69,7 +70,7 @@ rules /* language file. interpreter entry point */
       
         @Override
         protected String getSpoofaxLanguageName() {
-          return e_langname;
+          return x_language.NAME;
         }
         
       }
@@ -204,7 +205,7 @@ rules /* language file. interpreter entry point */
 
   ds-to-interp-language-coreentry =
     langname := <get-opt> LangName();
-    e_langname := Lit(String([Chars(langname)]));
+    x_language := $[[langname]Language];
     x_entryPoint := $[[langname]Main];
     x_classname := $[[langname]Runner];
     !compilation-unit |[
@@ -223,8 +224,8 @@ rules /* language file. interpreter entry point */
             System.exit(1);
           }
           String fileName = args[0];
-          Context graalvmctx = Context.newBuilder().in(System.in).out(System.out).err(System.err).build();
-          Object result = graalvmctx.eval(Source.newBuilder(e_langname, new File(fileName)).name(fileName).build());
+          Context graalvmctx = Context.newBuilder(x_language.NAME).in(System.in).out(System.out).err(System.err).build();
+          Object result = graalvmctx.eval(Source.newBuilder(x_language.NAME, new File(fileName)).name(fileName).build());
           printHelper(result);
         }
       

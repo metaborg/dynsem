@@ -113,11 +113,6 @@ rules
           </properties>
           <dependencies>
             <dependency>
-              <groupId>org.metaborg</groupId>
-              <artifactId>org.metaborg.meta.lang.dynsem.interpreter</artifactId>
-              <version>[<ver-spoofax>]</version>
-            </dependency>
-            <dependency>
               <groupId>org.graalvm.truffle</groupId>
               <artifactId>truffle-api</artifactId>
               <version>[<ver-truffle>]</version>
@@ -127,6 +122,11 @@ rules
               <groupId>org.graalvm.truffle</groupId>
               <artifactId>truffle-dsl-processor</artifactId>
               <version>[<ver-truffle>]</version>
+            </dependency>
+            <dependency>
+              <groupId>org.metaborg</groupId>
+              <artifactId>org.metaborg.meta.lang.dynsem.interpreter</artifactId>
+              <version>[<ver-spoofax>]</version>
             </dependency>
             <dependency>
               <groupId>org.metaborg</groupId>
