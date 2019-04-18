@@ -100,7 +100,7 @@ public class DynSemRunner {
 				props = propBuilder.build();
 				if (analyzed.hasAst()) {
 					ITransformGoal mkoccgoal = new EndNamedGoal("Make Occurrences");
-					if (S.transformService.available(context, mkoccgoal)) {
+					if (S.transformService.available(language, mkoccgoal)) {
 						program = S.transformService.transform(analyzed, context, mkoccgoal).iterator().next().ast();
 					} else {
 						program = analyzed.ast();
