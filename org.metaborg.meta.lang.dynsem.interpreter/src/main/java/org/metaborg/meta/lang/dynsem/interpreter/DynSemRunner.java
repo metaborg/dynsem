@@ -26,7 +26,7 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 import mb.nabl2.spoofax.analysis.IResult;
-import mb.nabl2.stratego.StrategoBlob;
+import mb.nabl2.terms.stratego.StrategoBlob;
 
 public class DynSemRunner {
 	private final Spoofax S;

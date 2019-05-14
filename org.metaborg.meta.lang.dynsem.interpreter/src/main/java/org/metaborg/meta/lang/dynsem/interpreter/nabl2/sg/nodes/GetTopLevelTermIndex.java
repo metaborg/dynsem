@@ -26,7 +26,7 @@ public abstract class GetTopLevelTermIndex extends NativeOpBuild {
 
 	@Specialization
 	public TermIndex doUncached(ITerm term) {
-		mb.nabl2.stratego.TermIndex termIndex = NaBL2SolutionUtils.getTermIndex(term.getStrategoTerm());
+		mb.nabl2.terms.stratego.TermIndex termIndex = NaBL2SolutionUtils.getTermIndex(term.getStrategoTerm());
 
 		return new TermIndex(termIndex.getResource(), 0);
 	}

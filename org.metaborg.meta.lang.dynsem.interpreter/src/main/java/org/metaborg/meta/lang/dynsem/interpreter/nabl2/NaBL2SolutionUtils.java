@@ -11,9 +11,9 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 import mb.nabl2.interpreter.InterpreterTerms;
 import mb.nabl2.stratego.ConstraintTerms;
-import mb.nabl2.stratego.StrategoTermIndices;
-import mb.nabl2.stratego.TermIndex;
 import mb.nabl2.terms.ITerm;
+import mb.nabl2.terms.stratego.StrategoTermIndices;
+import mb.nabl2.terms.stratego.TermIndex;
 
 public final class NaBL2SolutionUtils {
 
