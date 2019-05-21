@@ -3,7 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import mb.nabl2.solver.ISolution;
-import mb.nabl2.stratego.StrategoTerms;
+import mb.nabl2.terms.stratego.StrategoTerms;
 
 public class NaBL2Context {
 

@@ -16,9 +16,9 @@ import com.oracle.truffle.api.source.SourceSection;
 import mb.nabl2.constraints.ast.AstProperties;
 import mb.nabl2.interpreter.InterpreterTerms;
 import mb.nabl2.stratego.ConstraintTerms;
-import mb.nabl2.stratego.StrategoTermIndices;
-import mb.nabl2.stratego.TermIndex;
 import mb.nabl2.terms.ITerm;
+import mb.nabl2.terms.stratego.StrategoTermIndices;
+import mb.nabl2.terms.stratego.TermIndex;
 
 public abstract class DynSemNode extends Node {
 	private final SourceSection sourceSection;
