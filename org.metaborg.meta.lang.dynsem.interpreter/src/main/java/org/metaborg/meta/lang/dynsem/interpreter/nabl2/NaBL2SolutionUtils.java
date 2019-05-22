@@ -12,7 +12,8 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import mb.nabl2.interpreter.InterpreterTerms;
 import mb.nabl2.stratego.ConstraintTerms;
 import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.stratego.StrategoTermIndices;
+import mb.nabl2.terms.stratego.StrategoTermIndex;
+import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.nabl2.terms.stratego.TermIndex;
 
 public final class NaBL2SolutionUtils {
@@ -46,10 +47,17 @@ public final class NaBL2SolutionUtils {
 	@TruffleBoundary
 	public static TermIndex getTermIndex(IStrategoTerm sterm) {
 		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
+		final StrategoTerms strategoTerms = new StrategoTerms();
+		return strategoTerms.fromStratego(getStrategoTermIndex(sterm));
+	}
+
+	@TruffleBoundary
+	public static StrategoTermIndex getStrategoTermIndex(IStrategoTerm sterm) {
+		CompilerAsserts.neverPartOfCompilation("NaBL2 op should never be part of compilation");
 		if (sterm == null) {
 			throw new IllegalArgumentException("Primitive must be called on an AST node.");
 		}
-		return StrategoTermIndices.get(sterm).orElseThrow(() -> new IllegalArgumentException("Node has no index."));
+		return StrategoTermIndex.get(sterm).orElseThrow(() -> new IllegalArgumentException("Node has no index."));
 	}
 
 	@TruffleBoundary

@@ -11,6 +11,8 @@ import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.source.SourceSection;
 
+import mb.nabl2.terms.stratego.StrategoTermIndex;
+
 @NodeChild(value = "term", type = TermBuild.class)
 public abstract class GetTopLevelTermIndex extends NativeOpBuild {
 
@@ -26,7 +28,7 @@ public abstract class GetTopLevelTermIndex extends NativeOpBuild {
 
 	@Specialization
 	public TermIndex doUncached(ITerm term) {
-		mb.nabl2.terms.stratego.TermIndex termIndex = NaBL2SolutionUtils.getTermIndex(term.getStrategoTerm());
+		StrategoTermIndex termIndex = NaBL2SolutionUtils.getStrategoTermIndex(term.getStrategoTerm());
 
 		return new TermIndex(termIndex.getResource(), 0);
 	}

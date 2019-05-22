@@ -3,6 +3,7 @@ package org.metaborg.meta.lang.dynsem.interpreter.nabl2.sg;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -13,11 +14,11 @@ import com.oracle.truffle.api.CompilerDirectives.ValueType;
 @ValueType
 public final class TermIndex {
 
-	private final String resource;
+	private final IStrategoTerm resource;
 	private final int offset;
 
-	public TermIndex(String resource, int offset) {
-		this.resource = resource.intern();
+	public TermIndex(IStrategoTerm resource, int offset) {
+		this.resource = resource;
 		this.offset = offset;
 	}
 
@@ -25,7 +26,7 @@ public final class TermIndex {
 	public static TermIndex create(IStrategoAppl termIndexT) {
 		CompilerAsserts.neverPartOfCompilation();
 		assert Tools.hasConstructor(termIndexT, "TermIndex", 2);
-		return new TermIndex(Tools.javaStringAt(termIndexT, 0), Tools.javaIntAt(termIndexT, 1));
+		return new TermIndex(Tools.termAt(termIndexT, 0), Tools.javaIntAt(termIndexT, 1));
 	}
 
 	@CompilationFinal private int hashcode = -1;

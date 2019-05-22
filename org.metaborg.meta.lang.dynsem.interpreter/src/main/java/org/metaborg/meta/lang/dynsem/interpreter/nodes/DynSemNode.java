@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemContext;
 import org.metaborg.meta.lang.dynsem.interpreter.DynSemLanguage;
 import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2Context;
+import org.metaborg.meta.lang.dynsem.interpreter.nabl2.NaBL2SolutionUtils;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.oracle.truffle.api.CompilerDirectives;
@@ -17,7 +18,7 @@ import mb.nabl2.constraints.ast.AstProperties;
 import mb.nabl2.interpreter.InterpreterTerms;
 import mb.nabl2.stratego.ConstraintTerms;
 import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.stratego.StrategoTermIndices;
+import mb.nabl2.terms.stratego.StrategoTermIndex;
 import mb.nabl2.terms.stratego.TermIndex;
 
 public abstract class DynSemNode extends Node {
@@ -63,7 +64,7 @@ public abstract class DynSemNode extends Node {
 	}
 
 	protected IStrategoTerm getAstProperty(IStrategoTerm sterm, ITerm key) {
-		TermIndex index = getTermIndex(sterm);
+		TermIndex index = NaBL2SolutionUtils.getTermIndex(sterm);
 		NaBL2Context nabl2ctx = nabl2Context();
 		Optional<ITerm> val = internal_getPropertyValue(nabl2ctx, index, key);
 		if (!val.isPresent()) {
@@ -79,11 +80,11 @@ public abstract class DynSemNode extends Node {
 	}
 
 	@TruffleBoundary
-	protected static TermIndex getTermIndex(IStrategoTerm sterm) {
+	protected static StrategoTermIndex getTermIndex(IStrategoTerm sterm) {
 		if (sterm == null) {
 			throw new IllegalArgumentException("Primitive must be called on an AST node.");
 		}
-		return StrategoTermIndices.get(sterm).orElseThrow(() -> new IllegalArgumentException("Node has no index."));
+		return StrategoTermIndex.get(sterm).orElseThrow(() -> new IllegalArgumentException("Node has no index."));
 	}
 
 	@TruffleBoundary

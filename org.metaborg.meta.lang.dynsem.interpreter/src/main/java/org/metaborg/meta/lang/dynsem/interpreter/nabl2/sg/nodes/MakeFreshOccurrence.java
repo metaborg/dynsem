@@ -6,6 +6,8 @@ import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.Fresh;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.FreshNodeGen;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.NativeOpBuild;
 import org.metaborg.meta.lang.dynsem.interpreter.nodes.building.TermBuild;
+import org.spoofax.interpreter.terms.IStrategoString;
+import org.spoofax.terms.TermFactory;
 
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
@@ -26,7 +28,8 @@ public abstract class MakeFreshOccurrence extends NativeOpBuild {
 
 	@Specialization
 	public Occurrence execBuild(VirtualFrame frame, String namespace, String name) {
-		return new Occurrence(namespace, name, new TermIndex("<phantom>", freshGen.executeInteger(frame)));
+		IStrategoString resource = new TermFactory().makeString("<phantom>");
+		return new Occurrence(namespace, name, new TermIndex(resource, freshGen.executeInteger(frame)));
 	}
 
 	public static MakeFreshOccurrence create(SourceSection source, TermBuild namespace, TermBuild name) {
