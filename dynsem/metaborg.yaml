@@ -41,8 +41,6 @@ pardonedLanguages:
 - EditorService
 - Stratego-Sugar
 - SDF
-debug:
-  typesmart: false
 build:
  useBuildSystemSpec: true
  
