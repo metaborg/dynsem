@@ -51,11 +51,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.metaborg</groupId>
-			<artifactId>dynsem.lib.stratego.javastrat</artifactId>
-			<version>${metaborg-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.metaborg</groupId>
 			<artifactId>dynsem.lib.stratego.jar</artifactId>
 			<version>${metaborg-version}</version>
 		</dependency>
