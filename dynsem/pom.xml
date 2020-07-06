@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.metaborg</groupId>
 		<artifactId>parent.language</artifactId>
-		<version>2.5.8</version>
+		<version>2.6.0-SNAPSHOT</version>
 		<relativePath>../../releng/parent/language</relativePath>
 	</parent>
 
@@ -36,20 +36,6 @@
 							<file>${basedir}/target/metaborg/stratego.jar</file>
 						</configuration>
 					</execution>
-					<execution>
-						<id>install-stratego-javastrat</id>
-						<phase>install</phase>
-						<goals>
-							<goal>install-file</goal>
-						</goals>
-						<configuration>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>dynsem.lib.stratego.javastrat</artifactId>
-							<version>${project.version}</version>
-							<packaging>jar</packaging>
-							<file>${basedir}/target/metaborg/stratego-javastrat.jar</file>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 
@@ -69,22 +55,6 @@
 							<version>${project.version}</version>
 							<packaging>jar</packaging>
 							<file>${basedir}/target/metaborg/stratego.jar</file>
-							<repositoryId>${deployRepositoryId}</repositoryId>
-							<url>${deployFileUrl}</url>
-						</configuration>
-					</execution>
-					<execution>
-						<id>deploy-stratego-javastrat</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>deploy-file</goal>
-						</goals>
-						<configuration>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>dynsem.lib.stratego.javastrat</artifactId>
-							<version>${project.version}</version>
-							<packaging>jar</packaging>
-							<file>${basedir}/target/metaborg/stratego-javastrat.jar</file>
 							<repositoryId>${deployRepositoryId}</repositoryId>
 							<url>${deployFileUrl}</url>
 						</configuration>

@@ -93,7 +93,7 @@ public class DynSemRunner {
 						IStrategoTerm analysisTerm = constraintContext.getAnalysis(file);
 						StrategoBlob.match(analysisTerm, IResult.class).ifPresent(r -> {
 							propBuilder.put(NaBL2Context.class.getName(),
-									new NaBL2Context(r.solution(), S.termFactoryService.getGeneric()));
+									new NaBL2Context(r.solution(), S.termFactory));
 						});
 					}
 				}
