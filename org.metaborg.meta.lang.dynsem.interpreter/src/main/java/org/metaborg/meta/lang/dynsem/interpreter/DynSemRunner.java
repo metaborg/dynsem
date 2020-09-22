@@ -89,8 +89,8 @@ public class DynSemRunner {
 				ImmutableMap.Builder<String, Object> propBuilder = ImmutableMap.builder();
 				if (context instanceof IConstraintContext) {
 					IConstraintContext constraintContext = (IConstraintContext) context;
-					if (constraintContext.hasAnalysis(file)) {
-						IStrategoTerm analysisTerm = constraintContext.getAnalysis(file);
+					if (constraintContext.contains(file)) {
+						IStrategoTerm analysisTerm = constraintContext.get(file);
 						StrategoBlob.match(analysisTerm, IResult.class).ifPresent(r -> {
 							propBuilder.put(NaBL2Context.class.getName(),
 									new NaBL2Context(r.solution(), S.termFactory));
