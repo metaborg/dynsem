@@ -90,7 +90,7 @@ public class DynSemRunner {
 				if (context instanceof IConstraintContext) {
 					IConstraintContext constraintContext = (IConstraintContext) context;
 					if (constraintContext.contains(file)) {
-						IStrategoTerm analysisTerm = constraintContext.get(file);
+						IStrategoTerm analysisTerm = constraintContext.get(file).analysis();
 						StrategoBlob.match(analysisTerm, IResult.class).ifPresent(r -> {
 							propBuilder.put(NaBL2Context.class.getName(),
 									new NaBL2Context(r.solution(), S.termFactory));
