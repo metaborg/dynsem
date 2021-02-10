@@ -5,7 +5,7 @@ imports dynsem/Common dynsem/Module dynsem/Signatures
 context-free start-symbols Module 
 
 syntax
-  Rule+-CF = Rule+-CF LAYOUT?-CF Rule-CF {layout(2.first.line > 1.last.line)}
+  Rule+-CF = Rule+-CF LAYOUT?-CF Rule-CF {layout(1.first.line > 0.last.line)}
 
 context-free syntax // rules
      
