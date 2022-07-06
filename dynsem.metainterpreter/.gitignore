@@ -1,4 +1,4 @@
-
+.classpath
 /target/
 src/main/resources/meta-specification.aterm
 src/main/resources/parsetable.tbl
