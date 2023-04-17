@@ -48,7 +48,7 @@ rules
         import com.oracle.truffle.api.frame.VirtualFrame;
         import com.github.krukow.clj_lang.PersistentTreeMap;
         import java.util.List;
-        import com.google.common.collect.Lists;
+        import org.metaborg.util.iterators.ReverseListIterator;
         import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
         
         public class x_classname extends AbstractNodeList<x_elemname> {
@@ -104,10 +104,9 @@ rules
 
       @TruffleBoundary
 		  public static x_classname fromList(List<x_elemname> l) {
-		    final List<x_elemname> revL = Lists.reverse(l);
 		    final SourceSection ss = SourceSectionUtil.none();
 		    x_classname ll = new x_classname(ss);
-		    for (x_elemname a : revL) {
+		    for (x_elemname a : ReverseListIterator.reverse(l)) {
 		      ll = new x_classname(ss, a, ll);
 		    }
 		    return ll;

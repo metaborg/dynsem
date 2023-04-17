@@ -1,6 +1,9 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.vfs2.FileObject;
@@ -21,7 +24,6 @@ import org.metaborg.spoofax.core.unit.ISpoofaxParseUnit;
 import org.metaborg.util.concurrent.IClosableLock;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import com.google.common.collect.ImmutableMap;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
@@ -58,7 +60,7 @@ public class DynSemRunner {
 	private RunConfig prepareForEvaluation(FileObject file) throws MetaborgException {
 		CompilerAsserts.neverPartOfCompilation();
 		IStrategoTerm program;
-		ImmutableMap<String, Object> props;
+		Map<String, Object> props;
 		try {
 			IProject project = cli.getProject(file);
 
@@ -86,7 +88,7 @@ public class DynSemRunner {
 				if (!analyzed.success()) {
 					throw new MetaborgException("Analysis returned errors.");
 				}
-				ImmutableMap.Builder<String, Object> propBuilder = ImmutableMap.builder();
+				Map<String, Object> propBuilder = new HashMap<>();
 				if (context instanceof IConstraintContext) {
 					IConstraintContext constraintContext = (IConstraintContext) context;
 					if (constraintContext.contains(file)) {
@@ -97,7 +99,7 @@ public class DynSemRunner {
 						});
 					}
 				}
-				props = propBuilder.build();
+				props = propBuilder;
 				if (analyzed.hasAst()) {
 					ITransformGoal mkoccgoal = new EndNamedGoal("Make Occurrences");
 					if (S.transformService.available(language, mkoccgoal)) {
@@ -110,7 +112,7 @@ public class DynSemRunner {
 				}
 			} else {
 				program = parsed.ast();
-				props = ImmutableMap.of();
+				props = Collections.emptyMap();
 			}
 		} catch (IOException e) {
 			throw new MetaborgException("Analysis failed.", e);
@@ -120,9 +122,9 @@ public class DynSemRunner {
 
 	private class RunConfig {
 		protected final IStrategoTerm program;
-		protected final ImmutableMap<String, Object> props;
+		protected final Map<String, Object> props;
 
-		public RunConfig(IStrategoTerm program, ImmutableMap<String, Object> props) {
+		public RunConfig(IStrategoTerm program, Map<String, Object> props) {
 			this.program = program;
 			this.props = props;
 		}
