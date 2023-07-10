@@ -7,8 +7,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
 
-import com.google.common.hash.Hashing;
-
 public class shorten_uniqueify_string_0_0 extends Strategy {
 	public static shorten_uniqueify_string_0_0 instance = new shorten_uniqueify_string_0_0();
 
@@ -22,7 +20,7 @@ public class shorten_uniqueify_string_0_0 extends Strategy {
 		String[] parts = str.split("\\.");
 
 		String name = parts[parts.length - 1];
-		String hash = Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+		String hash = Tools.asJavaString(context.invokePrimitive("digest", context.getFactory().makeString(str), new Strategy[0], new IStrategoTerm[0]));
 		return context.getFactory().makeString(name + hash.substring(0, 8));
 	}
 }
