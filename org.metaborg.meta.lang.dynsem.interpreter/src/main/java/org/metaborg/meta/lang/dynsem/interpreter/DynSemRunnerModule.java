@@ -6,7 +6,7 @@ import org.metaborg.core.project.ConfigBasedProjectService;
 import org.metaborg.core.project.IProjectService;
 import org.metaborg.spoofax.core.SpoofaxModule;
 
-import javax.inject.Singleton;
+import com.google.inject.Singleton;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class DynSemRunnerModule extends SpoofaxModule {
