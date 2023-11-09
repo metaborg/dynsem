@@ -1,6 +1,6 @@
 package org.metaborg.meta.lang.dynsem.interpreter;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 

@@ -3,12 +3,12 @@ package org.metaborg.meta.interpreter.framework;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.metaborg.util.iterators.ReverseListIterator;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-import com.google.common.collect.Lists;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.SourceSection;
@@ -129,10 +129,9 @@ public class L_String extends Node implements IList<String> {
 
 	@TruffleBoundary
 	public static L_String fromList(List<String> l) {
-		final List<String> revL = Lists.reverse(l);
 		final SourceSection ss = SourceSectionUtil.none();
 		L_String ll = new L_String(ss);
-		for (String a : revL) {
+		for (String a : ReverseListIterator.reverse(l)) {
 			ll = new L_String(ss, a, ll);
 		}
 		return ll;
