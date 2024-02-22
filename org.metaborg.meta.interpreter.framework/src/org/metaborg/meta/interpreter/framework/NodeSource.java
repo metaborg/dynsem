@@ -4,8 +4,8 @@
 package org.metaborg.meta.interpreter.framework;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import jsglr.shared.IToken;
-import jsglr.shared.ImploderAttachment;
+import mb.jsglr.shared.IToken;
+import mb.jsglr.shared.ImploderAttachment;
 import org.spoofax.terms.attachments.AbstractTermAttachment;
 import org.spoofax.terms.attachments.OriginAttachment;
 

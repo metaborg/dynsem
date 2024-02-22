@@ -9,7 +9,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
-import jsglr.shared.ImploderAttachment;
+import mb.jsglr.shared.ImploderAttachment;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.TermTransformer;
 import org.spoofax.terms.io.TAFTermReader;
